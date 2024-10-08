@@ -33,26 +33,23 @@ const addPathParamToUrl = (url: string, onboardingLink: string) => {
   return `${url}?${paramsString}`;
 };
 
-const extractFeaturedCards = (
-  filteredCards: IntegrationCardItem[],
-  featuredCardNames?: string[]
-) => {
-  return filteredCards.reduce((acc: Record<string, IntegrationCardItem>, card) => {
-    if (featuredCardNames?.includes(card.name)) {
-      acc[card.name] = card;
+const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
+  return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
+    if (featuredCardIds.includes(card.id)) {
+      acc.push(card);
     }
     return acc;
-  }, {});
+  }, []);
 };
 
 const getFilteredCards = ({
-  customCardNames,
+  featuredCardIds,
   getAppUrl,
   installedIntegrationList,
   integrationsList,
   navigateTo,
 }: {
-  customCardNames?: string[];
+  featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   installedIntegrationList?: IntegrationCardItem[];
   integrationsList: IntegrationCardItem[];
@@ -61,12 +58,12 @@ const getFilteredCards = ({
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({ navigateTo, getAppUrl, card, installedIntegrationList })
   );
-  if (!customCardNames) {
-    return { featuredCards: {}, integrationCards: securityIntegrationsList };
+  if (!featuredCardIds) {
+    return { featuredCards: [], integrationCards: securityIntegrationsList };
   }
-
+  const featuredCards = extractFeaturedCards(securityIntegrationsList, featuredCardIds);
   return {
-    featuredCards: extractFeaturedCards(securityIntegrationsList, customCardNames),
+    featuredCards,
     integrationCards: securityIntegrationsList,
   };
 };
@@ -117,19 +114,20 @@ const addSecuritySpecificProps = ({
 
 export const useIntegrationCardList = ({
   integrationsList,
-  customCardNames,
+  featuredCardIds,
 }: {
   integrationsList: IntegrationCardItem[];
-  customCardNames?: string[] | undefined;
+  featuredCardIds?: string[] | undefined;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
+
   const { featuredCards, integrationCards } = useMemo(
-    () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, customCardNames }),
-    [navigateTo, getAppUrl, integrationsList, customCardNames]
+    () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, featuredCardIds }),
+    [navigateTo, getAppUrl, integrationsList, featuredCardIds]
   );
 
-  if (customCardNames && customCardNames.length > 0) {
-    return Object.values(featuredCards) ?? [];
+  if (featuredCardIds && featuredCardIds.length > 0) {
+    return featuredCards;
   }
   return integrationCards ?? [];
 };

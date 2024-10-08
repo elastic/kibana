@@ -18,17 +18,26 @@ jest
   .mockImplementation(() => Promise.resolve({ useAvailablePackages: jest.fn() }));
 
 describe('IntegrationsCardGridTabs', () => {
+  const props = {
+    installedIntegrationsCount: 1,
+    isAgentRequired: false,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('shows loading skeleton while fetching data', () => {
-    const { getByTestId } = render(<IntegrationsCardGridTabs />, { wrapper: TestProviders });
+    const { getByTestId } = render(<IntegrationsCardGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
   });
 
   it('renders PackageListGrid when data is loaded successfully', async () => {
-    const { getByTestId } = render(<IntegrationsCardGridTabs />, { wrapper: TestProviders });
+    const { getByTestId } = render(<IntegrationsCardGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
 
     await waitFor(() => {
       expect(getByTestId('packageListGrid')).toBeInTheDocument();

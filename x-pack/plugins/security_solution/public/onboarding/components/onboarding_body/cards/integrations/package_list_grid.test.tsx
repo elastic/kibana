@@ -36,6 +36,10 @@ describe('PackageListGrid', () => {
   const mockSetCategory = jest.fn();
   const mockSetSelectedSubCategory = jest.fn();
   const mockSetSearchTerm = jest.fn();
+  const props = {
+    installedIntegrationsCount: 1,
+    isAgentRequired: false,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +57,7 @@ describe('PackageListGrid', () => {
     });
 
     const { getByTestId } = render(
-      <PackageListGrid useAvailablePackages={mockUseAvailablePackages} />
+      <PackageListGrid {...props} useAvailablePackages={mockUseAvailablePackages} />
     );
 
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
@@ -69,7 +73,7 @@ describe('PackageListGrid', () => {
     });
 
     const { getByTestId } = render(
-      <PackageListGrid useAvailablePackages={mockUseAvailablePackages} />
+      <PackageListGrid {...props} useAvailablePackages={mockUseAvailablePackages} />
     );
 
     await waitFor(() => {
@@ -89,7 +93,7 @@ describe('PackageListGrid', () => {
     });
 
     const { getByTestId } = render(
-      <PackageListGrid useAvailablePackages={mockUseAvailablePackages} />
+      <PackageListGrid {...props} useAvailablePackages={mockUseAvailablePackages} />
     );
 
     const tabButton = getByTestId('user');
@@ -109,7 +113,7 @@ describe('PackageListGrid', () => {
       setSearchTerm: mockSetSearchTerm,
     });
 
-    render(<PackageListGrid useAvailablePackages={mockUseAvailablePackages} />);
+    render(<PackageListGrid {...props} useAvailablePackages={mockUseAvailablePackages} />);
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].showSearchTools).toEqual(false);
@@ -132,7 +136,7 @@ describe('PackageListGrid', () => {
       searchTerm: 'new search term',
     });
 
-    render(<PackageListGrid useAvailablePackages={mockUseAvailablePackages} />);
+    render(<PackageListGrid {...props} useAvailablePackages={mockUseAvailablePackages} />);
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].searchTerm).toEqual('new search term');

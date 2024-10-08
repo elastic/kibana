@@ -9,12 +9,25 @@ import { IntegrationTabId, type Tab } from './types';
 
 export const INTEGRATION_TABS: Tab[] = [
   {
-    category: 'security',
+    category: '',
     iconType: 'starFilled',
     id: IntegrationTabId.recommended,
     label: 'Recommended',
     overflow: 'hidden',
     showSearchTools: false,
+    // Fleet has a default sorting for integrations by category that Security Solution does not want to apply
+    // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardIds
+    sortByFeaturedIntegrations: false,
+    featuredCardIds: [
+      'epr:aws',
+      'epr:gcp',
+      'epr:azure',
+      'epr:endpoint',
+      'epr:crowdstrike',
+      'epr:wiz',
+      'epr:network_traffic',
+      'epr:osquery_manager',
+    ],
   },
   {
     category: 'security',
@@ -22,6 +35,7 @@ export const INTEGRATION_TABS: Tab[] = [
     label: 'Network',
     subCategory: 'network_security',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
   {
     category: 'security',
@@ -29,6 +43,7 @@ export const INTEGRATION_TABS: Tab[] = [
     label: 'User',
     subCategory: 'iam',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
   {
     category: 'security',
@@ -36,6 +51,7 @@ export const INTEGRATION_TABS: Tab[] = [
     label: 'Endpoint',
     subCategory: 'edr_xdr',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
   {
     category: 'security',
@@ -43,6 +59,7 @@ export const INTEGRATION_TABS: Tab[] = [
     label: 'Cloud',
     subCategory: 'cloudsecurity_cdr',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
   {
     category: 'security',
@@ -50,12 +67,14 @@ export const INTEGRATION_TABS: Tab[] = [
     label: 'Threat Intel',
     subCategory: 'threat_intel',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
   {
     category: '',
     id: IntegrationTabId.all,
     label: 'All',
     showSearchTools: true,
+    sortByFeaturedIntegrations: true,
   },
 ];
 

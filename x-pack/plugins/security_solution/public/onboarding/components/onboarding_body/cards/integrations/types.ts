@@ -6,13 +6,14 @@
  */
 export interface Tab {
   category: string;
-  customCardNames?: string[]; // custom card name e.g.: 1password
+  featuredCardIds?: string[];
   iconType?: string;
   id: IntegrationTabId;
   label: string;
   overflow?: 'hidden' | 'scroll';
   showSearchTools?: boolean;
   subCategory?: string;
+  sortByFeaturedIntegrations: boolean;
 }
 
 export enum IntegrationTabId {

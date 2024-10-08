@@ -11,7 +11,6 @@ import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import type { IntegrationCardMetadata } from './types';
-import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
 
 const isCheckCompleteMetadata = (metadata?: unknown): metadata is IntegrationCardMetadata => {
   return metadata !== undefined;
@@ -27,11 +26,10 @@ export const IntegrationsCard: OnboardingCardComponent = ({
 
   return (
     <OnboardingCardContentPanel>
-      <IntegrationCardTopCallout
+      <IntegrationsCardGridTabs
         isAgentRequired={isAgentRequired}
         installedIntegrationsCount={installedIntegrationsCount}
       />
-      <IntegrationsCardGridTabs />
     </OnboardingCardContentPanel>
   );
 };

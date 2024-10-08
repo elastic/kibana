@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { useObservable } from 'react-use';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
@@ -37,7 +36,6 @@ export const IntegrationCardTopCallout = React.memo(
             installedIntegrationsCount={installedIntegrationsCount}
           />
         )}
-        {(showAgentlessCallout || showInstalledCallout) && <EuiSpacer size="m" />}
       </>
     );
   }

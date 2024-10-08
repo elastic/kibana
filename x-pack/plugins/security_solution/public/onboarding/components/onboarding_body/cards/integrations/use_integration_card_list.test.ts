@@ -17,7 +17,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 describe('useIntegrationCardList', () => {
   const mockIntegrationsList = [
     {
-      id: 'security',
+      id: 'epr:endpoint',
       name: 'Security Integration',
       description: 'Integration for security monitoring',
       categories: ['security'],
@@ -39,7 +39,7 @@ describe('useIntegrationCardList', () => {
     jest.clearAllMocks();
   });
 
-  it('returns filtered integration cards when customCardNames are not provided', () => {
+  it('returns filtered integration cards when featuredCardIds are not provided', () => {
     const mockFilteredCards = {
       featuredCards: {},
       integrationCards: mockIntegrationsList,
@@ -54,11 +54,11 @@ describe('useIntegrationCardList', () => {
     expect(result.current).toEqual(mockFilteredCards.integrationCards);
   });
 
-  it('returns featured cards when customCardNames are provided', () => {
-    const customCardNames = ['Security Integration'];
+  it('returns featured cards when featuredCardIds are provided', () => {
+    const featuredCardIds = ['epr:endpoint'];
     const mockFilteredCards = {
       featuredCards: {
-        'Security Integration': mockIntegrationsList[0],
+        'epr:endpoint': mockIntegrationsList[0],
       },
       integrationCards: mockIntegrationsList,
     };
@@ -66,10 +66,10 @@ describe('useIntegrationCardList', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
-        customCardNames,
+        featuredCardIds,
       })
     );
 
-    expect(result.current).toEqual([mockFilteredCards.featuredCards['Security Integration']]);
+    expect(result.current).toEqual([mockFilteredCards.featuredCards['epr:endpoint']]);
   });
 });

@@ -9,7 +9,6 @@ import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
 jest.mock('./integration_card_grid_tabs');
-jest.mock('./callouts/integration_card_top_callout');
 
 const props = {
   setComplete: jest.fn(),
@@ -27,18 +26,5 @@ describe('IntegrationsCard', () => {
       <IntegrationsCard {...props} checkCompleteMetadata={undefined} />
     );
     expect(getByTestId('loadingInstalledIntegrations')).toBeInTheDocument();
-  });
-
-  it('renders the card when checkCompleteMetadata is defined', () => {
-    const { getByTestId } = render(
-      <IntegrationsCard
-        {...props}
-        checkCompleteMetadata={{
-          installedIntegrationsCount: 1,
-          isAgentRequired: false,
-        }}
-      />
-    );
-    expect(getByTestId('integrationCardTopCallout')).toBeInTheDocument();
   });
 });
