@@ -115,7 +115,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     setProviderPopoverOpen((isOpen) => !isOpen);
   }, []);
 
-  const handleProviderKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+  const handleProviderKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event: any) => {
     if (event.key === keys.ENTER) {
       setProviderPopoverOpen(true);
     }

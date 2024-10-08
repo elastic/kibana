@@ -109,7 +109,7 @@ const CompletionParamsFields: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.INPUT}>
+      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
         <EuiTextArea
           data-test-subj="inferenceInput"
           name="input"
@@ -134,7 +134,7 @@ const SparseEmbeddingParamsFields: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.INPUT}>
+      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
         <EuiTextArea
           data-test-subj="inferenceInput"
           name="input"
@@ -159,7 +159,7 @@ const TextEmbeddingParamsFields: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.INPUT}>
+      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
         <EuiTextArea
           data-test-subj="inferenceInputType"
           name="inputType"
@@ -172,7 +172,7 @@ const TextEmbeddingParamsFields: React.FunctionComponent<{
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.INPUT}>
+      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
         <EuiTextArea
           data-test-subj="inferenceInput"
           name="input"
@@ -213,7 +213,7 @@ const RerankParamsFields: React.FunctionComponent<{
         dataTestSubj="inference-inputJsonEditor"
       />
       <EuiSpacer size="s" />
-      <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.QUERY}>
+      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.QUERY}>
         <EuiTextArea
           data-test-subj="inferenceQuery"
           name="query"

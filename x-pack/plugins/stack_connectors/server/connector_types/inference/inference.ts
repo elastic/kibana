@@ -11,7 +11,11 @@ import { PassThrough, Stream } from 'stream';
 import { IncomingMessage } from 'http';
 
 import { AxiosError } from 'axios';
-import { InferenceInferenceRequest, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import {
+  InferenceInferenceRequest,
+  InferenceInferenceResponse,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -91,10 +95,14 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async performApiCompletion({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
+  public async performApiCompletion({
+    input,
+    signal,
+  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<ChatCompleteResponse> {
     const response = await this.performInferenceApi(
       { inference_id: this.inferenceId, input, task_type: 'completion' },
-      false
+      false,
+      signal
     );
     // const usageMetadata = response?.data?.usageMetadata;
     return response as ChatCompleteResponse;
@@ -104,7 +112,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the Inference API rerank task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async performApiRerank({ input, query }: RerankParams): Promise<RerankResponse> {
+  public async performApiRerank({
+    input,
+    query,
+    signal,
+  }: RerankParams & { signal?: AbortSignal }): Promise<RerankResponse> {
     const response = await this.performInferenceApi(
       {
         query,
@@ -112,7 +124,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         input,
         task_type: 'rerank',
       },
-      false
+      false,
+      signal
     );
     return response as RerankResponse;
   }
@@ -123,10 +136,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    */
   public async performApiSparseEmbedding({
     input,
-  }: SparseEmbeddingParams): Promise<SparseEmbeddingResponse> {
+    signal,
+  }: SparseEmbeddingParams & { signal?: AbortSignal }): Promise<SparseEmbeddingResponse> {
     const response = await this.performInferenceApi(
       { inference_id: this.inferenceId, input, task_type: 'sparse_embedding' },
-      false
+      false,
+      signal
     );
     return response as SparseEmbeddingResponse;
   }
@@ -138,7 +153,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiTextEmbedding({
     input,
     inputType,
-  }: TextEmbeddingParams): Promise<TextEmbeddingResponse> {
+    signal,
+  }: TextEmbeddingParams & { signal?: AbortSignal }): Promise<TextEmbeddingResponse> {
     const response = await this.performInferenceApi(
       {
         inference_id: this.inferenceId,
@@ -148,7 +164,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
           input_type: inputType,
         },
       },
-      false
+      false,
+      signal
     );
     return response as TextEmbeddingResponse;
   }
@@ -159,10 +176,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    */
   private async performInferenceApi(
     params: InferenceInferenceRequest,
-    asStream: boolean = false
-  ): Promise<unknown> {
+    asStream: boolean = false,
+    signal?: AbortSignal
+  ): Promise<InferenceInferenceResponse> {
     try {
-      const response = await this.esClient?.inference.inference(params, { asStream });
+      const response = await this.esClient?.inference.inference(params, { asStream, signal });
       this.logger.info(
         `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
       );
@@ -174,13 +192,17 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     }
   }
 
-  private async streamAPI({ input }: ChatCompleteParams): Promise<StreamingResponse> {
+  private async streamAPI({
+    input,
+    signal,
+  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<StreamingResponse> {
     const response = await this.performInferenceApi(
       { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
-      true
+      true,
+      signal
     );
 
-    return (response as Stream).pipe(new PassThrough());
+    return (response as unknown as Stream).pipe(new PassThrough());
   }
 
   /**
@@ -190,9 +212,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    *  which parses the proprietary response into a string of the response text alone
    * @param input A message to be sent to the API
    */
-  public async performApiCompletionStream({ input }: ChatCompleteParams): Promise<IncomingMessage> {
+  public async performApiCompletionStream({
+    input,
+    signal,
+  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
       input,
+      signal,
     })) as unknown as IncomingMessage;
     return res;
   }

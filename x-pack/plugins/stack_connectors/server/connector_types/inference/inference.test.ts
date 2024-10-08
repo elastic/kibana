@@ -12,62 +12,35 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { PassThrough, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import {
-  InferenceInferenceRequest,
-  InferenceInferenceResponse,
-} from '@elastic/elasticsearch/lib/api/types';
-jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
-const mockTee = jest.fn();
+import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
-const mockCreate = jest.fn().mockImplementation(() => ({
-  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
-}));
-const mockDefaults: InferenceInferenceRequest = {
-  inference_id: 'test',
-  // task_type: 'text_embedding',
-  task_settings: {
-    input_type: 'ingest',
-  },
-  input: 'What is Elastic?',
-};
-
-jest.mock('openai', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    api_key: '123',
-    chat: {
-      completions: {
-        create: mockCreate,
-      },
-    },
-  })),
-}));
-
 describe('InferenceConnector', () => {
-  const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
   let mockError: jest.Mock;
   const logger = loggingSystemMock.createLogger();
-  const mockResponseString = 'Hello! How can I assist you today?';
-  const mockResponse: Promise<InferenceInferenceResponse> = Promise.resolve({
+  const mockResponse: InferenceInferenceResponse = {
     completion: [
       {
         result:
           'Elastic is a company known for developing the Elasticsearch search and analytics engine, which allows for real-time data search, analysis, and visualization. Elasticsearch is part of the larger Elastic Stack (also known as the ELK Stack), which includes:\n\n1. **Elasticsearch**: A distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.\n  \n2. **Logstash**: A server-side data processing pipeline that ingests data from multiple sources simultaneously, transforms it, and sends it to your preferred "stash," such as Elasticsearch.\n  \n3. **Kibana**: A data visualization dashboard for Elasticsearch. It allows you to search, view, and interact with data stored in Elasticsearch indices. You can perform advanced data analysis and visualize data in various charts, tables, and maps.\n\n4. **Beats**: Lightweight data shippers for different types of data. They send data from hundreds or thousands of machines and systems to Elasticsearch or Logstash.\n\nThe Elastic Stack is commonly used for various applications, such as log and event data analysis, full-text search, security analytics, business analytics, and more. It is employed across many industries to derive insights from large volumes of structured and unstructured data.\n\nElastic offers both open-source and paid versions of its software, providing a variety of features ranging from basic data ingestion and visualization to advanced machine learning and security capabilities.',
       },
     ],
-    connector_id: 'fd681683-de83-48df-8463-122ed7fddbe4',
-  });
-  beforeEach(() => {
-    mockEsClient.inference.inference.mockResolvedValue(mockResponse);
-    mockError = jest.fn().mockImplementation(() => {
-      throw new Error('API Error');
-    });
-  });
+  };
 
-  describe('InferenceConnector', () => {
+  describe('performApiCompletion', () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+
+    beforeEach(() => {
+      mockEsClient.inference.inference.mockResolvedValue(mockResponse);
+      mockError = jest.fn().mockImplementation(() => {
+        throw new Error('API Error');
+      });
+    });
+
+    const services = actionsMock.createServices();
+    services.scopedClusterClient = mockEsClient;
     const connector = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
@@ -83,187 +56,107 @@ describe('InferenceConnector', () => {
       },
       secrets: { providerSecrets: { api_key: '123' } },
       logger,
-      services: actionsMock.createServices(),
+      services,
     });
 
-    beforeEach(() => {
-      jest.clearAllMocks();
+    it('uses the completion task_type is supplied', async () => {
+      const response = await connector.performApiCompletion({
+        input: 'What is Elastic?',
+      });
+      expect(mockEsClient.inference.inference).toBeCalledTimes(1);
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+        {
+          inference_id: 'test',
+          input: 'What is Elastic?',
+          task_type: 'completion',
+        },
+        { asStream: false }
+      );
+      expect(response).toEqual(mockResponse);
     });
 
-    describe('performApiCompletion', () => {
-      it('uses the default task_type is supplied', async () => {
-        const response = await connector.performApiCompletion({
-          input: 'What is Elastic?',
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith(mockDefaults);
-        expect(response).toEqual(mockResponse);
-      });
+    it('errors during API calls are properly handled', async () => {
+      // @ts-ignore
+      mockEsClient.inference.inference = mockError;
 
-      it('overrides task type specified in the body', async () => {
-        const requestBody = { input: 'What is Elastic?' };
-        const response = await connector.performApiCompletion(requestBody);
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          ...mockDefaults,
-          data: JSON.stringify({ ...requestBody, stream: false }),
-        });
-        expect(response).toEqual(mockResponse);
-      });
-
-      it('the Inference API call is successful with correct parameters', async () => {
-        const response = await connector.performApiCompletion({
-          input: 'What is Elastic?',
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          ...mockDefaults,
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-          }),
-        });
-        expect(response).toEqual(mockResponse);
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        mockEsClient.inference = mockError;
-
-        await expect(connector.performApiCompletion({ input: 'What is Elastic?' })).rejects.toThrow(
-          'API Error'
-        );
-      });
-    });
-
-    describe('streamApi', () => {
-      it('the Inference API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.performApiCompletionStream({
-          input: 'What is Elastic?',
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-          }),
-        });
-        expect(response).toEqual(mockResponse);
-      });
-
-      it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.performApiCompletionStream({
-          input: 'What is Elastic?',
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          responseType: 'stream',
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-          }),
-        });
-        expect(response).toEqual({
-          headers: { 'Content-Type': 'dont-compress-this' },
-          ...mockResponse,
-        });
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        mockEsClient.inference = mockError;
-
-        await expect(
-          connector.performApiCompletionStream({ input: 'What is Elastic?' })
-        ).rejects.toThrow('API Error');
-      });
-    });
-
-    describe('invokeStream', () => {
-      const mockStream = (
-        dataToStream: string[] = [
-          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}',
-        ]
-      ) => {
-        const streamMock = createStreamMock();
-        dataToStream.forEach((chunk) => {
-          streamMock.write(chunk);
-        });
-        streamMock.complete();
-        mockEsClient.inference.inference.mockResolvedValue({
-          ...mockResponse,
-          // data: streamMock.transform,
-        });
-        return mockEsClient.inference;
-      };
-      beforeEach(() => {
-        // @ts-ignore
-        mockEsClient.inference = mockStream();
-      });
-
-      it('the API call is successful with correct request parameters', async () => {
-        await connector.performApiCompletionStream({ input: 'What is Elastic?' });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          responseType: 'stream',
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-
-            model: DEFAULT_OPENAI_MODEL,
-          }),
-        });
-      });
-
-      it('signal is properly passed to streamApi', async () => {
-        const signal = jest.fn();
-        await connector.performApiCompletionStream({ input: 'What is Elastic?' });
-
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          responseType: 'stream',
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-
-            model: DEFAULT_OPENAI_MODEL,
-          }),
-          signal,
-        });
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        mockEsClient.inference = mockError;
-
-        await expect(
-          connector.performApiCompletionStream({ input: 'What is Elastic?' })
-        ).rejects.toThrow('API Error');
-      });
-
-      it('responds with a readable stream', async () => {
-        // @ts-ignore
-        mockEsClient.inference = mockStream();
-        const response = await connector.performApiCompletionStream({
-          input: 'What is Elastic?',
-        });
-        expect(response instanceof PassThrough).toEqual(true);
-      });
-    });
-
-    describe('performApiRerank', () => {
-      it('the API call is successful with correct parameters', async () => {
-        const response = await connector.performApiCompletionStream({
-          input: 'What is Elastic?',
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          ...mockDefaults,
-          data: JSON.stringify({
-            input: 'What is Elastic?',
-          }),
-        });
-        expect(response).toEqual(mockResponseString);
-      });
+      await expect(connector.performApiCompletion({ input: 'What is Elastic?' })).rejects.toThrow(
+        'API Error'
+      );
     });
   });
 
-  describe('Elasticsearch', () => {
-    const connector = new InferenceConnector({
+  describe('performApiRerank', () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    const mockResponseRerank = {
+      rerank: [
+        {
+          index: 2,
+          score: 0.011597361,
+          text: 'leia',
+        },
+        {
+          index: 0,
+          score: 0.006338922,
+          text: 'luke',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      mockEsClient.inference.inference.mockResolvedValue(mockResponseRerank);
+      mockError = jest.fn().mockImplementation(() => {
+        throw new Error('API Error');
+      });
+    });
+    const services = actionsMock.createServices();
+    services.scopedClusterClient = mockEsClient;
+    it('the API call is successful with correct parameters', async () => {
+      const connectorRerank = new InferenceConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: '123' },
+        config: {
+          provider: 'googlevertexai',
+          providerConfig: {
+            model_id: DEFAULT_OPENAI_MODEL,
+          },
+          taskType: 'rerank',
+          inferenceId: 'test-rerank',
+          taskTypeConfig: {},
+        },
+        secrets: { providerSecrets: { api_key: '123' } },
+        logger,
+        services,
+      });
+      const response = await connectorRerank.performApiRerank({
+        input: ['apple', 'banana'],
+        query: 'test',
+      });
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+        {
+          inference_id: 'test-rerank',
+          input: ['apple', 'banana'],
+          query: 'test',
+          task_type: 'rerank',
+        },
+        { asStream: false }
+      );
+      expect(response).toEqual(mockResponseRerank);
+    });
+  });
+
+  describe('performApiTextEmbedding', () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+
+    beforeEach(() => {
+      mockEsClient.inference.inference.mockResolvedValue(mockResponse);
+      mockError = jest.fn().mockImplementation(() => {
+        throw new Error('API Error');
+      });
+    });
+
+    const services = actionsMock.createServices();
+    services.scopedClusterClient = mockEsClient;
+    const connectorTextEmbedding = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -277,75 +170,123 @@ describe('InferenceConnector', () => {
       },
       secrets: { providerSecrets: {} },
       logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
+      services,
     });
 
-    const sampleAzureAiBody = {
-      messages: [
+    it('test the AzureAI API call is successful with correct parameters', async () => {
+      const response = await connectorTextEmbedding.performApiTextEmbedding({
+        input: 'Hello world',
+        inputType: 'ingest',
+      });
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         {
-          role: 'user',
-          content: 'Hello world',
+          inference_id: '',
+          input: 'Hello world',
+          task_settings: {
+            input_type: 'ingest',
+          },
+          task_type: 'text_embedding',
         },
-      ],
+        { asStream: false }
+      );
+      expect(response).toEqual(mockResponse);
+    });
+
+    it('errors during API calls are properly handled', async () => {
+      // @ts-ignore
+      mockEsClient.inference.inference = mockError;
+
+      await expect(
+        connectorTextEmbedding.performApiTextEmbedding({
+          input: 'Hello world',
+          inputType: 'ingest',
+        })
+      ).rejects.toThrow('API Error');
+    });
+  });
+
+  describe('performApiCompletionStream', () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+
+    const mockStream = (
+      dataToStream: string[] = [
+        'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}',
+      ]
+    ) => {
+      const streamMock = createStreamMock();
+      dataToStream.forEach((chunk) => {
+        streamMock.write(chunk);
+      });
+      streamMock.complete();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
     };
 
     beforeEach(() => {
       // @ts-ignore
-      mockEsClient.inference = mockEsClient.inference;
-      jest.clearAllMocks();
+      mockStream();
     });
 
-    describe('performApiTextEmbedding', () => {
-      it('test the AzureAI API call is successful with correct parameters', async () => {
-        const response = await connector.performApiCompletion({
-          input: JSON.stringify(sampleAzureAiBody),
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          ...mockDefaults,
+    const services = actionsMock.createServices();
+    services.scopedClusterClient = mockEsClient;
+    const connector = new InferenceConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      config: {
+        providerConfig: {
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual(mockResponse);
-      });
+        },
+        provider: 'elasticsearch',
+        taskType: 'completion',
+        inferenceId: '',
+        taskTypeConfig: {},
+      },
+      secrets: { providerSecrets: {} },
+      logger: loggingSystemMock.createLogger(),
+      services,
+    });
 
-      it('overrides stream parameter if set in the body', async () => {
-        const body = {
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-          ],
-        };
-        const response = await connector.performApiCompletion({
-          input: JSON.stringify({ ...body }),
-        });
-        expect(mockEsClient.inference).toBeCalledTimes(1);
-        expect(mockEsClient.inference).toHaveBeenCalledWith({
-          ...mockDefaults,
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual(mockResponse);
-      });
+    it('the API call is successful with correct request parameters', async () => {
+      await connector.performApiCompletionStream({ input: 'Hello world' });
+      expect(mockEsClient.inference.inference).toBeCalledTimes(1);
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+        {
+          inference_id: '',
+          input: 'Hello world',
+          task_type: 'completion',
+        },
+        { asStream: true }
+      );
+    });
 
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        mockEsClient.inference = mockError;
+    it('signal is properly passed to streamApi', async () => {
+      const signal = jest.fn() as unknown as AbortSignal;
+      await connector.performApiCompletionStream({ input: 'Hello world', signal });
 
-        await expect(
-          connector.performApiCompletion({ input: JSON.stringify(sampleAzureAiBody) })
-        ).rejects.toThrow('API Error');
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+        {
+          inference_id: '',
+          input: 'Hello world',
+          task_type: 'completion',
+        },
+        { asStream: true, signal }
+      );
+    });
+
+    it('errors during API calls are properly handled', async () => {
+      // @ts-ignore
+      mockEsClient.inference.inference = mockError;
+
+      await expect(
+        connector.performApiCompletionStream({ input: 'What is Elastic?' })
+      ).rejects.toThrow('API Error');
+    });
+
+    it('responds with a readable stream', async () => {
+      const response = await connector.performApiCompletionStream({
+        input: 'What is Elastic?',
       });
+      expect(response instanceof PassThrough).toEqual(true);
     });
   });
 });

@@ -42,7 +42,7 @@ export const RerankResponseSchema = schema.object({
     schema.object({
       text: schema.string(),
       index: schema.number(),
-      relevance_score: schema.number(),
+      score: schema.number(),
     }),
     { defaultValue: [] }
   ),
