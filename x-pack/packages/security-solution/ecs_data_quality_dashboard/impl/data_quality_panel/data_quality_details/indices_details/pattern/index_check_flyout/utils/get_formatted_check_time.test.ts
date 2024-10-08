@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+
+moment.tz.setDefault('UTC');
+
 import { getFormattedCheckTime } from './get_formatted_check_time';
 
 describe('getFormattedCheckTime', () => {
   it('returns formatted check time', () => {
     const formattedCheckTime = getFormattedCheckTime(1613474400000);
-    expect(formattedCheckTime).toBe('Feb 16, 2021 @ 12:20:00');
+    expect(formattedCheckTime).toBe('Feb 16, 2021 @ 11:20:00');
   });
 
   describe('when check time is invalid', () => {
