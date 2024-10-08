@@ -8096,6 +8096,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/suggestions/{suggestion_type}:
     post:
+      deprecated: true
       operationId: GetEndpointSuggestions
       parameters:
         - in: path
@@ -44211,6 +44212,7 @@ components:
         - id
         - rule_id
         - immutable
+        - rule_source
         - updated_at
         - updated_by
         - created_at
