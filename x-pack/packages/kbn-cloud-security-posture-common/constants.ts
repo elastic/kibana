@@ -36,6 +36,9 @@ export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
 export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
+// TODO: update grouping component to make from/to optional
+export const CDR_3P_RETENTION_POLICY = '365d'; // arbitrary big value, as some retention required for grouping queries
+
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
