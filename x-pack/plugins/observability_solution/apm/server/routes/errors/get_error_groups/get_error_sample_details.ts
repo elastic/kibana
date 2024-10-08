@@ -68,7 +68,6 @@ export async function getErrorSampleDetails({
 }): Promise<Partial<ErrorSampleDetailsResponse>> {
   const requiredFields = asMutableArray([
     AGENT_NAME,
-    AGENT_VERSION,
     PROCESSOR_EVENT,
     TRACE_ID,
     TIMESTAMP_US,
@@ -80,6 +79,7 @@ export async function getErrorSampleDetails({
 
   const optionalFields = asMutableArray([
     TRANSACTION_ID,
+    AGENT_VERSION,
     PROCESSOR_NAME,
     ERROR_STACK_TRACE,
     ERROR_EXC_MESSAGE,
