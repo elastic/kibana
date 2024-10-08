@@ -72,7 +72,7 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
           );
 
           const accessTagsFilter = (el) => isLiteralAccessTag(el) || isTemplateLiteralAccessTag(el);
-          const accessTags = tagsProperty.value.elements.filter(accessTagsFilter);
+          const accessTags = tagsProperty?.value.elements.filter(accessTagsFilter) ?? [];
 
           return accessTags.length > 0;
         }
