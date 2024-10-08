@@ -409,7 +409,7 @@ export function getWebpackConfig(
       ],
       // TODO: try to understand why usedExports is treeShaking code it shouldn't be
       usedExports: false,
-      sideEffects: false,
+      // sideEffects: false,
       //
     },
   };
