@@ -62,7 +62,7 @@ export function useFieldStatsTrigger<T = DropDownLabel>() {
     (option: T): ReactNode => {
       if (isSelectableOption(option)) {
         const field = (option as Option).field;
-        const isEmpty = populatedFields ? !populatedFields.has(field.id) : false;
+        const isEmpty = populatedFields && field ? !populatedFields.has(field?.id) : false;
         return option.isGroupLabel || !field ? (
           <EuiText color={isEmpty ? 'subdued' : undefined}>{option.label}</EuiText>
         ) : (

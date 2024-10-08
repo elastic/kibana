@@ -457,6 +457,18 @@ export function MachineLearningCommonUIProvider({
       await testSubjects.click(selector);
       await testSubjects.existOrFail('optionsListControlAvailableOptions');
 
+      await retry.tryForTime(1000, async () => {
+        const enabled =
+          (await testSubjects.getAttribute(`optionsListIncludeEmptyFields`, 'aria-checked')) ===
+          'true';
+        if (!enabled) {
+          await testSubjects.click(`optionsListIncludeEmptyFields`);
+          expect(
+            (await testSubjects.getAttribute(`optionsListIncludeEmptyFields`, 'aria-checked')) ===
+              'true'
+          ).to.eql(true, `Expected optionsListIncludeEmptyFields to be enabled.`);
+        }
+      });
       await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.find('optionsListFilterInput');
 
