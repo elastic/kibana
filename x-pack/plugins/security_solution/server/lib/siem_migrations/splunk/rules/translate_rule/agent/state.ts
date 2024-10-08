@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { Annotation } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
+import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
 export const translateRuleState = Annotation.Root({
-  splunkRuleTitle: Annotation<string>(),
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+  splunkRuleTitle: Annotation<string>,
   splunkRuleDescription: Annotation<string>,
+  splunkRuleQuery: Annotation<string>,
   response: Annotation<string>,
 });

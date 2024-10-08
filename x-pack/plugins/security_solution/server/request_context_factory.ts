@@ -214,6 +214,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           }),
         });
       }),
+      getInferenceClient: startPlugins.inference.getClient,
     };
   }
 }

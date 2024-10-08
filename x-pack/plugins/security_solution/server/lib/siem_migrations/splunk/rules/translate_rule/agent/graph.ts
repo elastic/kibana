@@ -6,27 +6,67 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 // import { StringOutputParser } from '@langchain/core/output_parsers';
+import type { StructuredTool } from '@langchain/core/tools';
+import type { AIMessage } from '@langchain/core/messages';
 import { translateRuleState } from './state';
 import type {
   TranslateRuleGraphParams,
   TranslateRuleNodeParams,
   TranslateRuleState,
 } from './types';
+import { TRANSLATE_RULE_MAIN_PROMPT } from './prompts';
 
 const callModel = async ({
   state,
   model,
 }: TranslateRuleNodeParams): Promise<Partial<TranslateRuleState>> => {
-  // TODO:
-  return state;
+  // const initialMessages = await TRANSLATE_RULE_MAIN_PROMPT.format({
+  //   splunkRuleTitle: state.splunkRuleTitle,
+  //   splunkRuleDescription: state.splunkRuleDescription,
+  //   splunkRuleQuery: state.splunkRuleQuery,
+  // });
+  const translateCall = TRANSLATE_RULE_MAIN_PROMPT.pipe((initialMessages) =>
+    model.invoke([...initialMessages.toChatMessages(), ...state.messages])
+  );
+
+  const response = await translateCall.invoke({
+    splunkRuleTitle: state.splunkRuleTitle,
+    splunkRuleDescription: state.splunkRuleDescription,
+    splunkRuleQuery: state.splunkRuleQuery,
+  });
+  return { messages: [response] };
 };
 
-export async function getTranslateRuleGraph({ model }: TranslateRuleGraphParams) {
-  const matchPrebuiltRuleGraph = new StateGraph(translateRuleState)
-    .addNode('callModel', (state: TranslateRuleState) => callModel({ state, model }))
-    .addEdge(START, 'callModel')
-    .addEdge('callModel', END);
+// Define the function that determines whether to continue or not
+// We can extract the state typing via `StateAnnotation.State`
+function toolConditionalEdge(state: TranslateRuleState) {
+  const messages = state.messages;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+  // If the LLM makes a tool call, then we route to the "tools" node
+  if (lastMessage.tool_calls?.length) {
+    return 'tools';
+  }
+  return END;
+}
 
-  return matchPrebuiltRuleGraph.compile();
+export async function getTranslateRuleGraph({
+  model,
+  esqlKnowledgeBaseTool,
+}: TranslateRuleGraphParams) {
+  if (model.bindTools === undefined) {
+    throw new Error(`The ${model.name} model does not support tools`);
+  }
+  const tools: StructuredTool[] = [esqlKnowledgeBaseTool];
+  model.bindTools(tools);
+
+  const translateRuleGraph = new StateGraph(translateRuleState)
+    .addNode('callModel', (state: TranslateRuleState) => callModel({ state, model }))
+    .addNode('tools', new ToolNode<TranslateRuleState>(tools))
+    .addEdge(START, 'callModel')
+    .addConditionalEdges('callModel', toolConditionalEdge)
+    .addEdge('tools', 'callModel');
+
+  return translateRuleGraph.compile();
 }

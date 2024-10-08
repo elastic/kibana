@@ -6,32 +6,27 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-export const MATCH_PREBUILT_RULE_PROMPT = ChatPromptTemplate.fromMessages([
+
+export const TRANSLATE_RULE_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are an expert assistant in Cybersecurity, your task is to help migrating a SIEM detection rule, from Splunk Security to Elastic Security.
-You will be provided with a Splunk Detection Rule name by the user, your goal is to try find an Elastic Detection Rule that covers the same threat, if any.
-The list of Elastic Detection Rules suggested is provided in the context below.
+    `You are a helpful assistant for translating queries from SPL (Splunk Search Processing Language) to Elastic ES|QL queries.
+Your goal is to construct the equivalent ES|QL query given a SPL query.
 
-<guidelines>
-If there is no Elastic rule in the list that covers the same threat, answer only with the string: no_match
-If there is one Elastic rule in the list that covers the same threat, answer only with its name without any further explanation.
-If there are multiple rules in the list that cover the same threat, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
-</guidelines>
+VERY IMPORTANT: Use the provided tools to construct and validate the ES|QL query, do not make assumptions about the ES|QL queries.
 
-<context>
-<elastic_detection_rule_names>
-{elasticSecurityRules}
-</elastic_detection_rule_names>
-</context>`,
+The final response should be the ES|QL query inside a esql code block like:
+\`\`\`esql
+<the query goes here>
+\`\`\`
+`,
   ],
   [
     'human',
-    `The Splunk Detection Rule is:
-<splunk_rule_name>
-{splunkRuleTitle}
-</splunk_rule_name>
+    `The SPL query is:
+\`\`\`spl
+{splunkRuleQuery}
+\`\`\`
 `,
   ],
-  ['ai', 'Please find the answer below:'],
 ]);

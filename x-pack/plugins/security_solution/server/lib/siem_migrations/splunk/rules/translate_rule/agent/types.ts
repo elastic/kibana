@@ -6,12 +6,14 @@
  */
 
 import type { ChatModel } from '../../../../actions_client_chat';
+import type { ESQLKnowledgeBaseTool } from '../../../../tools/esql_knowledge_base_tool';
 import type { translateRuleState } from './state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
 
 export interface TranslateRuleGraphParams {
   model: ChatModel;
+  esqlKnowledgeBaseTool: ESQLKnowledgeBaseTool;
 }
 
 export interface TranslateRuleNodeParams {
