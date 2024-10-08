@@ -24,7 +24,7 @@ export const EventMergingBanner: React.FC<{ onDismiss: () => void }> = ({ onDism
     <EuiCallOut title={bannerTitle} onDismiss={onDismiss} data-test-subj="eventMergingCallout">
       <EuiText size="s">
         <FormattedMessage
-          id="eventMergingBanner.body"
+          id="xpack.securitySolution.endpoint.policy.eventMergingBanner.body"
           defaultMessage="Elastic Agent 8.16+ will produce less telemetry without reducing system visibility, which may impact existing event filters. To learn more about these changes and how to adjust your settings, visit our "
         />
         <EuiLink
