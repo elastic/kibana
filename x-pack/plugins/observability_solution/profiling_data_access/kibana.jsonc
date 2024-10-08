@@ -1,16 +1,26 @@
 {
   "type": "plugin",
   "id": "@kbn/profiling-data-access-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "profilingDataAccess",
-    "server": true,
     "browser": false,
-    "configPath": ["xpack", "profiling"],
-    "requiredPlugins": [
-      "data", 
+    "server": true,
+    "configPath": [
+      "xpack",
+      "profiling"
     ],
-    "optionalPlugins": ["cloud",  "fleet"],
+    "requiredPlugins": [
+      "data"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "fleet"
+    ],
     "requiredBundles": []
   }
 }
