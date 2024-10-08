@@ -301,7 +301,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity}`
+      } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
+        this.config.auto_calculate_default_ech_capacity
+      }`
     );
 
     const managedConfiguration = createManagedConfiguration({
