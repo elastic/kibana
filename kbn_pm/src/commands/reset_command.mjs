@@ -26,7 +26,7 @@ export const command = {
   flagsHelp: `
     --quiet              Prevent logging more than basic success/error messages
   `,
-  async run({ args, log }) {
+  async run({ log }) {
     log.warning(dedent`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
@@ -40,11 +40,5 @@ export const command = {
       ...readCleanPatterns(REPO_ROOT),
       ...(await findPluginCleanPaths(log)),
     ]);
-
-    // if (await Bazel.isInstalled(log)) {
-    //   const quiet = args.getBooleanValue('quiet');
-    //   await Bazel.expungeCache(log, { quiet });
-    //   await Bazel.cleanDiskCache(log);
-    // }
   },
 };
