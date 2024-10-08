@@ -55,6 +55,7 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/recently-accessed",
+    "@kbn/shared-ux-button-exit-full-screen",
   ],
   "exclude": [
     "target/**/*",
