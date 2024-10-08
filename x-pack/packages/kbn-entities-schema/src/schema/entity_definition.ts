@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { RefinementCtx, z } from '@kbn/zod';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -17,14 +17,6 @@ import {
   historySettingsSchema,
   durationSchemaWithMinimum,
 } from './common';
-
-const IndexPatternsSchema = z.object({
-  indexPatterns: arrayOfStringsSchema,
-});
-
-const DataViewIdSchema = z.object({
-  dataViewId: z.string(),
-});
 
 const baseEntityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
@@ -64,16 +56,39 @@ const baseEntityDefinitionSchema = z.object({
     ])
   ),
   installStartedAt: z.optional(z.string()),
+  indexPatterns: z.optional(arrayOfStringsSchema),
+  dataViewId: z.optional(z.string()),
 });
 
-const entityDefinitionSchemaWithIndexPatterns =
-  baseEntityDefinitionSchema.merge(IndexPatternsSchema);
-const entityDefinitionSchemaWithDataViewId = baseEntityDefinitionSchema.merge(DataViewIdSchema);
+const validateDataViewIdAndIndexPatternMutualExclusion = (
+  data: Partial<Pick<z.infer<typeof baseEntityDefinitionSchema>, 'indexPatterns' | 'dataViewId'>>,
+  ctx: RefinementCtx
+) => {
+  if (data.indexPatterns && data.dataViewId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['dataViewId'],
+      message: "dataViewId can't bet set if indexPatterns is defined",
+    });
+  }
+};
 
-export const entityDefinitionSchema = z.union([
-  entityDefinitionSchemaWithIndexPatterns,
-  entityDefinitionSchemaWithDataViewId,
-]);
+const validateDataViewIdOrIndexPatternRequired = (
+  data: Partial<Pick<z.infer<typeof baseEntityDefinitionSchema>, 'indexPatterns' | 'dataViewId'>>,
+  ctx: RefinementCtx
+) => {
+  if (!data.indexPatterns && !data.dataViewId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['dataViewId'],
+      message: "dataViewId should be set if indexPatterns isn't",
+    });
+  }
+};
+
+export const entityDefinitionSchema = baseEntityDefinitionSchema
+  .superRefine(validateDataViewIdAndIndexPatternMutualExclusion)
+  .superRefine(validateDataViewIdOrIndexPatternRequired);
 
 export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
   .omit({
@@ -82,8 +97,6 @@ export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
     installStatus: true,
     installStartedAt: true,
   })
-  .merge(IndexPatternsSchema)
-  .merge(DataViewIdSchema)
   .partial()
   .merge(
     z.object({
@@ -91,29 +104,7 @@ export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
       version: semVerSchema,
     })
   )
-  // TODO test it
-  .superRefine((data, ctx) => {
-    if (data.indexPatterns && data.dataViewId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['dataViewId'],
-        message: "dataViewId can't bet set if indexPatterns is defined",
-      });
-    }
-  });
+  .superRefine(validateDataViewIdAndIndexPatternMutualExclusion);
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
 export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;
-
-export type EntityDefinitionSchemaWithIndexPatterns = z.infer<
-  typeof entityDefinitionSchemaWithIndexPatterns
->;
-export type EntityDefinitionSchemaWithDataViewId = z.infer<
-  typeof entityDefinitionSchemaWithDataViewId
->;
-
-export const isEntityDefinitionWithIndexPattern = (
-  definition: EntityDefinition
-): definition is EntityDefinitionSchemaWithIndexPatterns => {
-  return (definition as EntityDefinitionSchemaWithIndexPatterns).indexPatterns !== undefined;
-};

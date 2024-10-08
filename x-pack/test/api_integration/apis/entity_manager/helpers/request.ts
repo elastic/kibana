@@ -35,15 +35,16 @@ export const installDefinition = async (
   params: {
     definition: EntityDefinition;
     installOnly?: boolean;
+    expectedCode?: number;
   }
 ) => {
-  const { definition, installOnly = false } = params;
+  const { definition, installOnly = false, expectedCode = 200 } = params;
   return supertest
     .post('/internal/entities/definition')
     .query({ installOnly })
     .set('kbn-xsrf', 'xxx')
     .send(definition)
-    .expect(200);
+    .expect(expectedCode);
 };
 
 export const uninstallDefinition = (

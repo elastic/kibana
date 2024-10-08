@@ -14,9 +14,7 @@ export function mergeEntityDefinitionUpdate(
 ) {
   const validatedDefinition: EntityDefinitionUpdate = { ...definition };
 
-  // TODO add unit tests for this
-
-  // Make sure that if the users sets the dataViewId or indexPatterns we delete the other one
+  // Make sure that if dataViewId or indexPatterns is set we delete the other one
   if (update.dataViewId) {
     delete validatedDefinition.indexPatterns;
   } else if (update.indexPatterns) {

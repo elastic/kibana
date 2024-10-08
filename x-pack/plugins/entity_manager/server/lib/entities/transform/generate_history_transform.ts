@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition, isEntityDefinitionWithIndexPattern } from '@kbn/entities-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
@@ -186,21 +186,20 @@ const generateTransformPutRequest = async ({
   };
 };
 
-// TODO ADD UNIT TESTS
-const getIndexPatterns = async (
+export const getIndexPatterns = async (
   definition: EntityDefinition,
   dataViewsService: DataViewsService
 ): Promise<string | string[]> => {
-  if (isEntityDefinitionWithIndexPattern(definition)) {
-    return definition.indexPatterns; // dataViewId or indexPatterns must be defined
+  if (definition.indexPatterns) {
+    return definition.indexPatterns;
   }
 
   try {
-    const dataView = await dataViewsService.get(definition.dataViewId);
+    const dataView = await dataViewsService.get(definition.dataViewId!); // dataViewId or indexPatterns must be defined
     return [dataView.getIndexPattern()];
   } catch (e) {
     throw new Error(
-      `Data view '${definition.dataViewId}' not found for entity definition '${definition.id}'.` +
+      `Data view '${definition.dataViewId}' not found for entity definition '${definition.id}'. ` +
         e.message
     );
   }
