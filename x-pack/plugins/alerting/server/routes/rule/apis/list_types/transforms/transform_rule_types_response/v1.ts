@@ -6,7 +6,7 @@
  */
 
 import { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
-import { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/list_types';
+import type { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/list_types';
 
 export const transformRuleTypesResponse = (
   ruleTypes: Set<RegistryAlertTypeWithAuth>
