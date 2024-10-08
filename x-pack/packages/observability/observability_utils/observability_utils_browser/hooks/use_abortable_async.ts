@@ -20,10 +20,25 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
 export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
   T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
 
+interface UseAbortableAsyncOptions<T> {
+  clearValueOnNext?: boolean;
+  defaultValue?: () => T;
+  onError?: (error: Error) => void;
+}
+
+export type UseAbortableAsync<
+  TAdditionalParameters extends Record<string, any> = {},
+  TAdditionalOptions extends Record<string, any> = {}
+> = <T>(
+  fn: ({}: { signal: AbortSignal } & TAdditionalParameters) => T | Promise<T>,
+  deps: any[],
+  options?: UseAbortableAsyncOptions<T> & TAdditionalOptions
+) => AbortableAsyncState<T>;
+
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
   deps: any[],
-  options?: { clearValueOnNext?: boolean; defaultValue?: () => T }
+  options?: UseAbortableAsyncOptions<T>
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;
 
@@ -50,6 +65,7 @@ export function useAbortableAsync<T>(
       setError(err);
       // setValue(undefined);
       setLoading(false);
+      options?.onError?.(err);
     }
 
     try {

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 
 type EntityPivotIdentity = Record<string, string>;
 
 export interface EntityDataSource {
-  indexPattern: string;
-  filter?: QueryDslQueryContainer;
+  index: string | string[];
 }
 
 export interface IEntity {
@@ -25,14 +23,11 @@ interface IPivotEntity {
   identity: EntityPivotIdentity;
 }
 
-export interface StoredEntity extends IEntity {
-  relationships?: EntityRelationshipDefinition[];
-}
+export type StoredEntity = IEntity;
 
 export interface DefinitionEntity extends StoredEntity {
-  type: 'definition';
-  filters?: EntityFilter[];
-  sources: EntityDataSource[];
+  filters: EntityFilter[];
+  pivot: Omit<Pivot, 'type'>;
 }
 
 export interface Pivot {
@@ -40,32 +35,27 @@ export interface Pivot {
   identityFields: string[];
 }
 
-export interface PivotEntity extends StoredEntity {
-  type: 'pivot';
-  pivot: Pivot;
-  sources: EntityDataSource[];
-}
+export interface PivotEntity extends IEntity, IPivotEntity {}
 
-export interface SpawnedEntity extends IEntity, IPivotEntity {}
-
-export interface StoredSpawnedEntity extends StoredEntity, IPivotEntity {}
+export interface StoredPivotEntity extends StoredEntity, IPivotEntity {}
 
 interface EntityDefinitionTermFilter {
   term: { [x: string]: string };
 }
-interface EntityDefinitionEntityTypeFilter {
-  entity: { type: string };
+
+interface EntityDefinitionIndexFilter {
+  index: string[];
 }
 
-type EntityFilter = EntityDefinitionTermFilter | EntityDefinitionEntityTypeFilter;
-
-interface PivotRelationshipDefinition {
-  pivot: { identityFields: string[] } | { type: string };
+export interface EntityGrouping {
+  id: string;
+  filters: EntityFilter[];
+  pivot: Pivot;
 }
 
-type EntityRelationshipDefinition = PivotRelationshipDefinition;
+export type EntityFilter = EntityDefinitionTermFilter | EntityDefinitionIndexFilter;
 
-export type Entity = PivotEntity | DefinitionEntity | SpawnedEntity | StoredSpawnedEntity;
+export type Entity = DefinitionEntity | PivotEntity | StoredPivotEntity;
 
 export const ENTITY_HEALTH_STATUS = {
   Healthy: 'Healthy' as const,
@@ -76,12 +66,12 @@ export const ENTITY_HEALTH_STATUS = {
 
 export type EntityHealthStatus = ValuesType<typeof ENTITY_HEALTH_STATUS>;
 
-export const ENTITY_HEALTH_STATUS_INT: Record<EntityHealthStatus, number> = {
-  [ENTITY_HEALTH_STATUS.Violated]: 4,
-  [ENTITY_HEALTH_STATUS.Degraded]: 3,
-  [ENTITY_HEALTH_STATUS.NoData]: 2,
-  [ENTITY_HEALTH_STATUS.Healthy]: 1,
-};
+export const ENTITY_HEALTH_STATUS_INT = {
+  [ENTITY_HEALTH_STATUS.Violated]: 4 as const,
+  [ENTITY_HEALTH_STATUS.Degraded]: 3 as const,
+  [ENTITY_HEALTH_STATUS.NoData]: 2 as const,
+  [ENTITY_HEALTH_STATUS.Healthy]: 1 as const,
+} satisfies Record<EntityHealthStatus, number>;
 
 const HEALTH_STATUS_INT_TO_KEYWORD = Object.fromEntries(
   Object.entries(ENTITY_HEALTH_STATUS_INT).map(([healthStatus, int]) => {
@@ -93,11 +83,7 @@ export const healthStatusIntToKeyword = (value: ValuesType<typeof ENTITY_HEALTH_
   return HEALTH_STATUS_INT_TO_KEYWORD[value];
 };
 
-export type EntityWithSignalStatus = Entity & {
+export type EntityWithSignalStatus = IEntity & {
   alertsCount: number;
   healthStatus: EntityHealthStatus | null;
 };
-
-export enum BuiltInEntityType {
-  dataStream = 'data_stream',
-}

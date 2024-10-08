@@ -6,12 +6,12 @@
  */
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { EntityTable } from '../entity_table';
 import { EntitiesAppPageHeader } from '../entities_app_page_header';
 import { EntitiesAppPageHeaderTitle } from '../entities_app_page_header/entities_app_page_header_title';
 import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
 import { useKibana } from '../../hooks/use_kibana';
+import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
 
 export function EntityPivotTypeView() {
   const {
@@ -26,9 +26,9 @@ export function EntityPivotTypeView() {
     },
   } = useKibana();
 
-  const typesFetch = useAbortableAsync(
+  const typesFetch = useEntitiesAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('POST /internal/entities_api/pivots/metadata', {
+      return entitiesAPIClient.fetch('POST /internal/entities_api/definitions/metadata', {
         signal,
         params: {
           body: {
@@ -40,7 +40,7 @@ export function EntityPivotTypeView() {
     [entitiesAPIClient, type]
   );
 
-  const title = typesFetch.value?.pivots[0]?.displayName ?? '';
+  const title = typesFetch.value?.definitions[0]?.displayName ?? '';
 
   return (
     <EuiFlexGroup direction="column">

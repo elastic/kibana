@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { createEntitiesAPIServerRoute } from '../create_entities_api_server_route';
-import { PivotEntity } from '../../../common/entities';
-import { builtinPivotTypes } from '../../built_in_pivots_stub';
+import { DefinitionEntity } from '../../../common/entities';
+import { getDefinitionEntities } from '../../lib/get_definition_entities';
+import { createEntitiesAPIEsClient } from '../../lib/clients/create_entities_api_es_client';
 
-export const getPivotsMetadataRoute = createEntitiesAPIServerRoute({
-  endpoint: 'POST /internal/entities_api/pivots/metadata',
+export const getDefinitionsMetadataRoute = createEntitiesAPIServerRoute({
+  endpoint: 'POST /internal/entities_api/definitions/metadata',
   options: {
     tags: ['access:entities'],
   },
@@ -24,19 +25,23 @@ export const getPivotsMetadataRoute = createEntitiesAPIServerRoute({
         .partial(),
     })
     .partial(),
-  handler: async (resources): Promise<{ pivots: PivotEntity[] }> => {
+  handler: async (resources): Promise<{ definitions: DefinitionEntity[] }> => {
     const types = resources.params?.body?.types;
 
-    const allPivots = builtinPivotTypes;
+    const esClient = await createEntitiesAPIEsClient(resources);
+
+    const definitionEntities = await getDefinitionEntities({
+      esClient,
+    });
 
     return {
-      pivots: types?.length
-        ? allPivots.filter((pivot) => types.includes(pivot.pivot.type))
-        : allPivots,
+      definitions: types?.length
+        ? definitionEntities.filter((definitionEntity) => types.includes(definitionEntity.type))
+        : definitionEntities,
     };
   },
 });
 
 export const typesRoutes = {
-  ...getPivotsMetadataRoute,
+  ...getDefinitionsMetadataRoute,
 };

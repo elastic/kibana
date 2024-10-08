@@ -6,13 +6,13 @@
  */
 
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { builtinPivotTypes } from '../built_in_pivots_stub';
-import { PivotEntity } from '../../common';
+import { builtinEntityDefinitions } from '../built_in_definitions_stub';
+import { DefinitionEntity } from '../../common/entities';
 
-export async function getPivotEntities({
+export async function getDefinitionEntities({
   esClient,
 }: {
   esClient: ObservabilityElasticsearchClient;
-}): Promise<PivotEntity[]> {
-  return builtinPivotTypes;
+}): Promise<DefinitionEntity[]> {
+  return builtinEntityDefinitions;
 }

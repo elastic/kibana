@@ -18,7 +18,8 @@
       "share",
       "alerting",
       "ruleRegistry",
-      "slo"
+      "slo",
+      "spaces"
     ],
     "requiredBundles": [
     ],

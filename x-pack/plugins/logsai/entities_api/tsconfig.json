@@ -28,5 +28,8 @@
     "@kbn/slo-plugin",
     "@kbn/licensing-plugin",
     "@kbn/zod",
+    "@kbn/es-types",
+    "@kbn/observability-utils-common",
+    "@kbn/data-views-plugin",
   ]
 }

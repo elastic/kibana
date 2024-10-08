@@ -24,3 +24,5 @@ export const plugin: PluginInitializer<
   EntitiesAPIStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new EntitiesAPIPlugin(pluginInitializerContext);
+
+export { getIndexPatternsForFilters } from '../common';

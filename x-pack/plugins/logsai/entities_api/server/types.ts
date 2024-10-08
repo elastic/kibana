@@ -17,6 +17,7 @@ import type {
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
 import type { SloPluginStart, SloPluginSetup } from '@kbn/slo-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../../spaces/server';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -26,6 +27,7 @@ export interface EntitiesAPISetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   alerting: AlertingPluginSetup;
   slo: SloPluginSetup;
+  spaces: SpacesPluginSetup;
 }
 
 export interface EntitiesAPIStartDependencies {
@@ -33,6 +35,7 @@ export interface EntitiesAPIStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   alerting: AlertingPluginStart;
   slo: SloPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface EntitiesAPIServerSetup {}

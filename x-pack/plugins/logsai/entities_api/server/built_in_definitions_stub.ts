@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { PivotEntity } from '../common/entities';
+import { DefinitionEntity } from '../common/entities';
 
-export const dataStreamsPivot: PivotEntity = {
+export const dataStreamsEntity: DefinitionEntity = {
   id: 'data_streams',
   displayName: 'Data streams',
-  type: 'pivot',
+  type: 'data_stream',
   pivot: {
-    type: 'data_stream',
     identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
   },
-  sources: [
+  filters: [
     {
-      indexPattern: '.data_streams*',
+      index: ['logs-*', 'metrics-*', 'traces-*'],
     },
   ],
 };
 
-export const builtinPivotTypes = [dataStreamsPivot];
+export const builtinEntityDefinitions = [dataStreamsEntity];

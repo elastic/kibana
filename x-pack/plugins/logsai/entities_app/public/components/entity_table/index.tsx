@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useMemo, useState } from 'react';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { getIndexPatternsForFilters } from '@kbn/entities-api-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
+import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
 
 export function EntityTable({ type }: { type: 'all' | string }) {
   const {
@@ -37,9 +39,9 @@ export function EntityTable({ type }: { type: 'all' | string }) {
     order: 'desc',
   });
 
-  const pivotMetadataFetch = useAbortableAsync(
+  const definitionsMetadataFetch = useEntitiesAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('POST /internal/entities_api/pivots/metadata', {
+      return entitiesAPIClient.fetch('POST /internal/entities_api/definitions/metadata', {
         signal,
         params: {
           body: {
@@ -51,7 +53,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
     [entitiesAPIClient, selectedType]
   );
 
-  const queryFetch = useAbortableAsync(
+  const queryFetch = useEntitiesAppFetch(
     ({ signal }) => {
       return entitiesAPIClient.fetch('POST /internal/entities_api/entities', {
         signal,
@@ -61,7 +63,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
             end,
             kuery: persistedKqlFilter,
             types: [selectedType],
-            sortField: sort.field,
+            sortField: sort.field as any,
             sortOrder: sort.order,
           },
         },
@@ -80,12 +82,12 @@ export function EntityTable({ type }: { type: 'all' | string }) {
   }, [queryFetch.value]);
 
   const dataViewsFetch = useAbortableAsync(() => {
-    if (!pivotMetadataFetch.value) {
+    if (!definitionsMetadataFetch.value) {
       return undefined;
     }
 
-    const allIndexPatterns = pivotMetadataFetch.value.pivots.flatMap((pivot) =>
-      pivot.sources.flatMap((source) => source.indexPattern)
+    const allIndexPatterns = definitionsMetadataFetch.value.definitions.flatMap((definition) =>
+      getIndexPatternsForFilters(definition.filters)
     );
 
     return dataViews
@@ -100,7 +102,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
       .then((response) => {
         return [response];
       });
-  }, [dataViews, pivotMetadataFetch.value]);
+  }, [dataViews, definitionsMetadataFetch.value]);
 
   return (
     <ControlledEntityTable
