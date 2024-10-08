@@ -11,6 +11,8 @@ describe('usage_metrics schemas', () => {
   it('should accept valid request query', () => {
     expect(() =>
       UsageMetricsRequestSchema.query.validate({
+        from: new Date().toISOString(),
+        to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
       })
     ).not.toThrow();
@@ -47,24 +49,12 @@ describe('usage_metrics schemas', () => {
     ).not.toThrow();
   });
 
-  it('should accept valid `size`', () => {
-    expect(() =>
-      UsageMetricsRequestSchema.query.validate({
-        from: new Date().toISOString(),
-        to: new Date().toISOString(),
-        metricTypes: ['storage_retained'],
-        size: 100,
-      })
-    ).not.toThrow();
-  });
-
   it('should accept `dataStream` list', () => {
     expect(() =>
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
-        size: 3,
         dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
       })
     ).not.toThrow();
@@ -76,7 +66,6 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
-        size: 3,
         dataStreams: [],
       })
     ).toThrowError('expected value of type [string] but got [Array]');
@@ -88,7 +77,6 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
-        size: 1,
         dataStreams: '  ',
       })
     ).toThrow('[dataStreams] must have at least one value');
@@ -100,7 +88,6 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
-        size: 3,
         dataStreams: ['ds_1', '  '],
       })
     ).toThrow('[dataStreams] list can not contain empty values');
