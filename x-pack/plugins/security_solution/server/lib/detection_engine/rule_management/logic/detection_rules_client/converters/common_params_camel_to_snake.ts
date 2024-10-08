@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import snakecaseKeys from 'snakecase-keys';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import type { BaseRuleParams } from '../../../../rule_schema';
 import { migrateLegacyInvestigationFields } from '../../../utils/utils';
+import type { NormalizedRuleParams } from './normalize_rule_params';
 
 /**
  * @deprecated Use convertObjectKeysToSnakeCase instead
@@ -46,5 +48,12 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',
+  };
+};
+
+export const normalizedCommonParamsCamelToSnake = (params: NormalizedRuleParams) => {
+  return {
+    ...commonParamsCamelToSnake(params),
+    rule_source: snakecaseKeys(params.ruleSource, { deep: true }),
   };
 };

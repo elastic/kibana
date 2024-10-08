@@ -12,6 +12,10 @@ interface NormalizeRuleSourceParams {
   ruleSource: BaseRuleParams['ruleSource'];
 }
 
+export interface NormalizedRuleParams extends BaseRuleParams {
+  ruleSource: RuleSourceCamelCased;
+}
+
 /*
  * Since there's no mechanism to migrate all rules at the same time,
  * we cannot guarantee that the ruleSource params is present in all rules.
@@ -37,7 +41,7 @@ export const normalizeRuleSource = ({
   return ruleSource;
 };
 
-export const normalizeRuleParams = (params: BaseRuleParams) => {
+export const normalizeRuleParams = (params: BaseRuleParams): NormalizedRuleParams => {
   const investigationFields = migrateLegacyInvestigationFields(params.investigationFields);
   const ruleSource = normalizeRuleSource({
     immutable: params.immutable,
