@@ -97,7 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('With data', () => {
         before(async () => {
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
           await es.index({
             index: indexName,
             body: {
@@ -125,6 +124,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('settingsTab');
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
           await pageObjects.svlSearchIndexDetailPage.expectSettingsComponentIsVisible();
+        });
+        it('should be able to delete document', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
+          await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
+          await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         });
       });
 
