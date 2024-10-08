@@ -89,6 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.searchProfiler.setQuery(testQuery);
 
         await PageObjects.searchProfiler.clickProfileButton();
+        await PageObjects.common.sleep(2000);
 
         const content = await PageObjects.searchProfiler.getProfileContent();
         expect(content).to.contain(testIndex);

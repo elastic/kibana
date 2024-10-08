@@ -50,7 +50,7 @@ export const Editor = memo(
         <EuiSpacer size="m" />
         <CodeEditor
           languageId={XJsonLang.ID}
-          data-test-subj="searchProfilerEditor"
+          dataTestSubj="searchProfilerEditor"
           value={editorValue}
           editorDidMount={editorDidMountCallback}
           options={{
