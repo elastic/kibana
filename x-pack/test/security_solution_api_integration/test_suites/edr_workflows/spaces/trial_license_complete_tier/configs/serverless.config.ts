@@ -42,6 +42,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
+
+        // Enable spaces UI capabilities
+        '--xpack.spaces.maxSpaces=100',
       ],
     },
   };
