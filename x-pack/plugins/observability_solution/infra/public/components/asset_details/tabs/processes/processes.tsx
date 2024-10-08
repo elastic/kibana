@@ -55,7 +55,7 @@ export const Processes = () => {
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
-  const { dataStreams } = useAssetEntitySummary({
+  const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
     entityType: 'host',
     entityId: asset.name,
   });
@@ -141,7 +141,8 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
-  const showAddMetricsCallout = !hasMetrics(dataStreams) && renderMode.mode === 'page';
+  const showAddMetricsCallout =
+    dataStreamsStatus === 'success' && !hasMetrics(dataStreams) && renderMode.mode === 'page';
   const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
 
   return (

@@ -30,7 +30,7 @@ export function useAssetEntitySummary({
   entityType: string;
   entityId: string;
 }) {
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     async (callApi) => {
       if (!entityType || !entityId) {
         return undefined;
@@ -45,5 +45,5 @@ export function useAssetEntitySummary({
     [entityType, entityId]
   );
 
-  return { dataStreams: data ? data.sourceDataStreams : [] };
+  return { dataStreams: data ? data.sourceDataStreams : [], status };
 }

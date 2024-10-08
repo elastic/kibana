@@ -37,7 +37,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const { euiTheme } = useEuiTheme();
     const { asset, renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
-    const { dataStreams } = useAssetEntitySummary({
+    const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
       entityType: asset.type,
       entityId: asset.type === 'host' ? asset.name : asset.id,
     });
@@ -120,7 +120,8 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     const quickAccessItems = [...quickAccessItemsRef.current];
 
-    const showAddMetricsCallout = !hasMetrics(dataStreams) && renderMode.mode === 'page';
+    const showAddMetricsCallout =
+      dataStreamsStatus === 'success' && !hasMetrics(dataStreams) && renderMode.mode === 'page';
     const addMetricsCalloutId: AddMetricsCalloutKey =
       asset.type === 'host' ? 'hostMetrics' : 'containerMetrics';
 

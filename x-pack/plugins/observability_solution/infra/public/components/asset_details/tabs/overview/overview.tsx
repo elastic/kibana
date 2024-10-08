@@ -40,7 +40,7 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
-  const { dataStreams } = useAssetEntitySummary({
+  const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
     entityType: asset.type,
     entityId: asset.type === 'host' ? asset.name : asset.id,
   });
@@ -69,7 +69,10 @@ export const Overview = () => {
     const isHost = asset.type === 'host';
     const isContainer = asset.type === 'container';
     const baseCondition =
-      !hasMetrics(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
+      dataStreamsStatus === 'success' &&
+      !hasMetrics(dataStreams) &&
+      !dismissedAddMetricsCallout &&
+      renderMode.mode === 'page';
 
     if (isHost) {
       return baseCondition;
