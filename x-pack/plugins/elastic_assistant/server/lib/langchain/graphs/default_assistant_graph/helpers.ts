@@ -24,6 +24,7 @@ interface StreamGraphParams {
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
   logger: Logger;
+  isOssModel?: boolean;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceOptions?: TraceOptions;
@@ -36,6 +37,7 @@ interface StreamGraphParams {
  * @param assistantGraph
  * @param inputs
  * @param logger
+ * @param isOssModel
  * @param onLlmResponse
  * @param request
  * @param traceOptions
@@ -45,6 +47,7 @@ export const streamGraph = async ({
   assistantGraph,
   inputs,
   logger,
+  isOssModel,
   onLlmResponse,
   request,
   traceOptions,
@@ -80,8 +83,8 @@ export const streamGraph = async ({
   };
 
   if (
-    (inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') &&
-    inputs?.bedrockChatEnabled
+    inputs.isOssModel ||
+    ((inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') && inputs?.bedrockChatEnabled)
   ) {
     const stream = await assistantGraph.streamEvents(
       inputs,
@@ -92,7 +95,9 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
       },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs.isOssModel || inputs?.llmType === 'bedrock'
+        ? { includeNames: ['Summarizer'] }
+        : undefined
     );
 
     for await (const { event, data, tags } of stream) {

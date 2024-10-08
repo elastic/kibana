@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { RetrievalQAChain } from 'langchain/chains';
 import type { DynamicTool } from '@langchain/core/tools';
 import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
+import { getPromptSuffixForOssModel } from './common';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
-  const chain = {} as RetrievalQAChain;
+  const kbDataClient = jest.fn() as unknown as AIAssistantKnowledgeBaseDataClient;
   const esClient = {
     search: jest.fn().mockResolvedValue({}),
   } as unknown as ElasticsearchClient;
@@ -30,7 +31,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const logger = loggerMock.create();
   const rest = {
-    chain,
+    kbDataClient,
     esClient,
     logger,
     request,
@@ -107,6 +108,28 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       }) as DynamicTool;
 
       expect(tool.tags).toEqual(['esql', 'query-generation', 'knowledge-base']);
+    });
+
+    it('should return tool with the expected description for OSS model', () => {
+      const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
+        isEnabledKnowledgeBase: true,
+        modelExists: true,
+        isOssModel: true,
+        ...rest,
+      }) as DynamicTool;
+
+      expect(tool.description).toContain(getPromptSuffixForOssModel('ESQLKnowledgeBaseTool'));
+    });
+
+    it('should return tool with the expected description for non-OSS model', () => {
+      const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
+        isEnabledKnowledgeBase: true,
+        modelExists: true,
+        isOssModel: false,
+        ...rest,
+      }) as DynamicTool;
+
+      expect(tool.description).not.toContain(getPromptSuffixForOssModel('ESQLKnowledgeBaseTool'));
     });
   });
 });

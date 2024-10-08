@@ -133,6 +133,7 @@ export const SearchIndexDocuments: React.FC = () => {
       accessControlSwitch={
         shouldShowAccessControlSwitcher ? (
           <AccessControlIndexSelector
+            fullWidth
             onChange={setSelectedIndexType}
             valueOfSelected={selectedIndexType}
           />

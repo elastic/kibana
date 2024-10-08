@@ -17,8 +17,13 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
   ActionsClientSimpleChatModel,
-  ActionsClientGeminiChatModel,
+  ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import {
+  OPENAI_CHAT_URL,
+  OpenAiProviderType,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
 export interface OutputError {
@@ -187,5 +192,28 @@ export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
     : llmType === 'bedrock' && bedrockChatEnabled
     ? ActionsClientBedrockChatModel
     : llmType === 'gemini' && bedrockChatEnabled
-    ? ActionsClientGeminiChatModel
+    ? ActionsClientChatVertexAI
     : ActionsClientSimpleChatModel;
+
+export const isOpenSourceModel = (connector?: Connector): boolean => {
+  if (connector == null) {
+    return false;
+  }
+
+  const llmType = getLlmType(connector.actionTypeId);
+  const connectorApiUrl = connector.config?.apiUrl
+    ? (connector.config.apiUrl as string)
+    : undefined;
+  const connectorApiProvider = connector.config?.apiProvider
+    ? (connector.config?.apiProvider as OpenAiProviderType)
+    : undefined;
+
+  const isOpenAiType = llmType === 'openai';
+  const isOpenAI =
+    isOpenAiType &&
+    (!connectorApiUrl ||
+      connectorApiUrl === OPENAI_CHAT_URL ||
+      connectorApiProvider === OpenAiProviderType.AzureAi);
+
+  return isOpenAiType && !isOpenAI;
+};

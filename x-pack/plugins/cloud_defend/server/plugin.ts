@@ -61,7 +61,7 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
         plugins.fleet.registerExternalCallback(
           'packagePolicyCreate',
           async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-            const license = await plugins.licensing.refresh();
+            const license = await plugins.licensing.getLicense();
             if (isCloudDefendPackage(packagePolicy.package?.name)) {
               if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
                 throw new Error(

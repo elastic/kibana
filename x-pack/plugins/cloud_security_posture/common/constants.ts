@@ -6,7 +6,7 @@
  */
 
 import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
+
 import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
@@ -123,14 +123,6 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [CSPM_POLICY_TEMPLATE]: CSPM_POLICY_TEMPLATE,
   [VULN_MGMT_POLICY_TEMPLATE]: VULN_MGMT_POLICY_TEMPLATE,
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
-};
-
-export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  CRITICAL: 'CRITICAL',
-  UNKNOWN: 'UNKNOWN',
 };
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {

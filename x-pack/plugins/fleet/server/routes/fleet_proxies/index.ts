@@ -39,7 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List proxies`,
       options: {
-        tags: ['oas_tag:Fleet proxies'],
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(
@@ -68,7 +68,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create proxy`,
       options: {
-        tags: ['oas_tag:Fleet proxies'],
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(
@@ -97,7 +97,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Update proxy by ID`,
       options: {
-        tags: ['oas_tag:Fleet proxies'],
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(
@@ -126,7 +126,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get proxy by ID`,
       options: {
-        tags: ['oas_tag:Fleet proxies'],
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(
@@ -155,7 +155,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Delete proxy by ID`,
       options: {
-        tags: ['oas_tag:Fleet proxies'],
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(

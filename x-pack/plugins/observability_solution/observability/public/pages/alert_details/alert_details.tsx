@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiTabbedContentTab,
   useEuiTheme,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -31,15 +32,16 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { AlertDetailsSource } from './types';
+import { SourceBar } from './components';
+import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { RelatedAlerts } from './components/related_alerts';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { PageTitleContent } from './components/page_title_content';
 import { HeaderActions } from './components/header_actions';
-import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
@@ -103,10 +105,10 @@ export function AlertDetails() {
   const { rule } = useFetchRule({
     ruleId,
   });
-  const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
 
+  const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -212,17 +214,19 @@ export function AlertDetails() {
     */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
-        <EuiSpacer size="l" />
-        <AlertSummary alert={alertDetail.formatted} alertSummaryFields={summaryFields} />
-        <AlertDetailContextualInsights alert={alertDetail} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <AlertDetailContextualInsights alert={alertDetail} />
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
         {rule && alertDetail.formatted && (
           <>
             <AlertDetailsAppSection
               alert={alertDetail.formatted}
               rule={rule}
               timeZone={timeZone}
-              setAlertSummaryFields={setSummaryFields}
+              setSources={setSources}
               setRelatedAlertsKuery={setRelatedAlertsKuery}
             />
             <EuiSpacer size="l" />
@@ -290,13 +294,6 @@ export function AlertDetails() {
         ) : (
           <EuiLoadingSpinner />
         ),
-        children: (
-          <PageTitleContent
-            alert={alertDetail?.formatted ?? null}
-            alertStatus={alertStatus}
-            dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
-          />
-        ),
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -312,6 +309,7 @@ export function AlertDetails() {
           </CasesContext>,
         ],
         bottomBorder: false,
+        'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
       pageSectionProps={{
         paddingSize: 'none',
@@ -321,6 +319,8 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
+      <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
+      <EuiSpacer size="l" />
       <HeaderMenu />
       <EuiTabbedContent
         data-test-subj="alertDetailsTabbedContent"

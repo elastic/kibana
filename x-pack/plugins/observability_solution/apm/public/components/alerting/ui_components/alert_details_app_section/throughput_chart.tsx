@@ -17,6 +17,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CHART_SETTINGS } from './constants';
 
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -190,6 +191,7 @@ function ThroughputChart({
           timeseries={timeseriesThroughput}
           yLabelFormat={asExactTransactionRate}
           timeZone={timeZone}
+          settings={CHART_SETTINGS}
         />
       </EuiPanel>
     </EuiFlexItem>

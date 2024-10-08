@@ -41,6 +41,7 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": [
         "actions/checkout",
+        "actions/github-script",
         "elastic/github-actions/project-assigner",
         "hmarr/auto-approve-action",
         "octokit/graphql-action",

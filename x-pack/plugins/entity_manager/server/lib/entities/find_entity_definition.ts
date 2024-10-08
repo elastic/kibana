@@ -31,6 +31,7 @@ export async function findEntityDefinitions({
   page = 1,
   perPage = 10,
   includeState = false,
+  type,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -39,12 +40,14 @@ export async function findEntityDefinitions({
   page?: number;
   perPage?: number;
   includeState?: boolean;
+  type?: string;
 }): Promise<EntityDefinition[] | EntityDefinitionWithState[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
       : undefined,
     id ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})` : undefined,
+    type ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${type})` : undefined,
   ]).join(' AND ');
   const response = await soClient.find<EntityDefinition>({
     type: SO_ENTITY_DEFINITION_TYPE,

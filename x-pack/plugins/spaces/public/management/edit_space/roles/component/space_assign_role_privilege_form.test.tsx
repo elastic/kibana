@@ -160,6 +160,32 @@ describe('PrivilegesRolesForm', () => {
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
   });
 
+  it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    const roles: Role[] = [
+      createRole('test_role_1', [{ base: [], feature: {}, spaces: [space.id] }]),
+    ];
+
+    renderPrivilegeRolesForm({
+      preSelectedRoles: roles,
+    });
+
+    await waitFor(() => null);
+
+    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+      'aria-pressed',
+      String(false)
+    );
+
+    expect(
+      screen.getByTestId('space-assign-role-privilege-customization-form')
+    ).toBeInTheDocument();
+
+    expect(screen.getByTestId('space-update-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
   it('preselects the privilege of the selected role when one is provided', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));

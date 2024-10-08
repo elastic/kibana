@@ -29,30 +29,19 @@ interface Props {
 }
 
 const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
-  const {
-    dynamicMapping: {
-      enabled: dynamicMappingsEnabled,
-      throwErrorsForUnmappedFields,
-      /* eslint-disable @typescript-eslint/naming-convention */
-      numeric_detection,
-      date_detection,
-      dynamic_date_formats,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    },
-    sourceField,
-    metaField,
-    _routing,
-    _size,
-    subobjects,
-  } = formData;
+  const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
-  const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
+  const dynamic = dynamicMapping?.enabled
+    ? true
+    : dynamicMapping?.throwErrorsForUnmappedFields
+    ? 'strict'
+    : dynamicMapping?.enabled;
 
   const serialized = {
     dynamic,
-    numeric_detection,
-    date_detection,
-    dynamic_date_formats,
+    numeric_detection: dynamicMapping?.numeric_detection,
+    date_detection: dynamicMapping?.date_detection,
+    dynamic_date_formats: dynamicMapping?.dynamic_date_formats,
     _source: sourceFieldMode ? { mode: sourceFieldMode } : sourceField,
     _meta: metaField,
     _routing,
@@ -85,18 +74,18 @@ const formDeserializer = (formData: GenericObject) => {
 
   return {
     dynamicMapping: {
-      enabled: dynamic === true || dynamic === undefined,
-      throwErrorsForUnmappedFields: dynamic === 'strict',
+      enabled: dynamic === 'strict' ? false : dynamic,
+      throwErrorsForUnmappedFields: dynamic === 'strict' ? true : undefined,
       numeric_detection,
       date_detection,
       dynamic_date_formats,
     },
     sourceField: {
-      enabled: enabled === true || enabled === undefined,
+      enabled,
       includes,
       excludes,
     },
-    metaField: _meta ?? {},
+    metaField: _meta,
     _routing,
     _size,
     subobjects,
@@ -121,6 +110,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
+    options: { stripUnsetFields: true },
   });
   const dispatch = useDispatch();
   const { subscribe, submit, reset, getFormData } = form;

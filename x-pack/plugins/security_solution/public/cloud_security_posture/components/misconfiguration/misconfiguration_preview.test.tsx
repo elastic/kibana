@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// Add stuff here
 import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';

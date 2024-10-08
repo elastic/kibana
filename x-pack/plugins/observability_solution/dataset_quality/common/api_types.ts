@@ -103,6 +103,7 @@ export const degradedFieldRt = rt.type({
       y: rt.number,
     })
   ),
+  indexFieldWasLastPresentIn: rt.string,
 });
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
@@ -120,11 +121,34 @@ export const degradedFieldValuesRt = rt.type({
 
 export type DegradedFieldValues = rt.TypeOf<typeof degradedFieldValuesRt>;
 
-export const dataStreamSettingsRt = rt.partial({
-  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
-  integration: rt.string,
-  datasetUserPrivileges: datasetUserPrivilegesRt,
-});
+export const degradedFieldAnalysisRt = rt.intersection([
+  rt.type({
+    isFieldLimitIssue: rt.boolean,
+    fieldCount: rt.number,
+    totalFieldLimit: rt.number,
+  }),
+  rt.partial({
+    ignoreMalformed: rt.boolean,
+    nestedFieldLimit: rt.number,
+    fieldMapping: rt.partial({
+      type: rt.string,
+      ignore_above: rt.number,
+    }),
+  }),
+]);
+
+export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
+
+export const dataStreamSettingsRt = rt.intersection([
+  rt.type({
+    lastBackingIndexName: rt.string,
+  }),
+  rt.partial({
+    createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+    integration: rt.string,
+    datasetUserPrivileges: datasetUserPrivilegesRt,
+  }),
+]);
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 

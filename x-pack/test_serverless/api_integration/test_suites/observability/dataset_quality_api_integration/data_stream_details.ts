@@ -100,7 +100,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
 
     it('returns "sizeBytes" correctly', async () => {
       // Metering stats api is cached and refreshed every 30 seconds
-      await retry.waitForWithTimeout('Metering stats cache is refreshed', 31000, async () => {
+      await retry.waitForWithTimeout('Metering stats cache is refreshed', 45000, async () => {
         const detailsResponse = await callApi(
           `${type}-${dataset}-${namespace}`,
           roleAuthc,

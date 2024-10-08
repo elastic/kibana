@@ -4890,6 +4890,7 @@ components:
         - id
         - rule_id
         - immutable
+        - rule_source
         - updated_at
         - updated_by
         - created_at
@@ -7000,3 +7001,4 @@ tags:
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
     name: Security Detections API
+    x-displayName: Security detections

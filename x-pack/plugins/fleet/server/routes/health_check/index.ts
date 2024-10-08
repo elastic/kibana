@@ -24,7 +24,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Check Fleet Server health`,
       options: {
-        tags: ['oas_tag:Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(

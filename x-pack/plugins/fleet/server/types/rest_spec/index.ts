@@ -22,5 +22,4 @@ export * from './download_sources';
 export * from './tags';
 export * from './health_check';
 export * from './message_signing_service';
-export * from './app';
 export * from './standalone_agent_api_key';

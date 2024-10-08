@@ -18,6 +18,7 @@ export type {
   CspSetupStatus,
 } from './types/status';
 export type { CspFinding, CspFindingResult } from './types/findings';
+export type { CspVulnerabilityFinding } from './schema/vulnerabilities/csp_vulnerability_finding';
 export type { BenchmarksCisId } from './types/benchmark';
 export type { VulnSeverity } from './types/vulnerabilities';
 export * from './constants';

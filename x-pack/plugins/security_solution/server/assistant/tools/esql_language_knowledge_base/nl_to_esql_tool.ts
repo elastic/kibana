@@ -11,6 +11,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { APP_UI_ID } from '../../../../common';
+import { getPromptSuffixForOssModel } from './common';
 
 export type ESQLToolParams = AssistantToolParams;
 
@@ -20,29 +21,24 @@ const toolDetails = {
   id: 'nl-to-esql-tool',
   name: TOOL_NAME,
   description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
-  - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${TOOL_NAME}" function for this.
-
-  Even if the "${TOOL_NAME}" function was used before that, follow it up with the "${TOOL_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${TOOL_NAME}" function,
-  even if it has been called before.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
 };
 
 export const NL_TO_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
-    const { chain, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && chain != null;
+    const { inference, connectorId, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && inference != null && connectorId != null;
   },
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
     const callNaturalLanguageToEsql = async (question: string) => {
@@ -51,6 +47,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           client: inference.getClient({ request }),
           connectorId,
           input: question,
+          ...(isOssModel ? { functionCalling: 'simulated' } : {}),
           logger: {
             debug: (source) => {
               logger.debug(typeof source === 'function' ? source() : source);
@@ -62,7 +59,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description:
+        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),

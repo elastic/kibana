@@ -30,7 +30,6 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { rulesClientMock } from '../rules_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
   AlertingEventLogger,
@@ -143,7 +142,6 @@ const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
-const rulesClient = rulesClientMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 const rulesSettingsService = rulesSettingsServiceMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -166,7 +164,6 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   eventLogger: eventLoggerMock.create(),
   executionContext: executionContextServiceMock.createInternalStartContract(),
   maintenanceWindowsService,
-  getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
   kibanaBaseUrl: 'https://localhost:5601',
   logger,
   maxAlerts: 1000,
