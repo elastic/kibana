@@ -24,26 +24,17 @@ export const EX_ANSWER_CONFIG = [
   {
     name: 'config1',
     default: 50,
-    description: "config1's description",
     redact: false,
-    configurable: true,
-    type: 'integer',
   },
   {
     name: 'config2',
     default: '',
-    description: "config2's description",
     redact: false,
-    configurable: false,
-    type: 'text',
   },
   {
     name: 'config3',
     default: 'event',
-    description: "config3's description",
     redact: true,
-    configurable: true,
-    type: 'text',
   },
 ];
 

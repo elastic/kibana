@@ -82,26 +82,17 @@ export const celStateDetailsMockedResponse = [
   {
     name: 'config1',
     default: 50,
-    description: "config1's description",
     redact: false,
-    type: 'integer',
-    configurable: true,
   },
   {
     name: 'config2',
     default: '',
-    description: "config2's description",
     redact: true,
-    type: 'text',
-    configurable: false,
   },
   {
     name: 'config3',
     default: 'event',
-    description: "config3's description",
     redact: false,
-    type: 'text',
-    configurable: false,
   },
 ];
 

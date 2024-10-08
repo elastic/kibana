@@ -21,9 +21,6 @@ export interface CelInputGraphParams {
 
 export interface CelInputStateDetails {
   name: string;
-  description: string;
   default: string | number | boolean;
-  type: string;
   redact: boolean;
-  configurable: boolean;
 }

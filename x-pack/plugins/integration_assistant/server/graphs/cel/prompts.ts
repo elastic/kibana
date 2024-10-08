@@ -133,17 +133,14 @@ Here is some context for you to reference for your task, read it carefully as yo
   ],
   [
     'human',
-    `For the identified state variables {state_variables}, iterate through each variable (name) and identify a boolean representing if it should be user configurable (configurable), a helpful description (description), type (type), default value (default), and a boolean representing if it should be redacted(redact). Return all of this information in a JSON object like the sample below. 
+    `For the identified state variables {state_variables}, iterate through each variable (name) and identify a default value (default) and a boolean representing if it should be redacted(redact). Return all of this information in a JSON object like the sample below. 
 
 You ALWAYS follow these guidelines when writing your response:
 
  <guidelines>
- - Most tokens should not be configurable, unless they are API tokens.
- - A variable cannot need redaction if it is not user configurable.
- - Paging details should not be configurable, unless it is related to page sizing. Page sizing default should always be non-zero. 
+ - Page sizing default should always be non-zero. 
  - Redact anything that could possibly contain PII, tokens or keys, or expose any sensitive information in the logs.
- - The types should be consistent with the Elastic integration configuration types. For example, 'text' for strings and 'integer' for whole numbers.
- - You must use the variable names in parentheses when building the return object. Each item in the response must contain the fields: name, configurable, description, type and default.
+ - You must use the variable names in parentheses when building the return object. Each item in the response must contain the fields: name, redact and default.
  - Do not respond with anything except the JSON object enclosed with 3 backticks (\`), see example response below.
  </guidelines>
 Example response format:
