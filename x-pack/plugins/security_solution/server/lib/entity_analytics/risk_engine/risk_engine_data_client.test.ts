@@ -402,5 +402,56 @@ describe('RiskEngineDataClient', () => {
         expect(errors).toEqual([error]);
       });
     });
+
+    describe('updateSavedObjectConfiguration', () => {
+      it('should update the risk engine saved object configuration in the respective namespace', async () => {
+        const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+        const namespaces = {
+          default: 'default',
+          custom: 'space_2',
+        };
+        const options = {
+          logger,
+          kibanaVersion: '8.9.0',
+          esClient,
+          soClient: mockSavedObjectClient,
+          namespace: namespaces.default,
+          auditLogger: undefined,
+        };
+        riskEngineDataClient = new RiskEngineDataClient(options);
+        const attributes = {
+          enabled: true,
+          excludeAlertStatuses: ['closed'],
+          excludeAlertTags: ['Duplicate'],
+        };
+        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+
+        mockSavedObjectClient.update.mockResolvedValueOnce({
+          attributes,
+        } as unknown as SavedObject<RiskEngineConfiguration>);
+
+        const result = await riskEngineDataClient.updateSavedObjectConfiguration({ attributes });
+        expect(result.attributes).toEqual(attributes);
+
+        // Check for the saved object configuration in the non-default space
+
+        options.namespace = namespaces.custom;
+        const riskEngineDataClient2 = new RiskEngineDataClient(options);
+        const attributes2 = {
+          enabled: true,
+          excludeAlertStatuses: ['open', 'closed'],
+          excludeAlertTags: ['False Positive', 'Duplicate'],
+        };
+        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+        mockSavedObjectClient.update.mockResolvedValueOnce({
+          attributes,
+        } as unknown as SavedObject<RiskEngineConfiguration>);
+
+        const result2 = await riskEngineDataClient2.updateSavedObjectConfiguration({
+          attributes: attributes2,
+        });
+        expect(result2.attributes).toEqual(attributes2);
+      });
+    });
   });
 });

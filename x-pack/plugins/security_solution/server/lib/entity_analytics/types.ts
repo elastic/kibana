@@ -72,6 +72,8 @@ export interface RiskEngineConfiguration {
   pageSize: number;
   range: Range;
   alertSampleSizePerShard?: number;
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
 }
 
 export interface CalculateScoresParams {
