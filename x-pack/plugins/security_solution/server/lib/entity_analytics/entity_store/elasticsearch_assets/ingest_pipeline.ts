@@ -7,12 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import { getDefinitionForEntityType } from '../definition';
-import {
-  type FieldRetentionDefinition,
-  getFieldRetentionDefinition,
-} from '../field_retention_definitions';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import { type FieldRetentionDefinition } from '../field_retention_definition';
 import {
   debugDeepCopyContextStep,
   getDotExpanderSteps,
@@ -22,8 +18,9 @@ import {
 } from './ingest_processor_steps';
 import { getIdentityFieldForEntityType } from '../utils';
 import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
+import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
-const getPlatformPipelineId = (definition: ReturnType<typeof getDefinitionForEntityType>) => {
+const getPlatformPipelineId = (definition: EntityDefinition) => {
   return `${definition.id}-latest@platform`;
 };
 
@@ -40,6 +37,7 @@ export const ENRICH_FIELD = 'historical';
  * and the context field in the document to help with debugging.
  */
 const buildIngestPipeline = ({
+  version,
   fieldRetentionDefinition,
   allEntityFields,
   debugMode,
@@ -49,12 +47,14 @@ const buildIngestPipeline = ({
   allEntityFields: string[];
   debugMode?: boolean;
   namespace: string;
+  version: string;
 }): IngestProcessorContainer[] => {
-  const enrichPolicyName = getFieldRetentionEnrichPolicyName(
-    namespace,
-    fieldRetentionDefinition.entityType
-  );
   const { entityType, matchField } = fieldRetentionDefinition;
+  const enrichPolicyName = getFieldRetentionEnrichPolicyName({
+    namespace,
+    entityType,
+    version,
+  });
   return [
     ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
@@ -96,26 +96,18 @@ const buildIngestPipeline = ({
 };
 
 export const createPlatformPipeline = async ({
-  namespace,
-  entityType,
-  fieldHistoryLength,
+  unitedDefinition,
   logger,
   esClient,
   debugMode,
 }: {
-  namespace: string;
-  fieldHistoryLength: number;
-  entityType: EntityType;
+  unitedDefinition: UnitedEntityDefinition;
   logger: Logger;
   esClient: ElasticsearchClient;
   debugMode?: boolean;
 }) => {
-  const definition = getDefinitionForEntityType(entityType, namespace);
-  const fieldRetentionDefinition = getFieldRetentionDefinition({
-    entityType,
-    fieldHistoryLength,
-  });
-  const allEntityFields: string[] = (definition?.metadata || []).map((m) => {
+  const { fieldRetentionDefinition, entityManagerDefinition } = unitedDefinition;
+  const allEntityFields: string[] = (entityManagerDefinition?.metadata || []).map((m) => {
     if (typeof m === 'string') {
       return m;
     }
@@ -124,15 +116,16 @@ export const createPlatformPipeline = async ({
   });
 
   const pipeline = {
-    id: getPlatformPipelineId(definition),
+    id: getPlatformPipelineId(entityManagerDefinition),
     body: {
       _meta: {
         managed_by: 'entity_store',
         managed: true,
       },
-      description: `Ingest pipeline for entity defiinition ${definition.id}`,
+      description: `Ingest pipeline for entity defiinition ${entityManagerDefinition.id}`,
       processors: buildIngestPipeline({
-        namespace,
+        namespace: unitedDefinition.namespace,
+        version: unitedDefinition.version,
         fieldRetentionDefinition,
         allEntityFields,
         debugMode,
@@ -146,18 +139,15 @@ export const createPlatformPipeline = async ({
 };
 
 export const deletePlatformPipeline = ({
-  entityType,
-  namespace,
+  unitedDefinition,
   logger,
   esClient,
 }: {
-  entityType: EntityType;
-  namespace: string;
+  unitedDefinition: UnitedEntityDefinition;
   logger: Logger;
   esClient: ElasticsearchClient;
 }) => {
-  const definition = getDefinitionForEntityType(entityType, namespace);
-  const pipelineId = getPlatformPipelineId(definition);
+  const pipelineId = getPlatformPipelineId(unitedDefinition.entityManagerDefinition);
   logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
   return esClient.ingest.deletePipeline(
     {

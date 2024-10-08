@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
+import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
+import { ENTITY_STORE_DEFAULT_INTERVAL, ENTITY_STORE_DEFAULT_SOURCE_INDICES } from '../constants';
+import { buildEntityDefinitionId, getIdentityFieldForEntityType } from '../utils';
+import type {
+  FieldRetentionDefinition,
+  FieldRetentionOperator,
+} from '../field_retention_definition';
+import type { UnitedDefinitionField } from './types';
+import { BASE_ENTITY_INDEX_MAPPING } from './constants';
+
+export class UnitedEntityDefinition {
+  version: string;
+  entityType: EntityType;
+  fields: UnitedDefinitionField[];
+  namespace: string;
+  entityManagerDefinition: EntityDefinition;
+  fieldRetentionDefinition: FieldRetentionDefinition;
+  indexMappings: MappingTypeMapping;
+
+  constructor(opts: {
+    version: string;
+    entityType: EntityType;
+    fields: UnitedDefinitionField[];
+    namespace: string;
+  }) {
+    this.version = opts.version;
+    this.entityType = opts.entityType;
+    this.fields = opts.fields;
+    this.namespace = opts.namespace;
+    this.entityManagerDefinition = this.toEntityManagerDefinition();
+    this.fieldRetentionDefinition = this.toFieldRetentionDefinition();
+    this.indexMappings = this.toIndexMappings();
+  }
+
+  private toEntityManagerDefinition(): EntityDefinition {
+    const { entityType, namespace } = this;
+    const identityField = getIdentityFieldForEntityType(this.entityType);
+    const metadata = this.fields
+      .filter((field) => field.definition)
+      .map((field) => field.definition!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
+    return entityDefinitionSchema.parse({
+      id: buildEntityDefinitionId(entityType, namespace),
+      name: `Security '${entityType}' Entity Store Definition`,
+      type: entityType,
+      indexPatterns: [
+        ...ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+        getAssetCriticalityIndex(namespace),
+        getRiskScoreLatestIndex(namespace),
+      ],
+      identityFields: [identityField],
+      displayNameTemplate: `{{${identityField}}}`,
+      metadata,
+      history: {
+        timestampField: '@timestamp',
+        interval: ENTITY_STORE_DEFAULT_INTERVAL,
+      },
+      version: this.version,
+      managed: true,
+    });
+  }
+
+  private toFieldRetentionDefinition(): FieldRetentionDefinition {
+    return {
+      entityType: this.entityType,
+      matchField: getIdentityFieldForEntityType(this.entityType),
+      fields: this.fields
+        .filter((field) => field.retention_operator !== undefined)
+        .map((field) => field.retention_operator as FieldRetentionOperator),
+    };
+  }
+
+  private toIndexMappings(): MappingTypeMapping {
+    const properties = this.fields.reduce(
+      (acc = {}, { field, mapping }) => {
+        if (!mapping) {
+          return acc;
+        }
+        acc[field] = mapping;
+        return acc;
+      },
+      { ...BASE_ENTITY_INDEX_MAPPING } as MappingTypeMapping['properties']
+    );
+
+    return {
+      properties,
+    };
+  }
+}

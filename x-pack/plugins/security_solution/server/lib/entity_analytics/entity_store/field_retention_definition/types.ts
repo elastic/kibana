@@ -6,9 +6,16 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import type { CollectValues } from './collect_values';
 import type { PreferNewestValue } from './prefer_newest_value';
 import type { PreferOldestValue } from './prefer_oldest_value';
+
+export interface FieldRetentionDefinition {
+  entityType: EntityType;
+  matchField: string;
+  fields: FieldRetentionOperator[];
+}
 
 export interface BaseFieldRetentionOperator {
   field: string;

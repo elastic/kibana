@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { FieldRetentionOperator } from './types';
-export { fieldOperatorToIngestProcessor } from './operator_to_ingest_processor';
+export { getHostUnitedDefinition } from './host';
+export { getUserUnitedDefinition } from './user';
+export { getCommonUnitedFieldDefintions } from './common';

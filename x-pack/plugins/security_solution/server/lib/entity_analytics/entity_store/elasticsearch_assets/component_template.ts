@@ -6,43 +6,31 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
-import { getDefinitionForEntityType } from '../definition';
-import { getEntityIndexMapping } from '../index_mappings';
+import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;
 
 interface Options {
-  entityType: EntityType;
-  namespace: string;
+  unitedDefinition: UnitedEntityDefinition;
   esClient: ElasticsearchClient;
 }
 
-export const createEntityIndexComponentTemplate = ({
-  entityType,
-  namespace,
-  esClient,
-}: Options) => {
-  const definition = getDefinitionForEntityType(entityType, namespace);
-  const name = getComponentTemplateName(definition.id);
-  const mappings = getEntityIndexMapping(entityType);
+export const createEntityIndexComponentTemplate = ({ unitedDefinition, esClient }: Options) => {
+  const { entityManagerDefinition, indexMappings } = unitedDefinition;
+  const name = getComponentTemplateName(entityManagerDefinition.id);
   return esClient.cluster.putComponentTemplate({
     name,
     body: {
       template: {
-        mappings,
+        mappings: indexMappings,
       },
     },
   });
 };
 
-export const deleteEntityIndexComponentTemplate = ({
-  entityType,
-  namespace,
-  esClient,
-}: Options) => {
-  const definition = getDefinitionForEntityType(entityType, namespace);
-  const name = getComponentTemplateName(definition.id);
+export const deleteEntityIndexComponentTemplate = ({ unitedDefinition, esClient }: Options) => {
+  const { entityManagerDefinition } = unitedDefinition;
+  const name = getComponentTemplateName(entityManagerDefinition.id);
   return esClient.cluster.deleteComponentTemplate(
     { name },
     {

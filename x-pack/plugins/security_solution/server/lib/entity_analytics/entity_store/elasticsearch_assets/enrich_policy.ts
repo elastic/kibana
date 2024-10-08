@@ -7,64 +7,52 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import {
-  getFieldRetentionDefinitionMetadata,
-  getFieldRetentionDefinitionWithDefaults,
-} from '../field_retention_definitions';
 import { getEntitiesIndexName } from '../utils';
+import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
-export const getFieldRetentionEnrichPolicyName = (namespace: string, entityType: EntityType) => {
-  const metadata = getFieldRetentionDefinitionMetadata(entityType);
-  return `entity_store_field_retention_${metadata.entityType}_${namespace}_v${metadata.version}`;
-};
-
-const getFieldRetentionEnrichPolicy = ({
+export const getFieldRetentionEnrichPolicyName = ({
   namespace,
   entityType,
-}: {
-  namespace: string;
-  entityType: EntityType;
-}): EnrichPutPolicyRequest => {
-  const { fields, matchField } = getFieldRetentionDefinitionWithDefaults(entityType);
+  version,
+}: Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>): string => {
+  return `entity_store_field_retention_${entityType}_${namespace}_v${version}`;
+};
+
+const getFieldRetentionEnrichPolicy = (
+  unitedDefinition: UnitedEntityDefinition
+): EnrichPutPolicyRequest => {
+  const { namespace, entityType, fieldRetentionDefinition } = unitedDefinition;
   return {
-    name: getFieldRetentionEnrichPolicyName(namespace, entityType),
+    name: getFieldRetentionEnrichPolicyName(unitedDefinition),
     match: {
       indices: getEntitiesIndexName(entityType, namespace),
-      match_field: matchField,
-      enrich_fields: fields.map(({ field }) => field),
+      match_field: fieldRetentionDefinition.matchField,
+      enrich_fields: fieldRetentionDefinition.fields.map(({ field }) => field),
     },
   };
 };
 
 export const createFieldRetentionEnrichPolicy = async ({
   esClient,
-  entityType,
-  namespace,
+  unitedDefinition,
 }: {
-  entityType: EntityType;
   esClient: ElasticsearchClient;
-  namespace: string;
+  unitedDefinition: UnitedEntityDefinition;
 }) => {
-  const policy = getFieldRetentionEnrichPolicy({
-    namespace,
-    entityType,
-  });
+  const policy = getFieldRetentionEnrichPolicy(unitedDefinition);
   return esClient.enrich.putPolicy(policy);
 };
 
 export const executeFieldRetentionEnrichPolicy = async ({
-  namespace,
   esClient,
-  entityType,
+  unitedDefinition,
   logger,
 }: {
-  namespace: string;
+  unitedDefinition: UnitedEntityDefinition;
   esClient: ElasticsearchClient;
-  entityType: EntityType;
   logger: Logger;
 }): Promise<{ executed: boolean }> => {
-  const name = getFieldRetentionEnrichPolicyName(namespace, entityType);
+  const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
   try {
     await esClient.enrich.executePolicy({ name });
     return { executed: true };
@@ -72,20 +60,20 @@ export const executeFieldRetentionEnrichPolicy = async ({
     if (e.statusCode === 404) {
       return { executed: false };
     }
-    logger.error(`Error executing field retention enrich policy for ${entityType}: ${e.message}`);
+    logger.error(
+      `Error executing field retention enrich policy for ${unitedDefinition.entityType}: ${e.message}`
+    );
     throw e;
   }
 };
 
 export const deleteFieldRetentionEnrichPolicy = async ({
-  namespace,
+  unitedDefinition,
   esClient,
-  entityType,
 }: {
-  namespace: string;
   esClient: ElasticsearchClient;
-  entityType: EntityType;
+  unitedDefinition: UnitedEntityDefinition;
 }) => {
-  const name = getFieldRetentionEnrichPolicyName(namespace, entityType);
+  const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
   return esClient.enrich.deletePolicy({ name }, { ignore: [404] });
 };

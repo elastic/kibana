@@ -27,7 +27,7 @@ import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
-import { getDefinitionForEntityType } from './definition';
+import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
@@ -119,28 +119,33 @@ export class EntityStoreDataClient {
         'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
       );
     }
-
-    const definition = getDefinitionForEntityType(entityType, namespace);
-
     logger.info(`Initializing entity store for ${entityType}`);
 
     const debugLog = (message: string) =>
       logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
-    const descriptor = await this.engineClient.init(entityType, definition, {
+    const descriptor = await this.engineClient.init(entityType, {
       filter,
       fieldHistoryLength,
+      indexPattern,
     });
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
+    const unitedDefinition = getUnitedEntityDefinition({
+      entityType,
+      namespace,
+      fieldHistoryLength,
+    });
+    const { entityManagerDefinition } = unitedDefinition;
+
     await this.entityClient.createEntityDefinition({
       definition: {
-        ...definition,
+        ...entityManagerDefinition,
         filter,
         indexPatterns: indexPattern
-          ? [...definition.indexPatterns, ...indexPattern.split(',')]
-          : definition.indexPatterns,
+          ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
+          : entityManagerDefinition.indexPatterns,
       },
       installOnly: true,
     });
@@ -149,9 +154,8 @@ export class EntityStoreDataClient {
     // the index must be in place with the correct mapping before the enrich policy is created
     // this is because the enrich policy will fail if the index does not exist with the correct fields
     await createEntityIndexComponentTemplate({
-      entityType,
+      unitedDefinition,
       esClient,
-      namespace,
     });
     debugLog(`Created entity index component template`);
     await createEntityIndex({
@@ -165,22 +169,18 @@ export class EntityStoreDataClient {
     // we must create and execute the enrich policy before the pipeline is created
     // this is because the pipeline will fail if the enrich index does not exist
     await createFieldRetentionEnrichPolicy({
-      entityType,
+      unitedDefinition,
       esClient,
-      namespace,
     });
     debugLog(`Created field retention enrich policy`);
     await executeFieldRetentionEnrichPolicy({
-      entityType,
-      namespace,
+      unitedDefinition,
       esClient,
       logger,
     });
     debugLog(`Executed field retention enrich policy`);
     await createPlatformPipeline({
-      entityType,
-      fieldHistoryLength,
-      namespace,
+      unitedDefinition,
       logger,
       esClient,
     });
@@ -199,15 +199,13 @@ export class EntityStoreDataClient {
     debugLog(`Started entity store field retention enrich task`);
 
     // and finally update the engine status to started once everything is in place
-    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    const updated = await this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
     debugLog(`Updated engine status to 'started', initialisation complete`);
     logger.info(`Entity store initialized`);
     return { ...descriptor, ...updated };
   }
 
   public async start(entityType: EntityType, options?: { force: boolean }) {
-    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-
     const descriptor = await this.engineClient.get(entityType);
 
     if (!options?.force && descriptor.status !== ENGINE_STATUS.STOPPED) {
@@ -216,15 +214,19 @@ export class EntityStoreDataClient {
       );
     }
 
-    this.options.logger.info(`Starting entity store for ${entityType}`);
-    await this.entityClient.startEntityDefinition(definition);
+    const { entityManagerDefinition } = getUnitedEntityDefinition({
+      entityType,
+      namespace: this.options.namespace,
+      fieldHistoryLength: descriptor.fieldHistoryLength,
+    });
 
-    return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    this.options.logger.info(`Starting entity store for ${entityType}`);
+    await this.entityClient.startEntityDefinition(entityManagerDefinition);
+
+    return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
   }
 
   public async stop(entityType: EntityType) {
-    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-
     const descriptor = await this.engineClient.get(entityType);
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
@@ -233,10 +235,16 @@ export class EntityStoreDataClient {
       );
     }
 
-    this.options.logger.info(`Stopping entity store for ${entityType}`);
-    await this.entityClient.stopEntityDefinition(definition);
+    const { entityManagerDefinition } = getUnitedEntityDefinition({
+      entityType,
+      namespace: this.options.namespace,
+      fieldHistoryLength: descriptor.fieldHistoryLength,
+    });
 
-    return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
+    this.options.logger.info(`Stopping entity store for ${entityType}`);
+    await this.entityClient.stopEntityDefinition(entityManagerDefinition);
+
+    return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
   }
 
   public async get(entityType: EntityType) {
@@ -253,25 +261,34 @@ export class EntityStoreDataClient {
     deleteData: boolean
   ) {
     const { namespace, logger, esClient } = this.options;
-    const { id } = getDefinitionForEntityType(entityType, namespace);
-
+    const descriptor = await this.engineClient.maybeGet(entityType);
+    const unitedDefinition = getUnitedEntityDefinition({
+      entityType,
+      namespace: this.options.namespace,
+      fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
+    });
+    const { entityManagerDefinition } = unitedDefinition;
     logger.info(`Deleting entity store for ${entityType}`);
     try {
-      await this.entityClient.deleteEntityDefinition({ id, deleteData });
+      try {
+        await this.entityClient.deleteEntityDefinition({
+          id: entityManagerDefinition.id,
+          deleteData,
+        });
+      } catch (e) {
+        logger.error(`Error deleting entity definition for ${entityType}: ${e.message}`);
+      }
       await deleteEntityIndexComponentTemplate({
-        entityType,
+        unitedDefinition,
         esClient,
-        namespace,
       });
       await deletePlatformPipeline({
-        entityType,
-        namespace,
+        unitedDefinition,
         logger,
         esClient,
       });
       await deleteFieldRetentionEnrichPolicy({
-        entityType,
-        namespace,
+        unitedDefinition,
         esClient,
       });
 
@@ -293,7 +310,9 @@ export class EntityStoreDataClient {
         });
       }
 
-      await this.engineClient.delete(id);
+      if (descriptor) {
+        await this.engineClient.delete(entityType);
+      }
 
       return { deleted: true };
     } catch (e) {

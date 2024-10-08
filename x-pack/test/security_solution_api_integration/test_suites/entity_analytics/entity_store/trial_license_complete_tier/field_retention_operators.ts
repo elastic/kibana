@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   FieldRetentionOperator,
   fieldOperatorToIngestProcessor,
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention_operators';
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention_definition';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -115,6 +115,19 @@ export default ({ getService }: FtrProviderContext) => {
         const resultDoc = await applyOperatorToDoc(op, doc);
 
         expectArraysMatchAnyOrder(resultDoc.test_field, ['foo', 'bar']);
+      });
+
+      it('should handle value is string', async () => {
+        const op: FieldRetentionOperator = {
+          operation: 'collect_values',
+          field: 'test_field',
+          maxLength: 2,
+        };
+        const doc = {};
+
+        const resultDoc = await applyOperatorToDoc(op, doc);
+
+        expectArraysMatchAnyOrder(resultDoc.test_field, []);
       });
 
       it('should handle missing values', async () => {
