@@ -29,6 +29,7 @@ import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../security_license.mock';
 
 const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
@@ -80,6 +81,7 @@ describe('EditSpaceSettings', () => {
           notifications={notifications}
           overlays={overlays}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
+          getSecurityLicense={getSecurityLicenseMock}
           theme={theme}
           i18n={i18n}
           logger={logger}

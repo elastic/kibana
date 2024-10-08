@@ -28,6 +28,7 @@ import {
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../../security_license.mock';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -62,6 +63,7 @@ const SUTProvider = ({
           getUrlForApp: (_) => _,
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
+          getSecurityLicense: getSecurityLicenseMock,
           navigateToUrl: jest.fn(),
           capabilities,
         }}
