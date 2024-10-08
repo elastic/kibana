@@ -10,10 +10,32 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SolutionView } from '../../../common';
 
 const tourLearnMoreLink = 'https://ela.st/left-nav';
+
+const LearnMoreLink = () => (
+  <EuiLink href={tourLearnMoreLink} target="_blank" external>
+    {i18n.translate('xpack.spaces.navControl.tour.learnMore', {
+      defaultMessage: 'Learn more',
+    })}
+  </EuiLink>
+);
+
+const solutionMap: Record<SolutionView, string> = {
+  es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
+    defaultMessage: 'Search',
+  }),
+  security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
+    defaultMessage: 'Security',
+  }),
+  oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
+    defaultMessage: 'Observability',
+  }),
+  classic: '', // Tour is not shown for the classic solution
+};
 
 interface Props extends PropsWithChildren<{}> {
   solution?: SolutionView;
@@ -22,17 +44,21 @@ interface Props extends PropsWithChildren<{}> {
 }
 
 export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, onFinishTour }) => {
-  const tourTexts = getTourTexts(solution);
+  const solutionLabel = solutionMap[solution ?? 'classic'];
 
   return (
     <EuiTourStep
       content={
         <EuiText>
-          <p>{tourTexts.content}</p>
           <p>
-            <EuiLink href={tourLearnMoreLink} target="_blank" external>
-              {tourTexts.learnMore}
-            </EuiLink>
+            <FormattedMessage
+              id="xpack.spaces.navControl.tour.content"
+              defaultMessage="It provides all the analytics and {solution} features you need. You can switch views or return to the classic navigation from your space settings, or create other spaces with different views. {learnMore}"
+              values={{
+                solution: solutionLabel,
+                learnMore: <LearnMoreLink />,
+              }}
+            />
           </p>
         </EuiText>
       }
@@ -42,11 +68,16 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
       onFinish={onFinishTour}
       step={1}
       stepsTotal={1}
-      title={tourTexts.title}
+      title={i18n.translate('xpack.spaces.navControl.tour.title', {
+        defaultMessage: 'You chose the {solution} solution view',
+        values: { solution: solutionLabel },
+      })}
       anchorPosition="downCenter"
       footerAction={
         <EuiButtonEmpty size="s" color="text" onClick={onFinishTour} data-test-subj="closeTourBtn">
-          {tourTexts.closeBtn}
+          {i18n.translate('xpack.spaces.navControl.tour.closeBtn', {
+            defaultMessage: 'Close',
+          })}
         </EuiButtonEmpty>
       }
       panelProps={{
@@ -57,44 +88,3 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
     </EuiTourStep>
   );
 };
-
-function getTourTexts(solution?: SolutionView) {
-  const solutionMap: Record<SolutionView, string> = {
-    es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
-      defaultMessage: 'Search',
-    }),
-    security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
-      defaultMessage: 'Security',
-    }),
-    oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
-      defaultMessage: 'Observability',
-    }),
-    classic: '', // Tour is not shown for the classic solution
-  };
-
-  const title = !!solution
-    ? i18n.translate('xpack.spaces.navControl.tour.title', {
-        defaultMessage: 'You chose the {solution} solution view',
-        values: { solution: solutionMap[solution] },
-      })
-    : '';
-
-  const content = !!solution
-    ? i18n.translate('xpack.spaces.navControl.tour.content', {
-        defaultMessage:
-          'It provides all the analytics and {solution} features you need. You can switch views or return to the classic navigation from your space settings, or create other spaces with different views.',
-        values: { solution: solutionMap[solution] },
-      })
-    : '';
-
-  return {
-    title,
-    content,
-    closeBtn: i18n.translate('xpack.spaces.navControl.tour.closeBtn', {
-      defaultMessage: 'Close',
-    }),
-    learnMore: i18n.translate('xpack.spaces.navControl.tour.learnMore', {
-      defaultMessage: 'Learn more',
-    }),
-  };
-}
