@@ -9,20 +9,43 @@
 
 import React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+
+export interface AppMenuDiscoverParams {
+  dataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  isEsqlMode?: boolean;
+  query?: Query | AggregateQuery;
+  savedQueryId?: string;
+  savedSearch: SavedSearch;
+  services: {
+    core: CoreStart;
+    application: ApplicationStart;
+    triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  };
+  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+}
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
+  getDiscoverParams: () => AppMenuDiscoverParams;
   onFinishAction: () => void;
-  // some discover specific props?
 }
 
 export type AppMenuControlProps = Pick<
   TopNavMenuData,
   'testId' | 'isLoading' | 'label' | 'description' | 'disableButton' | 'href' | 'tooltip'
 > & {
-  onClick: (
-    params: AppMenuControlOnClickParams
-  ) => Promise<React.ReactNode | void> | React.ReactNode | void;
+  onClick:
+    | ((
+        params: AppMenuControlOnClickParams
+      ) => Promise<React.ReactNode | void> | React.ReactNode | void)
+    | undefined;
 };
 
 export type AppMenuIconControlProps = AppMenuControlProps & Pick<TopNavMenuData, 'iconType'>;
@@ -62,7 +85,9 @@ export interface AppMenuIconAction extends AppMenuActionBase {
 }
 
 export interface AppMenuPopoverActions extends AppMenuActionBase {
-  label: string;
+  label: TopNavMenuData['label'];
+  description?: TopNavMenuData['description'];
+  testId?: TopNavMenuData['testId'];
   type: AppMenuActionType.secondary | AppMenuActionType.custom;
   actions: AppMenuPopoverAction[];
 }

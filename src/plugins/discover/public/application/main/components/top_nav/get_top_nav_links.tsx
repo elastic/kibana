@@ -17,13 +17,14 @@ import {
   AppMenuAction,
   AppMenuActionId,
   AppMenuActionType,
+  AppMenuDiscoverParams,
   AppMenuItem,
 } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { openAlertsPopover } from './open_alerts_popover';
+import { getAlertsActionItem } from './get_action_alerts';
 import type { TopNavCustomization } from '../../../../customizations';
 import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
 import { runShareAction } from './run_share_action';
@@ -51,25 +52,22 @@ export const getTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
-  const alerts = {
-    id: 'alerts',
-    label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
-      defaultMessage: 'Alerts',
-    }),
-    description: i18n.translate('discover.localMenu.alertsDescription', {
-      defaultMessage: 'Alerts',
-    }),
-    run: async (anchorElement: HTMLElement) => {
-      openAlertsPopover({
-        anchorElement,
-        services,
-        stateContainer: state,
-        adHocDataViews,
-        isEsqlMode,
-      });
+  const getDiscoverParams = (): AppMenuDiscoverParams => ({
+    dataView,
+    adHocDataViews,
+    isEsqlMode,
+    services,
+    savedSearch: state.savedSearchState.getState(),
+    savedQueryId: state.appState.getState().savedQuery,
+    query: state.appState.getState().query,
+    onUpdateAdHocDataViews: async (adHocDataViewList) => {
+      await state.actions.loadDataViewList();
+      state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
     },
-    testId: 'discoverAlertsButton',
-  };
+  });
+
+  const alertsItem = getAlertsActionItem({ getDiscoverParams });
+  const alerts = convertMenuItem({ appMenuItem: alertsItem, getDiscoverParams });
 
   /**
    * Switches from ES|QL to classic mode and vice versa
@@ -119,7 +117,6 @@ export const getTopNavLinks = ({
     testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
-  const stateParams = { services, stateContainer: state, adHocDataViews, isEsqlMode };
   const newSearchItem: AppMenuAction = {
     id: AppMenuActionId.new,
     type: AppMenuActionType.secondary, // TODO: convert to primary
@@ -136,7 +133,7 @@ export const getTopNavLinks = ({
       },
     },
   };
-  const newSearch = convertMenuItem({ appMenuItem: newSearchItem, stateParams });
+  const newSearch = convertMenuItem({ appMenuItem: newSearchItem, getDiscoverParams });
 
   const saveSearch = {
     id: 'save',
@@ -182,7 +179,7 @@ export const getTopNavLinks = ({
       },
     },
   };
-  const openSearch = convertMenuItem({ appMenuItem: openSearchItem, stateParams });
+  const openSearch = convertMenuItem({ appMenuItem: openSearchItem, getDiscoverParams });
 
   const shareSearch = {
     id: 'share',
@@ -220,7 +217,7 @@ export const getTopNavLinks = ({
       },
     },
   };
-  const inspectSearch = convertMenuItem({ appMenuItem: inspectSearchItem, stateParams });
+  const inspectSearch = convertMenuItem({ appMenuItem: inspectSearchItem, getDiscoverParams });
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
@@ -262,29 +259,21 @@ export const getTopNavLinks = ({
 
 function convertMenuItem({
   appMenuItem,
-  stateParams: { services, stateContainer, adHocDataViews, isEsqlMode },
+  getDiscoverParams,
 }: {
   appMenuItem: AppMenuItem;
-  stateParams: {
-    stateContainer: DiscoverStateContainer;
-    services: DiscoverServices;
-    adHocDataViews: DataView[];
-    isEsqlMode?: boolean;
-  };
+  getDiscoverParams: () => AppMenuDiscoverParams;
 }): TopNavMenuData {
   if ('actions' in appMenuItem) {
     return {
       id: appMenuItem.id,
       label: appMenuItem.label,
-      description: appMenuItem.label,
+      description: appMenuItem.description ?? appMenuItem.label,
       run: (anchorElement: HTMLElement) => {
         runAppMenuPopoverAction({
           appMenuItem,
           anchorElement,
-          stateContainer,
-          adHocDataViews,
-          services,
-          isEsqlMode,
+          getDiscoverParams,
         });
       },
       testId: appMenuItem.id,
@@ -294,12 +283,12 @@ function convertMenuItem({
   return {
     id: appMenuItem.id,
     label: appMenuItem.controlProps.label,
-    description: appMenuItem.controlProps.label,
+    description: appMenuItem.controlProps.description ?? appMenuItem.controlProps.label,
     run: async (anchorElement: HTMLElement) => {
       await runAppMenuAction({
         appMenuItem,
         anchorElement,
-        services,
+        getDiscoverParams,
       });
     },
     testId: appMenuItem.id,

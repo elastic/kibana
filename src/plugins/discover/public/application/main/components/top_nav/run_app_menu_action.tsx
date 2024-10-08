@@ -19,12 +19,14 @@
 import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AppMenuAction, AppMenuIconAction, AppMenuPopoverActions } from '@kbn/discover-utils';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { DiscoverServices } from '../../../../build_services';
+import type {
+  AppMenuAction,
+  AppMenuDiscoverParams,
+  AppMenuIconAction,
+  AppMenuPopoverActions,
+} from '@kbn/discover-utils';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -32,16 +34,14 @@ let isOpen = false;
 interface AppMenuActionsMenuPopoverProps {
   appMenuItem: AppMenuPopoverActions;
   anchorElement: HTMLElement;
-  stateContainer: DiscoverStateContainer;
-  adHocDataViews: DataView[];
-  services: DiscoverServices;
-  isEsqlMode?: boolean;
+  getDiscoverParams: () => AppMenuDiscoverParams;
   onClose: () => void;
 }
 
 export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
   appMenuItem,
   anchorElement,
+  getDiscoverParams,
   onClose: originalOnClose,
 }) => {
   const [nestedContent, setNestedContent] = useState<React.ReactNode>();
@@ -65,8 +65,9 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
               ? controlProps.disableButton()
               : Boolean(controlProps.disableButton),
           onClick: async () => {
-            const result = await controlProps.onClick({
+            const result = await controlProps.onClick?.({
               anchorElement,
+              getDiscoverParams,
               onFinishAction: onClose,
             });
 
@@ -95,7 +96,12 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         isOpen={!nestedContent}
         panelPaddingSize="s"
       >
-        <EuiContextMenu initialPanelId={appMenuItem.id} size="s" panels={panels} />
+        <EuiContextMenu
+          initialPanelId={appMenuItem.id}
+          data-test-subj={appMenuItem.testId}
+          size="s"
+          panels={panels}
+        />
       </EuiWrappingPopover>
     </>
   );
@@ -113,17 +119,11 @@ function cleanup() {
 export function runAppMenuPopoverAction({
   appMenuItem,
   anchorElement,
-  stateContainer,
-  services,
-  adHocDataViews,
-  isEsqlMode,
+  getDiscoverParams,
 }: {
   appMenuItem: AppMenuPopoverActions;
   anchorElement: HTMLElement;
-  stateContainer: DiscoverStateContainer;
-  services: DiscoverServices;
-  adHocDataViews: DataView[];
-  isEsqlMode?: boolean;
+  getDiscoverParams: () => AppMenuDiscoverParams;
 }) {
   if (isOpen) {
     cleanup();
@@ -132,6 +132,7 @@ export function runAppMenuPopoverAction({
 
   isOpen = true;
   document.body.appendChild(container);
+  const { services } = getDiscoverParams();
 
   const element = (
     <KibanaRenderContextProvider {...services.core}>
@@ -139,10 +140,7 @@ export function runAppMenuPopoverAction({
         <AppMenuActionsMenuPopover
           appMenuItem={appMenuItem}
           anchorElement={anchorElement}
-          stateContainer={stateContainer}
-          adHocDataViews={adHocDataViews}
-          services={services}
-          isEsqlMode={isEsqlMode}
+          getDiscoverParams={getDiscoverParams}
           onClose={cleanup}
         />
       </KibanaContextProvider>
@@ -154,18 +152,20 @@ export function runAppMenuPopoverAction({
 export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
-  services,
+  getDiscoverParams,
 }: {
   appMenuItem: AppMenuAction | AppMenuIconAction;
   anchorElement: HTMLElement;
-  services: DiscoverServices;
+  getDiscoverParams: () => AppMenuDiscoverParams;
 }) {
   cleanup();
 
+  const { services } = getDiscoverParams();
   const controlProps = appMenuItem.controlProps;
 
-  const result = await controlProps.onClick({
+  const result = await controlProps.onClick?.({
     anchorElement,
+    getDiscoverParams,
     onFinishAction: () => {
       cleanup();
       anchorElement?.focus();
