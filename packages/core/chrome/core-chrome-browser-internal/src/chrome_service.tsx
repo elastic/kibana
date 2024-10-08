@@ -506,6 +506,8 @@ export class ChromeService {
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
+                isFullScreenMode={isFullScreenMode}
+                setIsFullScreenMode={setIsFullScreenMode}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -538,9 +540,9 @@ export class ChromeService {
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
             helpMenuLinks$={helpMenuLinks$}
+            homeHref={http.basePath.prepend('/app/home')}
             isFullScreenMode={isFullScreenMode}
             setIsFullScreenMode={setIsFullScreenMode}
-            homeHref={http.basePath.prepend('/app/home')}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             navLinks$={navLinks.getNavLinks$()}
             recentlyAccessed$={recentlyAccessed.get$()}
