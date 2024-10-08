@@ -9,10 +9,12 @@
 
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { EuiButtonIcon, EuiPortal, EuiProvider, setEuiDevProviderWarning } from '@elastic/eui';
+import { EuiButtonIcon, EuiProvider, setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -23,11 +25,6 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-
 import type {
   ChromeNavLink,
   ChromeBadge,
@@ -41,6 +38,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  ChromeNavControls,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -98,9 +96,6 @@ export class ChromeService {
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
   private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
-  private readonly isFullScreenMode$ = new BehaviorSubject(
-    localStorage.getItem(IS_FULLSCREEN_MODE_KEY) === 'true'
-  );
   private logger: Logger;
   private isServerless = false;
 
@@ -145,20 +140,10 @@ export class ChromeService {
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
 
   /**
-   * Fullscreen mode requires user interaction. Applications can detect if fullscreen mode is enabled using
-   * chrome.getIsVisible$()
-   */
-  private setIsFullScreenMode = (isFullScreenMode: boolean) => {
-    localStorage.setItem(IS_FULLSCREEN_MODE_KEY, JSON.stringify(isFullScreenMode));
-    this.isFullScreenMode$.next(isFullScreenMode);
-    this.setIsVisible(!isFullScreenMode);
-  };
-
-  /**
    * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
    * screen we want to hide the chrome, and when they are toggled back to normal we want to show the chrome.
    */
-  private handleEuiFullScreenChanges = () => {
+  private handleChromeVisibleChangesForEui = () => {
     const { body } = document;
     // HTML class names that are added to the body when Eui components are toggled in full screen
     const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
@@ -198,6 +183,52 @@ export class ChromeService {
 
     this.mutationObserver.observe(body, { attributes: true });
   };
+
+  private initFullScreenMode(
+    navControls: ChromeNavControls,
+    chromeStyle$: Observable<ChromeStyle>
+  ) {
+    /**
+     * Fullscreen mode requires user interaction.
+     */
+    const isFullScreenMode$ = new BehaviorSubject(
+      localStorage.getItem(IS_FULLSCREEN_MODE_KEY) === 'true'
+    );
+    const setIsFullScreenMode = (isFullScreenMode: boolean) => {
+      localStorage.setItem(IS_FULLSCREEN_MODE_KEY, JSON.stringify(isFullScreenMode));
+      isFullScreenMode$.next(isFullScreenMode);
+    };
+
+    chromeStyle$.subscribe((chromeStyle) => {
+      // rendering the full screen button depends on knowing the chrome style
+      navControls.registerRight({
+        order: 3000, // appear to the left of the user avatar icon
+        mount: (targetDomElement) => {
+          ReactDOM.render(
+            <EuiProvider
+              globalStyles={false}
+              colorMode={chromeStyle === 'classic' ? 'dark' : 'light'}
+            >
+              <EuiButtonIcon
+                iconType="fullScreen"
+                color="text"
+                onClick={() => setIsFullScreenMode(!isFullScreenMode$.value)}
+                aria-label={i18n.translate(
+                  'core.ui.primaryNav.project.headerSection.enterFullScreen',
+                  { defaultMessage: 'Enter full screeen' }
+                )}
+              />
+            </EuiProvider>,
+            targetDomElement
+          );
+
+          return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+        },
+      });
+    });
+
+    return { isFullScreenMode$, setIsFullScreenMode };
+  }
 
   // Ensure developers are notified if working in a context that lacks the EUI Provider.
   private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
@@ -257,7 +288,7 @@ export class ChromeService {
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
-    this.handleEuiFullScreenChanges();
+    this.handleChromeVisibleChangesForEui();
     this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
@@ -276,7 +307,6 @@ export class ChromeService {
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
     const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
-    let fullScreenButtonRegistered = false;
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -324,11 +354,15 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
     });
-
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
+
+    const { isFullScreenMode$, setIsFullScreenMode } = this.initFullScreenMode(
+      navControls,
+      chromeStyle$
+    );
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -418,59 +452,14 @@ export class ChromeService {
 
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
-        const isFullScreenMode = useObservable(this.isFullScreenMode$);
         const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+        const isFullScreenMode = useObservable(isFullScreenMode$, false);
 
-        if (!fullScreenButtonRegistered) {
-          // rendering the full screen button depends on knowing the chrome style
-          navControls.registerRight({
-            order: 3000, // appear to the left of the user avatar icon
-            mount: (targetDomElement) => {
-              ReactDOM.render(
-                <EuiProvider
-                  globalStyles={false}
-                  colorMode={chromeStyle === 'classic' ? 'dark' : 'light'}
-                >
-                  <EuiButtonIcon
-                    iconType="fullScreen"
-                    color="text"
-                    onClick={() => this.setIsFullScreenMode(true)}
-                    aria-label={i18n.translate(
-                      'core.ui.primaryNav.project.headerSection.enterFullScreen',
-                      { defaultMessage: 'Enter full screeen' }
-                    )}
-                  />
-                </EuiProvider>,
-                targetDomElement
-              );
-
-              return () => ReactDOM.unmountComponentAtNode(targetDomElement);
-            },
-          });
-
-          // prevent registering the button on each render
-          fullScreenButtonRegistered = true;
-        }
-
-        if (!isVisible || isFullScreenMode) {
+        if (!isVisible) {
           return (
             <div data-test-subj="kibanaHeaderChromeless">
               <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
               <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
-              {isFullScreenMode && (
-                <EuiPortal>
-                  <ExitFullScreenButtonKibanaProvider
-                    coreStart={{
-                      chrome: {
-                        setIsVisible: (visible) => this.setIsFullScreenMode(!visible),
-                      },
-                      customBranding: { customBranding$ },
-                    }}
-                  >
-                    <ExitFullScreenButton />
-                  </ExitFullScreenButtonKibanaProvider>
-                </EuiPortal>
-              )}
             </div>
           );
         }
@@ -549,6 +538,8 @@ export class ChromeService {
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
             helpMenuLinks$={helpMenuLinks$}
+            isFullScreenMode={isFullScreenMode}
+            setIsFullScreenMode={setIsFullScreenMode}
             homeHref={http.basePath.prepend('/app/home')}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             navLinks$={navLinks.getNavLinks$()}
