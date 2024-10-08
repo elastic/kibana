@@ -67,9 +67,9 @@ const PatternComponent: React.FC<Props> = ({
   const [initialFlyoutTabId, setInitialFlyoutTabId] = useState<
     typeof LATEST_CHECK_TAB_ID | typeof HISTORY_TAB_ID
   >(LATEST_CHECK_TAB_ID);
-  const flyoutIndexCheckNowAndExpandAbortControllerRef = useAbortControllerRef();
-  const flyoutIndexViewCheckHistoryAbortControllerRef = useAbortControllerRef();
-  const flyoutIndexChartSelectedActionAbortControllerRef = useAbortControllerRef();
+  const flyoutCheckNowAndExpandAbortControllerRef = useAbortControllerRef();
+  const flyoutViewCheckHistoryAbortControllerRef = useAbortControllerRef();
+  const flyoutChartSelectedActionAbortControllerRef = useAbortControllerRef();
 
   const {
     error: statsError,
@@ -121,10 +121,10 @@ const PatternComponent: React.FC<Props> = ({
     setExpandedIndexName(null);
   }, []);
 
-  const handleFlyoutIndexCheckNowAndExpandAction = useCallback(
+  const handleFlyoutCheckNowAndExpandAction = useCallback(
     (indexName: string) => {
       checkIndex({
-        abortController: flyoutIndexCheckNowAndExpandAbortControllerRef.current,
+        abortController: flyoutCheckNowAndExpandAbortControllerRef.current,
         indexName,
         pattern,
         httpFetch,
@@ -136,7 +136,7 @@ const PatternComponent: React.FC<Props> = ({
     },
     [
       checkIndex,
-      flyoutIndexCheckNowAndExpandAbortControllerRef,
+      flyoutCheckNowAndExpandAbortControllerRef,
       formatBytes,
       formatNumber,
       httpFetch,
@@ -147,13 +147,13 @@ const PatternComponent: React.FC<Props> = ({
   const handleFlyoutViewCheckHistoryAction = useCallback(
     (indexName: string) => {
       fetchHistoricalResults({
-        abortController: flyoutIndexViewCheckHistoryAbortControllerRef.current,
+        abortController: flyoutViewCheckHistoryAbortControllerRef.current,
         indexName,
       });
       setExpandedIndexName(indexName);
       setInitialFlyoutTabId(HISTORY_TAB_ID);
     },
-    [fetchHistoricalResults, flyoutIndexViewCheckHistoryAbortControllerRef]
+    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef]
   );
 
   useEffect(() => {
@@ -230,7 +230,7 @@ const PatternComponent: React.FC<Props> = ({
 
       if (chartSelectedIndex.indexName !== expandedIndexName && !isFlyoutVisible) {
         checkIndex({
-          abortController: flyoutIndexChartSelectedActionAbortControllerRef.current,
+          abortController: flyoutChartSelectedActionAbortControllerRef.current,
           indexName: chartSelectedIndex.indexName,
           pattern: chartSelectedIndex.pattern,
           httpFetch,
@@ -255,7 +255,7 @@ const PatternComponent: React.FC<Props> = ({
     httpFetch,
     formatBytes,
     formatNumber,
-    flyoutIndexChartSelectedActionAbortControllerRef,
+    flyoutChartSelectedActionAbortControllerRef,
   ]);
 
   return (
@@ -316,8 +316,8 @@ const PatternComponent: React.FC<Props> = ({
                   setPageIndex={setPageIndex}
                   setPageSize={setPageSize}
                   setSorting={setSorting}
-                  onCheckNowAction={handleFlyoutIndexCheckNowAndExpandAction}
-                  onViewCheckHistoryAction={handleFlyoutViewCheckHistoryAction}
+                  onCheckNowAction={handleFlyoutCheckNowAndExpandAction}
+                  onViewHistoryAction={handleFlyoutViewCheckHistoryAction}
                   sorting={sorting}
                 />
               </div>

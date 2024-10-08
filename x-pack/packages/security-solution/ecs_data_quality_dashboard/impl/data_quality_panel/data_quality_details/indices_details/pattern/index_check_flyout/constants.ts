@@ -8,5 +8,8 @@
 export const DEFAULT_HISTORICAL_RESULTS_START_DATE = 'now-30d';
 export const DEFAULT_HISTORICAL_RESULTS_END_DATE = 'now';
 
-export const INCOMPATIBLE_TAB_ID = 'incompatibleTab';
-export const SAME_FAMILY_TAB_ID = 'sameFamilyTab';
+export const ALL_TAB_ID = 'allTab' as const;
+export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab' as const;
+export const CUSTOM_TAB_ID = 'customTab' as const;
+export const INCOMPATIBLE_TAB_ID = 'incompatibleTab' as const;
+export const SAME_FAMILY_TAB_ID = 'sameFamilyTab' as const;

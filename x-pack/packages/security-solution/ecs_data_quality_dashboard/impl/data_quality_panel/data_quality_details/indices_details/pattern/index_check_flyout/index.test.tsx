@@ -13,11 +13,11 @@ import { IndexCheckFlyout } from '.';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
+  TestHistoricalResultsProvider,
 } from '../../../../mock/test_providers/test_providers';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../../mock/stats/mock_stats';
-import * as useHistoricalResults from '../hooks/use_historical_results';
 import { mockHistoricalResult } from '../../../../mock/historical_results/mock_historical_results_response';
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 
@@ -32,14 +32,17 @@ describe('IndexCheckFlyout', () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
-            <IndexCheckFlyout
-              ilmExplain={mockIlmExplain}
-              indexName="auditbeat-custom-index-1"
-              onClose={jest.fn()}
-              pattern="auditbeat-*"
-              patternRollup={auditbeatWithAllResults}
-              stats={mockStats}
-            />
+            <TestHistoricalResultsProvider>
+              <IndexCheckFlyout
+                initialSelectedTabId="latest_check"
+                ilmExplain={mockIlmExplain}
+                indexName="auditbeat-custom-index-1"
+                onClose={jest.fn()}
+                pattern="auditbeat-*"
+                patternRollup={auditbeatWithAllResults}
+                stats={mockStats}
+              />
+            </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -71,7 +74,7 @@ describe('IndexCheckFlyout', () => {
 
     it('should render the correct index properties panel', () => {
       expect(screen.getByTestId('indexStatsPanel')).toBeInTheDocument();
-      expect(screen.getByTestId('indexCheckFields')).toBeInTheDocument();
+      expect(screen.getByTestId('latestCheckFields')).toBeInTheDocument();
     });
 
     it('should render footer with check now button', () => {
@@ -85,14 +88,17 @@ describe('IndexCheckFlyout', () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
-            <IndexCheckFlyout
-              ilmExplain={mockIlmExplain}
-              indexName="auditbeat-custom-index-1"
-              onClose={onClose}
-              pattern="auditbeat-*"
-              patternRollup={auditbeatWithAllResults}
-              stats={mockStats}
-            />
+            <TestHistoricalResultsProvider>
+              <IndexCheckFlyout
+                ilmExplain={mockIlmExplain}
+                indexName="auditbeat-custom-index-1"
+                onClose={onClose}
+                pattern="auditbeat-*"
+                patternRollup={auditbeatWithAllResults}
+                stats={mockStats}
+                initialSelectedTabId="latest_check"
+              />
+            </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -114,14 +120,17 @@ describe('IndexCheckFlyout', () => {
               checkIndex,
             }}
           >
-            <IndexCheckFlyout
-              ilmExplain={mockIlmExplain}
-              indexName="auditbeat-custom-index-1"
-              onClose={jest.fn()}
-              pattern="auditbeat-*"
-              patternRollup={auditbeatWithAllResults}
-              stats={mockStats}
-            />
+            <TestHistoricalResultsProvider>
+              <IndexCheckFlyout
+                ilmExplain={mockIlmExplain}
+                indexName="auditbeat-custom-index-1"
+                onClose={jest.fn()}
+                pattern="auditbeat-*"
+                patternRollup={auditbeatWithAllResults}
+                stats={mockStats}
+                initialSelectedTabId="latest_check"
+              />
+            </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -144,27 +153,30 @@ describe('IndexCheckFlyout', () => {
     it('should call fetchHistoricalResults and switch to history tab', async () => {
       const fetchHistoricalResults = jest.fn();
 
-      jest.spyOn(useHistoricalResults, 'useHistoricalResults').mockReturnValue({
-        historicalResultsState: {
-          results: [mockHistoricalResult],
-          total: 1,
-          isLoading: false,
-          error: null,
-        },
-        fetchHistoricalResults,
-      });
+      const historicalResultsState = {
+        results: [mockHistoricalResult],
+        total: 1,
+        isLoading: false,
+        error: null,
+      };
 
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
-            <IndexCheckFlyout
-              ilmExplain={mockIlmExplain}
-              indexName="auditbeat-custom-index-1"
-              onClose={jest.fn()}
-              pattern="auditbeat-*"
-              patternRollup={auditbeatWithAllResults}
-              stats={mockStats}
-            />
+            <TestHistoricalResultsProvider
+              historicalResultsState={historicalResultsState}
+              fetchHistoricalResults={fetchHistoricalResults}
+            >
+              <IndexCheckFlyout
+                ilmExplain={mockIlmExplain}
+                indexName="auditbeat-custom-index-1"
+                onClose={jest.fn()}
+                pattern="auditbeat-*"
+                patternRollup={auditbeatWithAllResults}
+                stats={mockStats}
+                initialSelectedTabId="latest_check"
+              />
+            </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
       );

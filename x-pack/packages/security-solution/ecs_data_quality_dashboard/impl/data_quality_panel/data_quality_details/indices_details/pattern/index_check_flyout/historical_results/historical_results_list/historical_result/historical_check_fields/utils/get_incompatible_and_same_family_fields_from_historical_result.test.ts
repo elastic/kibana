@@ -11,7 +11,23 @@ import { getHistoricalResultStub } from '../../../../../../../../../stub/get_his
 
 describe('getIncompatibleAndSameFamilyFieldsFromHistoricalResult', () => {
   it('should return incompatible and same family fields', () => {
-    const historicalResult = getHistoricalResultStub('test');
+    const mockHistoricalResult = getHistoricalResultStub('test');
+    const historicalResult = {
+      ...mockHistoricalResult,
+      incompatibleFieldMappingItems: [
+        {
+          fieldName: 'host.name',
+          expectedValue: 'keyword',
+          actualValue: 'text',
+          description:
+            'Name of the host.\nIt can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+        },
+      ],
+      unallowedMappingFields: ['host.name'],
+      incompatibleFieldCount: 2,
+      sameFamilyFieldCount: 1,
+      sameFamilyFieldItems: [mockHistoricalResult.sameFamilyFieldItems[0]],
+    };
 
     const result = getIncompatibleAndSameFamilyFieldsFromHistoricalResult(historicalResult);
 
@@ -30,13 +46,13 @@ describe('getIncompatibleAndSameFamilyFieldsFromHistoricalResult', () => {
         ],
         incompatibleValuesFields: [
           {
-            ...EcsFlatTyped['host.name'],
-            indexFieldName: 'host.name',
+            ...EcsFlatTyped['event.category'],
+            indexFieldName: 'event.category',
             indexFieldType: 'keyword',
             indexInvalidValues: [
               {
-                fieldName: 'text',
-                count: 1,
+                fieldName: 'siem',
+                count: 110616,
               },
             ],
             hasEcsMetadata: true,
@@ -46,9 +62,9 @@ describe('getIncompatibleAndSameFamilyFieldsFromHistoricalResult', () => {
         ],
         sameFamilyFields: [
           {
-            ...EcsFlatTyped['host.name'],
-            indexFieldName: 'host.name',
-            indexFieldType: 'keyword',
+            ...EcsFlatTyped['error.message'],
+            indexFieldName: 'error.message',
+            indexFieldType: 'match_only_text',
             indexInvalidValues: [],
             hasEcsMetadata: true,
             isEcsCompliant: false,

@@ -14,7 +14,8 @@ import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleAndSameFamilyFieldsFromHistoricalResult } from './utils/get_incompatible_and_same_family_fields_from_historical_result';
 import { IncompatibleTab } from '../../../../incompatible_tab';
 import { SameFamilyTab } from '../../../../same_family_tab';
-import { HistoricalCheckFieldsTabs } from '../historical_check_fields_tabs';
+import { CheckFieldsTabs } from '../../../../check_fields_tabs';
+import { StyledHistoricalResultsCheckFieldsButtonGroup } from '../styles';
 
 export interface Props {
   indexName: string;
@@ -98,7 +99,10 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
 
   return (
     <div data-test-subj="historicalCheckFields">
-      <HistoricalCheckFieldsTabs tabs={tabs} />
+      <CheckFieldsTabs
+        tabs={tabs}
+        renderButtonGroup={(props) => <StyledHistoricalResultsCheckFieldsButtonGroup {...props} />}
+      />
     </div>
   );
 };

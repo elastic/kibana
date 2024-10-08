@@ -16,7 +16,8 @@ import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt'
 import { CHECK_IS_BASED_ON_LEGACY_FORMAT, TO_SEE_RUN_A_NEW_CHECK } from './translations';
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
-import { HistoricalCheckFieldsTabs } from '../historical_check_fields_tabs';
+import { CheckFieldsTabs } from '../../../../check_fields_tabs';
+import { StyledHistoricalResultsCheckFieldsButtonGroup } from '../styles';
 
 interface Props {
   indexName: string;
@@ -38,7 +39,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
         badgeColor: getIncompatibleStatBadgeColor(incompatibleFieldCount),
         badgeCount: incompatibleFieldCount,
         content: (
-          <div data-test-subj="legacyHistoricalCheckFieldsComponent">
+          <div data-test-subj="legacyIncompatibleTabContent">
             {incompatibleFieldCount > 0 ? (
               <>
                 <IncompatibleCallout
@@ -70,7 +71,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
         badgeColor: 'hollow',
         badgeCount: sameFamilyFieldCount,
         disabled: true,
-        disabledReason: `${CHECK_IS_BASED_ON_LEGACY_FORMAT}\n${TO_SEE_RUN_A_NEW_CHECK}`,
+        disabledReason: `${CHECK_IS_BASED_ON_LEGACY_FORMAT} ${TO_SEE_RUN_A_NEW_CHECK}`,
       },
     ],
     [
@@ -83,7 +84,14 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
     ]
   );
 
-  return <HistoricalCheckFieldsTabs tabs={tabs} />;
+  return (
+    <div data-test-subj="legacyHistoricalCheckFields">
+      <CheckFieldsTabs
+        tabs={tabs}
+        renderButtonGroup={(props) => <StyledHistoricalResultsCheckFieldsButtonGroup {...props} />}
+      />
+    </div>
+  );
 };
 
 LegacyHistoricalCheckFieldsComponent.displayName = 'LegacyHistoricalCheckFieldsComponent';

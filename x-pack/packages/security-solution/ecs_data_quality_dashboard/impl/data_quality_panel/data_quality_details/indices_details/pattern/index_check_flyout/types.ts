@@ -26,4 +26,4 @@ export interface FetchHistoricalResultsQueryState {
   outcome?: 'pass' | 'fail';
 }
 
-export type HistoricalResultsTabId = typeof HISTORY_TAB_ID | typeof LATEST_CHECK_TAB_ID;
+export type IndexCheckFlyoutTabId = typeof HISTORY_TAB_ID | typeof LATEST_CHECK_TAB_ID;

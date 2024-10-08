@@ -38,7 +38,7 @@ describe('HistoricalResults', () => {
               total: results.length,
             }}
           >
-            <HistoricalResults indexName={indexName} />
+            <HistoricalResults indexName={indexName} latestCheckExists={true} />
           </TestHistoricalResultsProvider>
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -63,7 +63,7 @@ describe('HistoricalResults', () => {
                 total: 1,
               }}
             >
-              <HistoricalResults indexName={indexName} />
+              <HistoricalResults indexName={indexName} latestCheckExists={true} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -96,7 +96,7 @@ describe('HistoricalResults', () => {
               }}
               fetchHistoricalResults={fetchHistoricalResults}
             >
-              <HistoricalResults indexName={indexName} />
+              <HistoricalResults indexName={indexName} latestCheckExists={true} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -138,7 +138,7 @@ describe('HistoricalResults', () => {
                 total: 1,
               }}
             >
-              <HistoricalResults indexName={indexName} />
+              <HistoricalResults indexName={indexName} latestCheckExists={true} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -172,7 +172,7 @@ describe('HistoricalResults', () => {
                 }}
                 fetchHistoricalResults={fetchHistoricalResults}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -227,7 +227,7 @@ describe('HistoricalResults', () => {
                   total: results.length,
                 }}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -254,7 +254,7 @@ describe('HistoricalResults', () => {
                   total: results.length,
                 }}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -285,7 +285,7 @@ describe('HistoricalResults', () => {
                   total: results.length,
                 }}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -313,7 +313,7 @@ describe('HistoricalResults', () => {
                   total: 1,
                 }}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -340,7 +340,7 @@ describe('HistoricalResults', () => {
                 }}
                 fetchHistoricalResults={fetchHistoricalResults}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -384,7 +384,7 @@ describe('HistoricalResults', () => {
                 }}
                 fetchHistoricalResults={fetchHistoricalResults}
               >
-                <HistoricalResults indexName={indexName} />
+                <HistoricalResults indexName={indexName} latestCheckExists={true} />
               </TestHistoricalResultsProvider>
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -428,7 +428,7 @@ describe('HistoricalResults', () => {
                 total: 0,
               }}
             >
-              <HistoricalResults indexName={indexName} />
+              <HistoricalResults indexName={indexName} latestCheckExists={true} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -454,7 +454,7 @@ describe('HistoricalResults', () => {
                 total: 0,
               }}
             >
-              <HistoricalResults indexName={indexName} />
+              <HistoricalResults indexName={indexName} latestCheckExists={true} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>

@@ -18,7 +18,7 @@ import { getHistoricalResultStub } from '../../../../../../../../stub/get_histor
 import { HistoricalCheckFields } from '.';
 
 describe('HistoricalCheckFields', () => {
-  it('should render incompatible and same family field tabs with incompatible preselected', () => {
+  it('should render incompatible (preselected) and same family field tabs', () => {
     render(
       <TestExternalProviders>
         <TestDataQualityProviders>
