@@ -1495,6 +1495,7 @@
     "@storybook/addon-docs": "^8.3.5",
     "@storybook/addon-essentials": "^8.3.5",
     "@storybook/addon-knobs": "^8.0.1",
+    "@storybook/blocks": "^8.3.5",
     "@storybook/builder-webpack5": "^8.3.5",
     "@storybook/components": "^8.3.5",
     "@storybook/core": "^8.3.5",
