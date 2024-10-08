@@ -382,7 +382,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 required: false,
               },
               {
-                key: 'number_custom_field_3',
+                key: 'number_custom_field_4',
                 label: 'number',
                 type: CustomFieldTypes.NUMBER,
                 required: false,
@@ -411,7 +411,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           key: 'number_custom_field_4',
           type: CustomFieldTypes.NUMBER,
-          value: 'this is a number field value 4',
+          value: 123,
         },
       ];
 

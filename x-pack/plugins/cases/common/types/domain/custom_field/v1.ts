@@ -45,3 +45,4 @@ export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
 export type CaseCustomFieldToggle = rt.TypeOf<typeof CaseCustomFieldToggleRt>;
 export type CaseCustomFieldText = rt.TypeOf<typeof CaseCustomFieldTextRt>;
+export type CaseCustomFieldNumber = rt.TypeOf<typeof CaseCustomFieldNumberRt>;
