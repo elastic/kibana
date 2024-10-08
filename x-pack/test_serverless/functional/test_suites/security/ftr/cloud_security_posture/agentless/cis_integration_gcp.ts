@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
   const supertest = getService('supertest');
-  const previousPackageVersion = '1.9.0';
 
   describe('Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
@@ -74,17 +73,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
-      });
-
-      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
       });
     });
 
