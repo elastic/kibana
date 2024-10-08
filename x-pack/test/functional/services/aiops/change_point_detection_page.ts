@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlTableService } from '../ml/common_table_service';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlTableService } from '../ml/common_table_service';
 
 export interface DashboardAttachmentOptions {
   applyTimeRange: boolean;
@@ -20,6 +20,7 @@ export function ChangePointDetectionPageProvider(
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const ml = getService('ml');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
@@ -63,7 +64,7 @@ export function ChangePointDetectionPageProvider(
     },
 
     async selectMetricField(panelIndex: number = 0, value: string) {
-      await comboBox.set(
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
         `aiopsChangePointPanel_${panelIndex} > aiopsChangePointMetricField > comboBoxInput`,
         value
       );
@@ -81,7 +82,7 @@ export function ChangePointDetectionPageProvider(
     },
 
     async selectSplitField(panelIndex: number = 0, value: string) {
-      await comboBox.set(
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
         `aiopsChangePointPanel_${panelIndex} > aiopsChangePointSplitField > comboBoxInput`,
         value
       );

@@ -21,7 +21,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange, inline = true }) => {
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
-    const { renderOption, closeFlyout } = useFieldStatsTrigger();
+    const { closeFlyout } = useFieldStatsTrigger();
 
     const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return metricFieldOptions.map((v) => {
