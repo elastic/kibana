@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextAlign,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
@@ -66,13 +67,30 @@ const PromptAddDataViews = ({
 
   const footer = dataViewsDocLink ? (
     <>
-      {canCreateNewDataView && (
+      {canCreateNewDataView ? (
         <EuiButton onClick={onClickCreate} fill={true} data-test-subj="createDataViewButton">
           <FormattedMessage
             id="sharedUXPackages.noDataViewsPrompt.addDataViewText"
             defaultMessage="Create data view"
           />
         </EuiButton>
+      ) : (
+        <EuiToolTip
+          position="right"
+          content={
+            <FormattedMessage
+              id="sharedUXPackages.noDataViewsPrompt.addDataViewTooltipNoPrivilege"
+              defaultMessage="Ask your administrator for the permissions required to create a data view."
+            />
+          }
+        >
+          <EuiButton disabled data-test-subj="createDataViewButton">
+            <FormattedMessage
+              id="sharedUXPackages.noDataViewsPrompt.addDataViewTextNoPrivilege"
+              defaultMessage="Create data view"
+            />
+          </EuiButton>
+        </EuiToolTip>
       )}
       <EuiHorizontalRule />
       <DocumentationLink href={dataViewsDocLink} data-test-subj="docLinkDataViews" />
