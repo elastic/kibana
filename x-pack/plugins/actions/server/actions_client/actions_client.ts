@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined, compact, uniq } from 'lodash';
+import { compact, uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -24,10 +24,11 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
-import { getAll } from '../application/connector/methods/get_all';
+import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import {
   GetGlobalExecutionKPIParams,
@@ -92,15 +93,10 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
-import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
+import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
+import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
 
-interface ActionUpdate {
-  name: string;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
-}
-
-interface Action extends ActionUpdate {
+interface Action extends ConnectorUpdate {
   actionTypeId: string;
 }
 
@@ -125,11 +121,6 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-}
-
-export interface UpdateOptions {
-  id: string;
-  action: ActionUpdate;
 }
 
 export interface ActionsClientContext {
@@ -350,174 +341,13 @@ export class ActionsClient {
   }
 
   /**
-   * Update action
+   * Update connector
    */
-  public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'update' });
-
-      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-        (connector) => connector.id === id
-      );
-
-      if (foundInMemoryConnector?.isSystemAction) {
-        throw Boom.badRequest(
-          i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
-            defaultMessage: 'System action {id} can not be updated.',
-            values: {
-              id,
-            },
-          })
-        );
-      }
-
-      if (foundInMemoryConnector?.isPreconfigured) {
-        throw new PreconfiguredActionDisabledModificationError(
-          i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-            defaultMessage: 'Preconfigured action {id} can not be updated.',
-            values: {
-              id,
-            },
-          }),
-          'update'
-        );
-      }
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.UPDATE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-    const { attributes, references, version } =
-      await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-    const { actionTypeId } = attributes;
-    const { name, config, secrets } = action;
-    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
-    const validatedActionTypeConfig = validateConfig(actionType, config, {
-      configurationUtilities,
-    });
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-      configurationUtilities,
-    });
-    if (actionType.validate?.connector) {
-      validateConnector(actionType, { config, secrets });
-    }
-
-    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.UPDATE,
-        savedObject: { type: 'action', id },
-        outcome: 'unknown',
-      })
-    );
-
-    const hookServices: HookServices = {
-      scopedClusterClient: this.context.scopedClusterClient,
-    };
-
-    if (actionType.preSaveHook) {
-      try {
-        await actionType.preSaveHook({
-          connectorId: id,
-          config,
-          secrets,
-          logger: this.context.logger,
-          request: this.context.request,
-          services: hookServices,
-          isUpdate: true,
-        });
-      } catch (error) {
-        this.context.auditLogger?.log(
-          connectorAuditEvent({
-            action: ConnectorAuditAction.CREATE,
-            savedObject: { type: 'action', id },
-            error,
-          })
-        );
-        throw error;
-      }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let result: any;
-    try {
-      result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
-        'action',
-        {
-          ...attributes,
-          actionTypeId,
-          name,
-          isMissingSecrets: false,
-          config: validatedActionTypeConfig as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-        },
-        omitBy(
-          {
-            id,
-            overwrite: true,
-            references,
-            version,
-          },
-          isUndefined
-        )
-      );
-    } catch (err) {
-      result = err;
-      this.context.logger.error(`postSaveHook update error for`);
-    }
-
-    const wasSuccessful = !(result instanceof Error);
-    const label = `connectorId: "${id}"; type: ${actionTypeId}`;
-    const tags = ['post-save-hook', id];
-
-    if (actionType.postSaveHook) {
-      try {
-        await actionType.postSaveHook({
-          connectorId: id,
-          config,
-          secrets,
-          logger: this.context.logger,
-          request: this.context.request,
-          services: hookServices,
-          isUpdate: true,
-          wasSuccessful,
-        });
-      } catch (err) {
-        this.context.logger.error(`postSaveHook update error for ${label}: ${err.message}`, {
-          tags,
-        });
-      }
-    }
-
-    if (!wasSuccessful) {
-      throw result;
-    }
-
-    try {
-      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
-      );
-    }
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId as string,
-      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
-      name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, unknown>,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+  public async update({
+    id,
+    action,
+  }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<Connector> {
+    return update({ context: this.context, id, action });
   }
 
   /**

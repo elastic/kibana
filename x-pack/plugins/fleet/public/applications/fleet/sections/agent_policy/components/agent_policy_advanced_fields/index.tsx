@@ -28,6 +28,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { MissingPrivilegesToolTip } from '../../../../../../components/missing_privileges_tooltip';
+
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
@@ -42,6 +44,7 @@ import {
   useUIExtension,
   useLink,
   useFleetStatus,
+  useAuthz,
 } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
@@ -59,7 +62,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-
 import { CustomFields } from './custom_fields';
 import { SpaceSelector } from './space_selector';
 import { AgentPolicyAdvancedMonitoringOptions } from './advanced_monitoring';
@@ -87,6 +89,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     'endpoint-agent-tamper-protection'
   );
   const config = useConfig();
+  const authz = useAuthz();
   const maxAgentPoliciesWithInactivityTimeout =
     config.developer?.maxAgentPoliciesWithInactivityTimeout ??
     DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
@@ -179,22 +182,40 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         {agentPolicy.id && (
           <>
             <EuiSpacer size="s" />
-            <EuiLink
-              onClick={() => {
-                setIsUninstallCommandFlyoutOpen(true);
-              }}
-              disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
-              data-test-subj="uninstallCommandLink"
+            <MissingPrivilegesToolTip
+              missingPrivilege={
+                policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
+                  ? 'Agents All'
+                  : undefined
+              }
+              position="left"
             >
-              {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-                defaultMessage: 'Get uninstall command',
-              })}
-            </EuiLink>
+              <EuiLink
+                onClick={() => {
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                disabled={
+                  !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
+                }
+                data-test-subj="uninstallCommandLink"
+              >
+                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                  defaultMessage: 'Get uninstall command',
+                })}
+              </EuiLink>
+            </MissingPrivilegesToolTip>
           </>
         )}
       </EuiDescribedFormGroup>
     ),
-    [agentPolicy.id, agentPolicy.is_protected, policyHasElasticDefend, updateAgentPolicy, disabled]
+    [
+      agentPolicy.id,
+      agentPolicy.is_protected,
+      policyHasElasticDefend,
+      updateAgentPolicy,
+      disabled,
+      authz.fleet.allAgents,
+    ]
   );
 
   const AgentTamperProtectionSection = useMemo(() => {
