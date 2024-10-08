@@ -7,7 +7,7 @@
 .globalFilterItem {
   line-height: $euiSize;
   color: $euiTextColor;
-  padding-block: $euiSizeM / 2;
+  padding-block: calc($euiSizeM / 2);
   white-space: normal; /* 1 */
 
   &:not(.globalFilterItem-isDisabled) {
