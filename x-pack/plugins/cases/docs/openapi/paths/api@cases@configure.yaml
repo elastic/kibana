@@ -9,7 +9,7 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: '../components/parameters/owner_filter.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -17,7 +17,7 @@ get:
         application/json:
           schema:
             type: array
-            items: 
+            items:
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
@@ -35,7 +35,7 @@ post:
   summary: Add case settings
   operationId: setCaseConfigurationDefaultSpace
   description: >
-    Case settings include external connection details, custom fields, and templates. 
+    Case settings include external connection details, custom fields, and templates.
     Connectors are used to interface with external systems.
     You must create a connector before you can use it in your cases.
     If you set a default connector, it is automatically selected when you create cases in Kibana.
