@@ -50,4 +50,8 @@ export interface SecurityPluginStart {
    * @deprecated in favor of Core's `userProfile` service.
    */
   userProfiles: UserProfileAPIClient;
+  /**
+   * Exposes information about the available security features under the current license.
+   */
+  license: SecurityLicense;
 }

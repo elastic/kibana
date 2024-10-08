@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-export {
-  EditSpaceProviderRoot,
-  EditSpaceProvider,
-  useEditSpaceServices,
-  useEditSpaceStore,
-} from './edit_space_provider';
-export type {
-  EditSpaceProviderRootProps,
-  EditSpaceServices,
-  EditSpaceStore,
-} from './edit_space_provider';
+import type { SecurityPluginStart } from '../plugin';
+
+export type SecurityLicense = SecurityPluginStart['license'];
