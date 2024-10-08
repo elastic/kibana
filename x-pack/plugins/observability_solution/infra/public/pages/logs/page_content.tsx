@@ -15,6 +15,8 @@ import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDevMode } from '@kbn/xstate-utils';
@@ -92,7 +94,21 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        {routes.stream && <Route path={routes.stream.path} component={StreamPage} />}
+        {routes.stream ? (
+          <Route path={routes.stream.path} component={StreamPage} />
+        ) : (
+          <Route
+            path="/stream"
+            exact
+            render={() => {
+              share.url.locators
+                .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                ?.navigate({});
+
+              return null;
+            }}
+          />
+        )}
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         <Route path={routes.settings.path} component={LogsSettingsPage} />
@@ -106,6 +122,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
           to={routes.stream?.path ?? routes.logsAnomalies.path}
           exact
         />
+
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>
     </>
