@@ -845,5 +845,30 @@ describe('Per-Alert Action Scheduler', () => {
         { action: actionWithAlertsFilter, alert: alerts['2'] },
       ]);
     });
+
+    test('should skip generating an executable when an alert has neither scheduled actions nor end time', async () => {
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const alertWithNoScheduledActions = generateAlert({
+        id: 5,
+        group: 'default',
+        state: {},
+        scheduleActions: false,
+      });
+      const executables = await scheduler.generateExecutables({
+        alerts: { ...alertWithNoScheduledActions, ...newAlert1 },
+        throttledSummaryActions: {},
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'An alert (id:5) has been skipped due to max alerts limit'
+      );
+
+      expect(executables).toHaveLength(2);
+
+      expect(executables).toEqual([
+        { action: rule.actions[0], alert: alerts['1'] },
+        { action: rule.actions[1], alert: alerts['1'] },
+      ]);
+    });
   });
 });
