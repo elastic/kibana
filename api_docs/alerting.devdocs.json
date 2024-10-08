@@ -5104,23 +5104,7 @@
           "SnoozeRuleOptions",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; clearExpiredSnoozes: (options: { rule: Pick<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; featureIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
+          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; featureIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>[]; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
@@ -5138,19 +5122,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
-          "GetAlertFromRawParams",
-          ") => ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Rule",
-            "text": "Rule"
-          },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>; }"
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; }"
         ],
         "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
