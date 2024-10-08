@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { isOfQueryType, type TimeRange } from '@kbn/es-query';
+import { type TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
@@ -23,6 +23,8 @@ import {
   startWith,
   switchMap,
   tap,
+  distinctUntilChanged,
+  merge,
 } from 'rxjs';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
@@ -61,7 +63,14 @@ export const initializeSwimLaneDataFetcher = (
     swimlaneType: swimLaneApi.swimlaneType,
     viewBy: swimLaneApi.viewBy,
     perPage: swimLaneApi.perPage,
-    fromPage: swimLaneApi.fromPage,
+    fromPage: merge(
+      query$.pipe(map(() => 1)),
+      swimLaneApi.fromPage,
+      filters$.pipe(map(() => 1))
+    ).pipe(
+      distinctUntilChanged(),
+      tap((fromPage) => swimLaneApi.updatePagination({ fromPage }))
+    ),
   });
 
   const bucketInterval$ = combineLatest([selectedJobs$, chartWidth$, appliedTimeRange$]).pipe(
@@ -95,14 +104,6 @@ export const initializeSwimLaneDataFetcher = (
 
         const { viewBy, swimlaneType, perPage, fromPage } = input;
 
-        let isEmptyQuery = true;
-
-        if (isOfQueryType(query)) {
-          isEmptyQuery = !query.query;
-        } else {
-          isEmptyQuery = !query?.esql;
-        }
-
         let appliedFilters: estypes.QueryDslQueryContainer;
         try {
           if (filters || query) {
@@ -131,7 +132,7 @@ export const initializeSwimLaneDataFetcher = (
                   viewBy!,
                   swimLaneLimit,
                   perPage!,
-                  isEmptyQuery ? fromPage : 1,
+                  fromPage,
                   undefined,
                   appliedFilters,
                   bucketInterval
@@ -167,6 +168,7 @@ export const initializeSwimLaneDataFetcher = (
     swimLaneData$,
     onDestroy: () => {
       subscription.unsubscribe();
+      query$.unsubscribe();
     },
   };
 };
