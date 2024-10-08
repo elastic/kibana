@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { PropTypes } from 'prop-types';
+import type { FC } from 'react';
+import React, { useState, useCallback } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
@@ -21,17 +23,21 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { EventsTable } from '../events_table';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
+import { DstEventGenerator } from './dst_event_generator';
+import { EventsTable } from '../events_table';
 
-function EditHeader({ calendarId, description }) {
+const EditHeader: FC<{ calendarId: string; description: string }> = ({
+  calendarId,
+  description,
+}) => {
   return (
-    <Fragment>
+    <>
       <MlPageHeader>
         <span data-test-subj={'mlCalendarTitle'}>
           <FormattedMessage
@@ -49,20 +55,47 @@ function EditHeader({ calendarId, description }) {
           <EuiSpacer size="l" />
         </>
       ) : null}
-    </Fragment>
+    </>
   );
+};
+
+interface Props {
+  calendarId: string;
+  description: string;
+  eventsList: estypes.MlCalendarEvent[];
+  groupIdOptions: EuiComboBoxOptionOption[];
+  isEdit: boolean;
+  isNewCalendarIdValid: boolean;
+  jobIdOptions: EuiComboBoxOptionOption[];
+  onCalendarIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCreate: () => void;
+  onCreateGroupOption: (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[]) => void;
+  onDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onEdit: () => void;
+  onEventDelete: (eventId: string) => void;
+  onGroupSelection: (selectedOptions: any) => void;
+  showImportModal: () => void;
+  onJobSelection: (selectedOptions: any) => void;
+  saving: boolean;
+  loading: boolean;
+  selectedGroupOptions: EuiComboBoxOptionOption[];
+  selectedJobOptions: EuiComboBoxOptionOption[];
+  showNewEventModal: () => void;
+  isGlobalCalendar: boolean;
+  onGlobalCalendarChange: (e: EuiSwitchEvent) => void;
+  addEvents: (events: estypes.MlCalendarEvent[]) => void;
+  clearEvents: () => void;
+  isDst: boolean;
 }
 
-export const CalendarForm = ({
+export const CalendarForm: FC<Props> = ({
   calendarId,
-  canCreateCalendar,
-  canDeleteCalendar,
   description,
   eventsList,
-  groupIds,
+  groupIdOptions,
   isEdit,
   isNewCalendarIdValid,
-  jobIds,
+  jobIdOptions,
   onCalendarIdChange,
   onCreate,
   onCreateGroupOption,
@@ -79,7 +112,12 @@ export const CalendarForm = ({
   showNewEventModal,
   isGlobalCalendar,
   onGlobalCalendarChange,
+  addEvents,
+  clearEvents,
+  isDst,
 }) => {
+  const [canCreateCalendar] = usePermissionCheck(['canCreateCalendar']);
+  const [timezone, setTimezone] = useState<string | undefined>(undefined);
   const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
       'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
@@ -92,20 +130,38 @@ export const CalendarForm = ({
     saving ||
     !isNewCalendarIdValid ||
     calendarId === '' ||
-    loading === true;
-  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
+    loading === true ||
+    (isDst && eventsList.length === 0);
+  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+  );
+
+  const addDstEvents = useCallback(
+    (events: estypes.MlCalendarEvent[]) => {
+      clearEvents();
+      addEvents(events);
+    },
+    [addEvents, clearEvents]
+  );
 
   return (
     <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>
       {isEdit === true ? (
         <EditHeader calendarId={calendarId} description={description} />
       ) : (
-        <Fragment>
+        <>
           <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-              defaultMessage="Create new calendar"
-            />
+            {isDst ? (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.createCalendarDstTitle"
+                defaultMessage="Create new DST calendar"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+                defaultMessage="Create new calendar"
+              />
+            )}
           </MlPageHeader>
           <EuiFormRow
             label={
@@ -122,47 +178,51 @@ export const CalendarForm = ({
               name="calendarId"
               value={calendarId}
               onChange={onCalendarIdChange}
-              disabled={isEdit === true || saving === true || loading === true}
+              disabled={saving === true || loading === true}
               data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-                defaultMessage="Description"
+          {isDst === false ? (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+                  defaultMessage="Description"
+                />
+              }
+            >
+              <EuiFieldText
+                name="description"
+                value={description}
+                onChange={onDescriptionChange}
+                disabled={saving === true || loading === true}
+                data-test-subj="mlCalendarDescriptionInput"
               />
-            }
-          >
-            <EuiFieldText
-              name="description"
-              value={description}
-              onChange={onDescriptionChange}
-              disabled={isEdit === true || saving === true || loading === true}
-              data-test-subj="mlCalendarDescriptionInput"
-            />
-          </EuiFormRow>
+            </EuiFormRow>
+          ) : null}
 
           <EuiSpacer size="m" />
-        </Fragment>
+        </>
       )}
 
-      <EuiSwitch
-        name="switch"
-        label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-            defaultMessage="Apply calendar to all jobs"
-          />
-        }
-        checked={isGlobalCalendar}
-        onChange={onGlobalCalendarChange}
-        disabled={saving === true || canCreateCalendar === false || loading === true}
-        data-test-subj="mlCalendarApplyToAllJobsSwitch"
-      />
+      {isDst === false ? (
+        <EuiSwitch
+          name="switch"
+          label={
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+              defaultMessage="Apply calendar to all jobs"
+            />
+          }
+          checked={isGlobalCalendar}
+          onChange={onGlobalCalendarChange}
+          disabled={saving === true || canCreateCalendar === false || loading === true}
+          data-test-subj="mlCalendarApplyToAllJobsSwitch"
+        />
+      ) : null}
 
-      {isGlobalCalendar === false && (
+      {isGlobalCalendar === false ? (
         <>
           <EuiSpacer size="m" />
 
@@ -175,7 +235,7 @@ export const CalendarForm = ({
             }
           >
             <EuiComboBox
-              options={jobIds}
+              options={jobIdOptions}
               selectedOptions={selectedJobOptions}
               onChange={onJobSelection}
               isDisabled={saving === true || canCreateCalendar === false || loading === true}
@@ -193,7 +253,7 @@ export const CalendarForm = ({
           >
             <EuiComboBox
               onCreateOption={onCreateGroupOption}
-              options={groupIds}
+              options={groupIdOptions}
               selectedOptions={selectedGroupOptions}
               onChange={onGroupSelection}
               isDisabled={saving === true || canCreateCalendar === false || loading === true}
@@ -201,30 +261,46 @@ export const CalendarForm = ({
             />
           </EuiFormRow>
         </>
-      )}
+      ) : null}
 
       <EuiSpacer size="xl" />
 
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
-            defaultMessage="Events"
-          />
+          isDst ? (
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.dstEventsLabel"
+              defaultMessage="Time zone of data"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+              defaultMessage="Events"
+            />
+          )
         }
         fullWidth
       >
-        <EventsTable
-          canCreateCalendar={canCreateCalendar}
-          canDeleteCalendar={canDeleteCalendar}
-          eventsList={eventsList}
-          onDeleteClick={onEventDelete}
-          showImportModal={showImportModal}
-          showNewEventModal={showNewEventModal}
-          loading={loading}
-          saving={saving}
-          showSearchBar
-        />
+        <>
+          {isDst ? (
+            <DstEventGenerator
+              addEvents={addDstEvents}
+              setTimezone={setTimezone}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
+            />
+          ) : null}
+          <EventsTable
+            eventsList={eventsList}
+            onDeleteClick={onEventDelete}
+            showImportModal={showImportModal}
+            showNewEventModal={showNewEventModal}
+            loading={loading}
+            saving={saving}
+            showSearchBar={isDst === false}
+            timezone={timezone}
+            isDst={isDst}
+          />
+        </>
       </EuiFormRow>
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
@@ -259,31 +335,4 @@ export const CalendarForm = ({
       </EuiFlexGroup>
     </EuiForm>
   );
-};
-
-CalendarForm.propTypes = {
-  calendarId: PropTypes.string.isRequired,
-  canCreateCalendar: PropTypes.bool.isRequired,
-  canDeleteCalendar: PropTypes.bool.isRequired,
-  description: PropTypes.string,
-  groupIds: PropTypes.array.isRequired,
-  isEdit: PropTypes.bool.isRequired,
-  isNewCalendarIdValid: PropTypes.bool.isRequired,
-  jobIds: PropTypes.array.isRequired,
-  onCalendarIdChange: PropTypes.func.isRequired,
-  onCreate: PropTypes.func.isRequired,
-  onCreateGroupOption: PropTypes.func.isRequired,
-  onDescriptionChange: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onEventDelete: PropTypes.func.isRequired,
-  onGroupSelection: PropTypes.func.isRequired,
-  showImportModal: PropTypes.func.isRequired,
-  onJobSelection: PropTypes.func.isRequired,
-  saving: PropTypes.bool.isRequired,
-  loading: PropTypes.bool.isRequired,
-  selectedGroupOptions: PropTypes.array.isRequired,
-  selectedJobOptions: PropTypes.array.isRequired,
-  showNewEventModal: PropTypes.func.isRequired,
-  isGlobalCalendar: PropTypes.bool.isRequired,
-  onGlobalCalendarChange: PropTypes.func.isRequired,
 };
