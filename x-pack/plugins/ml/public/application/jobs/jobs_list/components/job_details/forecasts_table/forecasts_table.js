@@ -381,7 +381,7 @@ export class ForecastsTable extends Component {
               defaultMessage: 'View',
             }),
             type: 'icon',
-            icon: 'singleMetricViewer',
+            icon: 'eye',
             enabled: (forecast) =>
               !(
                 this.props.job.blocked !== undefined ||
