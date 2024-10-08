@@ -244,6 +244,7 @@ export interface AssistantToolParams {
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
+  isOssModel?: boolean;
   logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
