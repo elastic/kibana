@@ -26,7 +26,7 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
+import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -186,7 +186,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
               title={i18n.BACKFILL_TABLE_TITLE}
               subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
             />
-            <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 
