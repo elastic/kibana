@@ -107,7 +107,7 @@ export interface PluginConfigDescriptor<T = any> {
    */
   exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
-   * List of configuration properties that can be dynamically changed via the PUT /_settings API.
+   * List of configuration properties that can be dynamically changed via the PUT /internal/core/_settings API.
    */
   dynamicConfig?: DynamicConfigDescriptor<T>;
   /**

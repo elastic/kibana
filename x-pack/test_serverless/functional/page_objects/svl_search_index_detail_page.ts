@@ -173,5 +173,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('tryInConsoleButton');
       await testSubjects.click('tryInConsoleButton');
     },
+
+    async expectAPIKeyToBeVisibleInCodeBlock(apiKey: string) {
+      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
+      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
+        apiKey
+      );
+    },
   };
 }
