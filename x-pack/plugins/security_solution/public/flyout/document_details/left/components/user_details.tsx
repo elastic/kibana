@@ -54,6 +54,7 @@ import {
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
   USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import {
   HOST_NAME_FIELD_NAME,
@@ -67,6 +68,7 @@ import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -346,6 +348,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         <EuiSpacer size="s" />
         <EuiHorizontalRule margin="s" />
         <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'user.name'}
+            name={userName}
+            direction="column"
+            data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
+          />
           <MisconfigurationsInsight
             fieldName={'user.name'}
             name={userName}

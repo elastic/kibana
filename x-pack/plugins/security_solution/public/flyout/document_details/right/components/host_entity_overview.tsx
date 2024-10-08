@@ -52,6 +52,7 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
@@ -61,6 +62,7 @@ import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../../../cloud_security_posture/components/vulnerabilities/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const HOST_ICON = 'storage';
 
@@ -274,6 +276,11 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
+      <AlertCountInsight
+        fieldName={'host.name'}
+        name={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
+      />
       <MisconfigurationsInsight
         fieldName={'host.name'}
         name={hostName}

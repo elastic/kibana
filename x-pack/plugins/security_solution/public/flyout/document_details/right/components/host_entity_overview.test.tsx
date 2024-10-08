@@ -20,6 +20,7 @@ import {
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -33,6 +34,7 @@ import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 const hostName = 'host';
 const osFamily = 'Windows';
@@ -52,6 +54,15 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
+jest.mock(
+  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+);
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -107,6 +118,7 @@ describe('<HostEntityContent />', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
+    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
   });
 
   describe('license is valid', () => {
@@ -232,6 +244,17 @@ describe('<HostEntityContent />', () => {
         queryByTestId(ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID)
       ).not.toBeInTheDocument();
       expect(queryByTestId(ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useSummaryChartData as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: [{ key: 'high', value: 78, label: 'High' }],
+      });
+
+      const { getByTestId } = renderHostEntityContent();
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render misconfiguration when data is available', () => {

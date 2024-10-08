@@ -17,6 +17,7 @@ import {
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -30,6 +31,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -48,6 +50,17 @@ const panelContextValue = {
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+
+jest.mock('../../../../common/lib/kibana');
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
+jest.mock(
+  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+);
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -89,6 +102,7 @@ describe('<UserEntityOverview />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
   });
 
   describe('license is valid', () => {
@@ -227,6 +241,17 @@ describe('<UserEntityOverview />', () => {
       expect(
         queryByTestId(ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID)
       ).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useSummaryChartData as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: [{ key: 'high', value: 78, label: 'High' }],
+      });
+
+      const { getByTestId } = renderUserEntityOverview();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render misconfiguration when data is available', () => {

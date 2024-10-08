@@ -53,6 +53,7 @@ import {
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
   HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_ALERT_COUNT_TEST_ID,
   HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
   HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
@@ -69,6 +70,7 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../../../cloud_security_posture/components/vulnerabilities/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -346,6 +348,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
 
         <EuiHorizontalRule margin="s" />
         <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'host.name'}
+            name={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
+          />
           <MisconfigurationsInsight
             fieldName={'host.name'}
             name={hostName}
