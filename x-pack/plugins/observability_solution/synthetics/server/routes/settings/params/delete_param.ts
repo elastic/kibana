@@ -32,11 +32,26 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request }) => {
+  handler: async ({ savedObjectsClient, request, response }) => {
     const { ids } = request.body;
+    const { id: queryId } = request;
+
+    if (ids && queryId) {
+      return response.badRequest({
+        body: 'Both query and body parameters cannot be provided',
+      });
+    }
+
+    const idsToDelete = ids ?? [queryId];
+
+    if (idsToDelete.length === 0) {
+      return response.badRequest({
+        body: 'At least one id must be provided',
+      });
+    }
 
     const result = await savedObjectsClient.bulkDelete(
-      ids.map((id) => ({ type: syntheticsParamType, id })),
+      idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
