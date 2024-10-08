@@ -17,6 +17,7 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.servicenow-sir',
   '.swimlane',
+  '.thehive',
 ];
 
 export default createTestConfig({
