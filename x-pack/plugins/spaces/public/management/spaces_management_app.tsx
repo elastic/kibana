@@ -18,7 +18,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
-  SecurityPluginStart,
+  SecurityLicense,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -38,7 +38,7 @@ export interface CreateParams {
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
   isServerless: boolean;
-  getSecurityLicense: () => Promise<SecurityPluginStart['license']>;
+  getSecurityLicense: () => Promise<SecurityLicense>;
 }
 
 export const spacesManagementApp = Object.freeze({
