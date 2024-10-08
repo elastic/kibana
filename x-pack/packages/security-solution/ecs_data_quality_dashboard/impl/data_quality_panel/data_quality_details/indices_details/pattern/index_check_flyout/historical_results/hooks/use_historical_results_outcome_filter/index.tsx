@@ -37,7 +37,7 @@ export const useHistoricalResultsOutcomeFilter = ({
   const { fetchHistoricalResults } = useHistoricalResultsContext();
 
   const handleOutcomeFilterChange = useCallback(
-    async (outcome) => {
+    async (outcome: 'pass' | 'fail' | undefined) => {
       const opts: UseHistoricalResultsFetchOpts = {
         indexName,
         abortController: fetchHistoricalResultsFromOutcomeAbortControllerRef.current,
