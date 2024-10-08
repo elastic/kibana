@@ -159,11 +159,18 @@ describe('createApi', () => {
         },
         handler: async () => ({}),
       },
+      {
+        endpoint: 'GET /fez',
+        options: {
+          tags: ['access:apm', 'access:apm_settings_write'],
+        },
+        handler: async () => ({}),
+      },
     ]);
 
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(3);
     expect(post).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(1);
 
@@ -178,6 +185,14 @@ describe('createApi', () => {
     expect(get.mock.calls[1][0]).toEqual({
       options: {
         tags: ['access:apm', 'access:apm_write'],
+      },
+      path: '/qux',
+      validate: expect.anything(),
+    });
+
+    expect(get.mock.calls[2][0]).toEqual({
+      options: {
+        tags: ['access:apm', 'access:apm_settings_write'],
       },
       path: '/qux',
       validate: expect.anything(),
@@ -258,7 +273,7 @@ describe('createApi', () => {
         expect(response.custom).toHaveBeenCalledWith({
           body: {
             attributes: { _inspect: [], data: null },
-            message: `Failed to validate: 
+            message: `Failed to validate:
   in /query/_inspect: 1 does not match expected type pipe(JSON, boolean)`,
           },
           statusCode: 400,

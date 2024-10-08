@@ -99,7 +99,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 const deleteAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.type({
     body: t.type({
@@ -155,7 +155,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.intersection([
     t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),

@@ -94,8 +94,9 @@ export const APM_FEATURE = {
               includeIn: 'all',
               savedObject: {
                 all: [],
-                read: [APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE],
+                read: [],
               },
+              api: ['apm_settings_write'],
               ui: ['settings:save'],
             },
           ],
