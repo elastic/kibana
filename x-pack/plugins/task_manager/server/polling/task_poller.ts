@@ -27,6 +27,12 @@ interface Opts<H> {
   work: WorkFn<H>;
 }
 
+export interface TaskPoller<T, H> {
+  start: () => void;
+  stop: () => void;
+  events$: Observable<Result<H, PollingError<T>>>;
+}
+
 /**
  * constructs a new TaskPoller stream, which emits events on demand and on a scheduled interval, waiting for capacity to be available before emitting more events.
  *
@@ -45,11 +51,7 @@ export function createTaskPoller<T, H>({
   pollIntervalDelay$,
   getCapacity,
   work,
-}: Opts<H>): {
-  start: () => void;
-  stop: () => void;
-  events$: Observable<Result<H, PollingError<T>>>;
-} {
+}: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
   let timeoutId: NodeJS.Timeout | null = null;
