@@ -42,8 +42,6 @@ export const importRulesLegacy = async ({
 }): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
-  // If we had 100% errors and no successful rule could be imported we still have to output an error.
-  // otherwise we would output we are success importing 0 rules.
   if (ruleChunks.length === 0) {
     return response;
   }
