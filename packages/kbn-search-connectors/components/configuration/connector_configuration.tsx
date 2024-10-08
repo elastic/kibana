@@ -45,6 +45,7 @@ interface ConnectorConfigurationProps {
   hasPlatinumLicense: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
@@ -90,6 +91,7 @@ export const ConnectorConfigurationComponent: FC<
   hasPlatinumLicense,
   isLoading,
   saveConfig,
+  saveAndSync,
   subscriptionLink,
   stackManagementLink,
 }) => {
@@ -164,6 +166,10 @@ export const ConnectorConfigurationComponent: FC<
               isNative={isNative}
               saveConfig={(config) => {
                 saveConfig(config);
+                setIsEditing(false);
+              }}
+              saveAndSync={(config) => {
+                saveAndSync(config);
                 setIsEditing(false);
               }}
             />

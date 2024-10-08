@@ -7,6 +7,8 @@
 
 import React, { useEffect } from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,24 +17,24 @@ import {
   EuiTitle,
   EuiText,
   EuiButton,
-  EuiButtonEmpty,
   EuiProgress,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-// import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
-import { Connector } from '@kbn/search-connectors/types/connectors';
+
+import { Status } from '../../../../../../common/types/api';
 
 import * as Constants from '../../../../shared/constants';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
 
 interface ConfigurationStepProps {
   currentStep: number;
-  isNextStepEnabled: boolean;
   setCurrentStep: Function;
   setNextStepEnabled: Function;
-  setSyncing: Function;
-  syncing: boolean;
   title: string;
 }
 
@@ -40,14 +42,15 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   title,
   currentStep,
   setCurrentStep,
-  isNextStepEnabled,
-  setNextStepEnabled,
-  setSyncing,
-  syncing,
 }) => {
-  if (connector) {
-    connector.status = 'created' as ConnectorStatus;
-  }
+  const { connector } = useValues(ConnectorViewLogic);
+  const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
+  const { status } = useValues(ConnectorConfigurationApiLogic);
+  const { isSyncing } = useValues(SyncsLogic);
+
+  const isNextStepEnabled =
+    connector?.status === ConnectorStatus.CONNECTED ||
+    connector?.status === ConnectorStatus.CONFIGURED;
 
   useEffect(() => {
     setTimeout(() => {
@@ -58,6 +61,8 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
     }, 100);
   }, []);
 
+  if (!connector) return null;
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
@@ -67,62 +72,34 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <ConnectorConfigurationComponent connector={connector} />
+            <ConnectorConfigurationComponent
+              connector={connector}
+              hasPlatinumLicense
+              isLoading={status === Status.LOADING}
+              saveConfig={(config) => {
+                updateConnectorConfiguration({
+                  configuration: config,
+                  connectorId: connector.id,
+                });
+              }}
+              saveAndSync={(config) => {
+                updateConnectorConfiguration({
+                  configuration: config,
+                  connectorId: connector.id,
+                });
+
+                // and sync
+              }}
+            />
             <EuiSpacer size="m" />
-            <EuiButtonEmpty
-              size="s"
-              data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => {
-                setNextStepEnabled(true);
-                setTimeout(() => {
-                  window.scrollTo({
-                    behavior: 'smooth',
-                    top: window.innerHeight,
-                  });
-                }, 100);
-              }}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
-                {
-                  defaultMessage: 'Simulates: Save',
-                }
-              )}
-            </EuiButtonEmpty>
-            <EuiButtonEmpty
-              size="s"
-              data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => {
-                setSyncing(true);
-                setNextStepEnabled(true);
-                setTimeout(() => {
-                  window.scrollTo({
-                    behavior: 'smooth',
-                    top: window.innerHeight,
-                  });
-                }, 100);
-              }}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
-                {
-                  defaultMessage: 'Simulates: Save and sync',
-                }
-              )}
-            </EuiButtonEmpty>
-            {syncing && (
+            {isSyncing && (
               <EuiProgress size="xs" position="absolute" style={{ top: 'calc(100% - 2px)' }} />
             )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            paddingSize="l"
-            color={isNextStepEnabled ? 'plain' : 'subdued'}
-          >
-            <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="l" color="plain">
+            <EuiText>
               <h3>
                 {i18n.translate(
                   'xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel',
@@ -149,7 +126,6 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
               onClick={() => setCurrentStep(currentStep + 1)}
               fill
-              disabled={!isNextStepEnabled}
             >
               {Constants.NEXT_BUTTON_LABEL}
             </EuiButton>

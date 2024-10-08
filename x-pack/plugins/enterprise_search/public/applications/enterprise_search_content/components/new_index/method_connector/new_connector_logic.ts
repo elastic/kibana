@@ -116,9 +116,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     ],
   },
   listeners: ({ actions, values }) => ({
-    connectorNameGenerated: ({ connectorName }) => {
-      // actions.setGeneratedName(connectorName);
-    },
     connectorCreated: ({ id }) => {
       actions.fetchConnector({ connectorId: id });
       actions.generateConfiguration({ connectorId: id });
@@ -134,7 +131,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         actions.createConnectorApi({
           deleteExistingConnector: false,
           indexName: values.fullIndexName,
-          isNative: !values.selectedConnector.isNative ? false : isSelfManaged,
+          isNative: !values.selectedConnector.isNative ? false : !isSelfManaged,
           language: null,
           name: values.generatedNameData.connectorName,
           serviceType: values.selectedConnector.serviceType,

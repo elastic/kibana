@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
-import { useValues, useActions } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -33,7 +33,6 @@ import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
-import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 import { errorToText } from '../../new_index/utils/error_to_text';
@@ -51,12 +50,7 @@ export const CreateConnector: React.FC = () => {
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
-  const { fetchConnector } = useActions(ConnectorViewLogic);
-  const [syncing, setSyncing] = useState(false);
 
-  useEffect(() => {
-    fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
-  }, []);
   const [startStepStatus, setStartStepStatus] = useState<EuiStepStatus>('current');
   const [deploymentStepStatus, setDeploymentStepStatus] = useState<EuiStepStatus>('incomplete');
   const [configurationStepStatus, setConfigurationStepStatus] =
@@ -133,10 +127,7 @@ export const CreateConnector: React.FC = () => {
           )}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          isNextStepEnabled={finishUpStepComplete}
           setNextStepEnabled={setFinishUpStepComplete}
-          syncing={syncing}
-          setSyncing={setSyncing}
         />
       ),
       status: configurationStepStatus,
@@ -154,8 +145,6 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
             { defaultMessage: 'Finish up' }
           )}
-          syncing={syncing}
-          setSyncing={setSyncing}
         />
       ),
       status: finishUpStepStatus,
@@ -221,8 +210,6 @@ export const CreateConnector: React.FC = () => {
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
           setNextStepEnabled={setFinishUpStepComplete}
-          syncing={syncing}
-          setSyncing={setSyncing}
         />
       ),
       status: configurationStepStatus,
@@ -239,8 +226,6 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
             { defaultMessage: 'Finish up' }
           )}
-          syncing={syncing}
-          setSyncing={setSyncing}
         />
       ),
       status: finishUpStepStatus,

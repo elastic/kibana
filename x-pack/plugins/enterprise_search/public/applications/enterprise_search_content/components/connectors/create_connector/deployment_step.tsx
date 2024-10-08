@@ -20,8 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorDeployment } from '../../connector_detail/deployment';
 import * as Constants from '../../../../shared/constants';
+import { ConnectorDeployment } from '../../connector_detail/deployment';
 
 interface DeploymentStepProps {
   currentStep: number;

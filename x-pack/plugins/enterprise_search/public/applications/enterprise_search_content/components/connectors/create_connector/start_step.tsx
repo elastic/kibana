@@ -36,7 +36,6 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
-import { UNIVERSAL_LANGUAGE_VALUE } from '../../new_index/constants';
 
 interface StartStepProps {
   currentStep: number;
@@ -56,11 +55,9 @@ export const StartStep: React.FC<StartStepProps> = ({
   selfManagePreference,
   currentStep,
   setCurrentStep,
-  isNextStepEnabled,
   setNextStepEnabled,
   onNameChange,
   onSelfManagePreferenceChange,
-  onSubmit,
   error,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });

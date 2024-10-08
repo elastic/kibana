@@ -7,10 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 
-// import { useLocation } from 'react-router-dom';
-
 import { css } from '@emotion/react';
-// import { useValues } from 'kea';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -33,24 +32,31 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import { IndexViewLogic } from '../../search_index/index_view_logic';
+import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
 
 import connectorLogo from './assets/connector-logo.svg';
 
 interface FinishUpStepProps {
-  setSyncing: Function;
-  syncing: boolean;
   title: string;
 }
 
-export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setSyncing }) => {
+export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
+  // TODO: Update this to use index data.
   const [hasData, setHasData] = useState(false);
 
+  const { isWaitingForSync, isSyncing: isSyncingProp } = useValues(IndexViewLogic);
+  const { connector } = useValues(ConnectorViewLogic);
+  const { startSync } = useActions(SyncsLogic);
+
+  const isSyncing = isWaitingForSync || isSyncingProp;
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -99,7 +105,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="xl" />
-            {syncing && (
+            {isSyncing && (
               <>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
@@ -112,16 +118,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
                       )}
                     </EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText textAlign="right" size="xs">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.finishUpStep.DocumentsTextLabel',
-                        {
-                          defaultMessage: '4 Documents',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="xs" />
                 <EuiProgress
@@ -129,7 +125,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
                   color="success"
                   onClick={() => {
                     setHasData(true);
-                    setSyncing(false);
                   }}
                 />
                 <EuiSpacer size="xl" />
@@ -172,16 +167,16 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
-                          isLoading={syncing}
+                          isLoading={isSyncing}
                           aria-label={i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
                             { defaultMessage: 'First sync data' }
                           )}
                           onClick={() => {
-                            setSyncing(true);
+                            startSync(connector);
                           }}
                         >
-                          {syncing ? 'Syncing data' : 'First sync data'}
+                          {isSyncing ? 'Syncing data' : 'First sync data'}
                         </EuiButton>
                       )
                     }
@@ -222,16 +217,16 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
-                          isLoading={syncing}
+                          isLoading={isSyncing}
                           aria-label={i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
                             { defaultMessage: 'First sync data' }
                           )}
                           onClick={() => {
-                            setSyncing(true);
+                            startSync(connector);
                           }}
                         >
-                          {syncing ? 'Syncing data' : 'First sync data'}
+                          {isSyncing ? 'Syncing data' : 'First sync data'}
                         </EuiButton>
                       )
                     }
@@ -259,6 +254,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
                             data-test-subj="enterpriseSearchFinishUpStepManageConnectorButton"
                             size="m"
                             fill
+                            onClick={() => {
+                              // TODO: Navigate to connector detail page
+                            }}
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.createConnector.finishUpStep.manageConnectorButtonLabel',
