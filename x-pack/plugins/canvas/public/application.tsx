@@ -65,13 +65,11 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
-        <ServicesContextProvider>
-          <LegacyServicesProvider providers={services}>
-            <Provider store={canvasStore}>
-              <App history={params.history} />
-            </Provider>
-          </LegacyServicesProvider>
-        </ServicesContextProvider>
+        <LegacyServicesProvider providers={services}>
+          <Provider store={canvasStore}>
+            <App history={params.history} appUpdater={appUpdater} />{' '}
+          </Provider>
+        </LegacyServicesProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element
