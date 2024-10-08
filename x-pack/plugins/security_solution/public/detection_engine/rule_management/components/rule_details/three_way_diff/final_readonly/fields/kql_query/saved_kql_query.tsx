@@ -10,8 +10,8 @@ import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
   SavedKqlQuery,
-  DiffableRule,
-  DiffableAllFields,
+  RuleDataSource,
+  DiffableRuleTypes,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
@@ -21,8 +21,8 @@ import { getDataSourceProps, getQueryLanguageLabel } from '../../../../helpers';
 
 interface SavedQueryProps {
   kqlQuery: SavedKqlQuery;
-  dataSource?: DiffableAllFields['data_source'];
-  ruleType: DiffableRule['type'];
+  dataSource?: RuleDataSource;
+  ruleType: DiffableRuleTypes;
 }
 
 export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQueryProps) {

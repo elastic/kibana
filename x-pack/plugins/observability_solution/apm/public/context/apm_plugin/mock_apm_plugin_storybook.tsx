@@ -187,7 +187,7 @@ export function MockApmPluginStorybook({
     contextMock.core as unknown as Partial<CoreStart>
   );
 
-  const history2 = createMemoryHistory({
+  const history = createMemoryHistory({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
   });
 
@@ -197,7 +197,7 @@ export function MockApmPluginStorybook({
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
             <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={apmRouter as any} history={history2}>
+              <RouterProvider router={apmRouter as any} history={history}>
                 <MockTimeRangeContextProvider>
                   <ApmTimeRangeMetadataContextProvider>
                     {children}

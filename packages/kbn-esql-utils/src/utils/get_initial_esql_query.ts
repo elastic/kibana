@@ -20,7 +20,7 @@ export function getInitialESQLQuery(dataView: DataView): string {
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
     !hasAtTimestampField && timeFieldName
-      ? ` | WHERE ${timeFieldName} >= ?t_start AND ${timeFieldName} <= ?t_end`
+      ? ` | WHERE ${timeFieldName} >= ?_tstart AND ${timeFieldName} <= ?_tend`
       : '';
   return `FROM ${dataView.getIndexPattern()}${filterByTimeParams} | LIMIT 10`;
 }

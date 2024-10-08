@@ -24,6 +24,7 @@ import { useLoadSnapshotPolicies } from '../../../../../services/api';
 import { UseField } from '../../../form';
 
 import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../..';
+import { i18nTexts } from '../../../i18n_texts';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
@@ -145,14 +146,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
 
   return (
     <EuiDescribedFormGroup
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
-            defaultMessage="Wait for snapshot policy"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.waitForSnapshotLabel}</h3>}
       description={
         <>
           <FormattedMessage

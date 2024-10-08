@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { EvaluationContext } from '@kbn/core-feature-flags-server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { LaunchDarklyClient } from '../launch_darkly_client';
+import type { LDClient, LDMultiKindContext } from '@launchdarkly/node-server-sdk';
 
 export interface Usage {
   initialized: boolean;
@@ -15,7 +16,8 @@ export interface Usage {
 }
 
 export type LaunchDarklyEntitiesGetter = () => {
-  launchDarklyClient?: LaunchDarklyClient;
+  launchDarklyClient?: LDClient;
+  currentContext: EvaluationContext;
 };
 
 export function registerUsageCollector(
@@ -50,10 +52,23 @@ export function registerUsageCollector(
         },
       },
       fetch: async () => {
-        const { launchDarklyClient } = getLaunchDarklyEntities();
+        const { launchDarklyClient, currentContext } = getLaunchDarklyEntities();
         if (!launchDarklyClient) return { initialized: false, flagNames: [], flags: {} };
-        return await launchDarklyClient.getAllFlags();
+        return await getAllFlags(launchDarklyClient, currentContext);
       },
     })
   );
+}
+
+async function getAllFlags(
+  launchDarklyClient: LDClient,
+  currentContext: EvaluationContext
+): Promise<Usage> {
+  const flagsState = await launchDarklyClient.allFlagsState(currentContext as LDMultiKindContext);
+  const flags = flagsState.allValues();
+  return {
+    initialized: flagsState.valid,
+    flags,
+    flagNames: Object.keys(flags),
+  };
 }

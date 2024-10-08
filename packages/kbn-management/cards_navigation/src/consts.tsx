@@ -72,6 +72,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'documents',
   },
 
+  [AppIds.DATA_USAGE]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataUsageDescription', {
+      defaultMessage: 'View data usage and retention.',
+    }),
+    icon: 'documents',
+  },
+
   [AppIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {

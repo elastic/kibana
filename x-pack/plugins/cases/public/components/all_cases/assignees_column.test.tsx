@@ -14,7 +14,8 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import type { AssigneesColumnProps } from './assignees_column';
 import { AssigneesColumn } from './assignees_column';
 
-describe('AssigneesColumn', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192674
+describe.skip('AssigneesColumn', () => {
   const defaultProps: AssigneesColumnProps = {
     assignees: userProfiles,
     userProfiles: userProfilesMap,

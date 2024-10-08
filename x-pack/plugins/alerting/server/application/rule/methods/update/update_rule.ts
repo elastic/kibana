@@ -190,7 +190,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
         error,
       })
     );
@@ -201,7 +201,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
     })
   );
 

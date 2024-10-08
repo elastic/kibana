@@ -26,6 +26,7 @@ import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
   eventsHistogramConfig,
+  NO_BREAKDOWN_STACK_BY_VALUE,
 } from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -36,7 +37,7 @@ import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
-const DEFAULT_STACK_BY = 'event.dataset';
+const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 
 const ID = 'eventsByDatasetOverview';
 const CHART_HEIGHT = 160;
@@ -156,7 +157,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       defaultStackByOption:
         onlyField != null
           ? getHistogramOption(onlyField)
-          : eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ??
+          : eventsStackByOptions.find((o) => o.value === DEFAULT_STACK_BY) ??
             eventsStackByOptions[0],
       legendPosition: Position.Right,
       subtitle: (totalCount: number) =>

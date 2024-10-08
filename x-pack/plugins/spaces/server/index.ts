@@ -34,6 +34,9 @@ export const config: PluginConfigDescriptor = {
     maxSpaces: true,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
+    experimental: {
+      forceSolutionVisibility: true,
+    },
   },
 };
 

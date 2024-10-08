@@ -27,6 +27,59 @@ interface UseRowHeightProps {
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
+interface ResolveRowHeightParams {
+  storage: Storage;
+  consumer: string;
+  key: string;
+  configRowHeight: number;
+  rowHeightState?: number;
+}
+
+const resolveRowHeight = ({
+  storage,
+  consumer,
+  key,
+  configRowHeight,
+  rowHeightState,
+}: ResolveRowHeightParams): number => {
+  const rowHeightFromLS = getStoredRowHeight(storage, consumer, key);
+
+  const configHasNotChanged = (
+    localStorageRecord: DataGridOptionsRecord | null
+  ): localStorageRecord is DataGridOptionsRecord =>
+    localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
+
+  let currentRowLines: number;
+  if (isValidRowHeight(rowHeightState)) {
+    currentRowLines = rowHeightState;
+  } else if (configHasNotChanged(rowHeightFromLS)) {
+    currentRowLines = rowHeightFromLS.previousRowHeight;
+  } else {
+    currentRowLines = configRowHeight;
+  }
+
+  return currentRowLines;
+};
+
+export const ROW_HEIGHT_STORAGE_KEY = 'dataGridRowHeight';
+
+export const getRowHeight = ({
+  storage,
+  consumer,
+  rowHeightState,
+  configRowHeight,
+}: Pick<ResolveRowHeightParams, 'storage' | 'consumer' | 'rowHeightState'> & {
+  configRowHeight?: number;
+}) => {
+  return resolveRowHeight({
+    storage,
+    consumer,
+    key: ROW_HEIGHT_STORAGE_KEY,
+    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    rowHeightState,
+  });
+};
+
 export const useRowHeight = ({
   storage,
   consumer,
@@ -36,23 +89,13 @@ export const useRowHeight = ({
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
   const rowHeightLines = useMemo(() => {
-    const rowHeightFromLS = getStoredRowHeight(storage, consumer, key);
-
-    const configHasNotChanged = (
-      localStorageRecord: DataGridOptionsRecord | null
-    ): localStorageRecord is DataGridOptionsRecord =>
-      localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
-
-    let currentRowLines: number;
-    if (isValidRowHeight(rowHeightState)) {
-      currentRowLines = rowHeightState;
-    } else if (configHasNotChanged(rowHeightFromLS)) {
-      currentRowLines = rowHeightFromLS.previousRowHeight;
-    } else {
-      currentRowLines = configRowHeight;
-    }
-
-    return currentRowLines;
+    return resolveRowHeight({
+      storage,
+      consumer,
+      key,
+      configRowHeight,
+      rowHeightState,
+    });
   }, [configRowHeight, consumer, key, rowHeightState, storage]);
 
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {

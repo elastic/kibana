@@ -36,3 +36,9 @@ export const EngineDescriptor = z.object({
   status: EngineStatus.optional(),
   filter: z.string().optional(),
 });
+
+export type InspectQuery = z.infer<typeof InspectQuery>;
+export const InspectQuery = z.object({
+  response: z.array(z.string()),
+  dsl: z.array(z.string()),
+});

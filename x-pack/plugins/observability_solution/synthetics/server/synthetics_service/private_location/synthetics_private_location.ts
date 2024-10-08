@@ -52,7 +52,7 @@ export class SyntheticsPrivateLocation {
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       soClient,
       'synthetics',
-      this.server.logger
+      { logger: this.server.logger, installMissingPackage: true }
     );
 
     if (!newPolicy) {

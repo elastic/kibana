@@ -30,7 +30,7 @@ async function generate() {
     );
   }
 
-  const flatYaml = await yaml.safeLoad(await readFile(ecsYamlFilename));
+  const flatYaml = await yaml.load(await readFile(ecsYamlFilename));
 
   const fields = reduce(
     flatYaml,

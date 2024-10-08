@@ -25,6 +25,7 @@ export const unsnoozeRuleRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_unsnooze`,
+      options: { access: 'internal' },
       validate: {
         params: unsnoozeParamsSchema,
         body: unsnoozeBodySchema,

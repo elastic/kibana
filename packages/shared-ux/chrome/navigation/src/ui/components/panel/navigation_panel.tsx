@@ -18,11 +18,11 @@ import {
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 
+import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
-import { PanelNavNode } from './types';
 
-const getTestSubj = (selectedNode: PanelNavNode | null): string | undefined => {
+const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined => {
   if (!selectedNode) return;
 
   const deeplinkId = selectedNode.deepLink?.id;
@@ -30,6 +30,12 @@ const getTestSubj = (selectedNode: PanelNavNode | null): string | undefined => {
     [`sideNavPanel-id-${selectedNode.id}`]: selectedNode.id,
     [`sideNavPanel-deepLinkId-${deeplinkId}`]: !!deeplinkId,
   });
+};
+
+const getTargetTestSubj = (target: EventTarget | null): string | undefined => {
+  if (!target) return;
+
+  return (target as HTMLElement).dataset.testSubj;
 };
 
 export const NavigationPanel: FC = () => {
@@ -48,12 +54,22 @@ export const NavigationPanel: FC = () => {
 
   const onOutsideClick = useCallback(
     ({ target }: Event) => {
-      // Only close if we are not clicking on the currently selected nav node
-      if (
-        !(target as HTMLButtonElement).dataset.testSubj?.includes(
-          `panelOpener-${selectedNode?.path}`
-        )
-      ) {
+      let doClose = true;
+
+      if (target) {
+        // Only close if we are not clicking on the currently selected nav node
+        const testSubj =
+          getTargetTestSubj(target) ?? getTargetTestSubj((target as HTMLElement).parentNode);
+
+        if (
+          testSubj?.includes(`nav-item-${selectedNode?.path}`) ||
+          testSubj?.includes(`panelOpener-${selectedNode?.path}`)
+        ) {
+          doClose = false;
+        }
+      }
+
+      if (doClose) {
         close();
       }
     },

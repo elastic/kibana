@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadExceptionListSummary
       x-codegen-enabled: true
-      summary: Retrieves an exception list summary
+      summary: Get an exception list summary
+      description: Get a summary of the specified exception list.
       parameters:
         - name: id
           in: query

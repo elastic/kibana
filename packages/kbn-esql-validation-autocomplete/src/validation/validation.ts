@@ -47,7 +47,6 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -815,11 +814,6 @@ function validateSource(
     return messages;
   }
 
-  const hasCCS = hasCCSSource(source.name);
-  if (hasCCS) {
-    return messages;
-  }
-
   const commandDef = getCommandDefinition(commandName);
   const isWildcardAndNotSupported =
     hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
@@ -1097,6 +1091,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**

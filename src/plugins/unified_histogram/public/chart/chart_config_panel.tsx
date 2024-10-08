@@ -14,6 +14,7 @@ import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
 import {
@@ -144,5 +145,13 @@ export function ChartConfigPanel({
     currentSuggestionType,
   ]);
 
-  return isPlainRecord ? editLensConfigPanel : null;
+  const flyoutElement = isPlainRecord ? editLensConfigPanel : null;
+
+  useEffect(() => {
+    if (flyoutElement) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensEdit);
+    }
+  }, [flyoutElement]);
+
+  return flyoutElement;
 }

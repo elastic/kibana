@@ -21,6 +21,7 @@ import {
   resetRulesSettings,
   TaskManagerDoc,
 } from '../../../../../common/lib';
+import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
@@ -64,7 +65,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(10000);
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
@@ -197,7 +198,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(10000);
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false, true].concat(
@@ -327,7 +328,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(10000);
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, false, false, false, false, false],
@@ -387,7 +388,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(10000);
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(

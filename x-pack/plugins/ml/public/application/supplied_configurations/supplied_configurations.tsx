@@ -6,21 +6,44 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { SearchFilterConfig, FieldValueOptionType } from '@elastic/eui';
-import { EuiCard, EuiIcon, EuiFlexGrid, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import type { SearchFilterConfig, FieldValueOptionType, EuiSearchBarProps } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSearchBar,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { usePageUrlState, type PageUrlState } from '@kbn/ml-url-state';
 import useMountedState from 'react-use/lib/useMountedState';
 import useMount from 'react-use/lib/useMount';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../contexts/kibana';
 import type { Module } from '../../../common/types/modules';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { LoadingIndicator } from '../components/loading_indicator';
 import { filterModules } from './utils';
 import { SuppliedConfigurationsFlyout } from './supplied_configurations_flyout';
 
+interface SuppliedConfigurationsPageUrlState {
+  queryText: string;
+}
+
 export function isLogoObject(arg: unknown): arg is { icon: string } {
   return isPopulatedObject(arg) && Object.hasOwn(arg, 'icon');
 }
+
+const SCHEMA = {
+  strict: true,
+  fields: {
+    tags: {
+      type: 'string',
+    },
+  },
+};
 
 export const SuppliedConfigurations = () => {
   const {
@@ -31,9 +54,14 @@ export const SuppliedConfigurations = () => {
     },
   } = useMlKibana();
 
+  const [suppliedConfigurationsPageState, setSuppliedConfigurationsPageState] =
+    usePageUrlState<PageUrlState>(ML_PAGES.SUPPLIED_CONFIGURATIONS, {
+      queryText: '',
+    });
+
   const [modules, setModules] = useState<Module[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [query, setQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(false);
   const [selectedModuleId, setSelectedModuleId] = useState<string | undefined>();
 
@@ -82,21 +110,33 @@ export const SuppliedConfigurations = () => {
     ];
   }, [modules]);
 
-  const schema = {
-    strict: true,
-    fields: {
-      tags: {
-        type: 'string',
-      },
+  const setSearchQueryText = useCallback(
+    (value: string) => {
+      setSuppliedConfigurationsPageState({ queryText: value });
     },
+    [setSuppliedConfigurationsPageState]
+  );
+
+  const query = useMemo(() => {
+    const searchQueryText = (suppliedConfigurationsPageState as SuppliedConfigurationsPageUrlState)
+      .queryText;
+    return searchQueryText !== '' ? EuiSearchBar.Query.parse(searchQueryText) : undefined;
+  }, [suppliedConfigurationsPageState]);
+
+  const onChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
   };
 
   const filteredModules = useMemo(() => {
     const clauses = query?.ast?.clauses ?? [];
     return clauses.length > 0 ? filterModules(modules, clauses) : modules;
   }, [query, modules]);
-
-  const onChange = useCallback(({ query: onChangeQuery }) => setQuery(onChangeQuery), [setQuery]);
 
   if (isLoading === true) return <LoadingIndicator />;
 
@@ -112,11 +152,18 @@ export const SuppliedConfigurations = () => {
             }
           ),
           incremental: true,
-          schema,
+          schema: SCHEMA,
         }}
         filters={filters}
         onChange={onChange}
       />
+      <EuiFormRow
+        data-test-subj="mlAnomalyJobSelectionControls"
+        isInvalid={searchError !== undefined}
+        error={searchError}
+      >
+        <></>
+      </EuiFormRow>
       <EuiSpacer size="l" />
       <EuiFlexGrid gutterSize="l" columns={4}>
         {filteredModules.map(({ description, id, logo, title }) => {

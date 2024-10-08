@@ -35,3 +35,16 @@ export const firstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =
     return item;
   }
 };
+
+/**
+ * Returns the last normalized "single item" from the "item" list.
+ *
+ * @param items Returns the last "single item" from the "item" list.
+ * @returns A "single item", if any.
+ */
+export const lastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
+  const last = items[items.length - 1];
+  if (!last) return undefined;
+  if (Array.isArray(last)) return lastItem(last as ESQLAstItem[]);
+  return last as ESQLSingleAstItem;
+};

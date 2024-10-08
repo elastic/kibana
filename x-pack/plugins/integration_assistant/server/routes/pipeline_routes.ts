@@ -12,6 +12,9 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { ErrorCode } from '../../common/constants';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -46,8 +49,15 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
             return res.ok({
               body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
             });
-          } catch (e) {
-            return res.badRequest({ body: e });
+          } catch (err) {
+            try {
+              handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+            } catch (e) {
+              if (isErrorThatHandlesItsOwnResponse(e)) {
+                return e.sendResponse(res);
+              }
+            }
+            return res.badRequest({ body: err });
           }
         }
       )
