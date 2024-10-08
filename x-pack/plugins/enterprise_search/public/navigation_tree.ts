@@ -69,14 +69,12 @@ const euiItemTypeToNodeDefinition = ({
 
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
-  isSearchHomepageEnabled,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
-  isSearchHomepageEnabled: boolean;
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: isSearchHomepageEnabled ? 'searchHomepage' : 'enterpriseSearch',
+    homePage: 'enterpriseSearch',
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -88,7 +86,7 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
-                  link: isSearchHomepageEnabled ? 'searchHomepage' : 'enterpriseSearch',
+                  link: 'enterpriseSearch',
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -348,6 +346,7 @@ export const getNavigationTreeDefinition = ({
                       title: 'Stack',
                     },
                   ],
+                  id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
                   link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,

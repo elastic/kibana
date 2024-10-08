@@ -166,9 +166,9 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // subscribing to completed$, because it handles both cases when request was completed and aborted.
           // when route is finished by timeout, aborted$ is not getting fired
           request.events.completed$.subscribe(() => abortController.abort());
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            true
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
+            v2KnowledgeBaseEnabled: true,
+          });
           const spaceId = ctx.elasticAssistant.getSpaceId();
           // Authenticated user null check completed in `performChecks()` above
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
@@ -201,8 +201,13 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((c) =>
-              transformToCreateSchema(changedAt, spaceId, authenticatedUser, c)
+            documentsToCreate: body.create?.map((entry) =>
+              transformToCreateSchema({
+                createdAt: changedAt,
+                spaceId,
+                user: authenticatedUser,
+                entry,
+              })
             ),
             documentsToDelete: body.delete?.ids,
             documentsToUpdate: [], // TODO: Support bulk update

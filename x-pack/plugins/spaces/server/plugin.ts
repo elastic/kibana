@@ -130,7 +130,10 @@ export class SpacesPlugin
         ([config, onCloud]): ConfigType => ({
           ...config,
           // We only allow "solution" to be set on cloud environments, not on prem
-          allowSolutionVisibility: onCloud ? config.allowSolutionVisibility : false,
+          // unless the forceSolutionVisibility flag is set.
+          allowSolutionVisibility:
+            (onCloud && config.allowSolutionVisibility) ||
+            Boolean(config.experimental?.forceSolutionVisibility),
         })
       )
     );

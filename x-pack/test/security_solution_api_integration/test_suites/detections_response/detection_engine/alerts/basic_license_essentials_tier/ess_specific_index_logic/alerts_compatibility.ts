@@ -300,9 +300,11 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'logs',
             dataset: 'elastic_agent.filebeat',
           },
-          'event.agent_id_status': 'verified',
-          'event.ingested': '2022-03-23T16:50:28.994Z',
-          'event.dataset': 'elastic_agent.filebeat',
+          event: {
+            agent_id_status: 'verified',
+            ingested: '2022-03-23T16:50:28.994Z',
+            dataset: 'elastic_agent.filebeat',
+          },
           'event.kind': 'signal',
           'kibana.alert.ancestors': [
             {
@@ -466,9 +468,11 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'logs',
             dataset: 'elastic_agent.filebeat',
           },
-          'event.agent_id_status': 'verified',
-          'event.ingested': '2022-03-23T16:50:28.994Z',
-          'event.dataset': 'elastic_agent.filebeat',
+          event: {
+            agent_id_status: 'verified',
+            ingested: '2022-03-23T16:50:28.994Z',
+            dataset: 'elastic_agent.filebeat',
+          },
           'event.kind': 'signal',
           'kibana.alert.ancestors': [
             {

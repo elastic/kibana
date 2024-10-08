@@ -6,13 +6,14 @@
  */
 
 import { each } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
-import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { jobCloningService } from '../../../services/job_cloning_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';

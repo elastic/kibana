@@ -53,6 +53,7 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
+import { hostsTitle, inventoryTitle, metricsExplorerTitle, metricsTitle } from './translations';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -136,19 +137,24 @@ export class Plugin implements InfraClientPluginClass {
             ],
             isInfrastructureHostsViewEnabled,
           ]) => {
+            const { infrastructure, logs, discover, fleet } = capabilities;
             return [
-              ...(capabilities.logs.show
+              ...(logs.show
                 ? [
                     {
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
-                        {
-                          label: 'Explorer',
-                          app: 'observability-logs-explorer',
-                          path: '/',
-                          isBetaFeature: true,
-                        },
+                        ...(discover?.show && fleet?.read
+                          ? [
+                              {
+                                label: 'Explorer',
+                                app: 'observability-logs-explorer',
+                                path: '/',
+                                isBetaFeature: true,
+                              },
+                            ]
+                          : []),
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
                               { label: 'Stream', app: 'logs', path: '/stream' },
@@ -160,20 +166,30 @@ export class Plugin implements InfraClientPluginClass {
                     },
                   ]
                 : []),
-              ...(capabilities.infrastructure.show
+              ...(infrastructure.show
                 ? [
                     {
-                      label: 'Infrastructure',
+                      label: metricsTitle,
                       sortKey: 300,
                       entries: [
-                        { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                        {
+                          label: inventoryTitle,
+                          app: 'metrics',
+                          path: '/inventory',
+                        },
                         ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                          ? [
+                              {
+                                label: metricsExplorerTitle,
+                                app: 'metrics',
+                                path: '/explorer',
+                              },
+                            ]
                           : []),
                         ...(isInfrastructureHostsViewEnabled
                           ? [
                               {
-                                label: 'Hosts',
+                                label: hostsTitle,
                                 app: 'metrics',
                                 path: '/hosts',
                               },
@@ -269,9 +285,7 @@ export class Plugin implements InfraClientPluginClass {
       return [
         {
           id: 'inventory',
-          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-            defaultMessage: 'Inventory',
-          }),
+          title: inventoryTitle,
           path: '/inventory',
           visibleIn,
         },

@@ -37,18 +37,6 @@ const getConfigurationSavedObject = async ({
   return savedObjectsResponse.saved_objects?.[0];
 };
 
-export const getEnabledRiskEngineAmount = async ({
-  savedObjectsClient,
-}: SavedObjectsClientArg): Promise<number> => {
-  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
-    type: riskEngineConfigurationTypeName,
-    namespaces: ['*'],
-  });
-
-  return savedObjectsResponse.saved_objects?.filter((config) => config?.attributes?.enabled)
-    ?.length;
-};
-
 export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
   attributes,

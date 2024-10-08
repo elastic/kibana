@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, CreateIndexLanguageExamples } from '../types';
+import { CodeLanguage, IngestDataCodeDefinition } from '../types';
+import { CreateIndexLanguageExamples } from './types';
 
 export const CURL_INFO: CodeLanguage = {
   id: 'curl',
@@ -16,7 +17,7 @@ export const CURL_INFO: CodeLanguage = {
   codeBlockLanguage: 'shell',
 };
 
-export const CurlExamples: CreateIndexLanguageExamples = {
+export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
     createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
       indexName ?? INDEX_PLACEHOLDER
@@ -44,4 +45,28 @@ export const CurlExamples: CreateIndexLanguageExamples = {
   }
 }'`,
   },
+};
+
+export const CurlVectorsIngestDataExample: IngestDataCodeDefinition = {
+  ingestCommand: ({
+    elasticsearchURL,
+    apiKey,
+    indexName,
+    sampleDocument,
+  }) => `curl -X POST "${elasticsearchURL}/_bulk?pretty" \
+--header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
+--header 'Content-Type: application/json' \
+-d'
+{ "index": { "_index": "${indexName}" } }
+${JSON.stringify(sampleDocument)}
+`,
+  updateMappingsCommand: ({
+    elasticsearchURL,
+    apiKey,
+    indexName,
+    mappingProperties,
+  }) => `curl -X PUT "${elasticsearchURL}/${indexName}/_mapping" \
+--header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
+--header 'Content-Type: application/json' \
+--data-raw '${JSON.stringify({ properties: mappingProperties })}'`,
 };

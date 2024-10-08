@@ -12,7 +12,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  DashboardAPI,
+  DashboardApi,
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
@@ -78,7 +78,7 @@ export class QuickJobCreatorBase {
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
-    dashboard?: DashboardAPI;
+    dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -225,7 +225,7 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+  private async createDashboardLink(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const savedObjectId = dashboard.savedObjectId?.value;
     if (!savedObjectId) {
       return null;
@@ -260,7 +260,7 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

@@ -41,13 +41,11 @@ export type GetTimelinesRequestQueryInput = z.input<typeof GetTimelinesRequestQu
 
 export type GetTimelinesResponse = z.infer<typeof GetTimelinesResponse>;
 export const GetTimelinesResponse = z.object({
-  data: z.object({
-    timelines: z.array(TimelineResponse),
-    totalCount: z.number(),
-    defaultTimelineCount: z.number(),
-    templateTimelineCount: z.number(),
-    favoriteCount: z.number(),
-    elasticTemplateTimelineCount: z.number(),
-    customTemplateTimelineCount: z.number(),
-  }),
+  timeline: z.array(TimelineResponse),
+  totalCount: z.number(),
+  defaultTimelineCount: z.number().optional(),
+  templateTimelineCount: z.number().optional(),
+  favoriteCount: z.number().optional(),
+  elasticTemplateTimelineCount: z.number().optional(),
+  customTemplateTimelineCount: z.number().optional(),
 });

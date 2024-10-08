@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Message } from '.';
-import { ToolOptions } from './tools';
+import type { Message, FunctionCallingMode } from '.';
+import type { ToolOptions } from './tools';
 
 export type ChatCompleteRequestBody = {
   connectorId: string;
   stream?: boolean;
   system?: string;
   messages: Message[];
+  functionCalling?: FunctionCallingMode;
 } & ToolOptions;

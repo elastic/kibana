@@ -183,6 +183,7 @@ export interface DocLinks {
     readonly searchApplicationsSearch: string;
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
+    readonly semanticSearch: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
     readonly start: string;
@@ -563,6 +564,7 @@ export interface DocLinks {
     roleAndPrivileges: string;
     proxiesSettings: string;
     unprivilegedMode: string;
+    httpMonitoring: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

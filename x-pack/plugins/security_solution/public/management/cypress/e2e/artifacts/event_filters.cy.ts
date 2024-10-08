@@ -17,7 +17,8 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import type { ReturnTypeFromChainable } from '../../types';
 
-describe('Event Filters', { tags: ['@ess', '@serverless'] }, () => {
+// Skipped in Serverless MKI due to interactions with internal indices
+describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   const CONDITION_VALUE = 'valuesAutocompleteMatch';

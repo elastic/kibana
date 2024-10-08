@@ -16,7 +16,6 @@ import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 import type { TransformListRowWithStats } from '../../../../common/transform_list';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 // @ts-expect-error mock data is too loosely typed

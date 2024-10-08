@@ -63,14 +63,14 @@ const TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES =
 
 export type TypeSpecificFields = z.infer<typeof TypeSpecificFields>;
 export const TypeSpecificFields = z.discriminatedUnion('type', [
-  EqlRuleCreateFields,
+  EqlRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
   QueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
   SavedQueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES),
   ThresholdRuleCreateFields,
   ThreatMatchRuleCreateFields,
   MachineLearningRuleCreateFields,
-  NewTermsRuleCreateFields,
-  EsqlRuleCreateFields,
+  NewTermsRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
+  EsqlRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
 ]);
 
 // Make sure the type-specific fields contain all the same rule types as the type-specific rule params.

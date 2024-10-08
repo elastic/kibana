@@ -285,7 +285,7 @@ describe('SLOs Page', () => {
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
 
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        (await screen.findByLabelText('All actions, row 1')).click();
 
         await waitForEuiPopoverOpen();
 
@@ -311,7 +311,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -337,7 +337,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -364,7 +364,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -396,7 +396,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 

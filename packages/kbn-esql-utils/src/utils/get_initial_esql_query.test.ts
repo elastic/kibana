@@ -98,7 +98,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
     expect(getInitialESQLQuery(dataView)).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?t_start AND @custom_timestamp <= ?t_end | LIMIT 10'
+      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend | LIMIT 10'
     );
   });
 });

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 import { useDashboardRenderer } from './use_dashboard_renderer';
 
 jest.mock('../../common/lib/kibana');
 
-const mockDashboardContainer = { getExplicitInput: () => ({ tags: ['tagId'] }) } as DashboardAPI;
+const mockDashboardContainer = {} as DashboardApi;
 
 describe('useDashboardRenderer', () => {
   it('should set dashboard container correctly when dashboard is loaded', async () => {

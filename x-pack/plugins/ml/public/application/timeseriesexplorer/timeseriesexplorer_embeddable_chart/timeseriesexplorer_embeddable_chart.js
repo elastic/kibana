@@ -65,6 +65,7 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
 
 // Used to indicate the chart is being plotted across
@@ -735,6 +736,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         this.props.selectedJob.job_id,
       ]);
     }
+
+    // Populate mlJobService to work with LinksMenuUI.
+    this.mlJobService = mlJobServiceFactory(undefined, this.context.services.mlServices.mlApi);
+    await this.mlJobService.loadJobsWrapper();
 
     this.componentDidUpdate();
   }

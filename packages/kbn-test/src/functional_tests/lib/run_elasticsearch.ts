@@ -13,7 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
-import { isServerlessProjectType } from '@kbn/es/src/utils';
+import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster, esTestConfig } from '../../es';
 
@@ -91,6 +91,7 @@ export async function runElasticsearch(
     });
     return async () => {
       await node.cleanup();
+      await extractAndArchiveLogs({ outputFolder: logsDir, log });
     };
   }
 
@@ -119,6 +120,7 @@ export async function runElasticsearch(
   return async () => {
     await localNode.cleanup();
     await remoteNode.cleanup();
+    await extractAndArchiveLogs({ outputFolder: logsDir, log });
   };
 }
 

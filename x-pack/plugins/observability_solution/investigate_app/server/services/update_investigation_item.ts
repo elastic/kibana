@@ -25,7 +25,7 @@ export async function updateInvestigationItem(
     throw new Error('Cannot change item type');
   }
 
-  if (item.createdBy !== user.username) {
+  if (item.createdBy !== user.profile_uid) {
     throw new Error('User does not have permission to update item');
   }
 

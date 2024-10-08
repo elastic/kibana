@@ -1455,7 +1455,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ", any>>(id: string) => Promise<TEmbeddable | ",
+              ", any>>(id: string) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1463,7 +1463,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -1822,7 +1822,7 @@
                 "section": "def-common.PanelState",
                 "text": "PanelState"
               },
-              "<{ id: string; version?: string | undefined; }>, otherPanels: TContainerInput[\"panels\"]) => Promise<TEmbeddable | ",
+              "<{ id: string; version?: string | undefined; }>, otherPanels: TContainerInput[\"panels\"]) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1830,7 +1830,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -7502,7 +7502,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -7992,7 +7992,7 @@
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
@@ -8069,7 +8069,7 @@
             "section": "def-public.EmbeddableRendererProps",
             "text": "EmbeddableRendererProps"
           },
-          "<I>) => JSX.Element"
+          "<I>) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -8111,7 +8111,7 @@
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
-          "({ embeddable, loading, error, input }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -8120,12 +8120,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableRoot.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -8394,9 +8394,7 @@
         "label": "isExplicitInputWithAttributes",
         "description": [],
         "signature": [
-          "(value: ",
-          "ExplicitInputWithAttributes",
-          " | Partial<",
+          "(value: Partial<",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -8404,7 +8402,9 @@
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
           },
-          ">) => value is ",
+          "> | ",
+          "ExplicitInputWithAttributes",
+          ") => value is ",
           "ExplicitInputWithAttributes"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
@@ -8419,8 +8419,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "ExplicitInputWithAttributes",
-              " | Partial<",
+              "Partial<",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
@@ -8428,7 +8427,8 @@
                 "section": "def-common.EmbeddableInput",
                 "text": "EmbeddableInput"
               },
-              ">"
+              "> | ",
+              "ExplicitInputWithAttributes"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -9019,7 +9019,7 @@
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<SerializedState>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -10224,9 +10224,9 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<Partial<TEmbeddableInput> | ",
+              "> | undefined) => Promise<",
               "ExplicitInputWithAttributes",
-              ">"
+              " | Partial<TEmbeddableInput>>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -13409,7 +13409,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"type\" | \"create\" | \"latestVersion\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"type\" | \"create\" | \"getDisplayName\" | \"latestVersion\" | \"isEditable\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -13417,7 +13417,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"getIconType\" | \"grouping\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,
@@ -14513,22 +14513,6 @@
               "path": "x-pack/plugins/lens/public/plugin.ts"
             },
             {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/plugin.tsx"
             }
@@ -14891,16 +14875,8 @@
               "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
             },
             {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/types.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable_service.ts"
-            },
-            {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
             },
             {
               "plugin": "dashboard",
@@ -14920,14 +14896,6 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable.story.ts"
-            },
-            {
-              "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
             },
             {
@@ -14940,19 +14908,23 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             }
           ],
           "children": [
@@ -15053,14 +15025,6 @@
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
             }
           ],
           "children": [],
