@@ -277,8 +277,13 @@ export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[dat
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
+// timeline table grid cell
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
-  `[data-test-subj="draggable-content-${fieldName}"]`;
+  `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${fieldName}"]`;
+
+// actual content within timeline table grid cell without screenreader text
+export const GET_TIMELINE_GRID_CELL_VALUE = (fieldName: string) =>
+  `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${fieldName}"] .unifiedDataTable__cellValue`;
 
 export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
 
@@ -289,11 +294,12 @@ export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
-  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
-  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
-  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
-  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
+  ADD_TO_TIMELINE:
+    '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]',
 };
 
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
