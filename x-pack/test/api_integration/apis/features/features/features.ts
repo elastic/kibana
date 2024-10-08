@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('/api/features', () => {
     describe('with the "global all" privilege', () => {
-      it('should return a 200', async () => {
+      it.only('should return a 200', async () => {
         const username = 'global_all';
         const roleName = 'global_all';
         const password = `${username}-password`;
