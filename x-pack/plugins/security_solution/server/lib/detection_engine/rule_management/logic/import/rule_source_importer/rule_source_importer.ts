@@ -37,7 +37,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
   private latestPackagesInstalled: boolean = false;
-  private matchingAssets: PrebuiltRuleAsset[] = [];
+  private matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
   private knownRules: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
 
@@ -67,7 +67,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     }
 
     this.knownRules = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
-    this.matchingAssets = await this.fetchMatchingAssets();
+    this.matchingAssetsByRuleId = await this.fetchMatchingAssetsByRuleId();
     this.availableRuleAssetIds = new Set(await this.fetchAvailableRuleAssetIds());
   }
 
@@ -82,18 +82,22 @@ export class RuleSourceImporter implements IRuleSourceImporter {
 
     return calculateRuleSourceForImport({
       rule,
-      prebuiltRuleAssets: this.matchingAssets,
+      prebuiltRuleAssetsByRuleId: this.matchingAssetsByRuleId,
       ruleIdExists: this.availableRuleAssetIds.has(rule.rule_id),
     });
   }
 
-  private async fetchMatchingAssets(): Promise<PrebuiltRuleAsset[]> {
+  private async fetchMatchingAssetsByRuleId(): Promise<Record<string, PrebuiltRuleAsset>> {
     this.validateSetupState();
-
-    return fetchMatchingAssets({
+    const matchingAssets = await fetchMatchingAssets({
       rules: this.knownRules,
       ruleAssetsClient: this.ruleAssetsClient,
     });
+
+    return matchingAssets.reduce<Record<string, PrebuiltRuleAsset>>((map, asset) => {
+      map[asset.rule_id] = asset;
+      return map;
+    }, {});
   }
 
   private async fetchAvailableRuleAssetIds(): Promise<string[]> {

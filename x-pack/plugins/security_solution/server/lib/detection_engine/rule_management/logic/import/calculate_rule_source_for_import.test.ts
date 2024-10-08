@@ -13,7 +13,7 @@ describe('calculateRuleSourceForImport', () => {
   it('calculates as internal if no asset is found', () => {
     const result = calculateRuleSourceForImport({
       rule: getRulesSchemaMock(),
-      prebuiltRuleAssets: [],
+      prebuiltRuleAssetsByRuleId: {},
       ruleIdExists: false,
     });
 
@@ -31,7 +31,7 @@ describe('calculateRuleSourceForImport', () => {
 
     const result = calculateRuleSourceForImport({
       rule,
-      prebuiltRuleAssets: [],
+      prebuiltRuleAssetsByRuleId: {},
       ruleIdExists: true,
     });
 
@@ -47,11 +47,11 @@ describe('calculateRuleSourceForImport', () => {
   it('calculates as external with customizations if a matching asset/version is found', () => {
     const rule = getRulesSchemaMock();
     rule.rule_id = 'rule_id';
-    const prebuiltRuleAssets = [getPrebuiltRuleMock({ rule_id: 'rule_id' })];
+    const prebuiltRuleAssetsByRuleId = { rule_id: getPrebuiltRuleMock({ rule_id: 'rule_id' }) };
 
     const result = calculateRuleSourceForImport({
       rule,
-      prebuiltRuleAssets,
+      prebuiltRuleAssetsByRuleId,
       ruleIdExists: true,
     });
 
@@ -67,11 +67,11 @@ describe('calculateRuleSourceForImport', () => {
   it('calculates as external without customizations if an exact match is found', () => {
     const rule = getRulesSchemaMock();
     rule.rule_id = 'rule_id';
-    const prebuiltRuleAssets = [getPrebuiltRuleMock(rule)];
+    const prebuiltRuleAssetsByRuleId = { rule_id: getPrebuiltRuleMock(rule) };
 
     const result = calculateRuleSourceForImport({
       rule,
-      prebuiltRuleAssets,
+      prebuiltRuleAssetsByRuleId,
       ruleIdExists: true,
     });
 

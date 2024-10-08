@@ -26,16 +26,14 @@ import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset
  */
 export const calculateRuleSourceForImport = ({
   rule,
-  prebuiltRuleAssets,
+  prebuiltRuleAssetsByRuleId,
   ruleIdExists,
 }: {
   rule: ValidatedRuleToImport;
-  prebuiltRuleAssets: PrebuiltRuleAsset[];
+  prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
   ruleIdExists: boolean;
 }): { ruleSource: RuleSource; immutable: boolean } => {
-  const assetWithMatchingVersion = prebuiltRuleAssets.find(
-    (asset) => asset.rule_id === rule.rule_id
-  );
+  const assetWithMatchingVersion = prebuiltRuleAssetsByRuleId[rule.rule_id];
   // We convert here so that RuleSource calculation can
   // continue to deal only with RuleResponses. The fields missing from the
   // incoming rule are not actually needed for the calculation, but only to

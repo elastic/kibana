@@ -30,6 +30,7 @@ describe('ruleSourceImporter', () => {
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
+    ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([]);
     ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleToImport;
 
     subject = createRuleSourceImporter({
@@ -137,7 +138,7 @@ describe('ruleSourceImporter', () => {
       expect(calculatorSpy).toHaveBeenCalledTimes(1);
       expect(calculatorSpy).toHaveBeenCalledWith({
         rule,
-        prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
+        prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
         ruleIdExists: true,
       });
     });
@@ -165,7 +166,7 @@ describe('ruleSourceImporter', () => {
         expect(calculatorSpy).toHaveBeenCalledTimes(1);
         expect(calculatorSpy).toHaveBeenCalledWith({
           rule,
-          prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
+          prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
           ruleIdExists: true,
         });
       });
