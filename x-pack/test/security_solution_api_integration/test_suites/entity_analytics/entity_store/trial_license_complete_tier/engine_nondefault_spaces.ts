@@ -6,17 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { v4 as uuidv4 } from 'uuid';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContextWithSpaces) => {
   const api = getService('securitySolutionApi');
+  const spaces = getService('spaces');
+  const namespace = uuidv4().substring(0, 8);
 
-  const utils = EntityStoreUtils(getService);
+  const utils = EntityStoreUtils(getService, namespace);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess Entity Store Engine APIs in non-default space', () => {
     before(async () => {
       await utils.cleanEngines();
+      await spaces.create({
+        id: namespace,
+        name: namespace,
+        disabledFeatures: [],
+      });
+    });
+
+    after(async () => {
+      await spaces.delete(namespace);
     });
 
     describe('init', () => {
@@ -28,8 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityType('user');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_default_user_entity_store',
-          'entities-v1-latest-ea_default_user_entity_store',
+          `entities-v1-history-ea_${namespace}_user_entity_store`,
+          `entities-v1-latest-ea_${namespace}_user_entity_store`,
         ];
 
         await utils.expectTransformsExist(expectedTransforms);
@@ -39,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityType('host');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_default_host_entity_store',
-          'entities-v1-latest-ea_default_host_entity_store',
+          `entities-v1-history-ea_${namespace}_host_entity_store`,
+          `entities-v1-latest-ea_${namespace}_host_entity_store`,
         ];
 
         await utils.expectTransformsExist(expectedTransforms);
@@ -62,9 +73,12 @@ export default ({ getService }: FtrProviderContext) => {
       describe('get', () => {
         it('should return the host entity engine', async () => {
           const getResponse = await api
-            .getEntityEngine({
-              params: { entityType: 'host' },
-            })
+            .getEntityEngine(
+              {
+                params: { entityType: 'host' },
+              },
+              namespace
+            )
             .expect(200);
 
           expect(getResponse.body).to.eql({
@@ -78,9 +92,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should return the user entity engine', async () => {
           const getResponse = await api
-            .getEntityEngine({
-              params: { entityType: 'user' },
-            })
+            .getEntityEngine(
+              {
+                params: { entityType: 'user' },
+              },
+              namespace
+            )
             .expect(200);
 
           expect(getResponse.body).to.eql({
@@ -95,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('list', () => {
         it('should return the list of entity engines', async () => {
-          const { body } = await api.listEntityEngines().expect(200);
+          const { body } = await api.listEntityEngines(namespace).expect(200);
 
           // @ts-expect-error body is any
           const sortedEngines = body.engines.sort((a, b) => a.type.localeCompare(b.type));
@@ -131,15 +148,21 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should stop the entity engine', async () => {
         await api
-          .stopEntityEngine({
-            params: { entityType: 'host' },
-          })
+          .stopEntityEngine(
+            {
+              params: { entityType: 'host' },
+            },
+            namespace
+          )
           .expect(200);
 
         const { body } = await api
-          .getEntityEngine({
-            params: { entityType: 'host' },
-          })
+          .getEntityEngine(
+            {
+              params: { entityType: 'host' },
+            },
+            namespace
+          )
           .expect(200);
 
         expect(body.status).to.eql('stopped');
@@ -147,15 +170,21 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should start the entity engine', async () => {
         await api
-          .startEntityEngine({
-            params: { entityType: 'host' },
-          })
+          .startEntityEngine(
+            {
+              params: { entityType: 'host' },
+            },
+            namespace
+          )
           .expect(200);
 
         const { body } = await api
-          .getEntityEngine({
-            params: { entityType: 'host' },
-          })
+          .getEntityEngine(
+            {
+              params: { entityType: 'host' },
+            },
+            namespace
+          )
           .expect(200);
 
         expect(body.status).to.eql('started');
@@ -167,28 +196,38 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityType('host');
 
         await api
-          .deleteEntityEngine({
-            params: { entityType: 'host' },
-            query: { data: true },
-          })
+          .deleteEntityEngine(
+            {
+              params: { entityType: 'host' },
+              query: { data: true },
+            },
+            namespace
+          )
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_host_entity_store');
-        await utils.expectTransformNotFound('entities-v1-latest-ea_host_entity_store');
+        await utils.expectTransformNotFound(
+          `entities-v1-history-ea_${namespace}_host_entity_store`
+        );
+        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_host_entity_store`);
       });
 
       it('should delete the user entity engine', async () => {
         await utils.initEntityEngineForEntityType('user');
 
         await api
-          .deleteEntityEngine({
-            params: { entityType: 'user' },
-            query: { data: true },
-          })
+          .deleteEntityEngine(
+            {
+              params: { entityType: 'user' },
+              query: { data: true },
+            },
+            namespace
+          )
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_user_entity_store');
-        await utils.expectTransformNotFound('entities-v1-latest-ea_user_entity_store');
+        await utils.expectTransformNotFound(
+          `entities-v1-history-ea_${namespace}_user_entity_store`
+        );
+        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_user_entity_store`);
       });
     });
   });
