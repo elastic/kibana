@@ -90,5 +90,24 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       );
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },
+    async expectAPIKeyVisibleInCodeBlock(apiKey: string) {
+      await testSubjects.existOrFail('createIndex-code-block');
+      await retry.try(async () => {
+        expect(await testSubjects.getVisibleText('createIndex-code-block')).to.contain(apiKey);
+      });
+    },
+
+    async expectAPIKeyPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasBeenGenerated');
+    },
+
+    async expectAPIKeyNotPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasNotBeenGenerated');
+    },
+
+    async expectAPIKeyFormNotAvailable() {
+      await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
+      await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
+    },
   };
 }

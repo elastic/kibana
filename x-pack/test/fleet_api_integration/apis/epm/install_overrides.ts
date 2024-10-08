@@ -164,6 +164,10 @@ export default function (providerContext: FtrProviderContext) {
             name: 'logs',
             index_patterns: ['logs-*-*'],
           },
+          {
+            index_patterns: ['logs-*.otel-*'],
+            name: 'logs-otel@template',
+          },
         ],
       });
     });

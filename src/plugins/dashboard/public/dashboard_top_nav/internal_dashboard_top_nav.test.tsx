@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
@@ -50,9 +51,12 @@ describe('Internal dashboard top nav', () => {
 
   it('should render the managed badge when the dashboard is managed', async () => {
     const container = buildMockDashboard();
-    container.dispatch.setManaged(true);
+    const dashboardApi = {
+      ...container,
+      managed$: new BehaviorSubject(true),
+    } as unknown as DashboardApi;
     const component = render(
-      <DashboardContext.Provider value={container as DashboardApi}>
+      <DashboardContext.Provider value={dashboardApi}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
       </DashboardContext.Provider>
     );
