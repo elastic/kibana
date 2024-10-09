@@ -19,6 +19,18 @@ import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writeable } from '@kbn/zod';
 import type { GraphContextServices, GraphContext } from './types';
 
+interface GraphEdge {
+  badge: number;
+  ips: string[];
+  hosts: string[];
+  users: string[];
+  actorIds: string[] | string;
+  action: string;
+  targetIds: string[] | string;
+  eventOutcome: string;
+  isAlert: boolean;
+}
+
 export const getGraph = async (
   services: GraphContextServices,
   query: {
@@ -49,6 +61,12 @@ export const getGraph = async (
   return { nodes: graphContext.nodes, edges: graphContext.edges };
 };
 
+interface ParseContext {
+  nodesMap: Record<string, NodeDataModel>;
+  edgeLabelsNodes: Record<string, string[]>;
+  edgesMap: Record<string, EdgeDataModel>;
+}
+
 const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
   const nodesMap: Record<string, NodeDataModel> = {};
   const edgeLabelsNodes: Record<string, string[]> = {};
@@ -56,110 +74,8 @@ const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
 
   logger.trace(`Parsing records [length: ${records.length}]`);
 
-  records.forEach(
-    ({
-      badge,
-      ips,
-      hosts,
-      users,
-      actorIds: maybeActorIds,
-      action,
-      targetIds: maybeTargetIds,
-      isAlert,
-      eventOutcome,
-    }) => {
-      const actorIds = castArray(maybeActorIds);
-      const targetIds = castArray(maybeTargetIds);
-
-      logger.trace(
-        `Parsing record [actorIds: ${actorIds.join(
-          ', '
-        )}, action: ${action}, targetIds: ${targetIds.join(', ')}]`
-      );
-
-      // Create entity nodes
-      [...actorIds, ...targetIds].forEach((id) => {
-        if (nodesMap[id] === undefined) {
-          nodesMap[id] = {
-            id,
-            label: id,
-            color: isAlert ? 'danger' : 'primary',
-            ...determineEntityNodeShape(id, ips ?? [], hosts ?? [], users ?? []),
-          };
-
-          logger.trace(`Creating entity node [${id}]`);
-        }
-      });
-
-      // Create label nodes
-      actorIds.forEach((actorId) => {
-        targetIds.forEach((targetId) => {
-          const edgeId = `a(${actorId})-b(${targetId})`;
-
-          if (edgeLabelsNodes[edgeId] === undefined) {
-            edgeLabelsNodes[edgeId] = [];
-          }
-
-          const labelNode = {
-            id: edgeId + `label(${action})`,
-            label: action,
-            source: actorId,
-            target: targetId,
-            color: eventOutcome === 'failed' ? 'warning' : isAlert ? 'danger' : 'primary',
-            shape: 'label',
-          } as LabelNodeDataModel;
-
-          logger.trace(`Creating label node [${labelNode.id}]`);
-
-          nodesMap[labelNode.id] = labelNode;
-          edgeLabelsNodes[edgeId].push(labelNode.id);
-        });
-      });
-
-      Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
-        // When there's more than one edge label, create a group node
-        if (edgeLabelsIds.length === 1) {
-          const edgeLabelId = edgeLabelsIds[0];
-
-          connectEntitiesAndLabelNode(
-            logger,
-            edgesMap,
-            nodesMap,
-            (nodesMap[edgeLabelId] as LabelNodeDataModel).source,
-            edgeLabelId,
-            (nodesMap[edgeLabelId] as LabelNodeDataModel).target
-          );
-        } else {
-          const groupNode: GroupNodeDataModel = {
-            id: `grp(${edgeId})`,
-            shape: 'group',
-          };
-          nodesMap[groupNode.id] = groupNode;
-
-          connectEntitiesAndLabelNode(
-            logger,
-            edgesMap,
-            nodesMap,
-            (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).source,
-            groupNode.id,
-            (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).target
-          );
-
-          edgeLabelsIds.forEach((edgeLabelId) => {
-            (nodesMap[edgeLabelId] as Writeable<LabelNodeDataModel>).parentId = groupNode.id;
-            connectEntitiesAndLabelNode(
-              logger,
-              edgesMap,
-              nodesMap,
-              groupNode.id,
-              edgeLabelId,
-              groupNode.id
-            );
-          });
-        }
-      });
-    }
-  );
+  createNodes(logger, records, { nodesMap, edgeLabelsNodes });
+  createEdges(logger, { edgeLabelsNodes, edgesMap, nodesMap });
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(nodesMap).length}, edges: ${Object.keys(edgesMap).length}]`
@@ -184,7 +100,11 @@ const fetchGraph = async ({
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const query = `from logs-*
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-| EVAL isAlert = event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})
+| EVAL isAlert = ${
+    eventIds.length > 0
+      ? `event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})`
+      : 'false'
+  }
 | STATS badge = COUNT(*),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
@@ -238,17 +158,64 @@ const fetchGraph = async ({
     .toRecords<GraphEdge>();
 };
 
-interface GraphEdge {
-  badge: number;
-  ips: string[];
-  hosts: string[];
-  users: string[];
-  actorIds: string[] | string;
-  action: string;
-  targetIds: string[] | string;
-  eventOutcome: string;
-  isAlert: boolean;
-}
+const createNodes = (
+  logger: Logger,
+  records: GraphEdge[],
+  context: Omit<ParseContext, 'edgesMap'>
+) => {
+  const { nodesMap, edgeLabelsNodes } = context;
+
+  for (const record of records) {
+    const { badge, ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
+    const actorIdsArray = castArray(actorIds);
+    const targetIdsArray = castArray(targetIds);
+
+    logger.trace(
+      `Parsing record [actorIds: ${actorIdsArray.join(
+        ', '
+      )}, action: ${action}, targetIds: ${targetIdsArray.join(', ')}]`
+    );
+
+    // Create entity nodes
+    [...actorIdsArray, ...targetIdsArray].forEach((id) => {
+      if (nodesMap[id] === undefined) {
+        nodesMap[id] = {
+          id,
+          label: id,
+          color: isAlert ? 'danger' : 'primary',
+          ...determineEntityNodeShape(id, ips ?? [], hosts ?? [], users ?? []),
+        };
+
+        logger.trace(`Creating entity node [${id}]`);
+      }
+    });
+
+    // Create label nodes
+    for (const actorId of actorIdsArray) {
+      for (const targetId of targetIdsArray) {
+        const edgeId = `a(${actorId})-b(${targetId})`;
+
+        if (edgeLabelsNodes[edgeId] === undefined) {
+          edgeLabelsNodes[edgeId] = [];
+        }
+
+        const labelNode = {
+          id: edgeId + `label(${action})outcome(${eventOutcome})`,
+          label: action,
+          source: actorId,
+          target: targetId,
+          color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          shape: 'label',
+        } as LabelNodeDataModel;
+
+        logger.trace(`Creating label node [${labelNode.id}]`);
+
+        nodesMap[labelNode.id] = labelNode;
+        edgeLabelsNodes[edgeId].push(labelNode.id);
+      }
+    }
+  }
+};
 
 const determineEntityNodeShape = (
   actorId: string,
@@ -277,6 +244,53 @@ const determineEntityNodeShape = (
   return { shape: 'hexagon', icon: 'questionInCircle' };
 };
 
+function createEdges(logger: Logger, context: ParseContext) {
+  const { edgeLabelsNodes, edgesMap, nodesMap } = context;
+
+  Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
+    // When there's more than one edge label, create a group node
+    if (edgeLabelsIds.length === 1) {
+      const edgeLabelId = edgeLabelsIds[0];
+
+      connectEntitiesAndLabelNode(
+        logger,
+        edgesMap,
+        nodesMap,
+        (nodesMap[edgeLabelId] as LabelNodeDataModel).source,
+        edgeLabelId,
+        (nodesMap[edgeLabelId] as LabelNodeDataModel).target
+      );
+    } else {
+      const groupNode: GroupNodeDataModel = {
+        id: `grp(${edgeId})`,
+        shape: 'group',
+      };
+      nodesMap[groupNode.id] = groupNode;
+
+      connectEntitiesAndLabelNode(
+        logger,
+        edgesMap,
+        nodesMap,
+        (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).source,
+        groupNode.id,
+        (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).target
+      );
+
+      edgeLabelsIds.forEach((edgeLabelId) => {
+        (nodesMap[edgeLabelId] as Writeable<LabelNodeDataModel>).parentId = groupNode.id;
+        connectEntitiesAndLabelNode(
+          logger,
+          edgesMap,
+          nodesMap,
+          groupNode.id,
+          edgeLabelId,
+          groupNode.id
+        );
+      });
+    }
+  });
+}
+
 const connectEntitiesAndLabelNode = (
   logger: Logger,
   edgesMap: Record<string, EdgeDataModel>,
@@ -299,11 +313,21 @@ const connectNodes = (
   sourceNodeId: string,
   targetNodeId: string
 ) => {
+  const sourceNode = nodesMap[sourceNodeId];
+  const targetNode = nodesMap[targetNodeId];
+  const color =
+    sourceNode.shape !== 'group' && targetNode.shape !== 'label'
+      ? sourceNode.color
+      : targetNode.shape !== 'group'
+      ? targetNode.color
+      : 'primary';
+
   return {
     id: `a(${sourceNodeId})-b(${targetNodeId})`,
     source: sourceNodeId,
     sourceShape: nodesMap[sourceNodeId].shape as NodeShape,
     target: targetNodeId,
     targetShape: nodesMap[targetNodeId].shape as NodeShape,
+    color,
   } as EdgeDataModel;
 };

@@ -50,9 +50,7 @@ export const nodeBaseDataSchema = schema.object({
 export const entityNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    color: schema.maybe(
-      schema.oneOf([schema.literal('primary'), schema.literal('danger'), schema.literal('warning')])
-    ),
+    color: colorSchema,
     shape: schema.oneOf([
       schema.literal('hexagon'),
       schema.literal('pentagon'),
@@ -77,7 +75,7 @@ export const labelNodeDataSchema = schema.allOf([
     target: schema.string(),
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
-    color: schema.maybe(colorSchema),
+    color: colorSchema,
   }),
 ]);
 
@@ -87,5 +85,5 @@ export const edgeDataSchema = schema.object({
   sourceShape: nodeShapeSchema,
   target: schema.string(),
   targetShape: nodeShapeSchema,
-  color: schema.maybe(colorSchema),
+  color: colorSchema,
 });
