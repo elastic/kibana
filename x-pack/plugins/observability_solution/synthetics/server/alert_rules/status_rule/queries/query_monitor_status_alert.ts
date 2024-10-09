@@ -31,6 +31,7 @@ const fields = [
   'url',
   'state',
   'tags',
+  'service',
 ];
 type StatusConfigs = Record<string, AlertStatusMetaData>;
 

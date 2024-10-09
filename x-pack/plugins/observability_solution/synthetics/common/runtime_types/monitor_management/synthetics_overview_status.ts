@@ -27,6 +27,9 @@ export const OverviewPingCodec = t.intersection([
   t.partial({
     error: PingErrorType,
     tags: t.array(t.string),
+    service: t.type({
+      name: t.string,
+    }),
   }),
 ]);
 
