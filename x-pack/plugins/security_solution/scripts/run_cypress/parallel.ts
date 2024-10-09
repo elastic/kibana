@@ -124,9 +124,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern, {
-            ignore: excludeSpecPattern,
-          }); // convert the glob pattern to concrete file paths
+        : globby.sync(
+            specPattern,
+            excludeSpecPattern
+              ? {
+                  ignore: excludeSpecPattern,
+                }
+              : undefined
+          ); // convert the glob pattern to concrete file paths
 
       let files = retrieveIntegrations(concreteFilePaths);
 
