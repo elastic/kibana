@@ -27,7 +27,7 @@ export async function buildWebpackPackages({ log, dist }: TaskContext) {
     try {
       await buildPackage(packageDir, log, dist);
     } catch (e) {
-      log.error(`webpack bundle build: ${e}`);
+      log.error(`bazel run failed: ${e}`);
       throw e;
     }
   }
@@ -78,31 +78,10 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
 
   log.info(`building packages/${packageName}`);
 
-  await execa('ls', ['-la', `node_modules/.bin/`], {
+  return execa('webpack-cli', argsProcessed, {
     stdio: 'inherit',
-    cwd: REPO_ROOT,
+    env: { ...process.env, ...env },
   });
-
-  try {
-    const a = await execa('webpack-cli', argsProcessed, {
-      stdio: 'inherit',
-      env: { ...process.env, ...env },
-    });
-    return a;
-  } catch (e) {
-    log.error(`webpack build failed: ${e}`);
-  }
-
-  try {
-    const a = await execa('webpack-cli', argsProcessed, {
-      stdio: 'inherit',
-      env: { ...process.env, ...env },
-      cwd: REPO_ROOT,
-    });
-    return a;
-  } catch (e) {
-    log.error(`webpack build failed: ${e}`);
-  }
 }
 
 async function copySources({
