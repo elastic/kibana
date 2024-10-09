@@ -1111,11 +1111,14 @@ describe('autocomplete', () => {
         ]);
       });
 
-      describe('KEEP <field>', () => {
+      describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {
         // KEEP field
-        testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
         testSuggestions(
-          'FROM a | KEEP d/',
+          `FROM a | ${commandName} /`,
+          getFieldNamesByType('any').map(attachTriggerCommand)
+        );
+        testSuggestions(
+          `FROM a | ${commandName} d/`,
           getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
@@ -1124,11 +1127,11 @@ describe('autocomplete', () => {
             .map(attachTriggerCommand)
         );
         testSuggestions(
-          'FROM a | KEEP doubleFiel/',
+          `FROM a | ${commandName} doubleFiel/`,
           getFieldNamesByType('any').map(attachTriggerCommand)
         );
         testSuggestions(
-          'FROM a | KEEP doubleField/',
+          `FROM a | ${commandName} doubleField/`,
           ['doubleField, ', 'doubleField | ']
             .map((text) => ({
               text,
@@ -1141,7 +1144,7 @@ describe('autocomplete', () => {
 
         // Let's get funky with the field names
         testSuggestions(
-          'FROM a | KEEP @timestamp/',
+          `FROM a | ${commandName} @timestamp/`,
           ['@timestamp, ', '@timestamp | ']
             .map((text) => ({
               text,
@@ -1150,10 +1153,15 @@ describe('autocomplete', () => {
             }))
             .map(attachTriggerCommand),
           undefined,
-          [[{ name: '@timestamp', type: 'date' }]]
+          [
+            [
+              { name: '@timestamp', type: 'date' },
+              { name: 'utc_stamp', type: 'date' },
+            ],
+          ]
         );
         testSuggestions(
-          'FROM a | KEEP foo.bar/',
+          `FROM a | ${commandName} foo.bar/`,
           ['foo.bar, ', 'foo.bar | ']
             .map((text) => ({
               text,
@@ -1162,26 +1170,34 @@ describe('autocomplete', () => {
             }))
             .map(attachTriggerCommand),
           undefined,
-          [[{ name: 'foo.bar', type: 'double' }]]
+          [
+            [
+              { name: 'foo.bar', type: 'double' },
+              { name: 'baz', type: 'date' },
+            ],
+          ]
         );
 
         describe('escaped field names', () => {
           // This isn't actually the behavior we want, but this test is here
           // to make sure no weird suggestions start cropping up in this case.
-          testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar'], undefined, [
+          testSuggestions(`FROM a | ${commandName} \`foo.bar\`/`, ['foo.bar'], undefined, [
             [{ name: 'foo.bar', type: 'double' }],
           ]);
           // @todo re-enable these tests when we can use AST to support this case
-          testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-            [{ name: 'foo.bar', type: 'double' }],
-          ]);
           testSuggestions.skip(
-            'FROM a | KEEP `foo`.`bar`/',
+            `FROM a | ${commandName} \`foo.bar\`/`,
             ['foo.bar, ', 'foo.bar | '],
             undefined,
             [[{ name: 'foo.bar', type: 'double' }]]
           );
-          testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
+          testSuggestions.skip(
+            `FROM a | ${commandName} \`foo\`.\`bar\`/`,
+            ['foo.bar, ', 'foo.bar | '],
+            undefined,
+            [[{ name: 'foo.bar', type: 'double' }]]
+          );
+          testSuggestions.skip(`FROM a | ${commandName} \`any#Char$Field\`/`, [
             '`any#Char$Field`, ',
             '`any#Char$Field` | ',
           ]);
@@ -1189,12 +1205,28 @@ describe('autocomplete', () => {
 
         // Subsequent fields
         testSuggestions(
-          'FROM a | KEEP doubleField, dateFiel/',
+          `FROM a | ${commandName} doubleField, dateFiel/`,
           getFieldNamesByType('any')
             .filter((s) => s !== 'doubleField')
             .map(attachTriggerCommand)
         );
-        testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
+        testSuggestions(`FROM a | ${commandName} doubleField, dateField/`, [
+          'dateField, ',
+          'dateField | ',
+        ]);
+
+        // out of fields
+        testSuggestions(
+          `FROM a | ${commandName} doubleField, dateField/`,
+          ['dateField | '],
+          undefined,
+          [
+            [
+              { name: 'doubleField', type: 'double' },
+              { name: 'dateField', type: 'date' },
+            ],
+          ]
+        );
       });
     });
   });
