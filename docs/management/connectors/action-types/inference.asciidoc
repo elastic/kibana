@@ -53,7 +53,8 @@ The {infer} actions have the following configuration properties. Properties depe
 === Connector perform completion task
 
 The following example performs a completion on the example question.
-Input::      The text on which you want to perform the {infer} task. For example:
+Input::
+The text on which you want to perform the {infer} task. For example:
 +
 [source,text]
 --
@@ -67,7 +68,8 @@ Input::      The text on which you want to perform the {infer} task. For example
 === Perform text embedding
 
 The following example performs text embedding.
-Input::      The text on which you want to perform the {infer} task. For example:
+Input::
+The text on which you want to perform the {infer} task. For example:
 +
 [source,text]
 --
@@ -86,7 +88,8 @@ An optional string that overwrites the connector's default model.
 === Connector perform rerank task
 
 The following example performs reranking on the example input.
-Input::      The text on which you want to perform the {infer} task. Should be a string array. For example:
+Input::
+The text on which you want to perform the {infer} task. Should be a string array. For example:
 +
 [source,text]
 --
@@ -103,7 +106,8 @@ The search query text.
 === Connector perform sparse embedding task
 
 The following example performs sparse embedding on the example sentence.
-Input::      The text on which you want to perform the {infer} task. For example:
+Input::
+The text on which you want to perform the {infer} task. For example:
 +
 [source,text]
 --

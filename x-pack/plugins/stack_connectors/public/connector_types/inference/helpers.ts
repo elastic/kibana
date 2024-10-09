@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
 import { isEmpty } from 'lodash/fp';
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConfigEntryView } from '../lib/dynamic_config/types';
@@ -36,10 +35,9 @@ export const generateInferenceEndpointId = (
   setFieldValue: (fieldName: string, value: unknown) => void
 ) => {
   const taskTypeSuffix = config.taskType ? `${config.taskType}-` : '';
-  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${faker.string.alpha({
-    length: 8,
-    casing: 'lower',
-  })}`;
+  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${Math.random()
+    .toString(36)
+    .slice(2)}`;
   config.inferenceId = inferenceEndpointId;
   setFieldValue('config.inferenceId', inferenceEndpointId);
 };

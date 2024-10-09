@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { css } from '@emotion/react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFormRow,
   EuiSpacer,
-  EuiTitle,
-  EuiAccordion,
   EuiInputPopover,
   EuiFieldText,
   EuiFieldTextProps,
   EuiSelectableOption,
   EuiFormControlLayout,
   keys,
-  useEuiTheme,
-  EuiTextColor,
-  EuiButtonGroup,
-  EuiPanel,
   EuiHorizontalRule,
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiButton,
-  useEuiFontSize,
 } from '@elastic/eui';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
@@ -59,13 +48,7 @@ import {
 } from './helpers';
 import { useProviders } from './providers/get_providers';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-
-// Custom trigger button CSS
-const buttonCss = css`
-  &:hover {
-    text-decoration: none;
-  }
-`;
+import { AdditionalOptionsConnectorFields } from './additional_options_fields';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -76,8 +59,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     notifications: { toasts },
   } = useKibana().services;
 
-  const xsFontSize = useEuiFontSize('xs').fontSize;
-  const { euiTheme } = useEuiTheme();
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
@@ -321,25 +302,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     [config, providerSchema, secrets, setFieldValue, validateFields]
   );
 
-  const onSetTaskTypeConfigEntry = useCallback(
-    async (key: string, value: unknown) => {
-      if (taskTypeSchema) {
-        const entry: ConfigEntryView | undefined = taskTypeSchema.find(
-          (p: ConfigEntryView) => p.key === key
-        );
-        if (entry) {
-          if (!config.taskTypeConfig) {
-            config.taskTypeConfig = {};
-          }
-          config.taskTypeConfig[key] = value;
-          setFieldValue('config.taskTypeConfig', config.taskTypeConfig);
-          await validateFields(['config.taskTypeConfig']);
-        }
-      }
-    },
-    [config, setFieldValue, taskTypeSchema, validateFields]
-  );
-
   const onClearProvider = useCallback(() => {
     onProviderChange();
     setFieldValue('config.taskType', '');
@@ -388,282 +350,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     ]
   );
 
-  const taskTypeSettings = useMemo(
-    () =>
-      selectedTaskType || config?.taskType.length ? (
-        <>
-          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
-                defaultMessage="Task settings"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <div
-            css={css`
-              font-size: ${xsFontSize};
-              color: ${euiTheme.colors.subduedText};
-            `}
-          >
-            <FormattedMessage
-              id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
-              defaultMessage="Configure the inference task. These settings are specific to the service and model selected."
-            />
-          </div>
-          <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(i18n.TASK_TYPE_REQUIRED),
-                  isBlocking: true,
-                },
-              ],
-            }}
-          >
-            {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-              return (
-                <EuiFormRow
-                  id="taskType"
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="xpack.stackConnectors.components.inference.taskTypeLabel"
-                      defaultMessage="Task type"
-                    />
-                  }
-                  isInvalid={isInvalid}
-                  error={errorMessage}
-                >
-                  {isEdit || readOnly ? (
-                    <EuiButton
-                      css={{
-                        background: euiTheme.colors.disabled,
-                        color: euiTheme.colors.lightestShade,
-                      }}
-                      data-test-subj="taskTypeSelectDisabled"
-                      isDisabled
-                    >
-                      {config?.taskType}
-                    </EuiButton>
-                  ) : taskTypeOptions.length === 1 ? (
-                    <EuiButton
-                      css={{
-                        background: euiTheme.colors.darkShade,
-                        color: euiTheme.colors.lightestShade,
-                      }}
-                      data-test-subj="taskTypeSelectSingle"
-                      onClick={() => onTaskTypeOptionsSelect(config?.taskType)}
-                    >
-                      {config?.taskType}
-                    </EuiButton>
-                  ) : (
-                    <EuiButtonGroup
-                      data-test-subj="taskTypeSelect"
-                      buttonSize="m"
-                      legend="Task type"
-                      defaultValue={DEFAULT_TASK_TYPE}
-                      idSelected={config?.taskType}
-                      onChange={(id) => onTaskTypeOptionsSelect(id)}
-                      options={taskTypeOptions}
-                      color="text"
-                      type="single"
-                    />
-                  )}
-                </EuiFormRow>
-              );
-            }}
-          </UseField>
-          <EuiSpacer size="s" />
-          <ConnectorConfigurationFormItems
-            itemsGrow={false}
-            isLoading={false}
-            direction="column"
-            items={taskTypeFormFields}
-            setConfigEntry={onSetTaskTypeConfigEntry}
-          />
-        </>
-      ) : null,
-    [
-      selectedTaskType,
-      config?.taskType,
-      xsFontSize,
-      euiTheme.colors,
-      taskTypeFormFields,
-      onSetTaskTypeConfigEntry,
-      isEdit,
-      readOnly,
-      taskTypeOptions,
-      onTaskTypeOptionsSelect,
-    ]
-  );
-
-  const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
-
-  const additionalOptions = useMemo(
-    () =>
-      config?.provider ? (
-        <EuiAccordion
-          id="inferenceAdditionalOptions"
-          data-test-subj="inferenceAdditionalOptions"
-          buttonProps={{ css: buttonCss }}
-          css={css`
-            .euiAccordion__triggerWrapper {
-              display: inline-flex;
-            }
-          `}
-          element="fieldset"
-          arrowDisplay="right"
-          arrowProps={{
-            color: 'primary',
-          }}
-          buttonElement="button"
-          borders="none"
-          buttonContent={
-            <EuiTextColor color={euiTheme.colors.primary}>
-              <FormattedMessage
-                id="xpack.stackConnectors.components.inference.additionalOptionsLabel"
-                defaultMessage="Additional options"
-              />
-            </EuiTextColor>
-          }
-          initialIsOpen={true}
-        >
-          <EuiSpacer size="m" />
-          <EuiPanel hasBorder={true}>
-            {optionalProviderFormFields.length > 0 ? (
-              <>
-                <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.stackConnectors.components.inference.providerOptionalSettingsLabel"
-                      defaultMessage="Service settings"
-                    />
-                  </h4>
-                </EuiTitle>
-                <EuiSpacer size="xs" />
-                <div
-                  css={css`
-                    font-size: ${xsFontSize};
-                    color: ${euiTheme.colors.subduedText};
-                  `}
-                >
-                  <FormattedMessage
-                    id="xpack.stackConnectors.components.inference.providerOptionalSettingsHelpLabel"
-                    defaultMessage="Configure the inference provider. These settings are optional provider settings."
-                  />
-                </div>
-                <EuiSpacer size="m" />
-                <ConnectorConfigurationFormItems
-                  itemsGrow={false}
-                  isLoading={false}
-                  direction="column"
-                  items={optionalProviderFormFields}
-                  setConfigEntry={onSetProviderConfigEntry}
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-
-            {taskTypeSettings}
-            <EuiHorizontalRule />
-            <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-              <h4>
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.inference.inferenceEndpointLabel"
-                  defaultMessage="Inference Endpoint"
-                />
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="xs" />
-            <div
-              css={css`
-                font-size: ${xsFontSize};
-                color: ${euiTheme.colors.subduedText};
-              `}
-            >
-              <FormattedMessage
-                id="xpack.stackConnectors.components.inference.inferenceEndpointHelpLabel"
-                defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
-              />
-            </div>
-            <EuiSpacer size="s" />
-
-            <UseField path="config.inferenceId">
-              {(field) => {
-                const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-                return (
-                  <EuiFormRow
-                    id="inferenceId"
-                    isInvalid={isInvalid}
-                    error={errorMessage}
-                    fullWidth
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.stackConnectors.components.inference.inferenceIdHelpLabel"
-                        defaultMessage="This ID cannot be changed once created."
-                      />
-                    }
-                  >
-                    <EuiFieldText
-                      fullWidth
-                      disabled={isEdit || readOnly}
-                      value={config?.inferenceId}
-                      onChange={(e) => {
-                        setFieldValue('config.inferenceId', e.target.value);
-                      }}
-                      prepend={inferenceUri}
-                      append={
-                        <EuiCopy
-                          beforeMessage={i18n.COPY_TOOLTIP}
-                          afterMessage={i18n.COPIED_TOOLTIP}
-                          textToCopy={`${inferenceUri}${config?.inferenceId}`}
-                        >
-                          {(copy) => (
-                            <EuiButtonEmpty
-                              iconType="copy"
-                              size="xs"
-                              iconSide="right"
-                              onClick={copy}
-                              data-test-subj="copyInferenceUriToClipboard"
-                            >
-                              <FormattedMessage
-                                id="xpack.stackConnectors.components.inference.copyLabel"
-                                defaultMessage="Copy"
-                              />
-                            </EuiButtonEmpty>
-                          )}
-                        </EuiCopy>
-                      }
-                    />
-                  </EuiFormRow>
-                );
-              }}
-            </UseField>
-          </EuiPanel>
-        </EuiAccordion>
-      ) : null,
-    [
-      config?.inferenceId,
-      config?.provider,
-      euiTheme.colors.primary,
-      euiTheme.colors.subduedText,
-      inferenceUri,
-      isEdit,
-      onSetProviderConfigEntry,
-      optionalProviderFormFields,
-      readOnly,
-      setFieldValue,
-      taskTypeSettings,
-      xsFontSize,
-    ]
-  );
   const providerSecretsHiddenField = (
     <UseField
       path="secrets.providerSecrets"
@@ -786,7 +472,18 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             setConfigEntry={onSetProviderConfigEntry}
           />
           <EuiSpacer size="m" />
-          {additionalOptions}
+          <AdditionalOptionsConnectorFields
+            config={config}
+            readOnly={readOnly}
+            isEdit={isEdit}
+            optionalProviderFormFields={optionalProviderFormFields}
+            onSetProviderConfigEntry={onSetProviderConfigEntry}
+            onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
+            taskTypeFormFields={taskTypeFormFields}
+            taskTypeSchema={taskTypeSchema}
+            taskTypeOptions={taskTypeOptions}
+            selectedTaskType={selectedTaskType}
+          />
           <EuiSpacer size="l" />
           <EuiHorizontalRule />
           {providerSecretsHiddenField}
