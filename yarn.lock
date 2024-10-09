@@ -5539,6 +5539,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/locator-examples-plugin@link:examples/locator_examples":
   version "0.0.0"
   uid ""

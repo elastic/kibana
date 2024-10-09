@@ -18,7 +18,7 @@ import { KnowledgeBaseRegistryPlugin } from './plugin';
 export { config } from './config';
 
 export type { ProductDocBaseSetupContract, ProductDocBaseStartContract };
-export type { SearchApi as ProductDocSearchApi } from './services/search/types';
+export type { SearchApi as ProductDocSearchAPI } from './services/search/types';
 
 export const plugin: PluginInitializer<
   ProductDocBaseSetupContract,

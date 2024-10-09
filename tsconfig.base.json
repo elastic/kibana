@@ -1128,6 +1128,8 @@
       "@kbn/lint-ts-projects-cli/*": ["packages/kbn-lint-ts-projects-cli/*"],
       "@kbn/lists-plugin": ["x-pack/plugins/lists"],
       "@kbn/lists-plugin/*": ["x-pack/plugins/lists/*"],
+      "@kbn/llm-tasks-plugin": ["x-pack/plugins/ai_infra/llm_tasks"],
+      "@kbn/llm-tasks-plugin/*": ["x-pack/plugins/ai_infra/llm_tasks/*"],
       "@kbn/locator-examples-plugin": ["examples/locator_examples"],
       "@kbn/locator-examples-plugin/*": ["examples/locator_examples/*"],
       "@kbn/locator-explorer-plugin": ["examples/locator_explorer"],

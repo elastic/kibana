@@ -607,6 +607,7 @@
     "@kbn/licensing-plugin": "link:x-pack/plugins/licensing",
     "@kbn/links-plugin": "link:src/plugins/links",
     "@kbn/lists-plugin": "link:x-pack/plugins/lists",
+    "@kbn/llm-tasks-plugin": "link:x-pack/plugins/ai_infra/llm_tasks",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
     "@kbn/logging": "link:packages/kbn-logging",
