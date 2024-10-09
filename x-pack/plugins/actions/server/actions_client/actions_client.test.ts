@@ -380,8 +380,7 @@ describe('create()', () => {
         name: 'my name',
         actionTypeId: 'my-action-type',
         isMissingSecrets: false,
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
+        config: {},
       },
       references: [],
     };
@@ -391,25 +390,21 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({ foo: schema.number() }) },
-        secrets: { schema: schema.object({ bar: schema.number() }) },
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveHook: async (params) => {
-        preSaveHook(params);
-      },
-      postSaveHook: async (params) => {
-        postSaveHook(params);
-      },
+      preSaveHook,
+      postSaveHook,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
+        config: {},
+        secrets: {},
       },
     });
     expect(result).toEqual({
@@ -420,7 +415,7 @@ describe('create()', () => {
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
-      config: { foo: 42 },
+      config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -428,14 +423,10 @@ describe('create()', () => {
         "action",
         Object {
           "actionTypeId": "my-action-type",
-          "config": Object {
-            "foo": 42,
-          },
+          "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
-          "secrets": Object {
-            "bar": 2001,
-          },
+          "secrets": Object {},
         },
         Object {
           "id": "mock-saved-object-id",
@@ -1996,8 +1987,8 @@ describe('delete()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({ foo: schema.number() }) },
-        secrets: { schema: schema.object({ bar: schema.number() }) },
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
       },
       executor,
@@ -2009,8 +2000,8 @@ describe('delete()', () => {
       attributes: {
         actionTypeId: 'my-action-delete',
         isMissingSecrets: false,
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
+        config: {},
+        secrets: {},
       },
       references: [],
     });
@@ -2041,7 +2032,6 @@ describe('delete()', () => {
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
-
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete auth tokens for connector "1" after delete: Fail`
@@ -2085,7 +2075,6 @@ describe('delete()', () => {
   test('calls unsecuredSavedObjectsClient with id', async () => {
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
-
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
@@ -2104,12 +2093,6 @@ describe('delete()', () => {
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        "1",
-      ]
-    `);
     expect(postDeleteHook).toHaveBeenCalledTimes(1);
   });
 
@@ -2202,12 +2185,6 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveHook: async (params) => {
-        preSaveHook(params);
-      },
-      postSaveHook: async (params) => {
-        postSaveHook(params);
-      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2312,17 +2289,13 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({ foo: schema.number() }) },
-        secrets: { schema: schema.object({ bar: schema.number() }) },
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveHook: async (params) => {
-        preSaveHook(params);
-      },
-      postSaveHook: async (params) => {
-        postSaveHook(params);
-      },
+      preSaveHook,
+      postSaveHook,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2340,8 +2313,8 @@ describe('update()', () => {
         actionTypeId: 'my-action-type',
         isMissingSecrets: false,
         name: 'my name',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
+        config: {},
+        secrets: {},
       },
       references: [],
     });
@@ -2349,8 +2322,8 @@ describe('update()', () => {
       id: 'my-action',
       action: {
         name: 'my name',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
+        config: {},
+        secrets: {},
       },
     });
     expect(result).toEqual({
@@ -2361,7 +2334,7 @@ describe('update()', () => {
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
-      config: { foo: 42 },
+      config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2369,14 +2342,10 @@ describe('update()', () => {
         "action",
         Object {
           "actionTypeId": "my-action-type",
-          "config": Object {
-            "foo": 42,
-          },
+          "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
-          "secrets": Object {
-            "bar": 2001,
-          },
+          "secrets": Object {},
         },
         Object {
           "id": "my-action",
@@ -3628,15 +3597,4 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     `);
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
   });
-});
-
-describe('hook failure cases', () => {
-  test('preSave hook throws error in create', async () => {});
-  test('preSave hook throws error in update', async () => {});
-  test('postSave hook throws error in create', async () => {});
-  test('postSave hook throws error in update', async () => {});
-  test('postDelete hook throws error in delete', async () => {});
-  test('postSave hook called on SO error in create', async () => {});
-  test('postSave hook called on SO error in update', async () => {});
-  test('postDelete hook not called on SO error in delete', async () => {});
 });

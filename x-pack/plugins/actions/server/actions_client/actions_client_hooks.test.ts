@@ -75,8 +75,8 @@ const CreateParms = {
   action: {
     name: ConnectorSavedObject.attributes.name,
     actionTypeId: ConnectorSavedObject.attributes.actionTypeId,
-    config: { foo: 42 },
-    secrets: { bar: 2001 },
+    config: ConnectorSavedObject.attributes.config,
+    secrets: ConnectorSavedObject.attributes.secrets,
   },
 };
 
@@ -84,15 +84,15 @@ const UpdateParms = {
   id: ConnectorSavedObject.id,
   action: {
     name: ConnectorSavedObject.attributes.name,
-    config: { foo: 42 },
-    secrets: { bar: 2001 },
+    config: ConnectorSavedObject.attributes.config,
+    secrets: ConnectorSavedObject.attributes.secrets,
   },
 };
 
 const CoreHookParams = {
   connectorId: ConnectorSavedObject.id,
-  config: { foo: 42 },
-  secrets: { bar: 2001 },
+  config: ConnectorSavedObject.attributes.config,
+  secrets: ConnectorSavedObject.attributes.secrets,
   request,
   services: {
     // this will be checked with a function test

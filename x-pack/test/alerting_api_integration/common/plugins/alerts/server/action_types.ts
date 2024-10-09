@@ -175,7 +175,7 @@ function getHookedActionType() {
         },
         reference: 'pre-save',
         source: config.source,
-      }
+      };
       logger.info(`running hook pre-save for ${JSON.stringify(body)}`);
       await services.scopedClusterClient.asInternalUser.index({
         index: config.index,
@@ -183,18 +183,26 @@ function getHookedActionType() {
         body,
       });
     },
-    async postSaveHook({ connectorId, config, secrets, services, logger, isUpdate, wasSuccessful }) {
+    async postSaveHook({
+      connectorId,
+      config,
+      secrets,
+      services,
+      logger,
+      isUpdate,
+      wasSuccessful,
+    }) {
       const body = {
         state: {
           connectorId,
           config,
           secrets,
           isUpdate,
-          wasSuccessful
+          wasSuccessful,
         },
         reference: 'post-save',
         source: config.source,
-      }
+      };
       logger.info(`running hook post-save for ${JSON.stringify(body)}`);
       await services.scopedClusterClient.asInternalUser.index({
         index: config.index,
@@ -210,7 +218,7 @@ function getHookedActionType() {
         },
         reference: 'post-delete',
         source: config.source,
-      }
+      };
       logger.info(`running hook post-delete for ${JSON.stringify(body)}`);
       await services.scopedClusterClient.asInternalUser.index({
         index: config.index,
