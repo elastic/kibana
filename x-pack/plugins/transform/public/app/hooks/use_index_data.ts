@@ -146,7 +146,9 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
     error: dataGridDataError,
     data: dataGridData,
     isError: dataGridDataIsError,
-    isLoading: dataGridDataIsLoading,
+    // React Query v4 has the weird behavior that `isLoading` is `true` on load
+    // when a query is disabled, that's why we need to use `isFetching` here.
+    isFetching: dataGridDataIsLoading,
   } = useDataSearch(
     {
       index: indexPattern,
