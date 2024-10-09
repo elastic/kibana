@@ -30,3 +30,4 @@ spec:
           access_level: READ_ONLY
       tags:
         - kibana
+        - kibana-serverless-release
