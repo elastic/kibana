@@ -34,7 +34,6 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.testSubjects.existOrFail('switch-to-dataviews'); // "Switch to Classic" app menu button
     await this.testSubjects.existOrFail('discoverNewButton');
     await this.testSubjects.existOrFail('discoverOpenButton');
   }
