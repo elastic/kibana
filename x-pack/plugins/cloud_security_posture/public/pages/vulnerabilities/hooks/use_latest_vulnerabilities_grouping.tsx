@@ -163,6 +163,11 @@ export const useLatestVulnerabilitiesGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+    runtimeMappings: {
+      'cloud.provider': {
+        type: 'keyword',
+      },
+    },
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({
