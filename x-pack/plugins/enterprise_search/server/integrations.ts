@@ -17,28 +17,6 @@ export const registerEnterpriseSearchIntegrations = (
   connectors: ConnectorServerSideDefinition[]
 ) => {
   const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
-  if (config.canDeployEntSearch) {
-    customIntegrations.registerCustomIntegration({
-      id: 'app_search_json',
-      title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
-        defaultMessage: 'JSON',
-      }),
-      description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonDescription', {
-        defaultMessage: 'Search over your JSON data with App Search.',
-      }),
-      categories: ['enterprise_search', 'custom', 'app_search'],
-      uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=json',
-      icons: [
-        {
-          type: 'eui',
-          src: 'logoAppSearch',
-        },
-      ],
-      shipper: 'enterprise_search',
-      isBeta: false,
-    });
-  }
-
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
