@@ -8,7 +8,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { printManifest, updateManifest } from './manifest';
+import { listManifestFiles, printManifest, updateManifest } from './manifest';
 
 /**
  * A CLI to manipulate Kibana package manifest files
@@ -16,21 +16,25 @@ import { printManifest, updateManifest } from './manifest';
 export const runKbnManifestCli = () => {
   run(
     async ({ log, flags }) => {
-      if (!flags.package && !flags.plugin) {
-        throw new Error('You must specify the identifer of the --package or --plugin to update.');
+      if (flags.list === 'all') {
+        listManifestFiles(flags, log);
+      } else {
+        if (!flags.package && !flags.plugin) {
+          throw new Error('You must specify the identifer of the --package or --plugin to update.');
+        }
+        await updateManifest(flags, log);
+        await printManifest(flags, log);
       }
-
-      await updateManifest(flags, log);
-      await printManifest(flags, log);
     },
     {
       log: {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['package', 'plugin', 'set', 'unset'],
+        string: ['list', 'package', 'plugin', 'set', 'unset'],
         help: `
           Usage: node scripts/manifest --package <packageId> --set group=platform --set visibility=private
+          --list all List all the manifests
           --package [packageId] Select a package to update.
           --plugin [pluginId] Select a plugin to update.
           --set [property] [value] Set the desired "[property]": "[value]"
