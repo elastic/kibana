@@ -50,6 +50,7 @@ export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
 
   return (
     <AddDataPanel
+      data-test-subj="infraAddMetricsCallout"
       content={addMetricsCalloutDefinitions(onboardingLocator)[id].content}
       actions={addMetricsCalloutDefinitions(onboardingLocator)[id].actions}
       onAddData={handleAddMetricsClick}
