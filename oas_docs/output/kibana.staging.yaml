@@ -29184,6 +29184,31 @@ components:
       title: Package information
       type: object
       properties:
+        agent:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                root:
+                  type: boolean
+        asset_tags:
+          items:
+            type: object
+            properties:
+              asset_ids:
+                items:
+                  type: string
+                type: array
+              asset_types:
+                items:
+                  type: string
+                type: array
+              text:
+                type: string
+            required:
+              - text
+          type: array
         assets:
           items:
             type: string
@@ -29248,6 +29273,18 @@ components:
           type: array
         description:
           type: string
+        discovery:
+          type: object
+          properties:
+            fields:
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                  - name
+              type: array
         download:
           type: string
         elasticsearch:
@@ -29270,6 +29307,19 @@ components:
           type: boolean
         name:
           type: string
+        owner:
+          type: object
+          properties:
+            github:
+              type: string
+            type:
+              enum:
+                - elastic
+                - partner
+                - community
+              type: string
+          required:
+            - github
         path:
           type: string
         readme:
@@ -29313,6 +29363,10 @@ components:
         title:
           type: string
         type:
+          enum:
+            - integration
+            - input
+            - content
           type: string
         version:
           type: string
@@ -29328,6 +29382,7 @@ components:
         - format_version
         - download
         - path
+        - owner
     Fleet_package_policy:
       allOf:
         - type: object
