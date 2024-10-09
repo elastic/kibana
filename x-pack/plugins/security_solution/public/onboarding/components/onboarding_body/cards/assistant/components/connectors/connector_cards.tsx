@@ -38,7 +38,13 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     if (connectors.length > 0) {
       return (
         <>
-          <EuiFlexGroup wrap>
+          <EuiFlexGroup
+            wrap
+            className={css`
+              max-height: 290px;
+              overflow-y: auto;
+            `}
+          >
             {connectors?.map((connector) => (
               <EuiFlexItem
                 grow={false}
@@ -47,13 +53,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
                 `}
               >
                 <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="center"
-                    className={css`
-                      height: 100%;
-                    `}
-                  >
+                  <EuiFlexGroup direction="row" gutterSize="s" wrap>
                     <EuiFlexItem>
                       <EuiText size="s">{connector.name}</EuiText>
                     </EuiFlexItem>

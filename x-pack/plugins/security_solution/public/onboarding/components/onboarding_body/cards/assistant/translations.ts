@@ -42,3 +42,17 @@ export const ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER = i18n.translate(
     defaultMessage: 'Create new connector',
   }
 );
+
+export const ASSISTANT_CARD_CONNECTOR_ADDED = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton',
+  {
+    defaultMessage: 'AI connector added',
+  }
+);
+
+export const ASSISTANT_CARD_CONNECTORS_ADDED = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton',
+  {
+    defaultMessage: 'AI connectors added',
+  }
+);
