@@ -14,7 +14,7 @@ ESS and Serverless OpenAPI bundles generation workflows are pretty similar so an
 
 At the first step domain OpenAPI bundles are produces. It depends on solution/team what approach to choose. There are three ways to get a domain OpenAPI bundle
 
-- Use **Specification first approach** via `kbn-openapi-bundler` to process source OpenAPI specs describing individual OpenAPI endpoints. It works well with OpenAPI code generation and provides a lot of flexibility during development to avoid publishing documentation for not yet released API endpoints.
+- Use **Specification first approach** via [`kbn-openapi-bundler`](../packages/kbn-openapi-bundler/README.md) to process source OpenAPI specs describing individual OpenAPI endpoints. It works well with OpenAPI code generation and provides a lot of flexibility during development to avoid publishing documentation for not yet released API endpoints.
 
 - Use **Code first approach** via `scripts/capture_oas_snapshot.js` to capture OpenAPI specs from routes source code. It allows to produce a domain bundle with minimum effort but requires running ES and Kibana for that and makes it hard to control what documentation is published eventually.
 
