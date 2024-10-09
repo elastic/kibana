@@ -104,7 +104,6 @@ describe('DeleteUnenrolledAgentsTask', () => {
       mockSettingsService.getSettingsOrUndefined.mockResolvedValue({
         delete_unenrolled_agents: true,
         id: '1',
-        prerelease_integrations_enabled: false,
       });
 
       await runTask();
@@ -123,7 +122,6 @@ describe('DeleteUnenrolledAgentsTask', () => {
       mockSettingsService.getSettingsOrUndefined.mockResolvedValue({
         delete_unenrolled_agents: false,
         id: '1',
-        prerelease_integrations_enabled: false,
       });
 
       await runTask();
