@@ -260,6 +260,102 @@ SimpleAPIMock.args = {
   ],
 };
 
+export const GroupWithWarningAPIMock = Template.bind({});
+GroupWithWarningAPIMock.args = {
+  nodes: [
+    {
+      id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      shape: 'group',
+    },
+    {
+      id: 'admin3@example.com',
+      label: 'admin3@example.com',
+      color: 'primary',
+      shape: 'ellipse',
+      icon: 'user',
+    },
+    {
+      id: 'projects/your-project-id/roles/customRole',
+      label: 'projects/your-project-id/roles/customRole',
+      color: 'primary',
+      shape: 'hexagon',
+      icon: 'questionInCircle',
+    },
+    {
+      id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+      label: 'google.iam.admin.v1.CreateRole',
+      source: 'admin3@example.com',
+      target: 'projects/your-project-id/roles/customRole',
+      color: 'warning',
+      shape: 'label',
+      parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+    },
+    {
+      id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+      label: 'google.iam.admin.v1.CreateRole',
+      source: 'admin3@example.com',
+      target: 'projects/your-project-id/roles/customRole',
+      color: 'primary',
+      shape: 'label',
+      parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+    },
+  ],
+  edges: [
+    {
+      id: 'a(admin3@example.com)-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+      source: 'admin3@example.com',
+      sourceShape: 'ellipse',
+      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      targetShape: 'group',
+      color: 'primary',
+    },
+    {
+      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
+      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      sourceShape: 'group',
+      target: 'projects/your-project-id/roles/customRole',
+      targetShape: 'hexagon',
+      color: 'primary',
+    },
+    {
+      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))',
+      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      sourceShape: 'group',
+      target:
+        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+      targetShape: 'label',
+      color: 'warning',
+    },
+    {
+      id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+      source:
+        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+      sourceShape: 'label',
+      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      targetShape: 'group',
+      color: 'warning',
+    },
+    {
+      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))',
+      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      sourceShape: 'group',
+      target:
+        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+      targetShape: 'label',
+      color: 'primary',
+    },
+    {
+      id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+      source:
+        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+      sourceShape: 'label',
+      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      targetShape: 'group',
+      color: 'primary',
+    },
+  ],
+};
+
 export const Graph = Template.bind({});
 const baseGraph: NodeDataModel[] = [
   {

@@ -75,12 +75,26 @@ const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
   logger.trace(`Parsing records [length: ${records.length}]`);
 
   createNodes(logger, records, { nodesMap, edgeLabelsNodes });
-  createEdges(logger, { edgeLabelsNodes, edgesMap, nodesMap });
+  createEdgesAndGroups(logger, { edgeLabelsNodes, edgesMap, nodesMap });
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(nodesMap).length}, edges: ${Object.keys(edgesMap).length}]`
   );
-  return { nodes: Object.values(nodesMap), edges: Object.values(edgesMap) };
+
+  // Sort groups to be first (fixes minor layout issue)
+  const nodes = Object.values(nodesMap).sort((a, b) => {
+    if (a.shape === b.shape) {
+      return 0;
+    } else if (a.shape === 'group') {
+      return -1;
+    } else if (b.shape === 'group') {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  return { nodes, edges: Object.values(edgesMap) };
 };
 
 const fetchGraph = async ({
@@ -244,7 +258,7 @@ const determineEntityNodeShape = (
   return { shape: 'hexagon', icon: 'questionInCircle' };
 };
 
-function createEdges(logger: Logger, context: ParseContext) {
+function createEdgesAndGroups(logger: Logger, context: ParseContext) {
   const { edgeLabelsNodes, edgesMap, nodesMap } = context;
 
   Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
