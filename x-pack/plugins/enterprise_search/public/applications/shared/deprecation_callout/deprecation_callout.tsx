@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiButton, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface DeprecationCalloutProps {
   onDismissAction: () => void;
@@ -28,22 +29,34 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       )}
       data-test-subj="EnterpriseSearchDeprecationCallout"
     >
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.deprecationCallout.first_message', {
-          defaultMessage:
-            'The standalone App Search and Workplace Search products remain available in maintenance mode, and are not recommended for new search experiences. Instead, we recommend using our Elasticsearch-native tools which we are actively developing and improving, for your search use cases. These tools offer the flexibility and composability of working directly with Elasticsearch indices.',
-        })}
-      </p>
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.deprecationCallout.first_message', {
-          defaultMessage:
-            'See this blog[link here, placeholder] post for more information about upgrading your internal knowledge search or this blog post[link here] about upgrading your catalog search. (opens in a new tab or window).',
-        })}
-      </p>
+      <FormattedMessage
+        id="xpack.enterpriseSearch.deprecationCallout.first_message"
+        defaultMessage="The standalone App Search and Workplace Search products remain available in maintenance mode, and are not recommended for new search experiences. Instead, we recommend using our Elasticsearch-native tools which we are actively developing and improving, for your search use cases. These tools offer the flexibility and composability of working directly with Elasticsearch indices."
+      />
+      <EuiSpacer size="s" />
+      <FormattedMessage
+        id="xpack.enterpriseSearch.deprecationCallout.second_message"
+        defaultMessage="See this {blogUrl} for more information about upgrading your internal knowledge search or this blog post about upgrading your catalog search."
+        values={{
+          blogUrl: (
+            <EuiLink
+              data-test-subj="workplaceSearch-deprecationCallout-blog-link"
+              href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
+              target="_blank"
+              data-telemetry-id="workplaceSearch-deprecationCallout-blog-viewLink"
+            >
+              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.viewBlog', {
+                defaultMessage: 'blog post',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href="#placeholder-for-link"
+            href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
             color="warning"
             iconType="popout"
             iconSide="right"
