@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 type Action = 'PUSH' | 'POP' | 'REPLACE';

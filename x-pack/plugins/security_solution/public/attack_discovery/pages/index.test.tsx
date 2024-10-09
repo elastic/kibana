@@ -38,7 +38,7 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalstorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
 jest.mock('react-use/lib/useSessionStorage', () =>
   jest.fn().mockReturnValue([undefined, jest.fn()])
 );

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Router, useParams } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import { useParams } from 'react-router-dom';
 
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
