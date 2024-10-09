@@ -193,7 +193,7 @@ const notesSlice = createSlice({
     userClosedDeleteModal: (state) => {
       state.pendingDeleteIds = [];
     },
-    userSelectedRowForDeletion: (state, action: { payload: string }) => {
+    userSelectedNotesForDeletion: (state, action: { payload: string }) => {
       state.pendingDeleteIds = [action.payload];
     },
     userSelectedBulkDelete: (state) => {
@@ -318,6 +318,18 @@ export const selectNotesBySavedObjectId = createSelector(
     savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
 );
 
+export const selectDocumentNotesBySavedObjectId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      { documentId, savedObjectId }: { documentId: string; savedObjectId: string }
+    ) => ({ documentId, savedObjectId }),
+  ],
+  (notes, { documentId, savedObjectId }) =>
+    notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+);
+
 export const selectSortedNotesByDocumentId = createSelector(
   [
     selectAllNotes,
@@ -379,6 +391,6 @@ export const {
   userSearchedNotes,
   userSelectedRow,
   userClosedDeleteModal,
-  userSelectedRowForDeletion,
+  userSelectedNotesForDeletion,
   userSelectedBulkDelete,
 } = notesSlice.actions;

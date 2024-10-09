@@ -8634,11 +8634,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -12672,7 +12672,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -20111,11 +20111,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -22577,7 +22577,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -33138,11 +33138,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -38082,7 +38082,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -38171,11 +38171,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
@@ -38187,19 +38187,19 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -39704,9 +39704,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
