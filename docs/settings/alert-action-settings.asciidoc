@@ -18,4 +18,3 @@ Alerting and actions are enabled by default in {kib}, but require you to configu
 You can configure the following settings in the `kibana.yml` file.
 
 include::../settings-gen/source/kibana-alert-action-settings.asciidoc[]
-

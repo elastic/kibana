@@ -1851,6 +1851,27 @@
                       ],
                       "type": "object"
                     },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
+                      "type": "object"
+                    },
                     "id": {
                       "description": "The identifier for the rule.",
                       "type": "string"
@@ -2667,6 +2688,27 @@
                     "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
                     "type": "boolean"
                   },
+                  "flapping": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "look_back_window": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      },
+                      "status_change_threshold": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
+                    ],
+                    "type": "object"
+                  },
                   "name": {
                     "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.",
                     "type": "string"
@@ -3044,6 +3086,27 @@
                       "required": [
                         "status",
                         "last_execution_date"
+                      ],
+                      "type": "object"
+                    },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
                       ],
                       "type": "object"
                     },
@@ -3853,6 +3916,27 @@
                     ],
                     "type": "object"
                   },
+                  "flapping": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "look_back_window": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      },
+                      "status_change_threshold": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
+                    ],
+                    "type": "object"
+                  },
                   "name": {
                     "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.",
                     "type": "string"
@@ -4223,6 +4307,27 @@
                       "required": [
                         "status",
                         "last_execution_date"
+                      ],
+                      "type": "object"
+                    },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
                       ],
                       "type": "object"
                     },
@@ -5689,6 +5794,27 @@
                       "required": [
                         "status",
                         "last_execution_date"
+                      ],
+                      "type": "object"
+                    },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
                       ],
                       "type": "object"
                     },
