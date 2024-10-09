@@ -143,7 +143,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
     for (let j = 0; j < numDocs; j++) {
       generator.updateHostData();
-      generator.updateHostPolicyData();
+      generator.updateHostPolicyData({ excludeInitialPolicy: true });
 
       hostMetadata = generator.generateHostMetadata(
         timestamp - timeBetweenDocs * (numDocs - j - 1),

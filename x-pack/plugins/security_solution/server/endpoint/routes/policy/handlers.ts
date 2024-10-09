@@ -42,6 +42,8 @@ export const getHostPolicyResponseHandler = function (
         return response.ok({ body: doc });
       }
 
+      logger.debug(`Agent id [${agentId}] has no policy response documents indexed yet`);
+
       throw new NotFoundError(`Policy response for endpoint id [${agentId}] not found`);
     } catch (err) {
       return errorHandler(logger, response, err);
