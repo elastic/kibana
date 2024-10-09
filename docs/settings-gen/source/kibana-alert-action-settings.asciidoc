@@ -1,6 +1,7 @@
 
-// This is a generated file. Please don't update it directly.
-// Collection: Alerting and action settings in {kib}
+// This is a generated file; please don't update it directly.
+// Instead, the updatable source for these settings can be found in kibana-alert-action-settings.yml
+// Collection: Alerting and action settings in Kibana
 // Product: Kibana
 
 
@@ -13,13 +14,13 @@
 .`xpack.encryptedSavedObjects.encryptionKey`
 [%collapsible]
 ====
-A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
+A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
 
-{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
+Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
 
-If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}.
+If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
 
-Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
+Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 
 ====
 
@@ -32,7 +33,7 @@ Although the key can be specified in clear text in `kibana.yml`, it's recommende
 .`xpack.actions.allowedHosts` {ess-icon}
 [%collapsible]
 ====
-A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 
 Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
@@ -94,7 +95,7 @@ A boolean value indicating whether to bypass server certificate validation. Over
 .`xpack.actions.customHostSettings[n].ssl.verificationMode` {ess-icon}
 [%collapsible]
 ====
-Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
+Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
 
 ====
 
@@ -120,7 +121,7 @@ The contents of one or more PEM-encoded certificate files in multiline format. T
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
 
 
-WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+WARNING: This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
 ====
 
 .`xpack.actions.enableFooterInEmail` {ess-icon}
@@ -134,9 +135,9 @@ Default: `true` +
 .`xpack.actions.enabledActionTypes` {ess-icon}
 [%collapsible]
 ====
-A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 
-Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
+Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
 
 
 IMPORTANT: <<pre-configured-connectors,Preconfigured connectors>> are not affected by this setting.
@@ -208,7 +209,7 @@ include::../embeds/example-xpack-actions-proxyonlyhosts.asciidoc[]
 ====
 Specifies HTTP headers for the proxy, if using a proxy for actions.
 
-Default: `HASH(0x144b67ab8)` +
+Default: `HASH(0x1478378d0)` +
 ====
 
 .`xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}
@@ -259,9 +260,9 @@ Default: `true` +
 .`xpack.actions.ssl.verificationMode` {ess-icon}
 [%collapsible]
 ====
-Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
+Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
-<<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>
+<<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>
 
 This setting can be overridden for specific URLs by using the setting `xpack.actions.customHostSettings[n].ssl.verificationMode` (described above) to a different value.
 
@@ -333,7 +334,7 @@ include::../embeds/example-preconfigured-connector-settings.asciidoc[]
 .`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}
 [%collapsible]
 ====
-Enables a preconfigured alert history {es} <<index-action-type, Index>> connector.
+Enables a preconfigured alert history Elasticsearch <<index-action-type, Index>> connector.
 
 Default: `false` +
 ====
@@ -578,7 +579,7 @@ For an <<email-action-type,email connector>>, specifies the host name of the ser
 .`xpack.actions.preconfigured.<connector-id>.config.index`
 [%collapsible]
 ====
-For an <<index-action-type,index connector>>, specifies the {es} index.
+For an <<index-action-type,index connector>>, specifies the Elasticsearch index.
 
 ====
 
@@ -798,7 +799,7 @@ The name of the preconfigured connector.
 Sensitive configuration details, such as username, password, and keys, which are specific to the connector type.
 
 
-TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>.
+TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,Kibana keystore>>.
 ====
 
 .`xpack.actions.preconfigured.<connector-id>.secrets.accessKey`

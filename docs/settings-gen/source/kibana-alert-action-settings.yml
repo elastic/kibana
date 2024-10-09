@@ -1,8 +1,8 @@
 ---
-# This file is used to generate a set of configuration settings in the product docs
+# This file is used to generate "Alert and action settings" page in the product docs
 
 product: Kibana
-collection: Alerting and action settings in {kib}
+collection: Alerting and action settings in Kibana
 
 groups:
   - group: General settings
@@ -15,10 +15,10 @@ groups:
       - setting: xpack.encryptedSavedObjects.encryptionKey
         # id:
         description:
-          - "A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties."
-          - "{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key."
-          - "If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}."
-          - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
+          - "A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties."
+          - "Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key."
+          - "If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana."
+          - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -44,7 +44,7 @@ groups:
       - setting: xpack.actions.allowedHosts
         # id:
         description:
-          - 'A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.'
+          - 'A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.'
           - 'Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.'
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -163,7 +163,7 @@ groups:
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
         id: action-config-custom-host-verification-mode
         description:
-          - "Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port."
+          - "Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -225,7 +225,7 @@ groups:
         # deprecation_details: ""
         # note: ""
         # tip: ""
-        warning: "This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly."
+        warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly."
         # important: ""
         # default:
         # options:
@@ -258,8 +258,8 @@ groups:
       - setting: xpack.actions.enabledActionTypes
         # id:
         description:
-          - 'A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.'
-          - "Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function."
+          - 'A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.'
+          - "Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -478,8 +478,8 @@ groups:
       - setting: xpack.actions.ssl.verificationMode
         id: action-config-verification-mode
         description:
-          - "Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification."
-          - "<<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>"
+          - "Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification."
+          - "<<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>"
           - "This setting can be overridden for specific URLs by using the setting `xpack.actions.customHostSettings[n].ssl.verificationMode` (described above) to a different value."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -603,7 +603,7 @@ groups:
       - setting: xpack.actions.preconfiguredAlertHistoryEsIndex
         # id:
         description:
-          - "Enables a preconfigured alert history {es} <<index-action-type, Index>> connector."
+          - "Enables a preconfigured alert history Elasticsearch <<index-action-type, Index>> connector."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1085,7 +1085,7 @@ groups:
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
         # id:
         description:
-          - "For an <<index-action-type,index connector>>, specifies the {es} index."
+          - "For an <<index-action-type,index connector>>, specifies the Elasticsearch index."
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1626,7 +1626,7 @@ groups:
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
-        tip: "Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>."
+        tip: "Sensitive properties, such as passwords, should be stored in the <<creating-keystore,Kibana keystore>>."
         # warning: ""
         # important: ""
         # default:

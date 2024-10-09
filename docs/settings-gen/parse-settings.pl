@@ -34,7 +34,7 @@ return;
 
 sub parsefile {
   # Create an output file based on yaml filename
-  my $outputfile = $file;
+  my $outputfile = my $outputfileorig = $file;
   $outputfile =~ s/.yml/.asciidoc/g;
   # We'll use this to store the contents of the generated asciidoc file
 
@@ -48,7 +48,7 @@ sub parsefile {
   my $product = $yaml->[0]->{product};
 
   # This variable is used to capture all the content that will become our output asciidoc file
-  my $asciidocoutput = "\n".'// '."This is a generated file. Please don't update it directly.";
+  my $asciidocoutput = "\n".'// '."This is a generated file; please don't update it directly.\n".'//'." Instead, the updatable source for these settings can be found in ".$outputfileorig;
   $asciidocoutput .= "\n".'// '."Collection: ".$collection;
   $asciidocoutput .= "\n".'// '."Product: ".$product."\n\n";
 
