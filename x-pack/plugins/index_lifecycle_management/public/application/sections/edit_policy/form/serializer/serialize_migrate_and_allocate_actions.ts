@@ -66,14 +66,14 @@ export const serializeMigrateAndAllocateActions = (
       if (!isEmpty(originalActions?.allocate?.include)) {
         actions.allocate = {
           ...actions.allocate,
-          include: { ...originalActions?.allocate?.include },
+          include: { ...(originalActions.allocate!.include as {}) },
         };
       }
 
       if (!isEmpty(originalActions?.allocate?.exclude)) {
         actions.allocate = {
           ...actions.allocate,
-          exclude: { ...originalActions?.allocate?.exclude },
+          exclude: { ...(originalActions.allocate!.exclude as {}) },
         };
       }
       break;

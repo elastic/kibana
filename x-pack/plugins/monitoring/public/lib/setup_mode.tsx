@@ -92,7 +92,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
 
   const clusterUuid = globalState.cluster_uuid;
   if (!clusterUuid) {
-    const liveClusterUuid: string = get(data, '_meta.liveClusterUuid');
+    const liveClusterUuid: string | undefined = get(data, '_meta.liveClusterUuid');
     const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {})).filter(
       (node: any) => node.isPartiallyMigrated || node.isFullyMigrated
     );

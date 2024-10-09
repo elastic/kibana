@@ -82,7 +82,7 @@ describe('threatMatchRowRenderer', () => {
       const NO_OF_MATCHES = 20;
       const largeNoOfIndicatorMatches = new Array(NO_OF_MATCHES)
         .fill({})
-        .map(() => get(threatMatchData, ENRICHMENT_DESTINATION_PATH)[0] as Fields);
+        .map(() => get(threatMatchData, ENRICHMENT_DESTINATION_PATH)![0] as Fields);
 
       const modThreatMatchData: typeof threatMatchData = {
         ...threatMatchData,

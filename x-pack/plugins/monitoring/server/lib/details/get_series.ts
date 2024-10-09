@@ -64,7 +64,7 @@ function defaultCalculation(
   metric?: Metric,
   defaultSizeInSeconds?: number
 ) {
-  const legacyValue: number = get(bucket, key, null);
+  const legacyValue: number = get(bucket, key, -1);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
   if (mbValue !== null && !isNaN(mbValue) && mbValue > 0) {
