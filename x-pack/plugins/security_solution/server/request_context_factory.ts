@@ -69,12 +69,20 @@ export class RequestContextFactory implements IRequestContextFactory {
     const { config, core, plugins, endpointAppContextService, ruleMonitoringService } = options;
 
     const { lists, ruleRegistry, security } = plugins;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const soClient = coreContext.savedObjects.client;
 
     const [_, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, request);
-    const coreContext = await context.core;
     const licensing = await context.licensing;
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
+
+    const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+      soClient,
+      esClient,
+      request
+    );
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -126,13 +134,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           license: licensing.license,
           ml: plugins.ml,
           request,
-          savedObjectsClient: coreContext.savedObjects.client,
+          savedObjectsClient: soClient,
         });
 
         return createDetectionRulesClient({
           actionsClient,
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
-          savedObjectsClient: coreContext.savedObjects.client,
+          savedObjectsClient: soClient,
           mlAuthz,
         });
       }),
@@ -147,7 +155,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleExecutionLog: memoize(() =>
         ruleMonitoringService.createRuleExecutionLogClientForRoutes({
-          savedObjectsClient: coreContext.savedObjects.client,
+          savedObjectsClient: soClient,
           eventLogClient: startPlugins.eventLog.getClient(request),
         })
       ),
@@ -168,7 +176,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           new RiskEngineDataClient({
             logger: options.logger,
             kibanaVersion: options.kibanaVersion,
-            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            esClient,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
             auditLogger: getAuditLogger(),
@@ -179,7 +187,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           new RiskScoreDataClient({
             logger: options.logger,
             kibanaVersion: options.kibanaVersion,
-            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            esClient,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
           })
@@ -188,15 +196,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         () =>
           new AssetCriticalityDataClient({
             logger: options.logger,
-            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            esClient,
             namespace: getSpaceId(),
             auditLogger: getAuditLogger(),
           })
       ),
       getEntityStoreDataClient: memoize(() => {
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const logger = options.logger;
-        const soClient = coreContext.savedObjects.client;
+
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           esClient,
@@ -206,6 +213,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient,
             soClient,
             logger,
+            dataViewsService,
           }),
           assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
             logger,

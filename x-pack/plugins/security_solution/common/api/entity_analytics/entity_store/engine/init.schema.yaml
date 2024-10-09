@@ -4,7 +4,7 @@ info:
   title: Init Entity Engine
   version: '2023-10-31'
 paths:
-   /api/entity_store/engines/{entityType}/init:
+  /api/entity_store/engines/{entityType}/init:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -25,8 +25,6 @@ paths:
             schema:
               type: object
               properties:
-                indexPattern:
-                  $ref: '../common.schema.yaml#/components/schemas/IndexPattern'
                 filter:
                   type: string
       responses:
@@ -36,4 +34,3 @@ paths:
             application/json:
               schema:
                 $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'
-                  

@@ -40,10 +40,15 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
   params: z.object({
     path: resetEntityDefinitionParamsSchema,
   }),
-  handler: async ({ context, response, params, logger }) => {
+  handler: async ({ context, response, params, logger, server, request }) => {
     try {
       const soClient = (await context.core).savedObjects.client;
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const dataViewsService = await server.dataViews.dataViewsServiceFactory(
+        soClient,
+        esClient,
+        request
+      );
 
       const definition = await readEntityDefinition(soClient, params.path.id, logger);
 
@@ -58,9 +63,14 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
       // Recreate everything
       await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
       await createAndInstallLatestIngestPipeline(esClient, definition, logger);
-      await createAndInstallHistoryTransform(esClient, definition, logger);
+      await createAndInstallHistoryTransform(esClient, dataViewsService, definition, logger);
       if (isBackfillEnabled(definition)) {
-        await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
+        await createAndInstallHistoryBackfillTransform(
+          esClient,
+          dataViewsService,
+          definition,
+          logger
+        );
       }
       await createAndInstallLatestTransform(esClient, definition, logger);
       await startTransforms(esClient, definition, logger);

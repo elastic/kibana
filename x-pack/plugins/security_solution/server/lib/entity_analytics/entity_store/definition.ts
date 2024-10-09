@@ -6,7 +6,7 @@
  */
 
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { buildEntityDefinitionId } from './utils/utils';
 
 export const buildHostEntityDefinition = (space: string): EntityDefinition =>
@@ -14,7 +14,7 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
     id: buildEntityDefinitionId('host', space),
     name: 'EA Host Store',
     type: 'host',
-    indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+    data_view_id: `${DEFAULT_DATA_VIEW_ID}-${space}`,
     identityFields: ['host.name'],
     displayNameTemplate: '{{host.name}}',
     metadata: [
@@ -40,7 +40,7 @@ export const buildUserEntityDefinition = (space: string): EntityDefinition =>
     id: buildEntityDefinitionId('user', space),
     name: 'EA User Store',
     type: 'user',
-    indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+    data_view_id: `${DEFAULT_DATA_VIEW_ID}-${space}`,
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
     metadata: ['user.email', 'user.full_name', 'user.hash', 'user.id', 'user.name', 'user.roles'],
