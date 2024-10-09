@@ -11,15 +11,8 @@ import { join as joinPath } from 'path';
 import { createSync, ensureDirSync } from '../util';
 
 export function createReadme(packageDir: string, integrationName: string, fields: object[]) {
-  try {
-    createPackageReadme(packageDir, integrationName, fields);
-    createBuildReadme(packageDir, integrationName, fields);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('********************************');
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
+  createPackageReadme(packageDir, integrationName, fields);
+  createBuildReadme(packageDir, integrationName, fields);
 }
 
 function createPackageReadme(packageDir: string, integrationName: string, fields: object[]) {
