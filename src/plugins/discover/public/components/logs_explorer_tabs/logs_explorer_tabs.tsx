@@ -16,7 +16,7 @@ import {
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
@@ -36,23 +36,31 @@ export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProp
   const discoverUrl = discoverLocator?.getRedirectUrl(emptyParams);
   const logsExplorerUrl = logsExplorerLocator?.getRedirectUrl(emptyParams);
 
-  const [_, setLastUsedViewer] = useLocalStorage<
+  const [lastUsedViewer, setLastUsedViewer] = useLocalStorage<
     typeof DISCOVER_APP_ID | typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID
   >(OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY, OBSERVABILITY_LOGS_EXPLORER_APP_ID);
 
   const navigateToDiscover = createNavigateHandler(() => {
     if (selectedTab !== 'discover') {
-      setLastUsedViewer(DISCOVER_APP_ID);
       discoverLocator?.navigate(emptyParams);
     }
   });
 
   const navigateToLogsExplorer = createNavigateHandler(() => {
     if (selectedTab !== 'logs-explorer') {
-      setLastUsedViewer(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
       logsExplorerLocator?.navigate(emptyParams);
     }
   });
+
+  useEffect(() => {
+    if (selectedTab === 'discover' && lastUsedViewer !== DISCOVER_APP_ID) {
+      setLastUsedViewer(DISCOVER_APP_ID);
+    }
+
+    if (selectedTab === 'logs-explorer' && lastUsedViewer !== OBSERVABILITY_LOGS_EXPLORER_APP_ID) {
+      setLastUsedViewer(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+    }
+  }, [setLastUsedViewer, lastUsedViewer, selectedTab]);
 
   return (
     <EuiTabs bottomBorder={false} data-test-subj="logsExplorerTabs">

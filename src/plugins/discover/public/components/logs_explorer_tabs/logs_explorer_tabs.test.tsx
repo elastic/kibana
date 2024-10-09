@@ -21,8 +21,8 @@ import { DISCOVER_APP_LOCATOR } from '../../../common';
 
 const mockSetLastUsedViewer = jest.fn();
 jest.mock('react-use/lib/useLocalStorage', () => {
-  return jest.fn((key: string, initialValue: string) => {
-    return [initialValue, mockSetLastUsedViewer];
+  return jest.fn((key: string, _initialValue: string) => {
+    return [undefined, mockSetLastUsedViewer]; // Always use undefined as the initial value
   });
 });
 
@@ -99,17 +99,13 @@ describe('LogsExplorerTabs', () => {
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
   });
 
-  it('should update the last used viewer in local storage', async () => {
+  it('should update the last used viewer in local storage for selectedTab', async () => {
     const { unmount } = renderTabs('discover');
-
-    mockSetLastUsedViewer.mockClear();
-    await userEvent.click(getLogsExplorerTab());
-    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(DISCOVER_APP_ID);
 
     unmount();
-    renderTabs('logs-explorer');
     mockSetLastUsedViewer.mockClear();
-    await userEvent.click(getDiscoverTab());
-    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(DISCOVER_APP_ID);
+    renderTabs('logs-explorer');
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
   });
 });
