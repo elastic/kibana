@@ -31,7 +31,7 @@ import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './rule/apis/resolve';
 import { ruleTypesRoute } from './rule_types';
-import { muteAllRuleRoute } from './mute_all_rule';
+import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
