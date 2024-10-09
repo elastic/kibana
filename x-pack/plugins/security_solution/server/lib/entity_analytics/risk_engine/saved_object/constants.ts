@@ -10,5 +10,5 @@
  */
 
 export const APP_ID = 'securitySolution' as const;
-export const PUBLIC_RISK_ENGINE_SO_URL = '/api/risk_engine/saved_object' as const;
+export const PUBLIC_RISK_ENGINE_SO_URL = '/api/risk_score/engine/saved_object' as const;
 export const RISK_ENGINE_SAVED_OBJECT_CONFIG_URL = `${PUBLIC_RISK_ENGINE_SO_URL}/config` as const;
