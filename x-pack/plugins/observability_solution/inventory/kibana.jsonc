@@ -16,7 +16,8 @@
       "features",
       "unifiedSearch",
       "data",
-      "share"
+      "share",
+      "spaces"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [],
