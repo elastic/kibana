@@ -13,6 +13,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+
 // import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { sharedWorkpads, WorkpadNames, tick } from '../test';
@@ -34,17 +35,14 @@ import { openSettings, selectMenuItem } from '../test/interactions';
 // Mock the renderers
 jest.mock('../supported_renderers');
 
+// @ts-ignore Importing this to mock
+import * as Portal from '@elastic/eui/lib/components/portal/portal';
+
 // Mock the EuiPortal - `insertAdjacentElement is not supported in
 // `jsdom` 12.  We're just going to render a `div` with the children
 // so the `enzyme` tests will be accurate.
-jest.mock('@elastic/eui/lib/components/portal/portal', () => {
-  // Local constants are not supported in Jest mocks-- they must be
-  // imported within the mock.
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const React = jest.requireActual('react');
-  return {
-    EuiPortal: (props: any) => <div>{props.children}</div>,
-  };
+jest.spyOn(Portal, 'EuiPortal').mockImplementation((props: any) => {
+  return <div className="mockedEuiPortal">{props.children}</div>;
 });
 
 const getWrapper: (name?: WorkpadNames) => ReactWrapper = (name = 'hello') => {

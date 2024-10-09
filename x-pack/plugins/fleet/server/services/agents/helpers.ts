@@ -72,7 +72,8 @@ export function searchHitToAgent(
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
     last_checkin: hit._source?.last_checkin,
-    last_checkin_status: hit._source?.last_checkin_status,
+    last_checkin_status:
+      hit._source?.last_checkin_status?.toLowerCase() as Agent['last_checkin_status'],
     last_checkin_message: hit._source?.last_checkin_message,
     policy_revision: hit._source?.policy_revision_idx,
     packages: hit._source?.packages ?? [],

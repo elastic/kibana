@@ -29,6 +29,7 @@ import {
   getSystemPromptFromUserConversation,
   langChainExecute,
 } from './helpers';
+import { isOpenSourceModel } from './utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -94,6 +95,9 @@ export const postActionsConnectorExecuteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
@@ -129,6 +133,7 @@ export const postActionsConnectorExecuteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            isOssModel,
             conversationId,
             context: ctx,
             getElser,
