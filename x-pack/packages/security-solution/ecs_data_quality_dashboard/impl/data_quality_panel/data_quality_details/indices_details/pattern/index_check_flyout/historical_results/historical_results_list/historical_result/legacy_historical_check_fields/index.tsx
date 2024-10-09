@@ -13,11 +13,11 @@ import { Actions } from '../../../../../../../../actions';
 import { LegacyHistoricalResult } from '../../../../../../../../types';
 import { IncompatibleCallout } from '../../../../incompatible_callout';
 import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt';
-import { CHECK_IS_BASED_ON_LEGACY_FORMAT, TO_SEE_RUN_A_NEW_CHECK } from './translations';
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
 import { CheckFieldsTabs } from '../../../../check_fields_tabs';
 import { StyledHistoricalResultsCheckFieldsButtonGroup } from '../styles';
+import { NOT_INCLUDED_IN_HISTORICAL_RESULTS } from './translations';
 
 interface Props {
   indexName: string;
@@ -71,7 +71,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
         badgeColor: 'hollow',
         badgeCount: sameFamilyFieldCount,
         disabled: true,
-        disabledReason: `${CHECK_IS_BASED_ON_LEGACY_FORMAT} ${TO_SEE_RUN_A_NEW_CHECK}`,
+        disabledReason: NOT_INCLUDED_IN_HISTORICAL_RESULTS,
       },
     ],
     [

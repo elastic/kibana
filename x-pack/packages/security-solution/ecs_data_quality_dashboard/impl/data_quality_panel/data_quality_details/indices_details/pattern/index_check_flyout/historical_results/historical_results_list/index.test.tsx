@@ -16,9 +16,8 @@ import {
 } from '../../../../../../mock/test_providers/test_providers';
 import { HistoricalResultsList } from '.';
 import {
-  NO_HISTORICAL_RESULTS,
-  NO_HISTORICAL_RESULTS_BODY,
-  NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE,
+  CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN,
+  NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA,
   TOGGLE_HISTORICAL_RESULT_CHECKED_AT,
 } from './translations';
 import { getFormattedCheckTime } from '../../utils/get_formatted_check_time';
@@ -59,7 +58,7 @@ describe('HistoricalResultsList', () => {
               total: modifiedResults.length,
             }}
           >
-            <HistoricalResultsList indexName={indexName} latestCheckExists={true} />
+            <HistoricalResultsList indexName={indexName} />
           </TestHistoricalResultsProvider>
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -92,7 +91,7 @@ describe('HistoricalResultsList', () => {
               total: 1,
             }}
           >
-            <HistoricalResultsList indexName={indexName} latestCheckExists={true} />
+            <HistoricalResultsList indexName={indexName} />
           </TestHistoricalResultsProvider>
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -122,7 +121,7 @@ describe('HistoricalResultsList', () => {
                 total: 1,
               }}
             >
-              <HistoricalResultsList indexName={indexName} latestCheckExists={true} />
+              <HistoricalResultsList indexName={indexName} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -153,54 +152,27 @@ describe('HistoricalResultsList', () => {
   });
 
   describe('when historical results are empty', () => {
-    describe('when latest check exists', () => {
-      it('should show empty for given range message', () => {
-        const indexName = 'test';
-        render(
-          <TestExternalProviders>
-            <TestDataQualityProviders>
-              <TestHistoricalResultsProvider
-                historicalResultsState={{
-                  results: [],
-                  isLoading: false,
-                  error: null,
-                  total: 0,
-                }}
-              >
-                <HistoricalResultsList indexName={indexName} latestCheckExists={true} />
-              </TestHistoricalResultsProvider>
-            </TestDataQualityProviders>
-          </TestExternalProviders>
-        );
+    it('should show empty message', () => {
+      const indexName = 'test';
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <TestHistoricalResultsProvider
+              historicalResultsState={{
+                results: [],
+                isLoading: false,
+                error: null,
+                total: 0,
+              }}
+            >
+              <HistoricalResultsList indexName={indexName} />
+            </TestHistoricalResultsProvider>
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
 
-        expect(screen.getByText(NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE)).toBeInTheDocument();
-        expect(screen.getByText(NO_HISTORICAL_RESULTS_BODY)).toBeInTheDocument();
-      });
-    });
-
-    describe('when latest check does not exist', () => {
-      it('should show empty message', () => {
-        const indexName = 'test';
-        render(
-          <TestExternalProviders>
-            <TestDataQualityProviders>
-              <TestHistoricalResultsProvider
-                historicalResultsState={{
-                  results: [],
-                  isLoading: false,
-                  error: null,
-                  total: 0,
-                }}
-              >
-                <HistoricalResultsList indexName={indexName} latestCheckExists={false} />
-              </TestHistoricalResultsProvider>
-            </TestDataQualityProviders>
-          </TestExternalProviders>
-        );
-
-        expect(screen.getByText(NO_HISTORICAL_RESULTS)).toBeInTheDocument();
-        expect(screen.getByText(NO_HISTORICAL_RESULTS_BODY)).toBeInTheDocument();
-      });
+      expect(screen.getByText(NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA)).toBeInTheDocument();
+      expect(screen.getByText(CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN)).toBeInTheDocument();
     });
   });
 
@@ -219,7 +191,7 @@ describe('HistoricalResultsList', () => {
                 total: results.length,
               }}
             >
-              <HistoricalResultsList indexName={indexName} latestCheckExists={true} />
+              <HistoricalResultsList indexName={indexName} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
