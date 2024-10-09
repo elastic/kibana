@@ -1887,6 +1887,9 @@ oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
 oas_docs/kibana.info.yaml                     @elastic/platform-docs
 
+# Documentation settings files
+docs/settings-gen                             @elastic/platform-docs
+
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
