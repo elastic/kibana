@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,7 +13,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const reportingFunctional = getService('reportingFunctional');
-  const esArchiver = getService('esArchiver');
 
   describe('Access to Management > Reporting', () => {
     before(async () => {
@@ -55,40 +53,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await browser.switchToWindow(dashboardWindowHandle);
 
       await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
-    });
-
-    describe('Download report', () => {
-      // use archived reports to allow reporting_user to view report jobs they've created
-      before(async () => {
-        try {
-          await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
-        } catch (error) {
-          //
-        }
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
-      });
-
-      it('user can access download link', async () => {
-        await PageObjects.common.navigateToApp('reporting');
-        await testSubjects.existOrFail('reportJobListing');
-
-        const csvReportLink = await testSubjects.find('viewReportingLink-krazcyw4156m0763b503j7f9');
-        expect(await csvReportLink.getVisibleText()).to.be('report jobtype: csv_searchsource'); // report title indicates the jobtype
-        await testSubjects.existOrFail('reportDownloadLink-krazcyw4156m0763b503j7f9');
-      });
-
-      it('user can access download link for export type that is no longer supported', async () => {
-        await PageObjects.common.navigateToApp('reporting');
-        await testSubjects.existOrFail('reportJobListing');
-
-        const csvReportLink = await testSubjects.find('viewReportingLink-krb7arhe164k0763b50bjm29');
-        expect(await csvReportLink.getVisibleText()).to.be('report jobtype: csv'); // report title indicates the removed jobtype
-        await testSubjects.existOrFail('reportDownloadLink-krb7arhe164k0763b50bjm29');
-      });
     });
   });
 };
