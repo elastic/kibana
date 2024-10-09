@@ -247,4 +247,54 @@ describe('LensVisService suggestions', () => {
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
+
+  test('should return histogramSuggestion if no suggestions returned by the api with a geo point breakdown field correctly', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | limit 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: { name: 'coordinates' } as DataViewField,
+      columns: [
+        {
+          id: 'coordinates',
+          name: 'coordinates',
+          meta: {
+            type: 'geo_point',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      hasHistogramSuggestionForESQL: true,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+    expect(lensVis.currentSuggestionContext?.suggestion?.visualizationState).toHaveProperty(
+      'layers',
+      [
+        {
+          layerId: '662552df-2cdc-4539-bf3b-73b9f827252c',
+          seriesType: 'bar_stacked',
+          xAccessor: '@timestamp every 30 second',
+          accessors: ['results'],
+          layerType: 'data',
+        },
+      ]
+    );
+
+    const histogramQuery = {
+      esql: `from the-data-view | limit 100
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`coordinates\` | rename timestamp as \`@timestamp every 30 minute\``,
+    };
+
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
 });
