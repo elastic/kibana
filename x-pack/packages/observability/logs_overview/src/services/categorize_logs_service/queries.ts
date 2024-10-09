@@ -97,7 +97,7 @@ export const createCategorizationRequestParams = ({
     aggs: randomSampler.wrap({
       histogram: {
         date_histogram: {
-          field: '@timestamp',
+          field: timeField,
           fixed_interval: fixedIntervalSize,
           extended_bounds: {
             min: startTimestamp,
