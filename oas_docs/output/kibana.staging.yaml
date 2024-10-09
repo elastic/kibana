@@ -11452,6 +11452,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
