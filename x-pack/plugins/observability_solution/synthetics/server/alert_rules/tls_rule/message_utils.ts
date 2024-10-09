@@ -74,6 +74,7 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     commonName: cert.common_name ?? '',
     issuer: cert.issuer ?? '',
     monitorName: cert.monitorName,
+    serviceName: cert.serviceName,
     monitorType: cert.monitorType,
     locationName: cert.locationName,
     monitorUrl: cert.monitorUrl,

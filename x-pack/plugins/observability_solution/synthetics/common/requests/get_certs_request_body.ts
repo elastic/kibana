@@ -147,6 +147,7 @@ export const getCertsRequestBody = ({
         'tls.server.hash.sha256',
         'tls.server.x509.not_after',
         'tls.server.x509.not_before',
+        'service',
       ],
       collapse: {
         field: 'tls.server.hash.sha256',
