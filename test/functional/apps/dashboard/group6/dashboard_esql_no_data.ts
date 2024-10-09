@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const esql = getService('esql');
   const PageObjects = getPageObjects(['discover', 'dashboard']);
 
   describe('No Data Views: Try ES|QL', () => {
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('tryESQLLink');
 
       await PageObjects.discover.expectOnDiscover();
-      await PageObjects.discover.expectEsqlStatement('FROM logs* | LIMIT 10');
+      await esql.expectEsqlStatement('FROM logs* | LIMIT 10');
     });
   });
 }
