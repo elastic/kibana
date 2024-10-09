@@ -48,7 +48,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
-      categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
+      categories: ['app_search', 'web', 'elastic_stack', 'crawler'],
       uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
       icons: [
         {
@@ -69,7 +69,7 @@ export const registerEnterpriseSearchIntegrations = (
     description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
-    categories: ['enterprise_search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
+    categories: ['custom', 'elastic_stack', 'sdk_search', 'language_client'],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/api',
     icons: [
       {
