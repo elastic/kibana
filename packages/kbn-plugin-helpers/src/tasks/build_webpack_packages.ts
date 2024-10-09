@@ -17,20 +17,24 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { TaskContext } from '../task_context';
 
-export async function buildWebpackPackages({ log, dist, sourceDir }: TaskContext) {
-  log.info('run bazel and build required artifacts for the optimizer');
+export async function buildWebpackPackages({ log, dist }: TaskContext) {
+  log.info('building required artifacts for the optimizer');
 
-  try {
-    await buildPackage(sourceDir, log);
+  const packagesToBuild = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
 
-    log.success('bazel run successfully and artifacts were created');
-  } catch (e) {
-    log.error(`bazel run failed: ${e}`);
-    process.exit(1);
+  for (const pkg of packagesToBuild) {
+    const packageDir = path.resolve(REPO_ROOT, 'packages', pkg);
+    try {
+      await buildPackage(packageDir, log, dist);
+    } catch (e) {
+      log.error(`bazel run failed: ${e}`);
+      throw e;
+    }
   }
+  log.success('required artifacts were created');
 }
 
-async function buildPackage(packageRoot: string, log: ToolingLog) {
+async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) {
   const packageConfig = JSON.parse(
     fs.readFileSync(path.resolve(packageRoot, 'package.json')).toString()
   );
@@ -43,6 +47,7 @@ async function buildPackage(packageRoot: string, log: ToolingLog) {
 
   let env = webpackBuildOptions.env.default;
   if (
+    dist ||
     process.env?.NODE_ENV?.toLowerCase()?.match(/^prod/) ||
     process.env?.DIST?.toLowerCase() === 'true'
   ) {
