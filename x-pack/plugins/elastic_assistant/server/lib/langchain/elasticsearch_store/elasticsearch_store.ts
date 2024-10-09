@@ -26,7 +26,6 @@ import { getTermsSearchQuery } from './helpers/get_terms_search_query';
 import { getVectorSearchQuery } from './helpers/get_vector_search_query';
 import type { MsearchResponse } from './helpers/types';
 import {
-  ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
@@ -72,7 +71,7 @@ export class ElasticsearchStore extends VectorStore {
   private readonly logger: Logger;
   private readonly telemetry: AnalyticsServiceSetup;
   private readonly model: string;
-  private readonly kbResource: string;
+  private kbResource?: string;
 
   _vectorstoreType(): string {
     return 'elasticsearch';
@@ -93,8 +92,12 @@ export class ElasticsearchStore extends VectorStore {
     this.logger = logger;
     this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
-    this.kbResource = kbResource ?? ESQL_RESOURCE;
+    this.kbResource = kbResource;
     this.kbDataClient = kbDataClient;
+  }
+
+  setKbResource(kbResource: string) {
+    this.kbResource = kbResource;
   }
 
   /**
@@ -212,6 +215,7 @@ export class ElasticsearchStore extends VectorStore {
    * @param k Number of similar documents to return
    * @param filter Optional filter to apply to the search
    * @param _callbacks Optional callbacks
+   * @param filterRequiredDocs Optional whether or not to exclude the required docs filter
    *
    * Fun facts:
    * - This function is called by LangChain's `VectorStoreRetriever._getRelevantDocuments`
@@ -222,10 +226,11 @@ export class ElasticsearchStore extends VectorStore {
     query: string,
     k?: number,
     filter?: this['FilterType'] | undefined,
-    _callbacks?: Callbacks | undefined
+    _callbacks?: Callbacks | undefined,
+    filterRequiredDocs = true
   ): Promise<Document[]> => {
     // requiredDocs is an array of filters that can be used in a `bool` Elasticsearch DSL query to filter in/out required KB documents:
-    const requiredDocs = getRequiredKbDocsTermsQueryDsl(this.kbResource);
+    const requiredDocs = filterRequiredDocs ? getRequiredKbDocsTermsQueryDsl(this.kbResource) : [];
 
     // The `k` parameter is typically provided by LangChain's `VectorStoreRetriever._getRelevantDocuments`, which calls this function:
     const vectorSearchQuerySize = k ?? FALLBACK_SIMILARITY_SEARCH_SIZE;
@@ -263,7 +268,7 @@ export class ElasticsearchStore extends VectorStore {
 
       this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
         model: this.model,
-        resourceAccessed: this.kbResource,
+        ...(this.kbResource != null ? { resourceAccessed: this.kbResource } : {}),
         resultCount: results.length,
         responseTime: result.took ?? 0,
       });
@@ -282,7 +287,7 @@ export class ElasticsearchStore extends VectorStore {
       const error = transformError(e);
       this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
         model: this.model,
-        resourceAccessed: this.kbResource,
+        ...(this.kbResource != null ? { resourceAccessed: this.kbResource } : {}),
         errorMessage: error.message,
       });
       this.logger.error(e);
