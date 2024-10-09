@@ -51,6 +51,11 @@ paths:
           schema:
             type: string
             nullable: true
+        - name: associatedFilter
+          in: query
+          schema:
+            type: string
+            nullable: true
       responses:
         '200':
           description: Indicates the requested notes were returned.

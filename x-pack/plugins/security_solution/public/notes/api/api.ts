@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AssociatedFilter } from '../../../common/notes/constants';
 import type { BareNote, Note } from '../../../common/api/timeline';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';
@@ -35,6 +36,7 @@ export const fetchNotes = async ({
   sortField,
   sortOrder,
   filter,
+  associatedFilter,
   search,
 }: {
   page: number;
@@ -42,6 +44,7 @@ export const fetchNotes = async ({
   sortField: string;
   sortOrder: string;
   filter: string;
+  associatedFilter: AssociatedFilter;
   search: string;
 }) => {
   const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
@@ -53,6 +56,7 @@ export const fetchNotes = async ({
         sortField,
         sortOrder,
         filter,
+        associatedFilter,
         search,
       },
       version: '2023-10-31',
