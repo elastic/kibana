@@ -10,7 +10,7 @@ import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  muteAllRuleRequestParamsSchemaV1,
+  unmuteAllRuleRequestParamsSchemaV1,
   UnmuteAllRuleRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/unmute_all';
 
@@ -28,7 +28,7 @@ export const unmuteAllRuleRoute = (
       },
       validate: {
         request: {
-          params: muteAllRuleRequestParamsSchemaV1,
+          params: unmuteAllRuleRequestParamsSchemaV1,
         },
         response: {
           204: {
