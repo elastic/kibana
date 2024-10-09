@@ -6,29 +6,24 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiPageSection,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { UsageMetricsRequestSchemaQueryParams } from '../../common/rest_types';
-import { Charts } from './components/charts';
-import { UsageMetricsDateRangePicker } from './components/date_picker';
-import { useBreadcrumbs } from '../utils/use_breadcrumbs';
-import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { PLUGIN_NAME } from '../../common';
-import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
-import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from './hooks/use_date_picker';
-import { useDataUsageMetricsUrlParams } from './hooks/use_charts_url_params';
-import { MetricsResponse } from './types';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { Charts } from './charts';
+import { UsageMetricsDateRangePicker } from './date_picker';
+import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { PLUGIN_NAME } from '../../../common';
+import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
+import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
+import { MetricsResponse } from '../types';
+import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
+import { UsageMetricsRequestSchemaQueryParams } from '../../../common/rest_types';
 
-export const DataUsage = () => {
+const EuiItemCss = css`
+  width: 100%;
+`;
+
+export const DataUsageMetrics = () => {
   const {
     services: { chrome, appParams },
   } = useKibanaContextForPlugin();
@@ -110,38 +105,19 @@ export const DataUsage = () => {
   }
 
   return (
-    <>
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate('xpack.dataUsage.pageTitle', {
-            defaultMessage: 'Data Usage',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiPageSection paddingSize="none">
-        <EuiFlexGroup alignItems="flexStart">
-          <EuiFlexItem>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.dataUsage.description"
-                defaultMessage="Monitor data ingested and retained by data streams."
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <UsageMetricsDateRangePicker
-              dateRangePickerState={dateRangePickerState}
-              isDataLoading={isFetching}
-              onRefresh={onRefresh}
-              onRefreshChange={onRefreshChange}
-              onTimeChange={onTimeChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+    <EuiFlexGroup alignItems="flexStart" direction="column">
+      <EuiFlexItem grow={false} css={EuiItemCss}>
+        <UsageMetricsDateRangePicker
+          dateRangePickerState={dateRangePickerState}
+          isDataLoading={isFetching}
+          onRefresh={onRefresh}
+          onRefreshChange={onRefreshChange}
+          onTimeChange={onTimeChange}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem css={EuiItemCss}>
         {isFetched && data ? <Charts data={data as MetricsResponse} /> : <EuiLoadingElastic />}
-      </EuiPageSection>
-    </>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
