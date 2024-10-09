@@ -46,6 +46,9 @@ const defaultProps: CustomTimelineDataGridBodyProps = {
   enabledRowRenderers: [],
   setCustomGridBodyProps: jest.fn(),
   visibleColumns: mockVisibleColumns,
+  headerRow: <></>,
+  footerRow: null,
+  gridWidth: 0,
 };
 
 const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {

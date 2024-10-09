@@ -331,15 +331,21 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         visibleRowData,
         visibleColumns,
         setCustomGridBodyProps,
+        gridWidth,
+        headerRow,
+        footerRow,
       }: EuiDataGridCustomBodyProps) => (
         <CustomTimelineDataGridBody
           rows={tableRows}
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
           rowHeight={rowHeight}
+          gridWidth={gridWidth}
           refetch={refetch}
         />
       ),
