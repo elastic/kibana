@@ -154,18 +154,22 @@ export const getUrlPathCompletionItems = (
   };
   return (
     filterTermsWithoutName(autoCompleteSet)
+      .filter(
+        (term) =>
+          // Only keep dot-prefixed terms if the user typed in a dot
+          !(typeof term.name === 'string' && term.name.startsWith('.')) ||
+          lineContent.trim().endsWith('.')
+      )
       // map autocomplete items to completion items
       .map((item) => {
-        if (!item.name.startsWith('.') || lineContent.trim().endsWith('.')) {
-          return {
-            label: item.name + '',
-            insertText: item.name + '',
-            detail: item.meta ?? i18nTexts.endpoint,
-            // the kind is only used to configure the icon
-            kind: monaco.languages.CompletionItemKind.Constant,
-            range,
-          };
-        }
+        return {
+          label: item.name + '',
+          insertText: item.name + '',
+          detail: item.meta ?? i18nTexts.endpoint,
+          // the kind is only used to configure the icon
+          kind: monaco.languages.CompletionItemKind.Constant,
+          range,
+        };
       })
   );
 };
