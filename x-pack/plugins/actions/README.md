@@ -178,6 +178,8 @@ The hooks are called just before, and just after, the Saved Object operation for
 
 The `PostDelete` hook does not have a `wasSuccessful` property, as the hook is not called if the delete operation fails.  The saved object will still exist.  Only a successful call to delete the connector will cause the hook to run.
 
+The `PostSave` hook is useful if the `PreSave` hook is creating / modifying other resources.  The `PreSave` hook is called just before the connector SO is actually created/updated, and of course that create/update could fail for some reason.  In those cases, the `PostSave` hook is passed `wasSuccessful: false` and can "undo" any work it did in the `PreSave` hook.
+
 The `PreSave` hook can be used to cancel a create or update, by throwing an exception.  The `PostSave` and `PostDelete` invocations will have thrown exceptions caught and logged to the Kibana log, and will not cancel the operation.  
 
 When throwing an error in the `PreSave` hook, the Error's message will be used as the error failing the operation, so should include a human-readable description of what it was doing, along with any message from an underlying API that failed, if available.  When an error is thrown from a `PreSave` hook, the `PostSave` hook will **NOT** be run.
