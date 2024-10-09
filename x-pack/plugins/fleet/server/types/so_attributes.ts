@@ -130,6 +130,7 @@ export interface PackagePolicySOAttributes {
   secret_references?: PolicySecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
+  connector_id?: string;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -255,4 +256,5 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
 }
+
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

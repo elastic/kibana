@@ -62,6 +62,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
         version: { type: 'keyword' },
       },
     },
+    connector_id: { type: 'keyword' },
     elasticsearch: {
       dynamic: false,
       properties: {},

@@ -41,6 +41,7 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
+  defaultConnector?: ActionType | null;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -49,6 +50,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onClose,
   onConnectorCreated,
   onTestConnector,
+  defaultConnector,
 }) => {
   const {
     application: { capabilities },
@@ -57,7 +59,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
-  const [actionType, setActionType] = useState<ActionType | null>(null);
+  const [actionType, setActionType] = useState<ActionType | null>(defaultConnector ?? null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
 

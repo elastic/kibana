@@ -1901,7 +1901,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       if (packageInfo) {
-        return packageToPackagePolicy(packageInfo, '');
+        return packageToPackagePolicy(
+          packageInfo,
+          '',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          options.connectorId
+        );
       }
     }
   }

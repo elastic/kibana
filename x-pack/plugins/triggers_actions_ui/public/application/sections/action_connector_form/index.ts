@@ -26,5 +26,11 @@ export const ConnectorAddModal = suspendedComponentWithProps<ConnectorAddModalPr
 export const AddConnectorInline = suspendedComponentWithProps(
   lazy(() => import('./connector_add_inline'))
 );
+export const LazyConnectorList = suspendedComponentWithProps(
+  lazy(() => import('../actions_connectors_list/components/actions_connectors_list'))
+);
+export const LazyConnectorSelection = suspendedComponentWithProps(
+  lazy(() => import('./connectors_selection'))
+);
 
 export type { ConnectorFormSchema } from './types';

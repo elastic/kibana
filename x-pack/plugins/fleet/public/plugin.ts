@@ -54,6 +54,11 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { Subject } from 'rxjs';
 
+import type {
+  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
+  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
+
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
 import {
@@ -93,7 +98,7 @@ export type { FleetConfigType } from '../common/types';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface FleetSetup {}
 
 /**
@@ -120,6 +125,7 @@ export interface FleetSetupDeps {
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
   usageCollection?: UsageCollectionSetup;
+  triggersActionsUi: TriggersActionsSetup;
 }
 
 export interface FleetStartDeps {
@@ -147,6 +153,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  triggersActionsUi: TriggersActionsStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {

@@ -347,9 +347,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       {
         esClient,
         casesClient,
-        endpointService: endpointContext.service,
         username: user?.username || 'unknown',
-        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger, {
+          endpointService: endpointContext.service,
+          soClient: coreContext.savedObjects.client,
+        }),
       }
     );
 

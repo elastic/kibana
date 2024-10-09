@@ -203,7 +203,8 @@ export const packageToPackagePolicy = (
   namespace: string = '',
   packagePolicyName?: string,
   description?: string,
-  integrationToEnable?: string
+  integrationToEnable?: string,
+  connectorId?: string
 ): NewPackagePolicy => {
   if (!Array.isArray(agentPolicyIds)) {
     agentPolicyIds = [agentPolicyIds];
@@ -213,6 +214,7 @@ export const packageToPackagePolicy = (
       ? packageInfo.installationInfo?.experimental_data_stream_features
       : undefined;
 
+  console.log('new connectorId', connectorId);
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
@@ -230,6 +232,7 @@ export const packageToPackagePolicy = (
     policy_ids: agentPolicyIds,
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
+    connector_id: connectorId,
   };
 
   if (packageInfo.vars?.length) {
