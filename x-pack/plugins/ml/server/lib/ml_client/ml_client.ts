@@ -25,7 +25,7 @@ import type {
   MlGetDatafeedParams,
   MlGetTrainedModelParams,
 } from './types';
-import type { MlAuditLogger } from '../../audit_logger';
+import type { MlAuditLogger } from './ml_audit_logger';
 
 export function getMlClient(
   client: IScopedClusterClient,

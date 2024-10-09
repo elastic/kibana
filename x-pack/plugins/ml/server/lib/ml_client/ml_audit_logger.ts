@@ -7,13 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuditLogger, CoreAuditService } from '@kbn/core/server';
-import type { MlClient, MlClientParams } from './lib/ml_client/types';
+import type { MlClient, MlClientParams } from './types';
 import {
   getADJobIdsFromRequest,
   getDFAJobIdsFromRequest,
   getDatafeedIdsFromRequest,
   getModelIdsFromRequest,
-} from './lib/ml_client/ml_client';
+} from './ml_client';
 
 type TaskTypeAD =
   | 'put_ad_job'
