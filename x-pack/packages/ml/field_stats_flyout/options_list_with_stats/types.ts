@@ -14,6 +14,7 @@ interface BaseOption<T> {
   isEmpty?: boolean;
   hideTrigger?: boolean;
   'data-is-empty'?: boolean;
+  'data-hide-inspect'?: boolean;
   isGroupLabelOption?: boolean;
   isGroupLabel?: boolean;
   field?: Field;
