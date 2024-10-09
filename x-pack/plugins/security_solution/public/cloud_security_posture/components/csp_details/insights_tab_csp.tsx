@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import type { FlyoutPanels } from '@kbn/expandable-flyout/src/store/state';
+// import type { FlyoutPanels } from '@kbn/expandable-flyout/src/store/state';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
@@ -28,34 +28,47 @@ interface CspFlyoutPanelProps extends FlyoutPanelProps {
     hasVulnerabilitiesFindings: boolean;
   };
 }
-interface CspFlyoutPanels extends FlyoutPanels {
-  left: CspFlyoutPanelProps;
-}
 
-// Type guard to check if the path is a PathPanel
-const isPathPanel = (path: PanelPath): path is PanelPath => {
-  return typeof path?.tab === 'string';
-};
+// Type guard to check if the panel is a CspFlyoutPanelProps
+function isCspFlyoutPanelProps(
+  panelLeft: FlyoutPanelProps | undefined
+): panelLeft is CspFlyoutPanelProps {
+  return (
+    !!panelLeft?.params?.hasMisconfigurationFindings ||
+    !!panelLeft?.params?.hasVulnerabilitiesFindings
+  );
+}
 
 export const InsightsTabCsp = memo(
   ({ name, fieldName }: { name: string; fieldName: 'host.name' | 'user.name' }) => {
-    /* Using type cast here because originally I thought paths are part of Params when its actually its own field. The correct
-    way to solve this is by putting path outside params for every single openLeftPanel call in this folder, but given the time frame
-    We decided to do this for now */
-    const panels = useExpandableFlyoutState() as CspFlyoutPanels;
+    const panels = useExpandableFlyoutState();
 
-    const getDefaultTab = () =>
-      panels.left?.params?.hasMisconfigurationFindings
+    let hasMisconfigurationFindings = false;
+    let hasVulnerabilitiesFindings = false;
+    let subTab: string | undefined;
+
+    // Check if panels.left is of type CspFlyoutPanelProps and extract values
+    if (isCspFlyoutPanelProps(panels.left)) {
+      hasMisconfigurationFindings = panels.left.params.hasMisconfigurationFindings;
+      hasVulnerabilitiesFindings = panels.left.params.hasVulnerabilitiesFindings;
+      subTab = panels.left.params.path?.subTab;
+    }
+
+    const getDefaultTab = () => {
+      if (subTab) {
+        return subTab;
+      }
+
+      return hasMisconfigurationFindings
         ? CspInsightLeftPanelSubTab.MISCONFIGURATIONS
-        : panels.left?.params?.hasVulnerabilitiesFindings
+        : hasVulnerabilitiesFindings
         ? CspInsightLeftPanelSubTab.VULNERABILITIES
-        : 'undefined';
+        : '';
+    };
 
-    const [activeInsightsId, setActiveInsightsId] = useState(
-      panels.left?.params?.path?.subTab || getDefaultTab()
-    );
+    const [activeInsightsId, setActiveInsightsId] = useState(getDefaultTab());
 
-    const insightsButtonsNew: EuiButtonGroupOptionProps[] = useMemo(() => {
+    const insightsButtons: EuiButtonGroupOptionProps[] = useMemo(() => {
       const buttons: EuiButtonGroupOptionProps[] = [];
 
       if (panels.left?.params?.hasMisconfigurationFindings) {
@@ -93,7 +106,9 @@ export const InsightsTabCsp = memo(
       setActiveInsightsId(id);
     };
 
-    if (!isPathPanel(panels.left?.params?.path)) return <></>;
+    if (insightsButtons.length === 0) {
+      return null;
+    }
 
     return (
       <>
@@ -105,7 +120,7 @@ export const InsightsTabCsp = memo(
               defaultMessage: 'Insights options',
             }
           )}
-          options={insightsButtonsNew}
+          options={insightsButtons}
           idSelected={activeInsightsId}
           onChange={onTabChange}
           buttonSize="compressed"
