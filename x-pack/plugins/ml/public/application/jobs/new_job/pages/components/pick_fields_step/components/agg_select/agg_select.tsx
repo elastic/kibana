@@ -69,6 +69,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
               const agg = {
                 key: label,
                 isEmpty,
+                hideTrigger: true,
                 isGroupLabel: false,
                 label,
                 agg: omit(a, 'fields') as Aggregation,

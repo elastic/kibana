@@ -88,6 +88,7 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         defaultMessage: '(no data found in 1000 sample records)',
       })
     : '';
+
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>

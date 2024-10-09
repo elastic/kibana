@@ -66,13 +66,14 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   const comboBoxOptions: DropDownLabel[] = useMemo(
     () =>
       Array.isArray(options)
-        ? options.map(({ isEmpty, ...o }) => ({
+        ? options.map(({ isEmpty, hideTrigger: hideInspectButton, ...o }) => ({
             key: o.key,
             ...o,
             css: optionCss,
             // Change data-is-empty- because EUI is passing all props to dom element
             // so isEmpty is invalid, but we need this info to render option correctly
             'data-is-empty': isEmpty,
+            'data-hide-inspect': hideInspectButton,
           }))
         : [],
     [options]

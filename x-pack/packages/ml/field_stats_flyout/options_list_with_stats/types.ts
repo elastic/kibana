@@ -12,6 +12,7 @@ interface BaseOption<T> {
   key?: string;
   label: string | React.ReactNode;
   isEmpty?: boolean;
+  hideTrigger?: boolean;
   'data-is-empty'?: boolean;
   isGroupLabelOption?: boolean;
   isGroupLabel?: boolean;
