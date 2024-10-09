@@ -393,7 +393,7 @@ describe('configure', () => {
       });
     });
 
-    it('defaultValue fails if the type is not boolean', () => {
+    it('defaultValue fails if the type is not number', () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({

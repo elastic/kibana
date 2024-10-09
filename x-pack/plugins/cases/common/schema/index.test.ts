@@ -13,6 +13,7 @@ import {
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
+  limitedJSNumberSchema,
 } from '.';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 
@@ -322,9 +323,8 @@ describe('schema', () => {
 
   describe('limitedJSNumberSchema', () => {
     it('works correctly the number is between min and max', () => {
-      expect(
-        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 0, max: 2 }).decode(1))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedJSNumberSchema({ fieldName: 'foo' }).decode(2)))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -333,22 +333,52 @@ describe('schema', () => {
 
     it('fails when given a number that is lower than the minimum', () => {
       expect(
-        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(0))
+        PathReporter.report(
+          limitedJSNumberSchema({ fieldName: 'foo' }).decode(Number.MIN_VALUE * 0.5)
+        )
       ).toMatchInlineSnapshot(`
         Array [
-          "The foo field cannot be less than 1.",
+          "Absolute value of the foo field cannot be less than ${Number.MIN_VALUE}.",
         ]
       `);
     });
 
     it('fails when given number that is higher than the maximum', () => {
       expect(
-        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(3))
+        PathReporter.report(
+          limitedJSNumberSchema({ fieldName: 'foo' }).decode(Number.MAX_VALUE * 2)
+        )
       ).toMatchInlineSnapshot(`
         Array [
-          "The foo field cannot be more than 2.",
+          "Absolute value of the foo field cannot be more than ${Number.MAX_VALUE}.",
         ]
       `);
     });
   });
 });
+
+// describe('CaseCustomFieldNumberWithValidationValueRt', () => {
+//   const numberCustomFieldValueType = CaseCustomFieldNumberWithValidationValueRt({
+//     fieldName: 'value',
+//   });
+//   it('should decode number correctly', () => {
+//     const query = numberCustomFieldValueType.decode(123);
+
+//     expect(query).toStrictEqual({
+//       _tag: 'Right',
+//       right: 123,
+//     });
+//   });
+
+//   it('should not be more than Number.MAX_VALUE', () => {
+//     expect(
+//       PathReporter.report(numberCustomFieldValueType.decode(Number.MAX_VALUE * 2))[0]
+//     ).toContain(`Absolute value of the value field cannot be more than ${Number.MAX_VALUE}.`);
+//   });
+
+//   it('should not be less than Number.MIN_VALUE', () => {
+//     expect(
+//       PathReporter.report(numberCustomFieldValueType.decode(Number.MIN_VALUE * 0.5))[0]
+//     ).toContain(`Absolute value of the value field cannot be less than ${Number.MIN_VALUE}.`);
+//   });
+// });

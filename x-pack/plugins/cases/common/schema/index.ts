@@ -159,7 +159,7 @@ export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) 
 
 export const limitedJSNumberSchema = ({ fieldName }: LimitedJSNumberSchemaType) =>
   new rt.Type<number, number, unknown>(
-    'LimitedNumber',
+    'LimitedJSNumber',
     rt.number.is,
     (input, context) =>
       either.chain(rt.number.validate(input, context), (s) => {

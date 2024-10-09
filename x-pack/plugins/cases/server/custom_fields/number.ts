@@ -11,11 +11,11 @@ import { isNumber } from 'lodash';
 export const getCasesNumberCustomField = () => ({
   isFilterable: true,
   isSortable: false,
-  savedObjectMappingType: 'number', // CHECK!!!
+  savedObjectMappingType: 'long',
   validateFilteringValues: (values: Array<string | number | boolean | null>) => {
     values.forEach((value) => {
       if (value !== null && !isNumber(value)) {
-        throw Boom.badRequest(`Unsupported filtering value for custom field of type number.`);
+        throw Boom.badRequest('Unsupported filtering value for custom field of type number.');
       }
     });
   },

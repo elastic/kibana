@@ -109,7 +109,7 @@ describe('Custom Fields', () => {
     const numberCustomFieldValueType = CaseCustomFieldNumberWithValidationValueRt({
       fieldName: 'value',
     });
-    it('should decode strings correctly', () => {
+    it('should decode number correctly', () => {
       const query = numberCustomFieldValueType.decode(123);
 
       expect(query).toStrictEqual({
