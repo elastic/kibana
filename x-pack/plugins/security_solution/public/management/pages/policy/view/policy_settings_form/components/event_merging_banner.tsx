@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export const EventMergingBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
+export interface EventMergingBannerProps {
+  onDismiss: () => void;
+}
+
+export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const bannerTitle = i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventMergingBanner.title',
@@ -44,4 +48,5 @@ export const EventMergingBanner: React.FC<{ onDismiss: () => void }> = ({ onDism
       </EuiText>
     </EuiCallOut>
   );
-};
+});
+EventMergingBanner.displayName = 'EventMergingBanner';
