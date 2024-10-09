@@ -124,9 +124,12 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    expect(mockAddError).toHaveBeenCalledWith(createNoteError, {
-      title: CREATE_NOTE_ERROR,
-    });
+    expect(mockAddError).toHaveBeenCalledWith(
+      createNoteError,
+      expect.objectContaining({
+        title: CREATE_NOTE_ERROR,
+      })
+    );
   });
 
   it('should call onNodeAdd callback when it is available', async () => {
