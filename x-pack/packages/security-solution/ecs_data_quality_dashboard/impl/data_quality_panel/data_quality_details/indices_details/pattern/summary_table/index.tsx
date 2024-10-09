@@ -12,7 +12,6 @@ import React, { useCallback, useMemo } from 'react';
 import { defaultSort } from '../../../../constants';
 import { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
-import { UseIndicesCheckCheckState } from '../../../../hooks/use_indices_check/types';
 import { MIN_PAGE_SIZE } from '../constants';
 import { getShowPagination } from './utils/get_show_pagination';
 
@@ -20,7 +19,6 @@ export interface Props {
   getTableColumns: ({
     formatBytes,
     formatNumber,
-    checkState,
     isILMAvailable,
     pattern,
     onCheckNowAction,
@@ -28,7 +26,6 @@ export interface Props {
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
-    checkState: UseIndicesCheckCheckState;
     isILMAvailable: boolean;
     pattern: string;
     onCheckNowAction: (indexName: string) => void;
@@ -44,7 +41,6 @@ export interface Props {
   sorting: SortConfig;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
-  checkState: UseIndicesCheckCheckState;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
@@ -59,7 +55,6 @@ const SummaryTableComponent: React.FC<Props> = ({
   sorting,
   onCheckNowAction,
   onViewHistoryAction,
-  checkState,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const columns = useMemo(
@@ -67,7 +62,6 @@ const SummaryTableComponent: React.FC<Props> = ({
       getTableColumns({
         formatBytes,
         formatNumber,
-        checkState,
         isILMAvailable,
         pattern,
         onCheckNowAction,
@@ -77,7 +71,6 @@ const SummaryTableComponent: React.FC<Props> = ({
       getTableColumns,
       formatBytes,
       formatNumber,
-      checkState,
       isILMAvailable,
       pattern,
       onCheckNowAction,
