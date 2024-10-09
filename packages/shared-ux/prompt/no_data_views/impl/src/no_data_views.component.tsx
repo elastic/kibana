@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTextAlign,
   EuiToolTip,
+  useEuiPaddingCSS,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
@@ -171,17 +172,22 @@ export const NoDataViewsPrompt = ({
   esqlDocLink,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
+  const cssStyles = [
+    css`
+      max-width: ${MAX_WIDTH}px;
+    `,
+    useEuiPaddingCSS('top').m,
+    useEuiPaddingCSS('right').m,
+    useEuiPaddingCSS('left').m,
+  ];
+
   return (
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceEvenly"
       data-test-subj="noDataViewsPrompt"
     >
-      <EuiFlexItem
-        css={css`
-          max-width: ${MAX_WIDTH}px;
-        `}
-      >
+      <EuiFlexItem css={cssStyles}>
         <EuiText>
           <EuiTextAlign textAlign="center">
             <h2>
