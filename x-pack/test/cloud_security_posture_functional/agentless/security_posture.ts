@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const CNVM_RADIO_OPTION = 'policy-template-radio-button-vuln_mgmt';
 
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
-  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
+  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector-accordion';
 
   describe('Agentless Security Posture Integration Options', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
