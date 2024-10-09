@@ -52,6 +52,7 @@ export interface AddDataPanelProps {
     secondary?: AddDataPanelButton;
     link: AddDataPanelButton;
   };
+  'data-test-subj'?: string;
 }
 
 const tryItDefaultLabel = i18n.translate(
@@ -75,6 +76,7 @@ export function AddDataPanel({
   onLearnMore,
   onTryIt,
   onAddData,
+  'data-test-subj': dataTestSubj,
 }: AddDataPanelProps) {
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
@@ -84,7 +86,12 @@ export function AddDataPanel({
 
   return (
     <>
-      <EuiPanel color="subdued" paddingSize="xl" style={{ position: 'relative' }}>
+      <EuiPanel
+        color="subdued"
+        paddingSize="xl"
+        style={{ position: 'relative' }}
+        data-test-subj={dataTestSubj}
+      >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
