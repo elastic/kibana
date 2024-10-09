@@ -18,6 +18,7 @@ import {
   apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
+  fetch$,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -26,7 +27,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, merge, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, of, Subscription } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -117,10 +119,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         // @ts-ignore
         (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
         new BehaviorSubject(undefined);
-      const timeRange$ =
-        // @ts-ignore
-        (state.timeRange ? new BehaviorSubject(state.timeRange) : parentApi?.timeRange$) ??
-        new BehaviorSubject(undefined);
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -131,14 +129,12 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
-      const swimlaneControlsDependencies$ = merge(query$, filters$, timeRange$);
-
       const {
         swimLaneControlsApi,
         serializeSwimLaneState,
         swimLaneComparators,
         onSwimLaneDestroy,
-      } = initializeSwimLaneControls(state, titlesApi, swimlaneControlsDependencies$);
+      } = initializeSwimLaneControls(state, titlesApi);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
@@ -241,6 +237,19 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         anomalySwimLaneServices
       );
 
+      const fetchSubscription = fetch$(api)
+        .pipe(
+          map((fetchContext) => ({
+            query: fetchContext.query,
+            filters: fetchContext.filters,
+            timeRange: fetchContext.timeRange,
+          })),
+          distinctUntilChanged(fastIsEqual)
+        )
+        .subscribe(() => {
+          api.updatePagination({ fromPage: 1 });
+        });
+
       const onRenderComplete = () => {};
 
       return {
@@ -266,6 +275,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             onSwimLaneDestroy();
             onDestroy();
             subscriptions.unsubscribe();
+            fetchSubscription.unsubscribe();
           });
 
           const [fromPage, perPage, swimlaneType, swimlaneData, error] =

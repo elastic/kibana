@@ -8,8 +8,7 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import fastIsEqual from 'fast-deep-equal';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableUserInput } from '..';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -23,8 +22,7 @@ export type AnomalySwimLaneControlsState = Pick<
 
 export const initializeSwimLaneControls = (
   rawState: AnomalySwimLaneEmbeddableState,
-  titlesApi: TitlesApi,
-  swimlaneControlsDependencies$: Observable<unknown>
+  titlesApi: TitlesApi
 ) => {
   const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const swimlaneType = new BehaviorSubject<SwimlaneType>(rawState.swimlaneType);
@@ -48,10 +46,7 @@ export const initializeSwimLaneControls = (
     }
   };
 
-  const subscription = merge(
-    combineLatest([jobIds, swimlaneType, viewBy]),
-    swimlaneControlsDependencies$
-  ).subscribe(() => {
+  const subscription = combineLatest([jobIds, swimlaneType, viewBy]).subscribe(() => {
     updatePagination({ fromPage: 1 });
   });
 
