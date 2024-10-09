@@ -12,7 +12,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { CoreSetup } from '@kbn/core/public';
-import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import { DataGrid, type UseIndexDataReturnType, INDEX_STATUS } from '@kbn/ml-data-grid';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SimpleQuery } from '@kbn/ml-query-utils';
 
@@ -40,7 +40,7 @@ const runtimeMappings: RuntimeMappings = {
 const queryClient = new QueryClient();
 
 describe('Transform: useIndexData()', () => {
-  test('dataView set triggers loading', async () => {
+  test('empty populatedFields does not trigger loading', async () => {
     const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">{children}</IntlProvider>
@@ -67,7 +67,51 @@ describe('Transform: useIndexData()', () => {
     await waitForNextUpdate();
 
     expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(1);
+    expect(IndexObj.status).toBe(INDEX_STATUS.UNUSED);
+    expect(IndexObj.tableItems).toEqual([]);
+  });
+
+  test('dataView set triggers loading', async () => {
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">{children}</IntlProvider>
+      </QueryClientProvider>
+    );
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useIndexData({
+          dataView: {
+            id: 'the-id',
+            getIndexPattern: () => 'the-index-pattern',
+            metaFields: [],
+            // minimal mock of DataView fields (array with getByName method)
+            fields: new (class DataViewFields extends Array<{ name: string }> {
+              getByName(id: string) {
+                return this.find((d) => d.name === id);
+              }
+            })(
+              {
+                name: 'the-populated-field',
+              },
+              {
+                name: 'the-unpopulated-field',
+              }
+            ),
+          } as unknown as SearchItems['dataView'],
+          query,
+          combinedRuntimeMappings: runtimeMappings,
+          populatedFields: ['the-populated-field'],
+        }),
+      { wrapper }
+    );
+
+    const IndexObj: UseIndexDataReturnType = result.current;
+
+    await waitForNextUpdate();
+
+    expect(IndexObj.errorMessage).toBe('');
+    expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
     expect(IndexObj.tableItems).toEqual([]);
   });
 });
@@ -86,7 +130,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
           dataView,
           query: { match_all: {} },
           combinedRuntimeMappings: runtimeMappings,
-          populatedFields: [],
+          populatedFields: ['the-populated-field'],
         }),
         copyToClipboard: 'the-copy-to-clipboard-code',
         copyToClipboardDescription: 'the-copy-to-clipboard-description',
