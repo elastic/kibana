@@ -18,11 +18,11 @@ describe('getKuery', () => {
 
   const appendAgentlessOffline = (kuery: string) =>
     kuery && kuery.length > 0
-      ? `not (local_metadata.host.hostname : "agentless*" and status:offline) and ( ${kuery})`
+      ? `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kuery})`
       : `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
 
   it('should return a kuery with base search', () => {
-    expect(getKuery({ search })).toEqual('base search');
+    expect(getKuery({ search })).toEqual(appendAgentlessOffline('base search'));
   });
 
   it('should return a kuery with selected tags', () => {
@@ -68,6 +68,6 @@ describe('getKuery', () => {
   });
 
   it('should return empty string if nothing is passed', () => {
-    expect(getKuery({})).toEqual('');
+    expect(getKuery({})).toEqual(appendAgentlessOffline(''));
   });
 });

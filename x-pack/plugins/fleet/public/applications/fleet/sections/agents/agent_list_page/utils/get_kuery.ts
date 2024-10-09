@@ -21,6 +21,8 @@ export const getKuery = ({
   selectedStatus?: string[];
   selectedAgentIds?: string[];
 }) => {
+  const addSpaceBetweenTerms = () => (kueryBuilder.length > 0 ? ' ' : '');
+
   let kueryBuilder = '';
   if (search) {
     kueryBuilder = search.trim();
@@ -30,7 +32,7 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
+    kueryBuilder = `${kueryBuilder}${addSpaceBetweenTerms()}${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
       .map((agentPolicy) => `"${agentPolicy}"`)
       .join(' or ')})`;
   }
@@ -39,7 +41,7 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
+    kueryBuilder = `${kueryBuilder}${addSpaceBetweenTerms()}${AGENTS_PREFIX}.tags : (${selectedTags
       .map((tag) => `"${tag}"`)
       .join(' or ')})`;
   }
@@ -48,7 +50,7 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${selectedAgentIds
+    kueryBuilder = `${kueryBuilder}${addSpaceBetweenTerms()}${AGENTS_PREFIX}.agent.id : (${selectedAgentIds
       .map((id) => `"${id}"`)
       .join(' or ')})`;
   }
@@ -84,7 +86,6 @@ export const getKuery = ({
   }
 
   if (kueryBuilder.length > 0) {
-    kueryBuilder.trim();
     kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kueryBuilder})`;
   } else {
     kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
