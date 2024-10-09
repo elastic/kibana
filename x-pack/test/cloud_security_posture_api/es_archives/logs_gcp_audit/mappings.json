@@ -12,7 +12,6 @@
       },
       "data_stream": {
         "allow_custom_routing": false,
-        "failure_store": false,
         "hidden": false
       },
       "ignore_missing_component_templates": [
@@ -614,9 +613,6 @@
           "index": {
             "codec": "best_compression",
             "final_pipeline": ".fleet_final_pipeline-1",
-            "lifecycle": {
-              "name": "logs"
-            },
             "mapping": {
               "ignore_malformed": "true",
               "total_fields": {
