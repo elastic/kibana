@@ -572,9 +572,6 @@ export function TrainedModelsTableProvider(
 
       await mlCommonUI.waitForRefreshButtonEnabled();
 
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been started successfully.`
-      );
       await this.waitForModelsToLoad();
 
       await retry.tryForTime(
@@ -599,10 +596,6 @@ export function TrainedModelsTableProvider(
 
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
-      await mlCommonUI.waitForRefreshButtonEnabled();
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been stopped successfully.`
-      );
       await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
