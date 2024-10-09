@@ -40,7 +40,7 @@ export const setStubKibanaServices = () => {
     dashboard: dashboardPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     contentManagement: contentManagementMock.createStartContract(),
-    presentationUtil: presentationUtilPluginMock.createStartContract(core),
+    presentationUtil: presentationUtilPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
   });
 };
