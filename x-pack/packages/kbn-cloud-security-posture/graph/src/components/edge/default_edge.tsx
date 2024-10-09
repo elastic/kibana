@@ -8,7 +8,8 @@
 import React from 'react';
 import { BaseEdge, getBezierPath } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import type { EdgeProps } from '.';
+import type { Color } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import type { EdgeProps } from '../types';
 import { getMarker } from './styles';
 import { getShapeHandlePosition } from './utils';
 
@@ -24,7 +25,7 @@ export function DefaultEdge({
   data,
 }: EdgeProps) {
   const { euiTheme } = useEuiTheme();
-  const color = data?.color ?? 'primary';
+  const color: Color = data?.color ?? 'primary';
 
   const [edgePath] = getBezierPath({
     sourceX:

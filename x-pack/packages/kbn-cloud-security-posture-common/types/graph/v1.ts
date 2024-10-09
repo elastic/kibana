@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import {
+  colorSchema,
   edgeDataSchema,
   entityNodeDataSchema,
   graphRequestSchema,
@@ -18,6 +19,8 @@ import {
 
 export type GraphRequest = TypeOf<typeof graphRequestSchema>;
 export type GraphResponse = TypeOf<typeof graphResponseSchema>;
+
+export type Color = typeof colorSchema.type;
 
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
 

@@ -12,6 +12,7 @@ import {
   Controls,
   Background,
   Node,
+  Edge,
   Position,
   useNodesState,
   useEdgesState,
@@ -32,7 +33,7 @@ import {
   LabelNode,
   EdgeGroupNode,
 } from './node';
-import type { EdgeViewModel, NodeViewModel } from './types';
+import type { NodeViewModel } from './types';
 import { DefaultEdge } from './edge';
 import { SvgDefsMarker } from './edge/styles';
 import { GroupStyleOverride } from './node/styles';
@@ -248,6 +249,7 @@ SimpleAPIMock.args = {
       target:
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
       targetShape: 'label',
+      color: 'primary',
     },
     {
       id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(projects/your-project-id/roles/customRole)',
@@ -256,6 +258,7 @@ SimpleAPIMock.args = {
       sourceShape: 'label',
       target: 'projects/your-project-id/roles/customRole',
       targetShape: 'hexagon',
+      color: 'primary',
     },
   ],
 };
@@ -544,7 +547,7 @@ function processGraph(
   edgesModel: EdgeDataModel[]
 ): {
   initialNodes: Node[];
-  initialEdges: EdgeViewModel[];
+  initialEdges: Edge[];
 } {
   const { nodes: nodesViewModel } = layoutGraph(nodesModel, edgesModel);
 
@@ -579,7 +582,7 @@ function processGraph(
     return node;
   });
 
-  const initialEdges = edgesModel.map((edgeData) => {
+  const initialEdges: Edge[] = edgesModel.map((edgeData) => {
     const isIn =
       nodesById[edgeData.source].shape !== 'label' && nodesById[edgeData.target].shape === 'group';
     const isInside =
@@ -593,13 +596,10 @@ function processGraph(
       id: edgeData.id,
       type: 'default',
       source: edgeData.source,
-      sourceShape: edgeData.sourceShape,
       sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
       target: edgeData.target,
-      targetShape: edgeData.targetShape,
       targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
       data: { ...edgeData },
-      interactive: false,
     };
   });
 
