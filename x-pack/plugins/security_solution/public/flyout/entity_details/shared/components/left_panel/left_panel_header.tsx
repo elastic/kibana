@@ -25,6 +25,11 @@ export enum EntityDetailsLeftPanelTab {
   CSP_INSIGHTS = 'csp_insights',
 }
 
+export enum CspInsightLeftPanelSubTab {
+  MISCONFIGURATIONS = 'misconfigurationTabId',
+  VULNERABILITIES = 'vulnerabilitiesTabId',
+}
+
 export interface PanelHeaderProps {
   /**
    * Id of the tab selected in the parent component to display its content

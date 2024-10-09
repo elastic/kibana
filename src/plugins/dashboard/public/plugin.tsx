@@ -72,7 +72,6 @@ import {
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
@@ -138,7 +137,6 @@ export interface DashboardStart {
 }
 
 export let resolveServicesReady: () => void;
-export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
 
 export class DashboardPlugin
   implements
@@ -226,14 +224,6 @@ export class DashboardPlugin
           return query;
         });
       },
-    });
-
-    core.getStartServices().then(([, deps]) => {
-      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
-      embeddable.registerEmbeddableFactory(
-        dashboardContainerFactory.type,
-        dashboardContainerFactory
-      );
     });
 
     this.stopUrlTracking = () => {
