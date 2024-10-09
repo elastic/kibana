@@ -58,4 +58,5 @@ export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = [
   'query',
   'new_terms',
   'threat_match',
+  'machine_learning',
 ];
