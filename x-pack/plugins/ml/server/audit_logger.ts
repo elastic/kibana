@@ -30,10 +30,16 @@ type TaskTypeAD =
   | 'stop_ad_datafeed'
   | 'update_ad_datafeed'
   | 'put_calendar'
+  | 'delete_calendar'
   | 'put_calendar_job'
+  | 'delete_calendar_job'
   | 'post_calendar_events'
+  | 'delete_calendar_event'
   | 'put_filter'
-  | 'update_filter';
+  | 'update_filter'
+  | 'delete_filter'
+  | 'forecast'
+  | 'delete_forecast';
 
 type TaskTypeDFA =
   | 'put_dfa_job'
@@ -150,10 +156,13 @@ export class MlAuditLogger {
         // @ts-expect-error body is optional
         const jobIds = (params.body ?? params).job_ids;
         return {
-          message: `Creating calendar ${calendarId} ${
-            jobIds ? `with job(s) ${jobIds.join()}` : ''
-          }`,
+          message: `Creating calendar ${calendarId} ${jobIds ? `with job(s) ${jobIds}` : ''}`,
         };
+      }
+      case 'delete_calendar': {
+        const [params] = p as Parameters<MlClient['deleteCalendar']>;
+        const calendarId = params.calendar_id;
+        return { message: `Deleting calendar ${calendarId}` };
       }
       case 'put_calendar_job': {
         const [params] = p as Parameters<MlClient['putCalendarJob']>;
@@ -161,6 +170,14 @@ export class MlAuditLogger {
         const jobIds = params.job_id;
         return {
           message: `Adding job(s) ${jobIds} to calendar ${calendarId}`,
+        };
+      }
+      case 'delete_calendar_job': {
+        const [params] = p as Parameters<MlClient['deleteCalendarJob']>;
+        const calendarId = params.calendar_id;
+        const jobIds = params.job_id;
+        return {
+          message: `Removing job(s) ${jobIds} from calendar ${calendarId}`,
         };
       }
       case 'post_calendar_events': {
@@ -172,6 +189,14 @@ export class MlAuditLogger {
           message: `Adding ${eventsCount} event(s) to calendar ${calendarId}`,
         };
       }
+      case 'delete_calendar_event': {
+        const [params] = p as Parameters<MlClient['deleteCalendarEvent']>;
+        const calendarId = params.calendar_id;
+        const eventId = params.event_id;
+        return {
+          message: `Removing event(s) ${eventId} from calendar ${calendarId}`,
+        };
+      }
       case 'put_filter': {
         const [params] = p as Parameters<MlClient['putFilter']>;
         const filterId = params.filter_id;
@@ -181,6 +206,21 @@ export class MlAuditLogger {
         const [params] = p as Parameters<MlClient['updateFilter']>;
         const filterId = params.filter_id;
         return { message: `Updating filter ${filterId}` };
+      }
+      case 'delete_filter': {
+        const [params] = p as Parameters<MlClient['deleteFilter']>;
+        const filterId = params.filter_id;
+        return { message: `Deleting filter ${filterId}` };
+      }
+      case 'forecast': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Forecasting for job ${jobId}` };
+      }
+      case 'delete_forecast': {
+        const [params] = p as Parameters<MlClient['deleteForecast']>;
+        const forecastId = params.forecast_id;
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Deleting forecast ${forecastId} for job ${jobId}` };
       }
 
       /* Data Frame Analytics */

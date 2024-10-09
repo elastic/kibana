@@ -165,13 +165,17 @@ export function getMlClient(
       return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'close_ad_job', p);
     },
     async deleteCalendar(...p: Parameters<MlClient['deleteCalendar']>) {
-      return mlClient.deleteCalendar(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteCalendar(...p), 'delete_calendar', p);
     },
     async deleteCalendarEvent(...p: Parameters<MlClient['deleteCalendarEvent']>) {
-      return mlClient.deleteCalendarEvent(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteCalendarEvent(...p),
+        'delete_calendar_event',
+        p
+      );
     },
     async deleteCalendarJob(...p: Parameters<MlClient['deleteCalendarJob']>) {
-      return mlClient.deleteCalendarJob(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteCalendarJob(...p), 'delete_calendar_job', p);
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
@@ -202,11 +206,11 @@ export function getMlClient(
       return mlClient.deleteExpiredData(...p);
     },
     async deleteFilter(...p: Parameters<MlClient['deleteFilter']>) {
-      return mlClient.deleteFilter(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteFilter(...p), 'delete_filter', p);
     },
     async deleteForecast(...p: Parameters<MlClient['deleteForecast']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.deleteForecast(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteForecast(...p), 'delete_forecast', p);
     },
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -246,7 +250,7 @@ export function getMlClient(
     },
     async forecast(...p: Parameters<MlClient['forecast']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.forecast(...p);
+      return auditLogger.wrapTask(() => mlClient.forecast(...p), 'forecast', p);
     },
     async getBuckets(...p: Parameters<MlClient['getBuckets']>) {
       await jobIdsCheck('anomaly-detector', p);
