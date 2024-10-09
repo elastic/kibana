@@ -28,6 +28,12 @@
     "@kbn/ui-theme",
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
-    "@kbn/navigation-plugin"
+    "@kbn/navigation-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/data-plugin",
+    "@kbn/core-capabilities-common"
   ]
 }
