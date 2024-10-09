@@ -202,7 +202,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
               patternRollup={patternRollup}
             />
           ) : (
-            <HistoricalResults indexName={indexName} latestCheckExists={Boolean(indexResult)} />
+            <HistoricalResults indexName={indexName} />
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

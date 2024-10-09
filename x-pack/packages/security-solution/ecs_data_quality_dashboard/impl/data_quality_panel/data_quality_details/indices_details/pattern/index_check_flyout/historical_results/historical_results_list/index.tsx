@@ -25,19 +25,17 @@ import { HistoricalResult } from './historical_result';
 import { StyledText } from '../styles';
 import { getCheckTextColor } from '../../../utils/get_check_text_color';
 import {
+  CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN,
   COUNTED_INCOMPATIBLE_FIELDS,
-  NO_HISTORICAL_RESULTS,
-  NO_HISTORICAL_RESULTS_BODY,
-  NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE,
+  NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA,
   TOGGLE_HISTORICAL_RESULT_CHECKED_AT,
 } from './translations';
 
 interface Props {
   indexName: string;
-  latestCheckExists: boolean;
 }
 
-export const HistoricalResultsListComponent: FC<Props> = ({ indexName, latestCheckExists }) => {
+export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
   const [accordionState, setAccordionState] = useState<Record<number, boolean>>(() => ({}));
   const historicalResultsAccordionId = useGeneratedHtmlId({ prefix: 'historicalResultsAccordion' });
   const { historicalResultsState } = useHistoricalResultsContext();
@@ -96,12 +94,8 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName, latestChe
       ) : (
         <EuiEmptyPrompt
           iconType="clockCounter"
-          title={
-            <h2>
-              {latestCheckExists ? NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE : NO_HISTORICAL_RESULTS}
-            </h2>
-          }
-          body={<p>{NO_HISTORICAL_RESULTS_BODY}</p>}
+          title={<h2>{NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA}</h2>}
+          body={<p>{CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN}</p>}
         />
       )}
     </div>

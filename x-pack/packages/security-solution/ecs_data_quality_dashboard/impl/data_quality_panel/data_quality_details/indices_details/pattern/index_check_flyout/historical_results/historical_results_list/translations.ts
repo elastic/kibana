@@ -7,24 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_HISTORICAL_RESULTS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResults',
+export const NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.noResultsMatchYourSearchCriteria',
   {
-    defaultMessage: 'No historical check results',
+    defaultMessage: 'No results match your search criteria',
   }
 );
 
-export const NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsForGivenRange',
+export const CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.changeYourSearchCriteriaOrRun',
   {
-    defaultMessage: 'No historical check results for the given range',
-  }
-);
-
-export const NO_HISTORICAL_RESULTS_BODY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsBody',
-  {
-    defaultMessage: 'To run a data quality check, click Check now',
+    defaultMessage: 'Change your search criteria or run a new check',
   }
 );
 

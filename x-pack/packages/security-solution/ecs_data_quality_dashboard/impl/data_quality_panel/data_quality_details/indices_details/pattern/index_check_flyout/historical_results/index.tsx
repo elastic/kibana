@@ -15,7 +15,6 @@ import {
   EuiTablePagination,
 } from '@elastic/eui';
 import React, { FC, useMemo, useReducer } from 'react';
-
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
 import {
@@ -54,10 +53,9 @@ const itemsPerPageOptions = [10, 25, 50];
 
 export interface Props {
   indexName: string;
-  latestCheckExists: boolean;
 }
 
-export const HistoricalResultsComponent: FC<Props> = ({ indexName, latestCheckExists }) => {
+export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
   const { formatNumber } = useDataQualityContext();
 
   // Manages state for the fetch historical results query object
@@ -163,7 +161,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName, latestCheckEx
         {totalChecksText}
       </StyledText>
       <div id={historicalResultsListId}>
-        <HistoricalResultsList indexName={indexName} latestCheckExists={latestCheckExists} />
+        <HistoricalResultsList indexName={indexName} />
       </div>
       {paginationState.pageCount > 1 ? (
         <div data-test-subj="historicalResultsPagination">
