@@ -133,4 +133,5 @@ export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeA
   mappings: { fieldMap: uptimeRuleTypeFieldMap },
   useLegacyAlerts: true,
   shouldWrite: true,
+  useEcs: true,
 };

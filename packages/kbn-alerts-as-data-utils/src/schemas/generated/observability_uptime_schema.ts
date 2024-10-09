@@ -12,6 +12,7 @@
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
+import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -106,6 +107,6 @@ const ObservabilityUptimeAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const ObservabilityUptimeAlertSchema = rt.intersection([ObservabilityUptimeAlertRequired, ObservabilityUptimeAlertOptional, AlertSchema, LegacyAlertSchema]);
+export const ObservabilityUptimeAlertSchema = rt.intersection([ObservabilityUptimeAlertRequired, ObservabilityUptimeAlertOptional, AlertSchema, EcsSchema, LegacyAlertSchema]);
 // prettier-ignore
 export type ObservabilityUptimeAlert = rt.TypeOf<typeof ObservabilityUptimeAlertSchema>;

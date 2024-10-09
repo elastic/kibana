@@ -30,6 +30,7 @@ export const OverviewPingCodec = t.intersection([
     service: t.type({
       name: t.string,
     }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 

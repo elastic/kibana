@@ -47,6 +47,7 @@ export const getMonitorAlertDocument = (
   [STATE_ID]: monitorSummary.stateId,
   'location.id': locationIds,
   'location.name': locationNames,
+  labels: monitorSummary.labels,
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
   'kibana.alert.evaluation.value':
@@ -115,6 +116,7 @@ export const getMonitorSummary = ({
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
     serviceName: monitorInfo.service?.name,
+    labels: monitorInfo.labels,
     locationName: formattedLocationName,
     locationNames: formattedLocationName,
     hostName: monitorInfo.agent?.name!,
