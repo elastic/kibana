@@ -25,18 +25,22 @@ export const EventMergingBanner: React.FC<{ onDismiss: () => void }> = ({ onDism
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.eventMergingBanner.body"
-          defaultMessage="Elastic Agent 8.16+ will produce less telemetry without reducing system visibility, which may impact existing event filters. To learn more about these changes and how to adjust your settings, visit our "
+          defaultMessage="Elastic Agent 8.16+ will produce less telemetry without reducing system visibility, which may impact existing event filters. To learn more about these changes and how to adjust your settings, visit our {documentation}."
+          values={{
+            documentation: (
+              <EuiLink
+                href={docLinks?.links.securitySolution.eventMerging}
+                target="_blank"
+                data-test-subj="eventMergingDocLink"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.eventMergingBanner.doc.link"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-        <EuiLink
-          href={docLinks?.links.securitySolution.eventMerging}
-          target="_blank"
-          data-test-subj="eventMergingDocLink"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.eventMergingBanner.doc.link"
-            defaultMessage="documentation."
-          />
-        </EuiLink>
       </EuiText>
     </EuiCallOut>
   );
