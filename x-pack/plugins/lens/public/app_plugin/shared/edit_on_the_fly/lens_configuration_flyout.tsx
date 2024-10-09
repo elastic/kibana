@@ -323,18 +323,16 @@ export function LensEditConfigurationFlyout({
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
       // do not run the suggestions if the query is the same as the previous one
-      const attrs = isEqual(q, prevQuery.current)
-        ? attributes
-        : await getSuggestions(
-            q,
-            startDependencies,
-            datasourceMap,
-            visualizationMap,
-            adHocDataViews,
-            setErrors,
-            abortController,
-            setDataGridAttrs
-          );
+      const attrs = await getSuggestions(
+        q,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors,
+        abortController,
+        setDataGridAttrs
+      );
       if (attrs) {
         setCurrentAttributes?.(attrs);
         setErrors([]);
@@ -344,7 +342,6 @@ export function LensEditConfigurationFlyout({
       setIsVisualizationLoading(false);
     },
     [
-      attributes,
       startDependencies,
       datasourceMap,
       visualizationMap,
@@ -501,7 +498,7 @@ export function LensEditConfigurationFlyout({
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
-                  if (q) {
+                  if (q && !isEqual(q, prevQuery.current)) {
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
