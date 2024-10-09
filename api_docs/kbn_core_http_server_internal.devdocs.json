@@ -1123,7 +1123,9 @@
           },
           ", server: ",
           "Server",
-          ", cookieOptions: ",
+          "<",
+          "ServerApplicationState",
+          ">, cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -1176,7 +1178,10 @@
               "- hapi server to create SessionStorage for"
             ],
             "signature": [
-              "Server"
+              "Server",
+              "<",
+              "ServerApplicationState",
+              ">"
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,

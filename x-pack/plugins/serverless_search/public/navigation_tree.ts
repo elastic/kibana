@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-export const navigationTree = (useSearchHomepage: boolean = false): NavigationTreeDefinition => ({
+const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
+  id: 'gettingStarted',
+  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+    defaultMessage: 'Getting Started',
+  }),
+  link: 'serverlessElasticsearch',
+  spaceBefore: 'm',
+};
+
+export const navigationTree = (
+  homeLink: AppDeepLinkId = 'serverlessElasticsearch' as AppDeepLinkId,
+  showGettingStarted: boolean
+): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -25,7 +41,7 @@ export const navigationTree = (useSearchHomepage: boolean = false): NavigationTr
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: useSearchHomepage ? 'searchHomepage' : 'serverlessElasticsearch',
+          link: homeLink,
           spaceBefore: 'm',
         },
         {
@@ -70,6 +86,16 @@ export const navigationTree = (useSearchHomepage: boolean = false): NavigationTr
               link: 'management:index_management',
               breadcrumbStatus:
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(
+                    prepend('/app/management/data/index_management/')
+                  ) ||
+                  pathNameSerialized.startsWith(
+                    prepend('/app/elasticsearch/indices/index_details/')
+                  )
+                );
+              },
             },
             {
               title: CONNECTORS_LABEL,
@@ -112,6 +138,7 @@ export const navigationTree = (useSearchHomepage: boolean = false): NavigationTr
             },
           ],
         },
+        ...(showGettingStarted ? [gettingStartedItem] : []),
       ],
     },
   ],

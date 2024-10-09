@@ -18,6 +18,21 @@ import { EmailActionParams } from '../types';
 
 const noop = () => {};
 
+export const getFormattedEmailOptions = (
+  searchValue: string,
+  previousOptions: Array<{ label: string }>
+): Array<{ label: string }> => {
+  if (!searchValue.trim()) return previousOptions;
+  const previousEmails: string[] = previousOptions.map((option) => option.label);
+  const allUniqueEmails: Set<string> = new Set(previousEmails);
+  searchValue.split(',').forEach((email) => {
+    const trimmedEmail = email.trim();
+    if (trimmedEmail) allUniqueEmails.add(trimmedEmail);
+  });
+  const formattedOptions = Array.from(allUniqueEmails).map((email) => ({ label: email }));
+  return formattedOptions;
+};
+
 export const EmailParamsFields = ({
   actionParams,
   editAction,
@@ -105,7 +120,7 @@ export const EmailParamsFields = ({
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {
-            const newOptions = [...toOptions, { label: searchValue }];
+            const newOptions = getFormattedEmailOptions(searchValue, toOptions);
             editAction(
               'to',
               newOptions.map((newOption) => newOption.label),
@@ -148,7 +163,7 @@ export const EmailParamsFields = ({
             data-test-subj="ccEmailAddressInput"
             selectedOptions={ccOptions}
             onCreateOption={(searchValue: string) => {
-              const newOptions = [...ccOptions, { label: searchValue }];
+              const newOptions = getFormattedEmailOptions(searchValue, ccOptions);
               editAction(
                 'cc',
                 newOptions.map((newOption) => newOption.label),
@@ -192,7 +207,7 @@ export const EmailParamsFields = ({
             data-test-subj="bccEmailAddressInput"
             selectedOptions={bccOptions}
             onCreateOption={(searchValue: string) => {
-              const newOptions = [...bccOptions, { label: searchValue }];
+              const newOptions = getFormattedEmailOptions(searchValue, bccOptions);
               editAction(
                 'bcc',
                 newOptions.map((newOption) => newOption.label),

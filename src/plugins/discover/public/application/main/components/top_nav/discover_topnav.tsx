@@ -12,6 +12,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -233,6 +234,12 @@ export const DiscoverTopNav = ({
     uiSettings,
   ]);
 
+  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+    }
+  }, []);
+
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   const SearchBar = useMemo(
@@ -278,6 +285,7 @@ export const DiscoverTopNav = ({
             <searchBarCustomization.PrependFilterBar />
           ) : undefined
         }
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
