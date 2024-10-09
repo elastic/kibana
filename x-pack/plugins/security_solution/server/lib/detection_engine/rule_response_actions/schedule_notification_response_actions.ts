@@ -32,6 +32,9 @@ export const getScheduleNotificationResponseActionsService =
     const nestedAlerts = signals.map((signal) => expandDottedObject(signal as object)) as Alert[];
     const alerts = nestedAlerts.filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
+    if (!alerts.length) {
+      return;
+    }
     return Promise.all(
       responseActions.map(async (responseAction) => {
         if (
