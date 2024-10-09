@@ -51,7 +51,7 @@ import {
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
@@ -569,8 +569,8 @@ describe('test endpoint routes', () => {
       ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
         routerMock,
         'get',
-        METADATA_TRANSFORMS_STATUS_ROUTE,
-        '2023-10-31'
+        METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        '1'
       ));
 
       const contextOverrides = {
@@ -602,8 +602,8 @@ describe('test endpoint routes', () => {
       ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
         routerMock,
         'get',
-        METADATA_TRANSFORMS_STATUS_ROUTE,
-        '2023-10-31'
+        METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        '1'
       ));
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),

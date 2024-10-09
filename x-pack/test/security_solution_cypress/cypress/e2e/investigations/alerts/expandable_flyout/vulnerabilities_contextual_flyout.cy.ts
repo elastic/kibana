@@ -18,10 +18,12 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { visit } from '../../../../tasks/navigation';
 
 const CSP_INSIGHT_VULNERABILITIES_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutInsightsVulnerabilitiesTitleText'
+  'securitySolutionFlyoutInsightsVulnerabilitiesTitleLink'
 );
 
-const NO_VULNERABILITIES_TEXT = getDataTestSubjectSelector('noVulnerabilitiesDataTestSubj');
+const CSP_INSIGHT_VULNERABILITIES_TABLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutVulnerabilitiesFindingsTable'
+);
 
 const timestamp = Date.now();
 
@@ -154,6 +156,28 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
   });
 
+  context(
+    'Host name - Has Vulnerabilities findings but with different host name than the alerts',
+    () => {
+      beforeEach(() => {
+        createMockVulnerability(false);
+        cy.reload();
+        expandFirstAlertHostFlyout();
+      });
+
+      afterEach(() => {
+        deleteDataStream();
+      });
+
+      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+        expandFirstAlertHostFlyout();
+
+        cy.log('check if Vulnerabilities preview title is not shown');
+        cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('not.exist');
+      });
+    }
+  );
+
   context('Host name - Has Vulnerabilities findings', () => {
     beforeEach(() => {
       createMockVulnerability(true);
@@ -169,27 +193,10 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       cy.log('check if Vulnerabilities preview title shown');
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
     });
+
+    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).click();
+      cy.get(CSP_INSIGHT_VULNERABILITIES_TABLE).should('be.visible');
+    });
   });
-
-  context(
-    'Host name - Has Vulnerabilities findings but host name is not the same as alert host name',
-    () => {
-      beforeEach(() => {
-        createMockVulnerability(false);
-        cy.reload();
-        expandFirstAlertHostFlyout();
-      });
-
-      afterEach(() => {
-        deleteDataStream();
-      });
-
-      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings but it should show no vulnerabilities title', () => {
-        cy.log('check if Vulnerabilities preview title shown');
-        cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
-        cy.log('check if no vulnerabilities text is shown');
-        cy.get(NO_VULNERABILITIES_TEXT).should('be.visible');
-      });
-    }
-  );
 });
