@@ -45,7 +45,7 @@ describe(
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY).and(
         'contain.text',
-        "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actions(opens in a new tab or window)."
+        "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actions(external, opens in a new tab or window)."
       );
     });
   }
