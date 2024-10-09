@@ -553,7 +553,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       })
     );
     const features = {
-      assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     };
