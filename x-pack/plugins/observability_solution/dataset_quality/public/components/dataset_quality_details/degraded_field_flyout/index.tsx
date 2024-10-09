@@ -38,6 +38,7 @@ import {
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
 import { _IGNORED } from '../../../../common/es_fields';
+import { PossibleMitigations } from './possible_mitigations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -121,6 +122,8 @@ export default function DegradedFieldFlyout() {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <DegradedFieldInfo fieldList={fieldList} />
+        <EuiSpacer size="s" />
+        {isUserViewingTheIssueOnLatestBackingIndex && <PossibleMitigations />}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

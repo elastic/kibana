@@ -125,7 +125,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
         </>
       )}
 
-      {!isAnalysisInProgress && degradedFieldAnalysisResult?.shouldDisplayValues && (
+      {!isAnalysisInProgress && degradedFieldAnalysisResult?.shouldDisplayIgnoredValuesAndLimit && (
         <>
           <EuiFlexGroup
             data-test-subj={'datasetQualityDetailsDegradedFieldFlyoutFieldsList-characterLimit'}

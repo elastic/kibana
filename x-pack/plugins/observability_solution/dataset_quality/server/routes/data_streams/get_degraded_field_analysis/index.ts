@@ -28,7 +28,13 @@ export async function analyzeDegradedField({
 
   const [
     { fieldCount, fieldPresent, fieldMapping },
-    { nestedFieldLimit, totalFieldLimit, ignoreDynamicBeyondLimit, ignoreMalformed },
+    {
+      nestedFieldLimit,
+      totalFieldLimit,
+      ignoreDynamicBeyondLimit,
+      ignoreMalformed,
+      defaultPipeline,
+    },
   ] = await Promise.all([
     getDataStreamMapping({
       datasetQualityESClient,
@@ -48,5 +54,6 @@ export async function analyzeDegradedField({
     totalFieldLimit,
     ignoreMalformed,
     nestedFieldLimit,
+    defaultPipeline,
   };
 }

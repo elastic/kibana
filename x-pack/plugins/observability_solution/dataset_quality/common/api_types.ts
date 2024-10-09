@@ -134,14 +134,35 @@ export const degradedFieldAnalysisRt = rt.intersection([
       type: rt.string,
       ignore_above: rt.number,
     }),
+    defaultPipeline: rt.string,
   }),
 ]);
 
 export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
 
+export const updateFieldLimitResponseRt = rt.intersection([
+  rt.type({
+    isComponentTemplateUpdated: rt.union([rt.boolean, rt.undefined]),
+    isLatestBackingIndexUpdated: rt.union([rt.boolean, rt.undefined]),
+    customComponentTemplateName: rt.string,
+  }),
+  rt.partial({
+    error: rt.string,
+  }),
+]);
+
+export type UpdateFieldLimitResponse = rt.TypeOf<typeof updateFieldLimitResponseRt>;
+
+export const dataStreamRolloverResponseRt = rt.type({
+  acknowledged: rt.boolean,
+});
+
+export type DataStreamRolloverResponse = rt.TypeOf<typeof dataStreamRolloverResponseRt>;
+
 export const dataStreamSettingsRt = rt.intersection([
   rt.type({
     lastBackingIndexName: rt.string,
+    indexTemplate: rt.string,
   }),
   rt.partial({
     createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless

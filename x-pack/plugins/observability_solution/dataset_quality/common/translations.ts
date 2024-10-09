@@ -500,3 +500,147 @@ export const degradedFieldMessageIssueDoesNotExistInLatestIndex = i18n.translate
       'This issue was detected in an older version of the dataset, but not in the most recent version.',
   }
 );
+
+export const possibleMitigationTitle = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigationTitle',
+  {
+    defaultMessage: 'Possible mitigation',
+  }
+);
+
+export const increaseFieldMappingLimitTitle = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldMappingLimitTitle',
+  {
+    defaultMessage: 'Increase field mapping limit',
+  }
+);
+
+export const fieldLimitMitigationDescriptionText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationDescription',
+  {
+    defaultMessage:
+      'The field mapping limit sets the maximum number of fields in an index. When exceeded,additional fields are ignored. To prevent this, increase your field mapping limit.',
+  }
+);
+
+export const fieldLimitMitigationConsiderationText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationConsiderations',
+  {
+    defaultMessage: 'Before changing the field limit, consider the following:',
+  }
+);
+
+export const fieldLimitMitigationConsiderationText1 = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationConsiderations1',
+  {
+    defaultMessage: 'Increasing the field limit could slow cluster performance.',
+  }
+);
+
+export const fieldLimitMitigationConsiderationText2 = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationConsiderations2',
+  {
+    defaultMessage: 'Increasing the field limit also resolves field limit issues for other fields.',
+  }
+);
+
+export const fieldLimitMitigationConsiderationText3 = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationConsiderations3',
+  {
+    defaultMessage:
+      'This change applies to the [name] component template and affects all namespaces in the template.',
+  }
+);
+
+export const fieldLimitMitigationConsiderationText4 = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationConsiderations4',
+  {
+    defaultMessage:
+      'You need to roll over affected data streams to apply mapping changes to component templates.',
+  }
+);
+
+export const fieldLimitMitigationCurrentLimitLabelText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationCurrentLimitLabelText',
+  {
+    defaultMessage: 'Current limit',
+  }
+);
+
+export const fieldLimitMitigationNewLimitButtonText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationNewLimitButtonText',
+  {
+    defaultMessage: 'New limit',
+  }
+);
+
+export const fieldLimitMitigationNewLimitPlaceholderText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationNewLimitPlaceholderText',
+  {
+    defaultMessage: 'New field limit',
+  }
+);
+
+export const fieldLimitMitigationApplyButtonText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationApplyButtonText',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const otherMitigationsCustomComponentTemplate = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomComponentTemplate',
+  {
+    defaultMessage: 'Add or edit custom component template',
+  }
+);
+
+export const otherMitigationsCustomIngestPipeline = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomIngestPipeline',
+  {
+    defaultMessage: 'Add or edit custom ingest pipeline',
+  }
+);
+
+export const fieldLimitMitigationOfficialDocumentation = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationOfficialDocumentation',
+  {
+    defaultMessage: 'Documentation',
+  }
+);
+
+export const fieldLimitMitigationSuccessMessage = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationSuccessMessage',
+  {
+    defaultMessage: 'New limit set!',
+  }
+);
+
+export const fieldLimitMitigationSuccessComponentTemplateLinkText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationSuccessComponentTemplateLinkText',
+  {
+    defaultMessage: 'See component template',
+  }
+);
+
+export const fieldLimitMitigationFailedMessage = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessage',
+  {
+    defaultMessage: 'Sorry, the request failed partially',
+  }
+);
+
+export const fieldLimitMitigationFailedMessageDescription = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessageDescription',
+  {
+    defaultMessage:
+      'The component template was successfully updated with the new limit, but we failed to updated the last backing index. Please do a rollover for the changes to be applicable on new data',
+  }
+);
+
+export const fieldLimitMitigationRolloverButton = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationRolloverButton',
+  {
+    defaultMessage: 'Rollover',
+  }
+);

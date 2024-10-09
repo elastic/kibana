@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { useKibanaContextForPlugin } from '../../../../../utils';
+import {
+  otherMitigationsCustomComponentTemplate,
+  otherMitigationsCustomIngestPipeline,
+} from '../../../../../../common/translations';
+import { useDatasetQualityDetailsState, useDegradedFields } from '../../../../../hooks';
+import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
+
+export function ManualMitigations() {
+  return (
+    <>
+      <EditComponentTemplate />
+      <EuiSpacer size="s" />
+      <EditPipeline />
+    </>
+  );
+}
+
+function EditComponentTemplate() {
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+
+  const { dataStreamSettings, integrationDetails, datasetDetails } =
+    useDatasetQualityDetailsState();
+  const { name } = datasetDetails;
+  const isIntegration = !!integrationDetails?.integration;
+
+  const onClickHandler = useCallback(async () => {
+    await application.navigateToApp(MANAGEMENT_APP_ID, {
+      path: isIntegration
+        ? `/data/index_management/component_templates/${getComponentTemplatePrefixFromIndexTemplate(
+            dataStreamSettings?.indexTemplate ?? name
+          )}@custom`
+        : `/data/index_management/templates/${dataStreamSettings?.indexTemplate}`,
+      openInNewTab: true,
+    });
+  }, [application, dataStreamSettings?.indexTemplate, isIntegration, name]);
+
+  return (
+    <EuiPanel hasBorder grow={false}>
+      <EuiLink
+        data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
+        onClick={onClickHandler}
+        target="_blank"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <p>{otherMitigationsCustomComponentTemplate}</p>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiPanel>
+  );
+}
+
+function EditPipeline() {
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+  const { degradedFieldAnalysis } = useDegradedFields();
+
+  const onClickHandler = async () => {
+    await application.navigateToApp(MANAGEMENT_APP_ID, {
+      path: `/ingest/ingest_pipelines/?pipeline=${degradedFieldAnalysis?.defaultPipeline}`,
+      openInNewTab: true,
+    });
+  };
+
+  return (
+    <EuiPanel hasBorder grow={false}>
+      <EuiLink
+        data-test-subj="datasetQualityManualMitigationsPipelineLink"
+        onClick={onClickHandler}
+        target="_blank"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <p>{otherMitigationsCustomIngestPipeline}</p>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiPanel>
+  );
+}

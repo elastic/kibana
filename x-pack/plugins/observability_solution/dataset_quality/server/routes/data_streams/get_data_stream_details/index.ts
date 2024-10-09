@@ -39,12 +39,14 @@ export async function getDataStreamSettings({
 
   const integration = dataStreamInfo?._meta?.package?.name;
   const lastBackingIndex = dataStreamInfo?.indices?.slice(-1)[0];
+  const indexTemplate = dataStreamInfo.template;
 
   return {
     createdOn,
     integration,
     datasetUserPrivileges,
     lastBackingIndexName: lastBackingIndex?.index_name,
+    indexTemplate,
   };
 }
 
