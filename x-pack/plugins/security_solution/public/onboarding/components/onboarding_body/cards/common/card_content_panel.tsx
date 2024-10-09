@@ -16,8 +16,8 @@ export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelP
       <EuiPanel
         className={css`
           background-color: ${isDarkMode ? euiTheme.colors.lightestShade : ''};
+          padding-top: 0;
         `}
-        style={{ paddingTop: 0 }}
         paddingSize="m"
         hasShadow={false}
         hasBorder={false}
