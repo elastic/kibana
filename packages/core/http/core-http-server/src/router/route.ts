@@ -286,14 +286,11 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router
-   * introspection. This primarily concerns outputs like OAS derived from router
-   * introspection.
+   * OAS introspection.
    *
    * @default false
-   * @remarks Setting this to `true` will make settings related to introspection useless,
-   *          for example "description".
    */
-  hiddenFromIntrospection?: boolean;
+  excludeFromOAS?: boolean;
 
   /**
    * Release version or date that this route will be removed

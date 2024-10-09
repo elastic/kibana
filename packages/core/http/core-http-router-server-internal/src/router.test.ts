@@ -95,7 +95,7 @@ describe('Router', () => {
       router.get(
         {
           path: '/hidden',
-          options: { hiddenFromIntrospection: true },
+          options: { excludeFromOAS: true },
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok()
@@ -103,7 +103,7 @@ describe('Router', () => {
       router.get(
         {
           path: '/hidden-versioned',
-          options: { hiddenFromIntrospection: true },
+          options: { excludeFromOAS: true },
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
