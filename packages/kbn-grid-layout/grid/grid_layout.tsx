@@ -59,9 +59,11 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
             );
             gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
           },
+
           removePanel: (panelId) => {
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
 
+            // find the row where the panel exists and delete it from the corresponding panels object
             let index = 0;
             let updatedPanels;
             for (const row of currentLayout) {
@@ -73,6 +75,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
               index++;
             }
 
+            // if the panels were updated (i.e. the panel was successfully found and deleted), update the layout
             if (updatedPanels) {
               const newLayout = [...currentLayout];
               newLayout[index] = compactGridRow({
@@ -82,6 +85,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
               gridLayoutStateManager.gridLayout$.next(newLayout);
             }
           },
+
           getPanelCount: () => {
             return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
               return prev + Object.keys(row.panels).length;
