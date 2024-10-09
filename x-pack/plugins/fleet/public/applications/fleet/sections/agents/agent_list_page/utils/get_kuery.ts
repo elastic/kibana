@@ -85,11 +85,8 @@ export const getKuery = ({
     }
   }
 
-  if (kueryBuilder.length > 0) {
-    kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kueryBuilder})`;
-  } else {
-    kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
-  }
+  kueryBuilder =
+    AgentStatusKueryHelper.buildKueryForFilteringOutOfflineAgentlessAgents(kueryBuilder);
 
   return kueryBuilder.trim();
 };

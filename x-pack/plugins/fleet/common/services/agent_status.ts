@@ -57,6 +57,13 @@ export function buildKueryForInactiveAgents() {
   return 'status:inactive';
 }
 
+export function buildKueryForFilteringOutOfflineAgentlessAgents(kuery: string) {
+  if (kuery.length > 0) {
+    return `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kuery})`;
+  }
+  return `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
+}
+
 export const AGENT_UPDATING_TIMEOUT_HOURS = 2;
 
 export function isStuckInUpdating(agent: Agent): boolean {
