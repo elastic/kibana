@@ -27,7 +27,7 @@ Use the following table to find links to the appropriate documentation, API refe
 
 | Connectors
 | link:https://www.elastic.co/guide/en/elasticsearch/reference/8.15/connector-apis.html[API reference]
-| {ref}/es-connectors[Elastic Connectors]
+| {ref}/es-connectors.html[Elastic Connectors]
 | {ref}/es-connectors-release-notes.html[Elasticsearch guide]
 
 | Web crawler
