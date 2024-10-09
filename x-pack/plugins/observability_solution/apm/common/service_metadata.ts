@@ -54,4 +54,13 @@ export const SERVICE_METADATA_CLOUD_KEYS = asMutableArray([
   CLOUD_PROVIDER,
 ] as const);
 
+export const SERVICE_METADATA_KUBERNETES_KEYS = asMutableArray([
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+  KUBERNETES_REPLICASET_NAME,
+] as const);
+
 export type ContainerType = 'Kubernetes' | 'Docker' | undefined;

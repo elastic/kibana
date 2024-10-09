@@ -8,6 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -22,7 +23,7 @@ import {
   AGENT_VERSION,
   SERVICE_FRAMEWORK_NAME,
 } from '../../../common/es_fields/apm';
-import { ContainerType } from '../../../common/service_metadata';
+import { ContainerType, SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
@@ -61,11 +62,11 @@ export async function getServiceMetadataIcons({
   const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
   const fields = asMutableArray([
-    KUBERNETES_POD_NAME,
     CLOUD_PROVIDER,
     CONTAINER_ID,
     AGENT_NAME,
     CLOUD_SERVICE_NAME,
+    ...SERVICE_METADATA_KUBERNETES_KEYS,
   ] as const);
 
   const params = {
@@ -80,7 +81,7 @@ export async function getServiceMetadataIcons({
       track_total_hits: 1,
       size: 1,
       query: { bool: { filter, should } },
-      fields,
+      fields: [...fields, 'kubernetes*'],
     },
   };
 
@@ -95,7 +96,9 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const event = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields);
+  const event = unflattenKnownApmEventFields(
+    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+  );
 
   const { kubernetes, cloud, container, agent } = event ?? {};
   let containerType: ContainerType;

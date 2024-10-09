@@ -14,7 +14,6 @@ Object {
   "kubernetes": Object {
     "container": Object {},
     "deployment": Object {},
-    "namespace": Object {},
     "pod": Object {
       "uid": "234",
     },
