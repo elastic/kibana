@@ -36,16 +36,28 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       <EuiSpacer size="s" />
       <FormattedMessage
         id="xpack.enterpriseSearch.deprecationCallout.second_message"
-        defaultMessage="See this {blogUrl} for more information about upgrading your internal knowledge search or this blog post about upgrading your catalog search."
+        defaultMessage="See this {workplaceSearchBlogUrl} for more information about upgrading your internal knowledge search or this {appSearchBlogUrl} about upgrading your catalog search."
         values={{
-          blogUrl: (
+          workplaceSearchBlogUrl: (
             <EuiLink
               data-test-subj="workplaceSearch-deprecationCallout-blog-link"
-              href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
+              href="https://www.elastic.co/blog/evolution-workplace-search-private-data-elasticsearch"
               target="_blank"
               data-telemetry-id="workplaceSearch-deprecationCallout-blog-viewLink"
             >
-              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.viewBlog', {
+              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.viewWorkplaceSearchBlog', {
+                defaultMessage: 'blog post',
+              })}
+            </EuiLink>
+          ),
+          appSearchBlogUrl: (
+            <EuiLink
+              data-test-subj="appSearch-deprecationCallout-blog-link"
+              href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
+              target="_blank"
+              data-telemetry-id="appSearch-deprecationCallout-blog-viewLink"
+            >
+              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.viewAppSearchBlog', {
                 defaultMessage: 'blog post',
               })}
             </EuiLink>
