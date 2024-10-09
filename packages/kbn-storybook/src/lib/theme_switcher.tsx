@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
-import { useGlobals } from '@storybook/api';
+import { useGlobals } from '@storybook/manager-api';
 
 type PropsOf<T extends React.FC<any>> = T extends React.FC<infer P> ? P : never;
 type ArrayItem<T extends any[]> = T extends Array<infer I> ? I : never;
