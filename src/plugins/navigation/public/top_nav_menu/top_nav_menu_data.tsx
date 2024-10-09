@@ -26,11 +26,14 @@ export interface TopNavMenuData {
   fill?: boolean;
   color?: string;
   isLoading?: boolean;
-  iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  /** iconType places an icon to the side of the item label */
+  iconType?: string;
+  /** mobileIconType replaces the item label with an icon for mobile */
+  mobileIconType?: string;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
