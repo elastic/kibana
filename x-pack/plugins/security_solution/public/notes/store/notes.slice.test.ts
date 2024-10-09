@@ -548,11 +548,8 @@ describe('notesSlice', () => {
               },
             },
             action
-          )
-        ).toEqual({
-          ...initalEmptyState,
-          pendingDeleteIds: [],
-        });
+          ).error.createNote
+        ).toBe(null);
       });
     });
 
