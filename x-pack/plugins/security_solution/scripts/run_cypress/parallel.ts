@@ -89,8 +89,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const specConfig = cypressConfigFile.e2e.specPattern;
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
+      const excludeSpecPattern = cypressConfigFile.e2e.excludeSpecPattern;
 
       log.info('Config spec pattern:', specConfig);
+      log.info('Exclude spec pattern:', excludeSpecPattern);
       log.info('Arguments spec pattern:', specArg);
       log.info('Resulting spec pattern:', specPattern);
 
@@ -99,7 +101,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const grepSpecPattern = grep({
         ...cypressConfigFile,
         specPattern,
-        excludeSpecPattern: cypressConfigFile.e2e?.excludeSpecPattern ?? [],
       }).specPattern;
 
       log.info('Resolved spec files or pattern after grep:', grepSpecPattern);
@@ -123,7 +124,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+        : globby.sync(specPattern, {
+            ignore: excludeSpecPattern,
+          }); // convert the glob pattern to concrete file paths
 
       let files = retrieveIntegrations(concreteFilePaths);
 
