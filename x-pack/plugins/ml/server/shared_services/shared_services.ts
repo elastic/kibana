@@ -60,7 +60,7 @@ import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service'
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
-import { MlAuditLogger } from '../audit_logger';
+import { MlAuditLogger } from '../lib/ml_client/ml_audit_logger';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
