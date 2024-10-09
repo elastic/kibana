@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { GridRowData } from '..';
 import { DASHBOARD_GRID_COLUMN_COUNT } from './constants';
 import { GridPanelData, PanelPlacementStrategy } from './types';
+import { resolveGridRow } from './resolve_grid_row';
 
 export const runPanelPlacementStrategy = (
   originalRowData: GridRowData,
@@ -99,11 +100,13 @@ export const runPanelPlacementStrategy = (
         return { column: 0, row: maxRow };
       })();
 
-      return {
+      // some panels might need to be pushed down to accomodate the height of the new panel;
+      // so, resolve the entire row to remove any potential collisions
+      return resolveGridRow({
         ...nextRowData,
         // place the new panel at the top left corner, since there is now space
         panels: { ...nextRowData.panels, [newPanel.id]: { ...newPanel, row, column } },
-      };
+      });
 
     default:
       throw new Error(

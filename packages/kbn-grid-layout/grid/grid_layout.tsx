@@ -44,17 +44,20 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
       ref,
       () => {
         return {
-          addNewPanel: (panelId) => {
-            console.log('panel', panelId);
-            // TODO: Better “find first match”;
+          addNewPanel: (panelId, placementStrategy) => {
+            // TODO: Better "find first match";
             // accept positioning
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
             const [firstRow, ...rest] = currentLayout;
-            const nextRow = runPanelPlacementStrategy(firstRow, {
-              id: panelId,
-              width: DEFAULT_PANEL_WIDTH,
-              height: DEFAULT_PANEL_HEIGHT,
-            });
+            const nextRow = runPanelPlacementStrategy(
+              firstRow,
+              {
+                id: panelId,
+                width: DEFAULT_PANEL_WIDTH,
+                height: DEFAULT_PANEL_HEIGHT,
+              },
+              placementStrategy
+            );
             gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
           },
           getPanelCount: () => {
