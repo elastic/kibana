@@ -54,7 +54,11 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
               >
                 <EuiPanel hasShadow={false} hasBorder paddingSize="m">
                   <EuiFlexGroup direction="row" gutterSize="s" wrap>
-                    <EuiFlexItem>
+                    <EuiFlexItem
+                      className={css`
+                        min-width: 100%;
+                      `}
+                    >
                       <EuiText size="s">{connector.name}</EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
