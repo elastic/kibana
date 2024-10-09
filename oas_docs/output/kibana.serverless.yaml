@@ -1270,6 +1270,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -2027,6 +2043,22 @@ paths:
                     Indicates whether you want to run the rule on an interval
                     basis after it is created.
                   type: boolean
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -2411,6 +2443,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -3147,6 +3195,22 @@ paths:
                       type: number
                   required:
                     - active
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -3523,6 +3587,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -4733,6 +4813,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -7957,6 +8053,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
