@@ -15,7 +15,7 @@ export {
   MAX_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
   MAX_STATUS_CHANGE_THRESHOLD,
-} from '@kbn/alerting-types';
+} from '@kbn/alerting-types/flapping/latest';
 
 export type {
   RulesSettingsModificationMetadata,

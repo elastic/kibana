@@ -73,10 +73,10 @@ export const RuleDefinition = () => {
   const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
 
   const {
-    capabilities: {
-      rulesSettings: { writeFlappingSettingsUI },
-    },
+    capabilities: { rulesSettings },
   } = application;
+
+  const { writeFlappingSettingsUI } = rulesSettings || {};
 
   const { params, schedule, notifyWhen, flapping } = formData;
 

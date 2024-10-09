@@ -73,7 +73,7 @@ const flappingExternalLinkLabel = i18n.translate(
 const flappingOverrideConfiguration = i18n.translate(
   'alertsUIShared.ruleSettingsFlappingForm.flappingOverrideConfiguration',
   {
-    defaultMessage: 'Override Configuration',
+    defaultMessage: 'Customize Configuration',
   }
 );
 
@@ -85,7 +85,7 @@ const clampFlappingValues = (flapping: RuleSpecificFlappingProperties) => {
 };
 
 export interface RuleSettingsFlappingFormProps {
-  flappingSettings?: RuleSpecificFlappingProperties;
+  flappingSettings?: RuleSpecificFlappingProperties | null;
   spaceFlappingSettings?: RulesSettingsFlapping;
   canWriteFlappingSettingsUI: boolean;
   onFlappingChange: (value: RuleSpecificFlappingProperties | null) => void;
@@ -242,7 +242,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             {flappingOffTooltip}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {flappingSettings && (
+        {flappingSettings && enabled && (
           <>
             <EuiSpacer size="m" />
             <EuiHorizontalRule margin="none" />
@@ -263,6 +263,9 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     if (!flappingSettings) {
       return null;
     }
+    if (!spaceFlappingSettings?.enabled) {
+      return null;
+    }
     return (
       <EuiFlexItem>
         <RuleSettingsFlappingInputs
@@ -273,7 +276,12 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
         />
       </EuiFlexItem>
     );
-  }, [flappingSettings, onLookBackWindowChange, onStatusChangeThresholdChange]);
+  }, [
+    flappingSettings,
+    spaceFlappingSettings,
+    onLookBackWindowChange,
+    onStatusChangeThresholdChange,
+  ]);
 
   const flappingFormMessage = useMemo(() => {
     if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {
@@ -290,6 +298,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
         <RuleSettingsFlappingMessage
           lookBackWindow={settingsToUse.lookBackWindow}
           statusChangeThreshold={settingsToUse.statusChangeThreshold}
+          isUsingRuleSpecificFlapping={!!flappingSettings}
         />
       </EuiSplitPanel.Inner>
     );

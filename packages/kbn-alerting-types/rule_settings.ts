@@ -44,8 +44,3 @@ export interface RulesSettings {
   flapping?: RulesSettingsFlapping;
   queryDelay?: RulesSettingsQueryDelay;
 }
-
-export const MIN_LOOK_BACK_WINDOW = 2;
-export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 2;
-export const MAX_STATUS_CHANGE_THRESHOLD = 20;
