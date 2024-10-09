@@ -20,7 +20,7 @@ import { State, AssetType, CanvasWorkpad } from '../../../types';
 
 import { AssetManager as Component } from './asset_manager.component';
 import { getFullWorkpadPersisted } from '../../state/selectors/workpad';
-import { pluginServices } from '../../services';
+import { getCanvasWorkpadService } from '../../services/canvas_workpad_service';
 
 export const AssetManager = connect(
   (state: State) => ({
@@ -31,7 +31,7 @@ export const AssetManager = connect(
     onAddAsset: (workpad: CanvasWorkpad, type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
       const asset = createAsset(type, content);
-      const { notify, workpad: workpadService } = pluginServices.getServices();
+      const workpadService = getCanvasWorkpadService();
 
       return workpadService
         .updateAssets(workpad.id, { ...workpad.assets, [asset.id]: asset })
@@ -40,7 +40,7 @@ export const AssetManager = connect(
           // then return the id, so the caller knows the id that will be created
           return asset.id;
         })
-        .catch((error) => notifyError(error, notify.error));
+        .catch((error) => notifyError(error));
     },
   }),
   (stateProps, dispatchProps, ownProps) => {
