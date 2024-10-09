@@ -76,17 +76,22 @@ export class KnowledgeBaseRegistryPlugin
       logger: this.logger.get('search-service'),
     });
 
+    // TODO: see if we should be using taskManager for that.
+    packageInstaller.ensureUpToDate({}).catch((err) => {
+      this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
+    });
+
     // TODO: remove
     delay(10)
       .then(async () => {
-        this.logger.info('*** test installing packages');
+        // this.logger.info('*** test installing packages');
         // await packageInstaller.installAll({});
 
-        const results = await searchService.search({
-          query: 'How to create a space in Kibana?',
-          products: ['kibana'],
-        });
-        console.log(JSON.stringify(results.results.map((result) => result.title)));
+        // const results = await searchService.search({
+        //  query: 'How to create a space in Kibana?',
+        //  products: ['kibana'],
+        // );
+        // console.log(JSON.stringify(results.results[0]));
       })
       .catch((e) => {
         this.logger.error('*** ERROR', e);

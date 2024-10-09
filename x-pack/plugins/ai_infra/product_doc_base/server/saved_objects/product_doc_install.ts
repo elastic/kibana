@@ -7,7 +7,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
-import type { InstallationStatus, ProductName } from '../../common/saved_objects';
+import type { InstallationStatus } from '../../common/install_status';
 
 /**
  * Interface describing the raw attributes of the KB Entry SO type.

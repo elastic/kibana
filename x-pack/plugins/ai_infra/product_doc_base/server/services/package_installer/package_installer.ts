@@ -67,20 +67,58 @@ export class PackageInstaller {
     this.log = logger;
   }
 
+  /**
+   * Make sure that the currently installed doc packages are up to date.
+   * Will not upgrade products that are not already installed
+   */
+  async ensureUpToDate({}: {}) {
+    const repositoryVersions = await fetchArtifactVersions({
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+    });
+
+    const installStatuses = await this.productDocClient.getInstallationStatus();
+
+    const toUpdate: Array<{
+      productName: ProductName;
+      productVersion: string;
+    }> = [];
+    Object.entries(installStatuses).forEach(([productName, productState]) => {
+      if (productState.status === 'uninstalled') {
+        return;
+      }
+      const availableVersions = repositoryVersions[productName as ProductName];
+      if (!availableVersions || !availableVersions.length) {
+        return;
+      }
+      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
+      if (productState.version !== selectedVersion) {
+        toUpdate.push({
+          productName: productName as ProductName,
+          productVersion: selectedVersion,
+        });
+      }
+    });
+
+    for (const { productName, productVersion } of toUpdate) {
+      await this.installPackage({
+        productName,
+        productVersion,
+      });
+    }
+  }
+
   async installAll({}: {}) {
-    const artifactVersions = await fetchArtifactVersions({
+    const repositoryVersions = await fetchArtifactVersions({
       artifactRepositoryUrl: this.artifactRepositoryUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
     for (const productName of allProducts) {
-      const availableVersions = artifactVersions[productName];
+      const availableVersions = repositoryVersions[productName];
       if (!availableVersions || !availableVersions.length) {
         this.log.warn(`No version found for product [${productName}]`);
         continue;
       }
-      const selectedVersion = availableVersions.includes(this.currentVersion)
-        ? this.currentVersion
-        : latestVersion(availableVersions);
+      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
 
       await this.installPackage({
         productName,
@@ -171,3 +209,9 @@ export class PackageInstaller {
     await this.productDocClient.setUninstalled(productName);
   }
 }
+
+const selectVersion = (currentVersion: string, availableVersions: string[]): string => {
+  return availableVersions.includes(currentVersion)
+    ? currentVersion
+    : latestVersion(availableVersions);
+};

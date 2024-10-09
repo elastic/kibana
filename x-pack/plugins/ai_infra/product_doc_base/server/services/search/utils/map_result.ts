@@ -12,7 +12,7 @@ import type { DocSearchResult } from '../types';
 export const mapResult = (docHit: SearchHit<ProductDocumentationAttributes>): DocSearchResult => {
   return {
     title: docHit._source!.content_title,
-    content: docHit._source!.content_body,
+    content: docHit._source!.content_body.text,
     url: docHit._source!.url,
     productName: docHit._source!.product_name,
   };

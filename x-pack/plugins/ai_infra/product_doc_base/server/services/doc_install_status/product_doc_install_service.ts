@@ -7,10 +7,16 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { ProductName } from '@kbn/product-doc-common';
+import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
+import { InstallationStatus } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { KnowledgeBaseProductDocInstallAttributes as TypeAttributes } from '../../saved_objects';
 // import { soToModel } from './model_conversion';
+
+interface ProductInstallState {
+  status: InstallationStatus;
+  version?: string;
+}
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
@@ -30,6 +36,27 @@ export class ProductDocInstallClient {
     }
   }
   */
+
+  async getInstallationStatus() {
+    const response = await this.soClient.find<TypeAttributes>({
+      type: typeName,
+      perPage: 100,
+    });
+
+    const installStatus = Object.values(DocumentationProduct).reduce((memo, product) => {
+      memo[product] = { status: 'uninstalled' };
+      return memo;
+    }, {} as Record<ProductName, ProductInstallState>);
+
+    response.saved_objects.forEach(({ attributes }) => {
+      installStatus[attributes.product_name as ProductName] = {
+        status: attributes.installation_status,
+        version: attributes.product_version,
+      };
+    });
+
+    return installStatus;
+  }
 
   async setInstallationStarted(fields: { productName: ProductName; productVersion: string }) {
     const { productName, productVersion } = fields;
