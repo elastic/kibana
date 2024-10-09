@@ -30,6 +30,7 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
+import { scheduleDataviewSyncTask } from './schedule_dataview_sync_task';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -88,6 +89,14 @@ export class EntityManagerServerPlugin
       },
       core,
       logger: this.logger,
+    });
+
+    console.log('================= HERE ======================');
+    scheduleDataviewSyncTask({
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      server: this.server,
+      taskManager: plugins.taskManager,
     });
 
     return {};
