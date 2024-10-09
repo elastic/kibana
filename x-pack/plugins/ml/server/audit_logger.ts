@@ -58,228 +58,226 @@ type TaskTypeNLP =
 
 type TaskType = TaskTypeAD | TaskTypeDFA | TaskTypeNLP;
 
+const APPLICATION = 'elastic/ml';
+
 export class MlAuditLogger {
   private auditLogger: AuditLogger;
   constructor(audit: CoreAuditService, request?: KibanaRequest) {
     this.auditLogger = request ? audit.asScoped(request) : audit.withoutRequest;
   }
 
-  public log(message: string) {
-    this.auditLogger.log({ message, labels: { application: 'elastic/ml' } });
-  }
-
-  private logSuccess(logEntry: any) {
-    this.auditLogger.log({ ...logEntry, labels: { application: 'elastic/ml' } });
-  }
-
-  private logFailure(logEntry: any) {
-    this.auditLogger.log({ ...logEntry, labels: { application: 'elastic/ml' } });
-  }
-
   public async wrapTask<T, P extends MlClientParams>(task: () => T, taskType: TaskType, p: P) {
-    const logEntry = this.createLogEntry(taskType, p);
     try {
       const resp = await task();
-      this.logSuccess(logEntry);
+      this.logSuccess(taskType, p);
       return resp;
     } catch (error) {
-      this.logFailure(logEntry);
+      this.logFailure(taskType, p);
       throw error;
     }
   }
 
-  private createLogEntry(taskName: string, p: MlClientParams) {
-    switch (taskName) {
+  public logMessage(message: string) {
+    this.auditLogger.log({
+      message,
+      labels: {
+        application: APPLICATION,
+      },
+    });
+  }
+
+  private logSuccess(taskType: TaskType, p: MlClientParams) {
+    const entry = this.createLogEntry(taskType, p, true);
+    this.auditLogger.log(entry);
+  }
+  private logFailure(taskType: TaskType, p: MlClientParams) {
+    const entry = this.createLogEntry(taskType, p, false);
+    this.auditLogger.log(entry);
+  }
+
+  private createLogEntry(taskType: TaskType, p: MlClientParams, success: boolean) {
+    return {
+      event: { action: taskType, outcome: success ? 'success' : 'failure' },
+      message: this.createMessage(taskType, p),
+      labels: {
+        application: APPLICATION,
+      },
+    };
+  }
+
+  private createMessage(taskType: TaskType, p: MlClientParams): string {
+    switch (taskType) {
       /* Anomaly Detection */
       case 'put_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Creating anomaly detection job ${jobId}` };
+        return `Creating anomaly detection job ${jobId}`;
       }
       case 'delete_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Deleting anomaly detection job ${jobId}` };
+        return `Deleting anomaly detection job ${jobId}`;
       }
       case 'delete_model_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
-        const snapshotId = getSnapshotIdFromRequest(
-          p as Parameters<MlClient['deleteModelSnapshot']>
-        );
-        return { message: `Deleting model snapshot ${snapshotId} from job ${jobId}` };
+        const [params] = p as Parameters<MlClient['deleteModelSnapshot']>;
+        const snapshotId = params.snapshot_id;
+        return `Deleting model snapshot ${snapshotId} from job ${jobId}`;
       }
       case 'open_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Opening anomaly detection job ${jobId}` };
+        return `Opening anomaly detection job ${jobId}`;
       }
       case 'close_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Closing anomaly detection job ${jobId}` };
+        return `Closing anomaly detection job ${jobId}`;
       }
       case 'update_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Updating anomaly detection job ${jobId}` };
+        return `Updating anomaly detection job ${jobId}`;
       }
       case 'reset_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Resetting anomaly detection job ${jobId}` };
+        return `Resetting anomaly detection job ${jobId}`;
       }
       case 'revert_ad_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
-        const snapshotId = getSnapshotIdFromRequest(
-          p as Parameters<MlClient['revertModelSnapshot']>
-        );
-        return { message: `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}` };
+        const [params] = p as Parameters<MlClient['revertModelSnapshot']>;
+        const snapshotId = params.snapshot_id;
+        return `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}`;
       }
       case 'put_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Creating anomaly detection datafeed ${datafeedId} for job ${jobId}` };
+        return `Creating anomaly detection datafeed ${datafeedId} for job ${jobId}`;
       }
       case 'delete_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return { message: `Deleting anomaly detection datafeed ${datafeedId}` };
+        return `Deleting anomaly detection datafeed ${datafeedId}`;
       }
       case 'start_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return { message: `Starting anomaly detection datafeed ${datafeedId}` };
+        return `Starting anomaly detection datafeed ${datafeedId}`;
       }
       case 'stop_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return { message: `Stopping anomaly detection datafeed ${datafeedId}` };
+        return `Stopping anomaly detection datafeed ${datafeedId}`;
       }
       case 'update_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return { message: `Updating anomaly detection datafeed ${datafeedId}` };
+        return `Updating anomaly detection datafeed ${datafeedId}`;
       }
       case 'put_calendar': {
         const [params] = p as Parameters<MlClient['putCalendar']>;
         const calendarId = params.calendar_id;
         // @ts-expect-error body is optional
         const jobIds = (params.body ?? params).job_ids;
-        return {
-          message: `Creating calendar ${calendarId} ${jobIds ? `with job(s) ${jobIds}` : ''}`,
-        };
+        return `Creating calendar ${calendarId} ${jobIds ? `with job(s) ${jobIds}` : ''}`;
       }
       case 'delete_calendar': {
         const [params] = p as Parameters<MlClient['deleteCalendar']>;
         const calendarId = params.calendar_id;
-        return { message: `Deleting calendar ${calendarId}` };
+        return `Deleting calendar ${calendarId}`;
       }
       case 'put_calendar_job': {
         const [params] = p as Parameters<MlClient['putCalendarJob']>;
         const calendarId = params.calendar_id;
         const jobIds = params.job_id;
-        return {
-          message: `Adding job(s) ${jobIds} to calendar ${calendarId}`,
-        };
+        return `Adding job(s) ${jobIds} to calendar ${calendarId}`;
       }
       case 'delete_calendar_job': {
         const [params] = p as Parameters<MlClient['deleteCalendarJob']>;
         const calendarId = params.calendar_id;
         const jobIds = params.job_id;
-        return {
-          message: `Removing job(s) ${jobIds} from calendar ${calendarId}`,
-        };
+        return `Removing job(s) ${jobIds} from calendar ${calendarId}`;
       }
       case 'post_calendar_events': {
         const [params] = p as Parameters<MlClient['postCalendarEvents']>;
         const calendarId = params.calendar_id;
         // @ts-expect-error body is optional
         const eventsCount = (params.body ?? params).events;
-        return {
-          message: `Adding ${eventsCount} event(s) to calendar ${calendarId}`,
-        };
+        return `Adding ${eventsCount} event(s) to calendar ${calendarId}`;
       }
       case 'delete_calendar_event': {
         const [params] = p as Parameters<MlClient['deleteCalendarEvent']>;
         const calendarId = params.calendar_id;
         const eventId = params.event_id;
-        return {
-          message: `Removing event(s) ${eventId} from calendar ${calendarId}`,
-        };
+        return `Removing event(s) ${eventId} from calendar ${calendarId}`;
       }
       case 'put_filter': {
         const [params] = p as Parameters<MlClient['putFilter']>;
         const filterId = params.filter_id;
-        return { message: `Creating filter ${filterId}` };
+        return `Creating filter ${filterId}`;
       }
       case 'update_filter': {
         const [params] = p as Parameters<MlClient['updateFilter']>;
         const filterId = params.filter_id;
-        return { message: `Updating filter ${filterId}` };
+        return `Updating filter ${filterId}`;
       }
       case 'delete_filter': {
         const [params] = p as Parameters<MlClient['deleteFilter']>;
         const filterId = params.filter_id;
-        return { message: `Deleting filter ${filterId}` };
+        return `Deleting filter ${filterId}`;
       }
       case 'forecast': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Forecasting for job ${jobId}` };
+        return `Forecasting for job ${jobId}`;
       }
       case 'delete_forecast': {
         const [params] = p as Parameters<MlClient['deleteForecast']>;
         const forecastId = params.forecast_id;
         const [jobId] = getADJobIdsFromRequest(p);
-        return { message: `Deleting forecast ${forecastId} for job ${jobId}` };
+        return `Deleting forecast ${forecastId} for job ${jobId}`;
       }
 
       /* Data Frame Analytics */
       case 'put_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return { message: `Creating data frame analytics job ${analyticsId}` };
+        return `Creating data frame analytics job ${analyticsId}`;
       }
       case 'delete_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return { message: `Deleting data frame analytics job ${analyticsId}` };
+        return `Deleting data frame analytics job ${analyticsId}`;
       }
       case 'start_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return { message: `Starting data frame analytics job ${analyticsId}` };
+        return `Starting data frame analytics job ${analyticsId}`;
       }
       case 'stop_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return { message: `Stopping data frame analytics job ${analyticsId}` };
+        return `Stopping data frame analytics job ${analyticsId}`;
       }
       case 'update_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return { message: `Updating data frame analytics job ${analyticsId}` };
+        return `Updating data frame analytics job ${analyticsId}`;
       }
 
       /* Trained Models */
       case 'put_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Creating trained model ${modelId}` };
+        return `Creating trained model ${modelId}`;
       }
       case 'delete_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Deleting trained model ${modelId}` };
+        return `Deleting trained model ${modelId}`;
       }
       case 'start_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Starting trained model deployment for model ${modelId}` };
+        return `Starting trained model deployment for model ${modelId}`;
       }
       case 'stop_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Stopping trained model deployment for model ${modelId}` };
+        return `Stopping trained model deployment for model ${modelId}`;
       }
       case 'update_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Updating trained model deployment for model ${modelId}` };
+        return `Updating trained model deployment for model ${modelId}`;
       }
       case 'infer_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return { message: `Inferring trained model ${modelId}` };
+        return `Inferring trained model ${modelId}`;
       }
 
-      default: {
-        return { message: `Unknown ML task ${taskName}` };
-      }
+      default:
+        return `Unknown ML task ${taskType}`;
     }
   }
-}
-
-function getSnapshotIdFromRequest([params]:
-  | Parameters<MlClient['deleteModelSnapshot']>
-  | Parameters<MlClient['revertModelSnapshot']>): string | undefined {
-  return params?.snapshot_id;
 }
