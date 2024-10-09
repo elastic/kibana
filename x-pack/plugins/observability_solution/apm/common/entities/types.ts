@@ -17,3 +17,9 @@ interface LogsMetrics {
 }
 
 export type EntityMetrics = TraceMetrics & LogsMetrics;
+
+export enum EntityDataStreamType {
+  METRICS = 'metrics',
+  TRACES = 'traces',
+  LOGS = 'logs',
+}
