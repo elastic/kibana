@@ -122,7 +122,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
-    isSnoozedUntil: DoNotUseIsSNoozedUntil,
+    isSnoozedUntil: DoNotUseIsSnoozedUntil,
     ...partialRawRule
   } = rawRule;
 
