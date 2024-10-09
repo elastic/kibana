@@ -154,6 +154,7 @@ describe('variable support', () => {
     const expectType = (type: FunctionParameterType) =>
       `Argument of [test] must be [cartesian_point], found value [var] type [${type}]`;
 
+    // @todo unskip after https://github.com/elastic/kibana/issues/195682
     test.skip('literals', async () => {
       const { expectErrors } = await setup();
       // literal assignment
@@ -168,6 +169,7 @@ describe('variable support', () => {
       await expectErrors('FROM index | EVAL var = textField, TEST(var)', [expectType('text')]);
     });
 
+    // @todo unskip after https://github.com/elastic/kibana/issues/195682
     test.skip('variables', async () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM index | EVAL var = textField, var2 = var, TEST(var2)', [
@@ -175,6 +177,7 @@ describe('variable support', () => {
       ]);
     });
 
+    // @todo unskip after https://github.com/elastic/kibana/issues/195682
     test.skip('inline casting', async () => {
       const { expectErrors } = await setup();
       // inline cast assignment
@@ -187,6 +190,7 @@ describe('variable support', () => {
       ]);
     });
 
+    // @todo unskip after https://github.com/elastic/kibana/issues/195682
     test.skip('function results', async () => {
       const { expectErrors } = await setup();
       // function assignment
