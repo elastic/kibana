@@ -87,6 +87,7 @@ const pluginInitializerContextParams = {
   request_timeouts: {
     update_by_query: 1000,
   },
+  auto_calculate_default_ech_capacity: false,
 };
 
 describe('TaskManagerPlugin', () => {

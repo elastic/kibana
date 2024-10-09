@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get enrollment API key by ID`,
       options: {
-        tags: ['oas_tag:Fleet enrollment API keys'],
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(
@@ -70,7 +70,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Revoke enrollment API key by ID by marking it as inactive`,
       options: {
-        tags: ['oas_tag:Fleet enrollment API keys'],
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(
@@ -99,7 +99,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List enrollment API keys`,
       options: {
-        tags: ['oas_tag:Fleet enrollment API keys'],
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(
@@ -131,7 +131,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create enrollment API key`,
       options: {
-        tags: ['oas_tag:Fleet enrollment API keys'],
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(
@@ -161,6 +161,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      deprecated: true,
     })
     .addVersion(
       {
@@ -176,6 +177,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      deprecated: true,
     })
     .addVersion(
       {
@@ -191,6 +193,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      deprecated: true,
     })
     .addVersion(
       {
@@ -206,6 +209,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      deprecated: true,
     })
     .addVersion(
       {
