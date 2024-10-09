@@ -119,11 +119,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
-   */
-  assistantBedrockChat: true,
-
-  /**
    * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
    */
   assistantNaturalLanguageESQLTool: false,
@@ -239,11 +234,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
