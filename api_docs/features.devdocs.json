@@ -2195,16 +2195,16 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
               },
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "security",
