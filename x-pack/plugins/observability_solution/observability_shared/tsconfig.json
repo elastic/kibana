@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../typings/**/*"
+    "../../../../typings/**/*",
+    ".storybook/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -43,7 +44,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/rule-data-utils",
     "@kbn/es-query",
-    "@kbn/serverless",
+    "@kbn/serverless"
   ],
   "exclude": ["target/**/*"]
 }
