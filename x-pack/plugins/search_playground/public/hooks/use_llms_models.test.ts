@@ -15,10 +15,10 @@ jest.mock('./use_load_connectors', () => ({
 }));
 
 const mockConnectors = [
-  { id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai },
-  { id: 'connectorId2', title: 'OpenAI Azure Connector', type: LLMs.openai_azure },
-  { id: 'connectorId2', title: 'Bedrock Connector', type: LLMs.bedrock },
-  { id: 'connectorId3', title: 'OpenAI OSS Model Connector', type: LLMs.openai_other },
+  { id: 'connectorId1', name: 'OpenAI Connector', type: LLMs.openai },
+  { id: 'connectorId2', name: 'OpenAI Azure Connector', type: LLMs.openai_azure },
+  { id: 'connectorId2', name: 'Bedrock Connector', type: LLMs.bedrock },
+  { id: 'connectorId3', name: 'OpenAI OSS Model Connector', type: LLMs.openai_other },
 ];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
@@ -37,7 +37,7 @@ describe('useLLMsModels Hook', () => {
     expect(result.current).toEqual([
       {
         connectorId: 'connectorId1',
-        connectorName: undefined,
+        connectorName: 'OpenAI Connector',
         connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
@@ -49,7 +49,7 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId1',
-        connectorName: undefined,
+        connectorName: 'OpenAI Connector',
         connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
@@ -61,7 +61,7 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId1',
-        connectorName: undefined,
+        connectorName: 'OpenAI Connector',
         connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
@@ -73,19 +73,19 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'OpenAI Azure Connector',
         connectorType: LLMs.openai_azure,
         disabled: false,
         icon: expect.any(Function),
-        id: 'connectorId2Azure OpenAI ',
-        name: 'Azure OpenAI ',
+        id: 'connectorId2OpenAI Azure Connector (Azure OpenAI)',
+        name: 'OpenAI Azure Connector (Azure OpenAI)',
         showConnectorName: false,
         value: undefined,
         promptTokenLimit: undefined,
       },
       {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'Bedrock Connector',
         connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
@@ -97,7 +97,7 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'Bedrock Connector',
         connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
@@ -109,12 +109,12 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId3',
-        connectorName: undefined,
+        connectorName: 'OpenAI OSS Model Connector',
         connectorType: LLMs.openai_other,
         disabled: false,
         icon: expect.any(Function),
-        id: 'connectorId3Other (OpenAI Compatible Service) ',
-        name: 'Other (OpenAI Compatible Service) ',
+        id: 'connectorId3OpenAI OSS Model Connector (OpenAI Compatible Service)',
+        name: 'OpenAI OSS Model Connector (OpenAI Compatible Service)',
         showConnectorName: false,
         value: undefined,
         promptTokenLimit: undefined,
