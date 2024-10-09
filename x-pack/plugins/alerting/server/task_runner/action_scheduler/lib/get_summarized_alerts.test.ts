@@ -6,10 +6,10 @@
  */
 
 import { getSummarizedAlerts } from './get_summarized_alerts';
-import { alertsClientMock } from '../../alerts_client/alerts_client.mock';
-import { mockAAD } from '../fixtures';
+import { alertsClientMock } from '../../../alerts_client/alerts_client.mock';
+import { mockAAD } from '../../fixtures';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { generateAlert } from './test_fixtures';
+import { generateAlert } from '../test_fixtures';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const alertsClient = alertsClientMock.create();
