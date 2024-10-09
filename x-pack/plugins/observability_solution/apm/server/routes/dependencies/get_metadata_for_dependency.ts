@@ -33,7 +33,7 @@ export async function getMetadataForDependency({
   start: number;
   end: number;
 }): Promise<MetadataForDependencyResponse> {
-  const requiredFields = asMutableArray([SPAN_TYPE, SPAN_SUBTYPE] as const);
+  const fields = asMutableArray([SPAN_TYPE, SPAN_SUBTYPE] as const);
   const sampleResponse = await apmEventClient.search('get_metadata_for_dependency', {
     apm: {
       events: [ProcessorEvent.span],
@@ -53,20 +53,17 @@ export async function getMetadataForDependency({
           ],
         },
       },
-      fields: requiredFields,
+      fields,
       sort: {
         '@timestamp': 'desc',
       },
     },
   });
 
-  const sample = unflattenKnownApmEventFields(
-    maybe(sampleResponse.hits.hits[0])?.fields,
-    requiredFields
-  );
+  const sample = unflattenKnownApmEventFields(maybe(sampleResponse.hits.hits[0])?.fields);
 
   return {
-    spanType: sample?.span.type,
-    spanSubtype: sample?.span.subtype,
+    spanType: sample?.span?.type,
+    spanSubtype: sample?.span?.subtype,
   };
 }
