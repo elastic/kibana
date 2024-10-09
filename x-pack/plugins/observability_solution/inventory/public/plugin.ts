@@ -17,7 +17,7 @@ import {
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { from, map } from 'rxjs';
+import { from, map, mergeMap } from 'rxjs';
 import { createCallInventoryAPI } from './api';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 import { InventoryServices } from './services/types';
@@ -54,34 +54,45 @@ export class InventoryPlugin
       'observability:entityCentricExperience',
       true
     );
+    const getStartServices = coreSetup.getStartServices();
 
-    if (isEntityCentricExperienceSettingEnabled) {
-      pluginsSetup.observabilityShared.navigation.registerSections(
-        from(coreSetup.getStartServices()).pipe(
-          map(([coreStart, pluginsStart]) => {
-            return [
-              {
-                label: '',
-                sortKey: 300,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                      defaultMessage: 'Inventory',
-                    }),
-                    app: INVENTORY_APP_ID,
-                    path: '/',
-                    matchPath(currentPath: string) {
-                      return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                    },
-                    isTechnicalPreview: true,
-                  },
-                ],
-              },
-            ];
-          })
+    const hideInventory$ = from(getStartServices).pipe(
+      mergeMap(([coreStart, pluginsStart]) =>
+        from(pluginsStart.spaces.getActiveSpace()).pipe(
+          map((space) => space.disabledFeatures.includes('inventory'))
         )
-      );
-    }
+      )
+    );
+
+    const sections$ = hideInventory$.pipe(
+      map((hideInventory) => {
+        if (isEntityCentricExperienceSettingEnabled && !hideInventory) {
+          return [
+            {
+              label: '',
+              sortKey: 300,
+              entries: [
+                {
+                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                    defaultMessage: 'Inventory',
+                  }),
+                  app: INVENTORY_APP_ID,
+                  path: '/',
+                  matchPath(currentPath: string) {
+                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                  },
+                  isTechnicalPreview: true,
+                },
+              ],
+            },
+          ];
+        }
+        return [];
+      })
+    );
+
+    pluginsSetup.observabilityShared.navigation.registerSections(sections$);
+
     this.telemetry.setup({ analytics: coreSetup.analytics });
     const telemetry = this.telemetry.start();
 
@@ -102,7 +113,7 @@ export class InventoryPlugin
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
-          coreSetup.getStartServices(),
+          getStartServices,
         ]);
 
         const services: InventoryServices = {
