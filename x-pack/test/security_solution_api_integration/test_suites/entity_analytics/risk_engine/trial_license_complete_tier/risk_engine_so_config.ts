@@ -20,8 +20,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, spaceName);
-  const es = getService('es');
-  const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
