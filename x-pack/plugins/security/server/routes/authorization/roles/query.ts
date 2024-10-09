@@ -45,6 +45,7 @@ export function defineQueryRolesRoutes({
           filters: schema.maybe(
             schema.object({
               showReserved: schema.maybe(schema.boolean({ defaultValue: true })),
+              spaceId: schema.maybe(schema.string({ minLength: 1 })),
             })
           ),
         }),
@@ -73,6 +74,14 @@ export function defineQueryRolesRoutes({
 
         if (showReservedRoles) {
           queryPayload.bool.should.push({ term: { 'metadata._reserved': showReservedRoles } });
+        }
+
+        if (filters?.spaceId) {
+          queryPayload.bool.must.push({
+            term: {
+              'applications.resources': `space:${filters.spaceId}`,
+            },
+          });
         }
 
         const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
