@@ -46,3 +46,5 @@ spec:
           env:
             AUTO_SELECT_COMMIT: 'true'
           branch: main
+      tags:
+        - kibana
