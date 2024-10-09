@@ -55,16 +55,16 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
-  MappedParams,
-  RuleSnooze,
-  IntervalSchedule,
+  // MappedParams,
+  // RuleSnooze,
+  // IntervalSchedule,
   RuleLastRun,
   SanitizedRule,
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
-  AlertDelay,
-  Flapping,
+  // AlertDelay,
+  // Flapping,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -470,43 +470,45 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+export type { RawRule } from './saved_objects/schemas/raw_rule';
+
 /**
  * @deprecated in favor of Rule
  */
-export interface RawRule extends SavedObjectAttributes {
-  enabled: boolean;
-  name: string;
-  tags: string[];
-  alertTypeId: string; // this cannot be renamed since it is in the saved object
-  consumer: string;
-  legacyId: string | null;
-  schedule: IntervalSchedule;
-  actions: RawRuleAction[];
-  params: SavedObjectAttributes;
-  mapped_params?: MappedParams;
-  scheduledTaskId?: string | null;
-  createdBy: string | null;
-  updatedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-  apiKey: string | null;
-  apiKeyOwner: string | null;
-  apiKeyCreatedByUser?: boolean | null;
-  throttle?: string | null;
-  notifyWhen?: RuleNotifyWhenType | null;
-  muteAll: boolean;
-  mutedInstanceIds: string[];
-  meta?: RuleMeta;
-  executionStatus: RawRuleExecutionStatus;
-  monitoring?: RawRuleMonitoring;
-  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
-  isSnoozedUntil?: string | null;
-  lastRun?: RawRuleLastRun | null;
-  nextRun?: string | null;
-  revision: number;
-  running?: boolean | null;
-  alertDelay?: AlertDelay;
-  flapping?: Flapping | null;
-}
+// export interface RawRule extends SavedObjectAttributes {
+//   enabled: boolean;
+//   name: string;
+//   tags: string[];
+//   alertTypeId: string; // this cannot be renamed since it is in the saved object
+//   consumer: string;
+//   legacyId: string | null;
+//   schedule: IntervalSchedule;
+//   actions: RawRuleAction[];
+//   params: SavedObjectAttributes;
+//   mapped_params?: MappedParams;
+//   scheduledTaskId?: string | null;
+//   createdBy: string | null;
+//   updatedBy: string | null;
+//   createdAt: string;
+//   updatedAt: string;
+//   apiKey: string | null;
+//   apiKeyOwner: string | null;
+//   apiKeyCreatedByUser?: boolean | null;
+//   throttle?: string | null;
+//   notifyWhen?: RuleNotifyWhenType | null;
+//   muteAll: boolean;
+//   mutedInstanceIds: string[];
+//   meta?: RuleMeta;
+//   executionStatus: RawRuleExecutionStatus;
+//   monitoring?: RawRuleMonitoring;
+//   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+//   isSnoozedUntil?: string | null;
+//   lastRun?: RawRuleLastRun | null;
+//   nextRun?: string | null;
+//   revision: number;
+//   running?: boolean | null;
+//   alertDelay?: AlertDelay;
+//   flapping?: Flapping | null;
+// }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
