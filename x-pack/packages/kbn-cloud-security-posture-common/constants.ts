@@ -36,6 +36,10 @@ export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
 export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
+// meant as a temp hack to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683
+// ideally we don't need the retention policy on queries using this constant
+export const CDR_3RD_PARTY_RETENTION_POLICY = '90d';
+
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
