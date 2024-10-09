@@ -27,7 +27,7 @@ export async function buildWebpackPackages({ log, dist }: TaskContext) {
     try {
       await buildPackage(packageDir, log, dist);
     } catch (e) {
-      log.error(`bazel run failed: ${e}`);
+      log.error(`webpack build failed: ${e}`);
       throw e;
     }
   }
@@ -81,6 +81,7 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
   return execa('webpack-cli', argsProcessed, {
     stdio: 'inherit',
     env: { ...process.env, ...env },
+    cwd: REPO_ROOT,
   });
 }
 
