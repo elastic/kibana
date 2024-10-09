@@ -94,7 +94,7 @@ export function defineQueryRolesRoutes({
         });
 
         const transformedRoles = queryRoles.roles?.map((role) =>
-          // @ts-expect-error
+          // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
           transformElasticsearchRoleToRole(features, role, role.name, authz.applicationName, logger)
         );
 

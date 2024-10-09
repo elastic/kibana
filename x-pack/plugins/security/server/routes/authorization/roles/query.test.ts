@@ -14,6 +14,4 @@ import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 import { defineQueryRolesRoutes } from './query';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
-describe('Query roles', () => {
-
-});
+describe('Query roles', () => {});
