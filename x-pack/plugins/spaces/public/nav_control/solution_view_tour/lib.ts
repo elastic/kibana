@@ -55,7 +55,7 @@ export function initTour(core: CoreStart, spacesManager: SpacesManager) {
   allSpaces$.subscribe((spaces) => {
     if (
       !hasValueInUiSettings &&
-      (hasMultipleSpaces(spaces) || (!hasMultipleSpaces(spaces) && isDefaultSpaceOnClassic(spaces)))
+      (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces))
     ) {
       // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
       // we don't want to show the tour later on. This can happen in the following scenarios:
