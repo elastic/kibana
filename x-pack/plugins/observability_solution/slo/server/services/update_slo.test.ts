@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-  ScopedClusterClientMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
 
@@ -31,40 +23,25 @@ import {
 } from './fixtures/slo';
 import { weeklyCalendarAligned } from './fixtures/time_window';
 import {
-  createSLORepositoryMock,
+  createSloContextMock,
   createSummaryTransformManagerMock,
   createTransformManagerMock,
+  SLOContextMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
 describe('UpdateSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
     mockTransformManager = createTransformManagerMock();
-    mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    updateSLO = new UpdateSLO(
-      mockRepository,
-      mockTransformManager,
-      mockSummaryTransformManager,
-      mockEsClient,
-      mockScopedClusterClient,
-      mockLogger,
-      'some-space',
-      httpServiceMock.createStartContract().basePath
-    );
+    updateSLO = new UpdateSLO(contextMock, mockTransformManager, mockSummaryTransformManager);
   });
 
   describe('when the update payload does not change the original SLO', () => {
@@ -79,13 +56,15 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.install).not.toBeCalled();
       expect(mockSummaryTransformManager.start).not.toBeCalled();
 
-      expect(mockEsClient.deleteByQuery).not.toBeCalled();
-      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
+      expect(contextMock.esClient.deleteByQuery).not.toBeCalled();
+      expect(
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline
+      ).not.toBeCalled();
     }
 
     it('returns early with a fully identical SLO payload', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = omit(cloneDeep(slo), [
         'id',
         'revision',
@@ -102,7 +81,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical name', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['name']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -112,7 +91,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical indicator', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['indicator']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -122,7 +101,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical timeWindow', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['timeWindow']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -132,7 +111,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical budgetingMethod', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['budgetingMethod']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -142,7 +121,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical description', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['description']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -152,7 +131,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical groupBy', async () => {
       const slo = createSLO({ groupBy: 'project.id' });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['groupBy']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -162,7 +141,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical objective', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['objective']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -172,7 +151,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical tags', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['tags']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -182,7 +161,7 @@ describe('UpdateSLO', () => {
 
     it('returns early with identical settings', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['settings']);
 
       await updateSLO.execute(slo.id, updatePayload);
@@ -194,7 +173,7 @@ describe('UpdateSLO', () => {
   describe('handles breaking changes', () => {
     it('consideres a settings change as a breaking change', async () => {
       const slo = createSLO();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       const newSettings = {
         ...slo.settings,
@@ -204,7 +183,7 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);
-      expect(mockRepository.update).toHaveBeenCalledWith(
+      expect(contextMock.repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           ...slo,
           settings: newSettings,
@@ -217,7 +196,7 @@ describe('UpdateSLO', () => {
 
     it('consideres a budgeting method change as a breaking change', async () => {
       const slo = createSLO({ budgetingMethod: 'occurrences' });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         budgetingMethod: 'timeslices',
@@ -234,7 +213,7 @@ describe('UpdateSLO', () => {
 
     it('consideres a timeWindow change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         timeWindow: weeklyCalendarAligned(),
@@ -246,7 +225,7 @@ describe('UpdateSLO', () => {
 
     it('consideres a timeslice target change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         objective: {
@@ -262,7 +241,7 @@ describe('UpdateSLO', () => {
 
     it('consideres a timeslice window change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         objective: {
@@ -278,7 +257,7 @@ describe('UpdateSLO', () => {
 
     it('consideres an indicator change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         indicator: createAPMTransactionErrorRateIndicator(),
@@ -290,7 +269,7 @@ describe('UpdateSLO', () => {
 
     it('consideres a groupBy change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await updateSLO.execute(slo.id, {
         groupBy: 'new-field',
@@ -307,7 +286,7 @@ describe('UpdateSLO', () => {
         id: 'original-id',
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
       });
-      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      contextMock.repository.findById.mockResolvedValueOnce(originalSlo);
       mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
@@ -316,9 +295,9 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('Transform install error');
 
-      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(contextMock.repository.update).toHaveBeenCalledWith(originalSlo);
       expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(1); // for the sli only
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
@@ -332,7 +311,7 @@ describe('UpdateSLO', () => {
         id: 'original-id',
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
       });
-      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      contextMock.repository.findById.mockResolvedValueOnce(originalSlo);
       mockSummaryTransformManager.start.mockRejectedValueOnce(
         new Error('summary transform start error')
       );
@@ -343,9 +322,11 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('summary transform start error');
 
-      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(contextMock.repository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
+      expect(
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
 
@@ -357,12 +338,14 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
 
-    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
+    expect(
+      contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline
+    ).toHaveBeenCalled();
 
     expect(mockSummaryTransformManager.install).toHaveBeenCalled();
     expect(mockSummaryTransformManager.start).toHaveBeenCalled();
 
-    expect(mockEsClient.index).toHaveBeenCalled();
+    expect(contextMock.esClient.index).toHaveBeenCalled();
   }
 
   function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
@@ -374,10 +357,12 @@ describe('UpdateSLO', () => {
     expect(mockSummaryTransformManager.stop).toHaveBeenCalledWith(summaryTransformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
-    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
+    expect(
+      contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+    ).toHaveBeenCalled();
 
-    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+    expect(contextMock.esClient.deleteByQuery).toHaveBeenCalledTimes(2);
+    expect(contextMock.esClient.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         index: SLO_DESTINATION_INDEX_PATTERN,
@@ -391,7 +376,7 @@ describe('UpdateSLO', () => {
         },
       })
     );
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+    expect(contextMock.esClient.deleteByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,

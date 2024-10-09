@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SloRouteContext } from '../types';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -31,16 +31,22 @@ import { TransformManager } from './transform_manager';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 
 export class CreateSLO {
+  private esClient: ElasticsearchClient;
+  private repository: SLORepository;
+  private logger: Logger;
+  private spaceId: string;
+  private basePath: IBasePath;
   constructor(
-    private esClient: ElasticsearchClient,
-    private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository,
+    private context: SloRouteContext,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager,
-    private logger: Logger,
-    private spaceId: string,
-    private basePath: IBasePath
-  ) {}
+    private summaryTransformManager: TransformManager
+  ) {
+    this.esClient = this.context.esClient;
+    this.repository = this.context.repository;
+    this.logger = this.context.logger;
+    this.spaceId = this.context.spaceId;
+    this.basePath = this.context.basePath;
+  }
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
@@ -150,13 +156,13 @@ export class CreateSLO {
 
   async createPipeline(params: IngestPutPipelineRequest) {
     return await retryTransientEsErrors(
-      () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
+      () => this.context.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
       { logger: this.logger }
     );
   }
 
   async deletePipeline(id: string) {
-    return this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+    return this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
       { id },
       { ignore: [404] }
     );

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { SLODefinition, IndicatorTypes } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { TransformGenerator } from './transform_generators';
+import { SloRouteContext } from '../types';
 
 type TransformId = string;
 
@@ -26,13 +26,16 @@ export interface TransformManager {
 }
 
 export class DefaultTransformManager implements TransformManager {
+  private logger: Logger;
+  private spaceId: string;
+
   constructor(
-    private generators: Record<IndicatorTypes, TransformGenerator>,
-    private scopedClusterClient: IScopedClusterClient,
-    private logger: Logger,
-    private spaceId: string,
-    private dataViewService: DataViewsService
-  ) {}
+    private context: SloRouteContext,
+    private generators: Record<IndicatorTypes, TransformGenerator>
+  ) {
+    this.logger = this.context.logger;
+    this.spaceId = this.context.spaceId;
+  }
 
   async install(slo: SLODefinition): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
@@ -44,11 +47,14 @@ export class DefaultTransformManager implements TransformManager {
     const transformParams = await generator.getTransformParams(
       slo,
       this.spaceId,
-      this.dataViewService
+      this.context.dataViewsService
     );
     try {
       await retryTransientEsErrors(
-        () => this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams),
+        () =>
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(
+            transformParams
+          ),
         {
           logger: this.logger,
         }
@@ -72,14 +78,14 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    return await generator.getTransformParams(slo, this.spaceId, this.dataViewService);
+    return await generator.getTransformParams(slo, this.spaceId, this.context.dataViewsService);
   }
 
   async preview(transformId: string): Promise<void> {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
             transform_id: transformId,
           }),
         { logger: this.logger }
@@ -94,7 +100,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
             { ignore: [409] }
           ),
@@ -111,7 +117,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
             { transform_id: transformId, wait_for_completion: true, force: true },
             { ignore: [404] }
           ),
@@ -127,7 +133,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
             { ignore: [404] }
           ),
@@ -140,7 +146,7 @@ export class DefaultTransformManager implements TransformManager {
   }
 
   async scheduleNowTransform(transformId: TransformId) {
-    this.scopedClusterClient.asSecondaryAuthUser.transform
+    this.context.scopedClusterClient.asSecondaryAuthUser.transform
       .scheduleNowTransform({ transform_id: transformId })
       .then(() => {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
