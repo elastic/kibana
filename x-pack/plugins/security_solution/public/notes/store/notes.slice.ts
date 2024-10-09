@@ -202,6 +202,9 @@ const notesSlice = createSlice({
     userSelectedBulkDelete: (state) => {
       state.pendingDeleteIds = state.selectedIds;
     },
+    userClosedCreateErrorToast: (state) => {
+      state.error.createNote = null;
+    },
   },
   extraReducers(builder) {
     builder
@@ -394,6 +397,7 @@ export const {
   userSearchedNotes,
   userSelectedRow,
   userClosedDeleteModal,
+  userClosedCreateErrorToast,
   userSelectedRowForDeletion,
   userSelectedBulkDelete,
 } = notesSlice.actions;
