@@ -41,7 +41,6 @@ export const useDeployIntegration = ({
       notifications?.toasts == null ||
       result?.pipeline == null ||
       result?.samplesFormat == null
-      // (integrationSettings.apiDefinition && celInputResult == null)
     ) {
       return;
     }
