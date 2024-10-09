@@ -57,7 +57,6 @@ Input::      The text on which you want to perform the {infer} task. For example
 +
 [source,text]
 --
-
 {
   input: 'What is Elastic?'
 }
@@ -65,14 +64,13 @@ Input::      The text on which you want to perform the {infer} task. For example
 
 [float]
 [[inference-connector-perform-text-embedding]]
-=== Connector perform text embedding
+=== Perform text embedding
 
 The following example performs text embedding.
 Input::      The text on which you want to perform the {infer} task. For example:
 +
 [source,text]
 --
-
 {
   input: 'The sky above the port was the color of television tuned to a dead channel.',
   task_settings: {
@@ -80,7 +78,8 @@ Input::      The text on which you want to perform the {infer} task. For example
   }
 }
 --
-Input type::      An optional string that overwrites the connector's default model.
+Input type::
+An optional string that overwrites the connector's default model.
 
 [float]
 [[inference-connector-perform-rerank]]
@@ -91,13 +90,13 @@ Input::      The text on which you want to perform the {infer} task. Should be a
 +
 [source,text]
 --
-
 {
   input: ['luke', 'like', 'leia', 'chewy', 'r2d2', 'star', 'wars'],
   query: 'star wars main character'
 }
 --
-Query::      The search query text.
+Query::
+The search query text.
 
 [float]
 [[inference-connector-perform-sparse-embedding]]
@@ -108,7 +107,6 @@ Input::      The text on which you want to perform the {infer} task. For example
 +
 [source,text]
 --
-
 {
   input: 'The sky above the port was the color of television tuned to a dead channel.'
 }
