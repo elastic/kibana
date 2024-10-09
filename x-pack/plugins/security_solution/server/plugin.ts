@@ -545,10 +545,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(
       APP_UI_ID,
-      getAssistantTools(config.experimentalFeatures.assistantNaturalLanguageESQLTool)
+      getAssistantTools({
+        naturalLanguageESQLToolEnabled:
+          config.experimentalFeatures.assistantNaturalLanguageESQLTool,
+        assistantKnowledgeBaseByDefault:
+          config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+      })
     );
     const features = {
-      assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     };
