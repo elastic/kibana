@@ -29,7 +29,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { findLastIndex } from 'lodash';
+import { findLastIndex, cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useConversation } from '../../hooks/use_conversation';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -225,10 +225,46 @@ export function ChatBody({
     }
   });
 
+  // const handleCopyConversation = () => {
+  //   const content = JSON.stringify({
+  //     title: initialTitle,
+  //     messages: conversation.value?.messages ?? messages,
+  //   });
+
+  //   navigator.clipboard?.writeText(content || '');
+  // };
+
   const handleCopyConversation = () => {
+    const deserializeMessage = (message: Message): Message => {
+      const copiedMessage = cloneDeep(message);
+
+      const { function_call: functionCall, content, data } = copiedMessage.message;
+
+      if (
+        copiedMessage.message.function_call?.arguments &&
+        typeof copiedMessage.message.function_call.arguments === 'string'
+      ) {
+        copiedMessage.message.function_call.arguments = JSON.parse(functionCall?.arguments ?? '{}');
+      }
+
+      if (copiedMessage.message.name) {
+        if (content && typeof content === 'string') {
+          copiedMessage.message.content = JSON.parse(content);
+        }
+
+        if (data && typeof data === 'string') {
+          copiedMessage.message.data = JSON.parse(data);
+        }
+      }
+
+      return copiedMessage;
+    };
+
+    const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
+
     const content = JSON.stringify({
       title: initialTitle,
-      messages: conversation.value?.messages ?? messages,
+      messages: deserializedMessages,
     });
 
     navigator.clipboard?.writeText(content || '');
