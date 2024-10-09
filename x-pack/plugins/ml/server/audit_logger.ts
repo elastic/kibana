@@ -12,9 +12,10 @@ import {
   getADJobIdsFromRequest,
   getDFAJobIdsFromRequest,
   getDatafeedIdsFromRequest,
+  getModelIdsFromRequest,
 } from './lib/ml_client/ml_client';
 
-type TaskType =
+type TaskTypeAD =
   | 'put_ad_job'
   | 'delete_ad_job'
   | 'delete_model_snapshot'
@@ -28,12 +29,28 @@ type TaskType =
   | 'start_ad_datafeed'
   | 'stop_ad_datafeed'
   | 'update_ad_datafeed'
+  | 'put_calendar'
+  | 'put_calendar_job'
+  | 'post_calendar_events'
+  | 'put_filter'
+  | 'update_filter';
+
+type TaskTypeDFA =
   | 'put_dfa_job'
   | 'delete_dfa_job'
   | 'start_dfa_job'
   | 'stop_dfa_job'
-  | 'get_ad_jobs'
-  | 'get_dfa_jobs';
+  | 'update_dfa_job';
+
+type TaskTypeNLP =
+  | 'put_trained_model'
+  | 'delete_trained_model'
+  | 'start_trained_model_deployment'
+  | 'stop_trained_model_deployment'
+  | 'update_trained_model_deployment'
+  | 'infer_trained_model';
+
+type TaskType = TaskTypeAD | TaskTypeDFA | TaskTypeNLP;
 
 export class MlAuditLogger {
   private auditLogger: AuditLogger;
@@ -67,6 +84,7 @@ export class MlAuditLogger {
 
   private createLogEntry(taskName: string, p: MlClientParams) {
     switch (taskName) {
+      /* Anomaly Detection */
       case 'put_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
         return { message: `Creating anomaly detection job ${jobId}` };
@@ -77,7 +95,9 @@ export class MlAuditLogger {
       }
       case 'delete_model_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
-        const snapshotId = getSnapshotIdFromBody(p as DeleteModelSnapshotParams);
+        const snapshotId = getSnapshotIdFromRequest(
+          p as Parameters<MlClient['deleteModelSnapshot']>
+        );
         return { message: `Deleting model snapshot ${snapshotId} from job ${jobId}` };
       }
       case 'open_ad_job': {
@@ -98,7 +118,9 @@ export class MlAuditLogger {
       }
       case 'revert_ad_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
-        const snapshotId = getSnapshotIdFromBody(p as RevertModelSnapshotParams);
+        const snapshotId = getSnapshotIdFromRequest(
+          p as Parameters<MlClient['revertModelSnapshot']>
+        );
         return { message: `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}` };
       }
       case 'put_ad_datafeed': {
@@ -122,6 +144,46 @@ export class MlAuditLogger {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
         return { message: `Updating anomaly detection datafeed ${datafeedId}` };
       }
+      case 'put_calendar': {
+        const [params] = p as Parameters<MlClient['putCalendar']>;
+        const calendarId = params.calendar_id;
+        // @ts-expect-error body is optional
+        const jobIds = (params.body ?? params).job_ids;
+        return {
+          message: `Creating calendar ${calendarId} ${
+            jobIds ? `with job(s) ${jobIds.join()}` : ''
+          }`,
+        };
+      }
+      case 'put_calendar_job': {
+        const [params] = p as Parameters<MlClient['putCalendarJob']>;
+        const calendarId = params.calendar_id;
+        const jobIds = params.job_id;
+        return {
+          message: `Adding job(s) ${jobIds} to calendar ${calendarId}`,
+        };
+      }
+      case 'post_calendar_events': {
+        const [params] = p as Parameters<MlClient['postCalendarEvents']>;
+        const calendarId = params.calendar_id;
+        // @ts-expect-error body is optional
+        const eventsCount = (params.body ?? params).events;
+        return {
+          message: `Adding ${eventsCount} event(s) to calendar ${calendarId}`,
+        };
+      }
+      case 'put_filter': {
+        const [params] = p as Parameters<MlClient['putFilter']>;
+        const filterId = params.filter_id;
+        return { message: `Creating filter ${filterId}` };
+      }
+      case 'update_filter': {
+        const [params] = p as Parameters<MlClient['updateFilter']>;
+        const filterId = params.filter_id;
+        return { message: `Updating filter ${filterId}` };
+      }
+
+      /* Data Frame Analytics */
       case 'put_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
         return { message: `Creating data frame analytics job ${analyticsId}` };
@@ -138,25 +200,46 @@ export class MlAuditLogger {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
         return { message: `Stopping data frame analytics job ${analyticsId}` };
       }
-      case 'get_ad_jobs': {
-        return { message: 'Getting anomaly detection jobs' };
+      case 'update_dfa_job': {
+        const [analyticsId] = getDFAJobIdsFromRequest(p);
+        return { message: `Updating data frame analytics job ${analyticsId}` };
       }
-      case 'get_dfa_jobs': {
-        return { message: 'Getting data frame analytics jobs' };
+
+      /* Trained Models */
+      case 'put_trained_model': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Creating trained model ${modelId}` };
       }
+      case 'delete_trained_model': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Deleting trained model ${modelId}` };
+      }
+      case 'start_trained_model_deployment': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Starting trained model deployment for model ${modelId}` };
+      }
+      case 'stop_trained_model_deployment': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Stopping trained model deployment for model ${modelId}` };
+      }
+      case 'update_trained_model_deployment': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Updating trained model deployment for model ${modelId}` };
+      }
+      case 'infer_trained_model': {
+        const [modelId] = getModelIdsFromRequest(p);
+        return { message: `Inferring trained model ${modelId}` };
+      }
+
       default: {
-        return { message: `Unknown task ${taskName}` };
+        return { message: `Unknown ML task ${taskName}` };
       }
     }
   }
 }
 
-type DeleteModelSnapshotParams = Parameters<MlClient['deleteModelSnapshot']>;
-type RevertModelSnapshotParams = Parameters<MlClient['revertModelSnapshot']>;
-
-function getSnapshotIdFromBody(
-  p: DeleteModelSnapshotParams | RevertModelSnapshotParams
-): string | undefined {
-  const [params] = p;
+function getSnapshotIdFromRequest([params]:
+  | Parameters<MlClient['deleteModelSnapshot']>
+  | Parameters<MlClient['revertModelSnapshot']>): string | undefined {
   return params?.snapshot_id;
 }
