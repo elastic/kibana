@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiIcon, EuiNotificationBadge, EuiButtonProps } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
 import { LabsFlyout, Props as FlyoutProps } from './labs_flyout';
+import { getPresentationLabsService } from '../../services/presentation_labs_service';
 
 export type Props = EuiButtonProps & Pick<FlyoutProps, 'solutions'>;
 
 export const LabsBeakerButton = ({ solutions, ...props }: Props) => {
-  const { labs: labsService } = pluginServices.getHooks();
-  const { getProjects } = labsService.useService();
+  const labsService = useMemo(() => getPresentationLabsService(), []);
+
   const [isOpen, setIsOpen] = useState(false);
 
-  const projects = getProjects();
+  const projects = labsService.getProjects();
 
   const [overrideCount, onEnabledCountChange] = useState(
     Object.values(projects).filter((project) => project.status.isOverride).length

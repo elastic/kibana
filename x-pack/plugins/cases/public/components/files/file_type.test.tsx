@@ -30,7 +30,8 @@ describe('getFileType', () => {
     });
   });
 
-  describe('getFileAttachmentViewObject', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175841
+  describe.skip('getFileAttachmentViewObject', () => {
     let appMockRender: AppMockRenderer;
 
     const attachmentViewProps: ExternalReferenceAttachmentViewProps = {

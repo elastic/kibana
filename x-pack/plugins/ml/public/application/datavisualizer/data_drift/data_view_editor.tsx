@@ -80,8 +80,7 @@ export function DataViewEditor({
   const { onTableChange, pagination } = useTableSettings<MatchedItem>(
     matchedReferenceIndices.length,
     pageState,
-    // @ts-expect-error callback will have all the 4 necessary params
-    updatePageState
+    updatePageState as Parameters<typeof useTableSettings>['2']
   );
 
   const pageOfItems = useMemo(() => {
