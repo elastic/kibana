@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { enableRuleRequestParamsSchema } from './schemas/latest';
-export type { EnableRuleRequestParams } from './types/latest';
+export { muteAllRuleRequestParamsSchema } from './schemas/latest';
+export type { MuteAllRuleRequestParams } from './types/latest';
 
-export { enableRuleRequestParamsSchema as enableRuleRequestParamsSchemaV1 } from './schemas/v1';
-export type { EnableRuleRequestParams as EnableRuleRequestParamsV1 } from './types/v1';
+export { muteAllRuleRequestParamsSchema as muteAllRuleRequestParamsSchemaV1 } from './schemas/v1';
+export type { MuteAllRuleRequestParams as MuteAllRuleRequestParamsV1 } from './types/v1';
