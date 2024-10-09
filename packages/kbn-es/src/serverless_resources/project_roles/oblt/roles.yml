@@ -38,8 +38,6 @@ viewer:
         - '*'
   run_as: []
 editor:
-  metadata:
-    _public: true
   cluster: []
   indices:
     - names:
