@@ -33,7 +33,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   RuleExecutionStatus,
@@ -45,7 +45,6 @@ import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
-  triggersActionsRoute,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
@@ -191,7 +190,7 @@ export const RulesList = ({
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToApp },
     http,
     kibanaFeatures,
     notifications: { toasts },
@@ -199,8 +198,6 @@ export const RulesList = ({
     i18n: i18nStart,
     theme,
   } = kibanaServices;
-
-  const { search } = useLocation();
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -321,9 +318,11 @@ export const RulesList = ({
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
-      navigateToUrl(`${triggersActionsRoute}${getEditRuleRoute(ruleItem.id)}`, {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
         state: {
-          returnUrl: `${triggersActionsRoute}/rules${search}`,
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/rules`,
         },
       });
     } else {
@@ -1023,10 +1022,8 @@ export const RulesList = ({
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
               if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
-                navigateToUrl(`${triggersActionsRoute}${getCreateRuleRoute(ruleTypeId)}`, {
-                  state: {
-                    returnUrl: `${triggersActionsRoute}/rules${search}`,
-                  },
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
                 });
               } else {
                 setRuleTypeIdToCreate(ruleTypeId);

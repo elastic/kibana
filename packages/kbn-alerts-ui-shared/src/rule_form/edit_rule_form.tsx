@@ -30,12 +30,12 @@ export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
   showMustacheAutocompleteSwitch?: boolean;
-  returnUrl: string;
+  onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
-  const { id, plugins, returnUrl, showMustacheAutocompleteSwitch = false, onSubmit } = props;
+  const { id, plugins, showMustacheAutocompleteSwitch = false, onCancel, onSubmit } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
   const { toasts } = notifications;
 
@@ -165,7 +165,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           showMustacheAutocompleteSwitch,
         }}
       >
-        <RulePage isEdit={true} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
+        <RulePage isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
       </RuleFormStateProvider>
     </div>
   );

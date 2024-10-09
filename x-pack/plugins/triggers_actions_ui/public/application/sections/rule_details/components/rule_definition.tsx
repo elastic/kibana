@@ -16,12 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import {
-  AlertConsumers,
-  getEditRuleRoute,
-  getRuleDetailsRoute,
-  triggersActionsRoute,
-} from '@kbn/rule-data-utils';
+import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
@@ -47,7 +42,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   useNewRuleForm = false,
 }) => {
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToApp },
   } = useKibana().services;
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
@@ -112,9 +107,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const onEditRuleClick = () => {
     if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
-      navigateToUrl(`${triggersActionsRoute}${getEditRuleRoute(rule.id)}`, {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
-          returnUrl: `${triggersActionsRoute}/${getRuleDetailsRoute(rule.id)}`,
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
         },
       });
     } else {

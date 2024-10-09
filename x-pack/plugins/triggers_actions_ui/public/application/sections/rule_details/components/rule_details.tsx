@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
-import { getEditRuleRoute, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -100,7 +100,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToApp },
     ruleTypeRegistry,
     actionTypeRegistry,
     setBreadcrumbs,
@@ -261,9 +261,11 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const onEditRuleClick = () => {
     if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
-      navigateToUrl(`${triggersActionsRoute}${getEditRuleRoute(rule.id)}`, {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
-          returnUrl: `${triggersActionsRoute}/${getRuleDetailsRoute(rule.id)}`,
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
         },
       });
     } else {

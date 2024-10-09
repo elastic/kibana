@@ -8,7 +8,7 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/alerts-ui-shared/src/rule_form/rule_form';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -29,9 +29,8 @@ export const CreateRuleRoute = () => {
     actionTypeRegistry,
   } = useKibana().services;
 
-  const {
-    state: { returnUrl },
-  } = useLocation<{ returnUrl?: string }>();
+  const { state } = useLocation<{ returnApp?: string; returnPath?: string }>();
+  const { returnApp, returnPath } = state || {};
 
   return (
     <IntlProvider locale="en">
@@ -51,9 +50,19 @@ export const CreateRuleRoute = () => {
           ruleTypeRegistry,
           actionTypeRegistry,
         }}
-        returnUrl={returnUrl || `${triggersActionsRoute}/rules`}
+        onCancel={() => {
+          if (returnApp && returnPath) {
+            application.navigateToApp(returnApp, { path: returnPath });
+          } else {
+            application.navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/rules`,
+            });
+          }
+        }}
         onSubmit={(id) => {
-          application.navigateToUrl(`${triggersActionsRoute}/${getRuleDetailsRoute(id)}`);
+          application.navigateToApp('management', {
+            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(id)}`,
+          });
         }}
       />
     </IntlProvider>
