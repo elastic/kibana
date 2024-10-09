@@ -104,8 +104,8 @@ export class ProxyHandler extends ProjectHandler {
   }
 
   // Method to reset the credentials for the created project.
-  resetCredentials(projectId: string, runnerId: string): Promise<Credentials | undefined> {
-    this.log.info(`${runnerId} : Reseting credentials`);
+  resetCredentials(projectId: string): Promise<Credentials | undefined> {
+    this.log.info(`${projectId} : Reseting credentials`);
 
     const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
       const response = await axios.post(
@@ -117,7 +117,7 @@ export class ProxyHandler extends ProjectHandler {
           },
         }
       );
-      this.log.info('Credentials have ben reset');
+      this.log.info('Credentials have been reset');
       return {
         password: response.data.password,
         username: response.data.username,

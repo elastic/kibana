@@ -76,6 +76,7 @@ describe('Hover actions', { tags: ['@testhere', '@ess', '@serverless'] }, () => 
     cy.get(TOP_N_CONTAINER).should('exist').should('contain.text', 'Top destination.domain');
   });
 
+  // it('Copy value', { tags: ['@testhere'] }, () => {
   it('Copy value', () => {
     cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
 
