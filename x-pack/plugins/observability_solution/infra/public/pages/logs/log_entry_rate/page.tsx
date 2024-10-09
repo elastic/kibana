@@ -31,7 +31,7 @@ export const LogEntryRatePage = () => {
       <SubscriptionSplashPage
         data-test-subj="logsLogEntryRatePage"
         pageHeader={{
-          pageTitle: anomaliesTitle,
+          pageTitle: logsAnomaliesTitle,
         }}
       />
     );
