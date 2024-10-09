@@ -627,7 +627,7 @@ async function getExpressionSuggestionsByType(
             literals: argDef.constantOnly,
           },
           {
-            ignoreFields: isNewExpression
+            ignoreColumns: isNewExpression
               ? command.args.filter(isColumnItem).map(({ name }) => name)
               : [],
           }
@@ -1181,15 +1181,15 @@ async function getFieldsOrFunctionsSuggestions(
   },
   {
     ignoreFn = [],
-    ignoreFields = [],
+    ignoreColumns = [],
   }: {
     ignoreFn?: string[];
-    ignoreFields?: string[];
+    ignoreColumns?: string[];
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
-      ? getFieldsByType(types, ignoreFields, {
+      ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
         })
@@ -1200,7 +1200,10 @@ async function getFieldsOrFunctionsSuggestions(
   const filteredVariablesByType: string[] = [];
   if (variables) {
     for (const variable of variables.values()) {
-      if (types.includes('any') || types.includes(variable[0].type)) {
+      if (
+        (types.includes('any') || types.includes(variable[0].type)) &&
+        !ignoreColumns.includes(variable[0].name)
+      ) {
         filteredVariablesByType.push(variable[0].name);
       }
     }
@@ -1520,7 +1523,7 @@ async function getListArgsSuggestions(
               fields: true,
               variables: anyVariables,
             },
-            { ignoreFields: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))
         );
       }

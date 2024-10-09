@@ -387,6 +387,23 @@ describe('autocomplete', () => {
           '```````````````````````````````round(doubleField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`',
         ]
       );
+
+      it('should not suggest already-used fields and variables', async () => {
+        const { suggest: suggestTest } = await setup();
+        const getSuggestions = async (query: string) =>
+          (await suggestTest(query)).map((value) => value.text);
+
+        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain('foo');
+        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /')).not.toContain(
+          'foo'
+        );
+        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain(
+          'doubleField'
+        );
+        expect(
+          await getSuggestions('from a_index | EVAL foo = 1 | KEEP doubleField, /')
+        ).not.toContain('doubleField');
+      });
     });
   }
 
