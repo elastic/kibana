@@ -29,7 +29,7 @@ function createPackageReadme(packageDir: string, integrationName: string, fields
 
 function createBuildReadme(packageDir: string, integrationName: string, fields: object[]) {
   const dirPath = joinPath(packageDir, '_dev/build/docs/');
-  createReadmeFile(dirPath, 'build_readme.md.njk', integrationName, fields);
+  createReadmeFile(dirPath, 'build_rdm.md.njk', integrationName, fields);
 }
 
 function createReadmeFile(
