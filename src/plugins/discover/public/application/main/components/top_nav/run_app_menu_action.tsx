@@ -96,12 +96,7 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         isOpen={!nestedContent}
         panelPaddingSize="s"
       >
-        <EuiContextMenu
-          initialPanelId={appMenuItem.id}
-          data-test-subj={appMenuItem.testId}
-          size="s"
-          panels={panels}
-        />
+        <EuiContextMenu initialPanelId={appMenuItem.id} size="s" panels={panels} />
       </EuiWrappingPopover>
     </>
   );

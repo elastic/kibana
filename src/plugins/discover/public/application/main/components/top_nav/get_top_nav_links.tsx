@@ -228,7 +228,7 @@ function convertMenuItem({
           getDiscoverParams,
         });
       },
-      testId: appMenuItem.id,
+      testId: appMenuItem.testId,
     };
   }
 
@@ -243,6 +243,6 @@ function convertMenuItem({
         getDiscoverParams,
       });
     },
-    testId: appMenuItem.id,
+    testId: appMenuItem.controlProps.testId,
   };
 }
