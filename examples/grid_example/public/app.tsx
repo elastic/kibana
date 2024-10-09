@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { GridLayout, type GridLayoutData, type GridLayoutApi } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { EuiButton, EuiPageTemplate, EuiProvider, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiProvider, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
@@ -37,7 +37,18 @@ export const GridExample = () => {
           <GridLayout
             ref={setGridLayoutApi}
             renderPanelContents={(id) => {
-              return <div style={{ padding: 8 }}>{id}</div>;
+              return (
+                <>
+                  <div style={{ padding: 8 }}>{id}</div>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      gridLayoutApi?.removePanel(id);
+                    }}
+                  >
+                    Delete this panel
+                  </EuiButtonEmpty>
+                </>
+              );
             }}
             getCreationOptions={() => {
               const initialLayout: GridLayoutData = [

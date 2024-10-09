@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { GridRowData } from '..';
 import { DASHBOARD_GRID_COLUMN_COUNT } from './constants';
 import { GridPanelData, PanelPlacementStrategy } from './types';
-import { resolveGridRow } from './resolve_grid_row';
+import { compactGridRow, resolveGridRow } from './resolve_grid_row';
 
 export const runPanelPlacementStrategy = (
   originalRowData: GridRowData,
@@ -18,7 +18,6 @@ export const runPanelPlacementStrategy = (
   strategy: PanelPlacementStrategy = PanelPlacementStrategy.findTopLeftMostOpenSpace
 ): GridRowData => {
   const nextRowData = { ...originalRowData, panels: { ...originalRowData.panels } };
-
   switch (strategy) {
     case PanelPlacementStrategy.placeAtTop:
       // move all other panels down by the height of the new panel to make room for the new panel
@@ -26,11 +25,13 @@ export const runPanelPlacementStrategy = (
         const panel = nextRowData.panels[key];
         panel.row += newPanel.height;
       });
-      return {
+
+      // some panels might need to be pushed back up because they are now floating - so, compact the row
+      return compactGridRow({
         ...nextRowData,
         // place the new panel at the top left corner, since there is now space
         panels: { ...nextRowData.panels, [newPanel.id]: { ...newPanel, row: 0, column: 0 } },
-      };
+      });
 
     case PanelPlacementStrategy.findTopLeftMostOpenSpace:
       // find the max row
