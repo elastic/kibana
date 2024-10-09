@@ -19,9 +19,7 @@ import {
 import { css } from '@emotion/css';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { CreateConnectorPopover } from './create_connector_popover';
-import { useFilteredActionTypes } from './hooks/use_load_action_types';
 import { ConnectorSetup } from './connector_setup';
-import { AllowedActionTypeIds } from '../../constants';
 
 interface ConnectorCardsProps {
   connectors?: AIConnector[];
@@ -32,14 +30,10 @@ interface ConnectorCardsProps {
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
   ({ connectors, onConnectorSaved, onClose }) => {
     const {
-      http,
       triggersActionsUi: { actionTypeRegistry },
-      notifications: { toasts },
     } = useKibana().services;
 
-    const actionTypes = useFilteredActionTypes(http, toasts);
-
-    if (!actionTypes || !connectors) return <EuiLoadingSpinner />;
+    if (!connectors) return <EuiLoadingSpinner />;
 
     if (connectors.length > 0) {
       return (
@@ -79,9 +73,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
       );
     }
 
-    return (
-      <ConnectorSetup actionTypeIds={AllowedActionTypeIds} onConnectorSaved={onConnectorSaved} />
-    );
+    return <ConnectorSetup onConnectorSaved={onConnectorSaved} />;
   }
 );
 ConnectorCards.displayName = 'ConnectorCards';

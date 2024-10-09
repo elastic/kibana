@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -23,9 +23,9 @@ import {
   ConnectorAddModal,
   type ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useFilteredActionTypes } from './hooks/use_load_action_types';
 
 const usePanelCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -42,11 +42,10 @@ const usePanelCss = () => {
 interface ConnectorSetupProps {
   onConnectorSaved?: (savedAction: ActionConnector) => void;
   onClose?: () => void;
-  actionTypeIds?: string[];
   compressed?: boolean;
 }
 export const ConnectorSetup = React.memo<ConnectorSetupProps>(
-  ({ onConnectorSaved, onClose, actionTypeIds, compressed = false }) => {
+  ({ onConnectorSaved, onClose, compressed = false }) => {
     const panelCss = usePanelCss();
     const {
       http,
@@ -54,19 +53,13 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
       notifications: { toasts },
     } = useKibana().services;
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
+
     const onModalClose = useCallback(() => {
       setSelectedActionType(null);
       onClose?.();
     }, [onClose]);
 
-    const { data } = useLoadActionTypes({ http, toasts });
-
-    const actionTypes = useMemo(() => {
-      if (actionTypeIds && data) {
-        return data.filter((actionType) => actionTypeIds.includes(actionType.id));
-      }
-      return data;
-    }, [data, actionTypeIds]);
+    const actionTypes = useFilteredActionTypes(http, toasts);
 
     if (!actionTypes) {
       return <EuiLoadingSpinner />;
