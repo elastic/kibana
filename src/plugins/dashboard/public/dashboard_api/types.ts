@@ -12,6 +12,7 @@ import {
   HasRuntimeChildState,
   HasSerializedChildState,
   PresentationContainer,
+  PublishesSettings,
   SerializedPanelState,
   TracksOverlays,
 } from '@kbn/presentation-containers';
@@ -42,7 +43,7 @@ import {
   ErrorEmbeddable,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -52,7 +53,7 @@ import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
+import { DashboardStateFromSettingsFlyout } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -98,7 +99,6 @@ export interface DashboardState {
   description?: string;
   executionContext: KibanaExecutionContext;
 
-  // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
   syncTooltips: DashboardOptions['syncTooltips'];
   useMargins: DashboardOptions['useMargins'];
@@ -133,6 +133,7 @@ export type DashboardApi = CanExpandPanels &
   Pick<PublishesPanelTitle, 'panelTitle'> &
   PublishesReload &
   PublishesSavedObjectId &
+  PublishesSettings &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
@@ -157,16 +158,12 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
-    setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-    setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
-    setQuery: (query?: Query | undefined) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setTags: (tags: string[]) => void;
-    setTimeRange: (timeRange?: TimeRange | undefined) => void;
     useMargins$: PublishingSubject<boolean | undefined>;
     // TODO replace with HasUniqueId once dashboard is refactored and navigateToDashboard is removed
     uuid$: PublishingSubject<string>;
@@ -177,9 +174,10 @@ export type DashboardApi = CanExpandPanels &
 
 export interface DashboardInternalApi {
   animatePanelTransforms$: PublishingSubject<boolean>;
-  controlGroupReload$: PublishingSubject<void>;
-  panelsReload$: PublishingSubject<void>;
-  getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
+  controlGroupReload$: Subject<void>;
+  panelsReload$: Subject<void>;
+  getRuntimeStateForControlGroup: () => object | undefined;
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
+  setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
 }

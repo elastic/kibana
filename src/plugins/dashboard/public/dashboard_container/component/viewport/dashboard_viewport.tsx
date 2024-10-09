@@ -138,7 +138,7 @@ export const DashboardViewportComponent = () => {
                 getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}
+            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
       ) : null}

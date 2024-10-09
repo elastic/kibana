@@ -23,11 +23,18 @@ import { initializeUnsavedChanges } from './unsaved_changes';
 import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
-import { DASHBOARD_API_TYPE, DashboardCreationOptions, DashboardState } from './types';
+import {
+  DASHBOARD_API_TYPE,
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardInternalApi,
+  DashboardState,
+} from './types';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
+import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 
 export function getDashboardApi({
   creationOptions,
@@ -120,7 +127,7 @@ export function getDashboardApi({
       },
       type: DASHBOARD_API_TYPE as 'dashboard',
       viewMode: viewMode$,
-    },
+    } as Omit<DashboardApi, 'reload$'>,
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
@@ -140,7 +147,12 @@ export function getDashboardApi({
           references: getReferencesForControls(references),
         };
       },
-    },
+      getRuntimeStateForControlGroup: () => {
+        return panelsManager.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
+      },
+      setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
+        controlGroupApi$.next(controlGroupApi),
+    } as DashboardInternalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();

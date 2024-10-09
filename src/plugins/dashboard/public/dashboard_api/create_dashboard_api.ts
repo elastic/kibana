@@ -58,7 +58,7 @@ export async function createDashboardApi({
   // --------------------------------------------------------------------------------------
   // Start the diffing integration after all other integrations are set up.
   // --------------------------------------------------------------------------------------
-  /*untilDashboardReady().then((dashboardApi) => {
+  /* untilDashboardReady().then((dashboardApi) => {
     startDiffingDashboardState.bind(dashboardApi)(creationOptions);
   });*/
 

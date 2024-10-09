@@ -7,22 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import { initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardState } from './types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DashboardStateFromSettingsFlyout } from '../dashboard_container/types';
 
-export function initializeSettingsManager(initialState: DashboardState) {
-  const timeRestore$ = new BehaviorSubject<boolean | undefined>(initialState.timeRestore);
-  const titleManager = initializeTitles(initialState);
+export function initializeSettingsManager(initialState?: DashboardState) {
+  const syncColors$ = new BehaviorSubject<boolean>(
+    initialState?.syncColors ?? DEFAULT_DASHBOARD_INPUT.syncColors
+  );
+  function setSyncColors(syncColors: boolean) {
+    if (syncColors !== syncColors$.value) syncColors$.next(syncColors);
+  }
+  const syncCursor$ = new BehaviorSubject<boolean>(
+    initialState?.syncCursor ?? DEFAULT_DASHBOARD_INPUT.syncCursor
+  );
+  function setSyncCursor(syncCursor: boolean) {
+    if (syncCursor !== syncCursor$.value) syncCursor$.next(syncCursor);
+  }
+  const syncTooltips$ = new BehaviorSubject<boolean>(
+    initialState?.syncTooltips ?? DEFAULT_DASHBOARD_INPUT.syncTooltips
+  );
+  function setSyncTooltips(syncTooltips: boolean) {
+    if (syncTooltips !== syncTooltips$.value) syncTooltips$.next(syncTooltips);
+  }
+  const tags$ = new BehaviorSubject<string[]>(initialState?.tags ?? DEFAULT_DASHBOARD_INPUT.tags);
+  function setTags(tags: string[]) {
+    if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
+  }
+  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
+    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
+  );
+  const titleManager = initializeTitles(initialState ?? {});
+  const useMargins$ = new BehaviorSubject<boolean>(
+    initialState?.useMargins ?? DEFAULT_DASHBOARD_INPUT.useMargins
+  );
+  function setUseMargins(useMargins: boolean) {
+    if (useMargins !== useMargins) useMargins$.next(useMargins);
+  }
+
+  function setSettings(settings: DashboardStateFromSettingsFlyout) {
+    setSyncColors(settings.syncColors);
+    setSyncCursor(settings.syncCursor);
+    setSyncTooltips(settings.syncTooltips);
+    setTags(settings.tags);
+    setUseMargins(settings.useMargins);
+    titleManager.titlesApi.setHidePanelTitle(settings.hidePanelTitles);
+    titleManager.titlesApi.setPanelDescription(settings.description);
+    titleManager.titlesApi.setPanelTitle(settings.title);
+  }
 
   return {
     api: {
-      timeRestore$,
       ...titleManager.titlesApi,
+      getSettings: () => ({
+        description: titleManager.titlesApi.panelDescription.value,
+        hidePanelTitles: titleManager.titlesApi.hidePanelTitle.value,
+        syncColors: syncColors$.value,
+        syncCursor: syncCursor$.value,
+        syncTooltips: syncTooltips$.value,
+        tags: tags$.value,
+        timeRestore: timeRestore$.value,
+        title: titleManager.titlesApi.panelTitle.value,
+        useMargins: useMargins$.value,
+      }),
+      settings: {
+        syncColors$,
+        syncCursor$,
+        syncTooltips$,
+      },
+      setSettings,
+      setTags,
+      timeRestore$,
+      useMargins$,
     },
     internalApi: {
       reset: (lastSavedState: DashboardState) => {
-        timeRestore$.next(lastSavedState.timeRestore);
+        setSettings(lastSavedState);
       },
     },
   };

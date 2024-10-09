@@ -32,14 +32,12 @@ import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management_service/types';
-import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
+import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import type { DashboardCreationOptions } from '../../..';
-import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 
 /**
  * Initializes a Dashboard and starts all of its integrations
@@ -300,7 +298,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Start performance tracker
   // --------------------------------------------------------------------------------------
-  /*untilDashboardReady().then((dashboardContainer) =>
+  /* untilDashboardReady().then((dashboardContainer) =>
     dashboardContainer.integrationSubscriptions.add(
       startQueryPerformanceTracking(dashboardContainer)
     )
@@ -310,7 +308,7 @@ export const initializeDashboard = async ({
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
   let initialSearchSessionId;
-  /*if (searchSessionSettings) {
+  /* if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.

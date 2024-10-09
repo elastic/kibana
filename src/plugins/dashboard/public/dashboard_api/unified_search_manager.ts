@@ -145,6 +145,10 @@ export function initializeUnifiedSearchManager(
   return {
     api: {
       filters$,
+      forceRefresh: () => {
+        controlGroupReload$.next();
+        panelsReload$.next();
+      },
       query$,
       refreshInterval$,
       timeRange$,
