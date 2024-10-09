@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import nunjucks from 'nunjucks';
+import { Environment, FileSystemLoader } from 'nunjucks';
 
 import { join as joinPath } from 'path';
 import { createSync, ensureDirSync } from '../util';
@@ -40,10 +40,17 @@ function createReadmeFile(
 ) {
   ensureDirSync(targetDir);
 
-  const template = nunjucks.render(templateName, {
+  const templatesPath = joinPath(__dirname, '../templates');
+  const env = new Environment(new FileSystemLoader(templatesPath), {
+    autoescape: false,
+  });
+
+  const template = env.getTemplate(templateName);
+
+  const renderedTemplate = template.render({
     package_name: integrationName,
     fields,
   });
 
-  createSync(joinPath(targetDir, 'README.md'), template);
+  createSync(joinPath(targetDir, 'README.md'), renderedTemplate);
 }
