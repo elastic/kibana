@@ -81,7 +81,7 @@ export async function getServiceMetadataIcons({
       track_total_hits: 1,
       size: 1,
       query: { bool: { filter, should } },
-      fields: [...fields, 'kubernetes*'],
+      fields,
     },
   };
 
