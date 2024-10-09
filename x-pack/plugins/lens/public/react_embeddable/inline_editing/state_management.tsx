@@ -25,7 +25,7 @@ export function getStateManagementForInlineEditing(
   const updatePanelState = (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType: string
+    visualizationType?: string
   ) => {
     const viz = getAttributes();
     const datasourceStates: DatasourceStates = {
@@ -37,7 +37,7 @@ export function getStateManagementForInlineEditing(
     const newViz = mergeToNewDoc(
       viz,
       {
-        activeId: visualizationType,
+        activeId: visualizationType || viz.visualizationType,
         state: visualizationState,
       },
       datasourceStates,

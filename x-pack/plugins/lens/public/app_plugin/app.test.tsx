@@ -38,18 +38,6 @@ import faker from 'faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VisualizeEditorContext } from '../types';
-import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
-
-presentationUtilPluginServices.getHooks = jest.fn().mockReturnValue({
-  capabilities: {
-    useService: () => ({
-      canAccessDashboards: () => true,
-      canCreateNewDashboards: () => true,
-      canSaveVisualizations: () => true,
-      canSetAdvancedSettings: () => true,
-    }),
-  },
-});
 
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(),
