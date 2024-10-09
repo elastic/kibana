@@ -59,7 +59,11 @@ export class InventoryPlugin
     const hideInventory$ = from(getStartServices).pipe(
       mergeMap(([coreStart, pluginsStart]) =>
         from(pluginsStart.spaces.getActiveSpace()).pipe(
-          map((space) => space.disabledFeatures.includes('inventory'))
+          map(
+            (space) =>
+              space.disabledFeatures.includes('inventory') ||
+              !coreStart.application.capabilities.inventory.show
+          )
         )
       )
     );
