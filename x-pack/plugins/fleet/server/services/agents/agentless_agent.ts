@@ -74,7 +74,7 @@ class AgentlessAgentService {
     );
 
     logger.debug(
-      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
+      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]-`
     );
 
     logger.debug(
