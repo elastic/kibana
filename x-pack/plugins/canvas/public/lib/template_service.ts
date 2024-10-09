@@ -9,12 +9,11 @@
 
 import { API_ROUTE_TEMPLATES } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
-import { pluginServices } from '../services';
 import { CanvasTemplate } from '../../types';
+import { coreServices } from '../services/kibana_services';
 
 const getApiPath = function () {
-  const platformService = pluginServices.getServices().platform;
-  const basePath = platformService.getBasePath();
+  const basePath = coreServices.http.basePath.get();
   return `${basePath}${API_ROUTE_TEMPLATES}`;
 };
 

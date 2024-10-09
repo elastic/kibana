@@ -1814,7 +1814,10 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({
+                filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
+                internal: true,
+              })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
