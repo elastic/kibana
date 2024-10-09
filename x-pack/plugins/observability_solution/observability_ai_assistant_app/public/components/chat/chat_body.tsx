@@ -225,15 +225,6 @@ export function ChatBody({
     }
   });
 
-  // const handleCopyConversation = () => {
-  //   const content = JSON.stringify({
-  //     title: initialTitle,
-  //     messages: conversation.value?.messages ?? messages,
-  //   });
-
-  //   navigator.clipboard?.writeText(content || '');
-  // };
-
   const handleCopyConversation = () => {
     const deserializeMessage = (message: Message): Message => {
       const copiedMessage = cloneDeep(message);
