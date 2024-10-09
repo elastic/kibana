@@ -42,12 +42,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     const firstDoc = res.docs?.[0];
 
-    if (firstDoc?.error) {
+    // @ts-expect-error error is not in the types
+    const error = firstDoc?.error;
+    if (error) {
       log.error('Full painless error below: ');
-      log.error(JSON.stringify(firstDoc.error, null, 2));
-      throw new Error(
-        'Painless error running pipelie see logs for full detail : ' + firstDoc.error?.type
-      );
+      log.error(JSON.stringify(error, null, 2));
+      throw new Error('Painless error running pipelie see logs for full detail : ' + error?.type);
     }
 
     return firstDoc?.doc?._source;
