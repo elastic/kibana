@@ -97,7 +97,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const grepSpecPattern = grep({
         ...cypressConfigFile,
         specPattern,
-        excludeSpecPattern: cypressConfigFile.excludeSpecPattern ?? [],
+        excludeSpecPattern: cypressConfigFile.e2e?.excludeSpecPattern ?? [],
       }).specPattern;
 
       log.info('Resolved spec files or pattern after grep:', grepSpecPattern);
