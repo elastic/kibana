@@ -22,12 +22,12 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { DATA_VIEW_FIELD, IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
 import { COMPARATOR_MAPPING } from '../../constants';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { TimestampFieldSelector } from '../common/timestamp_field_selector';
 
 export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 
@@ -41,7 +41,7 @@ export function TimesliceMetricIndicatorTypeForm() {
     dataViewId,
   });
 
-  const timestampFields = dataView?.fields.filter((field) => field.type === 'date');
+  const timestampFields = dataView?.fields.filter((field) => field.type === 'date') ?? [];
   const { uiSettings } = useKibana().services;
   const threshold = watch('indicator.params.metric.threshold');
   const comparator = watch('indicator.params.metric.comparator');
@@ -61,18 +61,10 @@ export function TimesliceMetricIndicatorTypeForm() {
             <IndexSelection />
           </EuiFlexItem>
           <EuiFlexItem>
-            <IndexFieldSelector
-              indexFields={timestampFields ?? []}
-              name="indicator.params.timestampField"
-              label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
-                defaultMessage: 'Timestamp field',
-              })}
-              placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
-                defaultMessage: 'Select a timestamp field',
-              })}
+            <TimestampFieldSelector
+              fields={timestampFields}
               isLoading={!!index && isIndexFieldsLoading}
               isDisabled={!index}
-              isRequired
             />
           </EuiFlexItem>
         </EuiFlexGroup>
