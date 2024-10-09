@@ -1137,22 +1137,17 @@ describe('autocomplete', () => {
         );
 
         describe('escaped field names', () => {
-          // This isn't actually the behavior we want, but this test is here
-          // to make sure no weird suggestions start cropping up in this case.
-          testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar'], undefined, [
+          testSuggestions('FROM a | KEEP `foo.bar`/', ['`foo.bar`, ', '`foo.bar` | '], undefined, [
             [{ name: 'foo.bar', type: 'double' }],
           ]);
           // @todo re-enable these tests when we can use AST to support this case
-          testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-            [{ name: 'foo.bar', type: 'double' }],
-          ]);
           testSuggestions.skip(
             'FROM a | KEEP `foo`.`bar`/',
             ['foo.bar, ', 'foo.bar | '],
             undefined,
             [[{ name: 'foo.bar', type: 'double' }]]
           );
-          testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
+          testSuggestions('FROM a | KEEP `any#Char$Field`/', [
             '`any#Char$Field`, ',
             '`any#Char$Field` | ',
           ]);

@@ -48,7 +48,7 @@ import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/t
 import { removeMarkerArgFromArgsList } from './context';
 import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
-import { EDITOR_MARKER } from './constants';
+import { EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -265,6 +265,11 @@ export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    columnName = columnName.slice(1, -1);
+  }
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
