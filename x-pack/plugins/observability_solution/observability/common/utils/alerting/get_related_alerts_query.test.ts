@@ -14,16 +14,18 @@ describe('getRelatedAlertKuery', () => {
     { field: 'group1Field', value: 'group1Value' },
     { field: 'group2Field', value: 'group2:Value' },
   ];
+  const ruleId = 'ruleUuid';
   const tagsKuery = '(tags: "tag1:v" or tags: "tag2")';
   const groupsKuery =
     '(group1Field: "group1Value" or kibana.alert.group.value: "group1Value") or (group2Field: "group2:Value" or kibana.alert.group.value: "group2:Value")';
+  const ruleKuery = '(kibana.alert.rule.uuid: "ruleUuid")';
 
   it('should generate correct query with no tags or groups', () => {
     expect(getRelatedAlertKuery()).toBeUndefined();
   });
 
   it('should generate correct query for tags', () => {
-    const kuery = getRelatedAlertKuery(tags);
+    const kuery = getRelatedAlertKuery({ tags });
     expect(kuery).toEqual(tagsKuery);
 
     // Should be able to parse keury without throwing error
@@ -31,7 +33,7 @@ describe('getRelatedAlertKuery', () => {
   });
 
   it('should generate correct query for groups', () => {
-    const kuery = getRelatedAlertKuery(undefined, groups);
+    const kuery = getRelatedAlertKuery({ groups });
     expect(kuery).toEqual(groupsKuery);
 
     // Should be able to parse keury without throwing error
@@ -39,8 +41,16 @@ describe('getRelatedAlertKuery', () => {
   });
 
   it('should generate correct query for tags and groups', () => {
-    const kuery = getRelatedAlertKuery(tags, groups);
+    const kuery = getRelatedAlertKuery({ tags, groups });
     expect(kuery).toEqual(`${tagsKuery} or ${groupsKuery}`);
+
+    // Should be able to parse keury without throwing error
+    fromKueryExpression(kuery!);
+  });
+
+  it('should generate correct query for tags, groups and ruleId', () => {
+    const kuery = getRelatedAlertKuery({ tags, groups, ruleId });
+    expect(kuery).toEqual(`${tagsKuery} or ${groupsKuery} or ${ruleKuery}`);
 
     // Should be able to parse keury without throwing error
     fromKueryExpression(kuery!);

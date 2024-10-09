@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, EuiBetaBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -23,7 +23,9 @@ export function ExperimentalBadge() {
   );
 }
 
-export function BetaBadge() {
+export function BetaBadge(
+  badgeProps: Partial<Pick<EuiBetaBadgeProps, 'size' | 'iconType' | 'style'>>
+) {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.observability.betaBadgeLabel', {
@@ -32,6 +34,7 @@ export function BetaBadge() {
       tooltipContent={i18n.translate('xpack.observability.betaBadgeDescription', {
         defaultMessage: 'This functionality is in beta and is subject to change.',
       })}
+      {...badgeProps}
     />
   );
 }

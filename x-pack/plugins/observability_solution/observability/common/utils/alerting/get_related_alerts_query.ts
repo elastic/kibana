@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Group } from '../../typings';
 
 export interface Query {
   query: string;
   language: string;
 }
+interface Props {
+  tags?: string[];
+  groups?: Group[];
+  ruleId?: string;
+}
 
-export const getRelatedAlertKuery = (tags?: string[], groups?: Group[]): string | undefined => {
+export const getRelatedAlertKuery = ({ tags, groups, ruleId }: Props = {}): string | undefined => {
   const tagKueries: string[] =
     tags?.map((tag) => {
       return `tags: "${tag}"`;
@@ -23,10 +29,11 @@ export const getRelatedAlertKuery = (tags?: string[], groups?: Group[]): string 
         return `(${field}: "${value}" or kibana.alert.group.value: "${value}")`;
       })) ??
     [];
+  const ruleKueries = (ruleId && [`(${ALERT_RULE_UUID}: "${ruleId}")`]) ?? [];
 
   const tagKueriesStr = tagKueries.length > 0 ? [`(${tagKueries.join(' or ')})`] : [];
   const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
-  const kueries = [...tagKueriesStr, ...groupKueriesStr];
+  const kueries = [...tagKueriesStr, ...groupKueriesStr, ...ruleKueries];
 
   return kueries.length ? kueries.join(' or ') : undefined;
 };
