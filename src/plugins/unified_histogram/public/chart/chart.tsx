@@ -382,9 +382,7 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
         <LensSaveModalComponent
-          initialInput={
-            removeTablesFromLensAttributes(visContext.attributes) as unknown as LensEmbeddableInput
-          }
+          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}

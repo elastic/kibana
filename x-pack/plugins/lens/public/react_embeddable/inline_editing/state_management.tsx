@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
-import { DatasourceStates, VisualizationState } from '../../state_management/types';
+import type { DatasourceStates } from '../../state_management/types';
 import type { VisualizationMap, DatasourceMap } from '../../types';
 import type { TypedLensSerializedState } from '../types';
 
@@ -22,7 +22,11 @@ export function getStateManagementForInlineEditing(
   datasourceMap: DatasourceMap,
   extractFilterReferences: FilterManager['extract']
 ) {
-  const updatePanelState = (datasourceState: unknown, visualizationState: unknown) => {
+  const updatePanelState = (
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType: string
+  ) => {
     const viz = getAttributes();
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
@@ -33,7 +37,7 @@ export function getStateManagementForInlineEditing(
     const newViz = mergeToNewDoc(
       viz,
       {
-        activeId: (viz.state.visualization as VisualizationState).activeId || viz.visualizationType,
+        activeId: visualizationType,
         state: visualizationState,
       },
       datasourceStates,

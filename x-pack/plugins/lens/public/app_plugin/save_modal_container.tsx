@@ -273,7 +273,7 @@ export const runSaveLensVisualization = async (
     return;
   }
 
-  let references = lastKnownDoc.references;
+  let references = lastKnownDoc.references || initialInput?.attributes?.references;
 
   if (savedObjectsTagging) {
     const tagsIds =

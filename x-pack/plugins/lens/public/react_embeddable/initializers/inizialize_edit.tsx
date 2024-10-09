@@ -66,7 +66,7 @@ export function initializeEditApi(
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
 
-  const inESQLModeEnabled = () => !uiSettings.get(ENABLE_ESQL);
+  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
   /**
    * Inline editing section
@@ -121,7 +121,7 @@ export function initializeEditApi(
       return false;
     }
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(getState()) && !inESQLModeEnabled()) {
+    if (isTextBasedLanguage(getState()) && !isESQLModeEnabled()) {
       return false;
     }
     return (
