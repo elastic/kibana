@@ -7,18 +7,18 @@
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { trackDeprecatedRouteUsage } from '../lib/track_deprecated_route_usage';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { trackDeprecatedRouteUsage } from '../../../../lib/track_deprecated_route_usage';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../lib/track_deprecated_route_usage', () => ({
+jest.mock('../../../../lib/track_deprecated_route_usage', () => ({
   trackDeprecatedRouteUsage: jest.fn(),
 }));
 

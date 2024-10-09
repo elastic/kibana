@@ -6,20 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-import { trackDeprecatedRouteUsage } from '../lib/track_deprecated_route_usage';
-
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the rule.',
-    },
-  }),
-});
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { trackDeprecatedRouteUsage } from '../../../../lib/track_deprecated_route_usage';
+import {
+  muteAllRuleRequestParamsSchemaV1,
+  MuteAllRuleRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/mute_all';
 
 export const muteAllRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -36,7 +31,7 @@ export const muteAllRuleRoute = (
       },
       validate: {
         request: {
-          params: paramSchema,
+          params: muteAllRuleRequestParamsSchemaV1,
         },
         response: {
           204: {
@@ -48,10 +43,10 @@ export const muteAllRuleRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
+        const params: MuteAllRuleRequestParamsV1 = req.params;
         trackDeprecatedRouteUsage('muteAll', usageCounter);
         try {
-          await rulesClient.muteAll({ id });
+          await rulesClient.muteAll(params);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
