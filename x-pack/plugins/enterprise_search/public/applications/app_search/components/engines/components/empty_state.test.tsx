@@ -12,11 +12,11 @@ import React from 'react';
 import { mount, shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { IntlProvider } from '@kbn/i18n-react';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta';
 
 import { EmptyState } from '.';
-import { IntlProvider } from 'react-intl';
 
 describe('EmptyState', () => {
   describe('when the user can manage/create engines', () => {
