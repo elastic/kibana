@@ -48,7 +48,7 @@ interface RunGenerationProps {
 
 // If the result is classified as a generation error, produce an error message
 // as defined in the i18n file. Otherwise, return undefined.
-function generationErrorMessage(body: unknown): string | undefined {
+function generationErrorMessage(body: unknown | undefined): string | undefined {
   if (!isGenerationErrorBody(body)) {
     return;
   }

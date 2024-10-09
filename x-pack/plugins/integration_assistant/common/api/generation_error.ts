@@ -13,7 +13,7 @@ export interface GenerationErrorBody {
   attributes: GenerationErrorAttributes;
 }
 
-export function isGenerationErrorBody(obj: unknown): obj is GenerationErrorBody {
+export function isGenerationErrorBody(obj: unknown | undefined): obj is GenerationErrorBody {
   return (
     typeof obj === 'object' &&
     obj !== null &&
