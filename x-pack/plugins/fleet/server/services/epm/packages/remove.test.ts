@@ -21,6 +21,9 @@ jest.mock('../..', () => {
         warn: jest.fn(),
       }),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+      getSavedObjects: jest.fn().mockReturnValue({
+        createInternalRepository: jest.fn(),
+      }),
     },
     packagePolicyService: {
       list: jest.fn().mockImplementation((soClient, params) => {

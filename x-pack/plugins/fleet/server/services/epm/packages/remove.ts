@@ -37,6 +37,7 @@ import type {
 } from '../../../types';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
+import { removeKnowledgeBaseEntries } from '../kibana/knowledge_base/remove';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
@@ -94,7 +95,11 @@ export async function removeInstallation(options: {
   }
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
-  const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
+  const installedAssets = [
+    ...installation.installed_kibana,
+    ...installation.installed_es,
+    ...(installation.installed_misc ?? []),
+  ];
   await deleteAssets(installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
@@ -311,6 +316,7 @@ async function deleteAssets(
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
+    installed_misc: installedMisc = [],
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
     additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
     name,
@@ -332,12 +338,22 @@ async function deleteAssets(
     esClient
   );
 
+  const savedObjectsClient = new SavedObjectsClient(
+    appContextService.getSavedObjects().createInternalRepository()
+  );
+
   // delete the other asset types
   try {
     const packageInfo = await Registry.fetchInfo(name, version);
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets({ installedObjects: installedKibana, spaceId, packageInfo }),
+      removeKnowledgeBaseEntries({
+        installedObjects: installedMisc,
+        packageName: packageInfo.name,
+        esClient,
+        savedObjectsClient,
+      }),
       Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
         deleteKibanaAssets({
           installedObjects: kibanaAssets,

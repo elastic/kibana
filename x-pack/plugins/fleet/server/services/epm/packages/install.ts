@@ -1113,6 +1113,7 @@ export async function createInstallation(options: {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
     installed_es: [],
+    installed_misc: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
     name: pkgName,

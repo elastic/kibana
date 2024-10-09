@@ -1143,6 +1143,10 @@
       "installed_kibana_space_id": {
         "type": "keyword"
       },
+      "installed_misc": {
+        "dynamic": false,
+        "properties": {}
+      },
       "internal": {
         "type": "boolean"
       },

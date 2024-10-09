@@ -1715,6 +1715,31 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing semantic_text fields', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: sem_without_inference_id
+  type: semantic_text
+- name: sem_with_inference_id
+  type: semantic_text
+  inference_id: .model_id
+`;
+    const semanticFieldMapping = {
+      properties: {
+        sem_without_inference_id: {
+          type: 'semantic_text',
+        },
+        sem_with_inference_id: {
+          inference_id: '.model_id',
+          type: 'semantic_text',
+        },
+      },
+    };
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(semanticFieldMapping);
+  });
+
   it('tests unexpected type for field as dynamic template fails', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*

@@ -660,6 +660,7 @@ const expectAssetsInstalled = ({
           type: 'ml_model',
         },
       ],
+      installed_misc: [],
       package_assets: [
         {
           id: '333a22a1-e639-5af5-ae62-907ffc83d603',

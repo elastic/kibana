@@ -44,6 +44,17 @@ describe('getPathParts', () => {
         type: 'fields',
       },
     },
+    {
+      path: 'knowledgebase-1.0.1/kibana/knowledge_base_entry/foo/manifest.yml',
+      assetParts: {
+        dataset: 'foo',
+        file: 'manifest.yml',
+        path: 'knowledgebase-1.0.1/kibana/knowledge_base_entry/foo/manifest.yml',
+        pkgkey: 'knowledgebase-1.0.1',
+        service: 'kibana',
+        type: 'knowledge_base_entry',
+      },
+    },
   ];
   test('testPathParts', () => {
     for (const value of testPaths) {
