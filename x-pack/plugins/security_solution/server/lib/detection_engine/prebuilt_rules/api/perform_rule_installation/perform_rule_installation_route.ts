@@ -25,9 +25,9 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -80,7 +80,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
             ruleObjectsClient,
             versionSpecifiers: mode === 'ALL_RULES' ? undefined : request.body.rules,
           });
-          const { currentRules, installableRules } = getVersionBuckets(ruleVersionsMap);
+          const { currentRules, installableRules } = getRuleGroups(ruleVersionsMap);
 
           // Perform all the checks we can before we start the upgrade process
           if (mode === 'SPECIFIC_RULES') {

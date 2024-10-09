@@ -19,7 +19,7 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   installPrebuiltRulesPackageByVersion,
-  upgradePrebuiltRules,
+  performUpgradePrebuiltRules,
   reviewPrebuiltRulesToInstall,
   reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
@@ -227,12 +227,13 @@ export default ({ getService }: FtrProviderContext): void => {
         prebuiltRulesToUpgradeReviewAfterLatestPackageInstallation.stats.num_rules_to_upgrade_total
       ).toBe(statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_upgrade);
 
-      // Call the upgrade _perform endpoint and verify that the number of upgraded rules is the same as the one
-      // returned by the _review endpoint and the status endpoint
-      const upgradePrebuiltRulesResponseAfterLatestPackageInstallation = await upgradePrebuiltRules(
-        es,
-        supertest
-      );
+      // Call the upgrade _perform endpoint to upgrade all rules to their target version and verify that the number
+      // of upgraded rules is the same as the one returned by the _review endpoint and the status endpoint
+      const upgradePrebuiltRulesResponseAfterLatestPackageInstallation =
+        await performUpgradePrebuiltRules(es, supertest, {
+          mode: 'ALL_RULES',
+          pick_version: 'TARGET',
+        });
 
       expect(upgradePrebuiltRulesResponseAfterLatestPackageInstallation.summary.succeeded).toEqual(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_upgrade

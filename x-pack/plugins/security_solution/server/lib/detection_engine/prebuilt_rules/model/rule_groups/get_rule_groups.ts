@@ -9,7 +9,21 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import type { PrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_asset';
 
-export interface VersionBuckets {
+export interface RuleTriad {
+  /**
+   * The base version of the rule (no customizations)
+   */
+  base?: PrebuiltRuleAsset;
+  /**
+   * The currently installed version
+   */
+  current: RuleResponse;
+  /**
+   * The latest available version
+   */
+  target: PrebuiltRuleAsset;
+}
+export interface RuleGroups {
   /**
    * Rules that are currently installed in Kibana
    */
@@ -21,16 +35,7 @@ export interface VersionBuckets {
   /**
    * Rules that are installed but outdated
    */
-  upgradeableRules: Array<{
-    /**
-     * The currently installed version
-     */
-    current: RuleResponse;
-    /**
-     * The latest available version
-     */
-    target: PrebuiltRuleAsset;
-  }>;
+  upgradeableRules: RuleTriad[];
   /**
    * All available rules
    * (installed and not installed)
@@ -38,13 +43,13 @@ export interface VersionBuckets {
   totalAvailableRules: PrebuiltRuleAsset[];
 }
 
-export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): VersionBuckets => {
+export const getRuleGroups = (ruleVersionsMap: Map<string, RuleVersions>): RuleGroups => {
   const currentRules: RuleResponse[] = [];
   const installableRules: PrebuiltRuleAsset[] = [];
   const totalAvailableRules: PrebuiltRuleAsset[] = [];
-  const upgradeableRules: VersionBuckets['upgradeableRules'] = [];
+  const upgradeableRules: RuleGroups['upgradeableRules'] = [];
 
-  ruleVersionsMap.forEach(({ current, target }) => {
+  ruleVersionsMap.forEach(({ base, current, target }) => {
     if (target != null) {
       // If this rule is available in the package
       totalAvailableRules.push(target);
@@ -63,6 +68,7 @@ export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): V
     if (current != null && target != null && current.version < target.version) {
       // If this rule is installed but outdated
       upgradeableRules.push({
+        base,
         current,
         target,
       });
