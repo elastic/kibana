@@ -24,7 +24,7 @@ import {
   DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELDS,
   DATA_GRID_FULL_SCREEN,
-  GET_DATA_GRID_HEADER,
+  GET_DATA_GRID_HEADER_ACTION_BUTTON,
   GET_DATA_GRID_HEADER_CELL_ACTION_GROUP,
 } from '../../../screens/common/data_grid';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -42,7 +42,7 @@ import { DATAGRID_HEADER } from '../../../screens/timeline';
  *
  * */
 
-describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
@@ -60,13 +60,14 @@ describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
       .trigger('click');
   });
 
-  it('should have correct column sorting values', () => {
+  it.only('should have correct column sorting values', () => {
     cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('be.visible');
 
     cy.log('Date Column');
 
     const timestampField = DATA_GRID_FIELDS.TIMESTAMP.fieldName;
-    cy.get(GET_DATA_GRID_HEADER(timestampField)).trigger('click');
+    cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(timestampField)).realHover();
+    cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(timestampField)).trigger('click');
     cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(timestampField))
       .should('be.visible')
       .should('contain.text', 'Sort Old-New');
@@ -74,7 +75,7 @@ describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
     cy.log('Number column');
 
     const riskScoreField = DATA_GRID_FIELDS.RISK_SCORE.fieldName;
-    cy.get(GET_DATA_GRID_HEADER(riskScoreField)).trigger('click');
+    cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(riskScoreField)).realHover().trigger('click');
     cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(riskScoreField))
       .should('be.visible')
       .should('contain.text', 'Sort Low-High');
@@ -82,7 +83,7 @@ describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
     cy.log('Text Column');
 
     const ruleField = DATA_GRID_FIELDS.RULE.fieldName;
-    cy.get(GET_DATA_GRID_HEADER(ruleField)).trigger('click');
+    cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(ruleField)).realHover().trigger('click');
     cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(ruleField))
       .should('be.visible')
       .should('contain.text', 'Sort A-Z');
