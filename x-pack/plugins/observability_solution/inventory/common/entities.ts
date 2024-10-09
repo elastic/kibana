@@ -85,20 +85,20 @@ interface BaseEntity {
 /**
  * These types are based on service, host and container from the built in definition.
  */
-interface ServiceEntity extends BaseEntity {
+export interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]?: string | string[] | null;
   [AGENT_NAME]: string | string[] | null;
 }
 
-interface HostEntity extends BaseEntity {
+export interface HostEntity extends BaseEntity {
   [ENTITY_TYPE]: 'host';
   [HOST_NAME]: string;
   [CLOUD_PROVIDER]: string | string[] | null;
 }
 
-interface ContainerEntity extends BaseEntity {
+export interface ContainerEntity extends BaseEntity {
   [ENTITY_TYPE]: 'container';
   [CONTAINER_ID]: string;
   [CLOUD_PROVIDER]: string | string[] | null;

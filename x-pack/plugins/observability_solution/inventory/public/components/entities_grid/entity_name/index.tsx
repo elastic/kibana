@@ -58,13 +58,15 @@ export function EntityName({ entity }: EntityNameProps) {
   }, [entity, assetDetailsLocator, serviceOverviewLocator]);
 
   return (
-    <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl()}>
+    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={0}>
           <EntityIcon entity={entity} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
+          <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
+            {entity[ENTITY_DISPLAY_NAME]}
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiLink>
