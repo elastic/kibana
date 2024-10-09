@@ -8,5 +8,9 @@
  */
 
 export type { ComparatorFunction, ComparatorDefinition, StateComparators } from './types';
-export { getInitialValuesFromComparators, runComparators } from './state_comparators';
+export {
+  getComparatorFunction,
+  getInitialValuesFromComparators,
+  runComparators,
+} from './state_comparators';
 export { getUnchangingComparator } from './fallback_comparator';
