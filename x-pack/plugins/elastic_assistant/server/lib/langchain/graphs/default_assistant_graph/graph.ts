@@ -86,11 +86,11 @@ export const getDefaultAssistantGraph = ({
         value: (x: string, y?: string) => y ?? x,
         default: () => 'unknown',
       },
-      bedrockChatEnabled: {
+      isStream: {
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },
-      isStream: {
+      isOssModel: {
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },

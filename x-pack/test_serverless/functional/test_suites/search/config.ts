@@ -24,4 +24,15 @@ export default createTestConfig({
     `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
     `--xpack.cloud.projects_url=/projects/`,
   ],
+  apps: {
+    serverlessElasticsearch: {
+      pathname: '/app/elasticsearch',
+    },
+    serverlessConnectors: {
+      pathname: '/app/connectors',
+    },
+    searchPlayground: {
+      pathname: '/app/search_playground',
+    },
+  },
 });
