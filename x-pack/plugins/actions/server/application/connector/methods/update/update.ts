@@ -15,7 +15,8 @@ import { PreconfiguredActionDisabledModificationError } from '../../../../lib/er
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import { HookServices, RawAction } from '../../../../types';
+import { RawAction, HookServices } from '../../../../types';
+import { tryCatch } from '../../../../lib';
 
 export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {
   try {
@@ -75,14 +76,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-  context.auditLogger?.log(
-    connectorAuditEvent({
-      action: ConnectorAuditAction.UPDATE,
-      savedObject: { type: 'action', id },
-      outcome: 'unknown',
-    })
-  );
-
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
   };
@@ -101,7 +94,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     } catch (error) {
       context.auditLogger?.log(
         connectorAuditEvent({
-          action: ConnectorAuditAction.CREATE,
+          action: ConnectorAuditAction.UPDATE,
           savedObject: { type: 'action', id },
           error,
         })
@@ -110,33 +103,37 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let result: any;
-  try {
-    result = await context.unsecuredSavedObjectsClient.create<RawAction>(
-      'action',
-      {
-        ...attributes,
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      omitBy(
+  context.auditLogger?.log(
+    connectorAuditEvent({
+      action: ConnectorAuditAction.UPDATE,
+      savedObject: { type: 'action', id },
+      outcome: 'unknown',
+    })
+  );
+
+  const result = await tryCatch(
+    async () =>
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
+        'action',
         {
-          id,
-          overwrite: true,
-          references,
-          version,
+          ...attributes,
+          actionTypeId,
+          name,
+          isMissingSecrets: false,
+          config: validatedActionTypeConfig as SavedObjectAttributes,
+          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
         },
-        isUndefined
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            references,
+            version,
+          },
+          isUndefined
+        )
       )
-    );
-  } catch (err) {
-    result = err;
-    context.logger.error(`postSaveHook update error for`);
-  }
+  );
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;
