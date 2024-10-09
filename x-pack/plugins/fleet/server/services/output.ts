@@ -823,9 +823,17 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    await packagePolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
+    await packagePolicyService.removeOutputFromAll(
+      appContextService.getInternalUserESClient(),
+      id,
+      {
+        force: fromPreconfiguration,
+      }
+    );
 
-    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
+    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id, {
+      force: fromPreconfiguration,
+    });
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',

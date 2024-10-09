@@ -17,6 +17,13 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import {
+  ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS,
+  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
@@ -51,6 +58,7 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS);
     const { data } = useMisconfigurationFindings({
       query: buildEntityFlyoutPreviewQuery(fieldName, queryName),
       sort: [],
@@ -107,6 +115,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
     };
 
     const navToFindingsByName = (name: string, queryField: 'host.name' | 'user.name') => {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.CLICK,
+        NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+      );
       navToFindings({ [queryField]: name }, ['rule.name']);
     };
 
@@ -154,6 +166,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <EuiLink
             onClick={() => {
+              uiMetricService.trackUiMetric(
+                METRIC_TYPE.CLICK,
+                NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+              );
               navToFindingsByName(queryName, fieldName);
             }}
           >

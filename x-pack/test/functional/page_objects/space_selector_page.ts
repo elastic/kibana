@@ -204,6 +204,10 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.click(`featureCategoryButton_${categoryName}`);
   }
 
+  async toggleFeatureCategoryCheckbox(categoryName: string) {
+    await this.testSubjects.click(`featureCategoryCheckbox_${categoryName}`);
+  }
+
   async clickOnDescriptionOfSpace() {
     await this.testSubjects.click('descriptionSpaceText');
   }

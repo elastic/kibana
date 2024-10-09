@@ -186,7 +186,6 @@ export default function (providerContext: FtrProviderContext) {
           name: 'My download source',
           host: 'http://test.fr:443',
           is_default: false,
-          proxy_id: null,
         });
       });
 

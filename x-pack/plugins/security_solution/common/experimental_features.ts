@@ -55,7 +55,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
    */
-  automatedResponseActionsForMoreRulesEnabled: false,
+  automatedResponseActionsForAllRulesEnabled: false,
 
   /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
@@ -119,16 +119,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
-   */
-  assistantBedrockChat: true,
-
-  /**
-   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
-   */
-  assistantNaturalLanguageESQLTool: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -188,6 +178,12 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
@@ -207,11 +203,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
-
-  /**
-   * Enables visualization: session viewer and analyzer in expandable flyout
-   */
-  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.

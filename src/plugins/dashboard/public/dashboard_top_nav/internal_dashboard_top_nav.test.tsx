@@ -8,14 +8,15 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { pluginServices } from '../services/plugin_services';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../dashboard_api/types';
+import { dataService, navigationService } from '../services/kibana_services';
 
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
@@ -32,13 +33,10 @@ describe('Internal dashboard top nav', () => {
 
   beforeEach(() => {
     setMockedPresentationUtilServices();
-    pluginServices.getServices().data.query.filterManager.getFilters = jest
-      .fn()
-      .mockReturnValue([]);
+    dataService.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
     // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
     // @ts-ignore type issue with the mockTopNav for this test suite
-    pluginServices.getServices().navigation.TopNavMenu = ({ badges }: TopNavMenuProps) =>
-      mockTopNav(badges);
+    navigationService.ui.TopNavMenu = ({ badges }: TopNavMenuProps) => mockTopNav(badges);
   });
 
   it('should not render the managed badge by default', async () => {
@@ -53,9 +51,12 @@ describe('Internal dashboard top nav', () => {
 
   it('should render the managed badge when the dashboard is managed', async () => {
     const container = buildMockDashboard();
-    container.dispatch.setManaged(true);
+    const dashboardApi = {
+      ...container,
+      managed$: new BehaviorSubject(true),
+    } as unknown as DashboardApi;
     const component = render(
-      <DashboardContext.Provider value={container as DashboardApi}>
+      <DashboardContext.Provider value={dashboardApi}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
       </DashboardContext.Provider>
     );
