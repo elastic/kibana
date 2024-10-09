@@ -63,11 +63,11 @@ export class ApiScraperTask {
   }
 
   private async runTask(taskInstance: ApiScraperTaskInstance) {
+    const { apiKeyId, definitionId } = taskInstance.params;
     try {
-      this.logger.info(`Starting indexing`);
+      this.logger.info(`[${definitionId}] Starting indexing`);
       const start = Date.now();
 
-      const { apiKeyId, definitionId } = taskInstance.params;
       const apiKey = await readApiScraperAPIKey(this.server, apiKeyId);
 
       if (!apiKey) {
@@ -98,14 +98,16 @@ export class ApiScraperTask {
         await scopedClusterClient.asCurrentUser.bulk({ body, refresh: false });
       }
       const end = Date.now();
-      this.logger.info(`Finished in ${end - start}ms – Processed ${docs.length} entities`);
+      this.logger.info(
+        `[${definition.id}] Finished in ${end - start}ms – Processed ${docs.length} entities`
+      );
 
       return {
         state: {},
       };
     } catch (e) {
       if (e instanceof ApiDefinitionNotFound) {
-        this.logger.error(`${e.message} – This task should have been deleted.`);
+        this.logger.error(`[${definitionId}] ${e.message} – This task should have been deleted.`);
         return {
           state: {},
         };
