@@ -1,6 +1,6 @@
 summary: Failed copy with missing reference errors
 description: >
-  The response for successfully copying a dashboard with the `my-dashboard` ID, including all references from the default space to the marketing space.
+  The response for successfully copying a dashboard with the my-dashboard ID, including all references from the default space to the marketing space.
   In this example, the dashboard has a reference to a visualization and a Canvas workpad and the visualization has a reference to a data view.
   The result indicates an unsuccessful copy because the visualization resulted in a missing references error.
   Objects are created when the errors are resolved using the resolve copy conflicts API.

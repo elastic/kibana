@@ -1,6 +1,6 @@
 summary: Copy with createNewCopies
 description: >
-  The response for successfully copying a dashboard with the `my-dashboard` ID, including all references from the default space to the marketing space.
+  The response for successfully copying a dashboard with the my-dashboard ID, including all references from the default space to the marketing space.
   The result indicates a successful copy and all three objects are created.
   Since these objects were created as new copies, each entry in the successResults array includes a destinationId attribute.
 value:

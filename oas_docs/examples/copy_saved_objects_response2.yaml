@@ -1,6 +1,6 @@
 summary: Copy without createNewCopies
 description: >
-  The response for successfully copying a dashboard with the `my-dashboard` ID with `createNewCopies` turned off.
+  The response for successfully copying a dashboard with the my-dashboard ID with createNewCopies turned off.
   The result indicates a successful copy and all three objects are created.
 value:
  marketing:

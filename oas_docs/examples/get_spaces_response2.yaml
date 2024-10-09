@@ -2,7 +2,7 @@ summary: Get all spaces with custom options
 description: >
   The user has read-only access to the Sales space.
   Get all spaces with the following query parameters:
-  `purpose=shareSavedObjectsIntoSpace&include_authorized_purposes=true`
+  "purpose=shareSavedObjectsIntoSpace&include_authorized_purposes=true"
 value:
   - id: default
     name: Default
