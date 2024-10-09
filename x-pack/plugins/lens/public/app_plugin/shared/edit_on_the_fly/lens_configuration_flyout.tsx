@@ -322,7 +322,6 @@ export function LensEditConfigurationFlyout({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
-      // do not run the suggestions if the query is the same as the previous one
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -498,6 +497,7 @@ export function LensEditConfigurationFlyout({
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
+                  // do not run the suggestions if the query is the same as the previous one
                   if (q && !isEqual(q, prevQuery.current)) {
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
