@@ -220,23 +220,21 @@ export function AlertDetails() {
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          {rule && alertDetail.formatted && (
+            <>
+              <AlertDetailsAppSection
+                alert={alertDetail.formatted}
+                rule={rule}
+                timeZone={timeZone}
+                setSources={setSources}
+              />
+              <AlertHistoryChart
+                alert={alertDetail.formatted}
+                rule={rule as unknown as CustomThresholdRule}
+              />
+            </>
+          )}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {rule && alertDetail.formatted && (
-          <>
-            <AlertDetailsAppSection
-              alert={alertDetail.formatted}
-              rule={rule}
-              timeZone={timeZone}
-              setSources={setSources}
-            />
-            <EuiSpacer size="l" />
-            <AlertHistoryChart
-              alert={alertDetail.formatted}
-              rule={rule as unknown as CustomThresholdRule}
-            />
-          </>
-        )}
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
