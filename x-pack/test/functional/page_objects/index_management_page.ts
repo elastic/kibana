@@ -148,18 +148,6 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         await testSubjects.existOrFail('indexDetailsContent');
         await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
       },
-      async openSearchIndexDetailsPage(indexOfRow: number) {
-        const indexList = await testSubjects.findAll('indexTableIndexNameLink');
-        await indexList[indexOfRow].click();
-        await retry.waitFor('index details page title to show up', async () => {
-          return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
-        });
-      },
-      async expectSearchIndexDetailsPageIsLoaded() {
-        await testSubjects.existOrFail('dataTab');
-        await testSubjects.existOrFail('mappingsTab');
-        await testSubjects.existOrFail('settingsTab');
-      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');

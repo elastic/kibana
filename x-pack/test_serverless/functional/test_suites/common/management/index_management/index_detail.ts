@@ -40,12 +40,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
       });
     });
-    describe('can view search index details', function () {
-      this.tags(['skipSvlOblt', 'skipSvlSec']);
-      it('index with no documents', async () => {
-        await pageObjects.indexManagement.indexDetailsPage.openSearchIndexDetailsPage(0);
-        await pageObjects.indexManagement.indexDetailsPage.expectSearchIndexDetailsPageIsLoaded();
-      });
-    });
   });
 };

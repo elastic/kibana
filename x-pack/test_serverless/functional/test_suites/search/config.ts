@@ -23,7 +23,6 @@ export default createTestConfig({
     `--xpack.cloud.serverless.project_id=fakeprojectid`,
     `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
     `--xpack.cloud.projects_url=/projects/`,
-    `--xpack.searchIndices.enabled=true`,
   ],
   apps: {
     serverlessElasticsearch: {
