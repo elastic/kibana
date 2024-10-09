@@ -8,7 +8,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('SLO - Burn rate rule', () => {
-    loadTestFile(require.resolve('./burn_rate_rule'));
+  describe('SLO', () => {
+    loadTestFile(require.resolve('./create_slo'));
   });
 }

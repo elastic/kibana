@@ -57,6 +57,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .delete(`/api/observability/slos/${id}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
+
       return response;
     },
 
@@ -80,6 +81,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(params);
+
       return body;
     },
 
