@@ -22,13 +22,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
         },
@@ -41,16 +34,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics', 'logs'],
         environments: ['test'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -68,13 +51,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:env-service-1',
         },
@@ -89,13 +65,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
-          metrics: {
-            logRate: 10,
-            logErrorRate: 10,
-            throughput: 10,
-            failedTransactionRate: 10,
-            latency: 10,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'apm-only-1:synthtrace-env-2',
         },
@@ -110,13 +79,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 15,
-            logErrorRate: 15,
-            throughput: 15,
-            failedTransactionRate: 15,
-            latency: 15,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
         },
@@ -131,13 +93,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 5,
-            logErrorRate: 5,
-            throughput: 5,
-            failedTransactionRate: 5,
-            latency: 5,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
         },
@@ -151,23 +106,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-          {
-            failedTransactionRate: 10,
-            latency: 10,
-            logErrorRate: 10,
-            logRate: 10,
-            throughput: 10,
-          },
-        ],
         serviceName: 'service-1',
       },
       {
@@ -175,23 +113,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 15,
-            latency: 15,
-            logErrorRate: 15,
-            logRate: 15,
-            throughput: 15,
-          },
-          {
-            failedTransactionRate: 5,
-            latency: 5,
-            logErrorRate: 5,
-            logRate: 5,
-            throughput: 5,
-          },
-        ],
         serviceName: 'service-2',
       },
     ]);
@@ -208,13 +129,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 5,
-            logErrorRate: 5,
-            throughput: 5,
-            failedTransactionRate: 5,
-            latency: 5,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
         },
@@ -229,13 +143,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 10,
-            logErrorRate: 10,
-            throughput: 10,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
         },
@@ -250,13 +157,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-23-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
-          metrics: {
-            logRate: 0.333,
-            logErrorRate: 0.333,
-            throughput: 0.333,
-            failedTransactionRate: 0.333,
-            latency: 0.333,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:prod',
         },
@@ -269,30 +169,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
         lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 5,
-            latency: 5,
-            logErrorRate: 5,
-            logRate: 5,
-            throughput: 5,
-          },
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: 10,
-            logRate: 10,
-            throughput: 10,
-          },
-          {
-            failedTransactionRate: 0.333,
-            latency: 0.333,
-            logErrorRate: 0.333,
-            logRate: 0.333,
-            throughput: 0.333,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -309,13 +185,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -328,16 +197,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -352,13 +211,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -372,13 +224,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -391,23 +236,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-          {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -424,13 +252,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -443,16 +264,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -467,13 +278,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -487,13 +291,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name'],
           id: 'service-1:test',
         },
@@ -506,23 +303,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            logErrorRate: null,
-            logRate: 1,
-            throughput: 0,
-          },
-          {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);
@@ -540,11 +320,6 @@ describe('mergeEntities', () => {
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-          metrics: {
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-          },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
         },
@@ -557,14 +332,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics'],
         environments: ['test'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: false,
-        metrics: [
-          {
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
-            throughput: 0,
-          },
-        ],
         serviceName: 'service-1',
       },
     ]);

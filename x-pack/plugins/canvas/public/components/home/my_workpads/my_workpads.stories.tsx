@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { reduxDecorator } from '../../../../storybook';
-import { argTypes } from '../../../services/storybook';
+import { argTypes } from '../../../../storybook/constants';
 
 import { MyWorkpads as Component } from './my_workpads';
 
