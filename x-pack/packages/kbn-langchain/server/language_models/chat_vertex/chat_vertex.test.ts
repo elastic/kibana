@@ -54,8 +54,10 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
   };
 });
 
+const systemInstruction = 'Answer the following questions truthfully and as best you can.';
+
 const callMessages = [
-  new SystemMessage('Answer the following questions truthfully and as best you can.'),
+  new SystemMessage(systemInstruction),
   new HumanMessage('Question: Do you know my name?\n\n'),
 ] as unknown as BaseMessage[];
 
@@ -194,6 +196,31 @@ describe('ActionsClientChatVertexAI', () => {
       expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
+    });
+  });
+
+  describe('message formatting', () => {
+    it('Properly sorts out the system role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager);
+      const params = actionsClient.execute.mock.calls[0][0].params.subActionParams;
+      console.log(actionsClient.execute.mock.calls[0][0].params.subActionParams);
+      expect(params.messages.length).toEqual(1);
+      expect(params.messages[0].parts.length).toEqual(1);
+      expect(params.systemInstruction).toEqual(systemInstruction);
+    });
+    it('Handles 2 messages in a row from the same role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(
+        [...callMessages, new HumanMessage('Oh boy, another')],
+        callOptions,
+        callRunManager
+      );
+      const messages = actionsClient.execute.mock.calls[0][0].params.subActionParams.messages;
+      expect(messages.length).toEqual(1);
+      expect(messages[0].parts.length).toEqual(2);
     });
   });
 });
