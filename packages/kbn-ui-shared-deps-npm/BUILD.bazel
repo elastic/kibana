@@ -26,7 +26,6 @@ SRCS = glob(
 RUNTIME_DEPS = [
   "@npm//babel-loader",
   "@npm//@babel/plugin-proposal-optional-chaining",
-  "@npm//loader-utils",
   "@npm//val-loader",
   "//packages/kbn-repo-info",
   # deps in the dll need to be included in the sandbox for consumers
@@ -53,6 +52,7 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//node-libs-browser",
   "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-router-dom",

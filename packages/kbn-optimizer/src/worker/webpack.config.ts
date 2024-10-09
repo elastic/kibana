@@ -10,18 +10,20 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-expect-error
+import nodeLibsBrowser from 'node-libs-browser';
 import TerserPlugin from 'terser-webpack-plugin';
-import webpackMerge from 'webpack-merge';
+import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
-// @ts-expect-error
-import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import {
+  STATS_WARNINGS_FILTER,
+  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+} from '@kbn/optimizer-webpack-helpers';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -40,31 +42,35 @@ export function getWebpackConfig(
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
     context: bundle.contextDir,
-    cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
+    target: 'web',
+
     output: {
-      hashFunction: 'sha1',
+      // TODO: remove this commented line if xxhash64 is faster
+      // hashFunction: 'sha1',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
-      devtoolModuleFilenameTemplate: (info) =>
+      devtoolModuleFilenameTemplate: (info: any) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoading: 'jsonp',
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      moduleIds: worker.dist ? 'deterministic' : 'natural',
+      chunkIds: worker.dist ? 'deterministic' : 'natural',
+      emitOnErrors: false,
       splitChunks: {
         maxAsyncRequests: 10,
         cacheGroups: {
@@ -75,9 +81,16 @@ export function getWebpackConfig(
       },
     },
 
-    externals: UiSharedDepsSrc.externals,
+    externals: {
+      'node:crypto': 'commonjs crypto',
+      ...UiSharedDepsSrc.externals,
+    },
 
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+        process: nodeLibsBrowser.process,
+      }),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -86,24 +99,22 @@ export function getWebpackConfig(
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
       ...(worker.profileWebpack
         ? [
             new EmitStatsPlugin(bundle),
-            new StatoscopeWebpackPlugin({
-              open: false,
-              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
-            }),
-            new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
             new BundleAnalyzerPlugin({
               analyzerMode: 'static',
               reportFilename: `${bundle.id}.analyzer.html`,
               openAnalyzer: false,
               logLevel: 'silent',
             }),
+            new StatoscopeWebpackPlugin({
+              open: false,
+              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
+              statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+            }),
           ]
         : []),
-      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
@@ -149,6 +160,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.css$/,
+          resourceQuery: { not: /raw/ },
           include: /node_modules/,
           use: [
             {
@@ -199,14 +211,17 @@ export function getWebpackConfig(
                 {
                   loader: 'sass-loader',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/styles/core_app/_globals_${theme}.scss`
+                    additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
+                      const req = JSON.stringify(
+                        loaderContext.utils.contextify(
+                          loaderContext.context || loaderContext.rootContext,
+                          Path.resolve(
+                            worker.repoRoot,
+                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                          )
                         )
-                      )};\n${content}`;
+                      );
+                      return `@import ${req};\n${content}`;
                     },
                     implementation: require('sass-embedded'),
                     sassOptions: {
@@ -229,14 +244,8 @@ export function getWebpackConfig(
           ],
         },
         {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-          },
-        },
-        {
           test: /\.(js|tsx?)$/,
+          resourceQuery: { not: /raw/ },
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
@@ -248,14 +257,35 @@ export function getWebpackConfig(
           },
         },
         {
-          test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
-        },
-        {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
+        },
+        // emits a separate file and exports the URL. Previously achievable by using file-loader.
+        {
+          include: [
+            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
+            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
+          ],
+          type: 'asset/resource',
+        },
+        // exports the source code of the asset. Previously achievable by using raw-loader.
+        {
+          resourceQuery: /raw/,
+          type: 'asset/source',
+        },
+        {
+          test: /\.(html|md|txt|tmpl)$/,
+          type: 'asset/source',
+        },
+        // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8192,
+            },
+          },
         },
       ],
     },
@@ -263,12 +293,26 @@ export function getWebpackConfig(
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
+      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        child_process: false,
+        fs: false,
+      },
+      fallback: {
+        buffer: nodeLibsBrowser.buffer,
+        child_process: false,
+        crypto: nodeLibsBrowser.crypto,
+        fs: false,
+        os: nodeLibsBrowser.os,
+        path: nodeLibsBrowser.path,
+        process: nodeLibsBrowser.process,
+        stream: nodeLibsBrowser.stream,
+        timers: nodeLibsBrowser.timers,
       },
     },
 
@@ -278,10 +322,54 @@ export function getWebpackConfig(
       // and not for the webpack compilations performance itself
       hints: false,
     },
+
+    ignoreWarnings: [STATS_WARNINGS_FILTER],
   };
 
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
+
+    // TODO: potential performance impact flags
+    cache: {
+      type: 'memory',
+      cacheUnaffected: true,
+    },
+
+    output: {
+      // xxhash64 or sha1: according to docs xxhash should be faster but for now sha1 looks faster
+      hashFunction: 'xxhash64',
+      // Setting this to false looks like it will boost performance by a little
+      // pathinfo: false,
+    },
+
+    experiments: {
+      cacheUnaffected: true,
+      // TODO: enable this after converting all plugins to v5
+      backCompat: false,
+    },
+
+    optimization: {
+      // Need to test which composition makes for the best performance
+      sideEffects: false,
+      // providedExports: false,
+      // usedExports: false,
+      removeAvailableModules: false,
+      removeEmptyChunks: false,
+      // mergeDuplicateChunks: false,
+    },
+
+    // resolve: {
+    //  // Not sure if this is bringing any performance to the table
+    //  cacheWithContext: false,
+    // },
+
+    module: {
+      // This was default on webpack v4
+      unsafeCache: true,
+    },
+    // NOTE: I'm not sure about this, but it does seem like it is speeding up
+    // parallelism: 5000,
+    //
   };
 
   const distributableConfig: webpack.Configuration = {
@@ -298,8 +386,6 @@ export function getWebpackConfig(
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
           terserOptions: {
@@ -309,6 +395,10 @@ export function getWebpackConfig(
           },
         }),
       ],
+      // TODO: try to understand why usedExports is treeShaking code it shouldn't be
+      usedExports: false,
+      // sideEffects: false,
+      //
     },
   };
 

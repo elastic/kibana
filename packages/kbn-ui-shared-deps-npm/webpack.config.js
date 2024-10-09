@@ -9,6 +9,8 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+// @ts-expect-error
+const nodeLibsBrowser = require('node-libs-browser');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -19,14 +21,11 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
+/** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
 
   return {
-    node: {
-      child_process: 'empty',
-      fs: 'empty',
-    },
     externals: {
       module: 'module',
     },
@@ -104,6 +103,7 @@ module.exports = (_, argv) => {
     },
     context: __dirname,
     devtool: 'cheap-source-map',
+    target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
@@ -111,7 +111,6 @@ module.exports = (_, argv) => {
       devtoolModuleFilenameTemplate: (info) =>
         `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
-      futureEmitAssets: true,
     },
 
     module: {
@@ -145,11 +144,22 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
+      // mainFields: ['browser', 'main'],
+      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
+      fallback: {
+        buffer: nodeLibsBrowser.buffer,
+        child_process: false,
+        fs: false,
+        process: nodeLibsBrowser.process,
+      },
     },
 
     optimization: {
+      moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+      chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
       minimize: false,
-      noEmitOnErrors: true,
+      emitOnErrors: false,
+      usedExports: false,
     },
 
     performance: {
@@ -160,6 +170,10 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+        process: nodeLibsBrowser.process,
+      }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
@@ -172,6 +186,7 @@ module.exports = (_, argv) => {
       }),
       new webpack.DllPlugin({
         context: REPO_ROOT,
+        entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),
