@@ -37,7 +37,8 @@ export const defaultConfig: StorybookConfig = {
   core: {
     builder: 'webpack5',
   },
-  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
+  stories: ['../**/*.stories.tsx'],
+  // stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   framework: {
     name: '@storybook/react-webpack5',
     options: {},
