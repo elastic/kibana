@@ -140,9 +140,6 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         `}
         options={selectableOptions}
         onChange={(newOptions, _, changedOption) => {
-          console.log('newOptions', newOptions);
-          console.log('changedOption', changedOption);
-
           selectableSetOptions(newOptions);
           setIsOpen(false);
           if (changedOption.checked === 'on') {

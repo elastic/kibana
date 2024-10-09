@@ -33,7 +33,6 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 interface ConfigurationStepProps {
   currentStep: number;
   setCurrentStep: Function;
-  setNextStepEnabled: Function;
   title: string;
 }
 

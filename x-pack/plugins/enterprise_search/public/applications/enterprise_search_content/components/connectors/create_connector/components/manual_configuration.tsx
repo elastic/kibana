@@ -45,13 +45,9 @@ import { NewConnectorLogic } from '../../../new_index/method_connector/new_conne
 
 export interface ManualConfigurationProps {
   isDisabled: boolean;
-  setIsNextStepEnabled: Function;
 }
 
-export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
-  isDisabled,
-  setIsNextStepEnabled,
-}) => {
+export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({ isDisabled }) => {
   const { services } = useKibana<KibanaDeps>();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
@@ -71,7 +67,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
-  const [flyoutConten, setFlyoutConten] = useState<React.FC>();
+  const [flyoutContent, setFlyoutContent] = useState<React.FC>();
   const cliCode = CREATE_CONNECTOR_PLUGIN.CLI_SNIPPET;
 
   const flyoutCliContent: React.FC = () => (
@@ -278,7 +274,6 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
               data-test-subj="enterpriseSearchFlyoutManualConfigContentSaveButton"
               onClick={() => {
                 setIsFlyoutVisible(false);
-                setIsNextStepEnabled(true);
                 setTimeout(() => {
                   window.scrollTo({
                     behavior: 'smooth',
@@ -304,7 +299,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       key="copy"
       icon="wrench"
       onClick={() => {
-        setFlyoutConten(flyoutManualConfigContent);
+        setFlyoutContent(flyoutManualConfigContent);
         setIsFlyoutVisible(true);
         closePopover();
       }}
@@ -337,7 +332,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       key="share"
       icon="console"
       onClick={() => {
-        setFlyoutConten(flyoutCliContent);
+        setFlyoutContent(flyoutCliContent);
         setIsFlyoutVisible(true);
         closePopover();
       }}
@@ -383,7 +378,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
           aria-labelledby={simpleFlyoutTitleId}
           size="s"
         >
-          {flyoutConten}
+          {flyoutContent}
         </EuiFlyout>
       )}
     </>

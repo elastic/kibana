@@ -44,7 +44,6 @@ interface StartStepProps {
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
-  setNextStepEnabled: Function;
   title: string;
 }
 
@@ -53,7 +52,6 @@ export const StartStep: React.FC<StartStepProps> = ({
   selfManagePreference,
   currentStep,
   setCurrentStep,
-  setNextStepEnabled,
   onSelfManagePreferenceChange,
   error,
 }) => {
@@ -357,10 +355,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManualConfiguration
-                      isDisabled={!canConfigureConnector}
-                      setIsNextStepEnabled={setNextStepEnabled}
-                    />
+                    <ManualConfiguration isDisabled={!canConfigureConnector} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

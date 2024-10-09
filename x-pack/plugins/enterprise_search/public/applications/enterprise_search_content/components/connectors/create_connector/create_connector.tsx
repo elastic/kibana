@@ -158,7 +158,6 @@ export const CreateConnector: React.FC = () => {
           selfManagePreference={selfManagePreference}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          setNextStepEnabled={setConfigurationStepComplete}
           onSelfManagePreferenceChange={(preference) => {
             setSelfManagePreference(preference);
           }}
@@ -186,7 +185,6 @@ export const CreateConnector: React.FC = () => {
           // connector={connector}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          setNextStepEnabled={setFinishUpStepComplete}
         />
       ),
       status: configurationStepStatus,
