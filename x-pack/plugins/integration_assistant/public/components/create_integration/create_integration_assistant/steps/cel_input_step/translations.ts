@@ -75,11 +75,12 @@ export const PROGRESS_CEL_INPUT_GRAPH = i18n.translate(
   }
 );
 
-export const GENERATION_ERROR = (progressStep: string) =>
-  i18n.translate('xpack.integrationAssistant.step.celInput.generationError', {
-    values: { progressStep },
-    defaultMessage: 'An error occurred during: {progressStep}',
-  });
+export const GENERATION_ERROR = i18n.translate(
+  'xpack.integrationAssistant.step.celInput.generationError',
+  {
+    defaultMessage: 'An error occurred during: CEL input generation',
+  }
+);
 
 export const RETRY = i18n.translate('xpack.integrationAssistant.step.celInput.retryButtonLabel', {
   defaultMessage: 'Retry',

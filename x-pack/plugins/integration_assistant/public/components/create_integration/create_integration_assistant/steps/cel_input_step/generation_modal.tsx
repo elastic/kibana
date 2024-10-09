@@ -16,13 +16,12 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiProgress,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
 import { type CelInputRequestBody } from '../../../../../../common';
@@ -33,13 +32,6 @@ import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
 
 export type OnComplete = (result: State['celInputResult']) => void;
-
-const ProgressOrder = ['ecs', 'categorization', 'related'];
-type ProgressItem = (typeof ProgressOrder)[number];
-
-const progressText: Record<ProgressItem, string> = {
-  cel: i18n.PROGRESS_CEL_INPUT_GRAPH,
-};
 
 interface UseGenerationProps {
   integrationSettings: State['integrationSettings'];
@@ -53,7 +45,6 @@ export const useGeneration = ({
 }: UseGenerationProps) => {
   const { reportCelGenerationComplete } = useTelemetry();
   const { http, notifications } = useKibana().services;
-  const [progress, setProgress] = useState<ProgressItem>();
   const [error, setError] = useState<null | string>(null);
   const [isRequesting, setIsRequesting] = useState<boolean>(true);
 
@@ -74,7 +65,6 @@ export const useGeneration = ({
     (async () => {
       try {
         const apiDefinition = integrationSettings.apiDefinition;
-        setProgress('cel');
         const celRequest: CelInputRequestBody = {
           dataStreamName: integrationSettings.dataStreamName ?? '',
           apiDefinition: apiDefinition ?? '',
@@ -126,7 +116,6 @@ export const useGeneration = ({
   }, [
     isRequesting,
     onComplete,
-    setProgress,
     connector,
     http,
     integrationSettings,
@@ -139,7 +128,7 @@ export const useGeneration = ({
     setIsRequesting(true);
   }, []);
 
-  return { progress, error, retry };
+  return { error, retry };
 };
 
 const useModalCss = () => {
@@ -165,16 +154,11 @@ interface GenerationModalProps {
 export const GenerationModal = React.memo<GenerationModalProps>(
   ({ integrationSettings, connector, onComplete, onClose }) => {
     const { headerCss, bodyCss } = useModalCss();
-    const { progress, error, retry } = useGeneration({
+    const { error, retry } = useGeneration({
       integrationSettings,
       connector,
       onComplete,
     });
-
-    const progressValue = useMemo<number>(
-      () => (progress ? ProgressOrder.indexOf(progress) + 1 : 0),
-      [progress]
-    );
 
     return (
       <EuiModal onClose={onClose} data-test-subj="generationModal">
@@ -183,44 +167,37 @@ export const GenerationModal = React.memo<GenerationModalProps>(
         </EuiModalHeader>
         <EuiModalBody css={bodyCss}>
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
-            {progress && (
+            {error ? (
+              <EuiFlexItem>
+                <EuiCallOut
+                  title={i18n.GENERATION_ERROR}
+                  color="danger"
+                  iconType="alert"
+                  data-test-subj="generationErrorCallout"
+                >
+                  {error}
+                </EuiCallOut>
+              </EuiFlexItem>
+            ) : (
               <>
-                {error ? (
-                  <EuiFlexItem>
-                    <EuiCallOut
-                      title={i18n.GENERATION_ERROR(progressText[progress])}
-                      color="danger"
-                      iconType="alert"
-                      data-test-subj="generationErrorCallout"
-                    >
-                      {error}
-                    </EuiCallOut>
-                  </EuiFlexItem>
-                ) : (
-                  <>
-                    <EuiFlexItem>
-                      <EuiFlexGroup
-                        direction="row"
-                        gutterSize="s"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <EuiFlexItem grow={false}>
-                          <EuiLoadingSpinner size="s" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs" color="subdued">
-                            {progressText[progress]}
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    direction="row"
+                    gutterSize="s"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
                     </EuiFlexItem>
-                    <EuiFlexItem />
-                    <EuiFlexItem>
-                      <EuiProgress value={progressValue} max={4} color="primary" size="m" />
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.PROGRESS_CEL_INPUT_GRAPH}
+                      </EuiText>
                     </EuiFlexItem>
-                  </>
-                )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem />
               </>
             )}
           </EuiFlexGroup>
