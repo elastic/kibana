@@ -43,32 +43,31 @@ export enum AppMenuActionType {
 }
 
 interface AppMenuActionBase {
-  id: AppMenuActionId | string;
-  order?: number;
+  readonly id: AppMenuActionId | string;
+  readonly order?: number;
 }
 
 export interface AppMenuPopoverAction extends AppMenuActionBase {
-  type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  controlProps: AppMenuControlProps;
+  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
+  readonly controlProps: AppMenuControlProps;
 }
 
 export interface AppMenuAction extends AppMenuActionBase {
-  type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  controlProps: AppMenuControlProps;
+  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
+  readonly controlProps: AppMenuControlProps;
 }
 
 export interface AppMenuIconAction extends AppMenuActionBase {
-  type: AppMenuActionType.primary;
-  controlProps: AppMenuIconControlProps;
+  readonly type: AppMenuActionType.primary;
+  readonly controlProps: AppMenuIconControlProps;
 }
 
 export interface AppMenuPopoverActions extends AppMenuActionBase {
-  label: TopNavMenuData['label'];
-  description?: TopNavMenuData['description'];
-  testId?: TopNavMenuData['testId'];
-  type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  actions: AppMenuPopoverAction[];
+  readonly label: TopNavMenuData['label'];
+  readonly description?: TopNavMenuData['description'];
+  readonly testId?: TopNavMenuData['testId'];
+  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
+  readonly actions: AppMenuPopoverAction[];
 }
 
 export type AppMenuItem = AppMenuPopoverActions | AppMenuAction | AppMenuIconAction;
-export type AppMenuItems = AppMenuItem[];

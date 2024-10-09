@@ -171,14 +171,14 @@ export const getTopNavLinks = ({
   // TODO: allow to extend with custom items
 
   const defaultMenu = topNavCustomization?.defaultMenu;
-  const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+  const entries = [];
 
   if (services.uiSettings.get(ENABLE_ESQL)) {
     entries.push({ data: esqLDataViewTransitionToggle, order: 0 });
   }
 
   if (!defaultMenu?.inspectItem?.disabled) {
-    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 100 });
+    entries.push({ data: inspectSearch, order: 100 });
   }
 
   if (
@@ -186,23 +186,23 @@ export const getTopNavLinks = ({
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !defaultMenu?.alertsItem?.disabled
   ) {
-    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 200 });
+    entries.push({ data: alerts, order: 200 });
   }
 
   if (!defaultMenu?.newItem?.disabled) {
-    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 300 });
+    entries.push({ data: newSearch, order: 300 });
   }
 
   if (!defaultMenu?.openItem?.disabled) {
-    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 400 });
+    entries.push({ data: openSearch, order: 400 });
   }
 
   if (!defaultMenu?.shareItem?.disabled) {
-    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 500 });
+    entries.push({ data: shareSearch, order: 500 });
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
-    entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 600 });
+    entries.push({ data: saveSearch, order: 600 });
   }
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
