@@ -8,11 +8,7 @@ import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import {
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import {
@@ -21,13 +17,6 @@ import {
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
-
-const INDEX_ARRAY = [
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-];
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -88,8 +77,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
-        await latestFindingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -101,6 +88,8 @@ export default function (providerContext: FtrProviderContext) {
           roleAuthc,
           internalRequestHeader
         );
+
+        await latestFindingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
@@ -116,8 +105,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
-        await latestFindingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -129,6 +116,8 @@ export default function (providerContext: FtrProviderContext) {
           roleAuthc,
           internalRequestHeader
         );
+
+        await latestFindingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
@@ -144,8 +133,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {
-        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
-
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -157,6 +144,8 @@ export default function (providerContext: FtrProviderContext) {
           roleAuthc,
           internalRequestHeader
         );
+
+        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)

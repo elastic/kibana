@@ -55,8 +55,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {
-        await findingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -65,6 +63,8 @@ export default function (providerContext: FtrProviderContext) {
           'vanilla',
           'kspm'
         );
+
+        await findingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
@@ -79,8 +79,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
-        await findingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -89,6 +87,8 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'cspm'
         );
+
+        await findingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
@@ -103,8 +103,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {
-        await vulnerabilitiesIndex.addBulk(vulnerabilityMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -113,6 +111,8 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'vuln_mgmt'
         );
+
+        await vulnerabilitiesIndex.addBulk(vulnerabilityMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)

@@ -104,8 +104,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
-        await latestFindingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -114,6 +112,8 @@ export default function (providerContext: FtrProviderContext) {
           'vanilla',
           'kspm'
         );
+
+        await latestFindingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
@@ -128,8 +128,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
-        await latestFindingsIndex.addBulk(findingsMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -138,6 +136,8 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'cspm'
         );
+
+        await latestFindingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
@@ -152,8 +152,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {
-        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
-
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -162,6 +160,8 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'vuln_mgmt'
         );
+
+        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
