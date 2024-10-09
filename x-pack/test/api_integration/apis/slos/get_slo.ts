@@ -30,7 +30,6 @@ export const expectSummary = (summary: Record<string, any>) => {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/177806
   describe('GetSLOs', function () {
     this.tags('skipCloud');
 
@@ -377,7 +376,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(instanceResponse.body.groupBy).toEqual('tags');
           expect(instanceResponse.body.instances.sort()).toEqual(['1', '2', '3']);
         },
-        onFailure
+        onFailure,
+        10 * 1000
       );
     });
 
