@@ -14,7 +14,7 @@ import { useGetEnrollmentSettings } from './use_request';
 /**
  * Return Fleet server hosts urls and proxy for a given agent policy
  */
-export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
+export function useFleetServerHostsForPolicy(agentPolicy?: Pick<AgentPolicy, 'id'> | null) {
   const {
     isLoading,
     isInitialRequest,
@@ -26,14 +26,20 @@ export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
       isLoadingInitialRequest: isLoading && isInitialRequest,
       fleetServerHost: enrollmentSettings?.fleet_server.host?.host_urls[0] || '',
       fleetProxy: enrollmentSettings?.fleet_server.host_proxy,
+      esOutput: enrollmentSettings?.fleet_server.es_output,
+      esOutputProxy: enrollmentSettings?.fleet_server.es_output_proxy,
       downloadSource: enrollmentSettings?.download_source,
+      downloadSourceProxy: enrollmentSettings?.download_source_proxy,
     }),
     [
       isLoading,
       isInitialRequest,
       enrollmentSettings?.fleet_server.host,
       enrollmentSettings?.fleet_server.host_proxy,
+      enrollmentSettings?.fleet_server.es_output,
+      enrollmentSettings?.fleet_server.es_output_proxy,
       enrollmentSettings?.download_source,
+      enrollmentSettings?.download_source_proxy,
     ]
   );
 }

@@ -43,7 +43,6 @@
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-rendering-server-internal",
-    "@kbn/ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src",
     "@kbn/core-saved-objects-server",
     "@kbn/utility-types-jest",
@@ -87,6 +86,7 @@
     "@kbn/security-authorization-core",
     "@kbn/security-role-management-model",
     "@kbn/security-ui-components",
+    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": [
     "target/**/*",

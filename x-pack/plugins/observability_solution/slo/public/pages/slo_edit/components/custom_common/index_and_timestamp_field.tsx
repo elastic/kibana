@@ -6,13 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { IndexSelection } from './index_selection';
-import { IndexFieldSelector } from '../common/index_field_selector';
 import { CreateSLOForm } from '../../types';
+import { TimestampFieldSelector } from '../common/timestamp_field_selector';
+import { IndexSelection } from './index_selection';
 
 export function IndexAndTimestampField({
   dataView,
@@ -32,18 +31,10 @@ export function IndexAndTimestampField({
         <IndexSelection selectedDataView={dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <IndexFieldSelector
-          indexFields={timestampFields}
-          name="indicator.params.timestampField"
-          label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
-            defaultMessage: 'Timestamp field',
-          })}
-          placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
-            defaultMessage: 'Select a timestamp field',
-          })}
+        <TimestampFieldSelector
+          fields={timestampFields}
           isLoading={!!index && isLoading}
           isDisabled={!index}
-          isRequired
         />
       </EuiFlexItem>
     </EuiFlexGroup>

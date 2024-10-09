@@ -164,18 +164,20 @@ export const sendCopyAgentPolicy = (
   });
 };
 
+export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequest<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export function useDeleteAgentPolicyMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: function sendDeleteAgentPolicy(body: DeleteAgentPolicyRequest['body']) {
-      return sendRequest<DeleteAgentPolicyResponse>({
-        path: agentPolicyRouteService.getDeletePath(),
-        method: 'post',
-        body: JSON.stringify(body),
-        version: API_VERSIONS.public.v1,
-      });
-    },
+    mutationFn: sendDeleteAgentPolicy,
     onSuccess: () => {
       return queryClient.invalidateQueries(['agentPolicies']);
     },

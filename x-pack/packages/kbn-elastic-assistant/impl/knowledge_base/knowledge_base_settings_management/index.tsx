@@ -43,13 +43,14 @@ import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
-  isEsqlSystemEntry,
+  isSystemEntry,
   isKnowledgeBaseEntryCreateProps,
   isKnowledgeBaseEntryResponse,
 } from './helpers';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
+import { KnowledgeBaseConfig } from '../../assistant/types';
 
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const {
@@ -68,7 +69,9 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
       false // Knowledge Base settings do not require prompts
     );
 
-  const handleUpdateKnowledgeBaseSettings = useCallback(
+  const handleUpdateKnowledgeBaseSettings = useCallback<
+    React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>
+  >(
     (updatedKnowledgeBase) => {
       setHasPendingChanges(true);
       setUpdatedKnowledgeBaseSettings(updatedKnowledgeBase);
@@ -148,17 +151,14 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
           setSelectedEntry(entry);
           openFlyout();
         },
-        onSpaceNameClicked: ({ namespace }: KnowledgeBaseEntryResponse) => {
-          openFlyout();
-        },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isEsqlSystemEntry(entry);
+          return !isSystemEntry(entry);
         },
         onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           deleteEntry({ ids: [id] });
         },
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isEsqlSystemEntry(entry);
+          return !isSystemEntry(entry);
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);

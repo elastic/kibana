@@ -323,13 +323,8 @@ export const createPureDatasetQualityControllerStateMachine = (
             const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
             const datasetUserPrivileges = event.data.datasetUserPrivileges;
 
-            // Check if any DataStreamStat has null; to check for serverless
-            const isSizeStatsAvailable =
-              !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
-
             return {
               dataStreamStats,
-              isSizeStatsAvailable,
               datasetUserPrivileges,
             };
           }

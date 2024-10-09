@@ -114,11 +114,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
-   */
-  assistantBedrockChat: true,
-
-  /**
    * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
    */
   assistantNaturalLanguageESQLTool: false,
@@ -208,11 +203,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
-
-  /**
-   * Enables visualization: session viewer and analyzer in expandable flyout
-   */
-  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.

@@ -139,6 +139,7 @@ export function useFetchAgentsData() {
 
       if (urlParams.kuery !== newVal) {
         history.replace({
+          // @ts-expect-error - kuery can't be undefined
           search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
         });
       }
