@@ -171,6 +171,7 @@ export interface InternalRouterRoute extends RouterRoute {
 
 /** @internal */
 interface InternalGetRoutesOptions {
+  /** @default false */
   excludeVersionedRoutes?: boolean;
 }
 
@@ -239,7 +240,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     if (excludeVersionedRoutes) {
       return this.routes.filter((route) => !route.isVersioned);
     }
-    return [...this.routes];
+    return this.routes;
   }
 
   public handleLegacyErrors = wrapErrors;
