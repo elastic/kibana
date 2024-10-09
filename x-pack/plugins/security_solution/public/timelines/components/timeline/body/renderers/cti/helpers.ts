@@ -9,16 +9,17 @@ import { get, isEmpty } from 'lodash';
 import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs, ThreatIndicatorEcs } from '@kbn/securitysolution-ecs';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../../common/constants';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
 
 const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
-  const threatData = get(data, DEFAULT_INDICATOR_SOURCE_PATH);
+  const threatData = get(data, ENRICHMENT_DESTINATION_PATH);
   if (threatData == null) {
     return [];
   } else if (!Array.isArray(threatData)) {
     return [threatData];
   }
+  // @ts-expect-error the returned type is ThreatEnrichmentEcs[]
   return threatData;
 };
 
