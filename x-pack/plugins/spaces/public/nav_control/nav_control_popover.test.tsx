@@ -331,7 +331,7 @@ describe('NavControlPopover', () => {
         id: 'space-1',
         name: 'Space-1',
         disabledFeatures: [],
-        solution: 'classic',
+        solution: 'es',
       },
     ];
 
