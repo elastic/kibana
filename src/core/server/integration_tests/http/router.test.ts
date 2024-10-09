@@ -859,7 +859,7 @@ describe('Handler', () => {
     router.post(
       {
         path: '/internal',
-        validate: false,
+        validate: { body: schema.object({ ok: schema.boolean() }) },
       },
       (context, req, res) => {
         return res.ok({ body: 'ok', headers: { test: 'this' } });
@@ -894,9 +894,21 @@ describe('Handler', () => {
       expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
     }
 
-    // Internal unversioned routes do not include the header
+    // Internal unversioned routes do not include the header for OK
     {
-      const { headers } = await supertest(innerServer.listener).post('/internal').expect(200);
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for validation failures
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: null })
+        .expect(400);
       expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
     }
   });
