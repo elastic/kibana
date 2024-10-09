@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 export interface GridLayoutApi {
-  addNewPanel: (id: string, placementSettings?: PanelPlacementSettings) => void;
+  addNewPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
   getPanelCount: () => number;
   // removePanel: (panelId: string) => void;
   // serializeState: () => void;
