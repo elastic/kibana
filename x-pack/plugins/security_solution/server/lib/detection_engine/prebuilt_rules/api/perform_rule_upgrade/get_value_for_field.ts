@@ -15,7 +15,7 @@ import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { createFieldUpgradeSpecifier } from './create_field_upgrade_specifier';
 import { mapDiffableRuleFieldValueToRuleSchemaFormat } from './diffable_rule_fields_mappings';
 import { getFieldPredefinedValue } from './get_field_predefined_value';
-import { getValuefromRuleTriad, getValueFromMergedVersion } from './get_value_from_rule_version';
+import { getValueFromRuleTriad, getValueFromMergedVersion } from './get_value_from_rule_version';
 
 interface GetValueForFieldArgs {
   fieldName: keyof PrebuiltRuleAsset;
@@ -48,7 +48,7 @@ export const getValueForField = ({
           },
           ruleFieldsDiff,
         })
-      : getValuefromRuleTriad({
+      : getValueFromRuleTriad({
           fieldName,
           upgradeableRule,
           fieldUpgradeSpecifier: {
@@ -87,7 +87,7 @@ export const getValueForField = ({
         fieldUpgradeSpecifier,
         ruleFieldsDiff,
       })
-    : getValuefromRuleTriad({
+    : getValueFromRuleTriad({
         fieldName,
         upgradeableRule,
         fieldUpgradeSpecifier,

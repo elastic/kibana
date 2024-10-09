@@ -51,7 +51,7 @@ export const getValueFromMergedVersion = ({
   }
 };
 
-export const getValuefromRuleTriad = ({
+export const getValueFromRuleTriad = ({
   fieldName,
   upgradeableRule,
   fieldUpgradeSpecifier,
