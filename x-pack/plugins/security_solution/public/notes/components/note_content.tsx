@@ -57,8 +57,15 @@ export const NoteContent = memo(({ note }: NoteContentProps) => {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiMarkdownFormat data-test-subj={NOTE_CONTENT_POPOVER_TEST_ID}>{note}</EuiMarkdownFormat>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelStyle={{ maxWidth: '50%', maxHeight: '50%', overflow: 'auto' }}
+    >
+      <EuiMarkdownFormat textSize="s" data-test-subj={NOTE_CONTENT_POPOVER_TEST_ID}>
+        {note}
+      </EuiMarkdownFormat>
     </EuiPopover>
   );
 });
