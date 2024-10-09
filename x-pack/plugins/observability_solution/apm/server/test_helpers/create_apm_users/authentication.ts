@@ -17,6 +17,8 @@ export enum ApmUsername {
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
   apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
   apmManageServiceAccount = 'apm_manage_service_account',
+  apmAllPrivilegesWithoutWriteSettings = 'apm_all_privileges_without_write_settings',
+  apmReadPrivilegesWithWriteSettings = 'apm_read_privileges_with_write_settings',
 }
 
 export enum ApmCustomRolename {
@@ -26,6 +28,8 @@ export enum ApmCustomRolename {
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
   apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
   apmManageServiceAccount = 'apm_manage_service_account',
+  apmAllPrivilegesWithoutWriteSettings = 'apm_all_privileges_without_write_settings',
+  apmReadPrivilegesWithWriteSettings = 'apm_read_privileges_with_write_settings',
 }
 
 export const customRoles = {
@@ -95,6 +99,24 @@ export const customRoles = {
       cluster: ['manage_service_account'],
     },
   },
+  [ApmCustomRolename.apmAllPrivilegesWithoutWriteSettings]: {
+    kibana: [
+      {
+        base: [],
+        feature: { apm: ['minimal_all'] },
+        spaces: ['*'],
+      },
+    ],
+  },
+  [ApmCustomRolename.apmReadPrivilegesWithWriteSettings]: {
+    kibana: [
+      {
+        base: [],
+        feature: { apm: ['minimal_read', 'settings_save'] },
+        spaces: ['*'],
+      },
+    ],
+  },
 };
 
 export const users: Record<
@@ -133,5 +155,13 @@ export const users: Record<
   [ApmUsername.apmManageServiceAccount]: {
     builtInRoleNames: ['editor'],
     customRoleNames: [ApmCustomRolename.apmManageServiceAccount],
+  },
+  [ApmUsername.apmAllPrivilegesWithoutWriteSettings]: {
+    builtInRoleNames: ['viewer'],
+    customRoleNames: [ApmCustomRolename.apmAllPrivilegesWithoutWriteSettings],
+  },
+  [ApmUsername.apmReadPrivilegesWithWriteSettings]: {
+    builtInRoleNames: ['viewer'],
+    customRoleNames: [ApmCustomRolename.apmReadPrivilegesWithWriteSettings],
   },
 };
