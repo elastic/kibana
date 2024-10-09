@@ -39,11 +39,17 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             }),
             // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
             link: 'last-used-logs-viewer',
+            breadcrumbStatus: 'hidden', // avoid duplicate "Discover" breadcrumbs
             renderAs: 'item',
             children: [
               {
-                // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-                link: 'observability-logs-explorer',
+                link: 'discover',
+                children: [
+                  {
+                    // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+                    link: 'observability-logs-explorer',
+                  },
+                ],
               },
             ],
           },
