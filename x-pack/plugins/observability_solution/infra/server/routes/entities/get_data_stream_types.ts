@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import { SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common';
-import { CONTAINER_ID_FIELD, HOST_NAME_FIELD } from '../../../common/constants';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import {
+  EntityDataStreamType,
+  SOURCE_DATA_STREAM_TYPE,
+} from '@kbn/observability-shared-plugin/common';
+import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getHasMetricsData } from './get_has_metrics_data';
 import { getLatestEntity } from './get_latest_entity';
@@ -33,10 +36,10 @@ export async function getDataStreamTypes({
   const hasMetricsData = await getHasMetricsData({
     infraMetricsClient,
     entityId,
-    field: entityType === 'host' ? HOST_NAME_FIELD : CONTAINER_ID_FIELD,
+    field: findInventoryFields(entityType).id,
   });
 
-  const sourceDataStreams = new Set(hasMetricsData ? ['metrics'] : []);
+  const sourceDataStreams = new Set(hasMetricsData ? [EntityDataStreamType.METRICS] : []);
 
   if (!entityCentriExperienceEnabled) {
     return Array.from(sourceDataStreams);

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export enum EntityDataStreamType {
-  METRICS = 'metrics',
-  TRACES = 'traces',
-  LOGS = 'logs',
-}
-
 interface TraceMetrics {
   latency?: number | null;
   throughput?: number | null;
