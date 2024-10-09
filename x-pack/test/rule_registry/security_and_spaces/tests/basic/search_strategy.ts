@@ -12,7 +12,7 @@ import {
   obsOnlySpacesAll,
   logsOnlySpacesAll,
   secOnlySpacesAllEsReadAll,
-  stackAlertsOnlySpacesAll,
+  stackAlertsOnlyAllSpacesAll,
   superUser,
 } from '../../../common/lib/authentication/users';
 
@@ -585,8 +585,8 @@ export default ({ getService }: FtrProviderContext) => {
         const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
-            username: stackAlertsOnlySpacesAll.username,
-            password: stackAlertsOnlySpacesAll.password,
+            username: stackAlertsOnlyAllSpacesAll.username,
+            password: stackAlertsOnlyAllSpacesAll.password,
           },
           referer: 'test',
           kibanaVersion,

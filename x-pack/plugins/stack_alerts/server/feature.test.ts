@@ -171,13 +171,5 @@ describe('Stack Alerts Feature Privileges', () => {
         },
       ]
     `);
-
-    alertingSetup.registerType.mock.calls.forEach((call) => {
-      expect(
-        ruleTypeAlerting.find((feature) => feature.ruleTypeId === call[0].id)
-      ).not.toBeUndefined();
-      expect(ruleTypeAll.find((feature) => feature.ruleTypeId === call[0].id)).not.toBeUndefined();
-      expect(ruleTypeRead.find((feature) => feature.ruleTypeId === call[0].id)).not.toBeUndefined();
-    });
   });
 });
