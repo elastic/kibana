@@ -43,7 +43,11 @@ export const DataUsage = () => {
 
   const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
-    dataStreams: [],
+    // TODO: Replace with data streams from /data_streams api
+    dataStreams: [
+      '.alerts-ml.anomaly-detection-health.alerts-default',
+      '.alerts-stack.alerts-default',
+    ],
     from: DEFAULT_DATE_RANGE_OPTIONS.startDate,
     to: DEFAULT_DATE_RANGE_OPTIONS.endDate,
   });

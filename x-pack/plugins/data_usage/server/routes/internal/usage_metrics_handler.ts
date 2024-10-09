@@ -36,38 +36,20 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
 
-      const { from, to, metricTypes, dataStreams: dsNames } = request.query;
+      const { from, to, metricTypes, dataStreams: requestDsNames } = request.query;
       logger.debug(`Retrieving usage metrics`);
 
       const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
         await esClient.indices.getDataStream({
-          name: '*',
+          name: requestDsNames,
           expand_wildcards: 'all',
         });
-
-      const hasDataStreams = dataStreamsResponse.length > 0;
-      let userDsNames: string[] = [];
-
-      if (dsNames?.length) {
-        userDsNames = typeof dsNames === 'string' ? [dsNames] : dsNames;
-      } else if (!userDsNames.length && hasDataStreams) {
-        userDsNames = dataStreamsResponse.map((ds) => ds.name);
-      }
-
-      // If no data streams are found, return an empty response
-      if (!userDsNames.length) {
-        return response.ok({
-          body: {
-            metrics: {},
-          },
-        });
-      }
 
       const metrics = await fetchMetricsFromAutoOps({
         from,
         to,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
-        dataStreams: formatStringParams(userDsNames),
+        dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });
 
       const processedMetrics = transformMetricsData(metrics);

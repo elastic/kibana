@@ -46,7 +46,7 @@ export const UsageMetricsRequestSchema = {
         minSize: 1,
         validate: (values) => {
           if (values.map((v) => v.trim()).some((v) => !v.length)) {
-            return '[metricTypes] list can not contain empty values';
+            return '[metricTypes] list cannot contain empty values';
           } else if (values.map((v) => v.trim()).some((v) => !isValidMetricType(v))) {
             return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
           }
@@ -62,22 +62,14 @@ export const UsageMetricsRequestSchema = {
         },
       }),
     ]),
-    dataStreams: schema.maybe(
-      schema.oneOf([
-        schema.arrayOf(schema.string(), {
-          minSize: 1,
-          validate: (values) => {
-            if (values.map((v) => v.trim()).some((v) => !v.length)) {
-              return '[dataStreams] list can not contain empty values';
-            }
-          },
-        }),
-        schema.string({
-          validate: (v) =>
-            v.trim().length ? undefined : '[dataStreams] must have at least one value',
-        }),
-      ])
-    ),
+    dataStreams: schema.arrayOf(schema.string(), {
+      minSize: 1,
+      validate: (values) => {
+        if (values.map((v) => v.trim()).some((v) => !v.length)) {
+          return '[dataStreams] list cannot contain empty values';
+        }
+      },
+    }),
   }),
 };
 
