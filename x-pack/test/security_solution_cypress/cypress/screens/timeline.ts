@@ -299,7 +299,7 @@ export const HOVER_ACTIONS = {
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {
-  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
+  return `[data-test-subj="timeline"] [data-test-subj="dataGridHeaderCell-${fieldName}"]`;
 };
 
 export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');

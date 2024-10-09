@@ -39,9 +39,7 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
-// FLAKY: https://github.com/elastic/kibana/issues/182206
-describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -64,7 +62,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       selectAlertsCountTable();
     });
 
-    it.skip('Open one alert when more than one closed alerts are selected', () => {
+    it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -160,7 +158,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
     });
   });
   // FLAKY: https://github.com/elastic/kibana/issues/173597
-  context.skip('Closing alerts', () => {
+  context('Closing alerts', () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -169,7 +167,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       waitForAlertsToPopulate();
       selectAlertsCountTable();
     });
-    it.skip('Closes and opens alerts', () => {
+    it('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
