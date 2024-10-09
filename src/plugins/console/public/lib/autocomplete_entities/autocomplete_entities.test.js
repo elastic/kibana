@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import '../../application/models/sense_editor/sense_editor.test.mocks';
 import { setAutocompleteInfo, AutocompleteInfo } from '../../services';
 import { expandAliases } from './expand_aliases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
