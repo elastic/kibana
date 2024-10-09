@@ -35,13 +35,14 @@ export async function upgradeBuiltInEntityDefinitions({
     );
   }
 
-  const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+  const { esClient, soClient, dataViewsService } = await getClientsFromAPIKey({ apiKey, server });
 
   logger.debug(`Starting built-in definitions upgrade`);
   const upgradedDefinitions = await installBuiltInEntityDefinitions({
     esClient,
     soClient,
     definitions,
+    dataViewsService,
     logger,
   });
 

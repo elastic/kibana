@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 import {
@@ -16,11 +17,12 @@ import {
 
 export async function createAndInstallHistoryTransform(
   esClient: ElasticsearchClient,
+  dataViewsService: DataViewsService,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
-    const historyTransform = generateHistoryTransform(definition);
+    const historyTransform = await generateHistoryTransform(definition, dataViewsService);
     await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
       logger,
     });
@@ -32,11 +34,12 @@ export async function createAndInstallHistoryTransform(
 
 export async function createAndInstallHistoryBackfillTransform(
   esClient: ElasticsearchClient,
+  dataViewsService: DataViewsService,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
-    const historyTransform = generateBackfillHistoryTransform(definition);
+    const historyTransform = await generateBackfillHistoryTransform(definition, dataViewsService);
     await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
       logger,
     });

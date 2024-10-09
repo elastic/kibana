@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { RefinementCtx, z } from '@kbn/zod';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -18,14 +18,13 @@ import {
   durationSchemaWithMinimum,
 } from './common';
 
-export const entityDefinitionSchema = z.object({
+const baseEntityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
   version: semVerSchema,
   name: z.string(),
   description: z.optional(z.string()),
   type: z.string(),
   filter: filterSchema,
-  indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
   displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
@@ -57,9 +56,41 @@ export const entityDefinitionSchema = z.object({
     ])
   ),
   installStartedAt: z.optional(z.string()),
+  indexPatterns: z.optional(arrayOfStringsSchema),
+  dataViewId: z.optional(z.string()),
 });
 
-export const entityDefinitionUpdateSchema = entityDefinitionSchema
+const validateDataViewIdAndIndexPatternMutualExclusion = (
+  data: Partial<Pick<z.infer<typeof baseEntityDefinitionSchema>, 'indexPatterns' | 'dataViewId'>>,
+  ctx: RefinementCtx
+) => {
+  if (data.indexPatterns && data.dataViewId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['dataViewId'],
+      message: "dataViewId can't bet set if indexPatterns is defined",
+    });
+  }
+};
+
+const validateDataViewIdOrIndexPatternRequired = (
+  data: Partial<Pick<z.infer<typeof baseEntityDefinitionSchema>, 'indexPatterns' | 'dataViewId'>>,
+  ctx: RefinementCtx
+) => {
+  if (!data.indexPatterns && !data.dataViewId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['dataViewId'],
+      message: "dataViewId should be set if indexPatterns isn't",
+    });
+  }
+};
+
+export const entityDefinitionSchema = baseEntityDefinitionSchema
+  .superRefine(validateDataViewIdAndIndexPatternMutualExclusion)
+  .superRefine(validateDataViewIdOrIndexPatternRequired);
+
+export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
   .omit({
     id: true,
     managed: true,
@@ -69,10 +100,11 @@ export const entityDefinitionUpdateSchema = entityDefinitionSchema
   .partial()
   .merge(
     z.object({
-      history: z.optional(entityDefinitionSchema.shape.history.partial()),
+      history: z.optional(baseEntityDefinitionSchema.shape.history.partial()),
       version: semVerSchema,
     })
-  );
+  )
+  .superRefine(validateDataViewIdAndIndexPatternMutualExclusion);
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
 export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;

@@ -117,10 +117,17 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
+      const dataViewsService = await server.dataViews.dataViewsServiceFactory(
+        soClient,
+        esClient,
+        request
+      );
+
       const installedDefinitions = await installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
+        dataViewsService,
         definitions: builtInDefinitions,
       });
 

@@ -66,10 +66,15 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
     query: createEntityDefinitionQuerySchema,
     body: entityDefinitionUpdateSchema,
   }),
-  handler: async ({ context, response, params, logger }) => {
+  handler: async ({ context, response, params, logger, server, request }) => {
     const core = await context.core;
     const soClient = core.savedObjects.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
+    const dataViewsService = await server.dataViews.dataViewsServiceFactory(
+      soClient,
+      esClient,
+      request
+    );
 
     try {
       const installedDefinition = await findEntityDefinitionById({
@@ -100,6 +105,7 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
         soClient,
         esClient,
         logger,
+        dataViewsService,
         definition: installedDefinition,
         definitionUpdate: params.body,
       });

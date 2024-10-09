@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { firstValueFrom } from 'rxjs';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
@@ -29,6 +30,7 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
+import { scheduleDataviewSyncTask } from './schedule_dataview_sync_task';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -60,7 +62,7 @@ export class EntityManagerServerPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<EntityManagerPluginStartDependencies>,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
     core.savedObjects.registerType(entityDefinition);
@@ -81,12 +83,20 @@ export class EntityManagerServerPlugin
       dependencies: {
         server: this.server,
         getScopedClient: async ({ request }: { request: KibanaRequest }) => {
-          const [coreStart] = await core.getStartServices();
-          return this.getScopedClient({ request, coreStart });
+          const [coreStart, { dataViews }] = await core.getStartServices();
+          return this.getScopedClient({ request, coreStart, dataViews });
         },
       },
       core,
       logger: this.logger,
+    });
+
+    console.log('================= HERE ======================');
+    scheduleDataviewSyncTask({
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      server: this.server,
+      taskManager: plugins.taskManager,
     });
 
     return {};
@@ -95,13 +105,17 @@ export class EntityManagerServerPlugin
   private async getScopedClient({
     request,
     coreStart,
+    dataViews,
   }: {
     request: KibanaRequest;
     coreStart: CoreStart;
+    dataViews: DataViewsPluginStart;
   }) {
     const esClient = coreStart.elasticsearch.client.asScoped(request).asSecondaryAuthUser;
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ esClient, soClient, logger: this.logger });
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient, request);
+
+    return new EntityClient({ esClient, soClient, dataViewsService, logger: this.logger });
   }
 
   public start(
@@ -113,6 +127,7 @@ export class EntityManagerServerPlugin
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.dataViews = plugins.dataViews;
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;
@@ -135,7 +150,7 @@ export class EntityManagerServerPlugin
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
-        return this.getScopedClient({ request, coreStart: core });
+        return this.getScopedClient({ request, coreStart: core, dataViews: plugins.dataViews });
       },
     };
   }

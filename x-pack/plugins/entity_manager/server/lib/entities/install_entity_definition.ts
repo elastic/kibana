@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
+import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import {
   generateHistoryIndexTemplateId,
   generateLatestIndexTemplateId,
@@ -47,6 +48,7 @@ import { deleteTransforms } from './delete_transforms';
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  dataViewsService: DataViewsService;
   definition: EntityDefinition;
   logger: Logger;
 }
@@ -67,6 +69,7 @@ const throwIfRejected = (values: Array<PromiseFulfilledResult<any> | PromiseReje
 export async function installEntityDefinition({
   esClient,
   soClient,
+  dataViewsService,
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
@@ -86,7 +89,13 @@ export async function installEntityDefinition({
       installStartedAt: new Date().toISOString(),
     });
 
-    return await install({ esClient, soClient, logger, definition: entityDefinition });
+    return await install({
+      esClient,
+      soClient,
+      logger,
+      dataViewsService,
+      definition: entityDefinition,
+    });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
     await stopAndDeleteTransforms(esClient, definition, logger);
@@ -123,6 +132,7 @@ export async function installEntityDefinition({
 export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
+  dataViewsService,
   logger,
   definitions,
 }: Omit<InstallDefinitionParams, 'definition'> & {
@@ -143,6 +153,7 @@ export async function installBuiltInEntityDefinitions({
       return await installEntityDefinition({
         definition: builtInDefinition,
         esClient,
+        dataViewsService,
         soClient,
         logger,
       });
@@ -164,6 +175,7 @@ export async function installBuiltInEntityDefinitions({
     return await reinstallEntityDefinition({
       soClient,
       esClient,
+      dataViewsService,
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
@@ -179,6 +191,7 @@ async function install({
   esClient,
   soClient,
   definition,
+  dataViewsService,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   logger.debug(
@@ -212,9 +225,9 @@ async function install({
 
   logger.debug(`Installing transforms for definition ${definition.id}`);
   await Promise.allSettled([
-    createAndInstallHistoryTransform(esClient, definition, logger),
+    createAndInstallHistoryTransform(esClient, dataViewsService, definition, logger),
     isBackfillEnabled(definition)
-      ? createAndInstallHistoryBackfillTransform(esClient, definition, logger)
+      ? createAndInstallHistoryBackfillTransform(esClient, dataViewsService, definition, logger)
       : Promise.resolve(),
     createAndInstallLatestTransform(esClient, definition, logger),
   ]).then(throwIfRejected);
@@ -227,6 +240,7 @@ async function install({
 export async function reinstallEntityDefinition({
   esClient,
   soClient,
+  dataViewsService,
   definition,
   definitionUpdate,
   logger,
@@ -255,6 +269,7 @@ export async function reinstallEntityDefinition({
     return await install({
       esClient,
       soClient,
+      dataViewsService,
       logger,
       definition: updatedDefinition,
     });
