@@ -26,7 +26,7 @@ import {
 
 import { last } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { Entity, EntityType } from '../../../common/entities';
+import { Entity, EntityColumnIds, EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
@@ -36,7 +36,7 @@ import { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
-import { EntityColumnIds, getColumns } from './grid_columns';
+import { getColumns } from './grid_columns';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
@@ -110,7 +110,7 @@ export function EntitiesGrid({
   );
 
   const showAlertsColumn = useMemo(
-    () => entities.some((entity: Entity) => entity?.alertsCount && entity.alertsCount > 0),
+    () => entities?.some((entity: Entity) => entity?.alertsCount && entity?.alertsCount > 0),
     [entities]
   );
 

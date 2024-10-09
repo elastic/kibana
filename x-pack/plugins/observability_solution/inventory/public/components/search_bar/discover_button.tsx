@@ -18,8 +18,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
-import { EntityColumnIds } from '../entities_grid';
-import { defaultEntityDefinitions } from '../../../common/entities';
+import { defaultEntityDefinitions, EntityColumnIds } from '../../../common/entities';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];

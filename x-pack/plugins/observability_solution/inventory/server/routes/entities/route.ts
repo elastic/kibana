@@ -8,7 +8,8 @@ import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
-import { entityTypeRt } from '../../../common/entities';
+import { sortBy } from 'lodash';
+import { entityTypeRt, entityColumnIdsRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';
 import { getLatestEntities } from './get_latest_entities';
@@ -40,7 +41,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        sortField: t.string,
+        sortField: entityColumnIdsRt,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       t.partial({
@@ -62,15 +63,16 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
 
     const { sortDirection, sortField, entityTypes, kuery } = params.query;
 
-    const alertsClient = await createAlertsClient({ plugins, request });
-
-    const latestEntities = await getLatestEntities({
-      inventoryEsClient,
-      sortDirection,
-      sortField,
-      entityTypes,
-      kuery,
-    });
+    const [alertsClient, latestEntities] = await Promise.all([
+      createAlertsClient({ plugins, request }),
+      getLatestEntities({
+        inventoryEsClient,
+        sortDirection,
+        sortField,
+        entityTypes,
+        kuery,
+      }),
+    ]);
 
     const identityFieldsPerEntityType = getIdentityFieldsPerEntityType(latestEntities);
 
@@ -80,16 +82,13 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       kuery,
     });
 
-    console.log('identityFieldsPerEntityType', identityFieldsPerEntityType.values());
-    console.log('alerts', alerts);
     const joined = joinByKey(
       [...latestEntities, ...alerts],
-      ['service.name', 'service.environment']
-    );
+      [...identityFieldsPerEntityType.values()].flat()
+    ).filter((entity) => entity['entity.id']);
 
-    console.log('joined', joined);
     return {
-      entities: joined,
+      entities: sortField === 'alertsCount' ? sortBy(joined, sortField, sortDirection) : joined,
     };
   },
 });

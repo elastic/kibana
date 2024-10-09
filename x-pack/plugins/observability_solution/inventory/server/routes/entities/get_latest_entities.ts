@@ -13,8 +13,10 @@ import {
   MAX_NUMBER_OF_ENTITIES,
   type EntityType,
   Entity,
+  type EntityColumnIds,
 } from '../../../common/entities';
 import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
+import { ENTITY_LAST_SEEN } from '../../../common/es_fields/entities';
 
 export async function getLatestEntities({
   inventoryEsClient,
@@ -25,15 +27,18 @@ export async function getLatestEntities({
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
-  sortField: string;
+  sortField: EntityColumnIds;
   entityTypes?: EntityType[];
   kuery?: string;
 }) {
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
+  // alertCount doesn't exist in entties. Ignore it and sort by entity.lastSeenTimestamp by default
+  const entitiesSortField = sortField === 'alertsCount' ? ENTITY_LAST_SEEN : sortField;
+
+  const request = {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
      | ${getEntityTypesWhereClause(entityTypes)}
      | ${getEntityDefinitionIdWhereClause()}
-     | SORT ${sortField} ${sortDirection}
+     | SORT ${entitiesSortField} ${sortDirection}
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
      `,
     filter: {
@@ -41,7 +46,9 @@ export async function getLatestEntities({
         filter: [...kqlQuery(kuery)],
       },
     },
-  });
+  };
+
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', request);
 
   return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse);
 }

@@ -7,9 +7,7 @@
 
 import { EuiButtonIcon, EuiDataGridColumn, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
@@ -54,12 +52,6 @@ const entityLastSeenToolip = i18n.translate(
   }
 );
 
-export type EntityColumnIds =
-  | typeof ENTITY_DISPLAY_NAME
-  | typeof ENTITY_LAST_SEEN
-  | typeof ENTITY_TYPE
-  | 'alertsCount';
-
 const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
   <>
     <span>{title}</span>
@@ -88,6 +80,7 @@ export const getColumns = ({
             isSortable: true,
             display: <CustomHeaderCell title={alertsLabel} tooltipContent={alertsTooltip} />,
             initialWidth: 100,
+            schema: 'numeric',
           },
         ]
       : []),

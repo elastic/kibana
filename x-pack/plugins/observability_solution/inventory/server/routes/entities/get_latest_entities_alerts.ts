@@ -39,10 +39,11 @@ export async function getLatestEntitiesAlerts({
     aggs: getGroupByTermsAgg(identityFieldsPerEntityType),
   });
 
-  const alerts = Array.from(identityFieldsPerEntityType).flatMap(([field, value]) => {
-    const buckets = response.aggregations?.[field]?.buckets ?? [];
+  const alerts = Array.from(identityFieldsPerEntityType).flatMap(([entityType]) => {
+    const buckets = response.aggregations?.[entityType]?.buckets ?? [];
     return buckets.map((bucket: { key: Record<string, string>; doc_count: number }) => ({
       alertsCount: bucket.doc_count,
+      type: entityType,
       ...bucket.key,
     }));
   });
