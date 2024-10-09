@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { IndicesStatusResponse } from '../../../../common';
 
@@ -15,13 +15,30 @@ import { navigateToIndexDetails } from './utils';
 
 export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
   const { application, http } = useKibana().services;
+  const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
+  const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   return useEffect(() => {
-    if (!indicesStatus) return;
-    if (indicesStatus.indexNames.length === 0) return;
+    if (hasDoneRedirect) {
+      return;
+    }
+    if (!indicesStatus) {
+      return;
+    }
+    if (indicesStatus.indexNames.length === 0) {
+      setLastStatus(indicesStatus);
+      return;
+    }
+    if (lastStatus === undefined && indicesStatus.indexNames.length > 0) {
+      application.navigateToApp('management', { deepLinkId: 'index_management' });
+      setHasDoneRedirect(true);
+      return;
+    }
     if (indicesStatus.indexNames.length === 1) {
       navigateToIndexDetails(application, http, indicesStatus.indexNames[0]);
+      setHasDoneRedirect(true);
       return;
     }
     application.navigateToApp('management', { deepLinkId: 'index_management' });
-  }, [application, http, indicesStatus]);
+    setHasDoneRedirect(true);
+  }, [application, http, indicesStatus, lastStatus, hasDoneRedirect]);
 };

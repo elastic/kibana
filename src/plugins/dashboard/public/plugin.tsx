@@ -138,7 +138,6 @@ export interface DashboardStart {
 }
 
 export let resolveServicesReady: () => void;
-export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
 
 export class DashboardPlugin
   implements
