@@ -19,6 +19,7 @@ import {
   ObjectRemover,
   getUnauthorizedErrorMessage,
   TaskManagerDoc,
+  resetRulesSettings,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -634,6 +635,90 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             })
           )
           .expect(400);
+      });
+
+      describe('create rule flapping', () => {
+        afterEach(async () => {
+          await resetRulesSettings(supertest, 'space1');
+        });
+
+        it('should allow flapping to be created', async () => {
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                flapping: {
+                  look_back_window: 5,
+                  status_change_threshold: 5,
+                },
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.flapping).to.eql({
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
+        });
+
+        it('should throw if flapping is created when global flapping is off', async () => {
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              enabled: false,
+              look_back_window: 5,
+              status_change_threshold: 5,
+            });
+
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                flapping: {
+                  look_back_window: 5,
+                  status_change_threshold: 5,
+                },
+              })
+            );
+
+          expect(response.statusCode).eql(400);
+          expect(response.body.message).eql(
+            'Error creating rule: can not create rule with flapping if global flapping is disabled'
+          );
+        });
+
+        it('should throw if flapping is invalid', async () => {
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                flapping: {
+                  look_back_window: 5,
+                  status_change_threshold: 10,
+                },
+              })
+            )
+            .expect(400);
+
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                flapping: {
+                  look_back_window: -5,
+                  status_change_threshold: -5,
+                },
+              })
+            )
+            .expect(400);
+        });
       });
     });
 
