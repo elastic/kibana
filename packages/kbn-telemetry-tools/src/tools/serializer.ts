@@ -99,12 +99,8 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.literal.text;
   }
 
-  if (ts.isStringLiteral(node) || ts.isStringLiteralLike(node)) {
+  if (ts.isStringLiteral(node)) {
     return node.text;
-  }
-
-  if (ts.isTemplateExpression(node)) {
-    return node.templateSpans.map((templateSpan) => templateSpan.literal.text).join('');
   }
 
   if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
