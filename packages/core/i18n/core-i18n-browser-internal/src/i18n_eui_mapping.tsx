@@ -860,13 +860,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
-      defaultMessage: 'External link',
-    }),
+    'euiExternalLinkIcon.externalTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.externalTarget.screenReaderOnlyText',
+      {
+        defaultMessage: '(external)',
+      }
+    ),
     'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
       'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
-        defaultMessage: '(opens in a new tab or window)',
+        defaultMessage: '(external, opens in a new tab or window)',
       }
     ),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
