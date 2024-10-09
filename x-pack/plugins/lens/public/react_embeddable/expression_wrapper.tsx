@@ -88,7 +88,7 @@ export function ExpressionWrapper({
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRender$}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         renderMode={renderMode}
         syncColors={syncColors}
         syncTooltips={syncTooltips}
@@ -98,12 +98,7 @@ export function ExpressionWrapper({
         renderError={(errorMessage, error) => {
           const messages = getOriginalRequestErrorMessages(error || null);
           addUserMessages(messages);
-          if (error?.original) {
-            onRuntimeError(error.original);
-          } else {
-            onRuntimeError(new Error(errorMessage ? errorMessage : ''));
-          }
-
+          onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
           return <></>; // the embeddable will take care of displaying the messages
         }}
         onEvent={handleEvent}

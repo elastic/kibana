@@ -26,7 +26,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
   debounce?: number;
   expression: string | ExpressionAstExpression;
   hasCustomErrorRenderer?: boolean;
-  onData$?<TData, TInspectorAdapters>(
+  onData$?<TData, TInspectorAdapters extends unknown>(
     data: TData,
     adapters?: TInspectorAdapters,
     partial?: boolean

@@ -43,13 +43,11 @@ export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service';
-export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
 
 export * from './trigger_actions/open_in_discover_helpers';
-export * from './trigger_actions/open_lens_config/edit_action_helpers';
 export * from './trigger_actions/open_lens_config/create_action_helpers';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';

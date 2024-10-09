@@ -8,30 +8,12 @@
 import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import { DOC_TYPE } from '../../common/constants';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
+import { getLensApiMock } from '../react_embeddable/mocks';
 
 describe('open in discover action', () => {
-  const compatibleEmbeddableApi = {
-    type: DOC_TYPE,
-    panelTitle: 'some title',
-    hidePanelTitle: false,
-    filters$: new BehaviorSubject([]),
-    query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
-    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-    getSavedVis: jest.fn(() => undefined),
-    canViewUnderlyingData: () => Promise.resolve(true),
-    getFullAttributes: jest.fn(() => undefined),
-    getViewUnderlyingDataArgs: jest.fn(() => ({
-      dataViewSpec: { id: 'index-pattern-id' },
-      timeRange: { from: 'now-7d', to: 'now' },
-      filters: [],
-      query: undefined,
-      columns: [],
-    })),
-  };
+  const compatibleEmbeddableApi = getLensApiMock();
 
   describe('compatibility check', () => {
     it('is incompatible with non-lens embeddables', async () => {
