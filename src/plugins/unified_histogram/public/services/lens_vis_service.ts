@@ -553,12 +553,16 @@ export class LensVisService {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
-    const breakdown = breakdownColumn
-      ? `, \`${breakdownColumn.name}\` | sort \`${breakdownColumn.name}\` asc`
-      : '';
+    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+    // sorting by geo_point is not supported
+    const sortBy =
+      breakdownColumn && breakdownColumn?.meta?.type !== 'geo_point'
+        ? ` | sort \`${breakdownColumn.name}\` asc`
+        : '';
+
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
