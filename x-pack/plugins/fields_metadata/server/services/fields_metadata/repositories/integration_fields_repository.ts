@@ -105,8 +105,8 @@ export class IntegrationFieldsRepository {
       .then((fieldMetadataTree) => this.storeFieldsInCache(cacheKey, fieldMetadataTree));
   }
 
-  private async extractIntegrationList(): Promise<void> {
-    await this.integrationListExtractor()
+  private extractIntegrationList(): void {
+    void this.integrationListExtractor()
       .then(this.mapExtractedIntegrationListToMap)
       .then((integrationsMap) => (this.integrationsMap = integrationsMap));
   }
