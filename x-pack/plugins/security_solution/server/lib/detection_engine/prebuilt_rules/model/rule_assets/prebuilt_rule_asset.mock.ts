@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { z } from '@kbn/zod';
 import type {
   EqlRuleCreateFields,
   QueryRuleCreateFields,
@@ -14,8 +14,11 @@ import type {
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
+  TypeSpecificCreatePropsInternal,
 } from '../../../../../../common/api/detection_engine';
-import { PrebuiltRuleAsset, type TypeSpecificFields } from './prebuilt_rule_asset';
+import { PrebuiltRuleAsset, type PrebuiltAssetBaseProps } from './prebuilt_rule_asset';
+
+type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;
 
 export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): PrebuiltRuleAsset => {
   return PrebuiltRuleAsset.parse({
@@ -113,11 +116,11 @@ export const getPrebuiltEsqlRuleSpecificFieldsMock = (): EsqlRuleCreateFields =>
   language: 'esql',
 });
 
-export const getPrebuiltRuleMockOfType = <T extends TypeSpecificFields>(
+export const getPrebuiltRuleMockOfType = <T extends TypeSpecificCreateProps>(
   type: T['type']
 ): PrebuiltAssetBaseProps &
-  Extract<TypeSpecificFields, T> & { version: number; rule_id: string } => {
-  let typeSpecificFields: TypeSpecificFields;
+  Extract<TypeSpecificCreateProps, T> & { version: number; rule_id: string } => {
+  let typeSpecificFields: TypeSpecificCreateProps;
 
   switch (type) {
     case 'query':
