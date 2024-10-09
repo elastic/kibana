@@ -225,7 +225,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle save hooks appropriately', async () => {
+        it('should handle delete hooks appropriately', async () => {
           const source = uuidv4();
           const encryptedValue = 'This value should be encrypted';
           const { body: createdAction } = await supertest

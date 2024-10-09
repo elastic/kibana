@@ -121,8 +121,7 @@ This is the primary function for an action type. Whenever the action needs to ru
 
 ### Hooks
 
-Hooks allow a connector implementation to be called during connector creation, update, and delete.  When not using hooks, the connector implementation is not involved in creation, update and delete, except for the schema validation that happens for creation and update.  Hooks can be used to force a create or update to fail, or run arbitrary code
-before and after update and create, and after delete.  We don't have a need for a hook before delete at the moment, so that hook is currently not available.
+Hooks allow a connector implementation to be called during connector creation, update, and delete.  When not using hooks, the connector implementation is not involved in creation, update and delete, except for the schema validation that happens for creation and update.  Hooks can be used to force a create or update to fail, or run arbitrary code before and after update and create, and after delete.  We don't have a need for a hook before delete at the moment, so that hook is currently not available.
 
 Hooks are passed the following parameters:
 
@@ -181,7 +180,7 @@ The `PostDelete` hook does not have a `wasSuccessful` property, as the hook is n
 
 The `PreSave` hook can be used to cancel a create or update, by throwing an exception.  The `PostSave` and `PostDelete` invocations will have thrown exceptions caught and logged to the Kibana log, and will not cancel the operation.  
 
-When throwing an error in the `PreSave` hook, the Error's message will be used as the error failing the operation, so should include a human-readable description of what it was doing, along with any message from an underlying API that failed, if available.
+When throwing an error in the `PreSave` hook, the Error's message will be used as the error failing the operation, so should include a human-readable description of what it was doing, along with any message from an underlying API that failed, if available.  When an error is thrown from a `PreSave` hook, the `PostSave` hook will **NOT** be run.
 
 ### Example
 
