@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
@@ -132,35 +132,24 @@ export function ApmMainTemplate({
     noDataConfig,
   });
 
-  const rightSideItems = [...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : [])];
-
   const sanitizedPath = getPathForFeedback(window.location.pathname);
 
-  const pageHeaderTitle = (
-    <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
-      {pageHeader?.pageTitle ?? pageTitle}
-      <EuiFlexItem grow={false} />
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <FeatureFeedbackButton
-              data-test-subj="infraApmFeedbackLink"
-              formUrl={
-                isEntityCentricExperienceEnabled && sanitizedPath.includes('service')
-                  ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
-                  : APM_FEEDBACK_LINK
-              }
-              kibanaVersion={kibanaVersion}
-              isCloudEnv={isCloudEnv}
-              isServerlessEnv={isServerlessEnv}
-              sanitizedPath={sanitizedPath}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{environmentFilter && <ApmEnvironmentFilter />}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const rightSideItems = [
+    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
+    <FeatureFeedbackButton
+      data-test-subj="infraApmFeedbackLink"
+      formUrl={
+        isEntityCentricExperienceEnabled && sanitizedPath.includes('service')
+          ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
+          : APM_FEEDBACK_LINK
+      }
+      kibanaVersion={kibanaVersion}
+      isCloudEnv={isCloudEnv}
+      isServerlessEnv={isServerlessEnv}
+      sanitizedPath={sanitizedPath}
+    />,
+  ];
 
   const [dismissedEntitiesInventoryCallout, setdismissedEntitiesInventoryCallout] = useLocalStorage(
     `apm.dismissedEntitiesInventoryCallout`,
@@ -180,7 +169,7 @@ export function ApmMainTemplate({
         pageHeader={{
           rightSideItems,
           ...pageHeader,
-          pageTitle: pageHeaderTitle,
+          pageTitle: pageHeader?.pageTitle ?? pageTitle,
           children: (
             <EuiFlexGroup direction="column">
               {showEntitiesInventoryCallout ? (
