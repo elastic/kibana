@@ -6,15 +6,18 @@
  */
 
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
+
 import { buildEntityDefinitionId } from './utils/utils';
 
-export const buildHostEntityDefinition = (space: string): EntityDefinition =>
+export const buildHostEntityDefinition = (
+  space: string,
+  indexPatterns: string[]
+): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('host', space),
     name: 'EA Host Store',
     type: 'host',
-    indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+    indexPatterns,
     identityFields: ['host.name'],
     displayNameTemplate: '{{host.name}}',
     metadata: [
@@ -35,12 +38,15 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
     managed: true,
   });
 
-export const buildUserEntityDefinition = (space: string): EntityDefinition =>
+export const buildUserEntityDefinition = (
+  space: string,
+  indexPatterns: string[]
+): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('user', space),
     name: 'EA User Store',
     type: 'user',
-    indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+    indexPatterns,
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
     metadata: ['user.email', 'user.full_name', 'user.hash', 'user.id', 'user.name', 'user.roles'],

@@ -9,6 +9,8 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { AppClient } from '../../..';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityEngineRequestBody,
@@ -21,7 +23,7 @@ import type {
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
+import { buildEntityDefinitionId, getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
@@ -32,6 +34,8 @@ interface EntityStoreClientOpts {
   assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  dataViewsService: DataViewsService;
+  appClient: AppClient;
 }
 
 interface SearchEntitiesParams {
@@ -66,7 +70,12 @@ export class EntityStoreDataClient {
       );
     }
 
-    const definition = getEntityDefinition(entityType, this.options.namespace);
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
 
     logger.info(
       `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
@@ -88,7 +97,12 @@ export class EntityStoreDataClient {
   }
 
   public async start(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType, this.options.namespace);
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -107,8 +121,12 @@ export class EntityStoreDataClient {
   }
 
   public async stop(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType, this.options.namespace);
-
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
     const descriptor = await this.engineClient.get(entityType);
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
@@ -134,7 +152,7 @@ export class EntityStoreDataClient {
   }
 
   public async delete(entityType: EntityType, deleteData: boolean) {
-    const { id } = getEntityDefinition(entityType, this.options.namespace);
+    const id = buildEntityDefinitionId(entityType, this.options.namespace);
 
     this.options.logger.info(
       `In namespace ${this.options.namespace}: Deleting entity store for ${entityType}`

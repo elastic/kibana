@@ -17,7 +17,7 @@ import type {
 } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
-import { getByEntityTypeQuery, getEntityDefinition } from '../utils/utils';
+import { buildEntityDefinitionId, getByEntityTypeQuery } from '../utils/utils';
 import { ENGINE_STATUS } from '../constants';
 
 interface EngineDescriptorDependencies {
@@ -66,7 +66,7 @@ export class EngineDescriptorClient {
   }
 
   async get(entityType: EntityType): Promise<EngineDescriptor> {
-    const { id } = getEntityDefinition(entityType, this.deps.namespace);
+    const id = buildEntityDefinitionId(entityType, this.deps.namespace);
 
     const { attributes } = await this.deps.soClient.get<EngineDescriptor>(
       entityEngineDescriptorTypeName,

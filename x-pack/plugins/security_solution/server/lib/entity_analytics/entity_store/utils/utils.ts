@@ -10,16 +10,54 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { AppClient } from '../../../../types';
+import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
+import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { buildHostEntityDefinition, buildUserEntityDefinition } from '../definition';
-
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
-export const getEntityDefinition = (entityType: EntityType, space: string) => {
-  if (entityType === 'host') return buildHostEntityDefinition(space);
-  if (entityType === 'user') return buildUserEntityDefinition(space);
+export const getEntityDefinition = async (
+  entityType: EntityType,
+  space: string,
+  dataViewsService: DataViewsService,
+  appClient: AppClient
+) => {
+  const indexPatterns = await buildIndexPatterns(space, appClient, dataViewsService);
+  if (entityType === 'host') return buildHostEntityDefinition(space, indexPatterns);
+  if (entityType === 'user') return buildUserEntityDefinition(space, indexPatterns);
 
   throw new Error(`Unsupported entity type: ${entityType}`);
+};
+
+export const buildIndexPatterns = async (
+  space: string,
+  appClient: AppClient,
+  dataViewsService: DataViewsService
+) => {
+  const { alertsIndex, securitySolutionDataViewIndices } = await getSecuritySolutionIndices(
+    appClient,
+    dataViewsService
+  );
+  return [
+    ...securitySolutionDataViewIndices.filter((item) => item !== alertsIndex),
+    getAssetCriticalityIndex(space),
+    getRiskScoreLatestIndex(space),
+  ];
+};
+
+const getSecuritySolutionIndices = async (
+  appClient: AppClient,
+  dataViewsService: DataViewsService
+) => {
+  const securitySolutionDataViewId = appClient.getSourcererDataViewId();
+  const dataView = await dataViewsService.get(securitySolutionDataViewId);
+  const dataViewIndexPattern = dataView.getIndexPattern();
+  return {
+    securitySolutionDataViewIndices: dataViewIndexPattern.split(','),
+    alertsIndex: appClient.getAlertsIndex(),
+  };
 };
 
 export const getByEntityTypeQuery = (entityType: EntityType) => {
