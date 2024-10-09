@@ -34,7 +34,7 @@ import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_for
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
+const logsAnomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
   defaultMessage: 'Anomalies',
 });
 
@@ -117,7 +117,7 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={anomaliesTitle} />
+        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={logsAnomaliesTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );
@@ -152,7 +152,7 @@ export const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps>
         rest.isEmptyState
           ? undefined
           : {
-              pageTitle: anomaliesTitle,
+              pageTitle: logsAnomaliesTitle,
             }
       }
       {...rest}
