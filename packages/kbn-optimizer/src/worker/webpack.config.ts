@@ -11,8 +11,6 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
-// @ts-expect-error
-import nodeLibsBrowser from 'node-libs-browser';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -24,6 +22,7 @@ import {
   STATS_WARNINGS_FILTER,
   STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
 } from '@kbn/optimizer-webpack-helpers';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -68,6 +67,7 @@ export function getWebpackConfig(
     },
 
     optimization: {
+      avoidEntryIife: true,
       moduleIds: worker.dist ? 'deterministic' : 'natural',
       chunkIds: worker.dist ? 'deterministic' : 'natural',
       emitOnErrors: false,
@@ -87,10 +87,7 @@ export function getWebpackConfig(
     },
 
     plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
-        process: nodeLibsBrowser.process,
-      }),
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -292,8 +289,8 @@ export function getWebpackConfig(
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
-      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
+      mainFields: ['browser', 'main', 'module'],
+      conditionNames: ['require', 'node', 'module', 'import', 'default'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
@@ -302,17 +299,6 @@ export function getWebpackConfig(
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         child_process: false,
         fs: false,
-      },
-      fallback: {
-        buffer: nodeLibsBrowser.buffer,
-        child_process: false,
-        crypto: nodeLibsBrowser.crypto,
-        fs: false,
-        os: nodeLibsBrowser.os,
-        path: nodeLibsBrowser.path,
-        process: nodeLibsBrowser.process,
-        stream: nodeLibsBrowser.stream,
-        timers: nodeLibsBrowser.timers,
       },
     },
 

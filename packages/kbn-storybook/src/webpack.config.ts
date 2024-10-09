@@ -12,8 +12,7 @@ import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
-// @ts-expect-error
-import nodeLibsBrowser from 'node-libs-browser';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
@@ -127,7 +126,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
       ],
     },
-    plugins: [new IgnoreNotFoundExportPlugin()],
+    plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
@@ -135,11 +134,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
-      },
-      fallback: {
-        constants: nodeLibsBrowser.path,
-        stream: nodeLibsBrowser.path,
-        timers: nodeLibsBrowser.path,
       },
     },
     stats: 'errors-only',

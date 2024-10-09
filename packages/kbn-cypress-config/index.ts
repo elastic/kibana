@@ -10,8 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
-// @ts-expect-error
-import nodeLibsBrowser from 'node-libs-browser';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({
@@ -28,9 +27,6 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
             webpackOptions: {
               resolve: {
                 extensions: ['.ts', '.tsx', '.js'],
-                fallback: {
-                  path: nodeLibsBrowser.path,
-                },
               },
               module: {
                 rules: [
@@ -48,6 +44,7 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                   },
                 ],
               },
+              plugins: [new NodeLibsBrowserPlugin()],
             },
           })(file);
         });

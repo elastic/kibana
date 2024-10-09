@@ -676,6 +676,7 @@
     "@kbn/newsfeed-plugin": "link:src/plugins/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
     "@kbn/no-data-page-plugin": "link:src/plugins/no_data_page",
+    "@kbn/node-libs-browser-webpack-plugin": "link:packages/kbn-node-libs-browser-webpack-plugin",
     "@kbn/notifications-plugin": "link:x-pack/plugins/notifications",
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/object-versioning-utils": "link:packages/kbn-object-versioning-utils",

@@ -9,8 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
-// @ts-expect-error
-const nodeLibsBrowser = require('node-libs-browser');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -144,14 +143,8 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      // mainFields: ['browser', 'main'],
-      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
-      fallback: {
-        buffer: nodeLibsBrowser.buffer,
-        child_process: false,
-        fs: false,
-        process: nodeLibsBrowser.process,
-      },
+      mainFields: ['browser', 'main', 'module'],
+      conditionNames: ['require', 'node', 'module', 'import', 'default'],
     },
 
     optimization: {
@@ -169,10 +162,7 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
-        process: nodeLibsBrowser.process,
-      }),
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [

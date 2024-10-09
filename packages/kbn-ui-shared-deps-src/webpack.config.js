@@ -13,8 +13,7 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
-// @ts-expect-error
-const nodeLibsBrowser = require('node-libs-browser');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
@@ -109,8 +108,8 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    // mainFields: ['browser', 'main'],
-    // conditionNames: ['require', 'default', 'node', 'module', 'import'],
+    mainFields: ['browser', 'main', 'module'],
+    conditionNames: ['require', 'node', 'module', 'import', 'default'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,
@@ -118,12 +117,6 @@ module.exports = {
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
-    },
-    fallback: {
-      buffer: nodeLibsBrowser.buffer,
-      child_process: false,
-      fs: false,
-      process: nodeLibsBrowser.process,
     },
   },
 
@@ -142,10 +135,7 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.ProvidePlugin({
-      Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
-      process: nodeLibsBrowser.process,
-    }),
+    new NodeLibsBrowserPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
