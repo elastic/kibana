@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
-import { dateSchema, limitedStringSchema } from '../../../schema';
+import { limitedStringSchema } from '../../../schema';
 
 export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
   limitedStringSchema({
@@ -21,12 +21,7 @@ export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
  */
 
 export const CustomFieldPutRequestRt = rt.strict({
-  value: rt.union([
-    rt.boolean,
-    rt.null,
-    CaseCustomFieldTextWithValidationValueRt('value'),
-    dateSchema(),
-  ]),
+  value: rt.union([rt.boolean, rt.null, CaseCustomFieldTextWithValidationValueRt('value')]),
   caseVersion: rt.string,
 });
 

@@ -104,24 +104,4 @@ describe('CaseCustomFieldRt', () => {
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value true supplied');
   });
-
-  it('fails if date type has text value', () => {
-    const query = CaseCustomFieldRt.decode({
-      key: 'date_custom_field_1',
-      type: 'date',
-      value: 'hello',
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('hello is not a valid date.');
-  });
-
-  it('fails if date type has invalid date value', () => {
-    const query = CaseCustomFieldRt.decode({
-      key: 'date_custom_field_1',
-      type: 'date',
-      value: '13-13-2024',
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('13-13-2024 is not a valid date.');
-  });
 });

@@ -28,10 +28,11 @@ import {
   limitedArraySchema,
   NonEmptyString,
   paginationSchema,
+  dateSchema,
 } from '../../../schema';
 import {
-  CaseCustomFieldDateRt,
   CaseCustomFieldToggleRt,
+  CustomFieldDateTypeRt,
   CustomFieldTextTypeRt,
 } from '../../domain';
 import {
@@ -53,10 +54,16 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
+const CaseCustomFieldDateWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldDateTypeRt,
+  value: rt.union([dateSchema(), rt.null]),
+});
+
 const CustomFieldRt = rt.union([
   CaseCustomFieldTextWithValidationRt,
   CaseCustomFieldToggleRt,
-  CaseCustomFieldDateRt,
+  CaseCustomFieldDateWithValidationRt,
 ]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({

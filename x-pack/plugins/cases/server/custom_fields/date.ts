@@ -7,21 +7,17 @@
 
 import Boom from '@hapi/boom';
 import { isString } from 'lodash';
+import moment from 'moment';
 
 export const getCasesDateCustomField = () => ({
   isFilterable: false,
   isSortable: false,
-  savedObjectMappingType: 'string',
+  savedObjectMappingType: 'date',
   validateFilteringValues: (values: Array<string | number | boolean | null>) => {
     values.forEach((value) => {
-      if (value !== null && (!isString(value) || !isDateValid(value))) {
+      if (value !== null && (!isString(value) || !moment(value, true).isValid())) {
         throw Boom.badRequest(`Unsupported filtering value for custom field of type date.`);
       }
     });
   },
 });
-
-const isDateValid = (timestamp: string): boolean => {
-  const date = new Date(timestamp);
-  return !isNaN(date.getTime());
-};

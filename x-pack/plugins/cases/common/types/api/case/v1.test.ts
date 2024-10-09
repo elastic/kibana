@@ -360,6 +360,23 @@ describe('CasePostRequestRt', () => {
       )
     ).toContain('202 is not a valid date.');
   });
+
+  it('throws an error when a date customField has text value', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: 'hello',
+            },
+          ],
+        })
+      )
+    ).toContain('hello is not a valid date.');
+  });
 });
 
 describe('CasesFindRequestRt', () => {
@@ -824,6 +841,23 @@ describe('CasePatchRequestRt', () => {
         })
       )
     ).toContain('-1 is not a valid date.');
+  });
+
+  it('throws an error when a date customField is text', () => {
+    expect(
+      PathReporter.report(
+        CasePatchRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'third_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: 'text',
+            },
+          ],
+        })
+      )
+    ).toContain('text is not a valid date.');
   });
 });
 

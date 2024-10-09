@@ -14,7 +14,6 @@ import {
   CustomFieldDateTypeRt,
 } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
-import { dateSchema } from '../../../schema';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -61,7 +60,7 @@ export const DateCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([dateSchema(), rt.null]),
+      defaultValue: rt.union([rt.string, rt.null]),
     })
   ),
 ]);

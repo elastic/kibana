@@ -252,6 +252,108 @@ describe('client', () => {
         get({ owner: 'cases', foo: 'bar' }, clientArgs, casesClientInternal)
       ).rejects.toThrow('invalid keys "foo"');
     });
+
+    it('does not throw when correct fields', async () => {
+      clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 20,
+        total: 1,
+        saved_objects: [
+          {
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            namespaces: ['default'],
+            references: [],
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'custom field 1',
+                  required: true,
+                  defaultValue: 'text default value',
+                },
+                {
+                  key: 'custom_field_key_2',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'custom field 2',
+                  required: true,
+                  defaultValue: true,
+                },
+                {
+                  key: 'custom_field_key_3',
+                  type: CustomFieldTypes.DATE,
+                  label: 'custom field 3',
+                  required: true,
+                  defaultValue: '2024-04-25',
+                },
+              ],
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              closure_type: 'close-by-user',
+              owner: 'cases',
+              templates: [],
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              updated_at: null,
+              updated_by: null,
+            },
+            score: 0,
+          },
+        ],
+        pit_id: undefined,
+      });
+
+      clientArgs.services.caseConfigureService.get.mockResolvedValue({
+        // @ts-ignore: these are all the attributes needed for the test
+        attributes: {
+          customFields: [
+            {
+              key: 'custom_field_key_1',
+              type: CustomFieldTypes.TEXT,
+              label: 'custom field 1',
+              required: true,
+              defaultValue: 'text default value',
+            },
+            {
+              key: 'custom_field_key_2',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'custom field 2',
+              required: true,
+              defaultValue: true,
+            },
+            {
+              key: 'custom_field_key_3',
+              type: CustomFieldTypes.DATE,
+              label: 'custom field 3',
+              required: true,
+              defaultValue: '2024-04-25',
+            },
+          ],
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closure_type: 'close-by-user',
+          owner: 'cases',
+          templates: [],
+        },
+        version: 'test-version',
+      });
+
+      await expect(get({ owner: 'cases' }, clientArgs, casesClientInternal)).resolves.not.toThrow();
+    });
   });
 
   describe('update', () => {
@@ -1211,6 +1313,95 @@ describe('client', () => {
       closure_type: 'close-by-user',
       owner: 'securitySolutionFixture',
     } as ConfigurationRequest;
+
+    it('creates config with valid custom fields', async () => {
+      const customFields: ConfigurationRequest['customFields'] = [
+        {
+          key: 'custom_field_key_1',
+          type: CustomFieldTypes.TEXT,
+          label: 'custom field 1',
+          required: true,
+          defaultValue: 'text default value',
+        },
+        {
+          key: 'custom_field_key_2',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'custom field 2',
+          required: true,
+          defaultValue: true,
+        },
+        {
+          key: 'custom_field_key_3',
+          type: CustomFieldTypes.DATE,
+          label: 'custom field 3',
+          required: true,
+          defaultValue: '2024-04-25',
+        },
+      ];
+
+      clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 20,
+        total: 1,
+        saved_objects: [
+          {
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            namespaces: ['default'],
+            references: [],
+            attributes: {
+              ...baseRequest,
+              customFields,
+              templates: [],
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              updated_at: null,
+              updated_by: null,
+            },
+            score: 0,
+          },
+        ],
+        pit_id: undefined,
+      });
+
+      clientArgs.services.caseConfigureService.post.mockResolvedValue({
+        id: 'test-id',
+        type: 'cases-configure',
+        version: 'test-version',
+        namespaces: ['default'],
+        references: [],
+        attributes: {
+          ...baseRequest,
+          customFields,
+          templates: [],
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          updated_at: null,
+          updated_by: null,
+        },
+      });
+
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields,
+            templates: [],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).resolves.not.toThrow();
+    });
 
     it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
       await expect(

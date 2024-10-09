@@ -112,16 +112,5 @@ describe('Custom Fields', () => {
         )
       ).toContain('The value field cannot be an empty string.');
     });
-
-    it('throws an error when a date customField is invalid', () => {
-      expect(
-        PathReporter.report(
-          CustomFieldPutRequestRt.decode({
-            caseVersion: 'WzQ3LDFd',
-            value: '13/13/2024',
-          })
-        )
-      ).toContain('13/13/2024 is not a valid date.');
-    });
   });
 });
