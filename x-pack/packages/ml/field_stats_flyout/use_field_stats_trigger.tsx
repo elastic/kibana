@@ -63,10 +63,10 @@ export function useFieldStatsTrigger<T = DropDownLabel>() {
     (option: T): ReactNode => {
       if (isSelectableOption(option)) {
         const field = (option as Option).field;
-        const isInternalEventRateFieldId = field.id === EVENT_RATE_FIELD_ID;
+        const isInternalEventRateFieldId = field?.id === EVENT_RATE_FIELD_ID;
         const isEmpty = isInternalEventRateFieldId
           ? false
-          : !populatedFields?.has(field.id ?? field.name);
+          : !populatedFields?.has(field?.id ?? field?.name);
         const shouldHideInpectButton = option.hideTrigger ?? option['data-hide-inspect'];
         return option.isGroupLabel || !field ? (
           option.label
