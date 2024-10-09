@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { cleanEngines, elasticAssetCheckerFactory } from '../../utils';
+import { EntityStoreUtils, elasticAssetCheckerFactory } from '../../utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const {
@@ -22,28 +21,21 @@ export default ({ getService }: FtrProviderContext) => {
     expectIngestPipelineNotFound,
   } = elasticAssetCheckerFactory(getService);
 
-  const initEntityEngineForEntityType = async (entityType: EntityType) => {
-    return api
-      .initEntityEngine({
-        params: { entityType },
-        body: {},
-      })
-      .expect(200);
-  };
-
+  const utils = EntityStoreUtils(getService);
   // TODO: unskip once permissions issue is resolved
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+
+  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
     before(async () => {
-      await cleanEngines({ getService });
+      await utils.cleanEngines();
     });
 
     describe('init', () => {
       afterEach(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       it('should have installed the expected user resources', async () => {
-        await initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityType('user');
 
         await expectTransformExists('entities-v1-latest-ea_default_user_entity_store');
         await expectEnrichPolicyExists('entity_store_field_retention_user_default_v1');
@@ -52,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have installed the expected host resources', async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
 
         await expectTransformExists('entities-v1-latest-ea_default_host_entity_store');
         await expectEnrichPolicyExists('entity_store_field_retention_host_default_v1');
@@ -64,13 +56,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('get and list', () => {
       before(async () => {
         await Promise.all([
-          initEntityEngineForEntityType('host'),
-          initEntityEngineForEntityType('user'),
+          utils.initEntityEngineForEntityType('host'),
+          utils.initEntityEngineForEntityType('user'),
         ]);
       });
 
       after(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       describe('get', () => {
@@ -136,11 +128,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
       });
 
       after(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       it('should stop the entity engine', async () => {
@@ -178,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
 
         await api
           .deleteEntityEngine({
@@ -194,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete the user entity engine', async () => {
-        await initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityType('user');
 
         await api
           .deleteEntityEngine({

@@ -120,8 +120,9 @@ export class EntityStoreDataClient {
         'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
       );
     }
-    logger.info(`Initializing entity store for ${entityType}`);
-
+    logger.info(
+      `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
+    );
     const debugLog = (message: string) =>
       logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
@@ -207,7 +208,7 @@ export class EntityStoreDataClient {
 
     if (!options?.force && descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
-        `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
@@ -217,7 +218,9 @@ export class EntityStoreDataClient {
       fieldHistoryLength: descriptor.fieldHistoryLength,
     });
 
-    this.options.logger.info(`Starting entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Starting entity store for ${entityType}`
+    );
     await this.entityClient.startEntityDefinition(entityManagerDefinition);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
@@ -228,7 +231,7 @@ export class EntityStoreDataClient {
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
       throw new Error(
-        `Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
@@ -237,8 +240,9 @@ export class EntityStoreDataClient {
       namespace: this.options.namespace,
       fieldHistoryLength: descriptor.fieldHistoryLength,
     });
-
-    this.options.logger.info(`Stopping entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Stopping entity store for ${entityType}`
+    );
     await this.entityClient.stopEntityDefinition(entityManagerDefinition);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
@@ -265,7 +269,7 @@ export class EntityStoreDataClient {
       fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
     });
     const { entityManagerDefinition } = unitedDefinition;
-    logger.info(`Deleting entity store for ${entityType}`);
+    logger.info(`In namespace ${namespace}: Deleting entity store for ${entityType}`);
     try {
       try {
         await this.entityClient.deleteEntityDefinition({
