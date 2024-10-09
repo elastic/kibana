@@ -16,6 +16,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta';
 
 import { EmptyState } from '.';
+import { IntlProvider } from 'react-intl';
 
 describe('EmptyState', () => {
   describe('when the user can manage/create engines', () => {
@@ -91,7 +92,11 @@ describe('EmptyState', () => {
     it('dismisses the deprecation callout', () => {
       setMockValues({ myRole: { canManageEngines: false } });
 
-      const wrapper = mount(<EmptyState />);
+      const wrapper = mount(
+        <IntlProvider locale="en">
+          <EmptyState />
+        </IntlProvider>
+      );
 
       sessionStorage.setItem('appSearchHideDeprecationCallout', 'false');
       expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
