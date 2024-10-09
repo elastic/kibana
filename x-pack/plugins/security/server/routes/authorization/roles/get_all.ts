@@ -31,7 +31,13 @@ export function defineGetAllRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
-        validate: false,
+        validate: {
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
+          },
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         try {

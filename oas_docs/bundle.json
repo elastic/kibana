@@ -40674,8 +40674,25 @@
     "/api/security/role": {
       "get": {
         "operationId": "%2Fapi%2Fsecurity%2Frole#0",
-        "parameters": [],
-        "responses": {},
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Get all roles",
         "tags": [
           "roles"
@@ -40718,7 +40735,11 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Delete a role",
         "tags": [
           "roles"
@@ -40740,6 +40761,7 @@
             }
           },
           {
+            "description": "The role name.",
             "in": "path",
             "name": "name",
             "required": true,
@@ -40749,13 +40771,18 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Get a role",
         "tags": [
           "roles"
         ]
       },
       "put": {
+        "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
         "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
         "parameters": [
           {
@@ -40781,6 +40808,7 @@
             }
           },
           {
+            "description": "The role name.",
             "in": "path",
             "name": "name",
             "required": true,
@@ -40791,6 +40819,7 @@
             }
           },
           {
+            "description": "When true, a role is not overwritten if it already exists.",
             "in": "query",
             "name": "createOnly",
             "required": false,
@@ -40807,6 +40836,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "description": {
+                    "description": "A description for the role.",
                     "maxLength": 2048,
                     "type": "string"
                   },
@@ -40815,6 +40845,7 @@
                     "properties": {
                       "cluster": {
                         "items": {
+                          "description": "Cluster privileges that define the cluster level actions that users can perform.",
                           "type": "string"
                         },
                         "type": "array"
@@ -40824,11 +40855,13 @@
                           "additionalProperties": false,
                           "properties": {
                             "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
                               "type": "boolean"
                             },
                             "field_security": {
                               "additionalProperties": {
                                 "items": {
+                                  "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
                                 "type": "array"
@@ -40837,6 +40870,7 @@
                             },
                             "names": {
                               "items": {
+                                "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -40844,12 +40878,14 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The index level privileges that the role members have for the data streams and indices.",
                                 "type": "string"
                               },
                               "minItems": 1,
                               "type": "array"
                             },
                             "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                               "type": "string"
                             }
                           },
@@ -40867,6 +40903,7 @@
                           "properties": {
                             "clusters": {
                               "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -40874,6 +40911,7 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -40893,10 +40931,12 @@
                           "additionalProperties": false,
                           "properties": {
                             "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
                               "type": "boolean"
                             },
                             "clusters": {
                               "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -40905,6 +40945,7 @@
                             "field_security": {
                               "additionalProperties": {
                                 "items": {
+                                  "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
                                 "type": "array"
@@ -40913,6 +40954,7 @@
                             },
                             "names": {
                               "items": {
+                                "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -40920,12 +40962,14 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The index level privileges that role members have for the specified indices.",
                                 "type": "string"
                               },
                               "minItems": 1,
                               "type": "array"
                             },
                             "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                               "type": "string"
                             }
                           },
@@ -40940,6 +40984,7 @@
                       },
                       "run_as": {
                         "items": {
+                          "description": "A user name that the role member can impersonate.",
                           "type": "string"
                         },
                         "type": "array"
@@ -40974,12 +41019,14 @@
                           "oneOf": [
                             {
                               "items": {
+                                "description": "A base privilege that grants applies to all spaces.",
                                 "type": "string"
                               },
                               "type": "array"
                             },
                             {
                               "items": {
+                                "description": "A base privilege that applies to specific spaces.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -40989,6 +41036,7 @@
                         "feature": {
                           "additionalProperties": {
                             "items": {
+                              "description": "The privileges that the role member has for the feature.",
                               "type": "string"
                             },
                             "type": "array"
@@ -41010,6 +41058,7 @@
                             },
                             {
                               "items": {
+                                "description": "A space that the privilege applies to.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41040,7 +41089,11 @@
             }
           }
         },
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Create or update a role",
         "tags": [
           "roles"
@@ -41085,6 +41138,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "description": {
+                          "description": "A description for the role.",
                           "maxLength": 2048,
                           "type": "string"
                         },
@@ -41093,6 +41147,7 @@
                           "properties": {
                             "cluster": {
                               "items": {
+                                "description": "Cluster privileges that define the cluster level actions that users can perform.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41102,11 +41157,13 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
                                     "type": "boolean"
                                   },
                                   "field_security": {
                                     "additionalProperties": {
                                       "items": {
+                                        "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
                                       "type": "array"
@@ -41115,6 +41172,7 @@
                                   },
                                   "names": {
                                     "items": {
+                                      "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41122,12 +41180,14 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The index level privileges that the role members have for the data streams and indices.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
                                     "type": "array"
                                   },
                                   "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                                     "type": "string"
                                   }
                                 },
@@ -41145,6 +41205,7 @@
                                 "properties": {
                                   "clusters": {
                                     "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41152,6 +41213,7 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41171,10 +41233,12 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
                                     "type": "boolean"
                                   },
                                   "clusters": {
                                     "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41183,6 +41247,7 @@
                                   "field_security": {
                                     "additionalProperties": {
                                       "items": {
+                                        "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
                                       "type": "array"
@@ -41191,6 +41256,7 @@
                                   },
                                   "names": {
                                     "items": {
+                                      "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41198,12 +41264,14 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The index level privileges that role members have for the specified indices.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
                                     "type": "array"
                                   },
                                   "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                                     "type": "string"
                                   }
                                 },
@@ -41218,6 +41286,7 @@
                             },
                             "run_as": {
                               "items": {
+                                "description": "A user name that the role member can impersonate.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41252,12 +41321,14 @@
                                 "oneOf": [
                                   {
                                     "items": {
+                                      "description": "A base privilege that grants applies to all spaces.",
                                       "type": "string"
                                     },
                                     "type": "array"
                                   },
                                   {
                                     "items": {
+                                      "description": "A base privilege that applies to specific spaces.",
                                       "type": "string"
                                     },
                                     "type": "array"
@@ -41267,6 +41338,7 @@
                               "feature": {
                                 "additionalProperties": {
                                   "items": {
+                                    "description": "The privileges that the role member has for the feature.",
                                     "type": "string"
                                   },
                                   "type": "array"
@@ -41288,6 +41360,7 @@
                                   },
                                   {
                                     "items": {
+                                      "description": "A space that the privilege applies to.",
                                       "type": "string"
                                     },
                                     "type": "array"
@@ -41326,7 +41399,11 @@
             }
           }
         },
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Create or update roles",
         "tags": [
           "roles"
