@@ -22,5 +22,9 @@ export async function ensureDeleteUnenrolledAgentsSetting(
     await settingsService.saveSettings(soClient, {
       delete_unenrolled_agents: true,
     });
+  } else {
+    await settingsService.saveSettings(soClient, {
+      delete_unenrolled_agents: false,
+    });
   }
 }

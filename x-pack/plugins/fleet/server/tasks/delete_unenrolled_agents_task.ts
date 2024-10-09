@@ -105,23 +105,26 @@ export class DeleteUnenrolledAgentsTask {
   public async deleteUnenrolledAgents(esClient: ElasticsearchClient) {
     this.logger.debug(`[DeleteUnenrolledAgentsTask] Fetching unenrolled agents`);
 
-    const response = await esClient.deleteByQuery({
-      index: AGENTS_INDEX,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  active: false,
+    const response = await esClient.deleteByQuery(
+      {
+        index: AGENTS_INDEX,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    active: false,
+                  },
                 },
-              },
-              { exists: { field: 'unenrolled_at' } },
-            ],
+                { exists: { field: 'unenrolled_at' } },
+              ],
+            },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
 
     this.logger.debug(
       `[DeleteUnenrolledAgentsTask] Executed deletion of ${response.deleted} unenrolled agents`
