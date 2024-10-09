@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { Charts } from './charts';
-import { UsageMetricsDateRangePicker } from './date_picker';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
@@ -18,6 +17,7 @@ import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { MetricsResponse } from '../types';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { UsageMetricsRequestSchemaQueryParams } from '../../../common/rest_types';
+import { ChartFilters } from './filters/charts_filters';
 
 const EuiItemCss = css`
   width: 100%;
@@ -97,6 +97,20 @@ export const DataUsageMetrics = () => {
     refetchDataUsageMetrics();
   }, [refetchDataUsageMetrics]);
 
+  const onChangeDataStreamsFilter = useCallback(
+    (selectedDataStreams: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, dataStreams: selectedDataStreams }));
+    },
+    [setQueryParams]
+  );
+
+  const onChangeMetricTypesFilter = useCallback(
+    (selectedMetricTypes: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, metricTypes: selectedMetricTypes }));
+    },
+    [setQueryParams]
+  );
+
   useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
   // TODO: show a toast?
@@ -106,13 +120,17 @@ export const DataUsageMetrics = () => {
 
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
-      <EuiFlexItem grow={false} css={EuiItemCss}>
-        <UsageMetricsDateRangePicker
+      <EuiFlexItem css={EuiItemCss}>
+        <ChartFilters
           dateRangePickerState={dateRangePickerState}
           isDataLoading={isFetching}
+          onClick={refetchDataUsageMetrics}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
+          onChangeDataStreamsFilter={onChangeDataStreamsFilter}
+          onChangeMetricTypesFilter={onChangeMetricTypesFilter}
+          showMetricsTypesFilter={false}
         />
       </EuiFlexItem>
       <EuiFlexItem css={EuiItemCss}>

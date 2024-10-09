@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-const METRIC_TYPE_VALUES = [
+export const METRIC_TYPE_VALUES = [
   'storage_retained',
   'ingest_rate',
   'search_vcu',
@@ -20,6 +20,18 @@ const METRIC_TYPE_VALUES = [
 ] as const;
 
 export type MetricTypes = (typeof METRIC_TYPE_VALUES)[number];
+
+export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<MetricTypes, string>>({
+  storage_retained: 'Data Retained in Storage',
+  ingest_rate: 'Data Ingested',
+  search_vcu: 'Search VCU',
+  ingest_vcu: 'Ingest VCU',
+  ml_vcu: 'ML VCU',
+  index_latency: 'Index Latency',
+  index_rate: 'Index Rate',
+  search_latency: 'Search Latency',
+  search_rate: 'Search Rate',
+});
 
 // type guard for MetricTypes
 export const isMetricType = (type: string): type is MetricTypes =>

@@ -33,3 +33,19 @@ export const DATA_USAGE_PAGE = Object.freeze({
     defaultMessage: 'Monitor data ingested and retained by data streams.',
   }),
 });
+
+export const UX_LABELS = Object.freeze({
+  filterClearAll: i18n.translate('xpack.dataUsage.metrics.filter.clearAll', {
+    defaultMessage: 'Clear all',
+  }),
+  filterSearchPlaceholder: (filterName: string) =>
+    i18n.translate('xpack.dataUsage.metrics.filter.searchPlaceholder', {
+      defaultMessage: 'Search {filterName}',
+      values: { filterName },
+    }),
+  filterEmptyMessage: (filterName: string) =>
+    i18n.translate('xpack.dataUsage.metrics.filter.emptyMessage', {
+      defaultMessage: 'No {filterName} available',
+      values: { filterName },
+    }),
+});
