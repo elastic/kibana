@@ -40,27 +40,19 @@ export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProp
     typeof DISCOVER_APP_ID | typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID
   >(OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY, OBSERVABILITY_LOGS_EXPLORER_APP_ID);
 
-  const navigateToDiscover = createNavigateHandler(
-    () => {
-      if (selectedTab !== 'discover') {
-        discoverLocator?.navigate(emptyParams);
-      }
-    },
-    () => {
+  const navigateToDiscover = createNavigateHandler(() => {
+    if (selectedTab !== 'discover') {
       setLastUsedViewer(DISCOVER_APP_ID);
+      discoverLocator?.navigate(emptyParams);
     }
-  );
+  });
 
-  const navigateToLogsExplorer = createNavigateHandler(
-    () => {
-      if (selectedTab !== 'logs-explorer') {
-        logsExplorerLocator?.navigate(emptyParams);
-      }
-    },
-    () => {
+  const navigateToLogsExplorer = createNavigateHandler(() => {
+    if (selectedTab !== 'logs-explorer') {
       setLastUsedViewer(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+      logsExplorerLocator?.navigate(emptyParams);
     }
-  );
+  });
 
   return (
     <EuiTabs bottomBorder={false} data-test-subj="logsExplorerTabs">
@@ -98,12 +90,11 @@ const isModifiedEvent = (event: MouseEvent) =>
 
 const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
 
-const createNavigateHandler = (onClick: () => void, updateState: () => void) => (e: MouseEvent) => {
+const createNavigateHandler = (onClick: () => void) => (e: MouseEvent) => {
   if (isModifiedEvent(e) || !isLeftClickEvent(e)) {
     return;
   }
 
   e.preventDefault();
-  updateState(); // Update local storage
   onClick();
 };

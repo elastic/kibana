@@ -57,11 +57,12 @@ describe('LogsExplorerTabs', () => {
       },
     } as unknown as typeof discoverServiceMock;
 
-    render(<LogsExplorerTabs services={services} selectedTab={selectedTab} />);
+    const { unmount } = render(<LogsExplorerTabs services={services} selectedTab={selectedTab} />);
 
     return {
       mockDiscoverLocator,
       mockLogsExplorerLocator,
+      unmount,
     };
   };
 
@@ -99,12 +100,14 @@ describe('LogsExplorerTabs', () => {
   });
 
   it('should update the last used viewer in local storage', async () => {
-    renderTabs();
+    const { unmount } = renderTabs('discover');
 
     mockSetLastUsedViewer.mockClear();
     await userEvent.click(getLogsExplorerTab());
     expect(mockSetLastUsedViewer).toHaveBeenCalledWith(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
 
+    unmount();
+    renderTabs('logs-explorer');
     mockSetLastUsedViewer.mockClear();
     await userEvent.click(getDiscoverTab());
     expect(mockSetLastUsedViewer).toHaveBeenCalledWith(DISCOVER_APP_ID);
