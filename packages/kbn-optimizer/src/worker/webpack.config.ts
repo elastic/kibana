@@ -67,7 +67,6 @@ export function getWebpackConfig(
     },
 
     optimization: {
-      avoidEntryIife: true,
       moduleIds: worker.dist ? 'deterministic' : 'natural',
       chunkIds: worker.dist ? 'deterministic' : 'natural',
       emitOnErrors: false,
