@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,7 +25,7 @@ const LearnMoreLink = () => (
   </EuiLink>
 );
 
-const solutionMap: Record<SolutionView, string> = {
+const solutionMap: Record<OnBoardingDefaultSolution, string> = {
   es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
     defaultMessage: 'Search',
   }),
@@ -34,7 +35,6 @@ const solutionMap: Record<SolutionView, string> = {
   oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
     defaultMessage: 'Observability',
   }),
-  classic: '', // Tour is not shown for the classic solution
 };
 
 interface Props extends PropsWithChildren<{}> {
@@ -45,12 +45,12 @@ interface Props extends PropsWithChildren<{}> {
 
 export const SolutionViewTour: FC<Props> = ({
   children,
-  solution = 'classic',
+  solution,
   isTourOpen: _isTourOpen,
   onFinishTour,
 }) => {
-  const solutionLabel = solutionMap[solution];
-  const isTourOpen = solution === 'classic' ? false : _isTourOpen;
+  const solutionLabel = solution && solution !== 'classic' ? solutionMap[solution] : '';
+  const isTourOpen = solutionLabel ? _isTourOpen : false;
 
   return (
     <EuiTourStep
