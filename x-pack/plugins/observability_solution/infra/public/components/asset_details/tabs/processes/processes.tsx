@@ -17,9 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useSourceContext } from '../../../../containers/metrics_source';
