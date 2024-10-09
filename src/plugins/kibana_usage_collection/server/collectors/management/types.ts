@@ -182,5 +182,6 @@ export interface UsageStats {
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
 }
