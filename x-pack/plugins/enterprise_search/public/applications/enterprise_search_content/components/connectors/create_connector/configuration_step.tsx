@@ -29,7 +29,6 @@ import { Status } from '../../../../../../common/types/api';
 import * as Constants from '../../../../shared/constants';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
-import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
 
 interface ConfigurationStepProps {
   currentStep: number;
@@ -46,7 +45,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   const { connector } = useValues(ConnectorViewLogic);
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
-  const { isSyncing } = useValues(SyncsLogic);
+  const isSyncing = false;
 
   const isNextStepEnabled =
     connector?.status === ConnectorStatus.CONNECTED ||

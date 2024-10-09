@@ -62,30 +62,31 @@ export const ConnectorDeployment: React.FC = () => {
   >('search:connector-ui-options', {});
 
   useEffect(() => {
+    if (connectorId && connector && connector.api_key_id) {
+      getApiKeyById(connector.api_key_id);
+    }
+  }, [connector, connectorId]);
+
+  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
+    if (connector) {
+      setSelectedDeploymentMethod(deploymentMethod);
+      setConnectorUiOptions({
+        ...connectorUiOptions,
+        [connector.id]: { deploymentMethod },
+      });
+    }
+  };
+
+  useEffect(() => {
     if (connectorUiOptions && connectorId && connectorUiOptions[connectorId]) {
       setSelectedDeploymentMethod(connectorUiOptions[connectorId].deploymentMethod);
     } else {
       selectDeploymentMethod('docker');
     }
   }, [connectorUiOptions, connectorId]);
-
-  useEffect(() => {
-    if (connectorId && connector && connector.api_key_id) {
-      getApiKeyById(connector.api_key_id);
-    }
-  }, [connector, connectorId]);
-
   if (!connector || connector.is_native) {
     return <></>;
   }
-
-  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
-    setSelectedDeploymentMethod(deploymentMethod);
-    setConnectorUiOptions({
-      ...connectorUiOptions,
-      [connector.id]: { deploymentMethod },
-    });
-  };
 
   const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey);
 

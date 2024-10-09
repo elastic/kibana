@@ -57,9 +57,7 @@ export const CreateConnector: React.FC = () => {
     useState<EuiStepStatus>('incomplete');
   const [finishUpStepStatus, setFinishUpStepStatus] = useState<EuiStepStatus>('incomplete');
   const [currentStep, setCurrentStep] = useState(0);
-  const [deploymentStepComplete, setDeploymentStepComplete] = useState(false);
   const [configurationStepComplete, setConfigurationStepComplete] = useState(false);
-  const [finishUpStepComplete, setFinishUpStepComplete] = useState(false);
   const { selectedConnector } = useValues(NewConnectorLogic);
 
   useEffect(() => {
@@ -83,16 +81,12 @@ export const CreateConnector: React.FC = () => {
             defaultMessage: 'Start',
           })}
           currentStep={currentStep}
-          isNextStepEnabled={deploymentStepComplete}
           selfManagePreference={selfManagePreference}
           setCurrentStep={setCurrentStep}
-          setNextStepEnabled={setDeploymentStepComplete}
           onSelfManagePreferenceChange={(preference) => {
             setSelfManagePreference(preference);
           }}
           error={errorToText(error)}
-          onNameChange={() => {}}
-          onSubmit={() => {}}
         />
       ),
       status: startStepStatus,
@@ -127,7 +121,6 @@ export const CreateConnector: React.FC = () => {
           )}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          setNextStepEnabled={setFinishUpStepComplete}
         />
       ),
       status: configurationStepStatus,
@@ -165,26 +158,11 @@ export const CreateConnector: React.FC = () => {
           selfManagePreference={selfManagePreference}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          isNextStepEnabled={configurationStepComplete}
           setNextStepEnabled={setConfigurationStepComplete}
           onSelfManagePreferenceChange={(preference) => {
             setSelfManagePreference(preference);
           }}
           error={errorToText(error)}
-          onNameChange={() => {
-            // apiReset();
-          }}
-          onSubmit={() => {
-            // call createConnector API
-          }}
-          // onSubmit={(name) =>
-          // createConnector({
-          //  isNative,
-          //  language: null,
-          //  name,
-          //  serviceType,
-          // })
-          // }
         />
       ),
       status: startStepStatus,
@@ -208,7 +186,6 @@ export const CreateConnector: React.FC = () => {
           // connector={connector}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
-          isNextStepEnabled={finishUpStepComplete}
           setNextStepEnabled={setFinishUpStepComplete}
         />
       ),

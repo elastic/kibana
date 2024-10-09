@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
@@ -40,10 +41,7 @@ import { SelfManagePreference } from './create_connector';
 interface StartStepProps {
   currentStep: number;
   error?: string | React.ReactNode;
-  isNextStepEnabled: boolean;
-  onNameChange?(name: string): void;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
-  onSubmit(name: string): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
   setNextStepEnabled: Function;
@@ -56,7 +54,6 @@ export const StartStep: React.FC<StartStepProps> = ({
   currentStep,
   setCurrentStep,
   setNextStepEnabled,
-  onNameChange,
   onSelfManagePreferenceChange,
   error,
 }) => {
@@ -73,12 +70,10 @@ export const StartStep: React.FC<StartStepProps> = ({
     generatedConfigData,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector } = useActions(NewConnectorLogic);
+  const { makeRequest } = useActions(AddConnectorApiLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
-    if (onNameChange) {
-      onNameChange(fullIndexName);
-    }
   };
 
   const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
@@ -265,9 +260,21 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiSpacer size="m" />
               <EuiButton
                 data-test-subj="enterpriseSearchStartStepNextButton"
-                onClick={() => setCurrentStep(currentStep + 1)}
+                onClick={() => {
+                  setCurrentStep(currentStep + 1);
+                  if (selectedConnector && selectedConnector.name) {
+                    makeRequest({
+                      deleteExistingConnector: false,
+                      indexName: fullIndexName,
+                      isNative: false,
+                      language: null,
+                      name: fullIndexName,
+                      serviceType: selectedConnector.serviceType,
+                    });
+                  }
+                }}
                 fill
-                disabled={canConfigureConnector}
+                disabled={!canConfigureConnector}
               >
                 {Constants.NEXT_BUTTON_LABEL}
               </EuiButton>
@@ -336,18 +343,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                       iconType="sparkles"
                       isLoading={isGenerateLoading}
                       onClick={() => {
-                        // when it is successfull then set next step enabled in the logic file
-                        // and show response component
                         createConnector({
                           isSelfManaged: false,
                         });
-
-                        // setTimeout(() => { // TODO: Move this to a function and call it
-                        //  window.scrollTo({
-                        //    behavior: 'smooth',
-                        //    top: window.innerHeight,
-                        //  });
-                        // }, 100);
                       }}
                     >
                       {i18n.translate(
