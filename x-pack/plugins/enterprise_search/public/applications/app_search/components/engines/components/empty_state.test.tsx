@@ -12,7 +12,7 @@ import React from 'react';
 import { mount, shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta';
 
