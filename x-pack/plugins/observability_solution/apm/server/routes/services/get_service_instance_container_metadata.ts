@@ -18,7 +18,7 @@ import {
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
   KUBERNETES_CONTAINER_ID,
-  KUBERNETES_NAMESPACE_NAME,
+  KUBERNETES_NAMESPACE,
 } from '../../../common/es_fields/apm';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
@@ -45,7 +45,7 @@ export const getServiceInstanceContainerMetadata = async ({
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },
     { exists: { field: KUBERNETES_CONTAINER_NAME } },
-    { exists: { field: KUBERNETES_NAMESPACE_NAME } },
+    { exists: { field: KUBERNETES_NAMESPACE } },
     { exists: { field: KUBERNETES_POD_NAME } },
     { exists: { field: KUBERNETES_POD_UID } },
     { exists: { field: KUBERNETES_REPLICASET_NAME } },
@@ -58,7 +58,7 @@ export const getServiceInstanceContainerMetadata = async ({
     KUBERNETES_DEPLOYMENT_NAME,
     KUBERNETES_CONTAINER_ID,
     KUBERNETES_CONTAINER_NAME,
-    KUBERNETES_NAMESPACE_NAME,
+    KUBERNETES_NAMESPACE,
     KUBERNETES_REPLICASET_NAME,
     KUBERNETES_DEPLOYMENT_NAME,
   ] as const);
@@ -96,9 +96,7 @@ export const getServiceInstanceContainerMetadata = async ({
       replicaset: {
         name: sample?.kubernetes?.replicaset?.name,
       },
-      namespace: {
-        name: sample?.kubernetes?.namespace?.name,
-      },
+      namespace: sample?.kubernetes?.namespace,
       container: {
         name: sample?.kubernetes?.container?.name,
         id: sample?.kubernetes?.container?.id,

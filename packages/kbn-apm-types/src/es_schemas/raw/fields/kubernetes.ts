@@ -9,9 +9,7 @@
 
 export interface Kubernetes {
   pod?: { uid?: string | null; name?: string };
-  namespace?: {
-    name?: string;
-  };
+  namespace?: string;
   replicaset?: {
     name?: string;
   };
