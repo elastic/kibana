@@ -9,10 +9,33 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge, EuiButtonColor } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiHeaderLink,
+  EuiBetaBadge,
+  EuiButtonColor,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
-export function TopNavMenuItem(props: TopNavMenuData) {
+/** If forButtonIcons=true, then the iconType should be a valid string */
+interface TopNavMenuItemPropsButtonIcons {
+  forButtonIcons: true;
+  label?: TopNavMenuData['label'] | undefined;
+  iconType: string;
+  tooltip: TopNavMenuData['tooltip'];
+}
+interface TopNavMenuItemPropsTextLabel {
+  forButtonIcons?: false;
+  label: TopNavMenuData['label'] | undefined;
+}
+
+type TopNavMenuItemPropsLabelConfig = TopNavMenuItemPropsButtonIcons | TopNavMenuItemPropsTextLabel;
+
+type TopNavMenuItemProps = Omit<TopNavMenuData, 'label'> & TopNavMenuItemPropsLabelConfig;
+
+export function TopNavMenuItem(props: TopNavMenuItemProps) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -59,16 +82,25 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
-  // fill is not compatible with EuiHeaderLink
-  const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
-      {getButtonContainer()}
-    </EuiButton>
-  ) : (
-    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
-      {getButtonContainer()}
-    </EuiHeaderLink>
-  );
+  let btn: React.JSX.Element;
+  if (props.forButtonIcons) {
+    btn = (
+      <EuiButtonIcon size="s" {...commonButtonProps} iconType={props.iconType}>
+        {getButtonContainer()}
+      </EuiButtonIcon>
+    );
+  } else {
+    // fill is not compatible with EuiHeaderLink
+    btn = props.emphasize ? (
+      <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
+        {getButtonContainer()}
+      </EuiButton>
+    ) : (
+      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
+        {getButtonContainer()}
+      </EuiHeaderLink>
+    );
+  }
 
   const tooltip = getTooltip();
   if (tooltip) {
