@@ -144,7 +144,7 @@ module.exports = (_, argv) => {
       },
       extensions: ['.js', '.ts'],
       mainFields: ['browser', 'main', 'module'],
-      conditionNames: ['require', 'node', 'module', 'import', 'default'],
+      // conditionNames: ['require', 'node', 'module', 'import', 'default'],
     },
 
     optimization: {
