@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
-import { includes, remove } from 'lodash';
-
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -34,11 +32,6 @@ import { startLegacyServices, services, LegacyServicesProvider } from './service
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
-
-// @ts-expect-error Not going to convert
-import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
-// @ts-expect-error Not going to convert
-import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
 
 import './style/index.scss';
 
@@ -161,13 +154,13 @@ export const teardownCanvas = (coreStart: CoreStart) => {
   // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.
   // Remove them when Canvas is unmounted.
   // see: ../canvas_plugin_src/renderers/plot/plugins/index.ts
-  if (includes($.plot.plugins, size)) {
-    remove($.plot.plugins, size);
-  }
+  // if (includes($.plot.plugins, size)) {
+  //   remove($.plot.plugins, size);
+  // }
 
-  if (includes($.plot.plugins, text)) {
-    remove($.plot.plugins, text);
-  }
+  // if (includes($.plot.plugins, text)) {
+  //   remove($.plot.plugins, text);
+  // }
 
   // TODO: Not cleaning these up temporarily.
   // We have an issue where if requests are inflight, and you navigate away,
