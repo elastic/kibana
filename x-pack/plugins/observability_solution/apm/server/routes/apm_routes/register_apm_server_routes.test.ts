@@ -194,7 +194,7 @@ describe('createApi', () => {
       options: {
         tags: ['access:apm', 'access:apm_settings_write'],
       },
-      path: '/qux',
+      path: '/fez',
       validate: expect.anything(),
     });
 
@@ -273,7 +273,7 @@ describe('createApi', () => {
         expect(response.custom).toHaveBeenCalledWith({
           body: {
             attributes: { _inspect: [], data: null },
-            message: `Failed to validate:
+            message: `Failed to validate: 
   in /query/_inspect: 1 does not match expected type pipe(JSON, boolean)`,
           },
           statusCode: 400,
