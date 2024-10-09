@@ -35,10 +35,13 @@ export type LogCategoryChange =
   | LogCategoryOtherChange
   | LogCategoryUnknownChange;
 
-export type NonImpactingCategoryChange =
-  | LogCategoryNoChange
-  | LogCategoryOtherChange
-  | LogCategoryUnknownChange;
+export type LogCategoryImpactingChange =
+  | LogCategoryRareChange
+  | LogCategorySpikeChange
+  | LogCategoryDipChange
+  | LogCategoryStepChange
+  | LogCategoryDistributionChange
+  | LogCategoryTrendChange;
 
 export interface LogCategoryNoChange {
   type: 'none';
@@ -52,27 +55,32 @@ export interface LogCategoryRareChange {
 export interface LogCategorySpikeChange {
   type: 'spike';
   timestamp: string;
+  pValue: number;
 }
 
 export interface LogCategoryDipChange {
   type: 'dip';
   timestamp: string;
+  pValue: number;
 }
 
 export interface LogCategoryStepChange {
   type: 'step';
   timestamp: string;
+  pValue: number;
 }
 
 export interface LogCategoryTrendChange {
   type: 'trend';
   timestamp: string;
   correlationCoefficient: number;
+  pValue: number;
 }
 
 export interface LogCategoryDistributionChange {
   type: 'distribution';
   timestamp: string;
+  pValue: number;
 }
 
 export interface LogCategoryOtherChange {
@@ -113,6 +121,7 @@ export const categorizeDocuments = async ({
   ignoredCategoryTerms,
   documentFilters = [],
   minDocsPerCategory,
+  label,
 }: {
   esClient: ElasticsearchClient;
   index: string;
@@ -124,6 +133,7 @@ export const categorizeDocuments = async ({
   ignoredCategoryTerms: string[];
   documentFilters?: QueryDslQueryContainer[];
   minDocsPerCategory?: number;
+  label?: string;
 }) => {
   const randomSampler = createRandomSamplerWrapper({
     probability: samplingProbability,
@@ -192,21 +202,25 @@ const mapChangePoint = ({ change, histogram }: EsCategoryBucket): LogCategoryCha
       return {
         type: change.type,
         timestamp: change.bucket.key,
+        pValue: change.details.p_value,
       };
     case 'step_change':
       return {
         type: 'step',
         timestamp: change.bucket.key,
+        pValue: change.details.p_value,
       };
     case 'distribution_change':
       return {
         type: 'distribution',
         timestamp: change.bucket.key,
+        pValue: change.details.p_value,
       };
     case 'trend_change':
       return {
         type: 'trend',
         timestamp: change.bucket.key,
+        pValue: change.details.p_value,
         correlationCoefficient: change.details.r_value,
       };
     case 'unknown':
@@ -418,7 +432,7 @@ export const createCategorizationRequestParams = ({
           field: messageField,
           size: maxCategoriesCount,
           categorization_analyzer: {
-            tokenizer: 'standard',
+            tokenizer: 'ml_standard',
           },
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
         },
@@ -501,3 +515,27 @@ export const excludeNonImpactingCategories = (categories: LogCategory[]): LogCat
   const nonImpactingCategories = ['none', 'other', 'unknown'];
   return categories.filter((category) => !nonImpactingCategories.includes(category.change.type));
 };
+
+export const sortByPValue = (
+  categories: Array<LogCategory & { change: LogCategoryChange }>
+): LogCategory[] =>
+  categories.sort((a, b) => {
+    // always sort rare items to the top
+    if (a.change.type === 'rare') {
+      return -1;
+    }
+    if (b.change.type === 'rare') {
+      return 1;
+    }
+    // always push non-impacting items to the bottom
+    if (a.change.type === 'other' || a.change.type === 'unknown' || a.change.type === 'none') {
+      return 1;
+    }
+    if (b.change.type === 'other' || b.change.type === 'unknown' || b.change.type === 'none') {
+      return -1;
+    }
+    if (a.change.pValue && b.change.pValue) {
+      return a.change.pValue - b.change.pValue;
+    }
+    return 0;
+  });

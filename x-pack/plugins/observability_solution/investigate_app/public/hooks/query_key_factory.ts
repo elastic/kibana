@@ -41,6 +41,16 @@ export const investigationKeys = {
     start: string;
     end: string;
   }) => [...investigationKeys.detail(investigationId), 'logPatterns', params] as const,
+  apmDependencies: ({
+    investigationId,
+    ...params
+  }: {
+    investigationId: string;
+    serviceName?: string;
+    start?: string;
+    end?: string;
+    serviceEnvironment?: string;
+  }) => [...investigationKeys.detail(investigationId), 'apmDependencies', params] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;

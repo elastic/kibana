@@ -6,19 +6,13 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { GetLogPatternsResponse } from '@kbn/investigation-shared';
+import { GetLogPatternsResponse, GetLogPatternsParams } from '@kbn/investigation-shared';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';
 
-export interface LogPatternAnalysisParams {
+export type LogPatternAnalysisParams = GetLogPatternsParams & {
   investigationId: string;
-  sources: Array<{
-    index: string;
-    filter?: string;
-  }>;
-  start: string;
-  end: string;
-}
+};
 
 export function useFetchLogPatterns({
   investigationId,

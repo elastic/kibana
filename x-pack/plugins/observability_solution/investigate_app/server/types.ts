@@ -7,6 +7,10 @@
 
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
+import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
@@ -18,10 +22,12 @@ export interface ConfigSchema {}
 export interface InvestigateAppSetupDependencies {
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  apmDataAccess: ApmDataAccessPluginSetup;
 }
 
 export interface InvestigateAppStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
+  apmDataAccess: ApmDataAccessPluginStart;
 }
 
 export interface InvestigateAppServerSetup {}

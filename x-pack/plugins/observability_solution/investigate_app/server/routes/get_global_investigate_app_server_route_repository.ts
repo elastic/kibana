@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
@@ -390,15 +389,19 @@ const getLogPatternsRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: getLogPatternsParamsSchema,
-  handler: async ({ params, context, request }): Promise<GetLogPatternsResponse> => {
+  handler: async ({ params, context, request, plugins }): Promise<GetLogPatternsResponse> => {
     const core = await context.core;
     const esClient = core.elasticsearch.client.asCurrentUser;
+    const apmDataAccess = plugins.apmDataAccess?.setup;
+
+    const { error: errorIndices } = await apmDataAccess.getApmIndices(core.savedObjects.client);
 
     const logPatterns = await getLogPatterns({
       esClient,
       sources: params.body.sources,
       start: params.body.start,
       end: params.body.end,
+      apmIndices: errorIndices,
     });
 
     return {

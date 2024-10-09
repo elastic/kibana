@@ -8,31 +8,18 @@
  */
 
 import { z } from '@kbn/zod';
-import { logPatternSchema } from './log_pattern';
+import { entityLogPatternsSchema, logPatternSourceSchema } from './log_pattern';
 
 const getLogPatternsParamsSchema = z.object({
   body: z.object({
-    sources: z.array(
-      z.object({
-        index: z.string(),
-        serviceName: z.string().optional(),
-        environment: z.string().optional(),
-        containerId: z.string().optional(),
-        hostName: z.string().optional(),
-      })
-    ),
+    sources: z.array(logPatternSourceSchema),
     start: z.string(),
     end: z.string(),
   }),
 });
 
 const getLogPatternsResponseSchema = z.object({
-  logPatterns: z.array(
-    z.object({
-      index: z.string(),
-      impactingPatterns: z.array(logPatternSchema),
-    })
-  ),
+  logPatterns: z.array(entityLogPatternsSchema),
 });
 
 type GetLogPatternsParams = z.infer<typeof getLogPatternsParamsSchema.shape.body>;

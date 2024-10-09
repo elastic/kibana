@@ -6,13 +6,19 @@
  */
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
-import { EntityWithSource, LogPattern, Investigation } from '@kbn/investigation-shared';
+import {
+  EntityWithSource,
+  LogPattern,
+  GetInvestigationResponse,
+  EntityLogPatterns,
+} from '@kbn/investigation-shared';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { useFetchEntities } from '../../../../hooks/use_fetch_entities';
 import { useFetchLogPatterns } from '../../../../hooks/use_fetch_log_patterns';
 import { getScreenContext } from '../../../../hooks/use_screen_context';
+import { useFetchAPMDependencies } from '../../../../hooks/use_fetch_apm_dependencies';
 export interface InvestigationContextualInsight {
   key: string;
   description: string;
@@ -24,7 +30,7 @@ export function AssistantHypothesis({
   start,
   end,
 }: {
-  investigation: Investigation;
+  investigation: GetInvestigationResponse;
   start: string;
   end: string;
 }) {
@@ -45,6 +51,13 @@ export function AssistantHypothesis({
     : undefined;
   const hostName = alert?.['host.name'] ? `${alert?.['host.name']}` : undefined;
   const containerId = alert?.['container.id'] ? `${alert?.['container.id']}` : undefined;
+  const { data: apmDependenciesData } = useFetchAPMDependencies({
+    investigationId: investigation.id,
+    serviceName,
+    serviceEnvironment,
+    start,
+    end,
+  });
   const { data: entitiesData } = useFetchEntities({
     investigationId: investigation.id,
     serviceName,
@@ -57,10 +70,14 @@ export function AssistantHypothesis({
     sources:
       entitiesData?.entities.map((entity) => ({
         index: entity.sources.map((source) => source.dataStream).join(','),
+        entity: entity.displayName,
         serviceName,
         serviceEnvironment,
         containerId,
         hostName,
+        dependencies: apmDependenciesData?.content
+          ?.map((dependency) => dependency['service.name'])
+          .filter((service): service is string => !!service),
       })) ?? [],
     start,
     end,
@@ -74,7 +91,7 @@ export function AssistantHypothesis({
     const entities = entitiesData?.entities ?? [];
     const logPatterns = logPatternsData?.logPatterns ?? [];
     const instructions = dedent(`
-      ${getScreenContext({ alert, investigation })}
+      ${getScreenContext({ alertDetails: alert, investigation }).screenDescription}
       
 ## Current task:
 ${getLogPatternContext(logPatterns)}
@@ -130,25 +147,31 @@ const formatEntityMetrics = (entity: EntityWithSource): string => {
   `);
 };
 
-const formatLogPatterns = (logPattern: Record<string, string>): string => {
+const formatLogPatterns = (logPattern: LogPattern): string => {
   return dedent(`
     ### Log pattern: ${logPattern.terms}
     Change type: ${logPattern?.change?.type}; 
     Change time: ${logPattern?.change?.timestamp}; 
-    Change correlation coefficient: ${logPattern?.change?.correlationCoefficient};
+    ${logPattern?.change?.pValue ? `Change p-value: ${logPattern?.change?.pValue};` : ''}
+    ${
+      logPattern?.change?.correlationCoefficient
+        ? `Change correlation coefficient: ${logPattern?.change?.correlationCoefficient};`
+        : ''
+    }
     Document count: ${logPattern?.documentCount};
+    ${logPattern?.source ? `Entity: ${logPattern?.source}` : ''}
   `);
 };
 
-const getLogPatternContext = (logPatterns: LogPattern[]): string => {
+const getLogPatternContext = (logPatterns: EntityLogPatterns[]): string => {
   return logPatterns?.length
     ? dedent(`
   I found the following new patterns in the logs. Can you correlate these patterns across the stack, explain the relationships and narrow down the root cause based on the evidence? Please include an evidence-based hypothesis for what's causing the outage and list the most critical patterns first.
 
-  Below is the list of the log patterns I detected across the stack. Feel free to exclude irrelevant messages that do not indicate a problem.
+  Below is the list of the log patterns I detected across the stack. Group related patterns together and exclude irrelevant patterns that do not indicate a problem, even if these patterns are rare. 
         
   ${logPatterns
-    .map((logPattern, index) => {
+    .map((logPattern) => {
       return dedent(`
         ## Log Patterns for ${logPattern.index}:
         ${logPattern.impactingPatterns.map((pattern) => formatLogPatterns(pattern)).join('\n\n')};

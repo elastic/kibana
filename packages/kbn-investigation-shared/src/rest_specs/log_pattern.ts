@@ -9,6 +9,17 @@
 
 import { z } from '@kbn/zod';
 
+const logPatternSourceSchema = z.object({
+  index: z.string(),
+  entity: z.string().optional(),
+  serviceName: z.string().optional(),
+  serviceEnvironment: z.string().optional(),
+  environment: z.string().optional(),
+  containerId: z.string().optional(),
+  hostName: z.string().optional(),
+  dependencies: z.array(z.string()).optional().default([]),
+});
+
 const changeHistogramSchema = z.array(
   z.object({
     timestamp: z.string(),
@@ -17,10 +28,11 @@ const changeHistogramSchema = z.array(
 );
 
 const changeSchema = z.object({
-  type: z.string,
-  timestamp: z.string,
+  type: z.string(),
+  pValue: z.number().optional(),
+  timestamp: z.string().optional(),
   correlationCoefficient: z.number().optional(),
-  rawChange: z.number().optional(),
+  rawChange: z.string().optional(),
 });
 
 const logPatternSchema = z.object({
@@ -28,11 +40,25 @@ const logPatternSchema = z.object({
   documentCount: z.number(),
   histogram: changeHistogramSchema,
   terms: z.string(),
+  source: z.string().optional(),
+});
+
+const entityLogPatternsSchema = z.object({
+  index: z.string(),
+  impactingPatterns: z.array(logPatternSchema),
 });
 
 type ChangeHistogram = z.output<typeof changeHistogramSchema>;
 type Change = z.output<typeof changeSchema>;
 type LogPattern = z.output<typeof logPatternSchema>;
+type LogPatternSource = z.output<typeof logPatternSourceSchema>;
+type EntityLogPatterns = z.output<typeof entityLogPatternsSchema>;
 
-export { changeSchema, changeHistogramSchema, logPatternSchema };
-export type { Change, ChangeHistogram, LogPattern };
+export {
+  changeSchema,
+  changeHistogramSchema,
+  logPatternSchema,
+  logPatternSourceSchema,
+  entityLogPatternsSchema,
+};
+export type { Change, ChangeHistogram, LogPattern, LogPatternSource, EntityLogPatterns };
