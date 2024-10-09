@@ -38,6 +38,7 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
+export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
 export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
   BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
 );
