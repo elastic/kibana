@@ -51,10 +51,7 @@ export const updateRule = async ({
     throw new ClientError(error.message, error.statusCode);
   }
 
-  // We don't allow non-customizable fields to be changed for prebuilt rules
-  if (existingRule.rule_source && existingRule.rule_source.type === 'external') {
-    validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
-  }
+  validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
 
   const ruleWithUpdates = await applyRuleUpdate({
     prebuiltRuleAssetClient,

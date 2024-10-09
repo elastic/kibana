@@ -52,10 +52,7 @@ export const patchRule = async ({
 
   await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
 
-  // We don't allow non-customizable fields to be changed for prebuilt rules
-  if (existingRule.rule_source && existingRule.rule_source.type === 'external') {
-    validateNonCustomizablePatchFields(rulePatch, existingRule);
-  }
+  validateNonCustomizablePatchFields(rulePatch, existingRule);
 
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,
