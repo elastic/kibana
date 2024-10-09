@@ -67,6 +67,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       namespace,
       entityType,
       fieldHistoryLength: 10, // we are not using this value so it can be anything
+      indexPatterns: [], // we are not using this value so it can be anything
     });
     return executeFieldRetentionEnrichPolicy({
       unitedDefinition,
