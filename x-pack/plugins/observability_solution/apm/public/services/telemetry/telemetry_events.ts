@@ -33,30 +33,6 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-const entityExperienceStatusEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS,
-  schema: {
-    status: {
-      type: 'keyword',
-      _meta: {
-        description: 'The status of the Entity experience (Enabled or Disabled)',
-      },
-    },
-  },
-};
-
-const entityInventoryPageStateEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ENTITY_INVENTORY_PAGE_STATE,
-  schema: {
-    state: {
-      type: 'keyword',
-      _meta: {
-        description: 'The current entity inventory page state (empty_state or available)',
-      },
-    },
-  },
-};
-
 const entityInventoryAddDataEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA,
   schema: {
@@ -106,8 +82,6 @@ const learnMoreClickEventType: TelemetryEvent = {
 
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
-  entityExperienceStatusEventType,
-  entityInventoryPageStateEventType,
   entityInventoryAddDataEventType,
   tryItClickEventType,
   learnMoreClickEventType,

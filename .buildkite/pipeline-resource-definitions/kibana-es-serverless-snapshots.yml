@@ -53,3 +53,5 @@ spec:
           env:
             PUBLISH_DOCKER_TAG: 'true'
           branch: main
+      tags:
+        - kibana

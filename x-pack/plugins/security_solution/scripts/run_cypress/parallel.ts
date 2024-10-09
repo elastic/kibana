@@ -54,6 +54,8 @@ export const cli = () => {
         )
         .boolean('inspect');
 
+      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
+
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -438,7 +440,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                 } else {
                   result = await cypress.run({
-                    browser: 'chrome',
+                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,

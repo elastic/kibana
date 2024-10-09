@@ -25,6 +25,7 @@ paths:
 
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       summary: Get metadata transforms
       operationId: GetEndpointMetadataTransform
       x-codegen-enabled: false

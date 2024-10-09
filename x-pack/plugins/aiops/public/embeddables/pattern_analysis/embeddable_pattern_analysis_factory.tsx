@@ -236,10 +236,9 @@ export const getPatternAnalysisEmbeddableFactory = (
           const lastReloadRequestTime = useObservable(reload$, Date.now());
           const timeRange = useObservable(timeRange$, undefined);
 
-          let embeddingOrigin;
-          if (apiHasExecutionContext(parentApi)) {
-            embeddingOrigin = parentApi.executionContext.type;
-          }
+          const embeddingOrigin = apiHasExecutionContext(parentApi)
+            ? parentApi.executionContext.type
+            : undefined;
 
           return (
             <PatternAnalysisComponent

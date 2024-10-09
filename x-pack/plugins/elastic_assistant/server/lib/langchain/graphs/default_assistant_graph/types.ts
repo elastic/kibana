@@ -16,10 +16,10 @@ export interface AgentStateBase {
 }
 
 export interface GraphInputs {
-  bedrockChatEnabled?: boolean;
   conversationId?: string;
   llmType?: string;
   isStream?: boolean;
+  isOssModel?: boolean;
   input: string;
   responseLanguage?: string;
 }
@@ -31,7 +31,7 @@ export interface AgentState extends AgentStateBase {
   lastNode: string;
   hasRespondStep: boolean;
   isStream: boolean;
-  bedrockChatEnabled: boolean;
+  isOssModel: boolean;
   llmType: string;
   responseLanguage: string;
   conversation: ConversationResponse | undefined;

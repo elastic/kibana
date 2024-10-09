@@ -13,3 +13,6 @@ export enum SearchIndexDetailsTabs {
   MAPPINGS = 'mappings',
   SETTINGS = 'settings',
 }
+
+export const START_APP_BASE = '/app/elasticsearch/start';
+export const INDICES_APP_BASE = '/app/elasticsearch/indices';

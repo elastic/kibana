@@ -157,7 +157,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       behavioralAnalytics: `${ELASTICSEARCH_DOCS}behavioral-analytics-overview.html`,
       behavioralAnalyticsCORS: `${ELASTICSEARCH_DOCS}behavioral-analytics-cors.html`,
       behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
-      buildConnector: `${ENTERPRISE_SEARCH_DOCS}build-connector.html`,
+      buildConnector: `${ELASTICSEARCH_DOCS}es-build-connector.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ELASTICSEARCH_DOCS}es-connectors.html`,

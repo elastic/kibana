@@ -229,6 +229,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
                       iconType="exportAction"
+                      disabled={inputEditorValue === ''}
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
                           content: inputEditorValue,
