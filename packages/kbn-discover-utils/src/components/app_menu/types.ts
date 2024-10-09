@@ -9,31 +9,9 @@
 
 import React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-
-export interface AppMenuDiscoverParams {
-  dataView: DataView | undefined;
-  adHocDataViews: DataView[];
-  isEsqlMode?: boolean;
-  services: {
-    core: CoreStart;
-    application: ApplicationStart;
-    triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-    data: DataPublicPluginStart;
-    filterManager: FilterManager;
-    capabilities: Capabilities;
-  };
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-}
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
-  getDiscoverParams: () => AppMenuDiscoverParams;
   onFinishAction: () => void;
 }
 

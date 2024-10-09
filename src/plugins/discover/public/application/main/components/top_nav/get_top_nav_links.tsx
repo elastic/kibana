@@ -12,7 +12,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { AppMenuDiscoverParams, AppMenuItem, AppMenuActionType } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -23,9 +22,10 @@ import {
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
   getInspectAppMenuItem,
+  convertAppMenuItemToTopNavItem,
+  AppMenuDiscoverParams,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
-import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
 
 /**
  * Helper function to build the top nav links
@@ -129,40 +129,42 @@ export const getTopNavLinks = ({
       await state.actions.loadDataViewList();
       state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
     },
+    onNewSearch: () => {
+      services.locator.navigate({});
+    },
+    onOpenSavedSearch: state.actions.onOpenSavedSearch,
   });
 
   /* Primary items */
 
-  const newSearch = convertMenuItem({
+  const newSearch = convertAppMenuItemToTopNavItem({
     appMenuItem: getNewSearchAppMenuItem({
-      onNewSearch: () => {
-        services.locator.navigate({});
-      },
+      getDiscoverParams,
     }),
-    getDiscoverParams,
+    services,
   });
 
-  const openSearch = convertMenuItem({
-    appMenuItem: getOpenSearchAppMenuItem({ onOpenSavedSearch: state.actions.onOpenSavedSearch }),
-    getDiscoverParams,
+  const openSearch = convertAppMenuItemToTopNavItem({
+    appMenuItem: getOpenSearchAppMenuItem({ getDiscoverParams }),
+    services,
   });
 
-  const shareSearch = convertMenuItem({
-    appMenuItem: getShareAppMenuItem({ stateContainer: state, services }),
-    getDiscoverParams,
+  const shareSearch = convertAppMenuItemToTopNavItem({
+    appMenuItem: getShareAppMenuItem({ getDiscoverParams, stateContainer: state }),
+    services,
   });
 
   /* Secondary items */
 
-  const alerts = convertMenuItem({
+  const alerts = convertAppMenuItemToTopNavItem({
     appMenuItem: getAlertsAppMenuItem({ getDiscoverParams, stateContainer: state }),
-    getDiscoverParams,
+    services,
   });
   // TODO: allow to extend the alerts menu
 
-  const inspectSearch = convertMenuItem({
+  const inspectSearch = convertAppMenuItemToTopNavItem({
     appMenuItem: getInspectAppMenuItem({ onOpenInspector }),
-    getDiscoverParams,
+    services,
   });
 
   /* Custom items */
@@ -205,44 +207,3 @@ export const getTopNavLinks = ({
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };
-
-function convertMenuItem({
-  appMenuItem,
-  getDiscoverParams,
-}: {
-  appMenuItem: AppMenuItem;
-  getDiscoverParams: () => AppMenuDiscoverParams;
-}): TopNavMenuData {
-  if ('actions' in appMenuItem) {
-    return {
-      id: appMenuItem.id,
-      label: appMenuItem.label,
-      description: appMenuItem.description ?? appMenuItem.label,
-      testId: appMenuItem.testId,
-      run: (anchorElement: HTMLElement) => {
-        runAppMenuPopoverAction({
-          appMenuItem,
-          anchorElement,
-          getDiscoverParams,
-        });
-      },
-    };
-  }
-
-  return {
-    id: appMenuItem.id,
-    label: appMenuItem.controlProps.label,
-    description: appMenuItem.controlProps.description ?? appMenuItem.controlProps.label,
-    testId: appMenuItem.controlProps.testId,
-    run: async (anchorElement: HTMLElement) => {
-      await runAppMenuAction({
-        appMenuItem,
-        anchorElement,
-        getDiscoverParams,
-      });
-    },
-    ...(appMenuItem.type === AppMenuActionType.primary
-      ? { iconType: appMenuItem.controlProps.iconType, iconOnly: true }
-      : {}),
-  };
-}

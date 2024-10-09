@@ -116,7 +116,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'save']);
+    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
@@ -128,7 +128,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect']);
+    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share']);
   });
 
   test('top nav is correct when discover saveQuery permission is granted', () => {
@@ -180,7 +180,7 @@ describe('Discover topnav component', () => {
       expect(mockTopNavCustomization.getMenuItems).toHaveBeenCalledTimes(1);
       const topNavMenu = component.find(TopNavMenu);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-      expect(topMenuConfig).toEqual(['new', 'open', 'share', 'test', 'inspect', 'save']);
+      expect(topMenuConfig).toEqual(['inspect', 'new', 'test', 'open', 'share', 'save']);
     });
 
     it('should allow disabling default menu items', () => {

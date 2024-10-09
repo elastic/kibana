@@ -21,12 +21,8 @@ import ReactDOM from 'react-dom';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type {
-  AppMenuAction,
-  AppMenuDiscoverParams,
-  AppMenuIconAction,
-  AppMenuPopoverActions,
-} from '@kbn/discover-utils';
+import type { AppMenuAction, AppMenuIconAction, AppMenuPopoverActions } from '@kbn/discover-utils';
+import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -34,14 +30,13 @@ let isOpen = false;
 interface AppMenuActionsMenuPopoverProps {
   appMenuItem: AppMenuPopoverActions;
   anchorElement: HTMLElement;
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  services: DiscoverServices;
   onClose: () => void;
 }
 
 export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
   appMenuItem,
   anchorElement,
-  getDiscoverParams,
   onClose: originalOnClose,
 }) => {
   const [nestedContent, setNestedContent] = useState<React.ReactNode>();
@@ -67,7 +62,6 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
           onClick: async () => {
             const result = await controlProps.onClick?.({
               anchorElement,
-              getDiscoverParams,
               onFinishAction: onClose,
             });
 
@@ -114,11 +108,11 @@ function cleanup() {
 export function runAppMenuPopoverAction({
   appMenuItem,
   anchorElement,
-  getDiscoverParams,
+  services,
 }: {
   appMenuItem: AppMenuPopoverActions;
   anchorElement: HTMLElement;
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  services: DiscoverServices;
 }) {
   if (isOpen) {
     cleanup();
@@ -127,7 +121,6 @@ export function runAppMenuPopoverAction({
 
   isOpen = true;
   document.body.appendChild(container);
-  const { services } = getDiscoverParams();
 
   const element = (
     <KibanaRenderContextProvider {...services.core}>
@@ -135,7 +128,7 @@ export function runAppMenuPopoverAction({
         <AppMenuActionsMenuPopover
           appMenuItem={appMenuItem}
           anchorElement={anchorElement}
-          getDiscoverParams={getDiscoverParams}
+          services={services}
           onClose={cleanup}
         />
       </KibanaContextProvider>
@@ -147,20 +140,18 @@ export function runAppMenuPopoverAction({
 export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
-  getDiscoverParams,
+  services,
 }: {
   appMenuItem: AppMenuAction | AppMenuIconAction;
   anchorElement: HTMLElement;
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  services: DiscoverServices;
 }) {
   cleanup();
 
-  const { services } = getDiscoverParams();
   const controlProps = appMenuItem.controlProps;
 
   const result = await controlProps.onClick?.({
     anchorElement,
-    getDiscoverParams,
     onFinishAction: () => {
       cleanup();
       anchorElement?.focus();

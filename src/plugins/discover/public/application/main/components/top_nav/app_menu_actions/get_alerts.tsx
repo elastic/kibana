@@ -10,12 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import {
-  AppMenuActionId,
-  AppMenuActionType,
-  AppMenuDiscoverParams,
-  AppMenuPopoverActions,
-} from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, AppMenuPopoverActions } from '@kbn/discover-utils';
 import {
   AlertConsumers,
   ES_QUERY_ID,
@@ -24,6 +19,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
+import { AppMenuDiscoverParams } from './types';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -135,7 +131,13 @@ export const getAlertsAppMenuItem = ({
                 defaultMessage: 'Data view does not have a time field.',
               }),
           onClick: async (params) => {
-            return <CreateAlertFlyout {...params} stateContainer={stateContainer} />;
+            return (
+              <CreateAlertFlyout
+                {...params}
+                getDiscoverParams={getDiscoverParams}
+                stateContainer={stateContainer}
+              />
+            );
           },
         },
       },

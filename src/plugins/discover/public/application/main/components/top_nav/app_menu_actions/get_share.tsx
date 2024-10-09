@@ -14,14 +14,14 @@ import { i18n } from '@kbn/i18n';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
-import { DiscoverServices } from '../../../../../build_services';
+import { AppMenuDiscoverParams } from './types';
 
 export const getShareAppMenuItem = ({
   stateContainer,
-  services,
+  getDiscoverParams,
 }: {
   stateContainer: DiscoverStateContainer;
-  services: DiscoverServices;
+  getDiscoverParams: () => AppMenuDiscoverParams;
 }): AppMenuIconAction => {
   return {
     id: AppMenuActionId.share,
@@ -35,8 +35,8 @@ export const getShareAppMenuItem = ({
       }),
       iconType: 'link',
       testId: 'shareTopNavButton',
-      onClick: async ({ getDiscoverParams, anchorElement }) => {
-        const { dataView, isEsqlMode } = getDiscoverParams();
+      onClick: async ({ anchorElement }) => {
+        const { dataView, isEsqlMode, services } = getDiscoverParams();
 
         if (!services.share) {
           return;

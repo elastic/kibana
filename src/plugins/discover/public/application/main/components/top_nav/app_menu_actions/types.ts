@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getAlertsAppMenuItem } from './get_alerts';
-export { getNewSearchAppMenuItem } from './get_new_search';
-export { getOpenSearchAppMenuItem } from './get_open_search';
-export { getShareAppMenuItem } from './get_share';
-export { getInspectAppMenuItem } from './get_inspect';
-export { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';
-export * from './types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../../build_services';
+
+export interface AppMenuDiscoverParams {
+  dataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  isEsqlMode?: boolean;
+  services: DiscoverServices;
+  onNewSearch: () => void;
+  onOpenSavedSearch: (id: string) => void;
+  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+}
