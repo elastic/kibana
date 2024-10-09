@@ -43,17 +43,17 @@ describe('buildAlert', () => {
         sampleDocNoSortId('619389b2-b077-400e-b40b-abde20d675d3'),
       ],
     };
-    const alertGroup = buildAlertGroupFromSequence(
-      ruleExecutionLoggerMock,
-      eqlSequence,
+    const alertGroup = buildAlertGroupFromSequence({
+      ruleExecutionLogger: ruleExecutionLoggerMock,
+      sequence: eqlSequence,
       completeRule,
-      'allFields',
-      SPACE_ID,
-      jest.fn(),
-      completeRule.ruleParams.index as string[],
-      undefined,
-      PUBLIC_BASE_URL
-    );
+      mergeStrategy: 'allFields',
+      spaceId: SPACE_ID,
+      buildReasonMessage: jest.fn(),
+      indicesToQuery: completeRule.ruleParams.index as string[],
+      alertTimestampOverride: undefined,
+      publicBaseUrl: PUBLIC_BASE_URL,
+    });
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(
       expect.objectContaining({

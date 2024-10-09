@@ -28,6 +28,7 @@ import {
   ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -382,7 +383,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               enrichAlerts,
               currentTimeOverride,
               isRuleExecutionOnly,
-              maxAlerts
+              maxAlerts,
+              getMatchingBuildingBlockAlerts
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -488,9 +490,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }, {});
 
                 // filter out alerts that were already suppressed
-                // alert was suppressed if its suppression ends is older than suppression end of existing alert
-                // if existing alert was created earlier during the same rule execution - then alerts can be counted as not suppressed yet
-                // as they are processed for the first against this existing alert
+                // alert was suppressed if its suppression ends is older
+                // than suppression end of existing alert
+                // if existing alert was created earlier during the same
+                // rule execution - then alerts can be counted as not suppressed yet
+                // as they are processed for the first time against this existing alert
                 const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
@@ -586,8 +590,34 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   intendedTimestamp,
                 });
 
+                const matchingBuildingBlockAlerts =
+                  newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
+                    ? newAlerts.flatMap(
+                        (newAlert) =>
+                          getMatchingBuildingBlockAlerts(newAlert?._source) as Array<{
+                            _id: string;
+                            _source: Record<string, string | number | null>;
+                          }>
+                      )
+                    : [];
+
+                const augmentedBuildingBlockAlerts =
+                  getMatchingBuildingBlockAlerts != null && newAlerts?.length > 0
+                    ? await augmentAlerts({
+                        alerts: matchingBuildingBlockAlerts,
+                        options,
+                        kibanaVersion: ruleDataClient.kibanaVersion,
+                        currentTimeOverride,
+                        intendedTimestamp,
+                      })
+                    : [];
+
                 const bulkResponse = await ruleDataClientWriter.bulk({
-                  body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
+                  body: [
+                    ...duplicateAlertUpdates,
+                    ...mapAlertsToBulkCreate(augmentedAlerts),
+                    ...mapAlertsToBulkCreate(augmentedBuildingBlockAlerts),
+                  ],
                   refresh: true,
                 });
 

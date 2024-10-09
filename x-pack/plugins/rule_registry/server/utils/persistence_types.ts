@@ -53,7 +53,8 @@ export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
   ) => Promise<Array<{ _id: string; _source: T }>>,
   currentTimeOverride?: Date,
   isRuleExecutionOnly?: boolean,
-  maxAlerts?: number
+  maxAlerts?: number,
+  getMatchingBuildingBlockAlerts?: (alert: unknown) => unknown[]
 ) => Promise<SuppressedAlertServiceResult<T>>;
 
 export interface SuppressedAlertServiceResult<T> extends PersistenceAlertServiceResult<T> {

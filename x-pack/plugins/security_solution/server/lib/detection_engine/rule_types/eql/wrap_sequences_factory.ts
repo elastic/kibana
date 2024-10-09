@@ -39,7 +39,7 @@ export const wrapSequencesFactory =
     sequences.reduce(
       (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
         ...acc,
-        ...buildAlertGroupFromSequence(
+        ...buildAlertGroupFromSequence({
           ruleExecutionLogger,
           sequence,
           completeRule,
@@ -48,8 +48,8 @@ export const wrapSequencesFactory =
           buildReasonMessage,
           indicesToQuery,
           alertTimestampOverride,
-          publicBaseUrl
-        ),
+          publicBaseUrl,
+        }),
       ],
       []
     );

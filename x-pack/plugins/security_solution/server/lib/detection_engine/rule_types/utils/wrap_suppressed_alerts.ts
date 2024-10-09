@@ -9,8 +9,9 @@ import objectHash from 'object-hash';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SignalSourceHit } from '../types';
+import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
+import type { SignalSource, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -28,6 +29,7 @@ import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_ut
 import { generateId } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
+import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 
 type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
@@ -109,4 +111,75 @@ export const wrapSuppressedAlerts = ({
       },
     };
   });
+};
+
+/**
+ * wraps suppressed alerts
+ * creates instanceId hash, which is used to search on time interval alerts
+ * populates alert's suppression fields
+ */
+export const wrapSuppressedSequenceAlerts = ({
+  sequences,
+  spaceId,
+  completeRule,
+  mergeStrategy,
+  indicesToQuery,
+  buildReasonMessage,
+  alertTimestampOverride,
+  ruleExecutionLogger,
+  publicBaseUrl,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  sequences: Array<EqlHitsSequence<SignalSource>>;
+  spaceId: string;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  indicesToQuery: string[];
+  buildReasonMessage: BuildReasonMessage;
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+  return sequences.reduce(
+    (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
+      const fields = sequence.events?.reduce(
+        (seqAcc, event) => ({ ...seqAcc, ...event.fields }),
+        {}
+      );
+      const suppressionTerms = getSuppressionTerms({
+        alertSuppression: completeRule?.ruleParams?.alertSuppression,
+        fields,
+      });
+      const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
+      const alertGroupFromSequence = buildAlertGroupFromSequence({
+        ruleExecutionLogger,
+        sequence,
+        completeRule,
+        mergeStrategy,
+        spaceId,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        applyOverrides: true,
+        extraFieldsForShellAlert: getSuppressionAlertFields({
+          primaryTimestamp,
+          secondaryTimestamp,
+          fields,
+          suppressionTerms,
+          fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+          instanceId,
+        }),
+        publicBaseUrl,
+      });
+
+      return [...acc, ...alertGroupFromSequence] as Array<
+        WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>
+      >;
+    },
+    [] as Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>
+  );
 };

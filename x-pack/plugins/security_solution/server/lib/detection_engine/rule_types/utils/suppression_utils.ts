@@ -75,7 +75,7 @@ export const getSuppressionTerms = ({
     string[] | number[] | undefined
   >;
   const suppressionTerms = suppressedBy.map((field) => {
-    const value = suppressedProps[field] ?? null;
+    const value = get(suppressedProps, field) ?? null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
     return {
       field,

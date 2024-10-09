@@ -30,6 +30,27 @@ import type {
   EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import type { SuppressionTerm } from '../utils';
+
+export interface BuildAlertGroupFromSequence {
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  sequence: EqlSequence<SignalSource>;
+  completeRule: CompleteRule<RuleParams>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  spaceId: string | null | undefined;
+  buildReasonMessage: BuildReasonMessage;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  applyOverrides?: boolean;
+  extraFieldsForShellAlert?: {
+    'kibana.alert.instance.id': string;
+    'kibana.alert.suppression.terms': SuppressionTerm[];
+    'kibana.alert.suppression.start': Date;
+    'kibana.alert.suppression.end': Date;
+    'kibana.alert.suppression.docs_count': number;
+  };
+  publicBaseUrl?: string;
+}
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -38,24 +59,30 @@ import type {
  * @param sequence The raw ES documents that make up the sequence
  * @param completeRule object representing the rule that found the sequence
  */
-export const buildAlertGroupFromSequence = (
-  ruleExecutionLogger: IRuleExecutionLogForExecutors,
-  sequence: EqlSequence<SignalSource>,
-  completeRule: CompleteRule<RuleParams>,
-  mergeStrategy: ConfigType['alertMergeStrategy'],
-  spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string
-): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
+export const buildAlertGroupFromSequence = ({
+  ruleExecutionLogger,
+  sequence,
+  completeRule,
+  mergeStrategy,
+  spaceId,
+  buildReasonMessage,
+  indicesToQuery,
+  alertTimestampOverride,
+  applyOverrides = false,
+  extraFieldsForShellAlert,
+  publicBaseUrl,
+}: BuildAlertGroupFromSequence): Array<
+  WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>
+> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return [];
   }
 
-  // The "building block" alerts start out as regular BaseFields. We'll add the group ID and index fields
-  // after creating the shell alert later on, since that's when the group ID is determined.
+  // The "building block" alerts start out as regular BaseFields.
+  // We'll add the group ID and index fields
+  // after creating the shell alert later on
+  // since that's when the group ID is determined.
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
@@ -66,7 +93,7 @@ export const buildAlertGroupFromSequence = (
         mergeStrategy,
         ignoreFields: {},
         ignoreFieldsRegexes: [],
-        applyOverrides: false,
+        applyOverrides,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
@@ -109,7 +136,10 @@ export const buildAlertGroupFromSequence = (
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
-    _source: shellAlert,
+    _source: {
+      ...shellAlert,
+      ...(extraFieldsForShellAlert ?? {}),
+    },
   };
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
