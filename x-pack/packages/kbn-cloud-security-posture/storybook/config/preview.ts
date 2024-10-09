@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { Preview } from '@storybook/react';
 import './styles.css';
 
-export const preview: Preview = {
-  parameters: {},
-};
+export const parameters = {};
