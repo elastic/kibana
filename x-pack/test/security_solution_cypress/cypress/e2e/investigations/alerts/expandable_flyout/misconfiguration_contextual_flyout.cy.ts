@@ -6,29 +6,29 @@
  */
 
 import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../objects/rule';
-import { getDataTestSubjectSelector } from '../../../helpers/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../objects/rule';
+import { getDataTestSubjectSelector } from '../../../../helpers/common';
 
-import { rootRequest, deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { rootRequest, deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
-} from '../../../tasks/asset_criticality/common';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login } from '../../../tasks/login';
-import { ALERTS_URL } from '../../../urls/navigation';
-import { visit } from '../../../tasks/navigation';
+} from '../../../../tasks/asset_criticality/common';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { login } from '../../../../tasks/login';
+import { ALERTS_URL } from '../../../../urls/navigation';
+import { visit } from '../../../../tasks/navigation';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutInsightsMisconfigurationsTitleText'
+  'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
 );
 
 const CSP_INSIGHT_TAB_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutInsightInputsTab');
 const CSP_INSIGHT_TABLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutMisconfigurationFindingsTable'
 );
-const NO_FINDINGS_TEXT = getDataTestSubjectSelector('noFindingsDataTestSubj');
+
 const timestamp = Date.now();
 
 // Create a Date object using the timestamp
@@ -124,22 +124,6 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     waitForAlertsToPopulate();
   });
 
-  context('No Misconfiguration Findings', () => {
-    it('should not display Misconfiguration preview under Insights Entities when it does not have Misconfiguration Findings', () => {
-      expandFirstAlertHostFlyout();
-
-      cy.log('check if Misconfiguration preview title is not shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
-    });
-
-    it('should not display Misconfiguration preview under Insights Entities when it does not have Misconfiguration Findings', () => {
-      expandFirstAlertUserFlyout();
-
-      cy.log('check if Misconfiguration preview title is not shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
-    });
-  });
-
   context('Host name - Has misconfiguration findings', () => {
     beforeEach(() => {
       createMockFinding(true, 'host.name');
@@ -157,8 +141,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      cy.contains('Failed findings', { timeout: 3000 });
-      cy.contains('Misconfigurations').click();
+      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).click();
       cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
       cy.get(CSP_INSIGHT_TABLE).should('be.visible');
     });
@@ -178,9 +161,10 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-        cy.log('check if Misconfiguration preview title shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-        cy.get(NO_FINDINGS_TEXT).should('be.visible');
+        expandFirstAlertHostFlyout();
+
+        cy.log('check if Misconfiguration preview title is not shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
       });
     }
   );
@@ -202,8 +186,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      cy.contains('Failed findings', { timeout: 3000 });
-      cy.contains('Misconfigurations').click();
+      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).click();
       cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
       cy.get(CSP_INSIGHT_TABLE).should('be.visible');
     });
@@ -223,9 +206,10 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-        cy.log('check if Misconfiguration preview title shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-        cy.get(NO_FINDINGS_TEXT).should('be.visible');
+        expandFirstAlertUserFlyout();
+
+        cy.log('check if Misconfiguration preview title is not shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
       });
     }
   );
