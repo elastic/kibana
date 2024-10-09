@@ -22,7 +22,7 @@ export interface CSVParseError {
 export class UnparseableCSVFormatError extends Error implements ErrorThatHandlesItsOwnResponse {
   attributes: GenerationErrorAttributes;
 
-  constructor(public readonly csvParseErrors: CSVParseError[]) {
+  constructor(csvParseErrors: CSVParseError[]) {
     super(errorCode);
     this.attributes = {
       errorCode,

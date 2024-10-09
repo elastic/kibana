@@ -25,7 +25,7 @@ Follow these steps to do this:
 6. If the log samples have unstructured body like a free-form text then classify it as "name: unstructured".
 7. If the log samples follow a csv format then classify it with "name: csv". There are two sub-cases for csv:
   a. If there is a csv header then set "header: true".
-  b. If there is no csv header then set "header: false" and try to find good names for the columns in the "columns" array by looking into the values of data in those columns. If you are unable to find good name for some column then keep it empty, like in the example.
+  b. If there is no csv header then set "header: false" and try to find good names for the columns in the "columns" array by looking into the values of data in those columns. For each column, if you are unable to find good name candidate for it then output an empty string, like in the example.
 8. If you cannot put the format into any of the above categories then classify it with "name: unsupported".
 
 You ALWAYS follow these guidelines when writing your response:
