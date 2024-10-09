@@ -10,7 +10,11 @@
 import { AppMenuActionId, AppMenuActionType, AppMenuAction } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
-export const getNewSearchAppMenuItem = (): AppMenuAction => {
+export const getNewSearchAppMenuItem = ({
+  onNewSearch,
+}: {
+  onNewSearch: () => void;
+}): AppMenuAction => {
   return {
     id: AppMenuActionId.new,
     type: AppMenuActionType.secondary, // TODO: convert to primary
@@ -22,8 +26,7 @@ export const getNewSearchAppMenuItem = (): AppMenuAction => {
         defaultMessage: 'New Search',
       }),
       testId: 'discoverNewButton',
-      onClick: ({ getDiscoverParams }) => {
-        const { onNewSearch } = getDiscoverParams();
+      onClick: () => {
         onNewSearch();
       },
     },

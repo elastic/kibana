@@ -125,28 +125,25 @@ export const getTopNavLinks = ({
     adHocDataViews,
     isEsqlMode,
     services,
-    savedSearch: state.savedSearchState.getState(),
-    savedQueryId: state.appState.getState().savedQuery,
-    query: state.appState.getState().query,
     onUpdateAdHocDataViews: async (adHocDataViewList) => {
       await state.actions.loadDataViewList();
       state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
     },
-    onNewSearch: () => {
-      services.locator.navigate({});
-    },
-    onOpenSavedSearch: state.actions.onOpenSavedSearch,
   });
 
   /* Primary items */
 
   const newSearch = convertMenuItem({
-    appMenuItem: getNewSearchAppMenuItem(),
+    appMenuItem: getNewSearchAppMenuItem({
+      onNewSearch: () => {
+        services.locator.navigate({});
+      },
+    }),
     getDiscoverParams,
   });
 
   const openSearch = convertMenuItem({
-    appMenuItem: getOpenSearchAppMenuItem(),
+    appMenuItem: getOpenSearchAppMenuItem({ onOpenSavedSearch: state.actions.onOpenSavedSearch }),
     getDiscoverParams,
   });
 
@@ -158,7 +155,7 @@ export const getTopNavLinks = ({
   /* Secondary items */
 
   const alerts = convertMenuItem({
-    appMenuItem: getAlertsAppMenuItem({ getDiscoverParams }),
+    appMenuItem: getAlertsAppMenuItem({ getDiscoverParams, stateContainer: state }),
     getDiscoverParams,
   });
   // TODO: allow to extend the alerts menu

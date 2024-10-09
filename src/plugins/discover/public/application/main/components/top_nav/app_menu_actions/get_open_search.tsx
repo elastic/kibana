@@ -12,7 +12,11 @@ import { AppMenuActionId, AppMenuActionType, AppMenuAction } from '@kbn/discover
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
 
-export const getOpenSearchAppMenuItem = (): AppMenuAction => {
+export const getOpenSearchAppMenuItem = ({
+  onOpenSavedSearch,
+}: {
+  onOpenSavedSearch: (id: string) => void;
+}): AppMenuAction => {
   return {
     id: AppMenuActionId.open,
     type: AppMenuActionType.secondary, // TODO: convert to primary
@@ -24,8 +28,7 @@ export const getOpenSearchAppMenuItem = (): AppMenuAction => {
         defaultMessage: 'Open Saved Search',
       }),
       testId: 'discoverOpenButton',
-      onClick: ({ getDiscoverParams, onFinishAction }) => {
-        const { onOpenSavedSearch } = getDiscoverParams();
+      onClick: ({ onFinishAction }) => {
         return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
       },
     },

@@ -10,10 +10,8 @@
 import React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import type { Capabilities } from '@kbn/core-capabilities-common';
@@ -22,9 +20,6 @@ export interface AppMenuDiscoverParams {
   dataView: DataView | undefined;
   adHocDataViews: DataView[];
   isEsqlMode?: boolean;
-  query?: Query | AggregateQuery;
-  savedQueryId?: string;
-  savedSearch: SavedSearch;
   services: {
     core: CoreStart;
     application: ApplicationStart;
@@ -34,8 +29,6 @@ export interface AppMenuDiscoverParams {
     capabilities: Capabilities;
   };
   onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-  onNewSearch: () => void;
-  onOpenSavedSearch: (id: string) => void;
 }
 
 export interface AppMenuControlOnClickParams {

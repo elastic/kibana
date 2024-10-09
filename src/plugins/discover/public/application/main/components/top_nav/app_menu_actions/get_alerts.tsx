@@ -23,6 +23,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { DiscoverStateContainer } from '../../../state_management/discover_state';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -39,17 +40,12 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
 const CreateAlertFlyout: React.FC<{
   getDiscoverParams: () => AppMenuDiscoverParams;
   onFinishAction: () => void;
-}> = React.memo(({ getDiscoverParams, onFinishAction }) => {
-  const {
-    dataView,
-    services,
-    savedQueryId,
-    savedSearch,
-    isEsqlMode,
-    query,
-    adHocDataViews,
-    onUpdateAdHocDataViews,
-  } = getDiscoverParams();
+  stateContainer: DiscoverStateContainer;
+}> = React.memo(({ stateContainer, getDiscoverParams, onFinishAction }) => {
+  const query = stateContainer.appState.getState().query;
+
+  const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } =
+    getDiscoverParams();
   const { triggersActionsUi } = services;
   const timeField = getTimeField(dataView);
 
@@ -64,12 +60,15 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
+    const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
-      searchConfiguration: savedSearch.searchSource.getSerializedFields(),
+      searchConfiguration: stateContainer.savedSearchState
+        .getState()
+        .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, savedSearch, savedQueryId, query, timeField]);
+  }, [isEsqlMode, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -100,9 +99,11 @@ const CreateAlertFlyout: React.FC<{
 });
 
 export const getAlertsAppMenuItem = ({
+  stateContainer,
   getDiscoverParams,
 }: {
   getDiscoverParams: () => AppMenuDiscoverParams;
+  stateContainer: DiscoverStateContainer;
 }): AppMenuPopoverActions => {
   const { dataView, services, isEsqlMode } = getDiscoverParams();
   const timeField = getTimeField(dataView);
@@ -134,7 +135,7 @@ export const getAlertsAppMenuItem = ({
                 defaultMessage: 'Data view does not have a time field.',
               }),
           onClick: async (params) => {
-            return <CreateAlertFlyout {...params} />;
+            return <CreateAlertFlyout {...params} stateContainer={stateContainer} />;
           },
         },
       },
