@@ -7,8 +7,8 @@
 
 import {
   PERFORM_RULE_UPGRADE_URL,
-  RuleVersionSpecifier,
   PerformRuleUpgradeResponseBody,
+  PerformRuleUpgradeRequestBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
@@ -17,30 +17,21 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
 /**
  * Upgrades available prebuilt rules in Kibana.
  *
- * - Pass in an array of rule version specifiers to upgrade specific rules. Otherwise
- *   all available rules will be upgraded.
- *
  * @param supertest SuperTest instance
- * @param rules Array of rule version specifiers to upgrade (optional)
+ * @param pazload Array of rule version specifiers to upgrade (optional)
  * @returns Upgrade prebuilt rules response
  */
-export const upgradePrebuiltRules = async (
+export const performUpgradePrebuiltRules = async (
   es: Client,
   supertest: SuperTest.Agent,
-  rules?: RuleVersionSpecifier[]
+  requestBody: PerformRuleUpgradeRequestBody
 ): Promise<PerformRuleUpgradeResponseBody> => {
-  let payload = {};
-  if (rules) {
-    payload = { mode: 'SPECIFIC_RULES', rules, pick_version: 'TARGET' };
-  } else {
-    payload = { mode: 'ALL_RULES', pick_version: 'TARGET' };
-  }
   const response = await supertest
     .post(PERFORM_RULE_UPGRADE_URL)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'foo')
-    .send(payload)
+    .send(requestBody)
     .expect(200);
 
   await refreshSavedObjectIndices(es);
