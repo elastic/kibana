@@ -8,7 +8,7 @@
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
@@ -53,6 +53,8 @@ export function useModelActions({
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
+  const isMobileLayout = useIsWithinMaxBreakpoint('l');
+
   const {
     services: {
       application: { navigateToUrl },
@@ -132,7 +134,7 @@ export function useModelActions({
     []
   );
 
-  return useMemo(
+  return useMemo<Array<Action<ModelItem>>>(
     () => [
       {
         name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
@@ -203,12 +205,18 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
+        color: 'success',
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
+          return canStartStopTrainedModels && !isLoading;
         },
-        available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
+        available: (item) => {
+          return (
+            item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED
+          );
+        },
         onClick: async (item) => {
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
             item,
@@ -233,14 +241,6 @@ export function useModelActions({
                   ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
                   : {}),
               }
-            );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
             );
             await fetchModels();
           } catch (e) {
@@ -342,6 +342,7 @@ export function useModelActions({
         available: (item) =>
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
+          // Deployment can be either started, starting, or exist in a failed state
           (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
           // Only show the action if there is at least one deployment that is not used by the inference service
           (!Array.isArray(item.inference_apis) ||
@@ -372,16 +373,6 @@ export function useModelActions({
               {
                 force: requireForceStop,
               }
-            );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-                defaultMessage:
-                  '{numberOfDeployments, plural, one {Deployment} other {Deployments}}  for "{modelId}" has been stopped successfully.',
-                values: {
-                  modelId: item.model_id,
-                  numberOfDeployments: deploymentIds.length,
-                },
-              })
             );
             if (Object.values(results).some((r) => r.error !== undefined)) {
               Object.entries(results).forEach(([id, r]) => {
@@ -423,7 +414,9 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
         icon: 'download',
-        type: 'icon',
+        color: 'text',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
@@ -480,10 +473,16 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          return (
+          return model.state === MODEL_STATE.DOWNLOADING ? (
             <>
               {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
+                defaultMessage: 'Cancel',
+              })}
+            </>
+          ) : (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete',
               })}
             </>
           );
@@ -491,27 +490,35 @@ export function useModelActions({
         description: (model: ModelItem) => {
           const hasDeployments = model.deployment_ids.length > 0;
           const { hasInferenceServices } = model;
-          return hasInferenceServices
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
-                {
-                  defaultMessage: 'Model is used by the _inference API',
-                }
-              )
-            : hasDeployments
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                {
-                  defaultMessage: 'Model has started deployments',
-                }
-              )
-            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
-              });
+
+          if (model.state === MODEL_STATE.DOWNLOADING) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
+              defaultMessage: 'Cancel download',
+            });
+          } else if (hasInferenceServices) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+              {
+                defaultMessage: 'Model is used by the _inference API',
+              }
+            );
+          } else if (hasDeployments) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+              {
+                defaultMessage: 'Model has started deployments',
+              }
+            );
+          } else {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+              defaultMessage: 'Delete model',
+            });
+          }
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,
         onClick: (model) => {
@@ -539,9 +546,10 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
-        available: isTestable,
+        available: (item) => isTestable(item, true),
         onClick: (item) => {
           if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
             onDfaTestAction(item);
@@ -550,7 +558,7 @@ export function useModelActions({
           }
         },
         enabled: (item) => {
-          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+          return canTestTrainedModels && !isLoading;
         },
       },
       {
@@ -612,6 +620,7 @@ export function useModelActions({
       trainedModelsApiService,
       urlLocator,
       onModelDownloadRequest,
+      isMobileLayout,
     ]
   );
 }
