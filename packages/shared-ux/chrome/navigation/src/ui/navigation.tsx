@@ -48,11 +48,12 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
-  const { activeNodes$, selectedPanelNode, setSelectedPanelNode } = useNavigationService();
+  const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
+    useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { body: [] });
-  const isFeedbackBtnVisible = true;
+  const isFeedbackBtnVisible = useObservable(isFeedbackBtnVisible$, false);
 
   const contextValue = useMemo<Context>(
     () => ({
