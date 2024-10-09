@@ -17,6 +17,7 @@ const testQuery = {
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
+  const es = getService('es');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -71,6 +72,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('With a test index', () => {
+      before(async () => {
+        await es.indices.create({ index: indexName });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: indexName });
+      });
+
       it('profiles a simple query', async () => {
         await PageObjects.searchProfiler.setIndexName(indexName);
         await PageObjects.searchProfiler.setQuery(testQuery);
