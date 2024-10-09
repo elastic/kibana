@@ -17,7 +17,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -29,7 +29,6 @@ export interface InventorySetupDependencies {
   share: SharePluginSetup;
   data: DataPublicPluginSetup;
   entityManager: EntityManagerPublicPluginSetup;
-  spaces: SpacesPluginSetup;
 }
 
 export interface InventoryStartDependencies {
@@ -40,6 +39,7 @@ export interface InventoryStartDependencies {
   data: DataPublicPluginStart;
   entityManager: EntityManagerPublicPluginStart;
   share: SharePluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface InventoryPublicSetup {}
