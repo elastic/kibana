@@ -16,6 +16,8 @@ import type { Flags } from '@kbn/dev-cli-runner';
 import { type Package, getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+const MANIFEST_FILE = 'kibana.jsonc';
+
 const getKibanaJsonc = (flags: Flags, log: ToolingLog): Package[] => {
   const modules = getPackages(REPO_ROOT);
 
@@ -40,10 +42,19 @@ const getKibanaJsonc = (flags: Flags, log: ToolingLog): Package[] => {
   );
 };
 
+export const listManifestFiles = (flags: Flags, log: ToolingLog) => {
+  const modules = getPackages(REPO_ROOT);
+  modules
+    .filter((module) => module.manifest.type === 'plugin' && !module.manifest.group)
+    .forEach((module) => {
+      log.info(join(module.directory, MANIFEST_FILE), module.id);
+    });
+};
+
 export const printManifest = (flags: Flags, log: ToolingLog) => {
   const kibanaJsoncs = getKibanaJsonc(flags, log);
   kibanaJsoncs.forEach((kibanaJsonc) => {
-    const manifestPath = join(kibanaJsonc.directory, 'kibana.jsonc');
+    const manifestPath = join(kibanaJsonc.directory, MANIFEST_FILE);
     log.info('\n\nShowing manifest: ', manifestPath);
     log.info(JSON.stringify(kibanaJsonc, null, 2));
   });
@@ -76,7 +87,7 @@ export const updateManifest = async (flags: Flags, log: ToolingLog) => {
     const kibanaJsonc = kibanaJsoncs[i];
 
     if (kibanaJsonc?.manifest) {
-      const manifestPath = join(kibanaJsonc.directory, 'kibana.jsonc');
+      const manifestPath = join(kibanaJsonc.directory, MANIFEST_FILE);
       log.info('Updating manifest: ', manifestPath);
       toSet.forEach((propValue) => {
         const [prop, value] = propValue.split('=');
