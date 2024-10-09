@@ -201,8 +201,8 @@ export const EditSpace: FC<PageProps> = ({
               <HeaderAvatar />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={true} al>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={true}>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={true}>
                       <EuiTitle size="l">

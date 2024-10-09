@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/193400
-  describe.skip('extension getAdditionalCellActions', () => {
+  describe('extension getAdditionalCellActions', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });

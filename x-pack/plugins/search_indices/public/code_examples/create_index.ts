@@ -13,6 +13,7 @@ import { PythonServerlessCreateIndexExamples } from './python';
 import { ConsoleCreateIndexExamples } from './sense';
 
 export const DefaultServerlessCodeExamples: CreateIndexCodeExamples = {
+  exampleType: 'search',
   sense: ConsoleCreateIndexExamples.default,
   curl: CurlCreateIndexExamples.default,
   python: PythonServerlessCreateIndexExamples.default,
@@ -20,6 +21,7 @@ export const DefaultServerlessCodeExamples: CreateIndexCodeExamples = {
 };
 
 export const DenseVectorSeverlessCodeExamples: CreateIndexCodeExamples = {
+  exampleType: 'vector',
   sense: ConsoleCreateIndexExamples.dense_vector,
   curl: CurlCreateIndexExamples.dense_vector,
   python: PythonServerlessCreateIndexExamples.dense_vector,

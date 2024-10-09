@@ -212,7 +212,6 @@ export class RenderingService {
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
-        themeVersion,
         baseHref: staticAssetsHrefBase,
       });
     const commonStylesheetPaths = getCommonStylesheetPaths({
