@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EntityMetrics, EntityDataStreamType } from '../../../../common/entities/types';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
+import { EntityMetrics } from '../../../../common/entities/types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 

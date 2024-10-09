@@ -6,10 +6,11 @@
  */
 
 import { compact, uniq } from 'lodash';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { EntityLatestServiceRaw } from '../types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type { EntityDataStreamType, EntityMetrics } from '../../../../common/entities/types';
+import type { EntityMetrics } from '../../../../common/entities/types';
 
 export interface MergedServiceEntity {
   serviceName: string;
