@@ -1269,6 +1269,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -2026,6 +2042,22 @@ paths:
                     Indicates whether you want to run the rule on an interval
                     basis after it is created.
                   type: boolean
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -2410,6 +2442,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -3146,6 +3194,22 @@ paths:
                       type: number
                   required:
                     - active
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -3522,6 +3586,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -4732,6 +4812,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -7984,6 +8080,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
@@ -41290,10 +41387,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/Security_Detections_API_TiebreakerField'
         timestamp_field:
@@ -41382,6 +41475,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -41507,6 +41604,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -41628,6 +41729,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -41731,6 +41836,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -41866,6 +41975,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -41990,6 +42103,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -42035,10 +42152,6 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_EsqlRulePatchProps:
       allOf:
         - type: object
@@ -42108,6 +42221,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -42234,6 +42351,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -42474,6 +42595,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -42600,6 +42725,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -42728,6 +42857,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -42851,6 +42984,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -42963,6 +43100,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -43093,6 +43234,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -43150,10 +43295,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_NewTermsRulePatchFields:
       allOf:
         - type: object
@@ -43237,6 +43378,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -43368,6 +43513,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -43603,6 +43752,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -43729,6 +43882,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -43787,10 +43944,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/Security_Detections_API_SavedQueryId'
     Security_Detections_API_QueryRulePatchFields:
@@ -43869,6 +44022,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -43992,6 +44149,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -44702,6 +44863,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -44831,6 +44996,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -44890,10 +45059,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
         query:
           $ref: '#/components/schemas/Security_Detections_API_RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_SavedQueryRulePatchFields:
       allOf:
         - type: object
@@ -44973,6 +45138,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -45099,6 +45268,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -45350,6 +45523,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -45478,6 +45655,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -45634,6 +45815,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -45768,6 +45953,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -45969,6 +46158,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -46097,6 +46290,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -46240,6 +46437,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -46368,6 +46569,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
