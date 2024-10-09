@@ -63,7 +63,7 @@ const PatternComponent: React.FC<Props> = ({
   );
   const { httpFetch, isILMAvailable, ilmPhases, startDate, endDate, formatBytes, formatNumber } =
     useDataQualityContext();
-  const { checkIndex, checkState } = useIndicesCheckContext();
+  const { checkIndex } = useIndicesCheckContext();
   const { updatePatternIndexNames, updatePatternRollup } = useResultsRollupContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);
@@ -310,7 +310,6 @@ const PatternComponent: React.FC<Props> = ({
               <div ref={containerRef}>
                 <SummaryTable
                   getTableColumns={getSummaryTableColumns}
-                  checkState={checkState}
                   items={items}
                   pageIndex={pageIndex}
                   pageSize={pageSize}

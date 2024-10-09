@@ -13,7 +13,6 @@ import {
   TestExternalProviders,
 } from '../../../mock/test_providers/test_providers';
 import { Pattern } from '.';
-import { getCheckStateStub } from '../../../stub/get_check_state_stub';
 import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { useIlmExplain } from './hooks/use_ilm_explain';
 import { useStats } from './hooks/use_stats';
@@ -61,7 +60,6 @@ describe('pattern', () => {
   });
 
   it('renders the initially open accordion with the pattern data and summary table', () => {
-    const indexName = 'auditbeat-custom-index-1';
     (useIlmExplain as jest.Mock).mockReturnValue({
       error: null,
       ilmExplain: auditbeatWithAllResults.ilmExplain,
@@ -76,11 +74,7 @@ describe('pattern', () => {
 
     render(
       <TestExternalProviders>
-        <TestDataQualityProviders
-          indicesCheckContextProps={{
-            checkState: getCheckStateStub(indexName),
-          }}
-        >
+        <TestDataQualityProviders>
           <Pattern
             patternRollup={auditbeatWithAllResults}
             chartSelectedIndex={null}
@@ -104,14 +98,9 @@ describe('pattern', () => {
   describe('remote clusters callout', () => {
     describe('when the pattern includes a colon', () => {
       it('it renders the remote clusters callout', () => {
-        const indexName = 'auditbeat-custom-index-1';
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={undefined}
                 chartSelectedIndex={null}
@@ -129,14 +118,9 @@ describe('pattern', () => {
 
     describe('when the pattern does NOT include a colon', () => {
       it('it does NOT render the remote clusters callout', () => {
-        const indexName = 'auditbeat-custom-index-1';
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={undefined}
                 chartSelectedIndex={null}
@@ -156,7 +140,6 @@ describe('pattern', () => {
   describe('loading & error', () => {
     describe('when useStats returns error', () => {
       it('renders the error message', () => {
-        const indexName = 'auditbeat-custom-index-1';
         (useStats as jest.Mock).mockReturnValue({
           stats: {},
           error: 'An error occurred',
@@ -165,11 +148,7 @@ describe('pattern', () => {
 
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
@@ -188,7 +167,6 @@ describe('pattern', () => {
 
     describe('when useIlmExplain returns error', () => {
       it('renders the error message', () => {
-        const indexName = 'auditbeat-custom-index-1';
         (useIlmExplain as jest.Mock).mockReturnValue({
           error: 'An error occurred',
           ilmExplain: {},
@@ -197,11 +175,7 @@ describe('pattern', () => {
 
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
@@ -220,7 +194,6 @@ describe('pattern', () => {
 
     describe('when useStats is loading but useIlmExplan returns error', () => {
       it('renders the loading message', () => {
-        const indexName = 'auditbeat-custom-index-1';
         (useStats as jest.Mock).mockReturnValue({
           stats: {},
           error: null,
@@ -235,11 +208,7 @@ describe('pattern', () => {
 
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
@@ -258,7 +227,6 @@ describe('pattern', () => {
 
     describe('when useIlmExplain is loading but useStats returns error', () => {
       it('renders the loading message', () => {
-        const indexName = 'auditbeat-custom-index-1';
         (useStats as jest.Mock).mockReturnValue({
           stats: {},
           error: 'An error occurred',
@@ -273,11 +241,7 @@ describe('pattern', () => {
 
         render(
           <TestExternalProviders>
-            <TestDataQualityProviders
-              indicesCheckContextProps={{
-                checkState: getCheckStateStub(indexName),
-              }}
-            >
+            <TestDataQualityProviders>
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
@@ -313,19 +277,12 @@ describe('pattern', () => {
         });
 
         const checkIndex = jest.fn();
-        const checkState = Object.keys(auditbeatWithAllResults.stats!).reduce((acc, index) => {
-          return {
-            ...acc,
-            ...getCheckStateStub(index),
-          };
-        }, {});
 
         // act
         render(
           <TestExternalProviders>
             <TestDataQualityProviders
               indicesCheckContextProps={{
-                checkState,
                 checkIndex,
               }}
             >
@@ -529,19 +486,12 @@ describe('pattern', () => {
         });
 
         const checkIndex = jest.fn();
-        const checkState = Object.keys(auditbeatWithAllResults.stats!).reduce((acc, index) => {
-          return {
-            ...acc,
-            ...getCheckStateStub(index),
-          };
-        }, {});
 
         // act
         render(
           <TestExternalProviders>
             <TestDataQualityProviders
               indicesCheckContextProps={{
-                checkState,
                 checkIndex,
               }}
             >
