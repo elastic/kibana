@@ -208,6 +208,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_before: notBefore,
       common_name: commonName,
       monitorName: ping?.monitor?.name,
+      serviceName: ping?.service?.name,
       configId: ping.config_id!,
       monitorUrl: ping?.url?.full,
       '@timestamp': ping['@timestamp'],
