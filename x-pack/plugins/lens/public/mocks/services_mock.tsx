@@ -103,7 +103,6 @@ export function makeDefaultServices(
   dataViewsMock.getIdsWithTitle.mockImplementation(jest.fn(async () => []));
 
   const navigationStartMock = navigationPluginMock.createStartContract();
-  const presentationUtilMock = presentationUtilPluginMock.createStartContract(core);
 
   return {
     ...startMock,
