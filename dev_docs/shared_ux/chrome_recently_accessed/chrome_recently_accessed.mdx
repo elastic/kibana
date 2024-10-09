@@ -9,13 +9,13 @@ tags: ['kibana', 'dev', 'contributor', 'chrome', 'navigation', 'shared-ux']
 
 ## Introduction
 
-The `ChromeRecentlyAccessed` service allows applications to register recently visited objects. These items are displayed in the "Recently Viewed" section of a side navigation menu, providing users with quick access to their previously visited resources. This service includes methods for adding, retrieving, and subscribing to the recently accessed history.
+The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> service allows applications to register recently visited objects. These items are displayed in the "Recently Viewed" section of a side navigation menu, providing users with quick access to their previously visited resources. This service includes methods for adding, retrieving, and subscribing to the recently accessed history.
 
 ![Recently viewed section in the sidenav](./chrome_recently_accessed.png)
 
 ## Guidelines
 
-The `ChromeRecentlyAccessed` service should be used thoughtfully to provide users with easy access to key resources they've interacted with. Unlike browser history, this feature is for important items that users may want to revisit.
+The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> service should be used thoughtfully to provide users with easy access to key resources they've interacted with. Unlike browser history, this feature is for important items that users may want to revisit.
 
 ### DOs
 
@@ -59,5 +59,5 @@ coreStart.chrome.recentlyAccessed.add(
 
 ## Implementation details
 
-The `ChromeRecentlyAccessed` services is based on <DocLink id="kibKbnRecentlyAccessedPluginApi" text="@kbn/recently-accessed"/> package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
+The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> services is based on <DocLink id="kibKbnRecentlyAccessedPluginApi" text="@kbn/recently-accessed"/> package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
 Applications can create their own instance of `RecentlyAccessedService` to manage their own list of recently accessed items scoped to their application.
