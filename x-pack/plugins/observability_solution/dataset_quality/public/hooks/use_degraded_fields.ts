@@ -115,8 +115,6 @@ export function useDegradedFields() {
       : undefined
   );
 
-  // This piece only cater field limit issue at the moment.
-  // In future this will cater the other 2 reasons as well
   const degradedFieldAnalysisResult = useMemo(() => {
     if (!degradedFieldAnalysis) {
       return undefined;
@@ -128,6 +126,7 @@ export function useDegradedFields() {
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
         shouldDisplayIgnoredValuesAndLimit: false,
+        identifiedUsingHeuristics: true,
       };
     }
 
@@ -143,6 +142,7 @@ export function useDegradedFields() {
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
           shouldDisplayIgnoredValuesAndLimit: true,
+          identifiedUsingHeuristics: true,
         };
       }
     }
@@ -152,6 +152,7 @@ export function useDegradedFields() {
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
       shouldDisplayIgnoredValuesAndLimit: false,
+      identifiedUsingHeuristics: false, // TODO: Add heuristics to identify ignore_malformed issues
     };
   }, [degradedFieldAnalysis, degradedFieldValues]);
 

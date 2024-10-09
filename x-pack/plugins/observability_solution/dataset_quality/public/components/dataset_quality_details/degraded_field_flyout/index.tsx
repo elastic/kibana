@@ -29,6 +29,7 @@ import {
 } from '../../../hooks';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
+  degradedFieldPotentialCauseIgnoreMalformedWarning,
   discoverAriaText,
   fieldIgnoredText,
   logsExplorerAriaText,
@@ -43,7 +44,13 @@ import { PossibleMitigations } from './possible_mitigations';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DegradedFieldFlyout() {
-  const { closeDegradedFieldFlyout, expandedDegradedField, renderedItems } = useDegradedFields();
+  const {
+    closeDegradedFieldFlyout,
+    expandedDegradedField,
+    renderedItems,
+    isAnalysisInProgress,
+    degradedFieldAnalysisResult,
+  } = useDegradedFields();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
@@ -119,6 +126,20 @@ export default function DegradedFieldFlyout() {
             </EuiTextColor>
           </>
         )}
+        {isUserViewingTheIssueOnLatestBackingIndex &&
+          !isAnalysisInProgress &&
+          degradedFieldAnalysisResult &&
+          !degradedFieldAnalysisResult.identifiedUsingHeuristics && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiTextColor
+                color="danger"
+                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+              >
+                {degradedFieldPotentialCauseIgnoreMalformedWarning}
+              </EuiTextColor>
+            </>
+          )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <DegradedFieldInfo fieldList={fieldList} />

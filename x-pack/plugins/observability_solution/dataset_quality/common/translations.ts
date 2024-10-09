@@ -501,6 +501,14 @@ export const degradedFieldMessageIssueDoesNotExistInLatestIndex = i18n.translate
   }
 );
 
+export const degradedFieldPotentialCauseIgnoreMalformedWarning = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning',
+  {
+    defaultMessage:
+      'If you recently changed any settings, it is possible that this potential cause may not be valid any more. Please rollover to check.',
+  }
+);
+
 export const possibleMitigationTitle = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigationTitle',
   {
@@ -626,7 +634,7 @@ export const fieldLimitMitigationSuccessComponentTemplateLinkText = i18n.transla
 export const fieldLimitMitigationFailedMessage = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessage',
   {
-    defaultMessage: 'Sorry, the request failed partially',
+    defaultMessage: 'Changes not applied to new data',
   }
 );
 
@@ -634,7 +642,7 @@ export const fieldLimitMitigationFailedMessageDescription = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessageDescription',
   {
     defaultMessage:
-      'The component template was successfully updated with the new limit, but we failed to updated the last backing index. Please do a rollover for the changes to be applicable on new data',
+      'The component template was successfully updated with the new field limit, but the changes were not applied to the most recent backing index. Perform a rollover to apply your changes to new data.',
   }
 );
 
