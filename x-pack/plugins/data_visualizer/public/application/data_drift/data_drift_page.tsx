@@ -77,7 +77,7 @@ export const PageHeader: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+  const updateTimeState = useCallback<NonNullable<FullTimeRangeSelectorProps['callback']>>(
     (update) => {
       setGlobalState({
         time: {

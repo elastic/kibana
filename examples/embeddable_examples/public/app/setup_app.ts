@@ -19,10 +19,10 @@ export function setupApp(core: CoreSetup<StartDeps>, developerExamples: Develope
     id: APP_ID,
     title,
     visibleIn: [],
-    async mount(params: AppMountParameters) {
+    async mount(mountParams: AppMountParameters) {
       const { renderApp } = await import('./app');
       const [coreStart, deps] = await core.getStartServices();
-      return renderApp(coreStart, deps, params.element);
+      return renderApp(coreStart, deps, mountParams);
     },
   });
   developerExamples.register({

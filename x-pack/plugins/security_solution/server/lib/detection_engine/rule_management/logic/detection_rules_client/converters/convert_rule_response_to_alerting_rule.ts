@@ -119,6 +119,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'esql': {
@@ -127,6 +130,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         language: params.language,
         query: params.query,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'threat_match': {
@@ -173,9 +179,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
@@ -213,6 +216,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     default: {

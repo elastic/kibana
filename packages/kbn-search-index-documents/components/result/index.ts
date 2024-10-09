@@ -8,3 +8,8 @@
  */
 
 export { Result } from './result';
+export {
+  resultMetaData,
+  resultToFieldFromMappingResponse,
+  resultToFieldFromMappings as resultToField,
+} from './result_metadata';

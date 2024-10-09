@@ -55,6 +55,12 @@ const buildFindRulesRoute = ({
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },
@@ -102,6 +108,7 @@ const buildFindRulesRoute = ({
     router.post(
       {
         path,
+        options: { access: 'internal' },
         validate: {
           body: findRulesRequestQuerySchemaV1,
         },

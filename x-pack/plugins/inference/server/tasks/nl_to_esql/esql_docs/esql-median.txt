@@ -1,15 +1,33 @@
-## MEDIAN
+# MEDIAN
 
-The `MEDIAN` function returns the value that is greater than half of all values and less than half of all values, also known as the 50% PERCENTILE. Like `PERCENTILE`, `MEDIAN` is usually approximate. It is also non-deterministic, meaning you can get slightly different results using the same data.
+The MEDIAN function calculates the median value of a numeric field. The median is the value that is greater than half of all values and less than half of all values, also known as the 50% percentile.
 
-### Examples
+## Syntax
+
+`MEDIAN(number)`
+
+### Parameters
+
+#### number
+
+The numeric field for which the median is calculated.
+
+## Examples
+
+Calculate the median salary:
 
 ```esql
 FROM employees
-| STATS MEDIAN(salary), PERCENTILE(salary, 50)
+| STATS MEDIAN(salary)
 ```
+
+Calculate the median of the maximum values of a multivalued column:
 
 ```esql
 FROM employees
 | STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))
 ```
+
+## Limitations
+
+- The MEDIAN function is usually approximate and non-deterministic. This means you can get slightly different results using the same data.

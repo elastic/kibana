@@ -1,35 +1,33 @@
-## DROP
+# DROP
 
-The `DROP` processing command in ES|QL is used to remove one or more columns from the result set. This command is particularly useful when you want to exclude certain fields from your query results, either to simplify the output or to reduce the amount of data being processed and transferred. The `DROP` command supports the use of wildcards, allowing you to remove multiple columns that match a specific pattern.
+The DROP command is used to eliminate one or more columns from the data.
 
-### Use Cases
-- **Simplifying Output:** Remove unnecessary columns to make the result set easier to read and analyze.
-- **Data Reduction:** Exclude large or irrelevant fields to reduce the amount of data processed and transferred.
-- **Pattern Matching:** Use wildcards to efficiently drop multiple columns that share a common naming pattern.
+## Syntax
 
-### Limitations
-- The `DROP` command does not support nested fields.
-- It cannot be used to drop columns of unsupported types as specified in the ES|QL limitations.
+`DROP columns`
 
-### Examples
+### Parameters
 
-#### Example 1: Dropping a Single Column
-This example demonstrates how to drop a single column named `height` from the `employees` index.
+#### columns
+
+This is a list of columns, separated by commas, that you want to remove. Wildcards are supported.
+
+## Examples
+
+In the following example, the 'height' column is removed from the data:
 
 ```esql
 FROM employees
 | DROP height
 ```
 
-#### Example 2: Dropping Multiple Columns Using Wildcards
-This example shows how to use wildcards to drop all columns that start with `height`.
+You can also use wildcards to remove all columns that match a certain pattern. In the following example, all columns that start with 'height' are removed:
 
 ```esql
 FROM employees
 | DROP height*
 ```
 
-#### Example 3: Dropping Multiple Specific Columns
 This example demonstrates how to drop multiple specific columns by listing them in a comma-separated format.
 
 ```esql
@@ -37,7 +35,6 @@ FROM employees
 | DROP height, weight, age
 ```
 
-#### Example 4: Dropping Columns with Complex Patterns
 This example shows how to drop columns that match a more complex pattern using wildcards.
 
 ```esql
@@ -45,7 +42,6 @@ FROM employees
 | DROP emp_*
 ```
 
-#### Example 5: Combining DROP with Other Commands
 This example demonstrates how to use the `DROP` command in conjunction with other commands like `KEEP` and `SORT`.
 
 ```esql
@@ -55,4 +51,6 @@ FROM employees
 | SORT height DESC
 ```
 
-By using the `DROP` command, you can effectively manage the columns in your result set, making your ES|QL queries more efficient and easier to work with.
+### Limitations
+- The `DROP` command does not support nested fields.
+- It cannot be used to drop columns of unsupported types as specified in the ES|QL limitations.

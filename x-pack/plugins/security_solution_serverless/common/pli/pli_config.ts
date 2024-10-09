@@ -42,6 +42,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
+      ProductFeatureKey.endpointCustomNotification,
       ProductFeatureKey.endpointProtectionUpdates,
     ],
   },

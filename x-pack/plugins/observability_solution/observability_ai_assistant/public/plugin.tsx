@@ -65,6 +65,7 @@ export class ObservabilityAIAssistantPlugin
         coreStart.application.capabilities.observabilityAIAssistant[
           aiAssistantCapabilities.show
         ] === true,
+      scope: 'observability',
     }));
 
     const withProviders = <P extends {}, R = {}>(

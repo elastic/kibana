@@ -42,8 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('forecasts', function () {
     this.tags(['ml']);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/164381
-    describe.skip('with single metric job', function () {
+    describe('with single metric job', function () {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');

@@ -19,7 +19,5 @@ export const TS_PROJECTS = TsProject.loadAll({
     // are present or up-to-date, and users likely won't know how to manage either, so the
     // type check is explicitly disabled in this project for now
     '.buildkite/tsconfig.json',
-
-    'x-pack/plugins/threat_intelligence/cypress/tsconfig.json',
   ],
 });

@@ -936,6 +936,43 @@ describe('ClusterClient', () => {
       );
     });
 
+    it('uses the authorization header from the request when using a `KibanaFakeRequest`', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization', 'foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization: 'fake_request_auth',
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            [ES_SECONDARY_AUTH_HEADER]: request.headers.authorization,
+          }),
+        })
+      );
+    });
+
     it('throws when used with a `FakeRequest` without authorization header', () => {
       const config = createConfig({
         requestHeadersWhitelist: ['authorization', 'foo'],

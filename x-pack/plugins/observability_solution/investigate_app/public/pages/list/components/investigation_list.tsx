@@ -6,46 +6,55 @@
  */
 import {
   Criteria,
-  EuiBadge,
+  EuiAvatar,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
-import { InvestigationNotFound } from '../../../components/investigation_not_found/investigation_not_found';
 import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
+import { InvestigationTag } from '../../../components/investigation_tag/investigation_tag';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
+import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
+import { InvestigationStats } from './investigation_stats';
+import { InvestigationsError } from './investigations_error';
+import { SearchBar } from './search_bar/search_bar';
 
 export function InvestigationList() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const {
     core: {
       http: { basePath },
       uiSettings,
     },
   } = useKibana();
-  const { data, isLoading, isError } = useFetchInvestigationList({
-    page: pageIndex + 1,
-    perPage: pageSize,
-  });
   const dateFormat = uiSettings.get('dateFormat');
   const tz = uiSettings.get('dateFormat:tz');
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
+  const [pageIndex, setPageIndex] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [search, setSearch] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
-  if (isError) {
-    return <InvestigationNotFound />;
-  }
+  const { data, isLoading, isError } = useFetchInvestigationList({
+    page: pageIndex + 1,
+    perPage: pageSize,
+    search,
+    filter: toFilter(status, tags),
+  });
+
+  const { data: userProfiles, isLoading: isUserProfilesLoading } = useFetchUserProfiles({
+    profileIds: new Set(data?.results.map((i) => i.createdBy)),
+  });
 
   const investigations = data?.results ?? [];
   const totalItemCount = data?.total ?? 0;
@@ -73,6 +82,42 @@ export function InvestigationList() {
         defaultMessage: 'Created by',
       }),
       truncateText: true,
+      render: (value: InvestigationResponse['createdBy']) => {
+        return isUserProfilesLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiFlexGroup gutterSize="s" direction="row">
+            <EuiAvatar
+              name={
+                userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value
+              }
+              size="s"
+            />
+            <EuiText size="s">
+              {userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value}
+            </EuiText>
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
+      field: 'tags',
+      name: i18n.translate('xpack.investigateApp.investigationList.tagsLabel', {
+        defaultMessage: 'Tags',
+      }),
+      render: (value: InvestigationResponse['tags']) => {
+        return (
+          <EuiFlexGroup wrap gutterSize="xs">
+            {value.map((tag) => (
+              <InvestigationTag key={tag} tag={tag} />
+            ))}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'notes',
@@ -82,32 +127,22 @@ export function InvestigationList() {
       render: (notes: InvestigationResponse['notes']) => <span>{notes?.length || 0}</span>,
     },
     {
-      field: 'createdAt',
-      name: i18n.translate('xpack.investigateApp.investigationList.createdAtLabel', {
-        defaultMessage: 'Created at',
+      field: 'updatedAt',
+      name: i18n.translate('xpack.investigateApp.investigationList.updatedAtLabel', {
+        defaultMessage: 'Updated at',
       }),
-      render: (createdAt: InvestigationResponse['createdAt']) => (
-        <span>{moment(createdAt).tz(tz).format(dateFormat)}</span>
+      render: (updatedAt: InvestigationResponse['updatedAt']) => (
+        <span>{moment(updatedAt).tz(tz).format(dateFormat)}</span>
       ),
     },
     {
       field: 'status',
       name: 'Status',
-      render: (status: InvestigationResponse['status']) => {
-        return <InvestigationStatusBadge status={status} />;
+      render: (s: InvestigationResponse['status']) => {
+        return <InvestigationStatusBadge status={s} />;
       },
     },
-    {
-      field: 'tags',
-      name: 'Tags',
-      render: (tags: InvestigationResponse['tags']) => {
-        return tags.map((tag) => (
-          <EuiBadge color={'default'} key="tag">
-            {tag}
-          </EuiBadge>
-        ));
-      },
-    },
+
     {
       name: 'Actions',
       render: (investigation: InvestigationResponse) => (
@@ -120,9 +155,23 @@ export function InvestigationList() {
     pageIndex,
     pageSize,
     totalItemCount,
-    pageSizeOptions: [10, 50],
+    pageSizeOptions: [10, 25, 50, 100],
     showPerPageOptions: true,
   };
+
+  const resultsCount =
+    pageSize === 0
+      ? i18n.translate('xpack.investigateApp.investigationList.allLabel', {
+          defaultMessage: 'Showing All',
+        })
+      : i18n.translate('xpack.investigateApp.investigationList.showingLabel', {
+          defaultMessage: 'Showing {startItem}-{endItem} of {totalItemCount}',
+          values: {
+            startItem: pageSize * pageIndex + 1,
+            endItem: pageSize * pageIndex + pageSize,
+            totalItemCount,
+          },
+        });
 
   const onTableChange = ({ page }: Criteria<InvestigationResponse>) => {
     if (page) {
@@ -133,15 +182,49 @@ export function InvestigationList() {
   };
 
   return (
-    <EuiBasicTable
-      tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
-        defaultMessage: 'Investigations List',
-      })}
-      items={investigations}
-      pagination={pagination}
-      rowHeader="title"
-      columns={columns}
-      onChange={onTableChange}
-    />
+    <EuiFlexGroup direction="column" gutterSize="l">
+      <InvestigationStats />
+      <SearchBar
+        isLoading={isLoading}
+        onSearch={(value) => setSearch(value)}
+        onStatusFilterChange={(selected) => setStatus(selected)}
+        onTagsFilterChange={(selected) => setTags(selected)}
+      />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {isLoading && <EuiLoadingSpinner size="xl" />}
+        {isError && <InvestigationsError />}
+        {!isLoading && !isError && (
+          <>
+            <EuiText size="xs">{resultsCount}</EuiText>
+            <EuiBasicTable
+              tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
+                defaultMessage: 'Investigations List',
+              })}
+              items={investigations}
+              pagination={pagination}
+              rowHeader="title"
+              columns={columns}
+              onChange={onTableChange}
+            />
+          </>
+        )}
+      </EuiFlexGroup>
+    </EuiFlexGroup>
   );
+}
+
+function toFilter(status: string[], tags: string[]) {
+  const statusFitler = status.map((s) => `investigation.attributes.status:${s}`).join(' OR ');
+  const tagsFilter = tags.map((tag) => `investigation.attributes.tags:${tag}`).join(' OR ');
+
+  if (statusFitler && tagsFilter) {
+    return `(${statusFitler}) AND (${tagsFilter})`;
+  }
+  if (statusFitler) {
+    return statusFitler;
+  }
+
+  if (tagsFilter) {
+    return tagsFilter;
+  }
 }

@@ -197,7 +197,10 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={Number(errors.termSize.length) > 0} error={errors.termSize}>
+                <EuiFormRow
+                  isInvalid={Number(errors.termSize.length) > 0}
+                  error={errors.termSize as string[]}
+                >
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
@@ -218,7 +221,7 @@ export const GroupByExpression = ({
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   isInvalid={Number(errors.termField.length) > 0}
-                  error={errors.termField}
+                  error={errors.termField as string}
                 >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}

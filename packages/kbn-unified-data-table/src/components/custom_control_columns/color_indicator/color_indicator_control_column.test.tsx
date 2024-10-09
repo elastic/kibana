@@ -39,6 +39,6 @@ describe('ColorIndicatorControlColumn', () => {
         />
       </UnifiedDataTableContext.Provider>
     );
-    expect(getRowIndicator).toHaveBeenCalledWith(contextMock.rows[1], expect.any(Object));
+    expect(getRowIndicator).toHaveBeenCalledWith(contextMock.getRowByIndex(1), expect.any(Object));
   });
 });

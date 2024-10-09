@@ -10,6 +10,9 @@
 import type { Profile } from '../types';
 import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
 
+/**
+ * Indicates the current solution type (i.e. Observability, Security, Search)
+ */
 export enum SolutionType {
   Observability = 'oblt',
   Security = 'security',
@@ -17,13 +20,28 @@ export enum SolutionType {
   Default = 'default',
 }
 
+/**
+ * The root profile interface
+ */
 export type RootProfile = Profile;
 
+/**
+ * Parameters for the root profile provider `resolve` method
+ */
 export interface RootProfileProviderParams {
+  /**
+   * The current solution navigation ID ('oblt', 'security', 'search', or null)
+   */
   solutionNavId?: string | null;
 }
 
+/**
+ * The resulting context object returned by the root profile provider `resolve` method
+ */
 export interface RootContext {
+  /**
+   * The current solution type
+   */
   solutionType: SolutionType;
 }
 

@@ -22,7 +22,7 @@ export class ShareDemoPlugin implements Plugin<void, void, SetupDeps, StartDeps>
   public setup(core: CoreSetup<StartDeps>, { share }: SetupDeps) {
     share.register({
       id: 'demo',
-      getShareMenuItems: (context) => [
+      getShareMenuItemsLegacy: (context) => [
         {
           panel: {
             id: 'demo',

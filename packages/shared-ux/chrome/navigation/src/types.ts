@@ -15,6 +15,7 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   ChromeRecentlyAccessedHistoryItem,
+  PanelSelectedNode,
 } from '@kbn/core-chrome-browser';
 import { EventTracker } from './analytics';
 
@@ -38,6 +39,8 @@ export interface NavigationServices {
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;
   eventTracker: EventTracker;
+  selectedPanelNode?: PanelSelectedNode | null;
+  setSelectedPanelNode?: (node: PanelSelectedNode | null) => void;
 }
 
 /**
@@ -53,7 +56,11 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
-      getIsSideNavCollapsed$: () => Observable<boolean>;
+      sideNav: {
+        getIsCollapsed$: () => Observable<boolean>;
+        getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+        setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+      };
     };
     http: {
       basePath: BasePathService;

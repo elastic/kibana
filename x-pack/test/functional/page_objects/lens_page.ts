@@ -1255,21 +1255,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
+    async changeTableSortingBy(colIndex = 0, direction: 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
       await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
       await popoverToggle.click();
-      let buttonEl;
-      if (direction !== 'none') {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
-        );
-      } else {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
-        );
-      }
+      const buttonEl = await find.byCssSelector(
+        `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+      );
       return buttonEl.click();
     },
 

@@ -11,7 +11,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { type TransformEnabledFeatures } from './serverless_context';
 import type { PluginsDependencies } from '../plugin';
-import { getMlSharedImports } from '../shared_imports';
 
 import type { ExperimentalFeatures } from '../../server/config';
 import type { AppDependencies } from './app_dependencies';
@@ -85,10 +84,8 @@ export async function mountManagementSection(
     uiSettings,
     settings,
     history,
-    savedObjectsPlugin: plugins.savedObjects,
     share,
     spaces,
-    ml: await getMlSharedImports(),
     triggersActionsUi,
     unifiedSearch,
     charts,

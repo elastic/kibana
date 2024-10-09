@@ -16,3 +16,7 @@ export function isApmSignal(dataStreamTypes: EntityDataStreamType[]) {
 export function isLogsSignal(dataStreamTypes: EntityDataStreamType[]) {
   return dataStreamTypes.includes(EntityDataStreamType.LOGS);
 }
+
+export function isLogsOnlySignal(signalTypes: EntityDataStreamType[]) {
+  return !isApmSignal(signalTypes) && isLogsSignal(signalTypes);
+}

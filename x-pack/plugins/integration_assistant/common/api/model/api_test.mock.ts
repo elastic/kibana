@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route';
-import type { BuildIntegrationRequestBody } from '../build_integration/build_integration';
-import type { CategorizationRequestBody } from '../categorization/categorization_route';
-import type { EcsMappingRequestBody } from '../ecs/ecs_route';
-import type { RelatedRequestBody } from '../related/related_route';
-import type { DataStream, Integration, Pipeline } from './common_attributes';
+import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route.gen';
+import type { BuildIntegrationRequestBody } from '../build_integration/build_integration.gen';
+import type { CategorizationRequestBody } from '../categorization/categorization_route.gen';
+import type { EcsMappingRequestBody } from '../ecs/ecs_route.gen';
+import type { RelatedRequestBody } from '../related/related_route.gen';
+import type { DataStream, Integration, Pipeline } from './common_attributes.gen';
 
 const rawSamples = ['{"test1": "test1"}'];
 

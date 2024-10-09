@@ -337,7 +337,7 @@ export const HEALTH_CHECK_ACTION_TEXT = i18n.translate('alertsUIShared.healthChe
 export const RULE_FORM_ROUTE_PARAMS_ERROR_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.routeParamsErrorTitle',
   {
-    defaultMessage: 'Unable to load rule form.',
+    defaultMessage: 'Unable to load rule form',
   }
 );
 
@@ -351,7 +351,7 @@ export const RULE_FORM_ROUTE_PARAMS_ERROR_TEXT = i18n.translate(
 export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleTypeNotFoundErrorTitle',
   {
-    defaultMessage: 'Unable to load rule type.',
+    defaultMessage: 'Unable to load rule type',
   }
 );
 
@@ -374,7 +374,7 @@ export const RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.ruleNotFoundErrorText',
   {
     defaultMessage:
-      'There was an error loading the rule. Please ensure you have access to the rule selected.',
+      'There was an error loading the rule. Please ensure the rule exists and you have access to the rule selected.',
   }
 );
 
@@ -458,6 +458,20 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleActionsNoPermissionTitle',
+  {
+    defaultMessage: 'Actions and connectors privileges missing',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleActionsNoPermissionDescription',
+  {
+    defaultMessage: 'You must have read access to actions and connectors to edit rules.',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleDetailsTitle',
   {
@@ -468,3 +482,92 @@ export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
 export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUIShared.ruleForm.returnTitle', {
   defaultMessage: 'Return',
 });
+
+export const MODAL_SEARCH_PLACEHOLDER = i18n.translate(
+  'alertsUIShared.ruleForm.modalSearchPlaceholder',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
+export const MODAL_SEARCH_CLEAR_FILTERS_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.modalSearchClearFiltersText',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const ACTION_TYPE_MODAL_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalTitle',
+  {
+    defaultMessage: 'Select connector',
+  }
+);
+
+export const ACTION_TYPE_MODAL_FILTER_ALL = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalFilterAll',
+  {
+    defaultMessage: 'All',
+  }
+);
+
+export const ACTION_TYPE_MODAL_EMPTY_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalEmptyTitle',
+  {
+    defaultMessage: 'No connectors found',
+  }
+);
+
+export const ACTION_TYPE_MODAL_EMPTY_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalEmptyText',
+  {
+    defaultMessage: 'Try a different search or change your filter settings.',
+  }
+);
+
+export const ACTION_ERROR_TOOLTIP = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionErrorToolTip',
+  {
+    defaultMessage: 'Action contains errors.',
+  }
+);
+
+export const ACTION_WARNING_TITLE = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionWarningsTitle',
+  {
+    defaultMessage: '1 warning',
+  }
+);
+
+export const ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUnableToLoadConnectorTitle',
+  {
+    defaultMessage: 'Unable to find connector',
+  }
+);
+
+export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUnableToLoadConnectorTitle',
+  {
+    defaultMessage: `Create a connector and try again. If you can't create a connector, contact your system administrator.`,
+  }
+);
+
+export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUseAadTemplateFieldsLabel',
+  {
+    defaultMessage: 'Use template fields from alerts index',
+  }
+);
+
+export const TECH_PREVIEW_LABEL = i18n.translate('alertsUIShared.technicalPreviewBadgeLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'alertsUIShared.technicalPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);

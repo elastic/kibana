@@ -43,6 +43,6 @@ describe('Testing kv header', () => {
     expect(response.grokPattern).toStrictEqual(
       '<%{NUMBER:priority}>%{NUMBER:version} %{GREEDYDATA:message}'
     );
-    expect(response.lastExecutedChain).toBe('kv_header');
+    expect(response.lastExecutedChain).toBe('kvHeader');
   });
 });

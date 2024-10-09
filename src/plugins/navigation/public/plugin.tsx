@@ -72,10 +72,8 @@ export class NavigationPublicPlugin
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-
-    this.isSolutionNavEnabled = onCloud && !isServerless;
+    this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
     /*
      *

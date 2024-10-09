@@ -29,7 +29,7 @@ export function FrameInformationAIAssistant({ frame }: Props) {
         instructions: `The library is: ${library}
         The function is: ${functionName}
 
-        Your have two tasks. Your first task is to desribe what the library is and what its use cases are, and to
+        You have two tasks. Your first task is to desribe what the library is and what its use cases are, and to
         describe what the function does. The output format should look as follows:
 
         Library description: Provide a concise description of the library

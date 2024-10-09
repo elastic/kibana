@@ -36,7 +36,7 @@ export async function getCurrentQARelease() {
   // @ts-ignore
   const fileContent = Buffer.from(releasesFile.data.content, 'base64').toString('utf8');
 
-  const sha = fileContent.match(`qa: "([a-z0-9]+)"`)?.[1];
+  const sha = fileContent.match(`qa-ds-1: "([a-z0-9]+)"`)?.[1];
 
   if (!sha) {
     throw new Error('Could not find QA hash in current releases file');

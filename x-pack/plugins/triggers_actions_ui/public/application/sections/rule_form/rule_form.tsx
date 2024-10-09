@@ -62,7 +62,6 @@ import {
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
   RuleActionKey,
-  RuleSpecificFlappingProperties,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -413,10 +412,6 @@ export const RuleForm = ({
 
   const setAlertDelayProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
-  };
-
-  const setFlapping = (flapping: RuleSpecificFlappingProperties | null) => {
-    dispatch({ command: { type: 'setProperty' }, payload: { key: 'flapping', value: flapping } });
   };
 
   const onAlertDelayChange = (value: string) => {
@@ -823,7 +818,7 @@ export const RuleForm = ({
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
               isInvalid={!!errors['schedule.interval'].length}
-              error={errors['schedule.interval']}
+              error={errors['schedule.interval'] as string[]}
             >
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={2}>
@@ -887,7 +882,7 @@ export const RuleForm = ({
             alertDelay={alertDelay}
             flappingSettings={rule.flapping}
             onAlertDelayChange={onAlertDelayChange}
-            onFlappingChange={setFlapping}
+            onFlappingChange={(flapping) => setRuleProperty('flapping', flapping)}
             enabledFlapping={IS_RULE_SPECIFIC_FLAPPING_ENABLED}
           />
         </EuiAccordion>
@@ -916,7 +911,7 @@ export const RuleForm = ({
           {!!errors.actionConnectors.length ? (
             <>
               <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors as string} />
               <EuiSpacer />
             </>
           ) : null}
@@ -986,7 +981,7 @@ export const RuleForm = ({
               />
             }
             isInvalid={!!errors.name.length && rule.name !== undefined}
-            error={errors.name}
+            error={errors.name as string}
           >
             <EuiFieldText
               fullWidth
@@ -1124,7 +1119,7 @@ export const RuleForm = ({
             {!!errors.ruleTypeId.length && rule.ruleTypeId !== undefined ? (
               <>
                 <EuiSpacer />
-                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId as string} />
                 <EuiSpacer />
               </>
             ) : null}

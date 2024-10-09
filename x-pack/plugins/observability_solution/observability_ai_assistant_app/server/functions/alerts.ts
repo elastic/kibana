@@ -131,13 +131,14 @@ export function registerAlertsFunction({
           fields: fields.length === 0 ? defaultFields : fields,
         },
       };
-    }
+    },
+    ['observability']
   );
 
   functions.registerFunction(
     {
       name: 'alerts',
-      description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.      
+      description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.
@@ -220,6 +221,7 @@ export function registerAlertsFunction({
           alerts,
         },
       };
-    }
+    },
+    ['observability']
   );
 }

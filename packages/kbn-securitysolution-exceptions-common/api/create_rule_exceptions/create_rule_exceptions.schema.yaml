@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateRuleExceptionListItems
       x-codegen-enabled: true
-      summary: Creates rule exception list items
+      summary: Create rule exception list items
+      description: Create exception items that apply to a single detection rule. 
       parameters:
         - name: id
           in: path

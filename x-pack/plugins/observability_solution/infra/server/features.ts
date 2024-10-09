@@ -14,6 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -37,6 +38,7 @@ export const METRICS_FEATURE = {
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -103,7 +105,8 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  app: ['infra', 'logs', 'kibana'],
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+  app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
   catalogue: ['infralogging', 'logs'],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -111,7 +114,7 @@ export const LOGS_FEATURE = {
   alerting: logsRuleTypes,
   privileges: {
     all: {
-      app: ['infra', 'logs', 'kibana'],
+      app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       savedObject: {
@@ -132,7 +135,7 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
-      app: ['infra', 'logs', 'kibana'],
+      app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       alerting: {

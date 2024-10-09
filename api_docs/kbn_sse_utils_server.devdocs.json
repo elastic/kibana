@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/sse-utils-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/sse-utils-server",
+        "id": "def-common.observableIntoEventSourceStream",
+        "type": "Function",
+        "tags": [],
+        "label": "observableIntoEventSourceStream",
+        "description": [],
+        "signature": [
+          "(source$: ",
+          "Observable",
+          "<Record<string, unknown> & { type: string; }>) => ",
+          "PassThrough"
+        ],
+        "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils-server",
+            "id": "def-common.observableIntoEventSourceStream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "source$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<Record<string, unknown> & { type: string; }>"
+            ],
+            "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

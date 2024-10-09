@@ -726,7 +726,7 @@ function doSearch(
           const message = (
             <KibanaRenderContextProvider {...startServices}>
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
+                Searched {res.rawResponse.hits.total as number} documents. <br />
                 The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
                 .
                 <br />

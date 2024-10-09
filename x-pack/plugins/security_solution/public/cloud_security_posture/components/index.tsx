@@ -12,17 +12,42 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
+import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 
-export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
+export const EntityInsight = <T,>({
+  name,
+  fieldName,
+  isPreviewMode,
+}: {
+  name: string;
+  fieldName: 'host.name' | 'user.name';
+  isPreviewMode?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   const getSetupStatus = useCspSetupStatusApi();
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
+  const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
+  const insightContent: React.ReactElement[] = [];
+  const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
 
+  if (hasMisconfigurationFindings)
+    insightContent.push(
+      <>
+        <MisconfigurationsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
+        <EuiSpacer size="m" />
+      </>
+    );
+  if (isVulnerabilitiesFindingForHost)
+    insightContent.push(
+      <>
+        <VulnerabilitiesPreview hostName={name} />
+        <EuiSpacer size="m" />
+      </>
+    );
   return (
     <>
-      {hasMisconfigurationFindings && (
+      {(hasMisconfigurationFindings || isVulnerabilitiesFindingForHost) && (
         <>
-          <EuiHorizontalRule />
           <EuiAccordion
             initialIsOpen={true}
             id="entityInsight-accordion"
@@ -45,9 +70,9 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
             }
           >
             <EuiSpacer size="m" />
-            <MisconfigurationsPreview hostName={hostName} />
-            <EuiSpacer size="m" />
+            {insightContent}
           </EuiAccordion>
+          <EuiHorizontalRule />
         </>
       )}
     </>
