@@ -36,12 +36,15 @@ export async function getDataStreamSettings({
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
     datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
   ]);
+
   const integration = dataStreamInfo?._meta?.package?.name;
+  const lastBackingIndex = dataStreamInfo?.indices?.slice(-1)[0];
 
   return {
     createdOn,
     integration,
     datasetUserPrivileges,
+    lastBackingIndexName: lastBackingIndex?.index_name,
   };
 }
 
@@ -116,7 +119,7 @@ export async function getDataStreamDetails({
 }
 
 async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream: string) {
-  const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, dataStream);
+  const indexSettings = await dataStreamService.getDataStreamIndexSettings(esClient, dataStream);
 
   const indexesList = Object.values(indexSettings);
 

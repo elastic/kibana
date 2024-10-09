@@ -16,7 +16,7 @@ properties:
     type: string
     example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   pushed_at:
     type: string
     format: date-time
@@ -24,7 +24,7 @@ properties:
     example: null
   pushed_by:
     $ref: 'case_response_pushed_by_properties.yaml'
-  type: 
+  type:
     type: string
     example: user
     enum:

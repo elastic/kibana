@@ -63,7 +63,6 @@ export const mockKibanaProps: KibanaLogicProps = {
   indexMappingComponent: () => {
     return <></>;
   },
-  isSearchHomepageEnabled: false,
   isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
@@ -86,7 +85,6 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
-  searchHomepage: undefined,
   searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),

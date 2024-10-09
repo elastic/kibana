@@ -145,3 +145,12 @@ export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
 export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
+
+export const ENTITY = 'entity';
+export const ENTITY_ID = 'entity.id';
+export const ENTITY_TYPE = 'entity.type';
+export const ENTITY_LAST_SEEN = 'entity.lastSeenTimestamp';
+export const ENTITY_FIRST_SEEN = 'entity.firstSeenTimestamp';
+export const ENTITY_DISPLAY_NAME = 'entity.displayName';
+export const ENTITY_DEFINITION_ID = 'entity.definitionId';
+export const SOURCE_DATA_STREAM_TYPE = 'source_data_stream.type';

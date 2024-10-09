@@ -51,6 +51,7 @@ const StickySidebar = styled(EuiFlexItem)`
 export interface PackageListGridProps {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
+  emptyStateStyles?: Record<string, string>;
   list: IntegrationCardItem[];
   searchTerm: string;
   setSearchTerm: (search: string) => void;
@@ -60,6 +61,8 @@ export interface PackageListGridProps {
   setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
   setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   callout?: JSX.Element | null;
+  // Props to decide the size of the spacer above callout. Security Solution uses this prop to customize the size of the spacer
+  calloutTopSpacerSize?: 's' | 'm' | 'xs' | 'l' | 'xl' | 'xxl';
   // Props used only in AvailablePackages component:
   showCardLabels?: boolean;
   title?: string;
@@ -69,11 +72,17 @@ export interface PackageListGridProps {
   showMissingIntegrationMessage?: boolean;
   showControls?: boolean;
   showSearchTools?: boolean;
+  // Customizing whether to sort by the default featured integrations' categories. Security Solution has custom sorting logic
+  sortByFeaturedIntegrations?: boolean;
+  spacer?: boolean;
+  // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
+  scrollElementId?: string;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   isLoading,
   controls,
+  emptyStateStyles,
   title,
   list,
   searchTerm,
@@ -87,10 +96,14 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   setUrlandReplaceHistory,
   setUrlandPushHistory,
   showMissingIntegrationMessage = false,
+  sortByFeaturedIntegrations = true,
   callout,
+  calloutTopSpacerSize = 'l', // Default EUI spacer size
   showCardLabels = true,
   showControls = true,
   showSearchTools = true,
+  spacer = true,
+  scrollElementId,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -134,9 +147,10 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         )
       : list;
 
-    return promoteFeaturedIntegrations(filteredList, selectedCategory);
-  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
-
+    return sortByFeaturedIntegrations
+      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+      : filteredList;
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
@@ -263,17 +277,19 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         ) : null}
         {callout ? (
           <>
-            <EuiSpacer />
+            <EuiSpacer size={calloutTopSpacerSize} />
             {callout}
           </>
         ) : null}
-        <EuiSpacer size="s" />
+        {spacer && <EuiSpacer size="s" />}
         <EuiFlexItem>
           <GridColumn
+            emptyStateStyles={emptyStateStyles}
             isLoading={!!isLoading}
             list={filteredPromotedList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
+            scrollElementId={scrollElementId}
           />
         </EuiFlexItem>
         {showMissingIntegrationMessage && (

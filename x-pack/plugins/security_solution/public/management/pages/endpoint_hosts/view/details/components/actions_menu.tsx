@@ -8,12 +8,12 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { HostMetadata } from '../../../../../../../common/endpoint/types';
+import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import { useEndpointActionItems } from '../../hooks';
 import { ContextMenuItemNavByRouter } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 
-export const ActionsMenu = memo<{ hostMetadata: HostMetadata }>(({ hostMetadata }) => {
-  const menuOptions = useEndpointActionItems(hostMetadata);
+export const ActionsMenu = memo<{ hostInfo: HostInfo }>(({ hostInfo }) => {
+  const menuOptions = useEndpointActionItems(hostInfo);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopoverHandler = useCallback(() => {

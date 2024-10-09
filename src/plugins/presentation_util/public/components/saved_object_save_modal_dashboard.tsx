@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,20 +17,21 @@ import {
   type SaveModalState,
 } from '@kbn/saved-objects-plugin/public';
 
-import { pluginServices } from '../services';
 import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
+import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
 
 function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
 
-  const { capabilities } = pluginServices.getHooks();
-  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
+  const { canAccessDashboards, canCreateNewDashboards } = useMemo(() => {
+    return getPresentationCapabilities();
+  }, []);
 
   // Disable the dashboard options if the user can't access dashboards or if they're read-only
-  const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
+  const disableDashboardOptions = !canAccessDashboards || !canCreateNewDashboards;
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'

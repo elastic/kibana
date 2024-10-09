@@ -9,10 +9,10 @@ Array [
       class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
         >
           <h1
             class="euiTitle emotion-euiTitle-l"
@@ -62,10 +62,10 @@ Array [
       class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
         >
           <h1
             class="euiTitle emotion-euiTitle-l"

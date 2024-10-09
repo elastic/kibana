@@ -150,7 +150,7 @@ describe('SecurityUsageReportingTask', () => {
           productTypes: [
             { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
           ],
-          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
+          usageApi: { url: USAGE_SERVICE_USAGE_URL },
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
@@ -227,7 +227,7 @@ describe('SecurityUsageReportingTask', () => {
       });
       taskArgs = buildTaskArgs({
         config: {
-          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
+          usageApi: { url: USAGE_SERVICE_USAGE_URL },
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);

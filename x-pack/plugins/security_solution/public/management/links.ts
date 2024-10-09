@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import IconFilebeatChart from '../app/solution_navigation/links/sections/icons/filebeat_chart';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -231,7 +230,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Oversee, revise and revisit the annotations within each document and timeline.',
       }),
-      landingIcon: IconFilebeatChart,
+      landingIcon: 'filebeatApp',
       path: NOTES_PATH,
       skipUrlState: true,
       hideTimeline: true,

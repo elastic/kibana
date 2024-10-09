@@ -41,6 +41,7 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": [
         "actions/checkout",
+        "actions/github-script",
         "elastic/github-actions/project-assigner",
         "hmarr/auto-approve-action",
         "octokit/graphql-action",
@@ -102,7 +103,7 @@
     },
     {
       "groupName": "APM",
-      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react", "@elastic/apm-rum-core"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],

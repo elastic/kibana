@@ -16,6 +16,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
@@ -261,23 +262,10 @@ export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>>
 
   const combinedQuery = useMemo(() => {
     const mergedQuery = createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
-    if (!Array.isArray(mergedQuery.bool?.filter)) {
-      if (!mergedQuery.bool) {
-        mergedQuery.bool = {};
-      }
-      mergedQuery.bool.filter = [];
-    }
-
-    mergedQuery.bool!.filter.push({
-      range: {
-        [dataView.timeFieldName!]: {
-          from: searchBounds.min?.valueOf(),
-          to: searchBounds.max?.valueOf(),
-        },
-      },
-    });
-
-    return mergedQuery;
+    const to = searchBounds.max?.valueOf();
+    const from = searchBounds.min?.valueOf();
+    const timeRange = to !== undefined && from !== undefined ? { from, to } : undefined;
+    return createDefaultQuery(mergedQuery, dataView.timeFieldName!, timeRange);
   }, [resultFilters, resultQuery, uiSettings, dataView, searchBounds]);
 
   if (!bucketInterval) return null;

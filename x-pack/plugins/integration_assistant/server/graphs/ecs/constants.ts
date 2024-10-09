@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-interface EcsFields {
-  [key: string]: string;
-}
+import { EcsFields } from '../../../common/ecs';
 
 export const ECS_TYPES: EcsFields = {
   '@timestamp': 'date',

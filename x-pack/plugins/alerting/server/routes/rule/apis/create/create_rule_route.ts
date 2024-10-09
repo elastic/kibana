@@ -64,6 +64,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
+          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -90,6 +91,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               actionsClient.isSystemAction(action.id)
             );
 
+            const flappingSettings = await rulesSettingsClient.flapping().get();
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
@@ -98,6 +101,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
+              isFlappingEnabled: flappingSettings.enabled,
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

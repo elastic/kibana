@@ -135,6 +135,9 @@ export const generateCspFinding = (
     data_stream: {
       dataset: 'cloud_security_posture.findings',
     },
+    observer: {
+      vendor: 'Elastic',
+    },
   };
 };
 

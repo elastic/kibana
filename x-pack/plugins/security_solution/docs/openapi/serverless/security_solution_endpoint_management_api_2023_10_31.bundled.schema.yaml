@@ -495,6 +495,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/suggestions/{suggestion_type}:
     post:
+      deprecated: true
       operationId: GetEndpointSuggestions
       parameters:
         - in: path
@@ -1036,3 +1037,4 @@ security:
 tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
+    x-displayName: Security endpoint management

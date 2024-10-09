@@ -35,13 +35,17 @@ import {
 } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
+import {
+  ESQL_DOCS_LOADED_QUERY,
+  SECURITY_LABS_RESOURCE,
+} from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
   isModelAlreadyExistsError,
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
+import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -203,9 +207,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     installEsqlDocs = true,
+    installSecurityLabsDocs = true,
   }: {
     soClient: SavedObjectsClientContract;
     installEsqlDocs?: boolean;
+    installSecurityLabsDocs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -255,6 +261,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           await loadESQL(this, this.options.logger);
         } else {
           this.options.logger.debug(`Knowledge Base docs already loaded!`);
+        }
+      }
+
+      if (installSecurityLabsDocs) {
+        const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
+        if (!labsDocsLoaded) {
+          this.options.logger.debug(`Loading Security Labs KB docs...`);
+          await loadSecurityLabs(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
       }
     } catch (e) {
@@ -350,6 +366,18 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       required: true,
     });
     return esqlDocs.length > 0;
+  };
+
+  /**
+   * Returns if Security Labs KB docs have been loaded
+   */
+  public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
+    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: '',
+      kbResource: SECURITY_LABS_RESOURCE,
+      required: false,
+    });
+    return securityLabsDocs.length > 0;
   };
 
   /**

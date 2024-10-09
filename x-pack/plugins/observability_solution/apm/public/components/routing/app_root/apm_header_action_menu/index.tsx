@@ -17,7 +17,7 @@ import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 import { AddDataContextMenu } from './add_data_context_menu';
-import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
+import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config } = useApmPluginContext();
@@ -33,8 +33,7 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const { isEntityCentricExperienceViewEnabled, isEnablementPending } =
-    useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -73,11 +72,10 @@ export function ApmHeaderActionMenu() {
           canReadMlJobs={canReadMlJobs}
         />
       )}
-      {isEntityCentricExperienceViewEnabled ? (
+      {isEntityCentricExperienceEnabled ? (
         <AddDataContextMenu />
       ) : (
         <EuiHeaderLink
-          isLoading={isEnablementPending}
           color="primary"
           href={kibanaHref('/app/apm/tutorial')}
           iconType="indexOpen"

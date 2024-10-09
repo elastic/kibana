@@ -68,7 +68,9 @@ export class EntityStoreDataClient {
 
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
-    logger.info(`Initializing entity store for ${entityType}`);
+    logger.info(
+      `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
+    );
 
     const descriptor = await this.engineClient.init(entityType, definition, filter);
     await entityClient.createEntityDefinition({
@@ -92,11 +94,13 @@ export class EntityStoreDataClient {
 
     if (descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
-        `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(`Starting entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Starting entity store for ${entityType}`
+    );
     await this.options.entityClient.startEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
@@ -109,11 +113,13 @@ export class EntityStoreDataClient {
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
       throw new Error(
-        `Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(`Stopping entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Stopping entity store for ${entityType}`
+    );
     await this.options.entityClient.stopEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
@@ -130,7 +136,9 @@ export class EntityStoreDataClient {
   public async delete(entityType: EntityType, deleteData: boolean) {
     const { id } = getEntityDefinition(entityType, this.options.namespace);
 
-    this.options.logger.info(`Deleting entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Deleting entity store for ${entityType}`
+    );
 
     await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
     await this.engineClient.delete(id);

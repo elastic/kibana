@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, Subject, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ILicense } from '../common/types';
@@ -134,6 +134,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
     return {
       refresh: this.refresh,
+      getLicense: async () => await firstValueFrom(this.license$!),
       license$: this.license$,
       featureUsage: this.featureUsage.start({ http: core.http }),
     };

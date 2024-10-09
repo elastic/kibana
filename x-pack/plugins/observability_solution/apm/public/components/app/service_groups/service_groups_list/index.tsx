@@ -24,14 +24,14 @@ import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { ServiceGroupSaveButton } from '../service_group_save';
 import { BetaBadge } from '../../../shared/beta_badge';
-import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
+import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
 const GET_STARTED_URL = 'https://www.elastic.co/guide/en/apm/get-started/current/index.html';
 
 export function ServiceGroupsList() {
-  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const [filter, setFilter] = useState('');
 
@@ -137,7 +137,7 @@ export function ServiceGroupsList() {
                         {i18n.translate('xpack.apm.serviceGroups.listDescription', {
                           defaultMessage: 'Displayed service counts reflect the last 24 hours.',
                         })}
-                        {isEntityCentricExperienceViewEnabled && (
+                        {isEntityCentricExperienceEnabled && (
                           <FormattedMessage
                             id="xpack.apm.serviceGroups.onlyApm"
                             defaultMessage="Only showing services {link}"

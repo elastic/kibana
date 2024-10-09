@@ -63,9 +63,9 @@ export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/al
 
 export * from './typings';
 import { TopAlert } from './typings/alerts';
-import { AlertSummary } from './pages/alert_details/components';
-import type { AlertSummaryField } from './pages/alert_details/components/alert_summary';
-export type { TopAlert, AlertSummary, AlertSummaryField };
+export type { TopAlert };
+import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
+export type { AlertDetailsAppSectionProps };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 
@@ -102,3 +102,4 @@ export { useAnnotations } from './components/annotations/use_annotations';
 export { RuleConditionChart } from './components/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
+export { Threshold } from './components/custom_threshold/components/threshold';

@@ -67,18 +67,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
   } else if (action.type === 'serverReturnedEndpointNonExistingPolicies') {
     return {
       ...state,
-      nonExistingPolicies: {
-        ...state.nonExistingPolicies,
-        ...action.payload,
-      },
-    };
-  } else if (action.type === 'serverReturnedEndpointAgentPolicies') {
-    return {
-      ...state,
-      agentPolicies: {
-        ...state.agentPolicies,
-        ...action.payload,
-      },
+      nonExistingPolicies: new Set([...state.nonExistingPolicies, ...action.payload]),
     };
   } else if (action.type === 'serverReturnedMetadataPatterns') {
     // handle an error case

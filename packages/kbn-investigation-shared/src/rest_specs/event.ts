@@ -13,6 +13,7 @@ import { eventSchema } from '../schema';
 const eventResponseSchema = eventSchema;
 
 type EventResponse = z.output<typeof eventResponseSchema>;
+type EventSchema = z.output<typeof eventSchema>;
 
 export { eventResponseSchema };
-export type { EventResponse };
+export type { EventResponse, EventSchema };

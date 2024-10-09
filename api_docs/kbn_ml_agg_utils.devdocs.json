@@ -471,8 +471,7 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null) & ",
-          "MemoizedFunction"
+          " | null) & _.MemoizedFunction"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
@@ -2539,6 +2538,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItem.logRateChangeSort",
+            "type": "number",
+            "tags": [],
+            "label": "logRateChangeSort",
+            "description": [
+              "Calculates a numerical value based on bg_count and doc_count for which to sort log rate change"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
