@@ -66,6 +66,7 @@ export const SettingsResponseSchema = schema.object({
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),
     use_space_awareness_migration_started_at: schema.maybe(schema.string()),
+    delete_unenrolled_agents: schema.maybe(schema.boolean()),
   }),
 });
 

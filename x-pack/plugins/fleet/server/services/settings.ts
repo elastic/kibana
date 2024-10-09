@@ -47,6 +47,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
       settingsSo.attributes.use_space_awareness_migration_started_at,
     fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
+    delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
   };
 }
 

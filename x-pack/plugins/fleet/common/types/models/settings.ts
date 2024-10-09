@@ -19,4 +19,5 @@ export interface Settings extends BaseSettings {
   output_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
+  delete_unenrolled_agents?: boolean;
 }
