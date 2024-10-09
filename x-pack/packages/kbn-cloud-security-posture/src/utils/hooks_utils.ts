@@ -6,10 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { UseCspOptions } from '../../type';
@@ -96,17 +93,7 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
     ...query,
     bool: {
       ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
+      filter: [...(query?.bool?.filter ?? [])],
       must_not: [...mutedRulesFilterQuery],
     },
   };

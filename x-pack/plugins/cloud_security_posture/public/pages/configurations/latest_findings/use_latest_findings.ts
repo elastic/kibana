@@ -13,10 +13,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
@@ -56,17 +53,7 @@ export const getFindingsQuery = (
       ...query,
       bool: {
         ...query?.bool,
-        filter: [
-          ...(query?.bool?.filter ?? []),
-          {
-            range: {
-              '@timestamp': {
-                gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
-                lte: 'now',
-              },
-            },
-          },
-        ],
+        filter: [...(query?.bool?.filter ?? [])],
         must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
       },
     },

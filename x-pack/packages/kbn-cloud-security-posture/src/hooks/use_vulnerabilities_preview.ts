@@ -14,10 +14,7 @@ import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CDR_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
@@ -45,17 +42,7 @@ const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) =>
     ...query,
     bool: {
       ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
+      filter: [...(query?.bool?.filter ?? [])],
     },
   },
 });
