@@ -10,6 +10,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import type { Agent } from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -23,45 +24,50 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
 
+  const postGraph = (agent: Agent, body: any, auth?: { user: string; pass: string }) => {
+    const req = agent
+      .post('/internal/cloud_security_posture/graph')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .set('kbn-xsrf', 'xxxx');
+
+    if (auth) {
+      req.auth(auth.user, auth.pass);
+    }
+
+    return req.send(body);
+  };
+
   describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
-        await supertestWithoutAuth
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'xxxx')
-          .auth(
-            'role_security_no_read_user',
-            cspSecurity.getPasswordForUser('role_security_no_read_user')
-          )
-          .send({
+        await postGraph(
+          supertestWithoutAuth,
+          {
             query: {
               actorIds: [],
               eventIds: [],
               start: 'now-1d/d',
               end: 'now/d',
             },
-          })
-          .expect(result(403));
+          },
+          {
+            user: 'role_security_no_read_user',
+            pass: cspSecurity.getPasswordForUser('role_security_no_read_user'),
+          }
+        ).expect(result(403));
       });
     });
 
     describe('Validation', () => {
       it('should return 400 when missing `actorIds` field', async () => {
-        await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              eventIds: [],
-              start: 'now-1d/d',
-              end: 'now/d',
-            },
-          })
-          .expect(result(400));
+        await postGraph(supertest, {
+          query: {
+            eventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        }).expect(result(400));
       });
     });
 
@@ -79,40 +85,28 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return an empty graph', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: [],
-              eventIds: [],
-              start: 'now-1d/d',
-              end: 'now/d',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: [],
+            eventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
       });
 
       it('should return a graph with nodes and edges by actor', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: ['admin@example.com'],
-              eventIds: [],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: ['admin@example.com'],
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
@@ -135,20 +129,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return a graph with nodes and edges by alert', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: [],
-              eventIds: ['kabcd1234efgh5678'],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: [],
+            eventIds: ['kabcd1234efgh5678'],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
@@ -171,20 +159,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('color of alert of failed event should be danger', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: [],
-              eventIds: ['failed-event'],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: [],
+            eventIds: ['failed-event'],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
@@ -207,20 +189,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('color of event of failed event should be warning', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: ['admin2@example.com'],
-              eventIds: [],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: ['admin2@example.com'],
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
@@ -244,20 +220,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('2 grouped of events, 1 failed, 1 success', async () => {
-        const response = await supertest
-          .post('/internal/cloud_security_posture/graph')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('kbn-xsrf', 'true')
-          .send({
-            query: {
-              actorIds: ['admin3@example.com'],
-              eventIds: [],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          })
-          .expect(result(200));
+        const response = await postGraph(supertest, {
+          query: {
+            actorIds: ['admin3@example.com'],
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(5);
         expect(response.body).to.have.property('edges').length(6);
