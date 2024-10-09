@@ -36419,7 +36419,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
@@ -36471,7 +36472,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:

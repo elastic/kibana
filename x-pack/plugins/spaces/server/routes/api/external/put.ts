@@ -32,7 +32,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({ meta: { description: 'The space identifier.' } }),
             }),
             body: getSpaceSchema(isServerless),
           },

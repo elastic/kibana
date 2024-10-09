@@ -34,7 +34,9 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The space identifier.' },
+              }),
             }),
           },
           response: {

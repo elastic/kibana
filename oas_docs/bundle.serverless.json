@@ -40870,6 +40870,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -40949,6 +40950,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,

@@ -40912,10 +40912,15 @@ paths:
                     type: object
                     properties:
                       sourceId:
+                        description: >-
+                          The alias source object identifier. This is the legacy
+                          object identifier.
                         type: string
                       targetSpace:
+                        description: The space where the alias target object exists.
                         type: string
                       targetType:
+                        description: 'The type of alias target object. '
                         type: string
                     required:
                       - targetSpace
@@ -41304,7 +41309,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
@@ -41356,7 +41362,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
