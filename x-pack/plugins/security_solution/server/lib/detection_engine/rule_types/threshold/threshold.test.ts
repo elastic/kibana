@@ -22,10 +22,12 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RunOpts } from '../types';
 import type { ExperimentalFeatures } from '../../../../../common';
 
+jest.mock('../utils/get_filter', () => ({ getFilter: jest.fn() }));
+
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
-
+  let mockScheduledNotificationResponseAction: jest.Mock;
   const version = '8.0.0';
   const params = getThresholdRuleParams();
   const thresholdCompleteRule = getCompleteRuleMock<ThresholdRuleParams>(params);
@@ -52,6 +54,7 @@ describe('threshold_executor', () => {
       ruleName: thresholdCompleteRule.ruleConfig.name,
       ruleType: thresholdCompleteRule.ruleConfig.ruleTypeId,
     });
+    mockScheduledNotificationResponseAction = jest.fn();
   });
 
   describe('thresholdExecutor', () => {
@@ -107,11 +110,11 @@ describe('threshold_executor', () => {
         aggregatableTimestampField: TIMESTAMP,
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        inputIndexFields: [],
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
         experimentalFeatures: {} as ExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
       expect(response.state).toEqual({
         initialized: true,
@@ -173,17 +176,58 @@ describe('threshold_executor', () => {
         aggregatableTimestampField: TIMESTAMP,
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        inputIndexFields: [],
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
         experimentalFeatures: {} as ExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
       expect(result.warningMessages).toEqual([
         `The following exceptions won't be applied to rule execution: ${
           getExceptionListItemSchemaMock().name
         }`,
       ]);
+    });
+    it('should call scheduleNotificationResponseActionsService', async () => {
+      const ruleDataClientMock = createRuleDataClientMock();
+      const state = {
+        initialized: true,
+        signalHistory: {},
+      };
+      const result = await thresholdExecutor({
+        completeRule: thresholdCompleteRule,
+        tuple,
+        services: alertServices,
+        state,
+        version,
+        ruleExecutionLogger,
+        startedAt: new Date(),
+        bulkCreate: jest.fn().mockImplementation((hits) => ({
+          errors: [],
+          success: true,
+          bulkCreateDuration: '0',
+          createdItemsCount: 0,
+          createdItems: [],
+        })),
+        wrapHits: jest.fn(),
+        ruleDataClient: ruleDataClientMock,
+        runtimeMappings: {},
+        inputIndex: ['auditbeat-*'],
+        primaryTimestamp: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
+        exceptionFilter: undefined,
+        unprocessedExceptions: [getExceptionListItemSchemaMock()],
+        spaceId: 'default',
+        runOpts: {} as RunOpts<ThresholdRuleParams>,
+        licensing,
+        experimentalFeatures: {} as ExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
+      });
+      expect(mockScheduledNotificationResponseAction).toBeCalledWith({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: thresholdCompleteRule.ruleParams.responseActions,
+      });
     });
   });
 });

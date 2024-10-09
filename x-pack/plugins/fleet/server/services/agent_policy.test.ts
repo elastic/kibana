@@ -363,7 +363,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in serverless env', async () => {
+    it('should create a policy  agentless feature flag is set and in serverless env', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: true } as any);
@@ -392,7 +392,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',
@@ -401,7 +401,7 @@ describe('Agent policy', () => {
       });
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
+    it('should create a policy if agentless feature flag is set and in cloud env', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
@@ -428,7 +428,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',

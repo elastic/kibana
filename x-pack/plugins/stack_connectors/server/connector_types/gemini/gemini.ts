@@ -201,16 +201,16 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
     // Validate the service account credentials JSON file input
-    let credentialsJSON;
+    let credentialsJson;
     try {
-      credentialsJSON = JSON.parse(this.secrets.credentialsJson);
+      credentialsJson = JSON.parse(this.secrets.credentialsJson);
     } catch (error) {
       throw new Error(`Failed to parse credentials JSON file: Invalid JSON format`);
     }
     const accessToken = await getGoogleOAuthJwtAccessToken({
       connectorId: this.connector.id,
       logger: this.logger,
-      credentials: credentialsJSON,
+      credentials: credentialsJson,
       connectorTokenClient: this.connectorTokenClient,
     });
     return accessToken;
@@ -395,9 +395,7 @@ const formatGeminiPayload = ({
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
-    ...(systemInstruction
-      ? { system_instruction: { role: 'user', parts: [{ text: systemInstruction }] } }
-      : {}),
+    ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     ...(toolConfig
       ? {
           tool_config: {
