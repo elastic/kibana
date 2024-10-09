@@ -205,7 +205,6 @@ describe('ActionsClientChatVertexAI', () => {
 
       await actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager);
       const params = actionsClient.execute.mock.calls[0][0].params.subActionParams;
-      console.log(actionsClient.execute.mock.calls[0][0].params.subActionParams);
       expect(params.messages.length).toEqual(1);
       expect(params.messages[0].parts.length).toEqual(1);
       expect(params.systemInstruction).toEqual(systemInstruction);
