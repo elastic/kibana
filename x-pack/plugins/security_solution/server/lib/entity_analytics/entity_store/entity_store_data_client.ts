@@ -189,7 +189,7 @@ export class EntityStoreDataClient {
     debugLog(`Created @platform pipeline`);
 
     // finally start the entity definition now that everything is in place
-    await this.start(entityType, { force: true });
+    const updated = await this.start(entityType, { force: true });
     debugLog(`Started entity definition`);
 
     // the task will execute the enrich policy on a schedule
@@ -198,11 +198,6 @@ export class EntityStoreDataClient {
       logger,
       taskManager,
     });
-    debugLog(`Started entity store field retention enrich task`);
-
-    // and finally update the engine status to started once everything is in place
-    const updated = await this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
-    debugLog(`Updated engine status to 'started', initialisation complete`);
     logger.info(`Entity store initialized`);
     return { ...descriptor, ...updated };
   }
