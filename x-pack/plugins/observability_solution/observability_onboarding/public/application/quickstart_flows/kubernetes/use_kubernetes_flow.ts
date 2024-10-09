@@ -11,7 +11,9 @@ import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../..
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
-export function useKubernetesFlow() {
+export function useKubernetesFlow(
+  onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes'
+) {
   const {
     services: {
       analytics,
@@ -20,21 +22,27 @@ export function useKubernetesFlow() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFetcher(
     (callApi) => {
-      return callApi('POST /internal/observability_onboarding/kubernetes/flow');
+      return callApi('POST /internal/observability_onboarding/kubernetes/flow', {
+        params: {
+          body: {
+            pkgName: onboardingFlowType,
+          },
+        },
+      });
     },
-    [],
+    [onboardingFlowType],
     { showToastOnError: false }
   );
 
   useEffect(() => {
     if (data?.onboardingId !== undefined) {
       analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType, {
-        onboardingFlowType: 'kubernetes',
+        onboardingFlowType,
         onboardingId: data?.onboardingId,
         step: 'in_progress',
       });
     }
-  }, [analytics, cloudServiceProvider, data?.onboardingId]);
+  }, [onboardingFlowType, analytics, cloudServiceProvider, data?.onboardingId]);
 
   return { data, status, error, refetch } as const;
 }
