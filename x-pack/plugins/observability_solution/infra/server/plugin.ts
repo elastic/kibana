@@ -59,6 +59,7 @@ import {
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { uiSettings } from '../common/ui_settings';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -211,6 +212,9 @@ export class InfraServerPlugin
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
 
+    // Register uiSettings config
+    core.uiSettings.register(uiSettings);
+
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
@@ -296,6 +300,7 @@ export class InfraServerPlugin
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
         const uiSettingsClient = coreContext.uiSettings.client;
+        const entityManager = await this.libs.plugins.entityManager.start();
 
         const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
@@ -317,6 +322,7 @@ export class InfraServerPlugin
           savedObjectsClient,
           uiSettingsClient,
           getMetricsIndices,
+          entityManager,
         };
       }
     );
