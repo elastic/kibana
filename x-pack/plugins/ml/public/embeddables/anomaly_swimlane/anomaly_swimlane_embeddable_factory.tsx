@@ -237,18 +237,20 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         anomalySwimLaneServices
       );
 
-      const fetchSubscription = fetch$(api)
-        .pipe(
-          map((fetchContext) => ({
-            query: fetchContext.query,
-            filters: fetchContext.filters,
-            timeRange: fetchContext.timeRange,
-          })),
-          distinctUntilChanged(fastIsEqual)
-        )
-        .subscribe(() => {
-          api.updatePagination({ fromPage: 1 });
-        });
+      subscriptions.add(
+        fetch$(api)
+          .pipe(
+            map((fetchContext) => ({
+              query: fetchContext.query,
+              filters: fetchContext.filters,
+              timeRange: fetchContext.timeRange,
+            })),
+            distinctUntilChanged(fastIsEqual)
+          )
+          .subscribe(() => {
+            api.updatePagination({ fromPage: 1 });
+          })
+      );
 
       const onRenderComplete = () => {};
 
@@ -275,7 +277,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             onSwimLaneDestroy();
             onDestroy();
             subscriptions.unsubscribe();
-            fetchSubscription.unsubscribe();
           });
 
           const [fromPage, perPage, swimlaneType, swimlaneData, error] =
