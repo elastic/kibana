@@ -7,9 +7,9 @@
 
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import { AllowedActionTypeIds } from './constants';
-import * as i18n from './translations';
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete = async ({ http }) => {
   const allConnectors = await loadConnectors({ http });
@@ -21,10 +21,13 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete = async ({ 
     return acc;
   }, []);
 
-  const completeBadgeText =
-    aiConnectors.length === 1
-      ? `${aiConnectors.length} ${i18n.ASSISTANT_CARD_CONNECTOR_ADDED}`
-      : `${aiConnectors.length} ${i18n.ASSISTANT_CARD_CONNECTORS_ADDED}`;
+  const completeBadgeText = i18n.translate(
+    'xpack.securitySolution.onboarding.assistantCard.badge.completeText',
+    {
+      defaultMessage: '{count} AI {count, plural, one {connector} other {connectors}} added',
+      values: { count: aiConnectors.length },
+    }
+  );
 
   return {
     isComplete: aiConnectors.length > 0,
