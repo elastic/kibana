@@ -6,49 +6,46 @@
  */
 
 import expect from 'expect';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// Notes:
-// Test coverage comes from stateful test suite: x-pack/test/api_integration/apis/security/roles.ts
-// It has been modified to work for serverless by removing invalid options (run_as, allow_restricted_indices, etc).
-//
-// Note: this suite is currently only called from the feature flags test configs, e.g.
-// x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
-//
-// This suite should be converted into a deployment agnostic suite when the native roles
-// feature flags are enabled permanently in serverless. Additionally, the route access tests
-// for the roles APIs in authorization.ts should also get updated at that time.
-// kbnServerArgs: ['--xpack.security.roleManagementEnabled=true'],
-// esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
+/*
+ * This file contains the authorization tests for serch and security
+ * projects. Custom roles are enabled in in these project types, so
+ * endpoints related to creating roles are enable.
+ */
 
 export default function ({ getService }: FtrProviderContext) {
-  const platformSecurityUtils = getService('platformSecurityUtils');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const log = getService('log');
   const svlCommonApi = getService('svlCommonApi');
-  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
-  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const platformSecurityUtils = getService('platformSecurityUtils');
   const es = getService('es');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
 
-  describe('security', function () {
-    describe('Roles', () => {
-      before(async () => {
-        supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
-          'admin',
-          {
-            useCookieHeader: true,
-            withInternalHeaders: true,
-          }
-        );
-        supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+  describe('security/authorization', function () {
+    this.tags(['skipSvlOblt']);
+
+    before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
           withCommonHeaders: true,
-        });
+        }
+      );
+      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withCommonHeaders: true,
       });
-      after(async () => {
-        await platformSecurityUtils.clearAllRoles();
-      });
+    });
 
+    after(async () => {
+      await platformSecurityUtils.clearAllRoles();
+      await supertestAdminWithApiKey.destroy();
+    });
+
+    describe('Roles', function () {
       describe('Create Role', () => {
         it('should allow us to create an empty role', async () => {
           await supertestAdminWithApiKey.put('/api/security/role/empty_role').send({}).expect(204);
@@ -423,6 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await supertestAdminWithCookieCredentials
             .get('/internal/security/roles/engineering')
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .expect((res: { body: Role[] }) => {
               const roles = res.body;
@@ -930,6 +928,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('Access', () => {
         describe('public', () => {
+          // Public but undocumented, hence "internal"
           it('reset session page', async () => {
             const { status } = await supertestAdminWithCookieCredentials.get(
               '/internal/security/reset_session_page.js'
@@ -937,12 +936,58 @@ export default function ({ getService }: FtrProviderContext) {
             expect(status).toBe(200);
           });
         });
+
+        // Disabled in serverless, inrernal in sttaeful
         describe('Disabled', () => {
           it('get shared saved object permissions', async () => {
             const { body, status } = await supertestAdminWithCookieCredentials.get(
               '/internal/security/_share_saved_object_permissions'
             );
             svlCommonApi.assertApiNotFound(body, status);
+          });
+        });
+      });
+    });
+
+    describe('route access', () => {
+      describe('internal', () => {
+        it('get built-in elasticsearch privileges', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithCookieCredentials
+            .get('/internal/security/esPrivileges/builtin')
+            .set(svlCommonApi.getCommonRequestHeader()));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [get] exists but is not available with the current configuration'
+            ),
+          });
+          expect(status).toBe(400);
+
+          ({ status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/esPrivileges/builtin'
+          ));
+          expect(status).toBe(400);
+
+          // expect success when using the internal header
+          ({ body, status } = await supertestAdminWithCookieCredentials
+            .get('/internal/security/esPrivileges/builtin')
+            .set(svlCommonApi.getInternalRequestHeader()));
+          expect(status).toBe(200);
+        });
+      });
+
+      describe('public', () => {
+        describe('when custom roles enabled', () => {
+          it('get all privileges', async () => {
+            const { status } = await supertestAdminWithApiKey
+              .get('/api/security/privileges')
+              .set(svlCommonApi.getInternalRequestHeader());
+            expect(status).toBe(200);
           });
         });
       });

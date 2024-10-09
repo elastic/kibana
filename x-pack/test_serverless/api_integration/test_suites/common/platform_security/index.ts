@@ -16,6 +16,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./authentication'));
     loadTestFile(require.resolve('./authentication_http'));
     loadTestFile(require.resolve('./authorization'));
+    loadTestFile(require.resolve('./authorization_custom_roles'));
+    loadTestFile(require.resolve('./authorization_oblt'));
     loadTestFile(require.resolve('./encrypted_saved_objects'));
     loadTestFile(require.resolve('./misc'));
     loadTestFile(require.resolve('./response_headers'));

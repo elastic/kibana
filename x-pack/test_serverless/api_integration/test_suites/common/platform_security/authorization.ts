@@ -10,6 +10,17 @@ import { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-pl
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+/*
+ * This file contains the common authorization tests that are applicable to
+ * all peroject types. There are two other authorization test files due to
+ * divergance of the custom roles feature:
+ *  - authorization_custom_roles.ts: custom roles are enabled in search and
+ *    security projects, so endpoints related to creating roles are enable.
+ *
+ *  - authorization_oblt.ts: custom roles are not enabled in OBLT projects
+ *    so endpoints related to creating roles are disabled
+ */
+
 function collectSubFeaturesPrivileges(feature: KibanaFeatureConfig) {
   return new Map(
     feature.subFeatures?.flatMap((subFeature) =>
@@ -30,8 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
 
   describe('security/authorization', function () {
-    // see details: https://github.com/elastic/kibana/issues/192282
-    this.tags(['failsOnMKI']);
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -48,50 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('route access', () => {
       describe('disabled', () => {
-        // Skipped due to change in QA environment for role management and spaces
-        // TODO: revisit once the change is rolled out to all environments
-        it.skip('get all privileges', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/api/security/privileges');
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        // Skipped due to change in QA environment for role management and spaces
-        // TODO: revisit once the change is rolled out to all environments
-        it.skip('get built-in elasticsearch privileges', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.get(
-            '/internal/security/esPrivileges/builtin'
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        // Role CRUD APIs are gated behind the xpack.security.roleManagementEnabled config
-        // setting. This setting is false by default on serverless. When the custom roles
-        // feature is enabled, this setting will be true, and the tests from
-        // roles_routes_feature_flag.ts can be moved here to replace these.
-        it('create/update roleAuthc', async () => {
-          const { body, status } = await supertestAdminWithApiKey.put('/api/security/role/test');
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('get role', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get(
-            '/api/security/role/superuser'
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('get all roles', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/api/security/role');
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('delete role', async () => {
-          const { body, status } = await supertestAdminWithApiKey.delete(
-            '/api/security/role/superuser'
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
         it('get shared saved object permissions', async () => {
           const { body, status } = await supertestAdminWithCookieCredentials.get(
             '/internal/security/_share_saved_object_permissions'
@@ -101,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('public', () => {
+        // Public but undocumented, hence 'internal' in path
         it('reset session page', async () => {
           const { status } = await supertestAdminWithCookieCredentials.get(
             '/internal/security/reset_session_page.js'
