@@ -120,23 +120,27 @@ export function DiscoverMainRoute({
         return true;
       }
 
-      const hasUserDataViewValue = await data.dataViews.hasData
-        .hasUserDataView()
-        .catch(() => false);
-      const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
+      const checkDefaultDataView = async () => {
+        try {
+          return await data.dataViews.defaultDataViewExists();
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
+        data.dataViews.hasData.hasUserDataView().catch(() => false),
+        data.dataViews.hasData.hasESData().catch(() => false),
+        checkDefaultDataView(),
+        await stateContainer.actions.loadDataViewList(),
+      ]);
+
       setHasUserDataView(hasUserDataViewValue);
       setHasESData(hasESDataValue);
 
       if (!hasUserDataViewValue) {
         setShowNoDataPage(true);
         return false;
-      }
-
-      let defaultDataViewExists: boolean = false;
-      try {
-        defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-      } catch (e) {
-        //
       }
 
       if (!defaultDataViewExists) {
@@ -148,7 +152,7 @@ export function DiscoverMainRoute({
       setError(e);
       return false;
     }
-  }, [data.dataViews, savedSearchId, stateContainer.appState]);
+  }, [data.dataViews, savedSearchId, stateContainer]);
 
   const loadSavedSearch = useCallback(
     async ({
@@ -162,8 +166,6 @@ export function DiscoverMainRoute({
         return;
       }
       try {
-        await stateContainer.actions.loadDataViewList();
-
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId,
           dataView: nextDataView,
