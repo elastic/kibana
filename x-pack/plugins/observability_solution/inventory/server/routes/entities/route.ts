@@ -105,7 +105,13 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/group_by/{field}',
   params: t.intersection([
     t.type({ path: t.type({ field: t.string }) }),
-    t.partial({ query: t.partial({ kuery: t.string }) }),
+    t.partial({
+      query: t.partial({
+        kuery: t.string,
+        sortField: t.string,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+      }),
+    }),
   ]),
   options: {
     tags: ['access:inventory'],
@@ -119,11 +125,14 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     });
 
     const { field } = params.path;
+    const { kuery, sortField, sortDirection } = params.query ?? {};
 
     const groups = await getEntityGroupsBy({
       inventoryEsClient,
       field,
-      kuery: params.query?.kuery,
+      kuery,
+      sortField,
+      sortDirection,
     });
 
     return { groupBy: field, groups };
