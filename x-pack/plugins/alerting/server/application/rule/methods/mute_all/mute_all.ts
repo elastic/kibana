@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../../../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMetaAttributes } from '../lib';
 import { clearUnscheduledSnoozeAttributes } from '../common';
