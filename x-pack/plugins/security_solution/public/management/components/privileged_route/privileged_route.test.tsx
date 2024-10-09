@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Routes, MemoryRouter } from '@kbn/shared-ux-router';
+// eslint-disable-next-line no-restricted-imports
+import { Switch, MemoryRouter } from 'react-router-dom';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { PrivilegedRoute } from './privileged_route';
@@ -39,9 +40,9 @@ describe('PrivilegedRoute', () => {
     render = () => {
       renderResult = renderer.render(
         <MemoryRouter initialEntries={[currentPath]}>
-          <Routes>
+          <Switch>
             <PrivilegedRoute {...renderProps} />
-          </Routes>
+          </Switch>
         </MemoryRouter>
       );
     };
