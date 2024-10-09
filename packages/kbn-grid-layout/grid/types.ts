@@ -13,7 +13,7 @@ import type { ObservedSize } from 'use-resize-observer/polyfilled';
 export interface GridLayoutApi {
   addNewPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
   getPanelCount: () => number;
-  // removePanel: (panelId: string) => void;
+  removePanel: (panelId: string) => void;
   // serializeState: () => void;
 }
 

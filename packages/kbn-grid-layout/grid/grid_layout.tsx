@@ -12,12 +12,12 @@ import React, { forwardRef, useImperativeHandle } from 'react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
-import { resolveGridRow } from './resolve_grid_row';
 import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
 import { runPanelPlacementStrategy } from './run_panel_placement';
+import { compactGridRow } from './resolve_grid_row';
 
 interface GridLayoutProps {
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
@@ -42,8 +42,6 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
       () => {
         return {
           addNewPanel: (panelId, placementStrategy) => {
-            // TODO: Better "find first match";
-            // accept positioning
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
             const [firstRow, ...rest] = currentLayout;
             const nextRow = runPanelPlacementStrategy(
@@ -56,6 +54,29 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
               placementStrategy
             );
             gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
+          },
+          removePanel: (panelId) => {
+            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+
+            let index = 0;
+            let updatedPanels;
+            for (const row of currentLayout) {
+              if (Object.keys(row.panels).includes(panelId)) {
+                updatedPanels = { ...row.panels };
+                delete updatedPanels[panelId];
+                break;
+              }
+              index++;
+            }
+
+            if (updatedPanels) {
+              const newLayout = [...currentLayout];
+              newLayout[index] = compactGridRow({
+                ...newLayout[index],
+                panels: updatedPanels,
+              });
+              gridLayoutStateManager.gridLayout$.next(newLayout);
+            }
           },
           getPanelCount: () => {
             return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
