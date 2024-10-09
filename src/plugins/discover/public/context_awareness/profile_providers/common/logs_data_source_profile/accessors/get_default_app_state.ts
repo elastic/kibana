@@ -12,8 +12,10 @@ import { DefaultAppStateColumn } from '../../../../types';
 
 export const createGetDefaultAppState = ({
   defaultColumns,
+  breakdownField,
 }: {
   defaultColumns?: DefaultAppStateColumn[];
+  breakdownField?: DefaultAppStateColumn;
 }): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
   return (prev) => (params) => {
     const appState = { ...prev(params) };
@@ -26,6 +28,10 @@ export const createGetDefaultAppState = ({
       }
 
       appState.columns.push(...defaultColumns);
+    }
+
+    if (breakdownField) {
+      appState.breakdownField = breakdownField;
     }
 
     return appState;

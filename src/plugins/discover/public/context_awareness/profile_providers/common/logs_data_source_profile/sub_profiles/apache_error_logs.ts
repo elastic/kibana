@@ -21,6 +21,7 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
+        breakdownField: `${LOG_LEVEL_COLUMN}.keyword`,
       }),
     },
     resolve: createResolve('logs-apache.error'),
