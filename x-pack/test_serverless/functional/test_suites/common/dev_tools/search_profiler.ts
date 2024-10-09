@@ -17,7 +17,6 @@ const testQuery = {
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
-  const es = getService('es');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
