@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-const basePath = '/app/apm/settings/general-settings';
+const basePath = '/app/apm/settings/apm-indices';
 
 const getAbleToModifyCase = () => {
   it('should be able to modify settings', () => {
+    const newErrorIndex = 'test';
     cy.visitKibana(basePath);
-    const button = cy.get('button[name="Inspect ES queries"]');
-    button.should('not.be.disabled');
-    button.click();
-    cy.contains('Save changes');
+    const input = cy.get('input[name="error"]');
+    input.should('not.be.disabled');
+    input.clear().type(newErrorIndex);
+    cy.contains('Apply changes').should('not.be.disabled').click();
+    cy.intercept('GET', '/internal/apm/settings/apm-index-settings').as('internalApiRequest');
+    cy.wait('@internalApiRequest');
+    cy.get('input[name="error"]').should('have.value', newErrorIndex);
   });
 };
 
 const getUnableToModifyCase = () => {
   return it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
-    const button = cy.get('button[name="Inspect ES queries"]');
-    button.should('be.disabled');
-    cy.contains('Save changes').should('not.exist');
+    const input = cy.get('input[name="error"]');
+    input.should('be.disabled');
+    cy.contains('Apply changes').should('be.disabled');
   });
 };
 
-describe('General Settings', () => {
+describe('Indices', () => {
   describe('when logged in as a viewer', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
