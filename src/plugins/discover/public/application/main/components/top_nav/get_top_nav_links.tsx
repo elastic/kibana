@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { AppMenuItem, AppMenuRegistry } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -49,77 +50,6 @@ export const getTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
-  /**
-   * Switches from ES|QL to classic mode and vice versa
-   */
-  const esqLDataViewTransitionToggle = {
-    id: 'esql',
-    label: isEsqlMode
-      ? i18n.translate('discover.localMenu.switchToClassicTitle', {
-          defaultMessage: 'Switch to classic',
-        })
-      : i18n.translate('discover.localMenu.tryESQLTitle', {
-          defaultMessage: 'Try ES|QL',
-        }),
-    emphasize: true,
-    fill: false,
-    color: 'text',
-    tooltip: isEsqlMode
-      ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
-          defaultMessage: 'Switch to KQL or Lucene syntax.',
-        })
-      : i18n.translate('discover.localMenu.esqlTooltipLabel', {
-          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
-        }),
-    run: () => {
-      if (dataView) {
-        if (isEsqlMode) {
-          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-          /**
-           * Display the transition modal if:
-           * - the user has not dismissed the modal
-           * - the user has opened and applied changes to the saved search
-           */
-          if (
-            shouldShowESQLToDataViewTransitionModal &&
-            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-          ) {
-            state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
-          } else {
-            state.actions.transitionFromESQLToDataView(dataView.id ?? '');
-          }
-        } else {
-          state.actions.transitionFromDataViewToESQL(dataView);
-          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-        }
-      }
-    },
-    testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
-  };
-
-  const saveSearch = {
-    id: 'save',
-    label: i18n.translate('discover.localMenu.saveTitle', {
-      defaultMessage: 'Save',
-    }),
-    description: i18n.translate('discover.localMenu.saveSearchDescription', {
-      defaultMessage: 'Save Search',
-    }),
-    testId: 'discoverSaveButton',
-    iconType: 'save',
-    emphasize: true,
-    run: (anchorElement: HTMLElement) => {
-      onSaveSearch({
-        savedSearch: state.savedSearchState.getState(),
-        services,
-        state,
-        onClose: () => {
-          anchorElement?.focus();
-        },
-      });
-    },
-  };
-
   const getDiscoverParams = (): AppMenuDiscoverParams => ({
     dataView,
     adHocDataViews,
@@ -135,50 +65,12 @@ export const getTopNavLinks = ({
     onOpenSavedSearch: state.actions.onOpenSavedSearch,
   });
 
-  /* Primary items */
-
-  const newSearch = convertAppMenuItemToTopNavItem({
-    appMenuItem: getNewSearchAppMenuItem({
-      getDiscoverParams,
-    }),
-    services,
-  });
-
-  const openSearch = convertAppMenuItemToTopNavItem({
-    appMenuItem: getOpenSearchAppMenuItem({ getDiscoverParams }),
-    services,
-  });
-
-  const shareSearch = convertAppMenuItemToTopNavItem({
-    appMenuItem: getShareAppMenuItem({ getDiscoverParams, stateContainer: state }),
-    services,
-  });
-
-  /* Secondary items */
-
-  const alerts = convertAppMenuItemToTopNavItem({
-    appMenuItem: getAlertsAppMenuItem({ getDiscoverParams, stateContainer: state }),
-    services,
-  });
-  // TODO: allow to extend the alerts menu
-
-  const inspectSearch = convertAppMenuItemToTopNavItem({
-    appMenuItem: getInspectAppMenuItem({ onOpenInspector }),
-    services,
-  });
-
-  /* Custom items */
-  // TODO: allow to extend with custom items
-
   const defaultMenu = topNavCustomization?.defaultMenu;
-  const entries = [];
-
-  if (services.uiSettings.get(ENABLE_ESQL)) {
-    entries.push({ data: esqLDataViewTransitionToggle, order: 0 });
-  }
+  const appMenuPrimaryAndSecondaryItems: AppMenuItem[] = [];
 
   if (!defaultMenu?.inspectItem?.disabled) {
-    entries.push({ data: inspectSearch, order: 100 });
+    const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+    appMenuPrimaryAndSecondaryItems.push(inspectAppMenuItem);
   }
 
   if (
@@ -186,24 +78,115 @@ export const getTopNavLinks = ({
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !defaultMenu?.alertsItem?.disabled
   ) {
-    entries.push({ data: alerts, order: 200 });
+    const alertsAppMenuItem = getAlertsAppMenuItem({ getDiscoverParams, stateContainer: state });
+    appMenuPrimaryAndSecondaryItems.push(alertsAppMenuItem);
   }
 
   if (!defaultMenu?.newItem?.disabled) {
-    entries.push({ data: newSearch, order: 300 });
+    const newSearchMenuItem = getNewSearchAppMenuItem({
+      getDiscoverParams,
+    });
+    appMenuPrimaryAndSecondaryItems.push(newSearchMenuItem);
   }
 
   if (!defaultMenu?.openItem?.disabled) {
-    entries.push({ data: openSearch, order: 400 });
+    const openSearchMenuItem = getOpenSearchAppMenuItem({ getDiscoverParams });
+    appMenuPrimaryAndSecondaryItems.push(openSearchMenuItem);
   }
 
   if (!defaultMenu?.shareItem?.disabled) {
-    entries.push({ data: shareSearch, order: 500 });
+    const shareAppMenuItem = getShareAppMenuItem({ getDiscoverParams, stateContainer: state });
+    appMenuPrimaryAndSecondaryItems.push(shareAppMenuItem);
+  }
+
+  const appMenuRegistry = new AppMenuRegistry(appMenuPrimaryAndSecondaryItems);
+
+  /* Custom items */
+  // TODO: allow to extend with custom items
+
+  const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
+    convertAppMenuItemToTopNavItem({
+      appMenuItem,
+      services,
+    })
+  );
+
+  if (services.uiSettings.get(ENABLE_ESQL)) {
+    /**
+     * Switches from ES|QL to classic mode and vice versa
+     */
+    const esqLDataViewTransitionToggle = {
+      id: 'esql',
+      label: isEsqlMode
+        ? i18n.translate('discover.localMenu.switchToClassicTitle', {
+            defaultMessage: 'Switch to classic',
+          })
+        : i18n.translate('discover.localMenu.tryESQLTitle', {
+            defaultMessage: 'Try ES|QL',
+          }),
+      emphasize: true,
+      fill: false,
+      color: 'text',
+      tooltip: isEsqlMode
+        ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
+            defaultMessage: 'Switch to KQL or Lucene syntax.',
+          })
+        : i18n.translate('discover.localMenu.esqlTooltipLabel', {
+            defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+          }),
+      run: () => {
+        if (dataView) {
+          if (isEsqlMode) {
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+            /**
+             * Display the transition modal if:
+             * - the user has not dismissed the modal
+             * - the user has opened and applied changes to the saved search
+             */
+            if (
+              shouldShowESQLToDataViewTransitionModal &&
+              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+            ) {
+              state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+            } else {
+              state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+            }
+          } else {
+            state.actions.transitionFromDataViewToESQL(dataView);
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+          }
+        }
+      },
+      testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
+    };
+    entries.unshift(esqLDataViewTransitionToggle);
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
-    entries.push({ data: saveSearch, order: 600 });
+    const saveSearch = {
+      id: 'save',
+      label: i18n.translate('discover.localMenu.saveTitle', {
+        defaultMessage: 'Save',
+      }),
+      description: i18n.translate('discover.localMenu.saveSearchDescription', {
+        defaultMessage: 'Save Search',
+      }),
+      testId: 'discoverSaveButton',
+      iconType: 'save',
+      emphasize: true,
+      run: (anchorElement: HTMLElement) => {
+        onSaveSearch({
+          savedSearch: state.savedSearchState.getState(),
+          services,
+          state,
+          onClose: () => {
+            anchorElement?.focus();
+          },
+        });
+      },
+    };
+    entries.push(saveSearch);
   }
 
-  return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
+  return entries;
 };

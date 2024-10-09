@@ -47,11 +47,6 @@ interface AppMenuActionBase {
   readonly order?: number;
 }
 
-export interface AppMenuPopoverAction extends AppMenuActionBase {
-  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  readonly controlProps: AppMenuControlProps;
-}
-
 export interface AppMenuAction extends AppMenuActionBase {
   readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
   readonly controlProps: AppMenuControlProps;
@@ -67,7 +62,7 @@ export interface AppMenuPopoverActions extends AppMenuActionBase {
   readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
   readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  readonly actions: AppMenuPopoverAction[];
+  readonly actions: AppMenuAction[];
 }
 
 export type AppMenuItem = AppMenuPopoverActions | AppMenuAction | AppMenuIconAction;
