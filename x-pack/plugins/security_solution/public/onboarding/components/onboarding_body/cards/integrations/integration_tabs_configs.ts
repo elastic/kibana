@@ -33,7 +33,7 @@ export const INTEGRATION_TABS: Tab[] = [
     category: 'security',
     id: IntegrationTabId.network,
     label: 'Network',
-    subCategory: 'network_security',
+    subCategory: 'network',
     showSearchTools: true,
     sortByFeaturedIntegrations: true,
   },
