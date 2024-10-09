@@ -80,7 +80,6 @@ export const buildTimelineEventsAllQuery = ({
       runtime_mappings: runtimeMappings,
       from: activePage * querySize,
       size: querySize,
-      wait_for_completion: true,
       track_total_hits: true,
       sort: getSortField(sort),
       fields: [
