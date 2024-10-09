@@ -74,7 +74,6 @@
     "@kbn/optimizer-webpack-helpers",
     "@kbn/storybook",
     "@kbn/core-apps-server-internal",
-    "@kbn/flot-charts",
     "@kbn/shared-ux-router",
     "@kbn/babel-register",
     "@kbn/shared-ux-button-toolbar",

@@ -9,6 +9,5 @@ import 'core-js/stable';
 import '@babel/runtime/regenerator';
 import 'whatwg-fetch';
 import 'jquery';
-import '@kbn/flot-charts';
 
 export * from './shareable';
