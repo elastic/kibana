@@ -43,8 +43,14 @@ interface Props extends PropsWithChildren<{}> {
   onFinishTour: () => void;
 }
 
-export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, onFinishTour }) => {
-  const solutionLabel = solutionMap[solution ?? 'classic'];
+export const SolutionViewTour: FC<Props> = ({
+  children,
+  solution = 'classic',
+  isTourOpen: _isTourOpen,
+  onFinishTour,
+}) => {
+  const solutionLabel = solutionMap[solution];
+  const isTourOpen = solution === 'classic' ? false : _isTourOpen;
 
   return (
     <EuiTourStep
