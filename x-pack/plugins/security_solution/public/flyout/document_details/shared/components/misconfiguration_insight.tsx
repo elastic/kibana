@@ -10,22 +10,36 @@ import { EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { InsightDistributionBar } from '../../../flyout/document_details/shared/components/insight_distribution_bar';
-import { getFindingsStats } from './misconfiguration_preview';
+import { InsightDistributionBar } from './insight_distribution_bar';
+import { getFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
+
+interface MisconfigurationsInsightProps {
+  /**
+   *  Entity name to retrieve misconfigurations for
+   */
+  name: string;
+  /**
+   * Indicator whether the entity is host or user
+   */
+  fieldName: 'host.name' | 'user.name';
+  /**
+   * The direction of the flex group
+   */
+  direction?: EuiFlexGroupProps['direction'];
+  /**
+   * The data-test-subj to use for the component
+   */
+  ['data-test-subj']?: string;
+}
 
 /*
- * Misconfigurations insight in the alert/event flyout.
+ * Displays a distribution bar with the count of failed misconfigurations for a given entity
  */
-export const MisconfigurationsInsight = ({
+export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> = ({
   name,
   fieldName,
   direction,
   'data-test-subj': dataTestSubj,
-}: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
-  direction?: EuiFlexGroupProps['direction'];
-  ['data-test-subj']?: string;
 }) => {
   const { data } = useMisconfigurationPreview({
     query: buildEntityFlyoutPreviewQuery(fieldName, name),

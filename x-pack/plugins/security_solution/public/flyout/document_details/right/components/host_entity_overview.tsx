@@ -60,8 +60,8 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
-import { MisconfigurationsInsight } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../../../cloud_security_posture/components/vulnerabilities/vulnerabilities_insight';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const HOST_ICON = 'storage';

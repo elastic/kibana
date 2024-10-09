@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { VulnerabilitiesInsight } from './vulnerabilities_insight';

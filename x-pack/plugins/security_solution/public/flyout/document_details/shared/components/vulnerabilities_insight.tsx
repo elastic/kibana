@@ -11,19 +11,30 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
-import { InsightDistributionBar } from '../../../flyout/document_details/shared/components/insight_distribution_bar';
+import { InsightDistributionBar } from './insight_distribution_bar';
+
+interface VulnerabilitiesInsightProps {
+  /**
+   *  Host name to retrieve vulnerabilities for
+   */
+  hostName: string;
+  /**
+   * The direction of the flex group
+   */
+  direction?: EuiFlexGroupProps['direction'];
+  /**
+   * The data-test-subj to use for the component
+   */
+  ['data-test-subj']?: string;
+}
 
 /*
- * Vulnerabilities insight in the alert/event flyout.
+ * Displays a distribution bar with the count of critical vulnerabilities for a given host
  */
-export const VulnerabilitiesInsight = ({
+export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   hostName,
   direction,
   'data-test-subj': dataTestSubj,
-}: {
-  hostName: string;
-  direction?: EuiFlexGroupProps['direction'];
-  ['data-test-subj']?: string;
 }) => {
   const { data } = useVulnerabilitiesPreview({
     query: buildEntityFlyoutPreviewQuery('host.name', hostName),

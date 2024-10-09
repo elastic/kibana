@@ -19,19 +19,33 @@ import {
 
 const ENTITY_ALERT_COUNT_ID = 'entity-alert-count';
 
+interface AlertCountInsightProps {
+  /**
+   * The name of the entity to filter the alerts by.
+   */
+  name: string;
+  /**
+   * The field name to filter the alerts by.
+   */
+  fieldName: 'host.name' | 'user.name';
+  /**
+   * The direction of the flex group.
+   */
+  direction?: EuiFlexGroupProps['direction'];
+  /**
+   * The data-test-subj to use for the component.
+   */
+  ['data-test-subj']?: string;
+}
+
 /*
- * Alert count insight in the alert/event flyout.
+ * Displays a distribution bar with the count of critical alerts for a given entity
  */
-export const AlertCountInsight = ({
+export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   name,
   fieldName,
   direction,
   'data-test-subj': dataTestSubj,
-}: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
-  direction?: EuiFlexGroupProps['direction'];
-  ['data-test-subj']?: string;
 }) => {
   const uniqueQueryId = useMemo(() => `${ENTITY_ALERT_COUNT_ID}-${uuid()}`, []);
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);

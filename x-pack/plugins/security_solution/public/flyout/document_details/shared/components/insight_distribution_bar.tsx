@@ -71,7 +71,7 @@ export const InsightDistributionBar: React.FC<InsightDistributionBarProps> = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs">
+        <EuiFlexGroup gutterSize="xs" responsive={false}>
           <EuiFlexItem>
             <DistributionBar
               stats={stats}
