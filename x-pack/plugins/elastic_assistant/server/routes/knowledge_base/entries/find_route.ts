@@ -26,7 +26,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { ESQL_RESOURCE, SECURITY_LABS_RESOURCE } from '../constants';
+import { SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -108,12 +108,6 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
 
           const systemEntries = [
-            {
-              bucketId: 'esqlDocsId',
-              kbResource: ESQL_RESOURCE,
-              name: 'ES|QL documents',
-              required: true,
-            },
             {
               bucketId: 'securityLabsId',
               kbResource: SECURITY_LABS_RESOURCE,
