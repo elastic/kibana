@@ -295,10 +295,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
       const response = hapiResponseAdapter.toBadRequest(error.message);
-      response.output.headers = {
-        ...response.output.headers,
-        ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
-      };
+      if (isPublicUnversionedRoute) {
+        response.output.headers = {
+          ...response.output.headers,
+          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+        };
+      }
       return response;
     }
 
