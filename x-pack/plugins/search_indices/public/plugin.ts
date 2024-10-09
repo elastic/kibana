@@ -16,6 +16,8 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
+import { INDICES_APP_ID, START_APP_ID } from '../common';
+import { INDICES_APP_BASE, START_APP_BASE } from './routes';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -26,8 +28,8 @@ export class SearchIndicesPlugin
     const queryClient = initQueryClient(core.notifications.toasts);
 
     core.application.register({
-      id: 'elasticsearchStart',
-      appRoute: '/app/elasticsearch/start',
+      id: START_APP_ID,
+      appRoute: START_APP_BASE,
       title: i18n.translate('xpack.searchIndices.elasticsearchStart.startAppTitle', {
         defaultMessage: 'Elasticsearch Start',
       }),
@@ -43,8 +45,8 @@ export class SearchIndicesPlugin
       },
     });
     core.application.register({
-      id: 'elasticsearchIndices',
-      appRoute: '/app/elasticsearch/indices',
+      id: INDICES_APP_ID,
+      appRoute: INDICES_APP_BASE,
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.startAppTitle', {
         defaultMessage: 'Elasticsearch Indices',
       }),
@@ -62,12 +64,18 @@ export class SearchIndicesPlugin
 
     return {
       enabled: true,
+      startAppId: START_APP_ID,
+      startRoute: START_APP_BASE,
     };
   }
 
   public start(core: CoreStart): SearchIndicesPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
-    return {};
+    return {
+      enabled: true,
+      startAppId: START_APP_ID,
+      startRoute: START_APP_BASE,
+    };
   }
 
   public stop() {}

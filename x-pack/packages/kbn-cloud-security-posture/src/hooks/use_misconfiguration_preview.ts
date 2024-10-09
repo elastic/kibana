@@ -38,7 +38,7 @@ export const useMisconfigurationPreview = (options: UseCspOptions) => {
           params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );
-      if (!aggregations && !options.ignore_unavailable)
+      if (!aggregations && options.ignore_unavailable === false)
         throw new Error('expected aggregations to be defined');
       return {
         count: getMisconfigurationAggregationCount(aggregations?.count?.buckets),
