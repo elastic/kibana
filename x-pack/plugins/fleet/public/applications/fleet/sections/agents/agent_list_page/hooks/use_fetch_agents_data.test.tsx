@@ -146,7 +146,7 @@ describe('useFetchAgentsData', () => {
       },
     });
     expect(result?.current.kuery).toEqual(
-      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline'
+      'not (local_metadata.host.hostname : "agentless*" and status:offline) and (status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline)'
     );
     expect(result?.current.currentRequestRef).toEqual({ current: 2 });
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
