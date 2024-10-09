@@ -33,7 +33,7 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
   try {
     muteAllRuleParamsSchema.validate(params);
   } catch (error) {
-    throw Boom.badRequest(`Error validating enable rule parameters - ${error.message}`);
+    throw Boom.badRequest(`Error validating mute all parameters - ${error.message}`);
   }
 
   const { id } = params;
