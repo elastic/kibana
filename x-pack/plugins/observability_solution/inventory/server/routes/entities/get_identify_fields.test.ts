@@ -34,7 +34,7 @@ describe('getIdentityFields', () => {
     expect(result.size).toBe(3);
 
     expect(result.get('service')).toEqual(['service.name', 'service.environment']);
-    expect(result.get('host')).toEqual('host.name');
-    expect(result.get('container')).toEqual('contaier.id');
+    expect(result.get('host')).toEqual(['host.name']);
+    expect(result.get('container')).toEqual(['contaier.id']);
   });
 });

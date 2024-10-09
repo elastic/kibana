@@ -5,9 +5,26 @@
  * 2.0.
  */
 
-import { castArray, merge } from 'lodash';
-import stableStringify from 'json-stable-stringify';
 import { UnionToIntersection, ValuesType } from 'utility-types';
+import { merge, castArray } from 'lodash';
+import stableStringify from 'json-stable-stringify';
+
+export type JoinedReturnType<
+  T extends Record<string, any>,
+  U extends UnionToIntersection<T>
+> = Array<
+  Partial<U> & {
+    [k in keyof T]: T[k];
+  }
+>;
+
+type ArrayOrSingle<T> = T | T[];
+
+export function joinByKey<
+  T extends Record<string, any>,
+  U extends UnionToIntersection<T>,
+  V extends ArrayOrSingle<keyof T & keyof U>
+>(items: T[], key: V): JoinedReturnType<T, U>;
 
 export function joinByKey<
   T extends Record<string, any>,
@@ -17,6 +34,7 @@ export function joinByKey<
   X extends (a: T, b: T) => ValuesType<W>
 >(items: T[], key: V, mergeFn: X): W;
 
+// TODO util already exists in apm and other plugins. Move it to oblt shared
 export function joinByKey(
   items: Array<Record<string, any>>,
   key: string | string[],

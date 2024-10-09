@@ -5,73 +5,61 @@
  * 2.0.
  */
 
-import { EntityType } from '../../../common/entities';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
+import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 describe('getGroupByTermsAgg', () => {
-  it('should return an empty object when no fields are provided', () => {
-    const result = getGroupByTermsAgg([]);
+  it('should return an empty object when fields is empty', () => {
+    const fields: IdentityFieldsPerEntityType = new Map();
+    const result = getGroupByTermsAgg(fields);
     expect(result).toEqual({});
   });
 
-  it('should return a valid aggregation structure for a single field', () => {
-    const fields = new Map(['host' as EntityType, 'host.name']);
+  it('should correctly generate aggregation structure for service, host, and container entity types', () => {
+    const fields: IdentityFieldsPerEntityType = new Map([
+      ['service', ['service.name', 'service.environment']],
+      ['host', ['host.name']],
+      ['container', ['container.id', 'foo.bar']],
+    ]);
+
     const result = getGroupByTermsAgg(fields);
+
     expect(result).toEqual({
-      host: {
-        terms: {
-          field: 'host.name',
+      service: {
+        composite: {
           size: 500,
+          sources: [
+            { 'service.name': { terms: { field: 'service.name' } } },
+            { 'service.environment': { terms: { field: 'service.environment' } } },
+          ],
+        },
+      },
+      host: {
+        composite: {
+          size: 500,
+          sources: [{ 'host.name': { terms: { field: 'host.name' } } }],
+        },
+      },
+      container: {
+        composite: {
+          size: 500,
+          sources: [
+            {
+              'container.id': {
+                terms: { field: 'container.id' },
+              },
+            },
+            {
+              'foo.bar': { terms: { field: 'foo.bar' } },
+            },
+          ],
         },
       },
     });
   });
-
-  // it('should return a valid aggregation structure for multiple fields', () => {
-  //   const result = getGroupByTermsAgg(['host.name', 'service.name']);
-  //   expect(result).toEqual({
-  //     'host.name': {
-  //       terms: {
-  //         field: 'host.name',
-  //         size: 500,
-  //       },
-  //     },
-  //     'service.name': {
-  //       terms: {
-  //         field: 'service.name',
-  //         size: 500,
-  //       },
-  //     },
-  //   });
-  // });
-
-  // it('should allow overriding the default maxSize value', () => {
-  //   const result = getGroupByTermsAgg(['host.name'], 100);
-  //   expect(result).toEqual({
-  //     'host.name': {
-  //       terms: {
-  //         field: 'host.name',
-  //         size: 100,
-  //       },
-  //     },
-  //   });
-  // });
-
-  // it('should apply maxSize to all fields', () => {
-  //   const result = getGroupByTermsAgg(['host.name', 'service.name'], 200);
-  //   expect(result).toEqual({
-  //     'host.name': {
-  //       terms: {
-  //         field: 'host.name',
-  //         size: 200,
-  //       },
-  //     },
-  //     'service.name': {
-  //       terms: {
-  //         field: 'service.name',
-  //         size: 200,
-  //       },
-  //     },
-  //   });
-  // });
+  it('should override maxSize when provided', () => {
+    const fields: IdentityFieldsPerEntityType = new Map([['host', ['host.name']]]);
+    const result = getGroupByTermsAgg(fields, 10);
+    expect(result.host.composite.size).toBe(10);
+  });
 });
