@@ -77,14 +77,17 @@ export const createModifiedPrebuiltRuleAssets = ({
           }
         }
 
-        return createModifiedPrebuiltRuleAsset({
-          processedRules,
+        const modifiedPrebuiltRuleAsset = createModifiedPrebuiltRuleAsset({
           upgradeableRule,
           fieldNames,
           requestBody,
           globalPickVersion,
           calculatedRuleDiff,
         });
+
+        processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
+
+        return processedRules;
       } catch (err) {
         processedRules.processingErrors.push({
           error: err,
@@ -107,7 +110,6 @@ export const createModifiedPrebuiltRuleAssets = ({
 };
 
 interface CreateModifiedPrebuiltRuleAssetParams {
-  processedRules: ProcessedRules;
   upgradeableRule: RuleTriad;
   fieldNames: Array<keyof PrebuiltRuleAsset>;
   globalPickVersion: PickVersionValues;
@@ -116,18 +118,17 @@ interface CreateModifiedPrebuiltRuleAssetParams {
 }
 
 function createModifiedPrebuiltRuleAsset({
-  processedRules,
   upgradeableRule,
   fieldNames,
   globalPickVersion,
   requestBody,
   calculatedRuleDiff,
-}: CreateModifiedPrebuiltRuleAssetParams) {
-  const rulePayload: Partial<PrebuiltRuleAsset> = {};
+}: CreateModifiedPrebuiltRuleAssetParams): PrebuiltRuleAsset {
+  const modifiedPrebuiltRuleAsset: Partial<PrebuiltRuleAsset> = {};
 
   for (const fieldName of fieldNames) {
     // TODO: try to get the return type of getFieldPredefinedValue to be more specific, not ANY
-    rulePayload[fieldName] = getValueForField({
+    modifiedPrebuiltRuleAsset[fieldName] = getValueForField({
       fieldName,
       upgradeableRule,
       globalPickVersion,
@@ -135,9 +136,8 @@ function createModifiedPrebuiltRuleAsset({
       ruleFieldsDiff: calculatedRuleDiff,
     });
   }
-  processedRules.modifiedPrebuiltRuleAssets.push(rulePayload as PrebuiltRuleAsset);
 
-  return processedRules;
+  return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
 }
 
 const getFieldsDiffConflicts = (ruleFieldsDiff: Partial<AllFieldsDiff>) =>
