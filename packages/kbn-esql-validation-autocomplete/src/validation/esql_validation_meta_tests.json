@@ -9836,30 +9836,22 @@
     },
     {
       "query": "fRoM remote-*:indexes*",
-      "error": [
-        "Unknown index [remote-*:indexes*]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "fRoM remote-*:indexes",
-      "error": [
-        "Unknown index [remote-*:indexes]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "fRoM remote-ccs:indexes",
-      "error": [
-        "Unknown index [remote-ccs:indexes]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "fRoM a_index, remote-ccs:indexes",
-      "error": [
-        "Unknown index [remote-ccs:indexes]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9996,18 +9988,14 @@
     },
     {
       "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": [
-        "Unknown index [remote-ccs:indexes]"
-      ],
+      "error": [],
       "warning": [
         "Square brackets '[]' need to be removed from FROM METADATA declaration"
       ]
     },
     {
       "query": "from *:indexes [METADATA _id]",
-      "error": [
-        "Unknown index [*:indexes]"
-      ],
+      "error": [],
       "warning": [
         "Square brackets '[]' need to be removed from FROM METADATA declaration"
       ]
@@ -10052,16 +10040,12 @@
     },
     {
       "query": "from remote-ccs:indexes METADATA _id",
-      "error": [
-        "Unknown index [remote-ccs:indexes]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "from *:indexes METADATA _id",
-      "error": [
-        "Unknown index [*:indexes]"
-      ],
+      "error": [],
       "warning": []
     },
     {
