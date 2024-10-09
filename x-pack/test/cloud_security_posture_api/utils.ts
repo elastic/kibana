@@ -44,13 +44,16 @@ export class EsIndexDataProvider {
     this.index = index;
   }
 
-  addBulk(docs: Array<Record<string, any>>, overrideTimestamp = true) {
+  async addBulk(docs: Array<Record<string, any>>, overrideTimestamp = true) {
     const operations = docs.flatMap((doc) => [
       { index: { _index: this.index } },
       { ...doc, ...(overrideTimestamp ? { '@timestamp': new Date().toISOString() } : {}) },
     ]);
 
-    return this.es.bulk({ refresh: 'wait_for', index: this.index, operations });
+    const resp = await this.es.bulk({ refresh: 'wait_for', index: this.index, operations });
+    expect(resp.errors).length(0, `Error in bulk indexing: ${JSON.stringify(resp)}`);
+
+    return resp;
   }
 
   async deleteAll() {

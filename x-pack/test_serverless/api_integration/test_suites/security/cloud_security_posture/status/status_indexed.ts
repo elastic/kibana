@@ -13,11 +13,8 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import {
-  deleteIndex,
-  addIndex,
-  createPackagePolicy,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import {
   findingsMockData,
   vulnerabilityMockData,
@@ -40,6 +37,11 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const latestVulnerabilitiesIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
+  );
 
   describe('GET /internal/cloud_security_posture/status', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
@@ -74,18 +76,20 @@ export default function (providerContext: FtrProviderContext) {
 
         agentPolicyId = agentPolicyResponse.item.id;
 
-        await deleteIndex(es, INDEX_ARRAY);
-        await addIndex(es, findingsMockData, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-        await addIndex(es, vulnerabilityMockData, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+        await latestFindingsIndex.deleteAll();
+        await latestVulnerabilitiesIndex.deleteAll();
       });
 
       afterEach(async () => {
-        await deleteIndex(es, INDEX_ARRAY);
+        await latestFindingsIndex.deleteAll();
+        await latestVulnerabilitiesIndex.deleteAll();
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
       it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
+        await latestFindingsIndex.addBulk(findingsMockData);
+
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -112,6 +116,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
+        await latestFindingsIndex.addBulk(findingsMockData);
+
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -138,6 +144,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {
+        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
+
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,

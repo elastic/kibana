@@ -20,7 +20,6 @@ import {
   createCSPOnlyRole,
   deleteRole,
   deleteUser,
-  deleteIndex,
   assertIndexStatus,
 } from '../helper';
 
@@ -32,7 +31,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
@@ -171,7 +169,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
-        await deleteIndex(es, [BENCHMARK_SCORE_INDEX_DEFAULT_NS]);
         await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
