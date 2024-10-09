@@ -10,7 +10,10 @@ import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } fro
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 
@@ -24,10 +27,37 @@ export const EntityInsight = <T,>({
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const getSetupStatus = useCspSetupStatusApi();
-  const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
-  const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
   const insightContent: React.ReactElement[] = [];
+
+  const { data: dataMisconfiguration } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery(fieldName, name),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = dataMisconfiguration?.count.passed || 0;
+  const failedFindings = dataMisconfiguration?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+
+  const { data } = useVulnerabilitiesPreview({
+    query: buildEntityFlyoutPreviewQuery(fieldName, name),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
+
+  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
+    critical: CRITICAL,
+    high: HIGH,
+    medium: MEDIUM,
+    low: LOW,
+    none: NONE,
+  });
+
   const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
 
   if (hasMisconfigurationFindings)
@@ -37,16 +67,17 @@ export const EntityInsight = <T,>({
         <EuiSpacer size="m" />
       </>
     );
-  if (isVulnerabilitiesFindingForHost)
+  if (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)
     insightContent.push(
       <>
-        <VulnerabilitiesPreview hostName={name} />
+        <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="m" />
       </>
     );
   return (
     <>
-      {(hasMisconfigurationFindings || isVulnerabilitiesFindingForHost) && (
+      {(hasMisconfigurationFindings ||
+        (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)) && (
         <>
           <EuiAccordion
             initialIsOpen={true}
