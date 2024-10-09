@@ -12,7 +12,6 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
 import type { AiopsPluginStartDeps } from '../types';
 
@@ -32,7 +31,16 @@ export function createAddChangePointChartAction(
 ): UiActionsActionDefinition<ChangePointChartActionContext> {
   return {
     id: 'create-change-point-chart',
-    grouping: AIOPS_EMBEDDABLE_GROUPING,
+    grouping: [
+      {
+        id: 'ml',
+        getDisplayName: () =>
+          i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
+            defaultMessage: 'Machine Learning and Analytics',
+          }),
+        getIconType: () => 'machineLearningApp',
+      },
+    ],
     order: 10,
     getIconType: () => 'changePointDetection',
     getDisplayName: () =>
