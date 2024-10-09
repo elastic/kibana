@@ -58,5 +58,6 @@ export const TEST_DIR = new Set([
   'storybook',
   '.storybook',
   'integration_tests',
+  'ui_tests',
   ...RANDOM_TEST_FILE_NAMES,
 ]);
