@@ -62,7 +62,6 @@ RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",
-  "@npm//util",
   "@npm//uuid",
   "@npm//io-ts",
   "@npm//@reduxjs/toolkit",
