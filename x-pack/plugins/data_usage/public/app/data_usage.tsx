@@ -26,7 +26,6 @@ import { PLUGIN_NAME } from '../../common';
 import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from './hooks/use_date_picker';
 import { useDataUsageMetricsUrlParams } from './hooks/use_charts_url_params';
-import { MetricsResponse } from './types';
 
 export const DataUsage = () => {
   const {
@@ -140,7 +139,7 @@ export const DataUsage = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        {isFetched && data ? <Charts data={data as MetricsResponse} /> : <EuiLoadingElastic />}
+        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
       </EuiPageSection>
     </>
   );

@@ -9,8 +9,10 @@ import { RequestHandler } from '@kbn/core/server';
 import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MetricTypes,
+  UsageMetricsAutoOpsResponseSchema,
+  UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestSchemaQueryParams,
-  UsageMetricsResponseSchema,
+  UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
@@ -34,8 +36,7 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
 
-      // @ts-ignore
-      const { from, to, metricTypes, dataStreams: dsNames, size } = request.query;
+      const { from, to, metricTypes, dataStreams: dsNames } = request.query;
       logger.debug(`Retrieving usage metrics`);
 
       const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
@@ -69,9 +70,11 @@ export const getUsageMetricsHandler = (
         dataStreams: formatStringParams(userDsNames),
       });
 
+      const processedMetrics = transformMetricsData(metrics);
+
       return response.ok({
         body: {
-          metrics,
+          ...processedMetrics,
         },
       });
     } catch (error) {
@@ -94,7 +97,7 @@ const fetchMetricsFromAutoOps = async ({
 }) => {
   // TODO: fetch data from autoOps using userDsNames
   /*
-    const response = await axios.post('https://api.auto-ops.{region}.{csp}.cloud.elastic.co/monitoring/serverless/v1/projects/{project_id}/metrics', {
+    const response = await axios.post({AUTOOPS_URL}, {
       from: Date.parse(from),
       to: Date.parse(to),
       metric_types: metricTypes,
@@ -231,7 +234,25 @@ const fetchMetricsFromAutoOps = async ({
     },
   };
   // Make sure data is what we expect
-  const validatedData = UsageMetricsResponseSchema.body().validate(mockData);
+  const validatedData = UsageMetricsAutoOpsResponseSchema.body().validate(mockData);
 
-  return validatedData.metrics;
+  return validatedData;
 };
+function transformMetricsData(
+  data: UsageMetricsAutoOpsResponseSchemaBody
+): UsageMetricsResponseSchemaBody {
+  return {
+    metrics: Object.fromEntries(
+      Object.entries(data.metrics).map(([metricType, series]) => [
+        metricType,
+        series.map((metricSeries) => ({
+          name: metricSeries.name,
+          data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+            x: timestamp,
+            y: value,
+          })),
+        })),
+      ])
+    ),
+  };
+}
