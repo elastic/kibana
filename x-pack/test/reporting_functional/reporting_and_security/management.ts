@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -56,10 +57,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/195144
-    describe.skip('Download report', () => {
+    describe('Download report', () => {
       // use archived reports to allow reporting_user to view report jobs they've created
-      before('log in as reporting user', async () => {
+      before(async () => {
+        try {
+          await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+        } catch (error) {
+          //
+        }
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       });
 
@@ -68,21 +73,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('user can access download link', async () => {
-        await reportingFunctional.loginReportingUser();
         await PageObjects.common.navigateToApp('reporting');
         await testSubjects.existOrFail('reportJobListing');
 
-        await testSubjects.existOrFail('reportDownloadLink-kraz9db6154g0763b5141viu');
+        const csvReportLink = await testSubjects.find('viewReportingLink-krazcyw4156m0763b503j7f9');
+        expect(await csvReportLink.getVisibleText()).to.be('report jobtype: csv_searchsource'); // report title indicates the jobtype
+        await testSubjects.existOrFail('reportDownloadLink-krazcyw4156m0763b503j7f9');
       });
 
       it('user can access download link for export type that is no longer supported', async () => {
-        await reportingFunctional.loginReportingUser();
         await PageObjects.common.navigateToApp('reporting');
         await testSubjects.existOrFail('reportJobListing');
 
-        // The "csv" export type, aka CSV V1, was removed and can no longer be created.
-        // Downloading a report of this export type does still work
-        await testSubjects.existOrFail('reportDownloadLink-krb7arhe164k0763b50bjm31');
+        const csvReportLink = await testSubjects.find('viewReportingLink-krb7arhe164k0763b50bjm29');
+        expect(await csvReportLink.getVisibleText()).to.be('report jobtype: csv'); // report title indicates the removed jobtype
+        await testSubjects.existOrFail('reportDownloadLink-krb7arhe164k0763b50bjm29');
       });
     });
   });
