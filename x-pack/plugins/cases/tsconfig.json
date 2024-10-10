@@ -77,6 +77,7 @@
     "@kbn/presentation-publishing",
     "@kbn/securitysolution-rules",
     "@kbn/alerts-ui-shared",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",
