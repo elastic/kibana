@@ -88,6 +88,8 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
       ];
+    case VULNERABILITY_GROUPING_OPTIONS.CVE:
+      return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
 };
@@ -103,13 +105,28 @@ const getRuntimeMappingsByGroupField = (
   switch (field) {
     case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return {
+        [VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
+          type: 'keyword',
+        },
         [VULNERABILITY_FIELDS.CLOUD_PROVIDER]: {
           type: 'keyword',
         },
       };
     case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
       return {
+        [VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME]: {
+          type: 'keyword',
+        },
         [VULNERABILITY_FIELDS.RESOURCE_ID]: {
+          type: 'keyword',
+        },
+      };
+    case VULNERABILITY_GROUPING_OPTIONS.CVE:
+      return {
+        [VULNERABILITY_GROUPING_OPTIONS.CVE]: {
+          type: 'keyword',
+        },
+        [VULNERABILITY_FIELDS.DESCRIPTION]: {
           type: 'keyword',
         },
       };

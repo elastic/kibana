@@ -125,6 +125,9 @@ const getRuntimeMappingsByGroupField = (
   switch (field) {
     case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
       return {
+        [FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME]: {
+          type: 'keyword',
+        },
         'resource.id': {
           type: 'keyword',
         },
@@ -137,13 +140,30 @@ const getRuntimeMappingsByGroupField = (
       };
     case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
       return {
+        [FINDINGS_GROUPING_OPTIONS.RULE_NAME]: {
+          type: 'keyword',
+        },
         'rule.benchmark.version': {
           type: 'keyword',
         },
       };
     case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return {
+        [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
+          type: 'keyword',
+        },
+        'rule.benchmark.name': {
+          type: 'keyword',
+        },
+        'rule.benchmark.id': {
+          type: 'keyword',
+        },
+      };
     case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return {
+        [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: {
+          type: 'keyword',
+        },
         'rule.benchmark.name': {
           type: 'keyword',
         },

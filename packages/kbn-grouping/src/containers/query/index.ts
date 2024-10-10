@@ -56,8 +56,8 @@ export const getGroupingQuery = ({
       type: 'keyword',
       script: {
         source:
-          // when doc misses the field, or it's size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
-          "if (!doc.containsKey(params['selectedGroup']) || doc[params['selectedGroup']].empty || doc[params['selectedGroup']].size() == 0) { emit(params['uniqueValue']) }" +
+          // when size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
+          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
           // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
           // the runtime field will only return the first value in an array.
           // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
