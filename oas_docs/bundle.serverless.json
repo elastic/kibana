@@ -40128,7 +40128,20 @@
                       "additionalProperties": false,
                       "properties": {
                         "delete_unenrolled_agents": {
-                          "type": "boolean"
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
                         },
                         "fleet_server_hosts": {
                           "items": {
@@ -40275,7 +40288,20 @@
                     "type": "string"
                   },
                   "delete_unenrolled_agents": {
-                    "type": "boolean"
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "is_preconfigured"
+                    ],
+                    "type": "object"
                   },
                   "fleet_server_hosts": {
                     "items": {
@@ -40317,7 +40343,20 @@
                       "additionalProperties": false,
                       "properties": {
                         "delete_unenrolled_agents": {
-                          "type": "boolean"
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
                         },
                         "fleet_server_hosts": {
                           "items": {
