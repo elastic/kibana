@@ -61,7 +61,7 @@ export class InventoryPlugin
         from(pluginsStart.spaces.getActiveSpace()).pipe(
           map(
             (space) =>
-              space.disabledFeatures.includes('inventory') ||
+              space.disabledFeatures.includes(INVENTORY_APP_ID) ||
               !coreStart.application.capabilities.inventory.show
           )
         )
