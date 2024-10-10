@@ -1,8 +1,26 @@
-## MV_SLICE
+# MV_SLICE
 
-The `MV_SLICE` function returns a subset of the multivalued field using the start and end index values.
+The MV_SLICE function is used to extract a subset of a multivalued field using specified start and end index values.
 
-### Examples
+## Syntax
+
+`MV_SLICE(field, start, end)`
+
+### Parameters
+
+#### field
+
+This is a multivalue expression. If `null`, the function will return `null`.
+
+#### start
+
+This is the start position. If `null`, the function will return `null`. The start argument can be negative, where an index of -1 is used to specify the last value in the list.
+
+#### end
+
+This is the end position (included). This parameter is optional; if omitted, the position at `start` is returned. The end argument can be negative, where an index of -1 is used to specify the last value in the list.
+
+## Examples
 
 ```esql
 ROW a = [1, 2, 2, 3]

@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../services/types';
 
 type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
       .post(`/internal/status_plugin_a/status/set?level=${level}`)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
   describe('status service', function () {

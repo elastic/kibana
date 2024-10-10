@@ -27,7 +27,8 @@ export {
   hasStartEndParams,
   prettifyQuery,
   isQueryWrappedByPipes,
-  retieveMetadataColumns,
+  retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
   TextBasedLanguages,
 } from './src';
 

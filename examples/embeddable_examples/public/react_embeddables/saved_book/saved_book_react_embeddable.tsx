@@ -13,6 +13,7 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  apiHasParentApi,
   initializeTitles,
   SerializedTitles,
   useBatchedPublishingSubjects,
@@ -20,6 +21,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
 import { SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
@@ -137,6 +139,10 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         }
       );
 
+      const showLibraryCallout =
+        apiHasParentApi(api) &&
+        typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function';
+
       return {
         api,
         Component: () => {
@@ -155,20 +161,22 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                 width: 100%;
               `}
             >
-              <EuiCallOut
-                size="s"
-                color={'warning'}
-                title={
-                  savedBookId
-                    ? i18n.translate('embeddableExamples.savedBook.libraryCallout', {
-                        defaultMessage: 'Saved in library',
-                      })
-                    : i18n.translate('embeddableExamples.savedBook.noLibraryCallout', {
-                        defaultMessage: 'Not saved in library',
-                      })
-                }
-                iconType={savedBookId ? 'folderCheck' : 'folderClosed'}
-              />
+              {showLibraryCallout && (
+                <EuiCallOut
+                  size="s"
+                  color={'warning'}
+                  title={
+                    savedBookId
+                      ? i18n.translate('embeddableExamples.savedBook.libraryCallout', {
+                          defaultMessage: 'Saved in library',
+                        })
+                      : i18n.translate('embeddableExamples.savedBook.noLibraryCallout', {
+                          defaultMessage: 'Not saved in library',
+                        })
+                  }
+                  iconType={savedBookId ? 'folderCheck' : 'folderClosed'}
+                />
+              )}
               <div
                 css={css`
                   padding: ${euiThemeVars.euiSizeM};

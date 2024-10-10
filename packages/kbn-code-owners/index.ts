@@ -8,4 +8,8 @@
  */
 
 export type { PathWithOwners } from './src/file_code_owner';
-export { getPathsWithOwnersReversed, getCodeOwnersForFile } from './src/file_code_owner';
+export {
+  getPathsWithOwnersReversed,
+  getCodeOwnersForFile,
+  runGetOwnersForFileCli,
+} from './src/file_code_owner';

@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -52,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 for an existing object', async () =>
       await supertest
         .post(endpoint)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([validObject])
         .expect(200)
         .then((response: Response) => {
@@ -62,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return error for invalid object type', async () =>
       await supertest
         .post(endpoint)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([invalidObject])
         .expect(200)
         .then((response: Response) => {
@@ -72,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return mix of successes and errors', async () =>
       await supertest
         .post(endpoint)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([validObject, invalidObject])
         .expect(200)
         .then((response: Response) => {

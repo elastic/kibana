@@ -16,7 +16,7 @@ import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { SerializedVis, Vis, VisSavedObject, VisualizeEmbeddableContract } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
-import { VisualizeInput } from '../../embeddable';
+import { VisualizeInput } from '../../legacy/embeddable';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;

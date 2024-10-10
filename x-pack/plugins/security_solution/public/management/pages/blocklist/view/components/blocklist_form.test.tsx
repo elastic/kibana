@@ -11,7 +11,6 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import type { BlocklistEntry } from './blocklist_form';
 import { BlockListForm } from './blocklist_form';
@@ -25,6 +24,8 @@ import { ERRORS } from '../../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
+import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -38,6 +39,58 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
+const blocklistOperatorFieldTestCases = [
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.path',
+    fieldText: 'Path, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.Ext.code_signature',
+    fieldText: 'Signature, ',
+    osText: 'Windows, ',
+    isMulti: true,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
+];
+
 describe('blocklist form', () => {
   let user: UserEvent;
   let onChangeSpy: jest.Mock;
@@ -47,8 +100,8 @@ describe('blocklist form', () => {
   function createEntry(field: BlocklistConditionEntryField, value: string[]): BlocklistEntry {
     return {
       field,
-      operator: 'included',
-      type: 'match_any',
+      operator: ListOperatorEnum.INCLUDED,
+      type: ListOperatorTypeEnum.MATCH_ANY,
       value,
     };
   }
@@ -57,7 +110,7 @@ describe('blocklist form', () => {
     overrides: Partial<ArtifactFormComponentProps['item']> = {}
   ): ArtifactFormComponentProps['item'] {
     const defaults: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: '',
       description: '',
       entries: [],
@@ -196,6 +249,41 @@ describe('blocklist form', () => {
     render();
     expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
   });
+
+  describe.each(blocklistOperatorFieldTestCases)(
+    'should correctly render operator field for $os OS, $fieldText',
+    ({ os, field, fieldText, osText, isMulti }) => {
+      it(`should correctly render operator field for ${os} OS, ${fieldText}`, () => {
+        const validItem: ArtifactFormComponentProps['item'] = {
+          list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+          name: 'test name',
+          description: 'test description',
+          entries: [createEntry(field as BlocklistConditionEntryField, isMulti ? ['hello'] : [])],
+          os_types: [os],
+          tags: [GLOBAL_ARTIFACT_TAG],
+          type: 'simple',
+        };
+
+        render(createProps({ item: validItem }));
+        expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual(osText);
+        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual(fieldText);
+
+        if (isMulti) {
+          expect(screen.queryByTestId('blocklist-form-operator-select-single')).toBeNull();
+          const element = screen.getByTestId('blocklist-form-operator-select-multi');
+          expect(element).toBeTruthy();
+          expect(element.textContent).toEqual('is one of, ');
+          expect(element).not.toHaveAttribute('readonly');
+        } else {
+          expect(screen.queryByTestId('blocklist-form-operator-select-multi')).toBeNull();
+          const element = screen.getByTestId('blocklist-form-operator-select-single');
+          expect(element).toBeTruthy();
+          expect(element).toHaveValue('is one of');
+          expect(element).toHaveAttribute('readonly');
+        }
+      });
+    }
+  );
 
   it('should allow all 3 fields when Windows OS is selected', async () => {
     render();
@@ -444,7 +532,7 @@ describe('blocklist form', () => {
 
   it('should be valid if all required inputs complete', async () => {
     const validItem: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: 'test name',
       description: 'test description',
       entries: [

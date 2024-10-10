@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -15,7 +16,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const sendRequest = (query: object) =>
-    supertest.get('/api/console/autocomplete_entities').query(query);
+    supertest
+      .get('/api/console/autocomplete_entities')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(query);
 
   describe('/api/console/autocomplete_entities', function () {
     const indexName = 'test-index-1';

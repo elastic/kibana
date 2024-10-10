@@ -19,7 +19,8 @@ export {
   getTimeFieldFromESQLQuery,
   prettifyQuery,
   isQueryWrappedByPipes,
-  retieveMetadataColumns,
+  retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export {

@@ -16,6 +16,7 @@
       ],
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
+      "include_named_queries_score": "__flag__",
       "max_concurrent_searches": "",
       "max_concurrent_shard_requests": [
         "5"

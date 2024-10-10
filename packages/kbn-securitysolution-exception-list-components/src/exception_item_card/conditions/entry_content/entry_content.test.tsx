@@ -53,6 +53,6 @@ describe('EntryContent', () => {
     expect(wrapper.getByTestId('EntryContentNestedEntry')).toBeInTheDocument();
     expect(wrapper.getByTestId('nstedEntryIcon')).toBeInTheDocument();
     expect(wrapper.getByTestId('entryValueExpression')).toHaveTextContent('list_id');
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
 });

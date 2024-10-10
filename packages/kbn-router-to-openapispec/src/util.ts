@@ -62,7 +62,7 @@ export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: st
 };
 
 export const getPathParameters = (path: string): KnownParameters => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+  return Array.from(path.matchAll(/\{([^{}?]+\??)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
     acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
     return acc;
@@ -105,13 +105,14 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal' } }
+  R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
 >(
   routes: R[],
   filters: GenerateOpenApiDocumentOptionsFilters = {}
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
+    if (route.options.excludeFromOAS) return false;
     if (
       filters.excludePathsMatching &&
       filters.excludePathsMatching.some((ex) => route.path.startsWith(ex))

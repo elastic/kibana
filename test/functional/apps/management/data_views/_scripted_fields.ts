@@ -487,7 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dataGrid.clickCellFilterForButton(0, 3);
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {

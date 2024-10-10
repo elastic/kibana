@@ -84,7 +84,11 @@ function createCustomCallbackMocks(
 
 function createModelAndPosition(text: string, string: string) {
   return {
-    model: { getValue: () => text } as monaco.editor.ITextModel,
+    model: {
+      getValue: () => text,
+      getLineCount: () => text.split('\n').length,
+      getLineMaxColumn: (lineNumber: number) => text.split('\n')[lineNumber - 1].length,
+    } as unknown as monaco.editor.ITextModel,
     // bumo the column by one as the internal logic has a -1 offset when converting frmo monaco
     position: { lineNumber: 1, column: text.lastIndexOf(string) + 1 } as monaco.Position,
   };
@@ -206,13 +210,17 @@ describe('hover', () => {
       'nonExistentFn',
       createFunctionContent
     );
-    testSuggestions(`from a | stats avg(round(numberField))`, 'round', createFunctionContent);
+    testSuggestions(`from a | stats avg(round(numberField))`, 'round', () => {
+      return [
+        '**Acceptable types**: **double** | **integer** | **long**',
+        ...createFunctionContent('round'),
+      ];
+    });
     testSuggestions(`from a | stats avg(round(numberField))`, 'avg', createFunctionContent);
-    testSuggestions(
-      `from a | stats avg(nonExistentFn(numberField))`,
-      'nonExistentFn',
-      createFunctionContent
-    );
+    testSuggestions(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', () => [
+      '**Acceptable types**: **double** | **integer** | **long**',
+      ...createFunctionContent('nonExistentFn'),
+    ]);
     testSuggestions(`from a | where round(numberField) > 0`, 'round', createFunctionContent);
   });
 });

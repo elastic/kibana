@@ -69,7 +69,7 @@ describe('When rendering the command list (help output)', () => {
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
         'Helpful tips:You can enter consecutive response actions — no need to wait for previous ' +
           'actions to complete.Leaving the response console does not terminate any actions that have ' +
-          'been submitted.Learn moreExternal link(opens in a new tab or window) about response actions ' +
+          'been submitted.Learn more(external, opens in a new tab or window) about response actions ' +
           'and using the console.'
       );
 

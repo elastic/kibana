@@ -111,6 +111,7 @@ export const applyRulePatch = async ({
     interval: rulePatch.interval ?? existingRule.interval,
     throttle: rulePatch.throttle ?? existingRule.throttle,
     actions: rulePatch.actions ?? existingRule.actions,
+    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     ...typeSpecificParams,
   };
 
@@ -189,7 +190,6 @@ const patchQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };
@@ -206,7 +206,6 @@ const patchSavedQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };

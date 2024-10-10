@@ -4,7 +4,7 @@ info:
   version: "not applicable"
 paths: {}
 components:
-  x-codegen-enabled: false
+  x-codegen-enabled: true
   schemas:
     ESProcessorItem:
       type: object

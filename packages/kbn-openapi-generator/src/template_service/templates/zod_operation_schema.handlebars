@@ -34,7 +34,7 @@ export const {{@key}}: z.ZodType<{{@key}}, ZodTypeDef, {{@key}}Input> = {{> zod_
 {{#if (shouldCastExplicitly this)}}
 {{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{@key}} type --}}
 {{!-- error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. --}}
-const {{@key}}Internal = {{> zod_schema_item}};
+export const {{@key}}Internal = {{> zod_schema_item}};
 
 export type {{@key}} = z.infer<typeof {{@key}}Internal>;
 export const {{@key}} = {{@key}}Internal as z.ZodType<{{@key}}>;

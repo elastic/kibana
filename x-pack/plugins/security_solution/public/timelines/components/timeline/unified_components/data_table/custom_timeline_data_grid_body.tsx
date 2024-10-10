@@ -215,6 +215,7 @@ const CustomGridRow = styled.div.attrs<{
   }
 
  [data-gridcell-column-id="timeline-event-detail-row"] > .euiDataGridRowCell__content {
+    width: 100%;
     max-width: ${(props) => props.maxWidth}px;
     overflow-x: auto;
     scrollbar-width: thin;
@@ -243,9 +244,6 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
-    .unifiedDataTable__rowControl {
-      margin-top: -4px;
-    }
   }
 `;
 

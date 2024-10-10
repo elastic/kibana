@@ -1,8 +1,18 @@
-## MV_AVG
+# MV_AVG
 
-The `MV_AVG` function converts a multivalued field into a single-valued field containing the average of all the values.
+The MV_AVG function calculates the average of all values in a multivalued field and returns a single value.
 
-### Examples
+## Syntax
+
+`MV_AVG(number)`
+
+### Parameters
+
+#### number
+
+A multivalued expression.
+
+## Examples
 
 ```esql
 ROW a=[3, 5, 1, 6]

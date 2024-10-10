@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`returns a 400 when an invalid app id is provided`, async () => {
       const { body } = await supertest
         .post('/api/core/capabilities')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           applications: ['dashboard', 'discover', 'bad%app'],
         })

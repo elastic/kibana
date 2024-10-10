@@ -1,10 +1,22 @@
-## ROW
+# ROW
 
-The `ROW` source command produces a row with one or more columns with values that you specify. This can be useful for testing. The command allows you to create a row with specified column names and values, which can be literals, expressions, or functions. In case of duplicate column names, only the rightmost duplicate creates a column.
+The ROW command is used to generate a row with one or more columns with specified values. This can be particularly useful for testing purposes.
 
-### Examples
+## Syntax
 
-Here are some example ES|QL queries using the `ROW` command:
+`ROW column1 = value1[, ..., columnN = valueN]`
+
+### Parameters
+
+#### {column name}
+
+This is the name of the column. If there are duplicate column names, only the rightmost duplicate will create a column.
+
+#### {value}
+
+This is the value for the column. It can be a literal, an expression, or a function.
+
+## Examples
 
 1. Creating a row with simple literal values:
     ```esql

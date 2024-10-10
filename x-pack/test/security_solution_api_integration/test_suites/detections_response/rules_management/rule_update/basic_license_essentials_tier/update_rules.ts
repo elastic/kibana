@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_rules', () => {
+  describe('@ess @serverless @serverlessQA update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

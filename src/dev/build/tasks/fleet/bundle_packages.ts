@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import JSON5 from 'json5';
-import { safeLoad, safeDump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -88,10 +88,10 @@ export async function bundleFleetPackages(pkgDir: string, log: ToolingLog, confi
           return;
         }
 
-        const manifestYml = await safeLoad(manifestEntry.buffer.toString('utf8'));
+        const manifestYml = await load(manifestEntry.buffer.toString('utf8'));
         manifestYml.version = stackVersion;
 
-        const newManifestYml = safeDump(manifestYml);
+        const newManifestYml = dump(manifestYml);
         manifestEntry.buffer = Buffer.from(newManifestYml, 'utf8');
 
         // Update all paths to use the new version

@@ -35,11 +35,7 @@ export function useDeleteInvestigation() {
             defaultMessage: 'Investigation deleted successfully',
           })
         );
-        queryClient.invalidateQueries({
-          queryKey: investigationKeys.list(),
-          exact: false,
-          refetchType: 'all',
-        });
+        queryClient.invalidateQueries({ queryKey: investigationKeys.all });
       },
       onError: (error, {}, context) => {
         toasts.addError(

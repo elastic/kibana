@@ -47,7 +47,6 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -199,11 +198,7 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (
-      'noNestingFunctions' in parameterDefinition &&
-      parameterDefinition.noNestingFunctions &&
-      fnDef.type === argFn.type
-    ) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
@@ -819,11 +814,6 @@ function validateSource(
     return messages;
   }
 
-  const hasCCS = hasCCSSource(source.name);
-  if (hasCCS) {
-    return messages;
-  }
-
   const commandDef = getCommandDefinition(commandName);
   const isWildcardAndNotSupported =
     hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
@@ -1101,6 +1091,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**

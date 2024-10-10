@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { InvestigationResponse } from '@kbn/investigation-shared';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { InvestigationForm } from '../investigation_edit_form';
@@ -16,16 +17,39 @@ const I18N_STATUS_LABEL = i18n.translate(
   { defaultMessage: 'Status' }
 );
 
+export const statusToColor: Record<InvestigationResponse['status'], string> = {
+  triage: 'warning',
+  active: 'danger',
+  mitigated: 'success',
+  resolved: 'success',
+  cancelled: 'default',
+};
+
 const options = [
   {
-    label: 'Ongoing',
-    value: 'ongoing',
-    prepend: <EuiIcon size="s" type="dot" color="danger" />,
+    label: 'Triage',
+    value: 'triage',
+    color: statusToColor.triage,
   },
   {
-    label: 'Closed',
-    value: 'closed',
-    prepend: <EuiIcon size="s" type="dot" color="success" />,
+    label: 'Active',
+    value: 'active',
+    color: statusToColor.active,
+  },
+  {
+    label: 'Mitigated',
+    value: 'mitigated',
+    color: statusToColor.mitigated,
+  },
+  {
+    label: 'Resolved',
+    value: 'resolved',
+    color: statusToColor.resolved,
+  },
+  {
+    label: 'Cancelled',
+    value: 'cancelled',
+    color: statusToColor.cancelled,
   },
 ];
 
@@ -51,7 +75,7 @@ export function StatusField() {
             onChange={(selected) => {
               return field.onChange(selected[0].value);
             }}
-            singleSelection={{ asPlainText: true }}
+            singleSelection
           />
         )}
       />

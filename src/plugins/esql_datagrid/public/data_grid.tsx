@@ -21,10 +21,10 @@ import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
-import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,13 +46,6 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
 }
-type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
 
 const sortOrder: SortOrder[] = [];
 const DEFAULT_INITIAL_ROW_HEIGHT = 5;

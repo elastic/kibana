@@ -163,7 +163,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER).should(
           'contain.text',
-          'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(opens in a new tab or window) for more information.'
+          'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.'
         );
 
         cy.log('analyzer graph preview');

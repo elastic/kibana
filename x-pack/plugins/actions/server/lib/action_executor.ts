@@ -575,7 +575,7 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed'],
+                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
@@ -605,15 +605,15 @@ export class ActionExecutor {
             .then((tokenTracking) => {
               if (tokenTracking != null) {
                 set(event, 'kibana.action.execution.gen_ai.usage', {
-                  total_tokens: tokenTracking.total_tokens,
-                  prompt_tokens: tokenTracking.prompt_tokens,
-                  completion_tokens: tokenTracking.completion_tokens,
+                  total_tokens: tokenTracking.total_tokens ?? 0,
+                  prompt_tokens: tokenTracking.prompt_tokens ?? 0,
+                  completion_tokens: tokenTracking.completion_tokens ?? 0,
                 });
                 analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
-                  total_tokens: tokenTracking.total_tokens,
-                  prompt_tokens: tokenTracking.prompt_tokens,
-                  completion_tokens: tokenTracking.completion_tokens,
+                  total_tokens: tokenTracking.total_tokens ?? 0,
+                  prompt_tokens: tokenTracking.prompt_tokens ?? 0,
+                  completion_tokens: tokenTracking.completion_tokens ?? 0,
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),

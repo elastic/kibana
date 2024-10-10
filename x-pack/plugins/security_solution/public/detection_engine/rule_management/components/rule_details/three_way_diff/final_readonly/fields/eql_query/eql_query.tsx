@@ -8,14 +8,17 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type {
+  RuleDataSource,
+  RuleEqlQuery,
+} from '../../../../../../../../../common/api/detection_engine';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
-import { getDataSourceProps, typeCheckFilters } from '../../../../helpers';
+import { getDataSourceProps, isFilters } from '../../../../helpers';
 
 interface EqlQueryReadOnlyProps {
-  eqlQuery: DiffableAllFields['eql_query'];
-  dataSource: DiffableAllFields['data_source'];
+  eqlQuery: RuleEqlQuery;
+  dataSource?: RuleDataSource;
 }
 
 export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps) {
@@ -26,14 +29,12 @@ export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps
     },
   ];
 
-  const filters = typeCheckFilters(eqlQuery.filters);
-
-  if (filters.length > 0) {
+  if (isFilters(eqlQuery.filters) && eqlQuery.filters.length > 0) {
     const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: descriptionStepI18n.FILTERS_LABEL,
-      description: <Filters filters={filters} {...dataSourceProps} />,
+      description: <Filters filters={eqlQuery.filters} {...dataSourceProps} />,
     });
   }
 

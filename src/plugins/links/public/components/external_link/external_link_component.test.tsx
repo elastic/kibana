@@ -10,7 +10,7 @@
 import React from 'react';
 
 import userEvent from '@testing-library/user-event';
-import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
@@ -39,8 +39,8 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
-    const externalIcon = within(link).getByText('External link');
-    expect(externalIcon.getAttribute('data-euiicon-type')).toBe('popout');
+    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    expect(externalIcon).toBeInTheDocument();
     await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
@@ -52,8 +52,8 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
     const link = await screen.findByTestId('externalLink--foo');
-    const externalIcon = within(link).getByText('External link');
-    expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
+    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    expect(externalIcon).toBeInTheDocument();
   });
 
   test('modified click does not trigger event.preventDefault', async () => {

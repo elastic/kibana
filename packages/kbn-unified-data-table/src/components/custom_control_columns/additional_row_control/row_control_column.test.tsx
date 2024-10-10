@@ -25,7 +25,12 @@ describe('getRowControlColumn', () => {
       id: 'test_row_control',
       headerAriaLabel: 'row control',
       renderControl: jest.fn((Control, rowProps) => (
-        <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
+        <Control
+          label={`test-${rowProps.rowIndex}`}
+          tooltipContent={`test-${rowProps.rowIndex}`}
+          iconType="heart"
+          onClick={mockClick}
+        />
       )),
     };
     const rowControlColumn = getRowControlColumn(props);
@@ -49,6 +54,6 @@ describe('getRowControlColumn', () => {
 
     button.click();
 
-    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.rows[1], rowIndex: 1 });
+    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });
 });

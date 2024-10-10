@@ -10,7 +10,7 @@
 export const query1 = `
 from kibana_sample_data_logs
 | EVAL timestamp=DATE_TRUNC(3 hour, @timestamp), status = CASE(    to_integer(response.keyword) >= 200 and to_integer(response.keyword) < 400, "HTTP 2xx and 3xx",    to_integer(response.keyword) >= 400 and to_integer(response.keyword) < 500, "HTTP 4xx",     "HTTP 5xx")
-| stats results = count(*) by \`Over time\` = BUCKET(timestamp, 50, ?t_start, ?t_end), status
+| stats results = count(*) by \`Over time\` = BUCKET(timestamp, 50, ?_tstart, ?_tend), status
 `;
 
 export const query2 = `

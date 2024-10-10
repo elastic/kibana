@@ -72,7 +72,9 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should be able to render a link', () => {
     addNotesToTimeline(`[${author}](${link})`);
-    cy.get(NOTES_LINK).last().should('have.text', `${author}(opens in a new tab or window)`);
+    cy.get(NOTES_LINK)
+      .last()
+      .should('have.text', `${author}(external, opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
   });
 

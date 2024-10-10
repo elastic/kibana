@@ -23,13 +23,11 @@ interface GetOptionFromPromptProps extends PromptResponse {
   content: string;
   id: string;
   name: string;
-  isCleared: boolean;
 }
 
 export const getOptionFromPrompt = ({
   content,
   id,
-  isCleared,
   name,
 }: GetOptionFromPromptProps): EuiSuperSelectOption<string> => ({
   value: id,
@@ -38,7 +36,7 @@ export const getOptionFromPrompt = ({
       data-test-subj="systemPromptText"
       // @ts-ignore
       css={css`
-        color: ${isCleared ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkestShade};
+        color: ${euiThemeVars.euiColorDarkestShade};
       `}
     >
       {name}
@@ -58,12 +56,6 @@ export const getOptionFromPrompt = ({
   ),
 });
 
-interface GetOptionsProps {
-  prompts: PromptResponse[] | undefined;
-  isCleared: boolean;
-}
-export const getOptions = ({
-  prompts,
-  isCleared,
-}: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, isCleared })) ?? [];
+export const getOptions = (
+  prompts: PromptResponse[] | undefined
+): Array<EuiSuperSelectOption<string>> => prompts?.map((p) => getOptionFromPrompt(p)) ?? [];

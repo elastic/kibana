@@ -42,8 +42,6 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardClonePanelActionStrings.getDisplayName();

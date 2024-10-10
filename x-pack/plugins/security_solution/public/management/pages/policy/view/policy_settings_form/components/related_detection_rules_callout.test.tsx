@@ -29,7 +29,7 @@ describe('Policy form RelatedDetectionRulesCallout component', () => {
 
     expect(renderResult.getByTestId('test')).toHaveTextContent(
       exactMatchText(
-        'The Endpoint Security detection rule is enabled automatically with Elastic Defend. This rule must remain enabled to receive Endpoint alerts. Learn MoreExternal link(opens in a new tab or window).'
+        'The Endpoint Security detection rule is enabled automatically with Elastic Defend. This rule must remain enabled to receive Endpoint alerts. Learn More(external, opens in a new tab or window).'
       )
     );
   });
