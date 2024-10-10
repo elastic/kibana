@@ -120,7 +120,6 @@ export const createLensEmbeddableFactory = (
        */
       function getState(): LensRuntimeState {
         return {
-          ...stateConfig.serialize(),
           ...actionsConfig.serialize(),
           ...editConfig.serialize(),
           ...inspectorConfig.serialize(),
