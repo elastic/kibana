@@ -8,39 +8,28 @@ import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
-  EuiLink,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
-  type ServiceOverviewParams,
-} from '@kbn/observability-shared-plugin/common';
-
 import { last } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { Entity, EntityColumnIds, EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { Entity, EntityColumnIds, EntityType } from '../../../common/entities';
 import { APIReturnType } from '../../api';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
-import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
+import { EntityName } from './entity_name';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
-
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
-type LatestEntity = LatestEntities extends Array<infer Entity> ? Entity : never;
 
 interface Props {
   loading: boolean;
@@ -65,14 +54,6 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
 }: Props) {
-  const { services } = useKibana<{ share?: SharePluginStart }>();
-
-  const assetDetailsLocator =
-    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-
-  const serviceOverviewLocator =
-    services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
-
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -81,31 +62,6 @@ export function EntitiesGrid({
       }
     },
     [onChangeSort]
-  );
-
-  const getEntityRedirectUrl = useCallback(
-    (entity: LatestEntity) => {
-      const type = entity[ENTITY_TYPE] as EntityType;
-
-      // Any unrecognised types will always return undefined
-      switch (type) {
-        case 'host':
-        case 'container':
-          return assetDetailsLocator?.getRedirectUrl({
-            assetId: entity[ENTITY_DISPLAY_NAME],
-            assetType: type,
-          });
-
-        case 'service':
-          // For services, the format of the display name is `service.name:service.environment`.
-          // We just want the first part of the name for the locator.
-          // TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-          return serviceOverviewLocator?.getRedirectUrl(
-            parseServiceParams(entity[ENTITY_DISPLAY_NAME])
-          );
-      }
-    },
-    [assetDetailsLocator, serviceOverviewLocator]
   );
 
   const showAlertsColumn = useMemo(
@@ -139,7 +95,7 @@ export function EntitiesGrid({
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId] as EntityType;
+          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
@@ -175,20 +131,12 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            <EuiLink
-              data-test-subj="inventoryCellValueLink"
-              className="eui-textTruncate"
-              href={getEntityRedirectUrl(entity)}
-            >
-              {entity[columnEntityTableId]}
-            </EuiLink>
-          );
+          return <EntityName entity={entity} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType, getEntityRedirectUrl]
+    [entities, onFilterByType]
   );
 
   if (loading) {

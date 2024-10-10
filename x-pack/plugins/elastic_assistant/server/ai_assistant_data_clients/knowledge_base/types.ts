@@ -82,6 +82,39 @@ export interface LegacyEsKnowledgeBaseEntrySchema {
     model_id: string;
   };
 }
+export interface UpdateKnowledgeBaseEntrySchema {
+  id: string;
+  created_at?: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+  users?: Array<{
+    id?: string;
+    name?: string;
+  }>;
+  name?: string;
+  type?: string;
+  // Document Entry Fields
+  kb_resource?: string;
+  required?: boolean;
+  source?: string;
+  text?: string;
+  vector?: {
+    tokens: Record<string, number>;
+    model_id: string;
+  };
+  // Index Entry Fields
+  index?: string;
+  field?: string;
+  description?: string;
+  query_description?: string;
+  input_schema?: Array<{
+    field_name: string;
+    field_type: string;
+    description: string;
+  }>;
+  output_fields?: string[];
+}
 
 export interface CreateKnowledgeBaseEntrySchema {
   '@timestamp'?: string;
