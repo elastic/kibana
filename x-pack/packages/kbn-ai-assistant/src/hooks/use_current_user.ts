@@ -19,7 +19,7 @@ export function useCurrentUser() {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const authenticatedUser = await security?.authc.getCurrentUser();
+        const authenticatedUser = await security!.authc.getCurrentUser();
         setUser(authenticatedUser);
       } catch {
         setUser(undefined);

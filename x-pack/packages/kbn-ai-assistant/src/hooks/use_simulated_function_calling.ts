@@ -13,7 +13,7 @@ export function useSimulatedFunctionCalling() {
     services: { uiSettings },
   } = useKibana();
 
-  const simulatedFunctionCallingEnabled = uiSettings?.get<boolean>(
+  const simulatedFunctionCallingEnabled = uiSettings!.get<boolean>(
     aiAssistantSimulatedFunctionCalling,
     false
   );

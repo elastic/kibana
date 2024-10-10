@@ -70,7 +70,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
             return install();
           }
           setInstallError(error);
-          notifications?.toasts.addError(error, {
+          notifications!.toasts.addError(error, {
             title: i18n.translate('xpack.aiAssistant.errorSettingUpKnowledgeBase', {
               defaultMessage: 'Could not set up Knowledge Base',
             }),

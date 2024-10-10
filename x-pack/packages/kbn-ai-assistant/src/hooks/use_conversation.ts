@@ -100,7 +100,7 @@ export function useConversation({
         },
       })
       .catch((err) => {
-        notifications?.toasts.addError(err, {
+        notifications!.toasts.addError(err, {
           title: i18n.translate('xpack.aiAssistant.errorUpdatingConversation', {
             defaultMessage: 'Could not update conversation',
           }),

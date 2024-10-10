@@ -61,7 +61,7 @@ export function useConversationList(): UseConversationListResult {
 
       conversations.refresh();
     } catch (err) {
-      notifications?.toasts.addError(err, {
+      notifications!.toasts.addError(err, {
         title: i18n.translate('xpack.aiAssistant.flyout.failedToDeleteConversation', {
           defaultMessage: 'Could not delete conversation',
         }),
