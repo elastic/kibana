@@ -8,7 +8,7 @@ import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { entityTypeRt, entityColumnIdsRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';
@@ -88,7 +88,14 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     ).filter((entity) => entity['entity.id']);
 
     return {
-      entities: sortField === 'alertsCount' ? sortBy(joined, sortField, sortDirection) : joined,
+      entities:
+        sortField === 'alertsCount'
+          ? orderBy(
+              joined,
+              [(item) => item?.alertsCount === undefined, sortField],
+              ['asc', sortDirection] // push entities without alertsCount to the end
+            )
+          : joined,
     };
   },
 });
