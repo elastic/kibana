@@ -15,7 +15,6 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     severity: 'high',
     type: 'query',
     risk_score: 55,
-    language: 'kuery',
     rule_id: 'rule-1',
     immutable: false,
     ...rewrites,
@@ -36,7 +35,6 @@ export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport 
   severity: 'high',
   type: 'query',
   risk_score: 55,
-  language: 'kuery',
   rule_id: ruleId,
   immutable: false,
 });
@@ -70,7 +68,6 @@ export const getImportThreatMatchRulesSchemaMock = (
     severity: 'high',
     type: 'threat_match',
     risk_score: 55,
-    language: 'kuery',
     rule_id: 'rule-1',
     threat_index: ['index-123'],
     threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
