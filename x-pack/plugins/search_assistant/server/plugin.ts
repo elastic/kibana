@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import type {
   SearchAssistantPluginSetup,
@@ -24,14 +24,18 @@ export class SearchAssistantPlugin
       SearchAssistantPluginStartDependencies
     >
 {
-  constructor() {}
+  isServerless: boolean;
+
+  constructor(context: PluginInitializerContext) {
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup() {
     return {};
   }
 
   public start(coreStart: CoreStart, pluginsStart: SearchAssistantPluginStartDependencies) {
-    pluginsStart.observabilityAIAssistant.service.register(registerFunctions);
+    pluginsStart.observabilityAIAssistant.service.register(registerFunctions(this.isServerless));
     return {};
   }
 
