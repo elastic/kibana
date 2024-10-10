@@ -92,6 +92,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
+    "@kbn/management-settings-components-form",
   ],
   "exclude": [
     "target/**/*",
