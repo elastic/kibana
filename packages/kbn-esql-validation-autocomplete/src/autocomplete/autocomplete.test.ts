@@ -1207,6 +1207,17 @@ describe('autocomplete', () => {
               ],
             ]
           );
+          testSuggestions(
+            `FROM a | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
+            ['`foo````bar``baz`, ', '`foo````bar``baz` | '],
+            undefined,
+            [
+              [
+                { name: 'foo``bar`baz', type: 'double' },
+                { name: 'baz', type: 'date' }, // added so that we get a comma suggestion
+              ],
+            ]
+          );
           testSuggestions(`FROM a | ${commandName} \`any#Char$Field\`/`, [
             '`any#Char$Field`, ',
             '`any#Char$Field` | ',
