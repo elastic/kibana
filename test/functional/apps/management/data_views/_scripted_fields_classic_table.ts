@@ -61,8 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.clickScriptedFieldsTab();
-      await PageObjects.settings.clickAddScriptedField();
+      await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
       await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
       await PageObjects.settings.clickSaveScriptedField();
@@ -80,7 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `1`;
         await PageObjects.settings.addScriptedField(
@@ -114,7 +112,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `if (doc['machine.ram'].size() == 0) return -1;
           else return doc['machine.ram'].value / (1024 * 1024 * 1024);
@@ -206,7 +203,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
@@ -294,7 +290,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
@@ -383,7 +378,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
