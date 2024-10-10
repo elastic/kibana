@@ -167,19 +167,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
       )}
       <EuiSpacer />
       <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
-              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
-              type="submit"
-              isLoading={isLoading}
-            >
-              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
-                defaultMessage: 'Save configuration',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
@@ -195,6 +183,32 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
                 }
               )}
             </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={isLoading}
+            >
+              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          {/* TODO: Can we save and start a sync? */}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={isLoading}
+              fill
+            >
+              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
+                defaultMessage: 'Save and sync',
+              })}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>

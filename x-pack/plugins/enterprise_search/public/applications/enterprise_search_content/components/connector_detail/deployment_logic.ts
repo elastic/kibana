@@ -10,14 +10,11 @@ import { kea, MakeLogicType } from 'kea';
 import { Connector } from '@kbn/search-connectors';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
-  GenerateConfigApiArgs,
+  GenerateConfigApiActions,
   GenerateConfigApiLogic,
 } from '../../api/connector/generate_connector_config_api_logic';
 import { APIKeyResponse } from '../../api/generate_api_key/generate_api_key_logic';
-
-type GenerateConfigApiActions = Actions<GenerateConfigApiArgs, {}>;
 
 export interface DeploymentLogicValues {
   generateConfigurationError: HttpError;

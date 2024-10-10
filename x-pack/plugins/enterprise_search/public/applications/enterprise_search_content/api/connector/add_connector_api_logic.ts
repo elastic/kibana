@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 interface AddConnectorValue {
@@ -58,3 +58,7 @@ export const addConnector = async ({
 };
 
 export const AddConnectorApiLogic = createApiLogic(['add_connector_api_logic'], addConnector);
+export type AddConnectorApiLogicActions = Actions<
+  AddConnectorApiLogicArgs,
+  AddConnectorApiLogicResponse
+>;
