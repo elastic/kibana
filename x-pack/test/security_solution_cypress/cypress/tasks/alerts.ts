@@ -351,6 +351,7 @@ const clickAction = (propertySelector: string, rowIndex: number, actionSelector:
     () => {
       // To clear focus
       cy.get('body').type('{esc}');
+      cy.get(propertySelector).eq(rowIndex).should('be.visible');
       cy.get(propertySelector).eq(rowIndex).realHover();
       return cy.get(actionSelector).first();
     },
@@ -407,6 +408,11 @@ export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
   cy.get(columnSelector).eq(1).find(CELL_EXPAND_VALUE).click();
 };
 
+export const hideAlertTableHorizontalScrollBar = () => {
+  // .realHover ends up being flaky if the scroll bar is visible as the element below it cannot be properly
+  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
+};
+
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   cy.get(columnSelector).eq(0).scrollIntoView();
 
@@ -415,6 +421,23 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
     interval: 500,
     timeout: 12000,
   });
+};
+
+export const scrollAlertTableColumnIntoViewAndTest = (
+  columnSelector: string,
+  testCallback: () => void
+) => {
+  cy.get(columnSelector).eq(0).scrollIntoView();
+
+  // Wait for data grid to populate column
+  cy.waitUntil(() => cy.get(columnSelector).then(($el) => $el.length > 1), {
+    interval: 500,
+    timeout: 12000,
+  });
+  // We remove the horizontal scrollbar from the table after scrolling
+  // so `realHover` doesn't conflict with it when attempting to click elements in the table
+  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
+  testCallback();
 };
 
 export const waitForPageFilters = () => {
