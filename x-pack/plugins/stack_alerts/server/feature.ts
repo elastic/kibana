@@ -21,11 +21,11 @@ import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
+const DISCOVER_CONSUMER = 'discover';
 
-const alertingFeatures = [
+const basicAlertingFeatures = [
   IndexThreshold,
   GeoContainment,
-  ElasticsearchQuery,
   TransformHealth,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -33,6 +33,20 @@ const alertingFeatures = [
   ruleTypeId,
   consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
 }));
+
+/**
+ * We need to add the discover consumer
+ * to support legacy ES rules that were
+ * created with the discover consumer.
+ *
+ * Issue: https://github.com/elastic/kibana/issues/184595
+ */
+const esQueryAlertingFeature = {
+  ruleTypeId: ElasticsearchQuery,
+  consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, DISCOVER_CONSUMER],
+};
+
+const alertingFeatures = [...basicAlertingFeatures, esQueryAlertingFeature];
 
 export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,
