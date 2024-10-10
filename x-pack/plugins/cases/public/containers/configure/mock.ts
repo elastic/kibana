@@ -50,6 +50,7 @@ export const caseConfigurationResponseMock: Configuration = {
   version: 'WzHJ12',
   customFields: customFieldsConfigurationMock,
   templates: templatesConfigurationMock,
+  observableTypes: [],
 };
 
 export const caseConfigurationRequest: ConfigurationRequest = {
@@ -77,4 +78,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   customFields: customFieldsConfigurationMock,
   templates: templatesConfigurationMock,
   owner: 'securitySolution',
+  observableTypes: [],
 };

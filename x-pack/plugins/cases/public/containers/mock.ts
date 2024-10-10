@@ -252,6 +252,7 @@ export const basicCase: CaseUI = {
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
   customFields: [],
+  observables: [],
 };
 
 export const basicFileMock: FileJSON = {
@@ -375,6 +376,7 @@ export const mockCase: CaseUI = {
   assignees: [],
   category: null,
   customFields: [],
+  observables: [],
 };
 
 export const basicCasePost: CaseUI = {

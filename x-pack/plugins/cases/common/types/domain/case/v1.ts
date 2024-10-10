@@ -12,6 +12,7 @@ import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
+import { CaseObservableRt } from '../observable/v1';
 
 export { CaseStatuses };
 
@@ -90,6 +91,10 @@ const CaseBaseFields = {
    * The alert sync settings
    */
   settings: CaseSettingsRt,
+  /**
+   * Observables
+   */
+  observables: rt.array(CaseObservableRt),
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(
@@ -135,6 +140,7 @@ export const CaseRt = rt.intersection([
   rt.exact(
     rt.partial({
       comments: rt.array(AttachmentRt),
+      observables: rt.array(CaseObservableRt),
     })
   ),
 ]);

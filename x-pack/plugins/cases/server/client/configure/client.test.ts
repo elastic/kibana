@@ -403,6 +403,7 @@ describe('client', () => {
               email: 'testemail@elastic.co',
               username: 'elastic',
             },
+            observableTypes: [],
           },
         });
 
@@ -463,6 +464,7 @@ describe('client', () => {
                 },
               },
             ],
+            observableTypes: [],
           },
           version: 'test-version',
         });
@@ -474,6 +476,7 @@ describe('client', () => {
           namespaces: ['default'],
           references: [],
           attributes: {
+            observableTypes: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1063,6 +1066,7 @@ describe('client', () => {
               ],
               closure_type: 'close-by-user',
               owner: 'cases',
+              observableTypes: [],
             },
             id: 'test-id',
             version: 'test-version',
@@ -1130,6 +1134,7 @@ describe('client', () => {
                     name: 'template 1',
                   },
                 ],
+                observableTypes: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1363,6 +1368,7 @@ describe('client', () => {
                   },
                   updated_at: null,
                   updated_by: null,
+                  observableTypes: [],
                 },
                 score: 0,
               },
@@ -1388,6 +1394,7 @@ describe('client', () => {
               },
               updated_at: null,
               updated_by: null,
+              observableTypes: [],
             },
           });
 

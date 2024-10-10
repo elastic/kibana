@@ -1,0 +1,167 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
+import type { ObservablePatchType, Observable } from '../../../common/types/domain/observable/v1';
+import * as i18n from './translations';
+
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesToast } from '../../common/use_cases_toast';
+import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
+import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
+import { type CaseUI } from '../../containers/types';
+import { usePostObservables } from '../../containers/use_post_observables';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { EditObservableModal } from './edit_observable_modal';
+
+export const ObservableActionsPopoverButton: React.FC<{
+  caseData: CaseUI;
+  observable: Observable;
+}> = ({ caseData, observable }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { permissions } = useCasesContext();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const { isLoading, mutateAsync: postObservables } = usePostObservables();
+  const { showSuccessToast } = useCasesToast();
+  const {
+    showDeletionModal,
+    onModalOpen: onDeletionModalOpen,
+    onConfirm,
+    onCancel,
+  } = useDeletePropertyAction({
+    onDelete: () => {
+      const filteredObservables = caseData.observables.filter(
+        (_observable) => _observable.id !== observable.id
+      );
+      postObservables({
+        observables: filteredObservables as ObservablePatchType[],
+        caseId: caseData.id,
+        version: caseData.version,
+      }).then(() => {
+        showSuccessToast(i18n.OBSERVABLE_REMOVED);
+        refreshCaseViewPage();
+      });
+    },
+  });
+
+  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
+    const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
+
+    const panelsToBuild = [
+      {
+        id: 0,
+        title: i18n.OBSERVABLE_ACTIONS,
+        items: mainPanelItems,
+      },
+    ];
+
+    if (permissions.delete) {
+      mainPanelItems.push({
+        name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        onClick: () => {
+          closePopover();
+          onDeletionModalOpen();
+        },
+        disabled: isLoading,
+        'data-test-subj': 'cases-observables-delete-button',
+      });
+    }
+
+    if (permissions.update) {
+      mainPanelItems.push({
+        name: <EuiTextColor>{i18n.EDIT_OBSERVABLE}</EuiTextColor>,
+        icon: <EuiIcon type="pencil" size="m" />,
+        onClick: () => {
+          setShowEditModal(true);
+          closePopover();
+        },
+        disabled: isLoading,
+        'data-test-subj': 'cases-observables-edit-button',
+      });
+    }
+
+    return panelsToBuild;
+  }, [closePopover, isLoading, onDeletionModalOpen, permissions]);
+
+  return (
+    <>
+      <EuiPopover
+        id={`cases-observables-popover-${observable.id}`}
+        key={`cases-observables-popover-${observable.id}`}
+        data-test-subj={`cases-observables-popover-${observable.id}`}
+        button={
+          <EuiButtonIcon
+            onClick={tooglePopover}
+            iconType="boxesHorizontal"
+            aria-label={i18n.OBSERVABLE_ACTIONS}
+            color="text"
+            key={`cases-observables-actions-popover-button-${observable.id}`}
+            data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
+          />
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          data-test-subj={'cases-observables-popover-context-menu'}
+        />
+      </EuiPopover>
+      {showDeletionModal && (
+        <DeleteAttachmentConfirmationModal
+          title={i18n.DELETE_OBSERVABLE_CONFIRM}
+          confirmButtonText={i18n.DELETE_OBSERVABLE}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+        />
+      )}
+      {showEditModal && (
+        <EditObservableModal
+          isLoading={isLoading}
+          handleUpdateObservable={async (updatedObservable) => {
+            const updatedObservableIndex = caseData.observables.findIndex(
+              (_observable) => _observable.id === observable.id
+            );
+            const observables = [...caseData.observables];
+            observables[updatedObservableIndex] = {
+              ...observable,
+              ...updatedObservable,
+            };
+
+            postObservables({
+              observables: observables as ObservablePatchType[],
+              caseId: caseData.id,
+              version: caseData.version,
+            }).then(() => {
+              setShowEditModal(false);
+              showSuccessToast(i18n.OBSERVABLE_UPDATED);
+              refreshCaseViewPage();
+            });
+          }}
+          observable={observable}
+          closeModal={() => setShowEditModal(false)}
+        />
+      )}
+    </>
+  );
+};
+
+ObservableActionsPopoverButton.displayName = 'FileActionsPopoverButton';

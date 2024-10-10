@@ -41,6 +41,8 @@ import {
   deleteFileAttachments,
   getCategories,
   replaceCustomField,
+  postObservables,
+  getSimilarCases,
 } from './api';
 
 import {
@@ -66,6 +68,7 @@ import {
   getCaseUserActionsStatsResponse,
   basicFileMock,
   customFieldsMock,
+  mockCase,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1188,6 +1191,116 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await replaceCustomField({ ...data, signal: abortCtrl.signal });
       expect(resp).toEqual(customFieldsMock[0]);
+    });
+  });
+
+  describe('getSimilarCases', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(allCasesSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
+        signal: abortCtrl.signal,
+        pageSize: 10,
+        pageIndex: 0,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_similar`, {
+        method: 'POST',
+        body: JSON.stringify({
+          case_id: mockCase.id,
+          observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
+          pageSize: 10,
+          pageIndex: 0,
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getSimilarCases({
+        caseId: mockCase.id,
+        observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
+        signal: abortCtrl.signal,
+        pageSize: 10,
+        pageIndex: 0,
+      });
+      expect(resp).toEqual(allCases);
+    });
+  });
+
+  describe('postObservables', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await postObservables(
+        {
+          version: mockCase.version,
+          observables: [
+            {
+              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+              value: 'test value',
+              description: '',
+              hasBeenSighted: false,
+              isIoc: false,
+              createdAt: '2024-10-03 11:37',
+              updatedAt: '2024-10-03 11:37',
+            },
+          ],
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${mockCase.id}/observable`, {
+        method: 'POST',
+        body: JSON.stringify({
+          version: mockCase.version,
+          observables: [
+            {
+              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+              value: 'test value',
+              description: '',
+              hasBeenSighted: false,
+              isIoc: false,
+              createdAt: '2024-10-03 11:37',
+              updatedAt: '2024-10-03 11:37',
+            },
+          ],
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await postObservables(
+        {
+          version: mockCase.version,
+          observables: [
+            {
+              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+              value: 'test value',
+              description: '',
+              hasBeenSighted: false,
+              isIoc: false,
+              createdAt: '2024-10-03 11:37',
+              updatedAt: '2024-10-03 11:37',
+            },
+          ],
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
     });
   });
 });
