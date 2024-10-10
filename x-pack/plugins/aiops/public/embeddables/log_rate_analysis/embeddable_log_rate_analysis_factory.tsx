@@ -28,7 +28,7 @@ import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
-import { getLogRateAnalysisComponent } from '../../shared_components';
+import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type {
@@ -162,7 +162,10 @@ export const getLogRateAnalysisEmbeddableFactory = (
         }
       );
 
-      const LogRateAnalysisComponent = getLogRateAnalysisComponent(coreStart, pluginStart);
+      const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(
+        coreStart,
+        pluginStart
+      );
 
       const onLoading = (v: boolean) => dataLoading.next(v);
       const onRenderComplete = () => dataLoading.next(false);
@@ -203,7 +206,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
             : undefined;
 
           return (
-            <LogRateAnalysisComponent
+            <LogRateAnalysisEmbeddableWrapper
               dataViewId={dataViewId}
               timeRange={timeRange}
               onLoading={onLoading}
