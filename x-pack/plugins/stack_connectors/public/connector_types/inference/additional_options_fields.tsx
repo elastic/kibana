@@ -82,9 +82,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
           (p: ConfigEntryView) => p.key === key
         );
         if (entry) {
-          if (!config.taskTypeConfig) {
-            config.taskTypeConfig = {};
-          }
+          config.taskTypeConfig ??= {};
           config.taskTypeConfig[key] = value;
           setFieldValue('config.taskTypeConfig', config.taskTypeConfig);
           await validateFields(['config.taskTypeConfig']);

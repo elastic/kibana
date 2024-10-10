@@ -17,18 +17,12 @@ export interface TaskTypeOption {
   label: string;
 }
 
-export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] => {
-  const options: TaskTypeOption[] = [];
-
-  taskTypes.forEach((taskType: string) => {
-    options.push({
-      id: taskType,
-      label: taskType,
-      value: taskType,
-    });
-  });
-  return options;
-};
+export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
+  taskTypes.map(taskType => ({
+    id: taskType,
+    label: taskType,
+    value: taskType,
+  }));
 
 export const generateInferenceEndpointId = (
   config: Config,
