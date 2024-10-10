@@ -54,7 +54,7 @@ export async function getDataStreamTypes({
 
   if (entity?.[SOURCE_DATA_STREAM_TYPE]) {
     [entity[SOURCE_DATA_STREAM_TYPE]].flat().forEach((item) => {
-      sourceDataStreams.add(item);
+      sourceDataStreams.add(item as EntityDataStreamType);
     });
   }
 
