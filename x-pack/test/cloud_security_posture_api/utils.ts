@@ -9,6 +9,7 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Agent } from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { CallbackHandler, Response } from 'superagent';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
@@ -34,6 +35,19 @@ export const waitForPluginInitialized = ({
     expect(response.body).to.eql({ isPluginInitialized: true });
     logger.debug('CSP plugin is initialized');
   });
+
+export function result(status: number): CallbackHandler {
+  return (err: any, res: Response) => {
+    if ((res?.status || err.status) !== status) {
+      const e = new Error(
+        `Expected ${status} ,got ${res?.status || err.status} resp: ${
+          res?.body ? JSON.stringify(res.body) : err.text
+        }`
+      );
+      throw e;
+    }
+  };
+}
 
 export class EsIndexDataProvider {
   private es: EsClient;
