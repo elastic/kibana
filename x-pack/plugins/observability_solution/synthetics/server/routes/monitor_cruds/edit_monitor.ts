@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { omit } from 'lodash';
 import { isEmpty } from 'lodash';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { UpsertMonitorAPI, CreateMonitorPayLoad } from './add_monitor/upsert_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
@@ -33,9 +34,10 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { SyntheticsServerSetup } from '../../types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_fields';
 
-// Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
@@ -73,7 +75,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       return response.badRequest(getInvalidOriginError(monitor));
     }
 
-    const editMonitorAPI = new AddEditMonitorAPI(routeContext);
+    const editMonitorAPI = new UpsertMonitorAPI(routeContext);
     if (monitor.name) {
       const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name, monitorId);
       if (nameError) {
@@ -219,6 +221,28 @@ const rollbackUpdate = async ({
   }
 };
 
+export const refreshInlineZip = async (
+  normalizedMonitor: SyntheticsMonitor,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
+  server: SyntheticsServerSetup
+) => {
+  return omit(
+    {
+      ...normalizedMonitor,
+      [ConfigKey.MONITOR_QUERY_ID]:
+        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+      [ConfigKey.CONFIG_ID]: previousMonitor.id,
+      ...(await mapInlineToProjectFields({
+        monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+        monitor: normalizedMonitor,
+        logger: server.logger,
+        includeInlineScript: false,
+      })),
+    },
+    ConfigKey.SOURCE_INLINE
+  );
+};
+
 export const syncEditedMonitor = async ({
   normalizedMonitor,
   decryptedPreviousMonitor,
@@ -232,13 +256,12 @@ export const syncEditedMonitor = async ({
 }) => {
   const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
-    const monitorWithId = {
-      ...normalizedMonitor,
-      [ConfigKey.MONITOR_QUERY_ID]:
-        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
-    };
-    const formattedMonitor = formatSecrets(monitorWithId);
+    const monitorWithId = await refreshInlineZip(
+      normalizedMonitor,
+      decryptedPreviousMonitor,
+      server
+    );
+    const formattedMonitor = formatSecrets(monitorWithId as MonitorFields);
 
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
