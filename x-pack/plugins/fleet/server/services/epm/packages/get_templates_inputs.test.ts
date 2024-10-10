@@ -12,10 +12,10 @@ import type { PackagePolicyInput } from '../../../../common/types';
 import { appContextService } from '../..';
 
 import { getTemplateInputs, templatePackagePolicyToFullInputStreams } from './get_template_inputs';
-import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis-1.18.0-package-info.json';
+import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.json';
 import { getPackageAssetsMap, getPackageInfo } from './get';
-import { REDIS_ASSETS_MAP } from './__fixtures__/redis-1.18.0-streams-template';
-import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs-2.3.0';
+import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
+import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
 
 jest.mock('./get');
 
