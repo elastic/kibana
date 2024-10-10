@@ -10,11 +10,9 @@ import type { DiffableRule } from '../../../../../../common/api/detection_engine
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { SetRuleFieldResolvedValueFn } from '../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';
 
-type ParamsWithoutRuleId = Omit<Parameters<SetRuleFieldResolvedValueFn>[0], 'ruleId'>;
-
 interface DiffableRuleContextType {
   finalDiffableRule: DiffableRule;
-  setRuleFieldResolvedValue: (paramsWithoutRuleId: ParamsWithoutRuleId) => void;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 const DiffableRuleContext = createContext<DiffableRuleContextType | null>(null);
@@ -30,16 +28,9 @@ export function DiffableRuleContextProvider({
   setRuleFieldResolvedValue,
   children,
 }: DiffableRuleContextProviderProps) {
-  const setRuleFieldResolvedValueWithRuleId = ({
-    fieldName,
-    resolvedValue,
-  }: ParamsWithoutRuleId) => {
-    setRuleFieldResolvedValue({ ruleId: finalDiffableRule.rule_id, fieldName, resolvedValue });
-  };
-
   const contextValue = {
     finalDiffableRule,
-    setRuleFieldResolvedValue: setRuleFieldResolvedValueWithRuleId,
+    setRuleFieldResolvedValue,
   };
 
   return (

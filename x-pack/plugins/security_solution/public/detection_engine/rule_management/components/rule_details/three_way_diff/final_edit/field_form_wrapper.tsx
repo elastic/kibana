@@ -23,8 +23,8 @@ interface FieldFormWrapperProps {
     setFieldValue: (fieldName: string, fieldValue: unknown) => void;
   }>;
   fieldFormSchema: FormSchema;
-  deserializer: (fieldValue: FormData, finalDiffableRule: DiffableRule) => FormData;
-  serializer: (formData: FormData) => FormData;
+  deserializer?: (fieldValue: FormData, finalDiffableRule: DiffableRule) => FormData;
+  serializer?: (formData: FormData) => FormData;
 }
 
 /**
@@ -64,6 +64,7 @@ export function FieldFormWrapper({
     onSubmit: async (formData, isValid) => {
       if (isValid) {
         setRuleFieldResolvedValue({
+          ruleId: finalDiffableRule.rule_id,
           fieldName: fieldName as keyof DiffableAllFields,
           resolvedValue: formData[fieldName],
         });
