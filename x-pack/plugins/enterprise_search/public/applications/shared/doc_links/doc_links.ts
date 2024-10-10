@@ -22,6 +22,7 @@ class DocLinks {
   public appSearchDuplicateDocuments: string;
   public appSearchElasticsearchIndexedEngines: string;
   public appSearchEntryPoints: string;
+  public appSearchEvolutionBlog: string;
   public appSearchGettingStarted: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
@@ -158,6 +159,7 @@ class DocLinks {
   public workplaceSearchCustomSources: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
+  public workplaceSearchEvolutionBlog: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchGatedFormBlog: string;
@@ -202,6 +204,7 @@ class DocLinks {
     this.appSearchDuplicateDocuments = '';
     this.appSearchEntryPoints = '';
     this.appSearchElasticsearchIndexedEngines = '';
+    this.appSearchEvolutionBlog = '';
     this.appSearchGettingStarted = '';
     this.appSearchGuide = '';
     this.appSearchIndexingDocs = '';
@@ -338,6 +341,7 @@ class DocLinks {
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
     this.workplaceSearchDropbox = '';
+    this.workplaceSearchEvolutionBlog = '';
     this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
     this.workplaceSearchGatedFormBlog = '';
@@ -384,6 +388,7 @@ class DocLinks {
     this.appSearchElasticsearchIndexedEngines =
       docLinks.links.appSearch.elasticsearchIndexedEngines;
     this.appSearchEntryPoints = docLinks.links.appSearch.entryPoints;
+    this.appSearchEvolutionBlog = docLinks.links.appSearch.searchLabsEvolutionBlog;
     this.appSearchGettingStarted = docLinks.links.appSearch.gettingStarted;
     this.appSearchGuide = docLinks.links.appSearch.guide;
     this.appSearchIndexingDocs = docLinks.links.appSearch.indexingDocuments;
@@ -524,6 +529,7 @@ class DocLinks {
       docLinks.links.workplaceSearch.customSourcePermissions;
     this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
     this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
+    this.workplaceSearchEvolutionBlog = docLinks.links.workplaceSearch.searchLabsEvolutionBlog;
     this.workplaceSearchExternalSharePointOnline =
       docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
