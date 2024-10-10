@@ -65,13 +65,9 @@ export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: 
 
   const [isTimelineSearchOpen, setIsTimelineSearchOpen] = useState(false);
 
-  const handleOpenTimelineSearch = useCallback(() => {
-    setIsTimelineSearchOpen(true);
-  }, []);
+  const handleOpenTimelineSearch = useCallback(() => setIsTimelineSearchOpen(true), []);
 
-  const handleCloseTimelineSearch = useCallback(() => {
-    setIsTimelineSearchOpen(false);
-  }, []);
+  const handleCloseTimelineSearch = useCallback(() => setIsTimelineSearchOpen(false), []);
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ queryBar: timelineQueryBar }) => {
