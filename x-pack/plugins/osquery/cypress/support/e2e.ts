@@ -96,6 +96,10 @@ Cypress.Commands.add('login', (role, useCookiesForMKI = true) => {
 
 Cypress.Commands.add('waitUntil', waitUntil);
 
+Cypress.Screenshot.defaults({
+  capture: 'runner',
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 Cypress.on('uncaught:exception', () => false);
