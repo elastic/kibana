@@ -105,6 +105,8 @@ describe('GenerationModal', () => {
     it('should call runAnalyzeLogsGraph with correct parameters', () => {
       expect(mockRunAnalyzeLogsGraph).toHaveBeenCalledWith({
         ...defaultRequest,
+        packageTitle: 'Mocked Integration title',
+        dataStreamTitle: 'Mocked Data Stream Title',
         logSamples: integrationSettingsNonJSON.logSamples ?? [],
       });
     });
