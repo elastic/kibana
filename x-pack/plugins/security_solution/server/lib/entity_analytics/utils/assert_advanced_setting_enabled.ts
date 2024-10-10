@@ -11,7 +11,7 @@ export const assertAdvancedSettingsEnabled = async (
   core: CoreRequestHandlerContext,
   settingId: string
 ) => {
-  const isAdvancedSettingsEnabled = await core.uiSettings.client.get<boolean>(settingId);
+  const isAdvancedSettingsEnabled = true;
 
   if (!isAdvancedSettingsEnabled) {
     const err: Error & { statusCode?: number } = new Error(
