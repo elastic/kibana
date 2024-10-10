@@ -223,3 +223,6 @@ monitoring.ui.enabled: false
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+# Enable role management (custom roles) by default
+xpack.security.roleManagementEnabled: true

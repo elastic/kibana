@@ -105,6 +105,3 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
-
-# Enable role management (custom roles)
-xpack.security.roleManagementEnabled: true
