@@ -40,7 +40,7 @@ import {
   userSelectedPage,
   userSelectedPerPage,
   userSelectedRow,
-  userSelectedRowForDeletion,
+  userSelectedNotesForDeletion,
   userSortedNotes,
   selectSortedNotesByDocumentId,
   fetchNotesBySavedObjectIds,
@@ -533,9 +533,9 @@ describe('notesSlice', () => {
       });
     });
 
-    describe('userSelectedRowForDeletion', () => {
-      it('should set correct id when user selects a row', () => {
-        const action = { type: userSelectedRowForDeletion.type, payload: '1' };
+    describe('userSelectedNotesForDeletion', () => {
+      it('should set correct id when user selects a note to delete', () => {
+        const action = { type: userSelectedNotesForDeletion.type, payload: '1' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           ...initalEmptyState,
