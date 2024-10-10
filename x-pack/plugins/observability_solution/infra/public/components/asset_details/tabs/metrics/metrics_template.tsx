@@ -129,7 +129,8 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
       <>
         {showAddMetricsCallout && (
           <>
-            <AddMetricsCallout id={addMetricsCalloutId} /> <EuiSpacer size="s" />
+            <AddMetricsCallout id={addMetricsCalloutId} />
+            <EuiSpacer size="s" />
           </>
         )}
         <EuiFlexGroup

@@ -149,7 +149,8 @@ export const Processes = () => {
     <>
       {showAddMetricsCallout && (
         <>
-          <AddMetricsCallout id={addMetricsCalloutId} /> <EuiSpacer />
+          <AddMetricsCallout id={addMetricsCalloutId} />
+          <EuiSpacer />
         </>
       )}
       <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
