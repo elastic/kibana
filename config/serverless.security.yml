@@ -92,6 +92,17 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # ML integrations
     'dga',
+
+    # Removed from serverless
+    'bluecoat',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'netscout',
+    'radware',
+    'tomcat',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
