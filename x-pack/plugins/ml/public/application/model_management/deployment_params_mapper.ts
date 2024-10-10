@@ -18,9 +18,6 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
 
 const THREADS_MAX_EXPONENT = 5;
 
-// TODO set to 0 when https://github.com/elastic/elasticsearch/pull/113455 is merged
-const MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS = 1;
-
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
   {
@@ -47,9 +44,9 @@ export class DeploymentParamsMapper {
    * TODO resolve dynamically when Control Pane exposes the vCPUs range.
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
-    medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 99999, static: 128 },
+    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
+    medium: { min: 1, max: 32, static: 32 },
+    high: { min: 1, max: 99999, static: 128 },
   };
 
   /**
@@ -57,9 +54,9 @@ export class DeploymentParamsMapper {
    * Can be overridden by the project specific settings.
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
-    medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 512, static: 512 },
+    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
+    medium: { min: 1, max: 32, static: 32 },
+    high: { min: 1, max: 512, static: 512 },
   };
 
   /**
@@ -72,6 +69,16 @@ export class DeploymentParamsMapper {
    * Result vCPUs level breakpoint based on the cluster env.
    */
   private readonly vCpuBreakpoints: VCPUBreakpoints;
+
+  /**
+   * Gets the min allowed number of allocations.
+   * - 0 for serverless and ESS with enabled autoscaling.
+   * - 1 otherwise
+   * @private
+   */
+  private get minAllowedNumberOfAllocation(): number {
+    return !this.showNodeInfo || this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
+  }
 
   constructor(
     private readonly modelId: string,
@@ -93,7 +100,7 @@ export class DeploymentParamsMapper {
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
     this.hardwareVCPUBreakpoints = {
-      low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
+      low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
       medium: { min: Math.min(3, mediumValue), max: mediumValue, static: mediumValue },
       high: {
         min: mediumValue + 1,
@@ -122,6 +129,11 @@ export class DeploymentParamsMapper {
     return input.vCPUUsage === 'low' ? 2 : Math.max(...this.threadingParamsValues);
   }
 
+  /**
+   * Returns allocation values accounting for the number of threads per allocation.
+   * @param params
+   * @private
+   */
   private getAllocationsParams(
     params: DeploymentParamsUI
   ): Pick<MlStartTrainedModelDeploymentRequestNew, 'number_of_allocations'> &
@@ -140,7 +152,7 @@ export class DeploymentParamsMapper {
       min_number_of_allocations:
         Math.floor(levelValues.min / threadsPerAllocation) ||
         // in any env, allow scale down to 0 only for "low" vCPU usage
-        (params.vCPUUsage === 'low' ? MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS : 1),
+        (params.vCPUUsage === 'low' ? this.minAllowedNumberOfAllocation : 1),
       max_number_of_allocations: maxValue,
     };
   }
