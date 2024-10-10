@@ -2031,27 +2031,6 @@ describe('delete()', () => {
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'action',
-        attributes: {
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-        },
-        references: [],
-      });
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
@@ -2062,27 +2041,6 @@ describe('delete()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when deleting a connector', async () => {
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'action',
-        attributes: {
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-        },
-        references: [],
-      });
       await actionsClient.delete({ id: '1' });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
