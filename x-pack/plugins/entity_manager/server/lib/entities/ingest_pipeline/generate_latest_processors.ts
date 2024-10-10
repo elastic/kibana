@@ -143,6 +143,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       set: {
         field: 'entity.id',
         value: definition.identityFields
+          .sort()
           .map((identityField) => `{{{entity.identity.${identityField}}}}`)
           .join('-'),
       },
