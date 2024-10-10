@@ -67,7 +67,9 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const {
     services: { storage, telemetry },
@@ -102,6 +104,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
@@ -110,7 +114,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       unit: defaultUnit,
     },
     defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
-    fields: indexPattern.fields,
+    fields,
     groupingId: props.tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onGroupChange,

@@ -159,6 +159,7 @@ describe('GroupedAlertsTable', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
+      sourcererDataView: {},
     });
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {

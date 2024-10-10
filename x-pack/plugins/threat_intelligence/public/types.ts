@@ -65,7 +65,7 @@ export interface LicenseAware {
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export interface SelectedDataView {
-  sourcererDataView: DataViewSpec | undefined;
+  sourcererDataView: DataViewSpec;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   selectedPatterns: string[];
