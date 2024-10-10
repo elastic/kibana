@@ -77,6 +77,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  queryTime,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -461,9 +462,10 @@ export const ESQLEditor = memo(function ESQLEditor({
         queryString: code,
         timeZone,
         status: clientParserStatus,
+        duration: queryTime ? `${queryTime}ms` : '',
       });
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
+  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone, queryTime]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {

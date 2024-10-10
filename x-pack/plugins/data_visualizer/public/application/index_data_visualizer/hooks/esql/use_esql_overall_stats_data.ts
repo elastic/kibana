@@ -40,7 +40,12 @@ interface ESQLColumn {
   name: string;
 }
 interface ESQLResponse {
-  rawResponse: { columns: ESQLColumn[]; all_columns: ESQLColumn[]; values: unknown[][] };
+  rawResponse: {
+    columns: ESQLColumn[];
+    all_columns: ESQLColumn[];
+    values: unknown[][];
+    took?: number;
+  };
 }
 export interface Column extends ESQLColumn {
   secondaryType: string;
