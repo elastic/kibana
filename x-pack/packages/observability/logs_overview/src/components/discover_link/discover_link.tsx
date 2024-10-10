@@ -14,7 +14,6 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-
 export interface DiscoverLinkProps {
   documentFilters?: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
