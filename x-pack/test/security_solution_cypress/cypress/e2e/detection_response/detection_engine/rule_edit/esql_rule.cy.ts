@@ -55,7 +55,8 @@ const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
 // Skipping in MKI due to flake
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/184557
+describe.skip(
   'Detection ES|QL rules, edit',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
