@@ -19,8 +19,14 @@ import {
   sanitizeRequest as azureAiSanitizeRequest,
   getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
 } from './azure_openai_utils';
+import {
+  sanitizeRequest as otherOpenAiSanitizeRequest,
+  getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
+} from './other_openai_utils';
+
 jest.mock('./openai_utils');
 jest.mock('./azure_openai_utils');
+jest.mock('./other_openai_utils');
 
 describe('Utils', () => {
   const azureAiUrl =
@@ -38,6 +44,7 @@ describe('Utils', () => {
   describe('sanitizeRequest', () => {
     const mockOpenAiSanitizeRequest = openAiSanitizeRequest as jest.Mock;
     const mockAzureAiSanitizeRequest = azureAiSanitizeRequest as jest.Mock;
+    const mockOtherOpenAiSanitizeRequest = otherOpenAiSanitizeRequest as jest.Mock;
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -50,24 +57,36 @@ describe('Utils', () => {
         DEFAULT_OPENAI_MODEL
       );
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiSanitizeRequest).not.toHaveBeenCalled();
+    });
+
+    it('calls other_openai_utils sanitizeRequest when provider is Other OpenAi', () => {
+      sanitizeRequest(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, DEFAULT_OPENAI_MODEL);
+      expect(mockOtherOpenAiSanitizeRequest).toHaveBeenCalledWith(bodyString);
+      expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
+      expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
     });
 
     it('calls azure_openai_utils sanitizeRequest when provider is AzureAi', () => {
       sanitizeRequest(OpenAiProviderType.AzureAi, azureAiUrl, bodyString);
       expect(mockAzureAiSanitizeRequest).toHaveBeenCalledWith(azureAiUrl, bodyString);
       expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiSanitizeRequest).not.toHaveBeenCalled();
     });
 
     it('does not call any helper fns when provider is unrecognized', () => {
       sanitizeRequest('foo', OPENAI_CHAT_URL, bodyString);
       expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiSanitizeRequest).not.toHaveBeenCalled();
     });
   });
 
   describe('getRequestWithStreamOption', () => {
     const mockOpenAiGetRequestWithStreamOption = openAiGetRequestWithStreamOption as jest.Mock;
     const mockAzureAiGetRequestWithStreamOption = azureAiGetRequestWithStreamOption as jest.Mock;
+    const mockOtherOpenAiGetRequestWithStreamOption =
+      otherOpenAiGetRequestWithStreamOption as jest.Mock;
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -88,6 +107,15 @@ describe('Utils', () => {
         DEFAULT_OPENAI_MODEL
       );
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
+    });
+
+    it('calls other_openai_utils getRequestWithStreamOption when provider is Other OpenAi', () => {
+      getRequestWithStreamOption(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, true);
+
+      expect(mockOtherOpenAiGetRequestWithStreamOption).toHaveBeenCalledWith(bodyString, true);
+      expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
+      expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });
 
     it('calls azure_openai_utils getRequestWithStreamOption when provider is AzureAi', () => {
@@ -99,6 +127,7 @@ describe('Utils', () => {
         true
       );
       expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });
 
     it('does not call any helper fns when provider is unrecognized', () => {
@@ -110,6 +139,7 @@ describe('Utils', () => {
       );
       expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
+      expect(mockOtherOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });
   });
 
@@ -122,6 +152,19 @@ describe('Utils', () => {
 
     it('returns correct axios options when provider is openai and stream is true', () => {
       expect(getAxiosOptions(OpenAiProviderType.OpenAi, 'api-abc', true)).toEqual({
+        headers: { Authorization: `Bearer api-abc`, ['content-type']: 'application/json' },
+        responseType: 'stream',
+      });
+    });
+
+    it('returns correct axios options when provider is other openai and stream is false', () => {
+      expect(getAxiosOptions(OpenAiProviderType.Other, 'api-abc', false)).toEqual({
+        headers: { Authorization: `Bearer api-abc`, ['content-type']: 'application/json' },
+      });
+    });
+
+    it('returns correct axios options when provider is other openai and stream is true', () => {
+      expect(getAxiosOptions(OpenAiProviderType.Other, 'api-abc', true)).toEqual({
         headers: { Authorization: `Bearer api-abc`, ['content-type']: 'application/json' },
         responseType: 'stream',
       });
