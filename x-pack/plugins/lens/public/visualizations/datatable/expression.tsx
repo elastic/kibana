@@ -13,6 +13,7 @@ import type { IAggType } from '@kbn/data-plugin/public';
 import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type {
   Datatable,
+  DatatableColumnMeta,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
@@ -102,6 +103,11 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 
     const resolvedGetType = await dependencies.getType;
+    const getType = (meta?: DatatableColumnMeta): IAggType | undefined => {
+      if (meta?.sourceParams?.type === undefined) return;
+      return resolvedGetType(String(meta.sourceParams.type));
+    };
+
     const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
 
     const renderComplete = () => {
@@ -161,7 +167,7 @@ export const getDatatableRenderer = (dependencies: {
           dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
           paletteService={dependencies.paletteService}
-          getType={resolvedGetType}
+          getType={getType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
           columnCellValueActions={columnCellValueActions}
           columnFilterable={columnsFilterable}
