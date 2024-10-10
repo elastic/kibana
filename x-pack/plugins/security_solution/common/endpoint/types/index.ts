@@ -538,6 +538,7 @@ export interface HostMetadataInterface {
     status: EndpointStatus;
     policy: {
       applied: {
+        /** The Endpoint integration policy UUID */
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
