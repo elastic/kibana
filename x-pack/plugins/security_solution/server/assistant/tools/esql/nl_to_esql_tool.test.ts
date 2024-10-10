@@ -41,7 +41,6 @@ describe('NaturalLanguageESQLTool', () => {
     inference,
     connectorId,
     isEnabledKnowledgeBase: true,
-    modelExists: true,
   };
 
   describe('isSupported', () => {
@@ -53,8 +52,6 @@ describe('NaturalLanguageESQLTool', () => {
   describe('getTool', () => {
     it('returns null if inference plugin is not provided', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
         inference: undefined,
       });
@@ -64,8 +61,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('returns null if connectorId is not provided', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
         connectorId: undefined,
       });
@@ -73,10 +68,8 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('should return a Tool instance if isEnabledKnowledgeBase and modelExists are true', () => {
+    it('should return a Tool instance when given required properties', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
       });
 
@@ -85,8 +78,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return a tool with the expected tags', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
       }) as DynamicTool;
 
@@ -95,8 +86,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return tool with the expected description for OSS model', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         isOssModel: true,
         ...rest,
       }) as DynamicTool;
@@ -106,8 +95,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return tool with the expected description for non-OSS model', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         isOssModel: false,
         ...rest,
       }) as DynamicTool;
