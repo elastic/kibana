@@ -8,6 +8,7 @@
 import React from 'react';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
+import { HIDDEN_FIELDS } from './constants';
 
 interface RuleUpgradeConflictsResolverProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -22,10 +23,11 @@ export function RuleUpgradeConflictsResolver({
       Required<typeof ruleUpgradeState.diff.fields>[keyof typeof ruleUpgradeState.diff.fields]
     ]
   >;
+
   const fields = fieldDiffEntries
     .filter(([fieldName]) => {
-      /* Do not show "version" field among changes */
-      return fieldName !== 'version';
+      /* Remove fields that aren't supposed to be displayed */
+      return HIDDEN_FIELDS.has(fieldName) === false;
     })
     .map(([fieldName, fieldDiff]) => (
       <FieldUpgradeConflictsResolver
