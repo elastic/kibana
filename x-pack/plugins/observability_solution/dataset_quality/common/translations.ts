@@ -501,14 +501,6 @@ export const degradedFieldMessageIssueDoesNotExistInLatestIndex = i18n.translate
   }
 );
 
-export const degradedFieldPotentialCauseIgnoreMalformedWarning = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning',
-  {
-    defaultMessage:
-      'If you recently changed any settings, it is possible that this potential cause may not be valid any more. Please rollover to check.',
-  }
-);
-
 export const possibleMitigationTitle = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigationTitle',
   {

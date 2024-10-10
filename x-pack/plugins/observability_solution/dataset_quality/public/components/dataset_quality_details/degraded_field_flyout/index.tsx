@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiFlyout,
@@ -20,6 +21,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigationSource } from '../../../services/telemetry';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -29,7 +31,6 @@ import {
 } from '../../../hooks';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
-  degradedFieldPotentialCauseIgnoreMalformedWarning,
   discoverAriaText,
   fieldIgnoredText,
   logsExplorerAriaText,
@@ -136,7 +137,20 @@ export default function DegradedFieldFlyout() {
                 color="danger"
                 data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
               >
-                {degradedFieldPotentialCauseIgnoreMalformedWarning}
+                <FormattedMessage
+                  id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
+                  defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
+                  values={{
+                    field_limit: (
+                      <strong>
+                        {i18n.translate(
+                          'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
+                          { defaultMessage: 'field limit' }
+                        )}
+                      </strong>
+                    ),
+                  }}
+                />
               </EuiTextColor>
             </>
           )}
