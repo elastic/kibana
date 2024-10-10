@@ -16,6 +16,12 @@ export const assistantCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.assistant,
   title: ASSISTANT_CARD_TITLE,
   icon: AssistantAvatar,
-  Component: React.lazy(() => import('./assistant_card')),
+  Component: React.lazy(
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_assistant_card" */
+        './assistant_card'
+      )
+  ),
   checkComplete: checkAssistantCardComplete,
 };

@@ -16,7 +16,11 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
   title: DASHBOARDS_CARD_TITLE,
   icon: dashboardsIcon,
   Component: React.lazy(
-    () => import('./dashboards_card' /* webpackChunkName: "onboarding_dashboards_card" */)
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_dashboards_card" */
+        './dashboards_card'
+      )
   ),
   capabilities: ['dashboard.show'],
 };

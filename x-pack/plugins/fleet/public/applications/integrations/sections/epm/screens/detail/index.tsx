@@ -90,7 +90,6 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 import './index.scss';
-import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 export type DetailViewPanelName =
   | 'overview'

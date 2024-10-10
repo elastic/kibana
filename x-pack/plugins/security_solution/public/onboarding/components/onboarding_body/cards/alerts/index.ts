@@ -15,5 +15,11 @@ export const alertsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.alerts,
   title: ALERTS_CARD_TITLE,
   icon: alertsIcon,
-  Component: React.lazy(() => import('./alerts_card')),
+  Component: React.lazy(
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_alerts_card" */
+        './alerts_card'
+      )
+  ),
 };

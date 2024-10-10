@@ -19,7 +19,11 @@ export const integrationsCardConfig: OnboardingCardConfig = {
   }),
   icon: integrationsIcon,
   Component: React.lazy(
-    () => import('./integrations_card' /* webpackChunkName: "onboarding_integrations_card" */)
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_integrations_card" */
+        './integrations_card'
+      )
   ),
   checkComplete: checkIntegrationsCardComplete,
   capabilities: ['fleet.all', 'fleetv2.all'],

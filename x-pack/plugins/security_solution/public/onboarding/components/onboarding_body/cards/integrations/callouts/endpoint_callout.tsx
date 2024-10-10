@@ -10,12 +10,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import { CardCallOut } from '../../common/card_callout';
-import { ENDPOINT_LEARN_MORE_LINK } from '../constants';
 
 export const EndpointCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
+  const { docLinks } = useKibana().services;
 
   return (
     <CardCallOut
@@ -46,7 +47,7 @@ export const EndpointCallout = React.memo(() => {
             ),
             link: (
               <LinkAnchor
-                href={ENDPOINT_LEARN_MORE_LINK}
+                href={docLinks.links.securitySolution.responseActions}
                 data-test-subj="endpointLearnMoreLink"
                 external={true}
                 target="_blank"

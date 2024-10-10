@@ -11,12 +11,9 @@ import type { Tab } from './types';
 
 export const ADD_AGENT_PATH = `/agents`;
 export const AGENT_INDEX = `logs-elastic_agent*`;
-export const AGENTLESS_LEARN_MORE_LINK = null; // Link to be confirmed.
 export const CARD_DESCRIPTION_LINE_CLAMP = 3; // 3 lines of text
 export const CARD_TITLE_LINE_CLAMP = 1; // 1 line of text
 export const DEFAULT_TAB: Tab = INTEGRATION_TABS[0];
-export const ENDPOINT_LEARN_MORE_LINK =
-  'https://www.elastic.co/guide/en/security/current/third-party-actions.html';
 export const FLEET_APP_ID = `fleet`;
 export const INTEGRATION_APP_ID = `integrations`;
 export const LOADING_SKELETON_HEIGHT = 10; // 10 lines of text

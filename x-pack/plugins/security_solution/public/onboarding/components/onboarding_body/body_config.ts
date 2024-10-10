@@ -30,6 +30,7 @@ export const bodyConfig: OnboardingGroupConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.discoverGroup.title', {
       defaultMessage: 'Discover Elastic AI',
     }),
+    // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
     cards: [assistantCardConfig],
   },
 ];

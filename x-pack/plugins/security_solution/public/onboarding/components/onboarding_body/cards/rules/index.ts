@@ -16,6 +16,12 @@ export const rulesCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.rules,
   title: RULES_CARD_TITLE,
   icon: rulesIcon,
-  Component: React.lazy(() => import('./rules_card')),
+  Component: React.lazy(
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_rules_card" */
+        './rules_card'
+      )
+  ),
   checkComplete: checkRulesComplete,
 };

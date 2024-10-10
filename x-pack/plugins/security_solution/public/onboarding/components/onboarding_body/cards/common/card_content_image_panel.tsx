@@ -9,8 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
 
-export const IMAGE_WIDTH = 540;
-
 export const OnboardingCardContentImagePanel = React.memo<
   PropsWithChildren<{ imageSrc: string; imageAlt: string }>
 >(({ children, imageSrc, imageAlt }) => {

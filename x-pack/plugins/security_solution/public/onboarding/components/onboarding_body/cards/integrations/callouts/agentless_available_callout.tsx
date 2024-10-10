@@ -10,14 +10,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import { CardCallOut } from '../../common/card_callout';
-import { AGENTLESS_LEARN_MORE_LINK } from '../constants';
 
 export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
+  const { docLinks } = useKibana().services;
 
-  if (!AGENTLESS_LEARN_MORE_LINK) {
+  /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
+  if (!docLinks.links.fleet.agentlessBlog) {
     return null;
   }
 
@@ -50,7 +52,8 @@ export const AgentlessAvailableCallout = React.memo(() => {
             ),
             link: (
               <LinkAnchor
-                href={AGENTLESS_LEARN_MORE_LINK}
+                /* @ts-expect-error-next-line */
+                href={docLinks.links.fleet.agentlessBlog}
                 data-test-subj="agentlessLearnMoreLink"
                 external={true}
                 target="_blank"

@@ -9,7 +9,6 @@ import React from 'react';
 import { useObservable } from 'react-use';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
-import { AGENTLESS_LEARN_MORE_LINK } from '../constants';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { InstalledIntegrationsCallout } from './installed_integrations_callout';
 import { IntegrationTabId } from '../types';
@@ -27,9 +26,9 @@ export const IntegrationCardTopCallout = React.memo(
   }) => {
     const { isAgentlessAvailable$ } = useOnboardingService();
     const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
+
     const showAgentlessCallout =
       isAgentlessAvailable &&
-      AGENTLESS_LEARN_MORE_LINK &&
       installedIntegrationsCount === 0 &&
       selectedTabId !== IntegrationTabId.endpoint;
     const showEndpointCallout =
