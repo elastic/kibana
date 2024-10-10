@@ -22,6 +22,9 @@ export const createEntityIndexComponentTemplate = ({ unitedDefinition, esClient 
     name,
     body: {
       template: {
+        settings: {
+          hidden: true,
+        },
         mappings: indexMappings,
       },
     },
