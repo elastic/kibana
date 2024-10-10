@@ -6,8 +6,6 @@ description: >
   that the user has access to read.
 schema:
   oneOf:
+    - $ref: '../schemas/owner.yaml'
     - $ref: '../schemas/owners.yaml'
-    - type: array
-      items:
-        $ref: '../schemas/owners.yaml'
 example: cases
