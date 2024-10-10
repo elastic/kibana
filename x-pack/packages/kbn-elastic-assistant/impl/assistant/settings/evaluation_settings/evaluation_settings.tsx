@@ -95,6 +95,20 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     },
     [setSelectedDatasetOptions]
   );
+  const onDatasetCreateOption = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+      if (!normalizedSearchValue) {
+        return;
+      }
+      const newOption = {
+        label: searchValue,
+      };
+
+      setSelectedDatasetOptions([newOption]);
+    },
+    [setSelectedDatasetOptions]
+  );
 
   // Predictions
   // Connectors / Models
@@ -244,6 +258,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             options={datasetOptions}
             selectedOptions={selectedDatasetOptions}
             onChange={onDatasetOptionsChange}
+            onCreateOption={onDatasetCreateOption}
             compressed={true}
           />
         </EuiFormRow>

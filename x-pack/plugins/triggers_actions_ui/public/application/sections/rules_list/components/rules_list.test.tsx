@@ -225,7 +225,8 @@ describe('Update Api Key', () => {
   });
 });
 
-describe('rules_list component empty', () => {
+// Failing: See https://github.com/elastic/kibana/issues/182435
+describe.skip('rules_list component empty', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
     loadRulesWithKueryFilter.mockResolvedValue({

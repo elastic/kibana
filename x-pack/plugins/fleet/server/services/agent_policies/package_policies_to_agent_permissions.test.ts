@@ -848,6 +848,10 @@ it('Returns the Elastic Connectors permissions for elastic_connectors package', 
           names: ['content-*', '.search-acl-filter-*'],
           privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
         },
+        {
+          names: ['logs-elastic_agent*'],
+          privileges: ['auto_configure', 'create_doc'],
+        },
       ],
     },
   });

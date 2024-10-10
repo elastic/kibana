@@ -94,6 +94,7 @@ export const getNormalizeCommonFields = ({
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
+    [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
   };
   return { normalizedFields, errors };
 };
@@ -459,7 +460,9 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
     return acc;
   }, {});
 
-export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
+export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => {
+  // we map fields to labels
+  const { fields: _fields, ...monitor } = data;
   const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);

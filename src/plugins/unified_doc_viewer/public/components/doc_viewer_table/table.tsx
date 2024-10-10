@@ -29,23 +29,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
-  formatFieldValue,
-  getIgnoredReason,
   getShouldShowFieldHandler,
-  isNestedFieldParent,
   usePager,
   getVisibleColumns,
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
-import { getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
-  type TableRow,
   getFieldCellActions,
   getFieldValueCellActions,
   getFilterExistsDisabledWarning,
@@ -58,12 +52,11 @@ import {
 import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
-
-export type FieldRecord = TableRow;
+import { FieldRow } from './field_row';
 
 interface ItemsEntry {
-  pinnedItems: FieldRecord[];
-  restItems: FieldRecord[];
+  pinnedRows: FieldRow[];
+  restRows: FieldRow[];
   allFields: TableFiltersProps['allFields'];
 }
 
@@ -184,62 +177,21 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
 
   const fieldToItem = useCallback(
-    (field: string, isPinned: boolean) => {
-      const fieldMapping = mapping(field);
-      const displayName = fieldMapping?.displayName ?? field;
-      const columnMeta = columnsMeta?.[field];
-      const columnIconType = getTextBasedColumnIconType(columnMeta);
-      const fieldType = columnIconType
-        ? columnIconType // for text-based results types come separately
-        : isNestedFieldParent(field, dataView)
-        ? 'nested'
-        : fieldMapping
-        ? getFieldIconType(fieldMapping)
-        : undefined;
-
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
-
-      return {
-        action: {
-          onToggleColumn,
-          onFilter: filter,
-          flattenedField: flattened[field],
-        },
-        field: {
-          field,
-          displayName,
-          fieldMapping,
-          fieldType,
-          scripted: Boolean(fieldMapping?.scripted),
-          pinned: isPinned,
-          onTogglePinned,
-        },
-        value: {
-          formattedValue: formatFieldValue(
-            hit.flattened[field],
-            hit.raw,
-            fieldFormats,
-            dataView,
-            fieldMapping
-          ),
-          ignored,
-        },
-      };
+    (field: string, isPinned: boolean): FieldRow => {
+      return new FieldRow({
+        name: field,
+        flattenedValue: flattened[field],
+        hit,
+        dataView,
+        fieldFormats,
+        isPinned,
+        columnsMeta,
+      });
     },
-    [
-      mapping,
-      dataView,
-      hit,
-      onToggleColumn,
-      filter,
-      columnsMeta,
-      flattened,
-      onTogglePinned,
-      fieldFormats,
-    ]
+    [dataView, hit, columnsMeta, flattened, fieldFormats]
   );
 
   const fieldsFromColumns = useMemo(
@@ -287,7 +239,7 @@ export const DocViewerTable = ({
     uiSettings,
   ]);
 
-  const { pinnedItems, restItems, allFields } = useMemo(
+  const { pinnedRows, restRows, allFields } = useMemo(
     () =>
       displayedFieldNames.reduce<ItemsEntry>(
         (acc, curFieldName) => {
@@ -304,25 +256,25 @@ export const DocViewerTable = ({
           const row = fieldToItem(curFieldName, isPinned);
 
           if (isPinned) {
-            acc.pinnedItems.push(row);
+            acc.pinnedRows.push(row);
           } else {
-            if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
+            if (onFilterField(row)) {
               // filter only unpinned fields
-              acc.restItems.push(row);
+              acc.restRows.push(row);
             }
           }
 
           acc.allFields.push({
             name: curFieldName,
-            displayName: row.field.displayName,
-            type: row.field.fieldType,
+            displayName: row.dataViewField?.displayName,
+            type: row.fieldType,
           });
 
           return acc;
         },
         {
-          pinnedItems: [],
-          restItems: [],
+          pinnedRows: [],
+          restRows: [],
           allFields: [],
         }
       ),
@@ -339,11 +291,11 @@ export const DocViewerTable = ({
     ]
   );
 
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+  const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
   const leadingControlColumns = useMemo(() => {
-    return [getPinColumnControl({ rows })];
-  }, [rows]);
+    return [getPinColumnControl({ rows, onTogglePinned })];
+  }, [rows, onTogglePinned]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -372,12 +324,12 @@ export const DocViewerTable = ({
   }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, filter, onToggleColumn }),
-    [rows, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
+    [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, filter }),
-    [rows, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
+    [rows, isEsqlMode, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -434,10 +386,11 @@ export const DocViewerTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
+          onFindSearchTermMatch={onFindSearchTermMatch}
         />
       );
     },
-    [rows, tableFiltersProps.searchTerm]
+    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(
@@ -447,9 +400,9 @@ export const DocViewerTable = ({
 
       let warningMessage: string | undefined;
       if (columnId === GRID_COLUMN_FIELD_VALUE) {
-        warningMessage = getFilterInOutPairDisabledWarning(row);
+        warningMessage = getFilterInOutPairDisabledWarning(row, filter);
       } else if (columnId === GRID_COLUMN_FIELD_NAME) {
-        warningMessage = getFilterExistsDisabledWarning(row);
+        warningMessage = getFilterExistsDisabledWarning(row, filter);
       }
 
       return (
@@ -465,7 +418,7 @@ export const DocViewerTable = ({
         </>
       );
     },
-    [rows]
+    [rows, filter]
   );
 
   const containerHeight = containerRef

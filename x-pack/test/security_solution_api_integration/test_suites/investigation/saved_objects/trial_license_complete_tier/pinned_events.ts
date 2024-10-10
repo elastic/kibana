@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Unpinned an event', () => {
-      it('return null', async () => {
+      it('returns null', async () => {
         const response = await supertest
           .patch('/api/pinned_event')
           .set('elastic-api-version', '2023-10-31')

@@ -16,4 +16,12 @@ ts-node "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"
 if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   echo "--- Trigger agent packer cache pipeline"
   ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-agent-packer-cache main
+  cat << EOF | buildkite-agent pipeline upload
+steps:
+  - label: "Builds Kibana VM images for cache update"
+    trigger: ci-vm-images
+    build:
+      env:
+        IMAGES_CONFIG="kibana/images.yml"
+EOF
 fi

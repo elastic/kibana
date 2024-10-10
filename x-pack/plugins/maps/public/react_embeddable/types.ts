@@ -31,7 +31,6 @@ import {
   MapSettings,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { EventHandlers } from '../reducers/non_serializable_instances';
 
 export type MapSerializedState = SerializedTitles &
@@ -47,15 +46,9 @@ export type MapSerializedState = SerializedTitles &
     mapBuffer?: MapExtent;
     mapSettings?: Partial<MapSettings>;
     hiddenLayers?: string[];
-    hideFilterActions?: boolean;
     timeRange?: TimeRange;
     filterByMapExtent?: boolean;
     isMovementSynchronized?: boolean;
-
-    // Configuration item that are never persisted
-    // Putting in state as a temporary work around
-    isSharable?: boolean;
-    tooltipRenderer?: RenderToolTipContent;
   };
 
 export type MapRuntimeState = MapSerializedState;

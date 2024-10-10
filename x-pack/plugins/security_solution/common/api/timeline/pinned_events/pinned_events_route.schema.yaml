@@ -5,13 +5,6 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/_pin_an_event_to_an_existing_timeline.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/pinned_event:
     patch:
@@ -52,11 +45,22 @@ paths:
                     required: [persistPinnedEventOnTimeline]
                     properties:
                       persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
+                        $ref: '#/components/schemas/PersistPinnedEventResponse'
+
+components:
+  schemas:
+    PersistPinnedEventResponse:
+      oneOf:
+        - allOf:
+            - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
+            - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - type: object
+          nullable: true
+    PinnedEventBaseResponseBody:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: number
+        message:
+          type: string

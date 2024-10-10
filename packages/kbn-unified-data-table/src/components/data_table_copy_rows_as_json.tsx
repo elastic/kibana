@@ -11,20 +11,23 @@ import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { copyRowsAsJsonToClipboard } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
 
 interface DataTableCopyRowsAsJsonProps {
+  rows: DataTableRecord[];
   toastNotifications: ToastsStart;
   onCompleted: () => void;
 }
 
 export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = ({
+  rows,
   toastNotifications,
   onCompleted,
 }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const { rows, selectedDocsState, isPlainRecord } = useContext(UnifiedDataTableContext);
+  const { selectedDocsState, isPlainRecord } = useContext(UnifiedDataTableContext);
   const { getSelectedDocsOrderedByRows } = selectedDocsState;
 
   return (
