@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverServices } from '../../../../../build_services';
+import type { AppMenuExtensionParams } from '../../../../../context_awareness/types';
 
-export interface AppMenuDiscoverParams {
-  dataView: DataView | undefined;
-  adHocDataViews: DataView[];
-  isEsqlMode?: boolean;
-  services: DiscoverServices;
-  onNewSearch: () => void;
-  onOpenSavedSearch: (id: string) => void;
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-}
+export type AppMenuDiscoverParams = AppMenuExtensionParams;

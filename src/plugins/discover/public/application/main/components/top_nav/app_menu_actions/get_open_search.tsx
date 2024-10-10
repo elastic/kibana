@@ -11,12 +11,11 @@ import React from 'react';
 import { AppMenuActionId, AppMenuActionType, AppMenuIconAction } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
-import { AppMenuDiscoverParams } from './types';
 
 export const getOpenSearchAppMenuItem = ({
-  getDiscoverParams,
+  onOpenSavedSearch,
 }: {
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  onOpenSavedSearch: (savedSearchId: string) => void;
 }): AppMenuIconAction => {
   return {
     id: AppMenuActionId.open,
@@ -31,7 +30,6 @@ export const getOpenSearchAppMenuItem = ({
       iconType: 'folderOpen',
       testId: 'discoverOpenButton',
       onClick: ({ onFinishAction }) => {
-        const { onOpenSavedSearch } = getDiscoverParams();
         return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
       },
     },

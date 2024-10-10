@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTopNavLinks } from './get_top_nav_links';
+import React from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { useTopNavLinks } from './use_top_nav_links';
 import { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
-describe('getTopNavLinks', () => {
+describe('useTopNavLinks', () => {
   const services = {
     ...createDiscoverServicesMock(),
     capabilities: {
@@ -29,17 +32,24 @@ describe('getTopNavLinks', () => {
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
-  test('getTopNavLinks result', () => {
-    const topNavLinks = getTopNavLinks({
-      dataView: dataViewMock,
-      onOpenInspector: jest.fn(),
-      services,
-      state,
-      isEsqlMode: false,
-      adHocDataViews: [],
-      topNavCustomization: undefined,
-      shouldShowESQLToDataViewTransitionModal: false,
-    });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+  };
+
+  test('useTopNavLinks result', () => {
+    const topNavLinks = renderHook(useTopNavLinks, {
+      initialProps: {
+        dataView: dataViewMock,
+        onOpenInspector: jest.fn(),
+        services,
+        state,
+        isEsqlMode: false,
+        adHocDataViews: [],
+        topNavCustomization: undefined,
+        shouldShowESQLToDataViewTransitionModal: false,
+      },
+      wrapper: Wrapper,
+    }).result.current;
     expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -99,17 +109,20 @@ describe('getTopNavLinks', () => {
   `);
   });
 
-  test('getTopNavLinks result for ES|QL mode', () => {
-    const topNavLinks = getTopNavLinks({
-      dataView: dataViewMock,
-      onOpenInspector: jest.fn(),
-      services,
-      state,
-      isEsqlMode: true,
-      adHocDataViews: [],
-      topNavCustomization: undefined,
-      shouldShowESQLToDataViewTransitionModal: false,
-    });
+  test('useTopNavLinks result for ES|QL mode', () => {
+    const topNavLinks = renderHook(useTopNavLinks, {
+      initialProps: {
+        dataView: dataViewMock,
+        onOpenInspector: jest.fn(),
+        services,
+        state,
+        isEsqlMode: true,
+        adHocDataViews: [],
+        topNavCustomization: undefined,
+        shouldShowESQLToDataViewTransitionModal: false,
+      },
+      wrapper: Wrapper,
+    }).result.current;
     expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
