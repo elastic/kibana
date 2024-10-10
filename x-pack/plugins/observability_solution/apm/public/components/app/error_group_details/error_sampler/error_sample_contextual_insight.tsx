@@ -8,9 +8,9 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
+import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
 import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
 
@@ -18,8 +18,26 @@ export function ErrorSampleContextualInsight({
   error,
   transaction,
 }: {
-  error: APMError;
-  transaction?: Transaction;
+  error: {
+    [AT_TIMESTAMP]: string;
+    error: Pick<APMError['error'], 'log' | 'exception' | 'id'>;
+    service: {
+      name: string;
+      environment?: string;
+      language?: {
+        name?: string;
+      };
+      runtime?: {
+        name?: string;
+        version?: string;
+      };
+    };
+  };
+  transaction?: {
+    transaction: {
+      name: string;
+    };
+  };
 }) {
   const { observabilityAIAssistant } = useApmPluginContext();
 
