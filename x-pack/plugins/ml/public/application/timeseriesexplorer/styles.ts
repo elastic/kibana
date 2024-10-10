@@ -252,9 +252,10 @@ export const getTimeseriesExplorerStyles = () =>
         },
       },
     },
+  });
 
-    // Annotations styles
-
+export const getAnnotationStyles = () =>
+  css({
     '.ml-annotation': {
       '&__brush': {
         '.extent': {
