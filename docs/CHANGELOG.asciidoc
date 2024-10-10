@@ -239,7 +239,7 @@ The Uptime app is already hidden from Kibana when there is no recent Heartbeat d
 
 [discrete]
 [[deprecation-search-sessions]]
-.<<search-sessions,Search Sessions>> is deprecated in 8.15.0 and will be removed in a future version.
+.<<search-sessions,Search sessions>> are deprecated in 8.15.0 and will be removed in a future version.
 [%collapsible]
 ====
 *Details* +
