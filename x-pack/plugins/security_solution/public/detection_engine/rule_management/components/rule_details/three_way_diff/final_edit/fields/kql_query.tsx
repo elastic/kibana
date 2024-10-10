@@ -54,31 +54,14 @@ interface KqlQueryEditProps {
 export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: KqlQueryEditProps) {
   const defaultIndexPattern = useDefaultIndexPattern();
 
-  let indexPatternParams: Parameters<typeof useRuleIndexPattern>[0] = {
-    dataSourceType: DataSourceType.IndexPatterns,
-    index: defaultIndexPattern,
-    dataViewId: undefined,
-  };
-
-  if ('data_source' in finalDiffableRule && finalDiffableRule.data_source) {
-    if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
-      indexPatternParams = {
-        dataSourceType: DataSourceType.DataView,
-        index: [],
-        dataViewId: finalDiffableRule.data_source.data_view_id,
-      };
-    } else {
-      indexPatternParams = {
-        dataSourceType: DataSourceType.IndexPatterns,
-        index: finalDiffableRule.data_source.index_patterns,
-        dataViewId: undefined,
-      };
-    }
-  }
+  const indexPatternParameters = getUseRuleIndexPatternParameters(
+    finalDiffableRule,
+    defaultIndexPattern
+  );
 
   const isSavedQueryRule = finalDiffableRule.type === 'saved_query';
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParams);
+  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
 
   const [isTimelineSearchOpen, setIsTimelineSearchOpen] = useState(false);
 
@@ -224,4 +207,39 @@ export function kqlQueryDeserializer(
   };
 
   return returnValue;
+}
+
+interface UseRuleIndexPatternParameters {
+  dataSourceType: DataSourceType;
+  index: string[];
+  dataViewId: string | undefined;
+}
+
+function getUseRuleIndexPatternParameters(
+  finalDiffableRule: DiffableRule,
+  defaultIndexPattern: string[]
+): UseRuleIndexPatternParameters {
+  let indexPatternParams: UseRuleIndexPatternParameters = {
+    dataSourceType: DataSourceType.IndexPatterns,
+    index: defaultIndexPattern,
+    dataViewId: undefined,
+  };
+
+  if ('data_source' in finalDiffableRule && finalDiffableRule.data_source) {
+    if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
+      indexPatternParams = {
+        dataSourceType: DataSourceType.DataView,
+        index: [],
+        dataViewId: finalDiffableRule.data_source.data_view_id,
+      };
+    } else {
+      indexPatternParams = {
+        dataSourceType: DataSourceType.IndexPatterns,
+        index: finalDiffableRule.data_source.index_patterns,
+        dataViewId: undefined,
+      };
+    }
+  }
+
+  return indexPatternParams;
 }
