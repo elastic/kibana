@@ -458,45 +458,9 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
     {
-      provider: 'elser',
-      logo: '', // should be elser logo here, the hardcoded uses assets/images
-      taskTypes: ['sparse_embedding'],
-      configuration: {
-        num_allocations: {
-          display: DisplayType.NUMERIC,
-          label: 'Number allocations',
-          order: 1,
-          required: true,
-          sensitive: false,
-          tooltip:
-            'The total number of allocations this model is assigned across machine learning nodes.',
-          type: FieldType.INTEGER,
-          validations: [],
-          value: null,
-          ui_restrictions: [],
-          default_value: null,
-          depends_on: [],
-        },
-        num_threads: {
-          display: DisplayType.NUMERIC,
-          label: 'Number threads',
-          order: 1,
-          required: true,
-          sensitive: false,
-          tooltip: 'Sets the number of threads used by each model allocation during inference.',
-          type: FieldType.INTEGER,
-          validations: [],
-          value: null,
-          ui_restrictions: [],
-          default_value: 1,
-          depends_on: [],
-        },
-      },
-    },
-    {
       provider: 'elasticsearch',
       logo: '', // elasticsearch logo here
-      taskTypes: ['text_embedding', 'rerank'],
+      taskTypes: ['sparse_embedding', 'text_embedding', 'rerank'],
       configuration: {
         model_id: {
           display: DisplayType.DROPDOWN,
@@ -508,6 +472,18 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           type: FieldType.STRING,
           validations: [],
           options: [
+            {
+              label: '.elser_model_1',
+              value: '.elser_model_1',
+            },
+            {
+              label: '.elser_model_2',
+              value: '.elser_model_2',
+            },
+            {
+              label: '.elser_model_2_linux-x86_64',
+              value: '.elser_model_2_linux-x86_64',
+            },
             {
               label: '.multilingual-e5-small',
               value: '.multilingual-e5-small',

@@ -20,7 +20,6 @@ export enum ServiceProviderKeys {
   azureaistudio = 'azureaistudio',
   cohere = 'cohere',
   elasticsearch = 'elasticsearch',
-  elser = 'elser',
   googleaistudio = 'googleaistudio',
   googlevertexai = 'googlevertexai',
   hugging_face = 'hugging_face',

@@ -65,11 +65,6 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Elasticsearch',
     solutions: ['Search'],
   },
-  [ServiceProviderKeys.elser]: {
-    icon: elasticIcon,
-    name: 'ELSER',
-    solutions: ['Search'],
-  },
   [ServiceProviderKeys.googleaistudio]: {
     icon: googleAIStudioIcon,
     name: 'Google AI Studio',

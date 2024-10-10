@@ -14,6 +14,7 @@ export interface InferenceTaskType {
   configuration: FieldsConfiguration;
 }
 
+// this http param is for the future migrating to real API
 export const getTaskTypes = (http: HttpSetup, provider: string): Promise<InferenceTaskType[]> => {
   const providersTaskTypes: Record<string, InferenceTaskType[]> = {
     openai: [
@@ -119,12 +120,6 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
         configuration: {},
       },
     ],
-    elser: [
-      {
-        task_type: 'sparse_embedding',
-        configuration: {},
-      },
-    ],
     elasticsearch: [
       {
         task_type: 'rerank',
@@ -145,6 +140,10 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             depends_on: [],
           },
         },
+      },
+      {
+        task_type: 'sparse_embedding',
+        configuration: {},
       },
       {
         task_type: 'text_embedding',

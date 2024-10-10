@@ -282,12 +282,16 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       );
       if (entry) {
         if (entry.sensitive) {
-          secrets.providerSecrets ??= {};
+          if (!secrets.providerSecrets) {
+            secrets.providerSecrets = {};
+          }
           secrets.providerSecrets[key] = value;
           setFieldValue('secrets.providerSecrets', secrets.providerSecrets);
           await validateFields(['secrets.providerSecrets']);
         } else {
-          config.providerConfig ??= {};
+          if (!config.providerConfig) {
+            config.providerConfig = {};
+          }
           config.providerConfig[key] = value;
           setFieldValue('config.providerConfig', config.providerConfig);
           await validateFields(['config.providerConfig']);

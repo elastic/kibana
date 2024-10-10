@@ -22,9 +22,7 @@ export const DEFAULT_SPARSE_EMBEDDING_BODY = {
 
 export const DEFAULT_TEXT_EMBEDDING_BODY = {
   input: 'The sky above the port was the color of television tuned to a dead channel.',
-  task_settings: {
-    input_type: 'ingest',
-  },
+  inputType: 'ingest',
 };
 
 export const DEFAULTS_BY_TASK_TYPE: Record<string, unknown> = {

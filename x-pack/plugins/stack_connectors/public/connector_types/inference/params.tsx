@@ -10,7 +10,7 @@ import {
   JsonEditorWithMessageVariables,
   type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiTextArea, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import { RuleFormParamsErrors } from '@kbn/alerts-ui-shared';
 import {
   ChatCompleteParams,
@@ -157,18 +157,30 @@ const TextEmbeddingParamsFields: React.FunctionComponent<{
 }> = ({ subActionParams, editSubActionParams, errors }) => {
   const { input, inputType } = subActionParams;
 
+  const options = [
+    { value: 'ingest', text: 'ingest' },
+    { value: 'search', text: 'search' },
+  ];
+
+  console.log(errors)
   return (
     <>
-      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
-        <EuiTextArea
+      <EuiFormRow
+        fullWidth
+        error={errors.inputType as string}
+        isInvalid={false}
+        label={i18n.INPUT_TYPE}
+      >
+        <EuiSelect
           data-test-subj="inferenceInputType"
+          fullWidth
           name="inputType"
+          isInvalid={false}
+          options={options}
           value={inputType}
           onChange={(e) => {
             editSubActionParams({ inputType: e.target.value });
           }}
-          isInvalid={false}
-          fullWidth={true}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />

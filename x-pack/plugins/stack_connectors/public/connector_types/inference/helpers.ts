@@ -18,7 +18,7 @@ export interface TaskTypeOption {
 }
 
 export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
-  taskTypes.map(taskType => ({
+  taskTypes.map((taskType) => ({
     id: taskType,
     label: taskType,
     value: taskType,

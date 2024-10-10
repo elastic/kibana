@@ -39,6 +39,13 @@ export const INPUT = i18n.translate(
   }
 );
 
+export const INPUT_TYPE = i18n.translate(
+  'xpack.stackConnectors.components.inference.completionInputTypeLabel',
+  {
+    defaultMessage: 'Input type',
+  }
+);
+
 export const QUERY = i18n.translate('xpack.stackConnectors.components.inference.rerankQueryLabel', {
   defaultMessage: 'Query',
 });
