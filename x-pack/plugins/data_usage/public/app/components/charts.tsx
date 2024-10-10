@@ -6,11 +6,11 @@
  */
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { MetricsResponse } from '../types';
 import { MetricTypes } from '../../../common/rest_types';
 import { ChartPanel } from './chart_panel';
+import { UsageMetricsResponseSchemaBody } from '../../../common/rest_types';
 interface ChartsProps {
-  data: MetricsResponse;
+  data: UsageMetricsResponseSchemaBody;
 }
 
 export const Charts: React.FC<ChartsProps> = ({ data }) => {
