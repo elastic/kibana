@@ -13,6 +13,8 @@ const CREATE_PATH = 'create';
 
 const CREATE_FROM_CSV_PATH = 'csv_create';
 
+const MANAGE_PROCESSORS_PATH = 'manage_processors';
+
 const _getEditPath = (name: string, encode = true): string => {
   return `${BASE_PATH}${EDIT_PATH}/${encode ? encodeURIComponent(name) : name}`;
 };
@@ -33,12 +35,17 @@ const _getCreateFromCsvPath = (): string => {
   return `${BASE_PATH}${CREATE_FROM_CSV_PATH}`;
 };
 
+const _getManageProcessorsPath = (): string => {
+  return `${BASE_PATH}${MANAGE_PROCESSORS_PATH}`;
+};
+
 export const ROUTES = {
   list: _getListPath(),
   edit: _getEditPath(':name', false),
   create: _getCreatePath(),
   clone: _getClonePath(':sourceName', false),
   createFromCsv: _getCreateFromCsvPath(),
+  manageProcessors: _getManageProcessorsPath(),
 };
 
 export const getListPath = ({
@@ -52,3 +59,4 @@ export const getCreatePath = (): string => _getCreatePath();
 export const getClonePath = ({ clonedPipelineName }: { clonedPipelineName: string }): string =>
   _getClonePath(clonedPipelineName, true);
 export const getCreateFromCsvPath = (): string => _getCreateFromCsvPath();
+export const getManageProcessorsPath = (): string => _getManageProcessorsPath();
