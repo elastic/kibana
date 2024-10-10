@@ -12,6 +12,7 @@ export * from './data_generator';
 export * from './telemetry';
 export * from './event_log';
 export * from './machine_learning';
+export * from './indices';
 
 export * from './binary_to_string';
 export * from './get_index_name_from_load';
