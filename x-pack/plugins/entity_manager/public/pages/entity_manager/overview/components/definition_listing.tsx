@@ -15,7 +15,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { paths } from '../../../../../common/locators/paths';
 import { LastSeenStat } from '../../../../components/stats/last_seen';
 import { EntityCountStat } from '../../../../components/stats/entity_count';
-import { HistoryCountStat } from '../../../../components/stats/history_count';
 import { useFetchEntityDefinitions } from '../../../../hooks/use_fetch_entity_definitions';
 
 interface ListingProps {
@@ -61,9 +60,6 @@ function Listing({ definition }: ListingProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EntityCountStat definition={definition} titleSize="s" textAlign="right" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={0}>
-          <HistoryCountStat definition={definition} titleSize="s" textAlign="right" />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiStat

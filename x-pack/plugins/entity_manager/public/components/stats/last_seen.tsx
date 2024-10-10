@@ -12,10 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { DefinitionStatProps } from './types';
 
 export function LastSeenStat({ definition, titleSize, textAlign }: DefinitionStatProps) {
+  const date = definition.stats.lastSeenTimestamp
+    ? moment(definition.stats.lastSeenTimestamp).fromNow()
+    : '-';
   return (
     <EuiStat
       titleSize={titleSize}
-      title={moment(definition.stats.lastSeenTimestamp).fromNow()}
+      title={date}
       textAlign={textAlign}
       description={i18n.translate('xpack.entityManager.listing.lastSeen.label', {
         defaultMessage: 'Last seen',

@@ -28,9 +28,6 @@ export function Transforms({ definition }: TransformsProps) {
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <Transform definition={definition} type="history" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
           <Transform definition={definition} type="latest" />
         </EuiFlexItem>
       </EuiFlexGroup>

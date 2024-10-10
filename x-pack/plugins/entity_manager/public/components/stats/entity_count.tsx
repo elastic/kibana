@@ -16,7 +16,7 @@ export function EntityCountStat({ definition, titleSize, textAlign }: Definition
     <EuiStat
       titleSize={titleSize}
       title={numeral(definition.stats.entityCount || 0).format(
-        definition.stats.entityCount > 100 ? '0.0a' : '0,0'
+        definition.stats.entityCount > 1000 ? '0.0a' : '0,0'
       )}
       textAlign={textAlign}
       description={i18n.translate('xpack.entityManager.defintionStat.entityCount.label', {

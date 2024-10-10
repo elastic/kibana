@@ -11,7 +11,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { installEntityDefinition } from './entities/install_entity_definition';
 import { startTransforms } from './entities/start_transforms';
-import { findEntityDefinitions } from './entities/find_entity_definition';
+import { findEntityDefinitionById, findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
@@ -104,15 +104,15 @@ export class EntityClient {
     return { definitions };
   }
 
-  async getEntityDefinition({ id }: { id: string }) {
-    const definitions = await findEntityDefinitions({
+  async getEntityDefinition({ id, includeState = false }: { id: string; includeState?: boolean }) {
+    const definition = await findEntityDefinitionById({
       esClient: this.options.scopedClusterClient.asCurrentUser,
       soClient: this.options.soClient,
       id,
-      includeState: true,
+      includeState,
     });
 
-    return definitions[0] || null;
+    return definition;
   }
 
   async findEntities({

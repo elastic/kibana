@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SearchRequest, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_component_id';
+import { generateLatestIndexName } from './helpers/generate_component_id';
 
 interface EntityCountAggregationResponse {
   entityCount: {
@@ -21,34 +21,33 @@ export async function getEntityDefinitionStats(
   definition: EntityDefinition
 ) {
   const entityCount = await getEntityCount(esClient, definition);
-  const historyStats = await getHistoryStats(esClient, definition);
-  return { ...historyStats, entityCount };
+  const lastSeenTimestamp = await getLastSeenTimestamp(esClient, definition);
+  return { entityCount, lastSeenTimestamp };
 }
 
-export async function getHistoryStats(esClient: ElasticsearchClient, definition: EntityDefinition) {
+export async function getLastSeenTimestamp(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition
+) {
   const params: SearchRequest = {
     ignore_unavailable: true,
     allow_no_indices: true,
     track_total_hits: true,
-    index: `${generateHistoryIndexName(definition)}.*`,
+    index: generateLatestIndexName(definition),
     size: 1,
-    _source: ['@timestamp'],
+    _source: ['entity.lastSeenTimestamp'],
     sort: [
       {
-        '@timestamp': { order: 'desc' },
+        'entity.lastSeenTimestamp': { order: 'desc' },
       },
     ],
   };
 
-  const response = await esClient.search<{ '@timestamp': string }>(params);
+  const response = await esClient.search<{ entity: { lastSeenTimestamp: string } }>(params);
   const total = response.hits.total as SearchTotalHits;
-  return {
-    totalDocs: total.value,
-    lastSeenTimestamp:
-      total.value && response.hits.hits[0]._source
-        ? response.hits.hits[0]._source['@timestamp']
-        : null,
-  };
+  return total.value && response.hits.hits[0]._source
+    ? response.hits.hits[0]._source.entity.lastSeenTimestamp
+    : null;
 }
 
 export async function getEntityCount(esClient: ElasticsearchClient, definition: EntityDefinition) {

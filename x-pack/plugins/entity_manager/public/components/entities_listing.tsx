@@ -59,15 +59,6 @@ export function EntitiesListing({ definition, defaultPerPage = 10 }: EntitiesLis
       sortable: true,
     },
     {
-      field: 'entity.firstSeenTimestamp',
-      name: i18n.translate('xpack.entityManager.entitiesListing.firstSeenLabel', {
-        defaultMessage: 'First seen',
-      }),
-      render: (value: string) => moment(value).format('ll LT'),
-      truncateText: true,
-      sortable: true,
-    },
-    {
       field: 'entity.lastSeenTimestamp',
       name: i18n.translate('xpack.entityManager.entitiesListing.lastSeenLabel', {
         defaultMessage: 'Last seen',
@@ -88,13 +79,6 @@ export function EntitiesListing({ definition, defaultPerPage = 10 }: EntitiesLis
           sortable: true,
         });
       }
-    });
-  } else {
-    columns.push({
-      field: 'entity.metrics.logRate',
-      name: 'Log rate',
-      render: (value: number) => (value != null ? numeral(value).format('0,0[.0]') : '--'),
-      sortable: true,
     });
   }
 

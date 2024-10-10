@@ -66,7 +66,10 @@ export function Transform({ definition, type }: TransformProps) {
           <EuiStat
             titleSize="s"
             title={
-              numeral(stats.stats.index_failures / stats.stats.index_total).format('0,0[.0]') + '%'
+              stats.stats.index_total > 0
+                ? numeral(stats.stats.index_failures / stats.stats.index_total).format('0,0[.0]') +
+                  '%'
+                : 0 + '%'
             }
             textAlign="right"
             description={i18n.translate('xpack.entityManager.transform.indexFailureLabel', {

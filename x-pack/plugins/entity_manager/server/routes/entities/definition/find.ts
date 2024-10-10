@@ -16,6 +16,12 @@ import { createEntityManagerServerRoute } from '../../create_entity_manager_serv
  *     tags:
  *       - definitions
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The entity definition ID
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id'
+ *         required: false
  *       - in: query
  *         name: page
  *         schema:
@@ -24,6 +30,10 @@ import { createEntityManagerServerRoute } from '../../create_entity_manager_serv
  *         name: perPage
  *         schema:
  *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *       - in: query
+ *         name: includeState
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/includeState'
  *     responses:
  *       200:
  *         description: OK
@@ -37,15 +47,6 @@ import { createEntityManagerServerRoute } from '../../create_entity_manager_serv
  *                   items:
  *                     allOf:
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
- *                       - type: object
- *                         properties:
- *                           state:
- *                            type: object
- *                            properties:
- *                              installed:
- *                                type: boolean
- *                              running:
- *                                type: boolean
  */
 export const findEntityDefinitionsRoute = createEntityManagerServerRoute({
   endpoint: 'GET /internal/entities/definition',

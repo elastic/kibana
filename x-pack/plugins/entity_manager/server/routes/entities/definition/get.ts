@@ -7,61 +7,51 @@
 
 import { getEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
 
 /** @openapi
- * /internal/entities/definition:
+ * /internal/entities/definition/{id}:
  *   get:
- *     description: Get all installed entity definitions.
+ *     description: Get an entity definition.
  *     tags:
  *       - definitions
  *     parameters:
- *       - in: query
- *         name: page
+ *       - in: path
+ *         name: id
  *         schema:
- *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/page'
+ *           $ref: '#/components/schemas/getEntityDefinitionParamsSchema/properties/id'
  *       - in: query
- *         name: perPage
+ *         name: includeState
  *         schema:
- *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *           type: boolean
  *     responses:
  *       200:
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 definitions:
- *                   type: array
- *                   items:
- *                     allOf:
- *                       - $ref: '#/components/schemas/entityDefinitionSchema'
- *                       - type: object
- *                         properties:
- *                           state:
- *                            type: object
- *                            properties:
- *                              installed:
- *                                type: boolean
- *                              running:
- *                                type: boolean
+ *               $ref: '#/components/schemas/entityDefinitionSchema'
  *       404:
- *         description: Not found
+ *         description: Entity definition does not exist
  */
 export const getEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'GET /internal/entities/definition/{id}',
   params: z.object({
     path: getEntityDefinitionParamsSchema,
+    query: z.object({
+      includeState: z.optional(BooleanFromString).default(false),
+    }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
       const client = await getScopedClient({ request });
       const result = await client.getEntityDefinition({
         id: params.path.id,
+        includeState: params.query.includeState,
       });
 
-      if (result === null) {
+      if (!result) {
         return response.notFound();
       }
 

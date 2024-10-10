@@ -9,8 +9,6 @@ import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LastSeenStat } from '../../../../components/stats/last_seen';
 import { EntityCountStat } from '../../../../components/stats/entity_count';
-import { HistoryCountStat } from '../../../../components/stats/history_count';
-import { HistoryCheckpointDurationStat } from '../../../../components/stats/history_checkpoint_duration';
 import { LatestCheckpointDurationStat } from '../../../../components/stats/latest_checkpoint_duration';
 
 interface DefinitionDetailsProps {
@@ -25,12 +23,6 @@ export function DefinitionDetails({ definition }: DefinitionDetailsProps) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EntityCountStat titleSize="s" definition={definition} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <HistoryCountStat titleSize="s" definition={definition} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <HistoryCheckpointDurationStat titleSize="s" definition={definition} />
       </EuiFlexItem>
       <EuiFlexItem>
         <LatestCheckpointDurationStat titleSize="s" definition={definition} />

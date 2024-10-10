@@ -20,6 +20,7 @@ export function useFetchEntityDefinition({ id }: GetEntityDefinitionParams) {
         const response = await http.get<EntityDefinitionWithState>(
           `/internal/entities/definition/${id}`,
           {
+            query: { includeState: true },
             signal,
           }
         );
