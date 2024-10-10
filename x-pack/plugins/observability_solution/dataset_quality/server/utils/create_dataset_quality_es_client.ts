@@ -8,11 +8,16 @@
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ClusterPutComponentTemplateRequest,
+  ClusterPutComponentTemplateResponse,
   FieldCapsRequest,
   FieldCapsResponse,
   Indices,
   IndicesGetMappingResponse,
   IndicesGetSettingsResponse,
+  IndicesPutSettingsRequest,
+  IndicesPutSettingsResponse,
+  IndicesRolloverResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
@@ -46,6 +51,17 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     },
     async settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
       return esClient.indices.getSettings(params);
+    },
+    async updateComponentTemplate(
+      params: ClusterPutComponentTemplateRequest
+    ): Promise<ClusterPutComponentTemplateResponse> {
+      return esClient.cluster.putComponentTemplate(params);
+    },
+    async updateSettings(params: IndicesPutSettingsRequest): Promise<IndicesPutSettingsResponse> {
+      return esClient.indices.putSettings(params);
+    },
+    async rollover(params: { alias: string }): Promise<IndicesRolloverResponse> {
+      return esClient.indices.rollover(params);
     },
   };
 }

@@ -104,19 +104,17 @@ export function useDegradedFields() {
   }, [service]);
 
   const degradedFieldValues = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.ignoredValues.done')
+    state.matches('initializing.degradedFieldFlyout.open.initialized.ignoredValues.done')
       ? state.context.degradedFieldValues
       : undefined
   );
 
   const degradedFieldAnalysis = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.analyze.done')
+    state.matches('initializing.degradedFieldFlyout.open.initialized.analyze.done')
       ? state.context.degradedFieldAnalysis
       : undefined
   );
 
-  // This piece only cater field limit issue at the moment.
-  // In future this will cater the other 2 reasons as well
   const degradedFieldAnalysisResult = useMemo(() => {
     if (!degradedFieldAnalysis) {
       return undefined;
@@ -127,8 +125,8 @@ export function useDegradedFields() {
       return {
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
-        shouldDisplayMitigation: true,
-        shouldDisplayValues: false,
+        shouldDisplayIgnoredValuesAndLimit: false,
+        identifiedUsingHeuristics: true,
       };
     }
 
@@ -143,8 +141,8 @@ export function useDegradedFields() {
         return {
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
-          shouldDisplayMitigation: false,
-          shouldDisplayValues: true,
+          shouldDisplayIgnoredValuesAndLimit: true,
+          identifiedUsingHeuristics: true,
         };
       }
     }
@@ -153,18 +151,39 @@ export function useDegradedFields() {
     return {
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
-      shouldDisplayMitigation: false,
-      shouldDisplayValues: false,
+      shouldDisplayIgnoredValuesAndLimit: false,
+      identifiedUsingHeuristics: false, // TODO: Add heuristics to identify ignore_malformed issues
     };
   }, [degradedFieldAnalysis, degradedFieldValues]);
 
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.ignoredValues.fetching');
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
+    );
   });
 
   const isAnalysisInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.analyze.fetching');
+    return state.matches('initializing.degradedFieldFlyout.open.initialized.analyze.fetching');
   });
+
+  const updateNewFieldLimit = useCallback(
+    (newFieldLimit: number) => {
+      service.send({ type: 'SET_NEW_FIELD_LIMIT', newFieldLimit });
+    },
+    [service]
+  );
+
+  const isSavingNewFieldLimitInProgress = useSelector(service, (state) => {
+    return state.matches('initializing.mitigations.savingNewFieldLimit');
+  });
+
+  const newFieldLimitResult = useSelector(service, (state) =>
+    state.matches('initializing.mitigations.done') ? state.context.fieldLimitResponse : undefined
+  );
+
+  const triggerRollover = useCallback(() => {
+    service.send('ROLLOVER_DATA_STREAM');
+  }, [service]);
 
   return {
     isDegradedFieldsLoading,
@@ -185,5 +204,9 @@ export function useDegradedFields() {
     toggleCurrentQualityIssues,
     showCurrentQualityIssues,
     expandedRenderedItem,
+    updateNewFieldLimit,
+    isSavingNewFieldLimitInProgress,
+    newFieldLimitResult,
+    triggerRollover,
   };
 }

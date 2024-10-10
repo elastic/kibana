@@ -10,12 +10,14 @@ import type { DegradedFieldSortField } from '../../hooks';
 import {
   Dashboard,
   DataStreamDetails,
+  DataStreamRolloverResponse,
   DataStreamSettings,
   DegradedField,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
+  UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import { Integration } from '../../../common/data_streams_stats/integration';
@@ -48,6 +50,8 @@ export interface WithDefaultControllerState {
   integration?: Integration;
   expandedDegradedField?: string;
   isNonAggregatable?: boolean;
+  newFieldLimit?: number;
+  fieldLimitResponse?: UpdateFieldLimitResponse;
 }
 
 export interface WithDataStreamDetails {
@@ -85,6 +89,14 @@ export interface WithDegradedFieldValues {
 
 export interface WithDegradeFieldAnalysis {
   degradedFieldAnalysis: DegradedFieldAnalysis;
+}
+
+export interface WithNewFieldLimit {
+  newFieldLimit: number;
+}
+
+export interface WithNewFieldLimitResponse {
+  fieldLimitResponse: UpdateFieldLimitResponse;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<
@@ -128,16 +140,16 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.degradedFieldFlyout.open.ignoredValues.fetching'
-        | 'initializing.degradedFieldFlyout.open.analyze.fetching';
+        | 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
+        | 'initializing.degradedFieldFlyout.open.initialized.analyze.fetching';
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.open.ignoredValues.done';
+      value: 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.open.analyze.done';
+      value: 'initializing.degradedFieldFlyout.open.initialized.analyze.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
     }
   | {
@@ -146,6 +158,23 @@ export type DatasetQualityDetailsControllerTypeState =
         WithDegradedFieldsData &
         WithDegradedFieldValues &
         WithDegradeFieldAnalysis;
+    }
+  | {
+      value: 'initializing.mitigations.savingNewFieldLimit';
+      context: WithDefaultControllerState &
+        WithDegradedFieldsData &
+        WithDegradedFieldValues &
+        WithDegradeFieldAnalysis &
+        WithNewFieldLimit;
+    }
+  | {
+      value: 'initializing.mitigations.done';
+      context: WithDefaultControllerState &
+        WithDegradedFieldsData &
+        WithDegradedFieldValues &
+        WithDegradeFieldAnalysis &
+        WithNewFieldLimit &
+        WithNewFieldLimitResponse;
     }
   | {
       value:
@@ -188,6 +217,13 @@ export type DatasetQualityDetailsControllerEvent =
       type: 'UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA';
       degraded_field_criteria: TableCriteria<DegradedFieldSortField>;
     }
+  | {
+      type: 'SET_NEW_FIELD_LIMIT';
+      newFieldLimit: number;
+    }
+  | {
+      type: 'ROLLOVER_DATA_STREAM';
+    }
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
@@ -197,4 +233,6 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<Integration>
   | DoneInvokeEvent<Dashboard[]>
-  | DoneInvokeEvent<DegradedFieldAnalysis>;
+  | DoneInvokeEvent<DegradedFieldAnalysis>
+  | DoneInvokeEvent<UpdateFieldLimitResponse>
+  | DoneInvokeEvent<DataStreamRolloverResponse>;

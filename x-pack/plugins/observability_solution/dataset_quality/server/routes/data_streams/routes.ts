@@ -16,6 +16,8 @@ import {
   DatasetUserPrivileges,
   DegradedFieldValues,
   DegradedFieldAnalysis,
+  UpdateFieldLimitResponse,
+  DataStreamRolloverResponse,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -29,6 +31,8 @@ import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
 import { analyzeDegradedField } from './get_degraded_field_analysis';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
+import { updateFieldLimit } from './update_field_limit';
+import { createDatasetQualityESClient } from '../../utils';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -324,6 +328,61 @@ const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
   },
 });
 
+const updateFieldLimitRoute = createDatasetQualityServerRoute({
+  endpoint: 'PUT /internal/dataset_quality/data_streams/{dataStream}/update_field_limit',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    body: t.type({
+      newFieldLimit: t.number,
+      indexTemplate: t.string,
+      lastBackingIndex: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<UpdateFieldLimitResponse> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const updatedLimitResponse = await updateFieldLimit({
+      esClient,
+      indexTemplate: params.body.indexTemplate,
+      lastBackingIndex: params.body.lastBackingIndex,
+      newFieldLimit: params.body.newFieldLimit,
+    });
+
+    return updatedLimitResponse;
+  },
+});
+
+const rolloverDataStream = createDatasetQualityServerRoute({
+  endpoint: 'POST /internal/dataset_quality/data_streams/{dataStream}/rollover',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamRolloverResponse> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+    const { acknowledged } = await datasetQualityESClient.rollover({
+      alias: params.path.dataStream,
+    });
+
+    return { acknowledged };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
@@ -334,4 +393,6 @@ export const dataStreamsRouteRepository = {
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
   ...analyzeDegradedFieldRoute,
+  ...updateFieldLimitRoute,
+  ...rolloverDataStream,
 };
