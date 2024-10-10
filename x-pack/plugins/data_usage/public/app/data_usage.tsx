@@ -41,7 +41,7 @@ export const DataUsage = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
+  const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
     // TODO: Replace with data streams from /data_streams api
     dataStreams: [
@@ -54,28 +54,24 @@ export const DataUsage = () => {
 
   useEffect(() => {
     if (!metricTypesFromUrl) {
-      setUrlMetricTypesFilter(
-        typeof queryParams.metricTypes !== 'string'
-          ? queryParams.metricTypes.join(',')
-          : queryParams.metricTypes
-      );
+      setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
     }
     if (!startDateFromUrl || !endDateFromUrl) {
-      setUrlDateRangeFilter({ startDate: queryParams.from, endDate: queryParams.to });
+      setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
     }
   }, [
     endDateFromUrl,
     metricTypesFromUrl,
-    queryParams.from,
-    queryParams.metricTypes,
-    queryParams.to,
+    metricsFilters.from,
+    metricsFilters.metricTypes,
+    metricsFilters.to,
     setUrlDateRangeFilter,
     setUrlMetricTypesFilter,
     startDateFromUrl,
   ]);
 
   useEffect(() => {
-    setQueryParams((prevState) => ({
+    setMetricsFilters((prevState) => ({
       ...prevState,
       metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
       dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
@@ -92,7 +88,7 @@ export const DataUsage = () => {
     refetch: refetchDataUsageMetrics,
   } = useGetDataUsageMetrics(
     {
-      ...queryParams,
+      ...metricsFilters,
       from: dateRangePickerState.startDate,
       to: dateRangePickerState.endDate,
     },

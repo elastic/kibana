@@ -37,43 +37,31 @@ const metricTypesSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
   METRIC_TYPE_VALUES.map((metricType) => schema.literal(metricType)) // Create a oneOf schema for the keys
 );
-export const UsageMetricsRequestSchema = {
-  query: schema.object({
-    from: DateSchema,
-    to: DateSchema,
-    metricTypes: schema.oneOf([
-      schema.arrayOf(schema.string(), {
-        minSize: 1,
-        validate: (values) => {
-          if (values.map((v) => v.trim()).some((v) => !v.length)) {
-            return '[metricTypes] list cannot contain empty values';
-          } else if (values.map((v) => v.trim()).some((v) => !isValidMetricType(v))) {
-            return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
-          }
-        },
-      }),
-      schema.string({
-        validate: (v) => {
-          if (!v.trim().length) {
-            return '[metricTypes] must have at least one value';
-          } else if (!isValidMetricType(v)) {
-            return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
-          }
-        },
-      }),
-    ]),
-    dataStreams: schema.arrayOf(schema.string(), {
-      minSize: 1,
-      validate: (values) => {
-        if (values.map((v) => v.trim()).some((v) => !v.length)) {
-          return '[dataStreams] list cannot contain empty values';
-        }
-      },
-    }),
+export const UsageMetricsRequestSchema = schema.object({
+  from: DateSchema,
+  to: DateSchema,
+  metricTypes: schema.arrayOf(schema.string(), {
+    minSize: 1,
+    validate: (values) => {
+      const trimmedValues = values.map((v) => v.trim());
+      if (trimmedValues.some((v) => !v.length)) {
+        return '[metricTypes] list cannot contain empty values';
+      } else if (trimmedValues.some((v) => !isValidMetricType(v))) {
+        return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
+      }
+    },
   }),
-};
+  dataStreams: schema.arrayOf(schema.string(), {
+    minSize: 1,
+    validate: (values) => {
+      if (values.map((v) => v.trim()).some((v) => !v.length)) {
+        return '[dataStreams] list cannot contain empty values';
+      }
+    },
+  }),
+});
 
-export type UsageMetricsRequestSchemaQueryParams = TypeOf<typeof UsageMetricsRequestSchema.query>;
+export type UsageMetricsRequestSchemaQueryParams = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
