@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { AppUpdater } from '@kbn/core-application-browser';
 import { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
 
@@ -14,12 +16,14 @@ export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
   mount: Mount;
   basePath: string;
   keywords?: string[];
+  updater$?: BehaviorSubject<AppUpdater>;
 }
 
 export class ManagementApp extends ManagementItem {
   public readonly mount: Mount;
   public readonly basePath: string;
   public readonly keywords: string[];
+  public readonly updater$: BehaviorSubject<AppUpdater> | undefined;
 
   constructor(args: RegisterManagementAppArgs) {
     super(args);
@@ -27,5 +31,6 @@ export class ManagementApp extends ManagementItem {
     this.mount = args.mount;
     this.basePath = args.basePath;
     this.keywords = args.keywords || [];
+    this.updater$ = args.updater$;
   }
 }
