@@ -100,8 +100,6 @@ export function FieldFormWrapper({
   );
 }
 
-function getDefaultValue(fieldName: string, finalDiffableRule: DiffableRule): FormData {
-  const rule = finalDiffableRule as Record<string, unknown>;
-
-  return { [fieldName]: rule[fieldName] };
+function getDefaultValue(fieldName: string, finalDiffableRule: Record<string, unknown>): FormData {
+  return { [fieldName]: finalDiffableRule[fieldName] };
 }
