@@ -14,6 +14,14 @@ import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from './types';
 
+/**
+ * Available datatables logged to inspector
+ */
+export const DatatableInspectorTables = {
+  Default: 'default',
+  Transpose: 'transpose',
+};
+
 export const datatableFn =
   (
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
@@ -36,7 +44,7 @@ export const datatableFn =
         true
       );
 
-      context.inspectorAdapters.tables.logDatatable('default', logTable);
+      context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Default, logTable);
     }
 
     let untransposedData: Datatable | undefined;
@@ -54,6 +62,15 @@ export const datatableFn =
       untransposedData = cloneDeep(table);
       // transposes table and args inplace
       transposeTable(args, table, formatters);
+
+      if (context?.inspectorAdapters?.tables) {
+        const exposedColumns = new Set(args.columns.map((c) => c.columnId));
+        context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, {
+          ...table,
+          columns: table.columns.filter((c) => exposedColumns.has(c.id)), // remove ghost formula columns
+        });
+        context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
+      }
     }
 
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);

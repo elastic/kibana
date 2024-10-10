@@ -11,6 +11,7 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { EuiDataGridColumnSortingConfig } from '@elastic/eui';
 import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';
@@ -22,12 +23,21 @@ interface CSVOptions {
   escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
-  columnsSorting?: string[];
+  sortedColumns?: string[];
+  columnSorting?: EuiDataGridColumnSortingConfig[];
 }
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions
+  {
+    csvSeparator,
+    quoteValues,
+    formatFactory,
+    raw,
+    escapeFormulaValues,
+    sortedColumns,
+    columnSorting,
+  }: CSVOptions
 ) {
   const escapeValues = createEscapeValue({
     separator: csvSeparator,
@@ -35,21 +45,32 @@ export function datatableToCSV(
     escapeFormulaValues,
   });
 
-  const sortedIds = columnsSorting || columns.map((col) => col.id);
+  const sortedIds = sortedColumns
+    ? columns
+        .map((c) => {
+          // need to find original id for transposed column
+          const sortIndex = sortedColumns.findIndex((id) => c.id.endsWith(id));
+          return {
+            id: c.id,
+            sortIndex,
+            isTransposed: (sortedColumns[sortIndex] ?? '') !== c.id,
+          };
+        })
+        .filter(({ sortIndex }) => sortIndex >= 0)
+        // keep original zipped order between multiple transposed columns
+        .sort((a, b) => (a.isTransposed && b.isTransposed ? 0 : a.sortIndex - b.sortIndex))
+        .map(({ id }) => id)
+    : columns.map(({ id }) => id);
 
-  // Build an index lookup table
-  const columnIndexLookup = sortedIds.reduce((memo, id, index) => {
-    memo[id] = index;
-    return memo;
-  }, {} as Record<string, number>);
+  const columnIndexLookup = new Map(sortedIds.map((id, i) => [id, i]));
 
-  // Build the header row by its names
   const header: string[] = [];
   const sortedColumnIds: string[] = [];
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   for (const column of columns) {
-    const columnIndex = columnIndexLookup[column.id];
+    const columnIndex = columnIndexLookup.get(column.id) ?? -1;
+    if (columnIndex < 0) continue; // hidden or not found
 
     header[columnIndex] = escapeValues(column.name);
     sortedColumnIds[columnIndex] = column.id;
@@ -61,14 +82,36 @@ export function datatableToCSV(
   }
 
   // Convert the array of row objects to an array of row arrays
-  const csvRows = rows.map((row) => {
-    return sortedColumnIds.map((id) =>
-      escapeValues(raw ? row[id] : formatters[id].convert(row[id]))
-    );
-  });
+  const csvRows = rows
+    .map((row) => {
+      return sortedColumnIds.map((id) =>
+        escapeValues(raw ? row[id] : formatters[id].convert(row[id]))
+      );
+    })
+    .sort(rowSortPredicate(sortedColumnIds, columnSorting));
 
   return (
     [header, ...csvRows].map((row) => row.join(csvSeparator)).join(LINE_FEED_CHARACTER) +
     LINE_FEED_CHARACTER
   ); // Add \r\n after last line
+}
+
+function rowSortPredicate(
+  sortedColumnIds: string[],
+  columnSorting?: EuiDataGridColumnSortingConfig[]
+) {
+  if (!columnSorting) return () => 0;
+
+  const columnIdMap = new Map(columnSorting.map(({ id }) => [id, sortedColumnIds.indexOf(id)]));
+  return (rowA: string[], rowB: string[]) => {
+    return columnSorting.reduce((acc, { id, direction }) => {
+      const i = columnIdMap.get(id) ?? -1;
+      if (i < 0) return acc;
+
+      const a = rowA[i];
+      const b = rowB[i];
+      const emptyValueSort = a === '' ? 1 : b === '' ? -1 : 0; // always put empty values at bottom
+      return acc || emptyValueSort || a.localeCompare(b) * (direction === 'asc' ? 1 : -1);
+    }, 0);
+  };
 }

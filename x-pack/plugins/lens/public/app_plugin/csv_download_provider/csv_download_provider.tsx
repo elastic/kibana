@@ -12,8 +12,18 @@ import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiDataGridColumnSortingConfig } from '@elastic/eui';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
+
+export interface CSVSharingData {
+  title: string;
+  activeData: TableInspectorAdapter;
+  csvEnabled: boolean;
+  tablesToShare?: string[];
+  sortedColumns?: string[];
+  columnSorting?: EuiDataGridColumnSortingConfig[];
+}
 
 declare global {
   interface Window {
@@ -30,13 +40,17 @@ async function downloadCSVs({
   title,
   formatFactory,
   uiSettings,
-  columnsSorting,
+  tablesToShare = [],
+  sortedColumns,
+  columnSorting,
 }: {
   title: string;
   activeData: TableInspectorAdapter;
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-  columnsSorting?: string[];
+  tablesToShare?: string[];
+  sortedColumns?: string[];
+  columnSorting?: EuiDataGridColumnSortingConfig[];
 }) {
   if (!activeData) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
@@ -44,7 +58,11 @@ async function downloadCSVs({
     }
     return;
   }
-  const datatables = Object.values(activeData);
+  const seletedDatatables = Object.entries(activeData)
+    .filter(([id]) => tablesToShare.includes(id))
+    .map(([, table]) => table);
+  const datatables = seletedDatatables.length > 0 ? seletedDatatables : Object.values(activeData);
+
   const content = datatables.reduce<Record<string, { content: string; type: string }>>(
     (memo, datatable, i) => {
       // skip empty datatables
@@ -57,7 +75,8 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
-            columnsSorting,
+            columnSorting,
+            sortedColumns,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -109,12 +128,9 @@ export const downloadCsvShareProvider = ({
       return [];
     }
 
-    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
-      title: string;
-      activeData: TableInspectorAdapter;
-      csvEnabled: boolean;
-      columnsSorting?: string[];
-    };
+    // TODO fix sharingData types
+    const { title, activeData, csvEnabled, sortedColumns, columnSorting, tablesToShare } =
+      sharingData as unknown as CSVSharingData;
 
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
@@ -138,7 +154,9 @@ export const downloadCsvShareProvider = ({
         formatFactory: formatFactoryFn(),
         activeData,
         uiSettings,
-        columnsSorting,
+        tablesToShare,
+        sortedColumns,
+        columnSorting,
       });
 
     return [
