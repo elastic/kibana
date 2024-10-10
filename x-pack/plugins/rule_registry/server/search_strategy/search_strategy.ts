@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { map, mergeMap, catchError } from 'rxjs';
+import { map, mergeMap, catchError, of } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import {
@@ -28,9 +28,10 @@ import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
 import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
+import { getConsumersFilter } from '../lib/get_consumers_filter';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
-  rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
+  rawResponse: { hits: { total: 0 } } as RuleRegistrySearchResponse['rawResponse'],
 };
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
@@ -130,6 +131,11 @@ export const ruleRegistrySearchStrategyProvider = (
           }
 
           const ruleTypeFilter = getRuleTypeIdsFilter(request.ruleTypeIds);
+          const consumersFilter = getConsumersFilter(request.consumers);
+
+          if (consumersFilter) {
+            filter.push(consumersFilter);
+          }
 
           if (ruleTypeFilter) {
             filter.push(ruleTypeFilter);

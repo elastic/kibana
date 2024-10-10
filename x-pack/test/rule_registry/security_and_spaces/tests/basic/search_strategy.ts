@@ -233,6 +233,84 @@ export default ({ getService }: FtrProviderContext) => {
         validateRuleTypeIds(result, apmRuleTypeIds);
       });
 
+      it('should return alerts from different rules', async () => {
+        const ruleTypeIds = [...apmRuleTypeIds, 'logs.alert.document.count'];
+
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(result.rawResponse.hits.total).to.eql(14);
+
+        validateRuleTypeIds(result, ruleTypeIds);
+      });
+
+      it('should filter alerts by rule type IDs with consumers', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            consumers: ['alerts', 'logs'],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(result.rawResponse.hits.total).to.eql(9);
+
+        validateRuleTypeIds(result, apmRuleTypeIds);
+      });
+
+      it('should filter alerts by consumers with rule type IDs', async () => {
+        const ruleTypeIds = [...apmRuleTypeIds, 'logs.alert.document.count'];
+
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds,
+            consumers: ['alerts'],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        /**
+         *There are five documents of rule type logs.alert.document.count
+         * The four have the consumer set to alerts
+         * and the one has the consumer set to logs.
+         * All apm rule types (nine in total) have consumer set to alerts.
+         */
+        expect(result.rawResponse.hits.total).to.eql(13);
+
+        validateRuleTypeIds(result, ruleTypeIds);
+      });
+
       it('should not by pass our RBAC authz filter with a should filter for rule type ids', async () => {
         const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
@@ -254,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.rule_type_id': 'logs.alert.document.count',
+                            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
                           },
                         },
                       ],
@@ -297,7 +375,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.consumer': 'logs',
+                            'kibana.alert.rule.consumer': 'infrastructure',
                           },
                         },
                       ],
@@ -340,7 +418,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.rule_type_id': 'logs.alert.document.count',
+                            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
                           },
                         },
                       ],
@@ -381,7 +459,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.consumer': 'logs',
+                            'kibana.alert.rule.consumer': 'infrastructure',
                           },
                         },
                       ],
@@ -487,7 +565,49 @@ export default ({ getService }: FtrProviderContext) => {
         validateRuleTypeIds(result, apmRuleTypeIds);
       });
 
-      it('should return 403 if the user does not have access to any alerts', async () => {
+      it('should not by pass our RBAC authz filter with the ruleTypeIds and consumers parameter', async () => {
+        const ruleTypeIds = [
+          ...apmRuleTypeIds,
+          'metrics.alert.inventory.threshold',
+          'metrics.alert.threshold',
+          '.es-query',
+        ];
+
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            /**
+             * obsOnlySpacesAll does not have access to the following pairs:
+             *
+             * Rule type ID: metrics.alert.inventory.threshold
+             * Consumer: alerts
+             *
+             * Rule type ID: metrics.alert.threshold
+             * Consumer: alerts
+             *
+             * Rule type ID: .es-query
+             * Consumer: discover
+             */
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds,
+            consumers: ['alerts', 'discover'],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(result.rawResponse.hits.total).to.eql(9);
+
+        validateRuleTypeIds(result, apmRuleTypeIds);
+      });
+
+      it('should not return any alerts if the user does not have access to any alerts', async () => {
         const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
@@ -504,8 +624,7 @@ export default ({ getService }: FtrProviderContext) => {
           space: 'default',
         });
 
-        expect(result.statusCode).to.eql(403);
-        expect(result.message).to.eql('Unauthorized to find alerts for any rule types');
+        expect(result.rawResponse.hits.total).to.eql(0);
       });
 
       it('should not return alerts that the user does not have access to', async () => {
@@ -592,10 +711,12 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: ['discover'],
+            ruleTypeIds: ['.es-query'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
+        validateRuleTypeIds(result, ['.es-query']);
 
         expect(result.rawResponse.hits.total).to.eql(1);
 
@@ -617,10 +738,12 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: ['discover'],
+            ruleTypeIds: ['.es-query'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
+        validateRuleTypeIds(result, ['.es-query']);
 
         expect(result.rawResponse.hits.total).to.eql(1);
 
@@ -642,13 +765,12 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: ['discover'],
+            ruleTypeIds: ['.es-query'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
 
-        expect(result.statusCode).to.be(500);
-        expect(result.message).to.be('Unauthorized to find alerts for any rule types');
+        expect(result.rawResponse.hits.total).to.eql(0);
       });
     });
 
@@ -668,13 +790,16 @@ export default ({ getService }: FtrProviderContext) => {
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
-        expect(result.rawResponse).to.eql({});
+
+        expect(result.rawResponse.hits.total).to.eql(0);
       });
     });
   });
 };
 
 const validateRuleTypeIds = (result: RuleRegistrySearchResponse, ruleTypeIdsToVerify: string[]) => {
+  expect(result.rawResponse.hits.total).to.greaterThan(0);
+
   const ruleTypeIds = result.rawResponse.hits.hits
     .map((hit) => {
       return hit.fields?.['kibana.alert.rule.rule_type_id'];

@@ -8,7 +8,7 @@
 import { getRuleTypeIdsFilter } from './get_rule_type_ids_filter';
 
 describe('getRuleTypeIdsFilter()', () => {
-  it('should return a spaces filter', () => {
+  it('should return a rule type ids filter', () => {
     expect(getRuleTypeIdsFilter(['foo', 'bar'])).toStrictEqual({
       terms: {
         'kibana.alert.rule.rule_type_id': ['foo', 'bar'],

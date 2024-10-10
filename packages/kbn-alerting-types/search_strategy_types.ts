@@ -18,6 +18,7 @@ import type { Alert } from './alert_type';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   ruleTypeIds: string[];
+  consumers?: string[];
   fields?: QueryDslFieldAndFormat[];
   query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   sort?: SortCombinations[];

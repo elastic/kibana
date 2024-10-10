@@ -8,7 +8,7 @@ import { lastValueFrom, of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
-import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
+import { ruleRegistrySearchStrategyProvider } from './search_strategy';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -156,7 +156,20 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
 
-    expect(result).toBe(EMPTY_RESPONSE);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "inspect": Object {
+          "dsl": Array [
+            "{}",
+          ],
+        },
+        "rawResponse": Object {
+          "hits": Object {
+            "total": 0,
+          },
+        },
+      }
+    `);
   });
 
   it('should not apply rbac filters for siem rule types', async () => {
@@ -563,6 +576,51 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       Object {
         "bool": Object {
           "filter": Array [
+            Object {
+              "terms": Object {
+                "kibana.alert.rule.rule_type_id": Array [
+                  "siem.esqlRule",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('should apply the consumers filter', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+      consumers: ['alerts'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.query).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "terms": Object {
+                "kibana.alert.rule.consumer": Array [
+                  "alerts",
+                ],
+              },
+            },
             Object {
               "terms": Object {
                 "kibana.alert.rule.rule_type_id": Array [
