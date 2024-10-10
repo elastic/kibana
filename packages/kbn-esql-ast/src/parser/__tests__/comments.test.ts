@@ -442,6 +442,76 @@ FROM index`;
         ],
       });
     });
+
+    it('to a list literal', () => {
+      const text = `
+        ROW
+        // comment
+        [1, 2, 3]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            formatting: {
+              top: [
+                {
+                  type: 'comment',
+                  subtype: 'single-line',
+                  text: ' comment',
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it('to a list literal member', () => {
+      const text = `
+        ROW
+        [
+        // comment
+        1,
+        2, 3]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            values: [
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  top: [
+                    {
+                      type: 'comment',
+                      subtype: 'single-line',
+                      text: ' comment',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 2,
+              },
+              {
+                type: 'literal',
+                value: 3,
+              },
+            ],
+          },
+        ],
+      });
+    });
   });
 
   describe('can attach "left" comment(s)', () => {
@@ -548,6 +618,92 @@ FROM index`;
           ],
         },
       ]);
+    });
+
+    it('to a list literal', () => {
+      const text = `
+        ROW
+        /* left */ [1, 2, 3]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            formatting: {
+              left: [
+                {
+                  type: 'comment',
+                  subtype: 'multi-line',
+                  text: ' left ',
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it('to a list literal member', () => {
+      const text = `
+        ROW
+        [
+        /* 1 */ 1,
+        /* 2 */ 2, /* 3 */ 3]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            values: [
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  left: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 1 ',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 2,
+                formatting: {
+                  left: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 2 ',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 3,
+                formatting: {
+                  left: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 3 ',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 
@@ -776,6 +932,66 @@ FROM index`;
         ],
       });
     });
+
+    it('to a list literal member after comma', () => {
+      const text = `
+        ROW
+        [
+        1, /* 1 */
+        2 /* 2 */, 3 /* 3 */]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            values: [
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  right: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 1 ',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 2,
+                formatting: {
+                  right: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 2 ',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 3,
+                formatting: {
+                  right: [
+                    {
+                      type: 'comment',
+                      subtype: 'multi-line',
+                      text: ' 3 ',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
   });
 
   describe('can attach "right end" comments', () => {
@@ -907,6 +1123,45 @@ FROM index`;
           ],
         },
       ]);
+    });
+    it('to a list literal member after comma', () => {
+      const text = `
+        ROW
+        [
+        1, // 1
+        2, 3]`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'list',
+            values: [
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  rightSingleLine: {
+                    type: 'comment',
+                    subtype: 'single-line',
+                    text: ' 1',
+                  },
+                },
+              },
+              {
+                type: 'literal',
+                value: 2,
+              },
+              {
+                type: 'literal',
+                value: 3,
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 
