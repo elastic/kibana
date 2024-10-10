@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -30,6 +29,7 @@ import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
+import { execute } from '../application/connector/methods/execute';
 import {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
@@ -96,6 +96,8 @@ import { connectorFromSavedObject, isConnectorDeprecated } from '../application/
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
 import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
 import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
+import { isPreconfigured } from '../lib/is_preconfigured';
+import { isSystemAction } from '../lib/is_system_action';
 
 interface Action extends ConnectorUpdate {
   actionTypeId: string;
@@ -649,21 +651,6 @@ export class ActionsClient {
     return result;
   }
 
-  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
-    const inMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === connectorId
-    );
-
-    const additionalPrivileges = inMemoryConnector?.isSystemAction
-      ? this.context.actionTypeRegistry.getSystemActionKibanaPrivileges(
-          inMemoryConnector.actionTypeId,
-          params
-        )
-      : [];
-
-    return additionalPrivileges;
-  }
-
   public async execute({
     actionId,
     params,
@@ -672,52 +659,7 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
-    const log = this.context.logger;
-
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      let actionTypeId: string | undefined;
-
-      try {
-        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
-          const connector = this.context.inMemoryConnectors.find(
-            (inMemoryConnector) => inMemoryConnector.id === actionId
-          );
-
-          actionTypeId = connector?.actionTypeId;
-        } else {
-          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
-          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-            'action',
-            actionId
-          );
-
-          actionTypeId = attributes.actionTypeId;
-        }
-      } catch (err) {
-        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
-      }
-
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        additionalPrivileges,
-        actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('execute', this.context.usageCounter);
-    }
-
-    return this.context.actionExecutor.execute({
-      actionId,
-      params,
-      source,
-      request: this.context.request,
-      relatedSavedObjects,
-      actionExecutionId: uuidv4(),
-    });
+    return execute({ context: this.context, actionId, params, source, relatedSavedObjects });
   }
 
   public async bulkEnqueueExecution(
@@ -789,15 +731,11 @@ export class ActionsClient {
   }
 
   public isPreconfigured(connectorId: string): boolean {
-    return !!this.context.inMemoryConnectors.find(
-      (connector) => connector.isPreconfigured && connector.id === connectorId
-    );
+    return isPreconfigured(this.context, connectorId);
   }
 
   public isSystemAction(connectorId: string): boolean {
-    return !!this.context.inMemoryConnectors.find(
-      (connector) => connector.isSystemAction && connector.id === connectorId
-    );
+    return isSystemAction(this.context, connectorId);
   }
 
   public async getGlobalExecutionLogWithAuth({
