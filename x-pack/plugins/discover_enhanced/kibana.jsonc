@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/discover-enhanced-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "discoverEnhanced",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "discoverEnhanced"
