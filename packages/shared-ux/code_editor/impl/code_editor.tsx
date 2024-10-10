@@ -169,7 +169,7 @@ export interface CodeEditorProps {
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
-  onChange: _onChange,
+  onChange,
   width,
   height,
   options,
@@ -225,8 +225,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
-
-  const onChange = useBug175684OnChange(_onChange);
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
