@@ -12,7 +12,6 @@ import type {
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type {
   EngineDescriptor,
-  EngineStatus,
   EntityType,
 } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
@@ -24,6 +23,8 @@ interface EngineDescriptorDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
+
+type EngineDescriptorUpdate = Partial<Pick<EngineDescriptor, 'status' | 'indexPattern'>>;
 
 export class EngineDescriptorClient {
   constructor(private readonly deps: EngineDescriptorDependencies) {}
@@ -47,11 +48,11 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
-  async update(id: string, status: EngineStatus) {
+  async update(id: string, updatedDescriptor: EngineDescriptorUpdate) {
     const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id,
-      { status },
+      updatedDescriptor,
       { refresh: 'wait_for' }
     );
     return attributes;

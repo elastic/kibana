@@ -74,3 +74,10 @@ export const getEntitiesIndexName = (entityType: EntityType, namespace: string) 
 export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
   return `ea_${space}_${entityType}_entity_store`;
 };
+
+export const isPromiseFulfilled = <T>(
+  result: PromiseSettledResult<T>
+): result is PromiseFulfilledResult<T> => result.status === 'fulfilled';
+
+export const isPromiseRejected = (result: PromiseSettledResult): result is PromiseRejectedResult =>
+  result.status === 'rejected';

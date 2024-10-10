@@ -23,6 +23,10 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         filter:
           type: string
+      required:
+        - type
+        - indexPattern
+        - status
 
     EngineStatus:
       type: string
@@ -30,6 +34,7 @@ components:
         - installing
         - started
         - stopped
+        - updating
 
     IndexPattern:
       type: string

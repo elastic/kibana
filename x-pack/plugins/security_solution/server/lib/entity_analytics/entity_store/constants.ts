@@ -16,6 +16,7 @@ export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
   STOPPED: 'stopped',
+  UPDATING: 'updating',
 };
 
 export const MAX_SEARCH_RESPONSE_SIZE = 10_000;

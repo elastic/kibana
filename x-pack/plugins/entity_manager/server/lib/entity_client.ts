@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { installEntityDefinition } from './entities/install_entity_definition';
+import {
+  installEntityDefinition,
+  installationInProgress,
+  reinstallEntityDefinition,
+} from './entities/install_entity_definition';
 import { startTransforms } from './entities/start_transforms';
 import { findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
@@ -45,6 +49,48 @@ export class EntityClient {
     }
 
     return installedDefinition;
+  }
+
+  async updateInEntityDefinition({
+    id,
+    definitionUpdate,
+    installOnly = false,
+  }: {
+    id: string;
+    definitionUpdate: EntityDefinitionUpdate;
+    installOnly?: boolean;
+  }) {
+    const [definition] = await findEntityDefinitions({
+      id,
+      perPage: 1,
+      soClient: this.options.soClient,
+      esClient: this.options.esClient,
+    });
+
+    if (!definition) {
+      const message = `Unable to find entity definition with [${id}]`;
+      this.options.logger.error(message);
+      throw new EntityDefinitionNotFound(message);
+    }
+
+    if (installationInProgress(definition)) {
+      const message = `Entity definition [${definition.id}] has changes in progress`;
+      this.options.logger.error(message);
+      throw new EntityDefinitionNotFound(message);
+    }
+
+    const updatedDefinition = await reinstallEntityDefinition({
+      definition,
+      definitionUpdate,
+      soClient: this.options.soClient,
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+    });
+
+    if (!installOnly) {
+      await startTransforms(this.options.esClient, updatedDefinition, this.options.logger);
+    }
+    return updatedDefinition;
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
