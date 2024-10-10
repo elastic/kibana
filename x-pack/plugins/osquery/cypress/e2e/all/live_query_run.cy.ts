@@ -23,8 +23,7 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-// FLAKY: https://github.com/elastic/kibana/issues/195458
-describe.skip('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
 

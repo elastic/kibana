@@ -99,6 +99,9 @@ Cypress.Commands.add(
     return evaluate();
   }
 );
+Cypress.Screenshot.defaults({
+  capture: 'runner',
+});
 
 Cypress.on('uncaught:exception', () => false);
 
