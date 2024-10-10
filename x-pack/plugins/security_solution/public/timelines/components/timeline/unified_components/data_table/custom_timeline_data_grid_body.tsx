@@ -7,15 +7,21 @@
 
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import { type EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import type { CSSProperties, FC } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
+import { VariableSizeList } from 'react-window';
+import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { getEventTypeRowClassName } from './get_event_type_row_classname';
+
+const defaultAutoHeight = {
+  defaultHeight: 'auto',
+};
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -26,6 +32,12 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 
 // THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
 const DEFAULT_UDT_ROW_HEIGHT = 34;
+
+const SCROLLBAR_STYLE: CSSProperties = {
+  scrollbarWidth: 'thin',
+  scrollPadding: '0 0 0 0',
+  overflow: 'auto',
+};
 
 /**
  *
@@ -42,31 +54,137 @@ const DEFAULT_UDT_ROW_HEIGHT = 34;
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const { Cell, visibleColumns, visibleRowData, rows, rowHeight, enabledRowRenderers, refetch } =
-      props;
+    const {
+      Cell,
+      visibleColumns,
+      visibleRowData,
+      rows,
+      rowHeight,
+      enabledRowRenderers,
+      refetch,
+      setCustomGridBodyProps,
+      headerRow,
+      footerRow,
+      gridWidth,
+    } = props;
+
+    const { euiTheme } = useEuiTheme();
+
+    // // Set custom props onto the grid body wrapper
+    const bodyRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      setCustomGridBodyProps({
+        ref: bodyRef,
+        style: {
+          width: '100%',
+          height: '100%',
+          overflowY: 'hidden',
+          scrollbarColor: `${euiTheme.colors.mediumShade} ${euiTheme.colors.lightestShade}`,
+        },
+      });
+    }, [setCustomGridBodyProps, euiTheme.colors.mediumShade, euiTheme.colors.lightestShade]);
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
 
-    return (
-      <>
-        {visibleRows.map((row, rowIndex) => {
+    const listRef = useRef<VariableSizeList<unknown>>(null);
+
+    const rowHeights = useRef<number[]>([]);
+
+    const setRowHeight = useCallback((index: number, height: number) => {
+      if (rowHeights.current[index] === height) return;
+      listRef.current?.resetAfterIndex(index);
+
+      rowHeights.current[index] = height;
+    }, []);
+
+    const getRowHeight = useCallback((index: number) => {
+      return rowHeights.current[index] ?? 100;
+    }, []);
+
+    const innerRowContainer = useMemo(() => {
+      const InnerComp = React.forwardRef<HTMLDivElement, PropsWithChildren<{}>>(
+        ({ children, style, ...rest }, ref) => {
           return (
-            <CustomDataGridSingleRow
-              rowData={row}
-              rowIndex={rowIndex}
-              key={rowIndex}
-              visibleColumns={visibleColumns}
-              rowHeight={rowHeight}
-              Cell={Cell}
-              enabledRowRenderers={enabledRowRenderers}
-              refetch={refetch}
-            />
+            <>
+              {headerRow}
+              <div
+                className="row-container"
+                ref={ref}
+                style={{ ...style, position: 'relative' }}
+                {...rest}
+              >
+                {children}
+              </div>
+
+              {footerRow}
+            </>
           );
-        })}
-      </>
+        }
+      );
+
+      InnerComp.displayName = 'InnerRowContainer';
+
+      return InnerComp;
+    }, [headerRow, footerRow]);
+
+    return (
+      <EuiAutoSizer className="autosizer" disableWidth>
+        {({ height }) => {
+          return (
+            <>
+              {
+                /**
+                 * whenever timeline is minimized, Variable is re-rendered which causes delay,
+                 * so below code makes sure that grid is only rendered when gridWidth is not 0
+                 */
+                gridWidth !== 0 && (
+                  <>
+                    <VariableSizeList
+                      className="variable__list"
+                      width={gridWidth}
+                      height={height}
+                      itemCount={visibleRows.length}
+                      itemSize={getRowHeight}
+                      overscanCount={5}
+                      ref={listRef}
+                      style={SCROLLBAR_STYLE}
+                      innerElementType={innerRowContainer}
+                    >
+                      {({ index, style }) => {
+                        return (
+                          <div
+                            role="row"
+                            style={{
+                              ...style,
+                              width: 'fit-content',
+                            }}
+                            key={`${gridWidth}-${index}`}
+                          >
+                            <CustomDataGridSingleRow
+                              rowData={visibleRows[index]}
+                              rowIndex={index}
+                              visibleColumns={visibleColumns}
+                              Cell={Cell}
+                              enabledRowRenderers={enabledRowRenderers}
+                              refetch={refetch}
+                              setRowHeight={setRowHeight}
+                              rowHeight={rowHeight}
+                              maxWidth={gridWidth}
+                            />
+                          </div>
+                        );
+                      }}
+                    </VariableSizeList>
+                  </>
+                )
+              }
+            </>
+          );
+        }}
+      </EuiAutoSizer>
     );
   }
 );
@@ -81,13 +199,10 @@ const CustomGridRow = styled.div.attrs<{
 }>((props) => ({
   className: `euiDataGridRow ${props.className ?? ''}`,
   role: 'row',
-}))`
-  width: fit-content;
+}))<{
+  maxWidth?: number;
+}>`
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
-  . euiDataGridRowCell--controlColumn {
-    height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
-    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
-  }
   .udt--customRow {
     border-radius: 0;
     padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
@@ -97,6 +212,14 @@ const CustomGridRow = styled.div.attrs<{
 
   .euiCommentEvent__body {
     background-color: ${(props) => (props.theme as EuiTheme).eui.euiColorEmptyShade};
+  }
+
+ [data-gridcell-column-id="timeline-event-detail-row"] > .euiDataGridRowCell__content {
+    width: 100%;
+    max-width: ${(props) => props.maxWidth}px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scroll-padding: 0 0 0 0,
   }
 
    &:has(.unifiedDataTable__cell--expanded) {
@@ -127,6 +250,8 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
+  setRowHeight: (index: number, height: number) => void;
+  maxWidth: number | undefined;
 } & Pick<
   CustomTimelineDataGridBodyProps,
   'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
@@ -157,11 +282,22 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     visibleColumns,
     Cell,
     rowHeight: rowHeightMultiple = 0,
+    setRowHeight,
+    maxWidth,
   } = props;
+
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
+
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (rowRef.current) {
+      setRowHeight(rowIndex, rowRef.current.offsetHeight);
+    }
+  }, [rowIndex, setRowHeight]);
 
   const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
   /**
@@ -180,15 +316,17 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   );
   const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
 
+  const [rowHeight, _] = useState<number>(0);
+
   return (
     <CustomGridRow
       className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
-      $cssRowHeight={cssRowHeight}
       key={rowIndex}
+      ref={rowRef}
+      maxWidth={maxWidth}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={'auto'}>
         {visibleColumns.map((column, colIndex) => {
-          // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
             return (
               <Cell
@@ -206,6 +344,11 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
+          rowHeightsOptions={{
+            defaultHeight: 'auto',
+          }}
+          /* @ts-expect-error because currently CellProps do not allow string width but it is important to be passed for height calculations   */
+          width={'100%'}
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
           visibleRowIndex={rowIndex}
         />
