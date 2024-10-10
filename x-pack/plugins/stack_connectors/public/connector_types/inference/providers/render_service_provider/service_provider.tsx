@@ -26,10 +26,12 @@ interface ServiceProviderProps {
   searchValue?: string;
 }
 
+type ProviderSolution = 'Observability' | 'Security' | 'Search';
+
 interface ServiceProviderRecord {
   icon: string;
   name: string;
-  solutions: string[];
+  solutions: ProviderSolution[];
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {

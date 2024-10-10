@@ -14,45 +14,10 @@ export const getRequiredMessage = (field: string) => {
   });
 };
 
-export const INPUT_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredInputTextField',
-  {
-    defaultMessage: 'Input is required.',
-  }
-);
-
-export const QUERY_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredQueryTextField',
-  {
-    defaultMessage: 'Query is required.',
-  }
-);
-
-export const INPUT_TYPE_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredInputTypeTextField',
-  {
-    defaultMessage: 'Input type is required.',
-  }
-);
-
-export const TASK_TYPE_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredTaskTypeTextField',
-  {
-    defaultMessage: 'Task type is required.',
-  }
-);
-
 export const INPUT_INVALID = i18n.translate(
-  'xpack.stackConnectors.security.inference.params.error.invalidInputText',
+  'xpack.stackConnectors.inference.params.error.invalidInputText',
   {
     defaultMessage: 'Input does not have a valid Array format.',
-  }
-);
-
-export const ACTION_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredActionText',
-  {
-    defaultMessage: 'Action is required.',
   }
 );
 

@@ -52,7 +52,7 @@ export function getConnectorType(): InferenceConnector {
         subAction === SUB_ACTION.SPARSE_EMBEDDING
       ) {
         if (!subActionParams.input?.length) {
-          errors.input.push(translations.INPUT_REQUIRED);
+          errors.input.push(translations.getRequiredMessage('Input'));
         }
       }
       if (subAction === SUB_ACTION.RERANK) {
@@ -61,19 +61,19 @@ export function getConnectorType(): InferenceConnector {
         }
 
         if (!(subActionParams as RerankParams).query?.length) {
-          errors.query.push(translations.QUERY_REQUIRED);
+          errors.query.push(translations.getRequiredMessage('Query'));
         }
       }
       if (subAction === SUB_ACTION.TEXT_EMBEDDING) {
         if (!(subActionParams as TextEmbeddingParams).inputType?.length) {
-          errors.query.push(translations.INPUT_TYPE_REQUIRED);
+          errors.query.push(translations.getRequiredMessage('Input type'));
         }
       }
       if (errors.input.length) return { errors };
 
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
-        errors.subAction.push(translations.ACTION_REQUIRED);
+        errors.subAction.push(translations.getRequiredMessage('Action'));
       } else if (
         ![
           SUB_ACTION.COMPLETION,

@@ -92,8 +92,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
+   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
    */
   public async performApiCompletion({
     input,
@@ -109,8 +110,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API rerank task endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
+   * responsible for making a esClient inference method to rerank task endpoint and returning the response data
+   * @param input the text on which you want to perform the inference task. input can be a single string or an array.
+   * @query the search query text
+   * @signal abort signal
    */
   public async performApiRerank({
     input,
@@ -131,8 +134,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API sparse embedding task endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
+   * responsible for making a esClient inference method sparse embedding task endpoint and returning the response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
    */
   public async performApiSparseEmbedding({
     input,
@@ -147,8 +151,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API text embedding task endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
+   * responsible for making a esClient inference method text embedding task endpoint and returning the response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
    */
   public async performApiTextEmbedding({
     input,
@@ -171,8 +176,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
+   * private generic method to avoid duplication esClient inference inference execute.
+   * @param params InferenceInferenceRequest params.
+   * @param asStream defines the type of the responce, regular or stream
+   * @signal abort signal
    */
   private async performInferenceApi(
     params: InferenceInferenceRequest,
@@ -211,6 +218,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    *  that pipes the response from the API through the transformToString function,
    *  which parses the proprietary response into a string of the response text alone
    * @param input A message to be sent to the API
+   * @signal abort signal
    */
   public async performApiCompletionStream({
     input,

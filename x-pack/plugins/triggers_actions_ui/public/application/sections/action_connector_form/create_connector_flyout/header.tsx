@@ -52,13 +52,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
                       {actionTypeName && actionTypeName.toLowerCase().includes('connector') ? (
-                        <FormattedMessage
-                          defaultMessage="{actionTypeName}"
-                          id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
-                          values={{
-                            actionTypeName,
-                          }}
-                        />
+                        actionTypeName
                       ) : (
                         <FormattedMessage
                           defaultMessage="{actionTypeName} connector"

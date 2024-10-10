@@ -2073,29 +2073,8 @@ describe('delete()', () => {
   });
 
   test('calls unsecuredSavedObjectsClient with id', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
-      },
-      references: [],
-    });
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);

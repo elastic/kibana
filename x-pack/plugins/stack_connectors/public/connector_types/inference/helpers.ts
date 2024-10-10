@@ -83,7 +83,7 @@ export const getNonEmptyValidator = (
         return {
           code: 'ERR_FIELD_MISSING',
           path,
-          message: i18n.ACTION_REQUIRED,
+          message: i18n.getRequiredMessage('Action'),
         };
       }
     }

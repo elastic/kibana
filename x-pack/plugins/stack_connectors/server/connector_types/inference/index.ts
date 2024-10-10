@@ -36,7 +36,7 @@ const deleteInferenceEndpoint = async (
   esClient: ElasticsearchClient
 ) => {
   try {
-    await esClient?.inference.delete({
+    await esClient.inference.delete({
       task_type: taskType,
       inference_id: inferenceId,
     });
@@ -117,7 +117,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       logger.info(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
           config?.inferenceId
-        } was successfuly ${isUpdate ? 'updated' : 'create'}`
+        } was successfuly ${isUpdate ? 'updated' : 'created'}`
       );
     } catch (e) {
       logger.warn(

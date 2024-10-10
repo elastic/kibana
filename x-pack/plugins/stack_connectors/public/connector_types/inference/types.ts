@@ -16,14 +16,11 @@ import {
 } from '../../../common/inference/types';
 import { ConfigProperties } from '../lib/dynamic_config/types';
 
-export interface InferenceActionParams {
-  subAction:
-    | SUB_ACTION.COMPLETION
-    | SUB_ACTION.RERANK
-    | SUB_ACTION.SPARSE_EMBEDDING
-    | SUB_ACTION.TEXT_EMBEDDING;
-  subActionParams: ChatCompleteParams | RerankParams | SparseEmbeddingParams | TextEmbeddingParams;
-}
+export type InferenceActionParams =
+  | { subAction: SUB_ACTION.COMPLETION; subActionParams: ChatCompleteParams }
+  | { subAction: SUB_ACTION.RERANK; subActionParams: RerankParams }
+  | { subAction: SUB_ACTION.SPARSE_EMBEDDING; subActionParams: SparseEmbeddingParams }
+  | { subAction: SUB_ACTION.TEXT_EMBEDDING; subActionParams: TextEmbeddingParams };
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 

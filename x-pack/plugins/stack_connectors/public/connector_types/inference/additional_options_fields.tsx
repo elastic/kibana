@@ -126,7 +126,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
             config={{
               validations: [
                 {
-                  validator: fieldValidators.emptyField(i18n.TASK_TYPE_REQUIRED),
+                  validator: fieldValidators.emptyField(i18n.getRequiredMessage('Task type')),
                   isBlocking: true,
                 },
               ],
