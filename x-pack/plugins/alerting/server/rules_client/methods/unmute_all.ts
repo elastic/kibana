@@ -13,7 +13,6 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMetaAttributes } from '../lib';
 import { clearUnscheduledSnoozeAttributes } from '../common';
-import { RuleAttributes } from '../../data/rule/types';
 
 export async function unmuteAll(
   context: RulesClientContext,
@@ -67,7 +66,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: false,
     mutedInstanceIds: [],
-    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes as RuleAttributes),
+    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });

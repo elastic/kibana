@@ -11,21 +11,21 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAttributes } from '../types';
+import { RawRule } from '../../../types';
 
 export interface UpdateRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;
   id: string;
-  updateRuleAttributes: Partial<RuleAttributes>;
-  savedObjectsUpdateOptions?: SavedObjectsUpdateOptions<RuleAttributes>;
+  updateRuleAttributes: Partial<RawRule>;
+  savedObjectsUpdateOptions?: SavedObjectsUpdateOptions<RawRule>;
 }
 
 export const updateRuleSo = (
   params: UpdateRuleSoParams
-): Promise<SavedObjectsUpdateResponse<RuleAttributes>> => {
+): Promise<SavedObjectsUpdateResponse<RawRule>> => {
   const { savedObjectsClient, id, updateRuleAttributes, savedObjectsUpdateOptions } = params;
 
-  return savedObjectsClient.update<RuleAttributes>(
+  return savedObjectsClient.update<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
     id,
     updateRuleAttributes,

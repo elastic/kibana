@@ -30,7 +30,7 @@ export const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
         success: history.success,
         timestamp: history.timestamp,
         ...(history.duration !== undefined ? { duration: history.duration } : {}),
-        ...(history.outcome ? { outcome: transformRuleLastRun(history.outcome) } : {}),
+        ...(history.outcome !== undefined ? { outcome: history.outcome } : {}),
       })),
       calculated_metrics: monitoring.run.calculated_metrics,
       last_run: monitoring.run.last_run,
