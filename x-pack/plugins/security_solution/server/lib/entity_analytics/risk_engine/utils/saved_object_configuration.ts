@@ -42,7 +42,19 @@ export const updateSavedObjectAttribute = async ({
   attributes,
 }: SavedObjectsClientArg & {
   attributes: {
-    enabled: boolean;
+    enabled?: boolean;
+    dataViewId?: string;
+    filter?: object;
+    identifierType?: string;
+    interval?: string;
+    pageSize?: number;
+    alertSampleSizePerShard?: number;
+    range?: {
+      start?: string;
+      end?: string;
+    };
+    excludeAlertStatuses?: Array<'open' | 'closed' | 'in-progress' | 'acknowledged'>;
+    excludeAlertTags?: Array<'Duplicate' | 'False Positive' | 'Futher investigation required'>;
   };
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({

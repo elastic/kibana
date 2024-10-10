@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Risk Engine API
+  description: These APIs allow the consumer to configure the Risk Engine saved object.
+paths:
+  /api/risk_engine/saved_object/configure:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: false
+      x-codegen-enabled: true
+      operationId: ConfigureRiskEngineSavedObject
+      summary: Configure the Risk Engine as per user requirements
+      requestBody:
+        description: User defined configuration the risk engine
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigureRiskEngineRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigureRiskEngineResponse'
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    ConfigureRiskEngineRequest:
+      type: object
+      properties:
+        dataViewId:
+          type: string
+        enabled:
+          type: boolean
+        filter:
+          type: object
+          additionalProperties: false
+          properties: {}
+        identifierType:
+          type: string
+        interval:
+          type: string
+        pageSize:
+          type: integer
+        alertSampleSizePerShard:
+          type: integer
+        range:
+          type: object
+          properties:
+            start:
+              type: string
+            end:
+              type: string
+        excludeAlertStatuses:
+          type: array
+          items:
+            type: string
+            enum:
+              - open
+              - closed
+              - in-progress
+              - acknowledged
+        excludeAlertTags:
+          type: array
+          items:
+            type: string
+            enum:
+              - 'Duplicate'
+              - 'False Positive'
+              - 'Futher investigation required'
+    
+    ConfigureRiskEngineResponse:
+      type: object
+      properties:
+        configuration_successful:
+          type: boolean
+
+
