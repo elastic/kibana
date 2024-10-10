@@ -21,12 +21,7 @@ export function setupPanelManagement(
   { canBeCreatedInline }: { canBeCreatedInline: boolean }
 ): PanelManagementApi {
   const isEditing$ = new BehaviorSubject(false);
-  const isNewlyCreated$ = new BehaviorSubject(true);
-
-  // Remove this once the inline creation is fully supported
-  if (!canBeCreatedInline) {
-    isNewlyCreated$.next(!canBeCreatedInline);
-  }
+  const isNewlyCreated$ = new BehaviorSubject(canBeCreatedInline);
 
   return {
     isEditingEnabled: () => !isEditing$.getValue(),
