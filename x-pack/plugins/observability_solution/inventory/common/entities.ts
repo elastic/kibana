@@ -117,3 +117,9 @@ export interface ContainerEntity extends BaseEntity {
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
+
+export type EntityGroup = {
+  count: number;
+} & {
+  [Field in keyof Entity]?: Entity[Field];
+};
