@@ -17,9 +17,9 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestViewer: Agent;
+  let supertestViewer: Pick<Agent, 'post'>;
 
-  const postGraph = (agent: Agent, body: any) => {
+  const postGraph = (agent: Pick<Agent, 'post'>, body: any) => {
     const req = agent
       .post('/internal/cloud_security_posture/graph')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
       supertestViewer = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-        withCookieHeader: true, // to avoid generating API key and use Cookie header instead
+        useCookieHeader: true, // to avoid generating API key and use Cookie header instead
         withInternalHeaders: true,
       });
     });
