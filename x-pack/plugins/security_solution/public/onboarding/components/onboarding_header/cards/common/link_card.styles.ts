@@ -14,7 +14,6 @@ export const useCardStyles = () => {
 
   return css`
     min-width: 315px;
-
     /* We needed to add the "headerCard" class to make it take priority over the default EUI card styles */
     &.headerCard:hover {
       *:not(.headerCardLink) {

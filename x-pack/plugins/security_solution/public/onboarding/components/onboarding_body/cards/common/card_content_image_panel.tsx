@@ -16,7 +16,7 @@ export const OnboardingCardContentImagePanel = React.memo<
 >(({ children, imageSrc, imageAlt }) => {
   const styles = useCardContentImagePanelStyles();
   return (
-    <OnboardingCardContentPanel hasBorder className={styles}>
+    <OnboardingCardContentPanel className={styles}>
       <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
         <EuiFlexItem>{children}</EuiFlexItem>
         <EuiFlexItem className="cardSpacer" grow={false}>

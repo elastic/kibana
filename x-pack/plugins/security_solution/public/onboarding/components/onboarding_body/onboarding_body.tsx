@@ -41,6 +41,13 @@ export const OnboardingBody = React.memo(() => {
     [setCardComplete]
   );
 
+  const createCheckCardComplete = useCallback(
+    (cardId: OnboardingCardId) => () => {
+      checkCardComplete(cardId);
+    },
+    [checkCardComplete]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xl">
       {bodyConfig.map((group, index) => (
@@ -64,6 +71,7 @@ export const OnboardingBody = React.memo(() => {
                       <Suspense fallback={<CenteredLoadingSpinner size="m" />}>
                         <LazyCardComponent
                           setComplete={createSetCardComplete(id)}
+                          checkComplete={createCheckCardComplete(id)}
                           isCardComplete={isCardComplete}
                           setExpandedCardId={setExpandedCardId}
                           checkCompleteMetadata={cardCheckCompleteResult?.metadata}

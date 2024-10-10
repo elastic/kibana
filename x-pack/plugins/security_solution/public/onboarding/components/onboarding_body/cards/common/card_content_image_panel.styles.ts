@@ -12,8 +12,9 @@ export const useCardContentImagePanelStyles = () => {
   const { euiTheme } = useEuiTheme();
   const shadowStyles = useEuiShadow('m');
   return css`
+    padding-top: 8px;
     .cardSpacer {
-      width: 10%;
+      width: 8%;
     }
     .cardImage {
       width: 50%;

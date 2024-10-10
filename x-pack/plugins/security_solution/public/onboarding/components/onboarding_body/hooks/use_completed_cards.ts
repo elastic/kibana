@@ -6,16 +6,16 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
 import type { OnboardingCardId } from '../../../constants';
 import type {
   CheckCompleteResult,
   CheckCompleteResponse,
-  OnboardingCardConfig,
   OnboardingGroupConfig,
+  OnboardingCardConfig,
 } from '../../../types';
 import { useOnboardingContext } from '../../onboarding_context';
-import { useKibana } from '../../../../common/lib/kibana';
 
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
 export type SetCardComplete = (
@@ -118,7 +118,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
         });
       }
     },
-    [cardsWithAutoCheck, services, processCardCheckCompleteResult]
+    [cardsWithAutoCheck, processCardCheckCompleteResult, services]
   );
 
   // Initial auto-check for all cards, it should run only once, after cardsGroupConfig is properly populated
@@ -128,7 +128,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
         processCardCheckCompleteResult(card.id, checkCompleteResult);
       })
     );
-  }, [cardsWithAutoCheck, services, processCardCheckCompleteResult]);
+  }, [cardsWithAutoCheck, processCardCheckCompleteResult, services]);
 
   return {
     isCardComplete,
