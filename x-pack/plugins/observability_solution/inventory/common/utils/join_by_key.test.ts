@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { joinByKey } from '.';
+import { joinByKey } from './join_by_key';
 
 describe('joinByKey', () => {
   it('joins by a string key', () => {
@@ -105,49 +105,57 @@ describe('joinByKey', () => {
   });
 
   it('joins by multiple keys', () => {
-    const joined = joinByKey(
-      [
-        {
-          serviceName: 'opbeans-node',
-          environment: 'production',
-          alertCount: 10,
-        },
-        {
-          serviceName: 'opbeans-node',
-          environment: 'production',
-        },
-        {
-          serviceName: 'opbeans-node',
-          environment: 'staging',
-        },
-        {
-          hostName: 'my-host',
-          cloudProvider: 'aws',
-        },
-        {
-          hostName: 'my-host',
-          alertCount: 10,
-          serviceName: 'opbeans-node',
-        },
-      ],
-      ['serviceName', 'environment', 'hostName']
-    );
-
-    expect(joined).toEqual([
+    const data = [
       {
         serviceName: 'opbeans-node',
         environment: 'production',
-        alertCount: 10,
+        type: 'service',
       },
       {
         serviceName: 'opbeans-node',
-        environment: 'staging',
+        environment: 'stage',
+        type: 'service',
       },
       {
-        hostName: 'my-host',
-        cloudProvider: 'aws',
+        serviceName: 'opbeans-node',
+        hostName: 'host-1',
+      },
+      {
+        containerId: 'containerId',
+      },
+    ];
+
+    const alerts = [
+      {
+        serviceName: 'opbeans-node',
+        environment: 'production',
+        type: 'service',
         alertCount: 10,
       },
+      {
+        containerId: 'containerId',
+        alertCount: 1,
+      },
+      {
+        hostName: 'host-1',
+        environment: 'production',
+        alertCount: 5,
+      },
+    ];
+
+    const joined = joinByKey(
+      [...data, ...alerts],
+      ['serviceName', 'environment', 'hostName', 'containerId']
+    );
+
+    expect(joined.length).toBe(5);
+
+    expect(joined).toEqual([
+      { environment: 'stage', serviceName: 'opbeans-node', type: 'service' },
+      { hostName: 'host-1', serviceName: 'opbeans-node' },
+      { alertCount: 10, environment: 'production', serviceName: 'opbeans-node', type: 'service' },
+      { alertCount: 1, containerId: 'containerId' },
+      { alertCount: 5, environment: 'production', hostName: 'host-1' },
     ]);
   });
 
