@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { pick } from 'lodash';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import {
   EuiFlyoutHeader,
@@ -20,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
@@ -28,6 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+import { TimeFieldWarning } from '../../components/time_field_warning';
 
 import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
 
@@ -52,13 +56,22 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   onPreview,
   isNewPanel,
 }) => {
+  const isMounted = useMountedState();
+
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
     pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableRuntimeState
   );
 
+  // State to track if the selected data view is time based, undefined is used
+  // to track that the check is in progress.
+  const [isDataViewTimeBased, setIsDataViewTimeBased] = useState<boolean | undefined>();
+
   const isFormValid = useMemo(
-    () => isPopulatedObject(formInput, ['dataViewId']) && formInput.dataViewId !== '',
-    [formInput]
+    () =>
+      isPopulatedObject(formInput, ['dataViewId']) &&
+      formInput.dataViewId !== '' &&
+      isDataViewTimeBased === true,
+    [formInput, isDataViewTimeBased]
   );
 
   const updatedProps = useMemo(() => {
@@ -78,7 +91,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
         onPreview(updatedProps);
       }
     },
-    [isFormValid, onPreview, updatedProps]
+    [isFormValid, onPreview, updatedProps, isDataViewTimeBased]
   );
 
   const setDataViewId = useCallback(
@@ -87,8 +100,34 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
         ...formInput,
         dataViewId: dataViewId ?? '',
       });
+      setIsDataViewTimeBased(undefined);
     },
     [formInput]
+  );
+
+  useEffect(
+    function checkIsDataViewTimeBased() {
+      setIsDataViewTimeBased(undefined);
+
+      const { dataViewId } = formInput;
+
+      if (!dataViewId) {
+        return;
+      }
+
+      dataViews
+        .get(dataViewId)
+        .then((dataView) => {
+          if (!isMounted()) {
+            return;
+          }
+          setIsDataViewTimeBased(dataView.isTimeBased());
+        })
+        .catch(() => {
+          setIsDataViewTimeBased(undefined);
+        });
+    },
+    [dataViews, formInput, isMounted]
   );
 
   return (
@@ -121,21 +160,29 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
               defaultMessage: 'Data view',
             })}
           >
-            <IndexPatternSelect
-              autoFocus={!formInput.dataViewId}
-              fullWidth
-              compressed
-              indexPatternId={formInput.dataViewId}
-              placeholder={i18n.translate(
-                'xpack.aiops.embeddableLogRateAnalysis.config.dataViewSelectorPlaceholder',
-                {
-                  defaultMessage: 'Select data view',
-                }
+            <>
+              <IndexPatternSelect
+                autoFocus={!formInput.dataViewId}
+                fullWidth
+                compressed
+                indexPatternId={formInput.dataViewId}
+                placeholder={i18n.translate(
+                  'xpack.aiops.embeddableLogRateAnalysis.config.dataViewSelectorPlaceholder',
+                  {
+                    defaultMessage: 'Select data view',
+                  }
+                )}
+                onChange={(newId) => {
+                  setDataViewId(newId ?? '');
+                }}
+              />
+              {isDataViewTimeBased === false && (
+                <>
+                  <EuiSpacer size="m" />
+                  <TimeFieldWarning />
+                </>
               )}
-              onChange={(newId) => {
-                setDataViewId(newId ?? '');
-              }}
-            />
+            </>
           </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>

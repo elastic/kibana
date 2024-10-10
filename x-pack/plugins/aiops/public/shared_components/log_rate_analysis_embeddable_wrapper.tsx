@@ -146,6 +146,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       setRerenderFlag((prev) => !prev);
     }
   }, [dataViewId, prevDataViewId]);
+  const showComponent = prevDataViewId === undefined || prevDataViewId === dataViewId;
 
   // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
@@ -159,7 +160,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
         padding: '10px',
       }}
     >
-      {prevDataViewId === dataViewId && (
+      {showComponent && (
         <Router history={history}>
           <ReloadContextProvider reload$={resultObservable$}>
             <AiopsAppContext.Provider value={aiopsAppContextValue}>
