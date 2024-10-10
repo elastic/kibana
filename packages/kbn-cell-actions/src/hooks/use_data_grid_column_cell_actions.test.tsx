@@ -78,10 +78,10 @@ describe('useDataGridColumnsCellActions', () => {
 
     expect(result.current).toHaveLength(0);
 
-    await waitFor(() => null);
-
-    expect(result.current).toHaveLength(columns.length);
-    expect(result.current[0]).toHaveLength(actions.length);
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+      expect(result.current[0]).toHaveLength(actions.length);
+    });
   });
 
   it('should call getCellValue with the proper params', async () => {
@@ -131,7 +131,7 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(action1.execute).toHaveBeenCalled();
     });
   });

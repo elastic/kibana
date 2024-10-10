@@ -66,9 +66,7 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitFor(() => null);
-
-    expect(useRefreshCaseViewPage()).toBeCalled();
+    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
   });
 
   it('shows a success toaster correctly', async () => {
@@ -83,12 +81,12 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitFor(() => null);
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'File deleted successfully',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'File deleted successfully',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('sets isError when fails to delete a file attachment', async () => {
@@ -106,7 +104,7 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(spyOnDeleteFileAttachments).toBeCalledWith({
       caseId: basicCaseId,
@@ -114,6 +112,5 @@ describe('useDeleteFileAttachment', () => {
     });
 
     expect(addError).toHaveBeenCalled();
-    expect(result.current.isError).toBe(true);
   });
 });

@@ -136,8 +136,8 @@ describe('useMetricsExplorerData Hook', () => {
       pageInfo: { total: 10, afterKey: 'host-06' },
       series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
     } as any);
-    act(() => {
-      result.current.fetchNextPage();
+    await act(async () => {
+      await result.current.fetchNextPage();
     });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     const { series: nextSeries } = result.current.data!.pages[1];
@@ -156,8 +156,8 @@ describe('useMetricsExplorerData Hook', () => {
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(error);
     mockedFetch.mockResolvedValue(resp as any);
-    act(() => {
-      result.current.refetch();
+    await act(async () => {
+      await result.current.refetch();
     });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);

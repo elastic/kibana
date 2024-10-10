@@ -89,9 +89,7 @@ describe('useDeleteKnowledgeBase', () => {
 
   it('should return delete response', async () => {
     const { result } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
-    await waitFor(() => null);
-
-    await expect(result.current).resolves.toStrictEqual(statusResponse);
+    await waitFor(async () => expect(result.current).resolves.toStrictEqual(statusResponse));
   });
 
   it('should display error toast when api throws error', async () => {

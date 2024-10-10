@@ -48,7 +48,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -127,14 +127,15 @@ describe('UseInfiniteFindCaseUserActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
+        expect.any(AbortSignal)
+      );
+      expect(addError).toHaveBeenCalled();
+    });
 
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-      expect.any(AbortSignal)
-    );
-    expect(addError).toHaveBeenCalled();
     spy.mockRestore();
   });
 
@@ -146,7 +147,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.pages).toStrictEqual([findCaseUserActionsResponse]);
 
@@ -163,7 +164,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
         expect.any(AbortSignal)
       );
     });
-    await waitFor(() => result.current.data?.pages.length === 2);
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
   });
 
   it('returns hasNextPage correctly', async () => {
