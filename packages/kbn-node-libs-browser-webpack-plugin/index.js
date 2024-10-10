@@ -9,6 +9,7 @@
 
 /** @typedef {import('webpack').Compiler} WebpackCompiler */
 
+/* eslint-disable import/no-extraneous-dependencies */
 // @ts-expect-error
 const nodeLibsBrowser = require('node-libs-browser');
 
