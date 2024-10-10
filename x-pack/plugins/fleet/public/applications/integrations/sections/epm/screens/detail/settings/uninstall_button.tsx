@@ -16,17 +16,16 @@ import { useAuthz, useGetPackageInstallStatus, useUninstallPackage } from '../..
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
-interface UninstallButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
+interface UninstallButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version' | 'assets'> {
   disabled?: boolean;
   latestVersion?: string;
-  numOfAssets: number;
 }
 
 export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   disabled = false,
   latestVersion,
   name,
-  numOfAssets,
+  assets,
   title,
   version,
 }) => {
@@ -37,6 +36,16 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   const isRemoving = installationStatus === InstallStatus.uninstalling;
 
   const [isUninstallModalVisible, setIsUninstallModalVisible] = useState<boolean>(false);
+
+  const numOfAssets = Object.entries(assets).reduce(
+    (acc, [serviceName, serviceNameValue]) =>
+      acc +
+      Object.entries(serviceNameValue || {}).reduce(
+        (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
+        0
+      ),
+    0
+  );
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
