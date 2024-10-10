@@ -14,7 +14,7 @@ export interface GridLayoutApi {
   addNewPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
   getPanelCount: () => number;
   removePanel: (panelId: string) => void;
-  // serializeState: () => void;
+  serializeState: () => void;
 }
 
 export interface GridCoordinate {

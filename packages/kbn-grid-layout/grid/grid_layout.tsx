@@ -12,12 +12,13 @@ import React, { forwardRef, useImperativeHandle } from 'react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
-import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
+import { GridLayoutApi, GridLayoutData, GridRowData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
-import { runPanelPlacementStrategy } from './run_panel_placement';
-import { compactGridRow } from './resolve_grid_row';
+import { runPanelPlacementStrategy } from './utils/run_panel_placement';
+import { compactGridRow } from './utils/resolve_grid_row';
+import { pick } from 'lodash';
 
 interface GridLayoutProps {
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
@@ -86,6 +87,36 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
             return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
               return prev + Object.keys(row.panels).length;
             }, 0);
+          },
+
+          serializeState: () => {
+            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+
+            const serializePanelRows = (row: GridRowData, rowIndex: number) => {
+              const panels = row.panels;
+              const gridData: { [key: string]: any } = {};
+              Object.keys(panels).forEach((key) => {
+                const panel = panels[key];
+                gridData[key] = {
+                  row: rowIndex,
+                  i: key,
+                  x: panel.column,
+                  y: panel.row,
+                  w: panel.width,
+                  h: panel.height,
+                };
+              });
+              return gridData;
+            };
+
+            return {
+              panels: currentLayout.map(serializePanelRows),
+              rows: currentLayout.map((row, index) => ({
+                i: index,
+                title: row.title,
+                isCollapsed: row.isCollapsed,
+              })),
+            };
           },
         };
       },
