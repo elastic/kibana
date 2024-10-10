@@ -98,23 +98,22 @@ export const Result: React.FC<ResultProps> = ({
                   ...metaData,
                   onDocumentDelete,
                 }}
-                rightSideActions={
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="left" content={toolTipContent}>
-                      <EuiButtonIcon
-                        iconType={isExpanded ? 'fold' : 'unfold'}
-                        color={isExpanded ? 'danger' : 'primary'}
-                        onClick={(e: React.MouseEvent<HTMLElement>) => {
-                          e.stopPropagation();
-                          setIsExpanded(!isExpanded);
-                        }}
-                        aria-label={tooltipText}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                }
               />
             )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="left" content={toolTipContent}>
+              <EuiButtonIcon
+                size="xs"
+                iconType={isExpanded ? 'fold' : 'unfold'}
+                color={isExpanded ? 'danger' : 'primary'}
+                onClick={(e: React.MouseEvent<HTMLElement>) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                aria-label={tooltipText}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

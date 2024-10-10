@@ -186,7 +186,7 @@ export const RichResultHeader: React.FC<Props> = ({
     <EuiFlexItem
       grow
       css={css`
-        min-height: ${euiTheme.base * 3}px;
+        min-height: ${euiTheme.base * 1}px;
         max-height: ${euiTheme.base * 8}px;
       `}
     >
