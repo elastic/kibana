@@ -86,9 +86,11 @@ export function DiscoverMainRoute({
     });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
-  const [hasESData, setHasESData] = useState(false);
-  const [hasUserDataView, setHasUserDataView] = useState(false);
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [noDataState, setNoDataState] = useState({
+    hasESData: true,
+    hasUserDataView: true,
+    showNoDataPage: false,
+  });
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
 
   /**
@@ -109,50 +111,48 @@ export function DiscoverMainRoute({
     page: 'app',
     id: savedSearchId || 'new',
   });
+  /**
+   * Helper function to determine when to skip the no data page
+   */
+  const skipNoDataPage = useCallback(
+    async (nextDataView: DataView | undefined) => {
+      try {
+        const isEsqlQuery = isDataSourceType(
+          stateContainer.appState.getState().dataSource,
+          DataSourceType.Esql
+        );
+        const skipDataTest = savedSearchId || isEsqlQuery;
 
-  const checkData = useCallback(async () => {
-    try {
-      if (savedSearchId) {
-        return true; // bypass NoData screen
-      }
+        if (nextDataView || skipDataTest) {
+          if (!isEsqlQuery) {
+            await stateContainer.actions.loadDataViewList();
+          }
+          return true;
+        }
 
-      if (isDataSourceType(stateContainer.appState.getState().dataSource, DataSourceType.Esql)) {
-        return true;
-      }
+        const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
+          data.dataViews.hasData.hasUserDataView().catch(() => false),
+          data.dataViews.hasData.hasESData().catch(() => false),
+          data.dataViews.defaultDataViewExists().catch(() => false),
+          await stateContainer.actions.loadDataViewList(),
+        ]);
 
-      const checkDefaultDataView = async () => {
-        try {
-          return await data.dataViews.defaultDataViewExists();
-        } catch (e) {
+        if (!hasUserDataViewValue || !defaultDataViewExists) {
+          setNoDataState({
+            showNoDataPage: true,
+            hasESData: hasESDataValue,
+            hasUserDataView: hasUserDataViewValue,
+          });
           return false;
         }
-      };
-
-      const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
-        data.dataViews.hasData.hasUserDataView().catch(() => false),
-        data.dataViews.hasData.hasESData().catch(() => false),
-        checkDefaultDataView(),
-        await stateContainer.actions.loadDataViewList(),
-      ]);
-
-      setHasUserDataView(hasUserDataViewValue);
-      setHasESData(hasESDataValue);
-
-      if (!hasUserDataViewValue) {
-        setShowNoDataPage(true);
+        return true;
+      } catch (e) {
+        setError(e);
         return false;
       }
-
-      if (!defaultDataViewExists) {
-        setShowNoDataPage(true);
-        return false;
-      }
-      return true;
-    } catch (e) {
-      setError(e);
-      return false;
-    }
-  }, [data.dataViews, savedSearchId, stateContainer]);
+    },
+    [data.dataViews, savedSearchId, stateContainer]
+  );
 
   const loadSavedSearch = useCallback(
     async ({
@@ -161,7 +161,8 @@ export function DiscoverMainRoute({
     }: { nextDataView?: DataView; initialAppState?: LoadParams['initialAppState'] } = {}) => {
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
-      if (!nextDataView && !(await checkData())) {
+      const skipNoData = await skipNoDataPage(nextDataView);
+      if (!skipNoData) {
         setLoading(false);
         return;
       }
@@ -216,8 +217,8 @@ export function DiscoverMainRoute({
       }
     },
     [
-      checkData,
-      stateContainer.actions,
+      skipNoDataPage,
+      stateContainer,
       savedSearchId,
       historyLocationState?.dataViewSpec,
       customizationContext.displayMode,
@@ -233,11 +234,12 @@ export function DiscoverMainRoute({
 
   useEffect(() => {
     if (!isCustomizationServiceInitialized) return;
-
     setLoading(true);
-    setHasESData(false);
-    setHasUserDataView(false);
-    setShowNoDataPage(false);
+    setNoDataState({
+      hasESData: false,
+      hasUserDataView: false,
+      showNoDataPage: false,
+    });
     setError(undefined);
     if (savedSearchId) {
       loadSavedSearch();
@@ -261,7 +263,7 @@ export function DiscoverMainRoute({
     async (nextDataView: unknown) => {
       if (nextDataView) {
         setLoading(true);
-        setShowNoDataPage(false);
+        setNoDataState({ showNoDataPage: false, hasESData: true, hasUserDataView: true });
         setError(undefined);
         await loadSavedSearch({ nextDataView: nextDataView as DataView });
       }
@@ -283,15 +285,15 @@ export function DiscoverMainRoute({
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasUserDataView),
+          hasESData: () => Promise.resolve(noDataState.hasESData),
+          hasUserDataView: () => Promise.resolve(noDataState.hasUserDataView),
         },
       },
       share,
       dataViewEditor,
       noDataPage: services.noDataPage,
     }),
-    [core, data.dataViews, dataViewEditor, hasESData, hasUserDataView, services.noDataPage, share]
+    [core, data.dataViews, dataViewEditor, noDataState, services.noDataPage, share]
   );
 
   const loadingIndicator = useMemo(
@@ -300,7 +302,7 @@ export function DiscoverMainRoute({
   );
 
   const mainContent = useMemo(() => {
-    if (showNoDataPage) {
+    if (noDataState.showNoDataPage) {
       const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
       const AnalyticsNoDataPageKibanaProvider = withSuspense(
         React.lazy(() =>
@@ -338,7 +340,7 @@ export function DiscoverMainRoute({
     noDataDependencies,
     onDataViewCreated,
     onESQLNavigationComplete,
-    showNoDataPage,
+    noDataState,
     stateContainer,
   ]);
 
@@ -359,7 +361,7 @@ export function DiscoverMainRoute({
         <>
           <DiscoverTopNavInline
             stateContainer={stateContainer}
-            hideNavMenuItems={loading || showNoDataPage}
+            hideNavMenuItems={loading || noDataState.showNoDataPage}
           />
           {mainContent}
         </>
