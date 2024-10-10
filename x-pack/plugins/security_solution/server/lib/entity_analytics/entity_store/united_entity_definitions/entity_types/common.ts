@@ -10,7 +10,7 @@ import { getIdentityFieldForEntityType } from '../../utils';
 import { collectValues, newestValue } from '../definition_utils';
 import type { UnitedDefinitionField } from '../types';
 
-export const getCommonUnitedFieldDefintions = ({
+export const getCommonUnitedFieldDefinitions = ({
   entityType,
   fieldHistoryLength,
 }: {

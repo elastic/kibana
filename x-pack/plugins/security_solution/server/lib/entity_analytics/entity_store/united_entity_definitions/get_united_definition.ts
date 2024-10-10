@@ -9,7 +9,7 @@ import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   getHostUnitedDefinition,
   getUserUnitedDefinition,
-  getCommonUnitedFieldDefintions,
+  getCommonUnitedFieldDefinitions,
 } from './entity_types';
 import type { UnitedDefinitionBuilder } from './types';
 import { UnitedEntityDefinition } from './united_entity_definition';
@@ -29,7 +29,7 @@ export const getUnitedEntityDefinition = memoize(
     const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
 
     unitedDefinition.fields.push(
-      ...getCommonUnitedFieldDefintions({
+      ...getCommonUnitedFieldDefinitions({
         entityType,
         fieldHistoryLength,
       })

@@ -7,4 +7,4 @@
 
 export { getHostUnitedDefinition } from './host';
 export { getUserUnitedDefinition } from './user';
-export { getCommonUnitedFieldDefintions } from './common';
+export { getCommonUnitedFieldDefinitions } from './common';
