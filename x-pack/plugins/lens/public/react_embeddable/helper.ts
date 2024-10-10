@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesViewMode,
+  getInheritedViewMode,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfQueryType } from '@kbn/es-query';
@@ -60,4 +64,8 @@ export function buildObservableVariable<T extends unknown>(
 
 export function isTextBasedLanguage(state: LensRuntimeState) {
   return !isOfQueryType(state.attributes?.state.query);
+}
+
+export function getViewMode(api: unknown) {
+  return apiPublishesViewMode(api) ? getInheritedViewMode(api) : undefined;
 }
