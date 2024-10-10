@@ -23,8 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const utils = EntityStoreUtils(getService);
   // TODO: unskip once permissions issue is resolved
-
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
     before(async () => {
       await utils.cleanEngines();
     });

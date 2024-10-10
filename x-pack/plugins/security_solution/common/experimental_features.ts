@@ -119,11 +119,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
-   */
-  assistantNaturalLanguageESQLTool: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -234,11 +229,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters

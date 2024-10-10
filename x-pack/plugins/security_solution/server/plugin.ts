@@ -545,8 +545,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(
       APP_UI_ID,
       getAssistantTools({
-        naturalLanguageESQLToolEnabled:
-          config.experimentalFeatures.assistantNaturalLanguageESQLTool,
         assistantKnowledgeBaseByDefault:
           config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       })
