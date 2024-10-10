@@ -444,7 +444,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setSortFieldValue(identificator: string, label: string) {
-      await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformWizardSortFieldSelector > comboBoxInput',
+        identificator
+      );
       await this.assertSortFieldInputValue(identificator);
     },
 
@@ -507,7 +510,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       expectedIntervalLabel?: string
     ) {
-      await comboBox.set('transformGroupBySelection > comboBoxInput', identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformGroupBySelection > comboBoxInput',
+        identifier
+      );
       await this.assertGroupByInputValue([]);
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
@@ -582,7 +588,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       formData?: Record<string, any>,
       parentSelector = ''
     ) {
-      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        this.getAggComboBoxInputSelector(parentSelector),
+        identifier
+      );
       await this.assertAggregationInputValue([], parentSelector);
       await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 

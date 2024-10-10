@@ -32,5 +32,6 @@
     "@kbn/ml-query-utils",
     "@kbn/ml-is-defined",
     "@kbn/field-types",
+    "@kbn/ui-theme",
   ]
 }

@@ -7,13 +7,26 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Field } from '@kbn/ml-anomaly-utils';
-import { optionCss } from './eui_combo_box_with_field_stats';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EVENT_RATE_FIELD_ID, type Field } from '@kbn/ml-anomaly-utils';
+import { css } from '@emotion/react';
+import type { DropDownLabel } from '.';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
 import { FieldStatsInfoButton } from './field_stats_info_button';
+import { isSelectableOption } from './options_list_with_stats/types';
 
+export const optionCss = css`
+  .euiComboBoxOption__enterBadge {
+    display: none;
+  }
+  .euiFlexGroup {
+    gap: 0px;
+  }
+  .euiComboBoxOption__content {
+    margin-left: 2px;
+  }
+`;
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
@@ -30,7 +43,7 @@ interface Option extends EuiComboBoxOptionOption<string> {
  *   - `optionCss`: CSS styles for the options in the combo box.
  *   - `populatedFields`: A set of populated fields.
  */
-export const useFieldStatsTrigger = () => {
+export function useFieldStatsTrigger<T = DropDownLabel>() {
   const { setIsFlyoutVisible, setFieldName, populatedFields } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
@@ -46,18 +59,21 @@ export const useFieldStatsTrigger = () => {
   );
 
   const renderOption = useCallback(
-    (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
-      const field = (option as Option).field;
-      return option.isGroupLabelOption || !field ? (
-        option.label
-      ) : (
-        <FieldStatsInfoButton
-          isEmpty={populatedFields && !populatedFields.has(field.id)}
-          field={field}
-          label={option.label}
-          onButtonClick={handleFieldStatsButtonClick}
-        />
-      );
+    (option: T): ReactNode => {
+      if (isSelectableOption(option)) {
+        const field = (option as Option).field;
+        const isEmpty = populatedFields && field ? !populatedFields.has(field?.id) : false;
+        return option.isGroupLabel || !field ? (
+          option.label
+        ) : (
+          <FieldStatsInfoButton
+            isEmpty={field.id === EVENT_RATE_FIELD_ID ? false : isEmpty}
+            field={field}
+            label={option.label}
+            onButtonClick={handleFieldStatsButtonClick}
+          />
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleFieldStatsButtonClick, populatedFields?.size]
@@ -71,4 +87,4 @@ export const useFieldStatsTrigger = () => {
     optionCss,
     populatedFields,
   };
-};
+}

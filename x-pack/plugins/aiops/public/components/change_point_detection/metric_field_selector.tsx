@@ -7,8 +7,8 @@
 
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import { type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 interface MetricFieldSelectorProps {
@@ -21,7 +21,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange, inline = true }) => {
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
-    const { renderOption, closeFlyout } = useFieldStatsTrigger();
+    const { closeFlyout } = useFieldStatsTrigger();
 
     const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return metricFieldOptions.map((v) => {
@@ -55,7 +55,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     return (
       <>
         <EuiFormRow fullWidth label={inline ? undefined : label}>
-          <EuiComboBox
+          <OptionListWithFieldStats
             fullWidth
             compressed
             prepend={inline ? label : undefined}
@@ -65,7 +65,6 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
             onChange={onChangeCallback}
             isClearable={false}
             data-test-subj="aiopsChangePointMetricField"
-            renderOption={renderOption}
           />
         </EuiFormRow>
       </>
