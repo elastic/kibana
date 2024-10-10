@@ -33,5 +33,6 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/serverless",
+    "@kbn/elastic-assistant",
   ]
 }
