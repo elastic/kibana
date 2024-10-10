@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, type PropsWithChildren } from 'react';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 interface FinalEditContextType {
@@ -16,11 +16,13 @@ interface FinalEditContextType {
 const FinalEditContext = createContext<FinalEditContextType | null>(null);
 
 interface FinalEditContextProviderProps {
-  children: React.ReactNode;
   value: FinalEditContextType;
 }
 
-export function FinalEditContextProvider({ children, value }: FinalEditContextProviderProps) {
+export function FinalEditContextProvider({
+  children,
+  value,
+}: PropsWithChildren<FinalEditContextProviderProps>) {
   return <FinalEditContext.Provider value={value}>{children}</FinalEditContext.Provider>;
 }
 
