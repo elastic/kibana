@@ -20,13 +20,17 @@ import type { Field, FieldValue, QueryDslTermQuery } from '@elastic/elasticsearc
  * @returns An array of `term`s that may be used in a `bool` Elasticsearch DSL query to filter in/out required KB documents
  */
 export const getRequiredKbDocsTermsQueryDsl = (
-  kbResource: string
+  kbResource?: string
 ): Array<Partial<Record<Field, QueryDslTermQuery | FieldValue>>> => [
-  {
-    term: {
-      'metadata.kbResource': kbResource,
-    },
-  },
+  ...(kbResource != null
+    ? [
+        {
+          term: {
+            'metadata.kbResource': kbResource,
+          },
+        },
+      ]
+    : []),
   {
     term: {
       'metadata.required': true,

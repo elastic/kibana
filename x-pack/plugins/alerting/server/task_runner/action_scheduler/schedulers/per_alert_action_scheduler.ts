@@ -12,19 +12,24 @@ import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common'
 import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import { AlertHit } from '../../../types';
 import { Alert } from '../../../alert';
-import { getSummarizedAlerts } from '../get_summarized_alerts';
 import {
+  buildRuleUrl,
+  formatActionToEnqueue,
   generateActionHash,
+  getSummarizedAlerts,
   isActionOnInterval,
   isSummaryAction,
   logNumberOfFilteredAlerts,
-} from '../rule_action_helper';
+  shouldScheduleAction,
+} from '../lib';
 import {
   ActionSchedulerOptions,
-  Executable,
-  GenerateExecutablesOpts,
+  ActionsToSchedule,
+  GetActionsToScheduleOpts,
   IActionScheduler,
 } from '../types';
+import { TransformActionParamsOptions, transformActionParams } from '../../transform_action_params';
+import { injectActionParams } from '../../inject_action_params';
 
 enum Reasons {
   MUTED = 'muted',
@@ -90,12 +95,16 @@ export class PerAlertActionScheduler<
     return 2;
   }
 
-  public async generateExecutables({
+  public async getActionsToSchedule({
     alerts,
-  }: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
-    Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>
+  }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
+    ActionsToSchedule[]
   > {
-    const executables = [];
+    const executables: Array<{
+      action: RuleAction;
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+    }> = [];
+    const results: ActionsToSchedule[] = [];
 
     const alertsArray = Object.entries(alerts);
     for (const action of this.actions) {
@@ -104,7 +113,7 @@ export class PerAlertActionScheduler<
       if (action.useAlertDataForTemplate || action.alertsFilter) {
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
-          ruleId: this.context.taskInstance.params.alertId,
+          ruleId: this.context.rule.id,
           excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
           alertsFilter: action.alertsFilter,
         };
@@ -135,7 +144,7 @@ export class PerAlertActionScheduler<
         if (alertMaintenanceWindowIds.length !== 0) {
           this.context.logger.debug(
             `no scheduling of summary actions "${action.id}" for rule "${
-              this.context.taskInstance.params.alertId
+              this.context.rule.id
             }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
           );
           continue;
@@ -185,7 +194,112 @@ export class PerAlertActionScheduler<
       }
     }
 
-    return executables;
+    if (executables.length === 0) return [];
+
+    this.context.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+
+    const ruleUrl = buildRuleUrl({
+      getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
+      kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
+      logger: this.context.logger,
+      rule: this.context.rule,
+      spaceId: this.context.taskInstance.params.spaceId,
+    });
+
+    for (const { action, alert } of executables) {
+      const { actionTypeId } = action;
+
+      if (
+        !shouldScheduleAction({
+          action,
+          actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
+          isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
+          logger: this.context.logger,
+          ruleId: this.context.rule.id,
+          ruleRunMetricsStore: this.context.ruleRunMetricsStore,
+        })
+      ) {
+        continue;
+      }
+
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
+        actionTypeId
+      );
+
+      const actionGroup = action.group as ActionGroupIds;
+      const transformActionParamsOptions: TransformActionParamsOptions = {
+        actionsPlugin: this.context.taskRunnerContext.actionsPlugin,
+        alertId: this.context.rule.id,
+        alertType: this.context.ruleType.id,
+        actionTypeId: action.actionTypeId,
+        alertName: this.context.rule.name,
+        spaceId: this.context.taskInstance.params.spaceId,
+        tags: this.context.rule.tags,
+        alertInstanceId: alert.getId(),
+        alertUuid: alert.getUuid(),
+        alertActionGroup: actionGroup,
+        alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+        context: alert.getContext(),
+        actionId: action.id,
+        state: alert.getState(),
+        kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
+        alertParams: this.context.rule.params,
+        actionParams: action.params,
+        flapping: alert.getFlapping(),
+        ruleUrl: ruleUrl?.absoluteUrl,
+      };
+
+      if (alert.isAlertAsData()) {
+        transformActionParamsOptions.aadAlert = alert.getAlertAsData();
+      }
+
+      const actionToRun = {
+        ...action,
+        params: injectActionParams({
+          actionTypeId: action.actionTypeId,
+          ruleUrl,
+          ruleName: this.context.rule.name,
+          actionParams: transformActionParams(transformActionParamsOptions),
+        }),
+      };
+
+      results.push({
+        actionToEnqueue: formatActionToEnqueue({
+          action: actionToRun,
+          apiKey: this.context.apiKey,
+          executionId: this.context.executionId,
+          ruleConsumer: this.context.ruleConsumer,
+          ruleId: this.context.rule.id,
+          ruleTypeId: this.context.ruleType.id,
+          spaceId: this.context.taskInstance.params.spaceId,
+        }),
+        actionToLog: {
+          id: action.id,
+          // uuid is typed as optional but in reality it is always
+          // populated - https://github.com/elastic/kibana/issues/195255
+          uuid: action.uuid,
+          typeId: action.actionTypeId,
+          alertId: alert.getId(),
+          alertGroup: action.group,
+        },
+      });
+
+      if (!this.isRecoveredAlert(actionGroup)) {
+        if (isActionOnInterval(action)) {
+          alert.updateLastScheduledActions(
+            action.group as ActionGroupIds,
+            generateActionHash(action),
+            action.uuid
+          );
+        } else {
+          alert.updateLastScheduledActions(action.group as ActionGroupIds);
+        }
+        alert.unscheduleActions();
+      }
+    }
+
+    return results;
   }
 
   private isAlertMuted(alertId: string) {
