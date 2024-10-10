@@ -6,6 +6,7 @@
  */
 
 import snakecaseKeys from 'snakecase-keys';
+import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import type { BaseRuleParams } from '../../../../rule_schema';
 import { migrateLegacyInvestigationFields } from '../../../utils/utils';
@@ -47,6 +48,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_source: params.ruleSource ? convertObjectKeysToSnakeCase(params.ruleSource) : undefined,
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
+    response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
     setup: params.setup ?? '',
   };
 };

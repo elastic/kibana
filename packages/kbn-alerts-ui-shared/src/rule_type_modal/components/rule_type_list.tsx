@@ -97,6 +97,8 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
           grow={1}
           style={{
             paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
+            paddingRight: euiTheme.size.base,
+            overflowY: 'auto',
           }}
         >
           <EuiFacetGroup>

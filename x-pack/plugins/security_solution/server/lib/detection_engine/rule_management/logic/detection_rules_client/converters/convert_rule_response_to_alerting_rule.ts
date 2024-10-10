@@ -53,6 +53,9 @@ export const convertRuleResponseToAlertingRule = (
   const alertActions = ruleActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], rule.throttle);
 
+  const responseActions = rule.response_actions?.map((ruleResponseAction) =>
+    transformRuleToAlertResponseAction(ruleResponseAction)
+  );
   // Because of Omit<RuleResponse, RuntimeFields> Typescript doesn't recognize
   // that rule is assignable to TypeSpecificCreateProps despite omitted fields
   // are not part of type specific props. So we need to cast here.
@@ -94,6 +97,7 @@ export const convertRuleResponseToAlertingRule = (
       note: rule.note,
       version: rule.version,
       exceptionsList: rule.exceptions_list,
+      responseActions,
       ...typeSpecificParams,
     },
     schedule: { interval: rule.interval },
@@ -121,9 +125,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
       };
     }
     case 'esql': {
@@ -134,9 +135,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
       };
     }
     case 'threat_match': {
@@ -170,9 +168,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
@@ -187,9 +182,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
@@ -233,9 +225,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
       };
     }
     default: {

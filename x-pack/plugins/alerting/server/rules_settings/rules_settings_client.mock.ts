@@ -11,6 +11,7 @@ import {
   RulesSettingsQueryDelayClientApi,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  RulesSettingsFlappingProperties,
 } from '../types';
 
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
@@ -19,9 +20,9 @@ export type RulesSettingsQueryDelayClientMock = jest.Mocked<RulesSettingsQueryDe
 
 // Warning: Becareful when resetting all mocks in tests as it would clear
 // the mock return value on the flapping
-const createRulesSettingsClientMock = () => {
+const createRulesSettingsClientMock = (flappingOverride?: RulesSettingsFlappingProperties) => {
   const flappingMocked: RulesSettingsFlappingClientMock = {
-    get: jest.fn().mockReturnValue(DEFAULT_FLAPPING_SETTINGS),
+    get: jest.fn().mockReturnValue(flappingOverride || DEFAULT_FLAPPING_SETTINGS),
     update: jest.fn(),
   };
   const queryDelayMocked: RulesSettingsQueryDelayClientMock = {
@@ -36,7 +37,8 @@ const createRulesSettingsClientMock = () => {
 };
 
 export const rulesSettingsClientMock: {
-  create: () => RulesSettingsClientMock;
+  create: (flappingOverride?: RulesSettingsFlappingProperties) => RulesSettingsClientMock;
 } = {
-  create: createRulesSettingsClientMock,
+  create: (flappingOverride?: RulesSettingsFlappingProperties) =>
+    createRulesSettingsClientMock(flappingOverride),
 };
