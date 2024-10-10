@@ -117,6 +117,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
               'data-test-subj': 'create-api-key-expires-days-radio',
             },
           ]}
+          name="create-api-key-expires-group"
           idSelected={expires === null ? 'never' : 'days'}
           onChange={(id) => onChangeExpires(id === 'never' ? null : DEFAULT_EXPIRES_VALUE)}
           data-test-subj="create-api-key-expires-radio"
