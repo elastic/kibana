@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { connectorModelVersions } from './connector_model_versions';
-export { connectorTokenModelVersions } from './connector_token_model_versions';
-export { actionTaskParamsModelVersions } from './action_task_params_model_versions';
+import { schema } from '@kbn/config-schema';
+
+export const rawApiKeyPendingInvalidationSchema = schema.object({
+  apiKeyId: schema.string(),
+  createdAt: schema.string(),
+});
