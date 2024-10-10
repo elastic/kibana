@@ -70,7 +70,6 @@ const HOSTS = [
 const HOSTS_WITHOUT_DATA = [
   {
     hostName: 'host-7',
-    cpuValue: null,
   },
 ];
 interface QueryParams {
