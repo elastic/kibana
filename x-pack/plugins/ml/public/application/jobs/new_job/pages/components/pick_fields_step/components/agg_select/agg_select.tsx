@@ -60,8 +60,9 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
             />
           ),
         };
-        opts.push(aggOption);
-        if (typeof f.aggs !== 'undefined') {
+        if (typeof f.aggs !== 'undefined' && f.aggs.length > 0) {
+          opts.push(aggOption);
+
           f.aggs.forEach((a) => {
             const label = `${a.title}(${f.name})`;
             if (removeLabels.includes(label) === true) return;
