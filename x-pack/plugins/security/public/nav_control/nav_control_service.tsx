@@ -15,6 +15,7 @@ import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SectionRegistryStart } from '@kbn/management-settings-section-registry';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   AuthenticationServiceSetup,
@@ -37,6 +38,7 @@ interface SetupDeps {
 interface StartDeps {
   core: CoreStart;
   authc: AuthenticationServiceSetup;
+  advancedSettings?: SectionRegistryStart;
 }
 
 export class SecurityNavControlService {
@@ -59,7 +61,7 @@ export class SecurityNavControlService {
     this.securityApiClients = securityApiClients;
   }
 
-  public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
+  public start({ core, authc, advancedSettings }: StartDeps): SecurityNavControlServiceStart {
     this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
       ({ showLinks }) => {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
@@ -67,7 +69,7 @@ export class SecurityNavControlService {
         const shouldRegisterNavControl =
           !isAnonymousPath && showLinks && !this.navControlRegistered;
         if (shouldRegisterNavControl) {
-          this.registerSecurityNavControl(core, authc);
+          this.registerSecurityNavControl(core, authc, advancedSettings);
         }
       }
     );
@@ -109,12 +111,21 @@ export class SecurityNavControlService {
     this.stop$.next();
   }
 
-  private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
+  private registerSecurityNavControl(
+    core: CoreStart,
+    authc: AuthenticationServiceSetup,
+    advancedSettings?: SectionRegistryStart
+  ) {
     core.chrome.navControls.registerRight({
       order: 4000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+          <Providers
+            services={core}
+            authc={authc}
+            securityApiClients={this.securityApiClients}
+            advancedSettings={advancedSettings}
+          >
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
@@ -141,6 +152,7 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
   securityApiClients: SecurityApiClients;
+  advancedSettings?: SectionRegistryStart;
 }
 
 export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
@@ -148,9 +160,10 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   securityApiClients,
   children,
+  advancedSettings,
 }) => (
   <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={{ ...services, advancedSettings }}>
       <AuthenticationProvider authc={authc}>
         <SecurityApiClientsProvider {...securityApiClients}>
           <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>

@@ -20,6 +20,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SectionRegistryStart } from '@kbn/management-settings-section-registry';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -62,6 +63,7 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   cloud?: CloudStart;
+  advancedSettings?: SectionRegistryStart;
 }
 
 export class SecurityPlugin
@@ -190,7 +192,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { management, share }: PluginStartDependencies
+    { management, share, advancedSettings }: PluginStartDependencies
   ): SecurityPluginStart {
     const { application, http, notifications } = core;
     const { anonymousPaths } = http;
@@ -220,7 +222,11 @@ export class SecurityPlugin
 
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core, authc: this.authc }),
+      navControlService: this.navControlService.start({
+        core,
+        authc: this.authc,
+        advancedSettings,
+      }),
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,
       userProfiles: {

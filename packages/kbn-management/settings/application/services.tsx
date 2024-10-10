@@ -50,7 +50,7 @@ export interface KibanaDependencies {
       'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
     >;
   };
-  history: ScopedHistory;
+  history?: ScopedHistory;
   sectionRegistry: SectionRegistryStart;
   notifications: {
     toasts: ToastsStart;
@@ -189,7 +189,7 @@ export const SettingsApplicationKibanaProvider: FC<
     isCustomSetting,
     isOverriddenSetting,
     subscribeToUpdates,
-    addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
+    addUrlToHistory: (url: string) => history?.push({ pathname: '', search: url }),
   };
 
   return (

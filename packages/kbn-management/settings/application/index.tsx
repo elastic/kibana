@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { OutPortal } from 'react-reverse-portal';
+import { SettingFlyoutFooterPortal } from '@kbn/management-settings-components-form/form';
 import { SettingsApplication } from './application';
 import {
   SettingsApplicationKibanaDependencies,
@@ -21,6 +23,10 @@ export {
   type SettingsApplicationServices,
   type SettingsApplicationKibanaDependencies,
 } from './services';
+
+export const SettingFlyoutFooterOutPortalComponent = () => (
+  <OutPortal node={SettingFlyoutFooterPortal} />
+);
 
 export const KibanaSettingsApplication = ({
   docLinks,
