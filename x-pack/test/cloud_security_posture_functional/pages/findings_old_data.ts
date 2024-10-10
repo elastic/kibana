@@ -13,11 +13,11 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
-  const hoursToMillisecond = (hours: number) => hours * 60 * 60 * 1000;
+  const daysToMillisecond = (days: number) => days * 24 * 60 * 60 * 1000;
 
   const dataOldKspm = [
     {
-      '@timestamp': (Date.now() - hoursToMillisecond(27)).toString(),
+      '@timestamp': (Date.now() - daysToMillisecond(91)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -37,7 +37,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   const dataOldCspm = [
     {
-      '@timestamp': (Date.now() - hoursToMillisecond(27)).toString(),
+      '@timestamp': (Date.now() - daysToMillisecond(91)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
