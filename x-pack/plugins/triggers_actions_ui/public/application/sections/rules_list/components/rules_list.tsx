@@ -45,8 +45,11 @@ import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
+  getCreateRuleRoute,
+  getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import {
   Rule,
   RuleTableItem,
@@ -139,6 +142,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  useNewRuleForm?: boolean;
 }
 
 export const percentileFields = {
@@ -180,12 +184,13 @@ export const RulesList = ({
   onRefresh,
   setHeaderActions,
   initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
+  useNewRuleForm = false,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities },
+    application: { capabilities, navigateToApp },
     http,
     kibanaFeatures,
     notifications: { toasts },
@@ -312,8 +317,18 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    setEditFlyoutVisibility(true);
-    setCurrentRuleToEdit(ruleItem);
+    if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/rules`,
+        },
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+      setCurrentRuleToEdit(ruleItem);
+    }
   };
 
   const onRunRule = async (id: string) => {
@@ -1006,9 +1021,15 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              setRuleTypeIdToCreate(ruleTypeId);
-              setRuleTypeModalVisibility(false);
-              setRuleFlyoutVisibility(true);
+              if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              } else {
+                setRuleTypeIdToCreate(ruleTypeId);
+                setRuleTypeModalVisibility(false);
+                setRuleFlyoutVisibility(true);
+              }
             }}
             http={http}
             toasts={toasts}

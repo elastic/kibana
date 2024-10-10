@@ -64,6 +64,18 @@ export const getAlertingSectionBreadcrumb = (
             }
           : {}),
       };
+    case 'createRule':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rules.createRule.breadcrumbTitle', {
+          defaultMessage: 'Create Rule',
+        }),
+      };
+    case 'editRule':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rules.editRule.breadcrumbTitle', {
+          defaultMessage: 'Edit Rule',
+        }),
+      };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {

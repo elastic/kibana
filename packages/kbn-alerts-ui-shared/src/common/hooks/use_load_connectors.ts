@@ -27,6 +27,7 @@ export const useLoadConnectors = (props: UseLoadConnectorsProps) => {
   const { data, isLoading, isFetching, isInitialLoading } = useQuery({
     queryKey: ['useLoadConnectors', includeSystemActions],
     queryFn,
+    cacheTime: 0,
     refetchOnWindowFocus: false,
     enabled,
   });

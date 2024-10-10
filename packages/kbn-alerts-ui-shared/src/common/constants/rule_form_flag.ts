@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './alerts';
-export * from './i18n_weekdays';
-export * from './routes';
-export * from './rule_form_flag';
-
-export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
+export const USE_NEW_RULE_FORM_FEATURE_FLAG = false;

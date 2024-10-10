@@ -38,12 +38,12 @@ import {
 export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
-  returnUrl: string;
+  onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const { isEdit = false, isSaving = false, returnUrl, onSave } = props;
+  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
 
   const {
     plugins: { application },
@@ -54,10 +54,6 @@ export const RulePage = (props: RulePageProps) => {
   const canReadConnectors = !!application.capabilities.actions?.show;
 
   const styles = useEuiBackgroundColorCSS().transparent;
-
-  const onCancel = useCallback(() => {
-    application.navigateToUrl(returnUrl);
-  }, [application, returnUrl]);
 
   const onSaveInternal = useCallback(() => {
     onSave({

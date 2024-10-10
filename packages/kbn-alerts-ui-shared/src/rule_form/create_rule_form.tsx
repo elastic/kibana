@@ -42,7 +42,8 @@ export interface CreateRuleFormProps {
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
-  returnUrl: string;
+  onCancel?: () => void;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -56,7 +57,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
-    returnUrl,
+    onCancel,
+    onSubmit,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
@@ -64,8 +66,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
-    onSuccess: ({ name }) => {
+    onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(
@@ -185,7 +188,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           }),
         }}
       >
-        <RulePage isEdit={false} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
+        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

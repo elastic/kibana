@@ -31,10 +31,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -58,6 +59,8 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
+const CreateRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
+const EditRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -123,6 +126,20 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Routes>
+        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+          <Route
+            exact
+            path={createRuleRoute}
+            component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
+          />
+        )}
+        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+          <Route
+            exact
+            path={editRuleRoute}
+            component={suspendedComponentWithProps(EditRuleRoute, 'xl')}
+          />
+        )}
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
@@ -152,7 +169,6 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
             return null;
           }}
         />
-
         <Redirect from={'/'} to="rules" />
       </Routes>
     </ConnectorProvider>
