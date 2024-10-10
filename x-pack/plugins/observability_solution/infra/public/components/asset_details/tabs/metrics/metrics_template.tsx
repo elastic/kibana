@@ -30,7 +30,7 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
-import { hasMetrics } from '../../utils/get_data_stream_types';
+import { isMetricsSignal } from '../../utils/get_data_stream_types';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => {
@@ -121,7 +121,9 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const quickAccessItems = [...quickAccessItemsRef.current];
 
     const showAddMetricsCallout =
-      dataStreamsStatus === 'success' && !hasMetrics(dataStreams) && renderMode.mode === 'page';
+      dataStreamsStatus === 'success' &&
+      !isMetricsSignal(dataStreams) &&
+      renderMode.mode === 'page';
     const addMetricsCalloutId: AddMetricsCalloutKey =
       asset.type === 'host' ? 'hostMetrics' : 'containerMetrics';
 
