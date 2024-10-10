@@ -519,7 +519,7 @@ export const fieldLimitMitigationDescriptionText = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationDescription',
   {
     defaultMessage:
-      'The field mapping limit sets the maximum number of fields in an index. When exceeded,additional fields are ignored. To prevent this, increase your field mapping limit.',
+      'The field mapping limit sets the maximum number of fields in an index. When exceeded, additional fields are ignored. To prevent this, increase your field mapping limit.',
   }
 );
 
