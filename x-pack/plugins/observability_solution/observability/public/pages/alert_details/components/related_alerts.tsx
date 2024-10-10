@@ -30,7 +30,10 @@ import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
-import { getRelatedAlertKuery } from '../../../../common/utils/alerting/get_related_alerts_query';
+import {
+  getRelatedAlertKuery,
+  getSharedFields,
+} from '../../../../common/utils/alerting/get_related_alerts_query';
 import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
@@ -48,7 +51,7 @@ import {
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../../components/alert_search_bar/containers';
-import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
+import { RELATED_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
@@ -86,7 +89,8 @@ export function InternalRelatedAlerts({ alert }: Props) {
   const tags = alert?.fields[TAGS];
   const groups = alert?.fields[ALERT_GROUP];
   const ruleId = alert?.fields[ALERT_RULE_UUID];
-  const kuery = getRelatedAlertKuery({ tags, groups, ruleId });
+  const sharedFields = getSharedFields(alert?.fields);
+  const kuery = getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
 
   const defaultQuery = useRef<Query[]>([
     { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
@@ -127,7 +131,7 @@ export function InternalRelatedAlerts({ alert }: Props) {
             to={alertSearchBarStateProps.rangeTo}
             globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
             globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
-            groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+            groupingId={RELATED_ALERTS_TABLE_CONFIG_ID}
             defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
             getAggregationsByGroupingField={getAggregationsByGroupingField}
             renderGroupPanel={renderGroupPanel}
@@ -146,7 +150,7 @@ export function InternalRelatedAlerts({ alert }: Props) {
                 <AlertsStateTable
                   id={ALERTS_TABLE_ID}
                   featureIds={observabilityAlertFeatureIds}
-                  configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                  configurationId={RELATED_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   showAlertStatusWithFlapping
                   initialPageSize={ALERTS_PER_PAGE}
