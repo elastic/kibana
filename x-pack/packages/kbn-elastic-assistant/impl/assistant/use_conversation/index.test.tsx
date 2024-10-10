@@ -67,7 +67,7 @@ describe('useConversation', () => {
 
     let createResult;
 
-    act(async () => {
+    await act(async () => {
       createResult = await result.current.createConversation({
         ...mockConvo,
         replacements: {},
@@ -88,7 +88,7 @@ describe('useConversation', () => {
 
     await waitFor(() => null);
 
-    act(async () => {
+    await act(async () => {
       await result.current.deleteConversation('new-convo');
     });
 
@@ -106,7 +106,7 @@ describe('useConversation', () => {
     });
     await waitFor(() => null);
 
-    act(async () => {
+    await act(async () => {
       await result.current.setApiConfig({
         conversation: WELCOME_CONVERSATION,
         apiConfig: mockConvo.apiConfig,
@@ -131,7 +131,7 @@ describe('useConversation', () => {
 
     let removeResult;
 
-    act(async () => {
+    await act(async () => {
       removeResult = await result.current.removeLastMessage('new-convo');
     });
 

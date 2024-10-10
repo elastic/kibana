@@ -31,9 +31,7 @@ describe('useConnectors', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) }));
   });
 
   it('shows a toast error when the API returns error', async () => {
@@ -48,9 +46,8 @@ describe('useConnectors', () => {
     renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
-    await waitFor(() => null);
 
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 
   it('does not fetch connectors when the user does not has access to actions', async () => {
@@ -61,9 +58,7 @@ describe('useConnectors', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitFor(() => null);
-
-    expect(spyOnFetchConnectors).not.toHaveBeenCalled();
+    await waitFor(() => expect(spyOnFetchConnectors).not.toHaveBeenCalled());
     expect(result.current.data).toEqual([]);
   });
 
@@ -77,9 +72,8 @@ describe('useConnectors', () => {
       ),
     });
 
-    await waitFor(() => null);
+    await waitFor(() => expect(spyOnFetchConnectors).not.toHaveBeenCalled());
 
-    expect(spyOnFetchConnectors).not.toHaveBeenCalled();
     expect(result.current.data).toEqual([]);
   });
 });

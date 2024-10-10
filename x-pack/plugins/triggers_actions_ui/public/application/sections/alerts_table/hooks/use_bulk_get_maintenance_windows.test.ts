@@ -107,9 +107,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    await waitFor(() => null);
-
-    expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow);
+    await waitFor(() => expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow));
 
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),

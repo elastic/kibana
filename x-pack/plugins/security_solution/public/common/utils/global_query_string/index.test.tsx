@@ -319,11 +319,11 @@ describe('global query string', () => {
         store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
       });
 
-      waitFor(() => null);
-
-      expect(mockHistory.replace).toHaveBeenCalledWith({
-        search: ``,
-      });
+      waitFor(() =>
+        expect(mockHistory.replace).toHaveBeenCalledWith({
+          search: ``,
+        })
+      );
     });
   });
 });

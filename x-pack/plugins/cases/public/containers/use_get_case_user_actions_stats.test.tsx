@@ -37,7 +37,7 @@ describe('useGetCaseUserActionsStats', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -66,10 +66,10 @@ describe('useGetCaseUserActionsStats', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -79,8 +79,6 @@ describe('useGetCaseUserActionsStats', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal)));
   });
 });
