@@ -8,6 +8,7 @@
 import {
   App,
   AppMountParameters,
+  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -70,9 +71,9 @@ export class Plugin implements EntityManagerPluginClass {
       mount,
       visibleIn: ['sideNav'],
       keywords: ['observability', 'monitor', 'entities'],
+      status: AppStatus.inaccessible,
     };
 
-    // Register an application into the side navigation menu
     core.application.register(app);
 
     const entityClient = new EntityClient(core);
