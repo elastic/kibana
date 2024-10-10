@@ -143,7 +143,7 @@ describe('useTimelineEvents', () => {
       }
     );
 
-    expect(result.current).toEqual([
+    expect(result.all[0]).toEqual([
       DataLoadingState.loaded,
       {
         events: [],

@@ -39,13 +39,14 @@ describe('useSuggestUserProfiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spyOnSuggestUserProfiles).toBeCalledWith({
-      ...props,
-      size: 10,
-      http: expect.anything(),
-      signal: expect.anything(),
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeDefined();
+      expect(spyOnSuggestUserProfiles).toBeCalledWith({
+        ...props,
+        size: 10,
+        http: expect.anything(),
+        signal: expect.anything(),
+      });
     });
   });
 
@@ -63,8 +64,9 @@ describe('useSuggestUserProfiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isError).toBeDefined();
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

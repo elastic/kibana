@@ -39,8 +39,9 @@ describe('useGetCaseMetrics', () => {
       wrapper,
     });
 
-    await waitFor(() => null);
-    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+    await waitFor(() =>
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal)
+    );
   });
 
   it('shows an error toast when getSingleCaseMetrics throws', async () => {
@@ -56,9 +57,9 @@ describe('useGetCaseMetrics', () => {
       wrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

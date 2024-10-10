@@ -56,9 +56,10 @@ describe('usePersistExceptionItem', () => {
 
     rerender();
 
-    await waitFor(() =>
-      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]])
-    );
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBe(true);
+      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
+    });
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {

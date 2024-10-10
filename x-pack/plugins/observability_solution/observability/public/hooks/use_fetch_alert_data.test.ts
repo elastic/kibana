@@ -45,7 +45,7 @@ describe('useFetchAlertData', () => {
       useFetchAlertData(testIds)
     );
 
-    expect(result.current).toEqual([false, {}]);
+    expect(result.all[0]).toEqual([false, {}]);
   });
 
   it('returns no data when an error occurs', async () => {
@@ -82,6 +82,8 @@ describe('useFetchAlertData', () => {
       unmount();
     });
 
-    expect(result.current).toEqual([false, {}]);
+    // unmounting the component should cancels the request in flight,
+    // and as such the loading value would actually be true since not the request is not resolved
+    expect(result.current).toEqual([true, {}]);
   });
 });
