@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 /*
@@ -16,7 +17,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
  */
 
 export default function ({ getService }: FtrProviderContext) {
-  const log = getService('log');
   const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const platformSecurityUtils = getService('platformSecurityUtils');
