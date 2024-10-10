@@ -83,13 +83,13 @@ export function ControlledEntityTable({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (_, { type, displayName }) => {
+        render: (_, { type, key, displayName }) => {
           return (
             <EuiLink
               data-test-subj="entityColumnsLink"
-              href={router.link('/{type}/{displayName}', {
+              href={router.link('/{type}/{key}', {
                 path: {
-                  displayName,
+                  key,
                   type,
                 },
               })}

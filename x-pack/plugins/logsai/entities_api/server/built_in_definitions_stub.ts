@@ -7,8 +7,9 @@
 
 import { DefinitionEntity } from '../common/entities';
 
-export const dataStreamsEntity: DefinitionEntity = {
+export const allDataStreamsEntity: DefinitionEntity = {
   id: 'data_streams',
+  key: 'data_streams',
   displayName: 'Data streams',
   type: 'data_stream',
   pivot: {
@@ -16,9 +17,38 @@ export const dataStreamsEntity: DefinitionEntity = {
   },
   filters: [
     {
-      index: ['logs-*', 'metrics-*', 'traces-*'],
+      index: ['logs-*', 'metrics-*', 'traces-*', '.entities.v1.instance.data_streams'],
     },
   ],
 };
 
-export const builtinEntityDefinitions = [dataStreamsEntity];
+export const allLogsEntity: DefinitionEntity = {
+  id: 'data_streams',
+  key: 'data_streams',
+  displayName: 'Data streams',
+  type: 'data_stream',
+  pivot: {
+    identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
+  },
+  filters: [
+    {
+      index: ['logs-*', '.entities.v1.instance.data_streams'],
+    },
+  ],
+};
+
+// export const allLogsEntity: DefinitionEntity = {
+//   id: 'all_logs',
+//   displayName: 'All logs',
+//   type: 'data_stream',
+//   pivot: {
+//     identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
+//   },
+//   filters: [
+//     {
+//       index: ['logs-*'],
+//     },
+//   ],
+// };
+
+export const builtinEntityDefinitions = [allDataStreamsEntity, allLogsEntity];

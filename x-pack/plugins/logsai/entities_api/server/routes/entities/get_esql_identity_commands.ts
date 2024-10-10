@@ -5,13 +5,44 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
-import { EntityGrouping, Pivot, EntityFilter } from '../../../common/entities';
+import { compact, uniq, uniqBy } from 'lodash';
+import { EntityGrouping, Pivot, EntityFilter, PivotEntity } from '../../../common/entities';
 import { escapeColumn, escapeString } from '../../../common/utils/esql_escape';
 
 const ENTITY_MISSING_VALUE_STRING = '__EMPTY__';
-const ENTITY_ID_SEPARATOR = '@';
-const ENTITY_DISPLAY_NAME_SEPARATOR = '/';
+export const ENTITY_ID_SEPARATOR = '@';
+const ENTITY_KEYS_SEPARATOR = '/';
+const ENTITY_ID_LIST_SEPARATOR = ';';
+
+export function pivotEntityFromTypeAndKey({
+  type,
+  key,
+  identityFields,
+}: {
+  type: string;
+  key: string;
+  identityFields: string[];
+}): PivotEntity {
+  const sortedIdentityFields = identityFields.concat().sort();
+
+  const keys = key.split(ENTITY_KEYS_SEPARATOR);
+
+  const identity = Object.fromEntries(
+    keys.map((value, index) => {
+      return [sortedIdentityFields[index], value];
+    })
+  );
+
+  const id = `${type}${ENTITY_ID_SEPARATOR}${key}}`;
+
+  return {
+    id,
+    type,
+    key,
+    identity,
+    displayName: key,
+  };
+}
 
 function joinArray<T>(source: T[], separator: T): T[] {
   return source.flatMap((value, index, array) => {
@@ -29,7 +60,7 @@ function getExpressionForPivot(pivot: Pivot) {
     sortedFields.map((field) => {
       return escapeColumn(field);
     }),
-    `"${ENTITY_DISPLAY_NAME_SEPARATOR}"`
+    `"${ENTITY_KEYS_SEPARATOR}"`
   ).join(', ');
 
   // CONCAT()
@@ -45,58 +76,112 @@ function getExpressionForFilter(filter: EntityFilter) {
     return `${escapeColumn(fieldName)} == ${escapeString(filter.term[fieldName])}`;
   }
   if ('index' in filter) {
-    return filter.index.map((index) => `_index LIKE ${escapeString(`*${index}*`)}`).join(' OR ');
+    return `${filter.index
+      .flatMap((index) => [index, `.ds-${index}-*`])
+      .map((index) => `(_index LIKE ${escapeString(`${index}`)})`)
+      .join(' OR ')}`;
   }
 }
 
-function getExpressionForGrouping(grouping: EntityGrouping) {
+function getMatchesExpressionForGrouping(grouping: EntityGrouping) {
   const applicableFilters = grouping.filters.filter((filter) => {
-    return 'term' in filter;
+    return 'term' in filter || 'index' in filter;
   });
 
   if (applicableFilters.length) {
-    return `CASE(
-      ${compact(applicableFilters.map(getExpressionForFilter)).join(' AND ')},
-      MV_APPEND(
-        CONCAT(${escapeString(grouping.pivot.type)}, "${ENTITY_ID_SEPARATOR}", ${escapeString(
-      grouping.id
-    )}),
-        ${getExpressionForPivot(grouping.pivot)}
-      ),
-      NULL
-    )`;
+    return `${compact(
+      applicableFilters.map((filter) => `(${getExpressionForFilter(filter)})`)
+    ).join(' AND ')}`;
   }
 
-  return getExpressionForPivot(grouping.pivot);
+  return `true`;
 }
 
-export function getEsqlIdentityCommands(
-  groupings: EntityGrouping[],
-  entityIdExists: boolean
-): { beforeStatsBy: string[]; afterStatsBy: string[] } {
-  const groupExpressions = [
-    ...(entityIdExists ? [`entity.id`] : []),
-    ...groupings.map(getExpressionForGrouping),
-  ];
+export function getEsqlIdentityCommands({
+  groupings,
+  entityIdExists,
+  columns,
+  preaggregate,
+}: {
+  groupings: EntityGrouping[];
+  entityIdExists: boolean;
+  columns: string[];
+  preaggregate: boolean;
+}): string[] {
+  const pivotIdExpressions = uniqBy(
+    groupings.map((grouping) => grouping.pivot),
+    (pivot) => pivot.type
+  ).map(getExpressionForPivot);
+
+  const filterClauses = groupings.map((grouping) => {
+    return {
+      fieldName: `_matches_group_${grouping.id}`,
+      type: grouping.pivot.type,
+      key: grouping.id,
+      expression: getMatchesExpressionForGrouping(grouping),
+    };
+  });
+
+  const filterColumnEvals = filterClauses.map(({ fieldName, expression }) => {
+    return `${escapeColumn(fieldName)} = ${expression}`;
+  });
+
+  const filterStatsByColumns = filterClauses.map(({ fieldName }) => {
+    return `${escapeColumn(fieldName)} = MAX(${escapeColumn(fieldName)})`;
+  });
+
+  const filterIdExpressions = filterClauses.map(({ fieldName, type, key }) => {
+    return `CASE(
+      ${escapeColumn(fieldName)},
+      CONCAT(${escapeString(type)}, "${ENTITY_ID_SEPARATOR}", "${key}"),
+      NULL
+    )`;
+  });
+
+  const groupingFields = uniq(groupings.flatMap((grouping) => grouping.pivot.identityFields));
+
+  const groupExpressions = joinArray(
+    [
+      ...(entityIdExists ? [`entity.id`] : []),
+      ...pivotIdExpressions.concat(filterIdExpressions).map((expression) => {
+        return `COALESCE(${expression}, "${ENTITY_MISSING_VALUE_STRING}")`;
+      }),
+    ],
+    `"${ENTITY_ID_LIST_SEPARATOR}"`
+  ).join(', ');
 
   const entityIdExpression =
     groupExpressions.length === 1
       ? groupExpressions[0]
-      : `MV_APPEND(
-    ${groupExpressions
-      .map((expression) => `COALESCE(${expression}, "${ENTITY_MISSING_VALUE_STRING}")`)
-      .join(', ')}
-  )`;
+      : `MV_DEDUPE(
+      SPLIT(
+        CONCAT(${groupExpressions}),
+        "${ENTITY_ID_LIST_SEPARATOR}"
+      )
+    )`;
 
-  return {
-    beforeStatsBy: [`EVAL entity.id = ${entityIdExpression}`],
-    afterStatsBy: [
-      `MV_EXPAND entity.id`,
-      `WHERE entity.id != "${ENTITY_MISSING_VALUE_STRING}"`,
-      `EVAL entity_identifier = SPLIT(entity.id, "${ENTITY_ID_SEPARATOR}")`,
-      `EVAL entity.type = MV_FIRST(entity_identifier)`,
-      `EVAL entity.displayName = MV_LAST(entity_identifier)`,
-      `DROP entity_identifier`,
-    ],
-  };
+  const commands: string[] = [`EVAL ${filterColumnEvals.join(', ')}`];
+
+  const allColumns = filterStatsByColumns.concat(columns);
+
+  if (preaggregate) {
+    commands.push(`STATS ${allColumns.join(', ')} BY ${groupingFields.join(', ')}`);
+  }
+
+  const entityDisplayNameExists = columns.find((column) => column.includes('entity.displayName'));
+
+  return [
+    ...commands,
+    `EVAL entity.id = ${entityIdExpression}`,
+    `STATS ${columns.join(', ')} BY entity.id`,
+    `MV_EXPAND entity.id`,
+    `WHERE entity.id != "${ENTITY_MISSING_VALUE_STRING}"`,
+    `EVAL entity_identifier = SPLIT(entity.id, "${ENTITY_ID_SEPARATOR}")`,
+    `EVAL entity.type = MV_FIRST(entity_identifier)`,
+    `EVAL entity.key = MV_LAST(entity_identifier)`,
+    entityDisplayNameExists
+      ? `EVAL entity.displayName = COALESCE(entity.displayName, entity.key)`
+      : `EVAL entity.displayName = entity.key`,
+    `DROP entity_identifier`,
+  ];
 }

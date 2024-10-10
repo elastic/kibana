@@ -13,3 +13,4 @@ export type {
 } from './entities';
 
 export { getIndexPatternsForFilters } from './utils/get_index_patterns_for_filters';
+export { entitySourceQuery } from './queries/entity_source_query';

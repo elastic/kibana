@@ -15,7 +15,8 @@
       "unifiedSearch"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esqlDataGrid"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

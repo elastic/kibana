@@ -25,4 +25,6 @@ export const plugin: PluginInitializer<
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new EntitiesAPIPlugin(pluginInitializerContext);
 
-export { getIndexPatternsForFilters } from '../common';
+export { getIndexPatternsForFilters, entitySourceQuery } from '../common';
+
+export type { Entity } from '../common';

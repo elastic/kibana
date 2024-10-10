@@ -21,6 +21,7 @@ export async function getEntities({
   internalUserEsClient,
   start,
   end,
+  sourceRangeQuery,
   groupings,
   sources,
   logger,
@@ -36,6 +37,7 @@ export async function getEntities({
   internalUserEsClient: ObservabilityElasticsearchClient;
   start: number;
   end: number;
+  sourceRangeQuery?: QueryDslQueryContainer;
   sources: EntityDataSource[];
   groupings: EntityGrouping[];
   logger: Logger;
@@ -96,7 +98,7 @@ export async function getEntities({
             ),
           },
         ],
-        rangeQuery: {
+        rangeQuery: sourceRangeQuery ?? {
           range: {
             '@timestamp': {
               gte: start,

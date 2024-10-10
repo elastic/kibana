@@ -16,10 +16,11 @@ export interface EntityDataSource {
 export interface IEntity {
   id: string;
   type: string;
+  key: string;
   displayName: string;
 }
 
-interface IPivotEntity {
+interface IPivotEntity extends IEntity {
   identity: EntityPivotIdentity;
 }
 
@@ -35,7 +36,7 @@ export interface Pivot {
   identityFields: string[];
 }
 
-export interface PivotEntity extends IEntity, IPivotEntity {}
+export type PivotEntity = IPivotEntity;
 
 export interface StoredPivotEntity extends StoredEntity, IPivotEntity {}
 
@@ -47,13 +48,28 @@ interface EntityDefinitionIndexFilter {
   index: string[];
 }
 
+interface EntityDefinitionMatchAllFilter {
+  match_all: {};
+}
+
 export interface EntityGrouping {
   id: string;
+  key: string;
+  displayName: string;
   filters: EntityFilter[];
   pivot: Pivot;
 }
 
-export type EntityFilter = EntityDefinitionTermFilter | EntityDefinitionIndexFilter;
+export interface EntityTypeDefinition {
+  pivot: Pivot;
+  displayName: string;
+  displayNameTemplate?: string;
+}
+
+export type EntityFilter =
+  | EntityDefinitionTermFilter
+  | EntityDefinitionIndexFilter
+  | EntityDefinitionMatchAllFilter;
 
 export type Entity = DefinitionEntity | PivotEntity | StoredPivotEntity;
 
@@ -87,3 +103,11 @@ export type EntityWithSignalStatus = IEntity & {
   alertsCount: number;
   healthStatus: EntityHealthStatus | null;
 };
+
+export function isPivotEntity(entity: IEntity): entity is IPivotEntity {
+  return 'identity' in entity;
+}
+
+export function isDefinitionEntity(entity: IEntity): entity is DefinitionEntity {
+  return 'filters' in entity;
+}

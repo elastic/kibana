@@ -11,12 +11,12 @@ import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
 
 export function DataStreamDetailView() {
   const {
-    path: { displayName, tab },
-  } = useEntitiesAppParams('/data_stream/{displayName}/{tab}');
+    path: { key, tab },
+  } = useEntitiesAppParams('/data_stream/{key}/{tab}');
   return (
     <EntityDetailViewWithoutParams
       type="data_stream"
-      displayName={displayName}
+      entityKey={key}
       tab={tab}
       getAdditionalTabs={() => [
         {

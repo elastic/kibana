@@ -47,23 +47,20 @@ const entitiesAppRoutes = {
           </EntitiesAppRouterBreadcrumb>
         ),
       },
-      '/data_stream/{displayName}': {
+      '/data_stream/{key}': {
         element: <Outlet />,
         params: t.type({
           path: t.type({
-            displayName: t.string,
+            key: t.string,
           }),
         }),
         children: {
-          '/data_stream/{displayName}': {
+          '/data_stream/{key}': {
             element: (
-              <RedirectTo
-                path="/data_stream/{displayName}/{tab}"
-                params={{ path: { tab: 'overview' } }}
-              />
+              <RedirectTo path="/data_stream/{key}/{tab}" params={{ path: { tab: 'overview' } }} />
             ),
           },
-          '/data_stream/{displayName}/{tab}': {
+          '/data_stream/{key}/{tab}': {
             element: <DataStreamDetailView />,
             params: t.type({
               path: t.type({
@@ -82,21 +79,18 @@ const entitiesAppRoutes = {
           '/{type}': {
             element: <EntityPivotTypeView />,
           },
-          '/{type}/{displayName}': {
+          '/{type}/{key}': {
             params: t.type({
-              path: t.type({ displayName: t.string }),
+              path: t.type({ key: t.string }),
             }),
             element: <Outlet />,
             children: {
-              '/{type}/{displayName}': {
+              '/{type}/{key}': {
                 element: (
-                  <RedirectTo
-                    path="/{type}/{displayName}/{tab}"
-                    params={{ path: { tab: 'overview' } }}
-                  />
+                  <RedirectTo path="/{type}/{key}/{tab}" params={{ path: { tab: 'overview' } }} />
                 ),
               },
-              '/{type}/{displayName}/{tab}': {
+              '/{type}/{key}/{tab}': {
                 element: <EntityDetailView />,
                 params: t.type({
                   path: t.type({ tab: t.string }),

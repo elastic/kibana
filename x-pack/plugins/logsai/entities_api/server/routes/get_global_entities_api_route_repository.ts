@@ -6,12 +6,14 @@
  */
 
 import { entitiesRoutes } from './entities/route';
+import { esqlRoutes } from './esql/route';
 import { typesRoutes } from './types/route';
 
 export function getGlobalEntitiesAPIServerRouteRepository() {
   return {
     ...entitiesRoutes,
     ...typesRoutes,
+    ...esqlRoutes,
   };
 }
 

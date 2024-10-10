@@ -7,13 +7,16 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { isEmpty, omit, partition, pickBy, uniq } from 'lodash';
+import { isEmpty, omit, partition, pick, pickBy, uniq } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { EntityDataSource, EntityFilter, EntityGrouping, IEntity } from '../../../common/entities';
 import { escapeColumn } from '../../../common/utils/esql_escape';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
-import { getEsqlIdentityCommands } from '../../routes/entities/get_esql_identity_commands';
+import {
+  ENTITY_ID_SEPARATOR,
+  getEsqlIdentityCommands,
+} from '../../routes/entities/get_esql_identity_commands';
 import { EntityLookupTable } from './entity_lookup_table';
 
 interface EntityColumnMap {
@@ -50,13 +53,19 @@ function getLookupCommands(table: EntityLookupTable<string>) {
   return [
     `EVAL ${escapeColumn(entityIdAlias)} = entity.id`,
     `LOOKUP ${table.name} ON ${joinKeys.map((key) => escapeColumn(key)).join(', ')}`,
-    `EVAL entity.id = CASE(
+    ...(joinKeys.includes('entity.id')
+      ? [
+          `EVAL entity.id = CASE(
       entity.id IS NULL, ${escapeColumn(entityIdAlias)},
       ${escapeColumn(entityIdAlias)} IS NOT NULL, MV_APPEND(entity.id, ${escapeColumn(
-      entityIdAlias
-    )}),
+            entityIdAlias
+          )}),
       NULL
     )`,
+          `MV_EXPAND entity.id`,
+        ]
+      : []),
+    `DROP ${escapeColumn(entityIdAlias)}`,
   ];
 }
 
@@ -125,7 +134,7 @@ export async function querySourcesAsEntities<
   const fieldCapsResponse = await esClient.fieldCaps(
     'check_column_availability_for_source_indices',
     {
-      fields: [...allGroupingFields, ...fieldsToFilterOn],
+      fields: [...allGroupingFields, ...fieldsToFilterOn, 'entity.displayName'],
       index: indexPatterns,
       index_filter: {
         bool: {
@@ -157,11 +166,18 @@ export async function querySourcesAsEntities<
   const groupColumns = uniq([
     ...validGroupings.flatMap(({ pivot }) => pivot.identityFields),
     ...lookupAfterTables.flatMap((table) => table.joins),
-  ]);
+  ]).filter((fieldName) => fieldName !== 'entity.id');
+
+  const hasEntityDisplayName = !isEmpty(fieldCapsResponse.fields['entity.displayName']);
+
+  if (hasEntityDisplayName) {
+    commands.push(`EVAL entity.displayName = entity.displayName.keyword`);
+  }
 
   const metadataColumns = {
     ...pickBy(columns, (column): column is { metadata: {} } => 'metadata' in column),
     ...Object.fromEntries(fieldsToFilterOn.map((fieldName) => [fieldName, { metadata: {} }])),
+    ...(hasEntityDisplayName ? { 'entity.displayName': { metadata: {} } } : {}),
   };
 
   const expressionColumns = pickBy(
@@ -177,28 +193,20 @@ export async function querySourcesAsEntities<
       )
     );
 
-  const shouldPreAggregate = validGroupings.length > 1 && !isEmpty(expressionColumns);
-
-  if (shouldPreAggregate) {
-    commands.push(`STATS ${columnStatements.join(', ')} BY ${groupColumns.join(', ')}`);
-  }
-
-  const { beforeStatsBy, afterStatsBy } = getEsqlIdentityCommands(
-    groupings,
-    lookupBeforeTables.length > 0
-  );
-
-  commands.push(...beforeStatsBy);
-
   const columnsInFinalStatsBy = columnStatements.concat(
     groupColumns.map((column) => {
       return `${escapeColumn(column)} = MAX(${escapeColumn(column)})`;
     })
   );
 
-  commands.push(`STATS ${columnsInFinalStatsBy.join(', ')} BY entity.id`);
+  const identityCommands = getEsqlIdentityCommands({
+    groupings,
+    columns: columnsInFinalStatsBy,
+    preaggregate: isEmpty(expressionColumns),
+    entityIdExists: lookupBeforeTables.length > 0,
+  });
 
-  commands.push(...afterStatsBy);
+  commands.push(...identityCommands);
 
   lookupAfterTables.forEach((table) => {
     commands.push(...getLookupCommands(table));
@@ -239,13 +247,28 @@ export async function querySourcesAsEntities<
 
   const response = await esClient.esql('search_source_indices_for_entities', request);
 
+  // should actually be a lookup to properly sort, but multiple LOOKUPs break
+  const groupingsByEntityId = new Map(
+    groupings.map((grouping) => {
+      const parts = [grouping.pivot.type, ENTITY_ID_SEPARATOR, grouping.key];
+      const id = parts.join('');
+      return [id, grouping];
+    })
+  );
+
   return esqlResultToPlainObjects(response).map((row) => {
     const columnValues = omit(row, 'entity.id', 'entity.displayName', 'entity.type');
 
+    const entityId = row['entity.id'];
+
+    const grouping = groupingsByEntityId.get(entityId);
+
     return {
-      id: row['entity.id'],
+      id: entityId,
       type: row['entity.type'],
+      key: row['entity.key'],
       displayName: row['entity.displayName'],
+      ...pick(grouping, 'displayName', 'type', 'key'),
       columns: columnValues as Record<TLookupColumnName | keyof TEntityColumnMap, unknown>,
     };
   });
