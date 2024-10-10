@@ -221,7 +221,6 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               iconSide="right"
               iconType="popout"
               data-test-subj="analyzeLogsBtn"
-              data-telemetry-id="searchIndicesStartCollectLogsLink"
               href={docLinks.analyzeLogs}
               target="_blank"
             >
@@ -249,7 +248,6 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               iconSide="right"
               iconType="popout"
               data-test-subj="startO11yTrialBtn"
-              data-telemetry-id="searchIndicesStartO11yTrialLink"
               href={o11yTrialLink}
               target="_blank"
             >
