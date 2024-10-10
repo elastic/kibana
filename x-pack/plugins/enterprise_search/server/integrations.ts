@@ -26,7 +26,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
-      categories: ['app_search', 'web', 'elastic_stack', 'crawler'],
+      categories: ['search', 'web', 'elastic_stack', 'crawler'],
       uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
       icons: [
         {
@@ -34,7 +34,7 @@ export const registerEnterpriseSearchIntegrations = (
           src: 'logoEnterpriseSearch',
         },
       ],
-      shipper: 'enterprise_search',
+      shipper: 'search',
       isBeta: false,
     });
   }
@@ -47,7 +47,7 @@ export const registerEnterpriseSearchIntegrations = (
     description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
-    categories: ['custom', 'elastic_stack', 'sdk_search', 'language_client'],
+    categories: ['search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/api',
     icons: [
       {
@@ -55,7 +55,7 @@ export const registerEnterpriseSearchIntegrations = (
         src: 'logoEnterpriseSearch',
       },
     ],
-    shipper: 'enterprise_search',
+    shipper: 'search',
     isBeta: false,
   });
 
@@ -77,7 +77,7 @@ export const registerEnterpriseSearchIntegrations = (
         ],
         id: `${connector.serviceType}-${connector.name}`,
         isBeta: connector.isBeta,
-        shipper: 'enterprise_search',
+        shipper: 'search',
         title: connector.name,
         uiInternalPath: `/app/enterprise_search/content/connectors/new_connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
       });
