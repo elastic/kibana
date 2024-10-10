@@ -41,7 +41,6 @@ function createReadmeFile(
   });
 
   const template = env.getTemplate(templateName);
-
   const renderedTemplate = template.render({
     package_name: integrationName,
     fields,
