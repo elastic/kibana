@@ -289,7 +289,7 @@ export function getWebpackConfig(
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'module', 'main'],
-      conditionNames: ['browser', 'module', 'import', 'require', 'default'],
+      // conditionNames: ['browser', 'module', 'import', 'require', 'default'],
       //
       // mainFields: ['browser', 'main', 'module'],
       // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
