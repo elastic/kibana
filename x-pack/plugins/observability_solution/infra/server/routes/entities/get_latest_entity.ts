@@ -11,7 +11,7 @@ import {
   ENTITY_TYPE,
   SOURCE_DATA_STREAM_TYPE,
 } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
 
 const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
