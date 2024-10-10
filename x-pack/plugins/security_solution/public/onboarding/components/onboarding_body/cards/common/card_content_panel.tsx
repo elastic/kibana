@@ -6,7 +6,7 @@
  */
 import React, { type PropsWithChildren } from 'react';
 import { COLOR_MODES_STANDARD, EuiPanel, useEuiTheme, type EuiPanelProps } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelProps>>(
   ({ children, ...panelProps }) => {
@@ -14,13 +14,13 @@ export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelP
     const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
     return (
       <EuiPanel
-        className={css`
-          background-color: ${isDarkMode ? euiTheme.colors.lightestShade : ''};
-          padding-top: 0;
-        `}
         paddingSize="m"
         hasShadow={false}
         hasBorder={false}
+        css={css`
+          background-color: ${isDarkMode ? euiTheme.colors.lightestShade : ''};
+          padding-top: 0;
+        `}
       >
         <EuiPanel {...panelProps} hasShadow={false} paddingSize="l">
           {children}

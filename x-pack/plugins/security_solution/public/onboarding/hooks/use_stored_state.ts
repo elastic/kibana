@@ -7,12 +7,16 @@
 
 import { useLocalStorage } from 'react-use';
 import type { OnboardingCardId } from '../constants';
+import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
 
 const LocalStorageKey = {
   avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
   videoVisited: 'ONBOARDING_HUB.VIDEO_VISITED',
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
   expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
+  selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
+  IntegrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
+  IntegrationScrollTop: 'ONBOARDING_HUB.INTEGRATION_SCROLL_TOP',
 } as const;
 
 /**
@@ -41,5 +45,26 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
 export const useStoredExpandedCardId = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId | null>(
     `${LocalStorageKey.expandedCard}.${spaceId}`,
+    null
+  );
+
+/**
+ * Stores the selected integration tab ID per space
+ */
+export const useStoredIntegrationTabId = (
+  spaceId: string,
+  defaultSelectedTabId: IntegrationTabId
+) =>
+  useDefinedLocalStorage<IntegrationTabId>(
+    `${LocalStorageKey.selectedIntegrationTabId}.${spaceId}`,
+    defaultSelectedTabId
+  );
+
+/**
+ * Stores the integration search term per space
+ */
+export const useStoredIntegrationSearchTerm = (spaceId: string) =>
+  useDefinedLocalStorage<string | null>(
+    `${LocalStorageKey.IntegrationSearchTerm}.${spaceId}`,
     null
   );

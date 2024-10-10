@@ -4,34 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { CardCallOut } from '../common/card_callout';
+import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
+import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
+import type { IntegrationCardMetadata } from './types';
+
+const isCheckCompleteMetadata = (metadata?: unknown): metadata is IntegrationCardMetadata => {
+  return metadata !== undefined;
+};
 
 export const IntegrationsCard: OnboardingCardComponent = ({
-  setComplete,
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
 }) => {
-  // TODO: implement. This is just for demo purposes
+  if (!isCheckCompleteMetadata(checkCompleteMetadata)) {
+    return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
+  }
+  const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
+
   return (
     <OnboardingCardContentPanel>
-      <EuiFlexGroup gutterSize="m" direction="column" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          {checkCompleteMetadata ? (
-            <CardCallOut
-              text={`${checkCompleteMetadata.integrationsInstalled} integrations installed`}
-            />
-          ) : (
-            <EuiLoadingSpinner size="s" />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setComplete(false)}>{'Set not complete'}</EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <IntegrationsCardGridTabs
+        isAgentRequired={isAgentRequired}
+        installedIntegrationsCount={installedIntegrationsCount}
+      />
     </OnboardingCardContentPanel>
   );
 };

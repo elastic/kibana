@@ -11,7 +11,7 @@ import type { EuiCallOutProps, IconType } from '@elastic/eui';
 import { useCardCallOutStyles } from './card_callout.styles';
 
 export interface CardCallOutProps {
-  text: string;
+  text: React.ReactNode;
   color?: EuiCallOutProps['color'];
   icon?: IconType;
   action?: React.ReactNode;
