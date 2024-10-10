@@ -9,7 +9,9 @@
 
 import React, { useEffect, KeyboardEventHandler } from 'react';
 import { monaco } from '@kbn/monaco';
-import type { MonacoEditorProps } from '@kbn/code-editor/react_monaco_editor';
+// TODO: circular dependency
+// import type { MonacoEditorProps } from '@kbn/code-editor/react_monaco_editor';
+type MonacoEditorProps = any;
 
 function createEditorInstance() {
   const keyDownListeners: Array<(e?: unknown) => void> = [];
