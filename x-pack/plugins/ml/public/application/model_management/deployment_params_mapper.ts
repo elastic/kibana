@@ -6,6 +6,7 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
@@ -25,8 +26,11 @@ type VCPUBreakpoints = Record<
   {
     min: number;
     max: number;
-    /** Static value is used for the number of vCPUs when the adaptive resources are disabled */
-    static: number;
+    /**
+     * Static value is used for the number of vCPUs when the adaptive resources are disabled.
+     * Not allowed in certain environments.
+     */
+    static?: number;
   }
 >;
 
@@ -39,26 +43,28 @@ export class DeploymentParamsMapper {
   private readonly threadingParamsValues: number[];
 
   /**
-   * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
+   * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling.
+   * TODO resolve dynamically when Control Pane exposes the vCPUs range.
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
     low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
     medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 99999, static: 100 },
+    high: { min: 33, max: 99999, static: 128 },
   };
 
   /**
-   * vCPUs level breakpoints for serverless projects
+   * Default vCPUs level breakpoints for serverless projects.
+   * Can be overridden by the project specific settings.
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
     low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
     medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 500, static: 100 },
+    high: { min: 33, max: 512, static: 512 },
   };
 
   /**
    * vCPUs level breakpoints based on the ML server limits.
-   * Either on-prem or cloud with disabled ML autoscaling
+   * Either on-prem or cloud with disabled ML autoscaling.
    */
   private readonly hardwareVCPUBreakpoints: VCPUBreakpoints;
 
@@ -71,8 +77,12 @@ export class DeploymentParamsMapper {
     private readonly modelId: string,
     private readonly mlServerLimits: MlServerLimits,
     private readonly cloudInfo: CloudInfo,
-    private readonly showNodeInfo: boolean
+    private readonly showNodeInfo: boolean,
+    private readonly nlpSettings?: NLPSettings
   ) {
+    /**
+     * Initial value can be different for serverless and ESS with autoscaling.
+     */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
     this.threadingParamsValues = new Array(THREADS_MAX_EXPONENT)
@@ -94,6 +104,10 @@ export class DeploymentParamsMapper {
 
     if (!this.showNodeInfo) {
       this.vCpuBreakpoints = this.serverlessVCPUBreakpoints;
+      if (this.nlpSettings?.modelDeployment) {
+        // Apply project specific overrides
+        this.vCpuBreakpoints = this.nlpSettings.modelDeployment.vCPURange;
+      }
     } else if (this.cloudInfo.isMlAutoscalingEnabled) {
       this.vCpuBreakpoints = this.autoscalingVCPUBreakpoints;
     } else {

@@ -7,11 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type {
-  ExperimentalFeatures,
-  MlFeatures,
-  NLPSettings,
-} from '../../../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
   showLogsSuppliedConfigurationsInfo: boolean;
@@ -41,7 +37,6 @@ interface Props {
   mlFeatures: MlFeatures;
   showMLNavMenu?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
-  nlpSettings?: NLPSettings;
 }
 
 export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
@@ -50,7 +45,6 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   showMLNavMenu = true,
   mlFeatures,
   experimentalFeatures,
-  nlpSettings,
 }) => {
   const features: EnabledFeatures = {
     showLogsSuppliedConfigurationsInfo: !isServerless,

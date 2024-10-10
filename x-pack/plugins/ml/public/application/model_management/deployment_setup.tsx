@@ -41,6 +41,7 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
+import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import type { ModelItem } from './models_list';
@@ -811,7 +812,8 @@ export const getUserInputModelDeploymentParamsProvider =
     startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
     startModelDeploymentDocUrl: string,
     cloudInfo: CloudInfo,
-    showNodeInfo: boolean
+    showNodeInfo: boolean,
+    nlpSettings: NLPSettings
   ) =>
   (
     model: ModelItem,
@@ -822,7 +824,8 @@ export const getUserInputModelDeploymentParamsProvider =
       model.model_id,
       getNewJobLimits(),
       cloudInfo,
-      showNodeInfo
+      showNodeInfo,
+      nlpSettings
     );
 
     const params = initialParams

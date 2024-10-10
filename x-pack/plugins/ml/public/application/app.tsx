@@ -25,7 +25,7 @@ import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
-import { EnabledFeaturesContextProvider } from './contexts/ml';
+import { EnabledFeaturesContextProvider, MlServerContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
 
@@ -143,9 +143,10 @@ const App: FC<AppProps> = ({
                 mlFeatures={mlFeatures}
                 showMLNavMenu={chromeStyle === 'classic'}
                 experimentalFeatures={experimentalFeatures}
-                nlpSettings={nlpSettings}
               >
-                <MlRouter pageDeps={pageDeps} />
+                <MlServerContextProvider nlpSettings={nlpSettings}>
+                  <MlRouter pageDeps={pageDeps} />
+                </MlServerContextProvider>
               </EnabledFeaturesContextProvider>
             </DatePickerContextProvider>
           </StorageContextProvider>
