@@ -19,6 +19,7 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { useQuery } from '@tanstack/react-query';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { useKibana } from '../../common/lib/kibana';
+import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -39,7 +40,7 @@ export const ManagementSettings = React.memo(() => {
     },
     data: { dataViews },
     security,
-    chrome: { setBreadcrumbs },
+    chrome: { docTitle, setBreadcrumbs },
     serverless
   } = useKibana().services;
 
@@ -75,6 +76,10 @@ export const ManagementSettings = React.memo(() => {
       conversations?.[defaultSelectedConversationId] ??
       getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
     [conversations, getDefaultConversation]
+  );
+
+  docTitle.change(
+    SECURITY_AI_SETTINGS
   );
 
   if (!securityAIAssistantEnabled) {

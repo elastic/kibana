@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
+import { AlertSettingsModal } from '../alerts_settings/alerts_modal';
 
 interface Params {
   isDisabled?: boolean;
@@ -37,6 +38,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const [isPopoverOpen, setPopover] = useState(false);
 
     const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
+
+    const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
+    const closeAlertSettingsModal = () => setIsAlertsSettingsModalVisible(false);
+    const showAlertSettingsModal = () => setIsAlertsSettingsModalVisible(true);
+
     const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
 
     const onButtonClick = useCallback(() => {
@@ -106,7 +112,10 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
-          onClick={handleNavigateToSettings}
+          onClick={() => {
+            showAlertSettingsModal();
+            closePopover()
+          }}
           icon={'magnifyWithExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
@@ -172,6 +181,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             `}
           />
         </EuiPopover>
+        {isAlertsSettingsModalVisible && (
+          <AlertSettingsModal onClose={closeAlertSettingsModal} />
+        )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             title={i18n.RESET_CONVERSATION}

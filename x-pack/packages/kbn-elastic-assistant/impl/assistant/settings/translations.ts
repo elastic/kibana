@@ -113,7 +113,7 @@ export const ROOT_ASSISTANTS_MANAGEMENT_BREADCRUMB = i18n.translate(
 );
 
 export const SECURITY_AI_ASSISTANT_BREADCRUMB = i18n.translate(
-  'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.security',
+  'xpack.elasticAssistant.assistant.settings.breadcrumb.serverless.security',
   {
     defaultMessage: 'AI Assistant for Security Settings',
   }
