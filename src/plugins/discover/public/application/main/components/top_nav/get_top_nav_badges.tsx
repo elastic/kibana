@@ -40,7 +40,7 @@ export const getTopNavBadges = ({
     });
 
   const defaultBadges = topNavCustomization?.defaultBadges;
-  const entries = [...(topNavCustomization?.getBadges?.() ?? [])];
+  const entries = [];
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
@@ -63,7 +63,7 @@ export const getTopNavBadges = ({
             }
           : undefined,
       }),
-      order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
+      order: 100,
     });
   }
 
