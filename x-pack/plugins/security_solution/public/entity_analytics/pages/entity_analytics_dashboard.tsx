@@ -24,15 +24,12 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
-import { EntitiesList } from '../components/entity_store/entities_list';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { EntityStoreDashboardPanel } from '../components/entity_store/components/dashboard_panel';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
-
-  const isEntityStoreEnabled = useIsExperimentalFeatureEnabled('entityStoreEnabled');
 
   return (
     <>
@@ -60,6 +57,10 @@ const EntityAnalyticsComponent = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem>
+                  <EntityStoreDashboardPanel />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
                   <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
                 </EuiFlexItem>
 
@@ -70,12 +71,6 @@ const EntityAnalyticsComponent = () => {
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />
                 </EuiFlexItem>
-
-                {isEntityStoreEnabled ? (
-                  <EuiFlexItem>
-                    <EntitiesList />
-                  </EuiFlexItem>
-                ) : null}
               </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>
