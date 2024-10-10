@@ -6,7 +6,6 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import 'brace';
 import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
