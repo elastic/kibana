@@ -50,15 +50,15 @@ describe('ruleSourceImporter', () => {
 
   describe('#setup()', () => {
     it('fetches the rules package on the initial call', async () => {
-      await subject.setup({ rules: [] });
+      await subject.setup([]);
 
       expect(ruleAssetsClientMock.fetchLatestAssets).toHaveBeenCalledTimes(1);
     });
 
     it('does not fetch the rules package on subsequent calls', async () => {
-      await subject.setup({ rules: [] });
-      await subject.setup({ rules: [] });
-      await subject.setup({ rules: [] });
+      await subject.setup([]);
+      await subject.setup([]);
+      await subject.setup([]);
 
       expect(ruleAssetsClientMock.fetchLatestAssets).toHaveBeenCalledTimes(1);
     });
@@ -66,9 +66,7 @@ describe('ruleSourceImporter', () => {
     it('throws an error if the ruleAsstClient does', async () => {
       ruleAssetsClientMock.fetchLatestAssets.mockReset().mockRejectedValue(new Error('failed'));
 
-      await expect(() => subject.setup({ rules: [] })).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"failed"`
-      );
+      await expect(() => subject.setup([])).rejects.toThrowErrorMatchingInlineSnapshot(`"failed"`);
     });
   });
 
@@ -79,26 +77,26 @@ describe('ruleSourceImporter', () => {
 
     it("returns false if the rule's rule_id doesn't match an available rule asset", async () => {
       ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
-      await subject.setup({ rules: [ruleToImport] });
+      await subject.setup([ruleToImport]);
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(false);
     });
 
     it("returns true if the rule's rule_id matches an available rule asset", async () => {
-      await subject.setup({ rules: [ruleToImport] });
+      await subject.setup([ruleToImport]);
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
     });
 
     it('returns true if the rule has no version, but its rule_id matches an available rule asset', async () => {
       const ruleWithoutVersion = { ...ruleToImport, version: undefined };
-      await subject.setup({ rules: [ruleWithoutVersion] });
+      await subject.setup([ruleWithoutVersion]);
 
       expect(subject.isPrebuiltRule(ruleWithoutVersion)).toBe(true);
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
-      await subject.setup({ rules: [ruleToImport] });
+      await subject.setup([ruleToImport]);
 
       expect(() =>
         subject.isPrebuiltRule({ rule_id: 'other-rule' } as RuleToImport)
@@ -132,7 +130,7 @@ describe('ruleSourceImporter', () => {
     });
 
     it('invokes calculateRuleSourceForImport with the correct arguments', async () => {
-      await subject.setup({ rules: [rule] });
+      await subject.setup([rule]);
       await subject.calculateRuleSource(rule);
 
       expect(calculatorSpy).toHaveBeenCalledTimes(1);
@@ -145,7 +143,7 @@ describe('ruleSourceImporter', () => {
 
     it('throws an error if the rule is not known to the calculator', async () => {
       ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
-      await subject.setup({ rules: [ruleToImport] });
+      await subject.setup([ruleToImport]);
 
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(
         `"Rule validated-rule was not registered during setup."`
@@ -160,7 +158,7 @@ describe('ruleSourceImporter', () => {
 
     describe('for rules set up without a version', () => {
       it('invokes the calculator with the correct arguments', async () => {
-        await subject.setup({ rules: [{ ...rule, version: undefined }] });
+        await subject.setup([{ ...rule, version: undefined }]);
         await subject.calculateRuleSource(rule);
 
         expect(calculatorSpy).toHaveBeenCalledTimes(1);

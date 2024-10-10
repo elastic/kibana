@@ -43,7 +43,7 @@ export const importRules = async ({
     rules,
     savedObjectsClient,
   });
-  await ruleSourceImporter.setup({ rules });
+  await ruleSourceImporter.setup(rules);
 
   return Promise.all(
     rules.map(async (rule) => {

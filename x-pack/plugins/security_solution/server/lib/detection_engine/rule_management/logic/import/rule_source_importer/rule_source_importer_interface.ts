@@ -17,7 +17,7 @@ export interface CalculatedRuleSource {
 }
 
 export interface IRuleSourceImporter {
-  setup: ({ rules }: { rules: RuleToImport[] }) => Promise<void>;
+  setup: (rules: RuleToImport[]) => Promise<void>;
   isPrebuiltRule: (rule: RuleToImport) => boolean;
   calculateRuleSource: (rule: ValidatedRuleToImport) => CalculatedRuleSource;
 }

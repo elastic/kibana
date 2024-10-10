@@ -60,7 +60,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * Prepares the importing of rules by ensuring the latest rules
    * package is installed and fetching the associated prebuilt rule assets.
    */
-  public async setup({ rules }: { rules: RuleToImport[] }): Promise<void> {
+  public async setup(rules: RuleToImport[]): Promise<void> {
     if (!this.latestPackagesInstalled) {
       await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.config, this.context);
       this.latestPackagesInstalled = true;
