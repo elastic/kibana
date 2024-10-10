@@ -24,6 +24,9 @@ import type {
   PackagePolicyInput,
   TemplateAgentPolicyInput,
   RegistryVarsEntry,
+  RegistryStream,
+  PackagePolicyConfigRecordEntry,
+  RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
@@ -34,16 +37,13 @@ import { getPackageAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
 
-type PackageComments = Record<
+type PackageWithInputAndStreamIndexed = Record<
   string,
-  {
-    comment: string;
-    vars: Record<string, RegistryVarsEntry>;
+  RegistryInput & {
     streams: Record<
       string,
-      {
-        comment: string;
-        vars: Record<string, RegistryVarsEntry>;
+      RegistryStream & {
+        data_stream: { type: string; dataset: string };
       }
     >;
   }
@@ -103,66 +103,46 @@ export async function getTemplateInputs(
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ) {
-  const packageInfoMap = new Map<string, PackageInfo>();
-  let packageInfo: PackageInfo;
-
-  if (packageInfoMap.has(pkgName)) {
-    packageInfo = packageInfoMap.get(pkgName)!;
-  } else {
-    packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName,
-      pkgVersion,
-      prerelease,
-      ignoreUnverified,
-    });
-  }
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName,
+    pkgVersion,
+    prerelease,
+    ignoreUnverified,
+  });
 
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
 
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
 
+  const packageComments = buildIndexedPackage(packageInfo);
+
   // Add a placeholder <VAR_NAME> to all variables without default value
   for (const inputWithStreamIds of inputsWithStreamIds) {
-    const policyTemplate = packageInfo.policy_templates?.find(
-      (_policyTemplate) => _policyTemplate.name === inputWithStreamIds.policy_template
-    );
-    if (!policyTemplate) {
-      continue;
-    }
-    const normalizedInputs = getNormalizedInputs(policyTemplate);
+    const inputId = inputWithStreamIds.policy_template
+      ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
+      : inputWithStreamIds.type;
 
-    const packageInput = normalizedInputs.find((_input) => _input.type === inputWithStreamIds.type);
+    const packageInput = packageComments[inputId];
     if (!packageInput) {
       continue;
     }
-    const streams = getStreamsForInputType(
-      packageInput.type,
-      packageInfo,
-      isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
-        ? policyTemplate.data_streams
-        : []
-    );
 
     for (const [inputVarKey, inputVarValue] of Object.entries(inputWithStreamIds.vars ?? {})) {
       const varDef = packageInput.vars?.find((_varDef) => _varDef.name === inputVarKey);
-      if (varDef && !inputVarValue.value && varDef.type !== 'yaml') {
-        const placeHolder = `<${inputVarKey.toUpperCase()}>`;
-        inputVarValue.value = placeHolder;
+      if (varDef) {
+        addPlaceholderIfNeeded(varDef, inputVarValue);
       }
     }
     for (const stream of inputWithStreamIds.streams) {
-      const packageStream = streams.find(
-        (_stream) => _stream.data_stream.dataset === stream.data_stream.dataset
-      );
+      const packageStream = packageInput.streams[stream.id];
       if (!packageStream) {
         continue;
       }
       for (const [streamVarKey, streamVarValue] of Object.entries(stream.vars ?? {})) {
         const varDef = packageStream.vars?.find((_varDef) => _varDef.name === streamVarKey);
-        if (varDef && !streamVarValue.value && varDef.type !== 'yaml') {
-          const placeHolder = `<${streamVarKey.toUpperCase()}>`;
-          streamVarValue.value = placeHolder;
+        if (varDef) {
+          addPlaceholderIfNeeded(varDef, streamVarValue);
         }
       }
     }
@@ -199,75 +179,71 @@ export async function getTemplateInputs(
         sortKeys: _sortYamlKeys,
       }
     );
-    return addCommentsToYaml(yaml, buildPackageComments(packageInfo));
+    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo));
   }
 
   return { inputs: [] };
 }
 
-function buildPackageComments(packageInfo: PackageInfo): PackageComments {
+function getPlaceholder(varDef: RegistryVarsEntry) {
+  return `<${varDef.name.toUpperCase()}>`;
+}
+
+function addPlaceholderIfNeeded(
+  varDef: RegistryVarsEntry,
+  varValue: PackagePolicyConfigRecordEntry
+) {
+  const placeHolder = `<${varDef.name.toUpperCase()}>`;
+  if (varDef && !varValue.value && varDef.type !== 'yaml') {
+    varValue.value = placeHolder;
+  } else if (varDef && varValue.value && varValue.value.length === 0 && varDef.type === 'text') {
+    varValue.value = [placeHolder];
+  }
+}
+
+function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStreamIndexed {
   return (
-    packageInfo.policy_templates?.reduce<
-      Record<
-        string,
-        {
-          comment: string;
-          vars: Record<string, RegistryVarsEntry>;
-          streams: Record<
-            string,
-            {
-              comment: string;
-              vars: Record<string, RegistryVarsEntry>;
-            }
-          >;
-        }
-      >
-    >((inputComments, policyTemplate) => {
-      const inputs = getNormalizedInputs(policyTemplate);
+    packageInfo.policy_templates?.reduce<PackageWithInputAndStreamIndexed>(
+      (inputComments, policyTemplate) => {
+        const inputs = getNormalizedInputs(policyTemplate);
 
-      inputs.forEach((packageInput) => {
-        const inputId = `${policyTemplate.name}-${packageInput.type}`;
+        inputs.forEach((packageInput) => {
+          const inputId = `${policyTemplate.name}-${packageInput.type}`;
 
-        const streams = getStreamsForInputType(
-          packageInput.type,
-          packageInfo,
-          isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
-            ? policyTemplate.data_streams
-            : []
-        ).reduce<Record<string, { comment: string; vars: Record<string, RegistryVarsEntry> }>>(
-          (acc, stream) => {
+          const streams = getStreamsForInputType(
+            packageInput.type,
+            packageInfo,
+            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
+              ? policyTemplate.data_streams
+              : []
+          ).reduce<
+            Record<
+              string,
+              RegistryStream & {
+                data_stream: { type: string; dataset: string };
+              }
+            >
+          >((acc, stream) => {
             const streamId = `${packageInput.type}-${stream.data_stream.dataset}`;
             acc[streamId] = {
-              comment: ` ${stream.title} ${stream.description}`,
-              vars:
-                stream.vars?.reduce<Record<string, RegistryVarsEntry>>((varsAcc, varDef) => {
-                  varsAcc[`<${varDef.name.toUpperCase()}>`] = varDef;
-                  return varsAcc;
-                }, {}) ?? {},
+              ...stream,
             };
             return acc;
-          },
-          {}
-        );
+          }, {});
 
-        const vars =
-          packageInput.vars?.reduce<Record<string, RegistryVarsEntry>>((acc, varDef) => {
-            acc[`<${varDef.name.toUpperCase()}>`] = varDef;
-            return acc;
-          }, {}) ?? {};
-
-        inputComments[inputId] = {
-          comment: ` ${packageInput.title} ${packageInput.description}`,
-          streams,
-          vars,
-        };
-      });
-      return inputComments;
-    }, {}) ?? {}
+          inputComments[inputId] = {
+            ...packageInput,
+            streams,
+          };
+        });
+        return inputComments;
+      },
+      {}
+    ) ?? {}
   );
 }
 
-function addCommentsToYaml(yaml: string, packageComments: PackageComments) {
+function addCommentsToYaml(yaml: string, packageComments: PackageWithInputAndStreamIndexed) {
   const doc = yamlDoc.parseDocument(yaml);
   // Add input and streams comments
   const yamlInputs = doc.get('inputs');
@@ -281,17 +257,19 @@ function addCommentsToYaml(yaml: string, packageComments: PackageComments) {
         return;
       }
       const inputId = inputIdNode.value as string;
-      const inputComments = packageComments[inputId];
-      if (inputComments) {
-        inputItem.commentBefore = inputComments.comment;
+      const pkgInput = packageComments[inputId];
+      if (pkgInput) {
+        inputItem.commentBefore = ` ${pkgInput.title} ${
+          pkgInput.description ? ` ${pkgInput.description}` : ''
+        }`;
 
         yamlDoc.visit(inputItem, {
           Scalar(key, node) {
             if (node.value) {
               const val = node.value.toString();
-              for (const placeholder of Object.keys(inputComments.vars)) {
+              for (const varDef of pkgInput.vars ?? []) {
+                const placeholder = getPlaceholder(varDef);
                 if (val.includes(placeholder)) {
-                  const varDef = inputComments.vars[placeholder];
                   node.comment = ` ${varDef.title}${
                     varDef.description ? ` ${varDef.description}` : ''
                   }`;
@@ -312,16 +290,18 @@ function addCommentsToYaml(yaml: string, packageComments: PackageComments) {
           const streamIdNode = streamItem.get('id', true);
           if (yamlDoc.isScalar(streamIdNode)) {
             const streamId = streamIdNode.value as string;
-            const streamComments = inputComments.streams[streamId];
-            if (streamComments) {
-              streamItem.commentBefore = streamComments.comment;
+            const pkgStream = pkgInput.streams[streamId];
+            if (pkgStream) {
+              streamItem.commentBefore = ` ${pkgStream.title} ${
+                pkgStream.description ? ` ${pkgStream.description}` : ''
+              }`;
               yamlDoc.visit(streamItem, {
                 Scalar(key, node) {
                   if (node.value) {
                     const val = node.value.toString();
-                    for (const placeholder of Object.keys(streamComments.vars)) {
+                    for (const varDef of pkgStream.vars ?? []) {
+                      const placeholder = getPlaceholder(varDef);
                       if (val.includes(placeholder)) {
-                        const varDef = streamComments.vars[placeholder];
                         node.comment = ` ${varDef.title}${
                           varDef.description ? ` ${varDef.description}` : ''
                         }`;
