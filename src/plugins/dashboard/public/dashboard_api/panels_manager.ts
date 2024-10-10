@@ -14,7 +14,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
 import { DefaultEmbeddableApi, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import { StateComparators, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
@@ -226,7 +226,7 @@ export function initializePanelsManager(
           return true;
         },
       ],
-    },
+    } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({

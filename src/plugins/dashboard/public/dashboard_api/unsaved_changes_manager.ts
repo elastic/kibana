@@ -36,13 +36,8 @@ export function initializeUnsavedChangesManager({
 }) {
   const hasRunMigrations$ = new BehaviorSubject(anyMigrationRun);
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-  const lastSavedInput$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
   const saveNotification$ = new Subject<void>();
-
-  /**
-   * Some keys will often have deviated from their last saved state, but should be
-   * ignored when calculating whether or not this dashboard has unsaved changes.
-   */
 
   const dashboardUnsavedChanges = initializeUnsavedChanges<
     Omit<
@@ -95,25 +90,29 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        panelsManager.internalApi.reset(lastSavedInput$.value);
-        settingsManager.internalApi.reset(lastSavedInput$.value);
-        unifiedSearchManager.internalApi.reset(lastSavedInput$.value);
+        panelsManager.internalApi.reset(lastSavedState$.value);
+        settingsManager.internalApi.reset(lastSavedState$.value);
+        unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
       },
       hasRunMigrations$,
       hasUnsavedChanges$,
       saveNotification$,
-      setLastSavedInput: (input: DashboardState) => {
-        lastSavedInput$.next(input);
-
-        // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
-        // been serialized into the SO.
-        hasRunMigrations$.next(false);
-      },
     },
     cleanup: () => {
       dashboardUnsavedChanges.cleanup();
       unsavedChangesSubscription.unsubscribe();
+    },
+    internalApi: {
+      onSave: (savedState: DashboardState) => {
+        lastSavedState$.next(savedState);
+
+        // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+        // been serialized into the SO.
+        hasRunMigrations$.next(false);
+
+        saveNotification$.next();
+      },
     },
   };
 }

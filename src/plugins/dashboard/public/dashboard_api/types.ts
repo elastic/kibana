@@ -162,12 +162,15 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
+    setQuery: (query?: Query | undefined) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setTags: (tags: string[]) => void;
+    setTimeRange: (timeRange?: TimeRange | undefined) => void;
 
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;

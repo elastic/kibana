@@ -8,13 +8,25 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import {
+  PublishingSubject,
+  StateComparators,
+  initializeTitles,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardState } from './types';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardStateFromSettingsFlyout } from '../dashboard_container/types';
 
-export function initializeSettingsManager(initialState?: DashboardState) {
+export function initializeSettingsManager({
+  initialState,
+  setTimeRestore,
+  timeRestore$,
+}: {
+  initialState?: DashboardState;
+  setTimeRestore: (timeRestore: boolean) => void;
+  timeRestore$: PublishingSubject<boolean | undefined>;
+}) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_INPUT.syncColors
   );
@@ -36,12 +48,6 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   const tags$ = new BehaviorSubject<string[]>(initialState?.tags ?? DEFAULT_DASHBOARD_INPUT.tags);
   function setTags(tags: string[]) {
     if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
-  }
-  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
-    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
-  );
-  function setTimeRestore(timeRestore: boolean) {
-    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
   const titleManager = initializeTitles(initialState ?? {});
   const useMargins$ = new BehaviorSubject<boolean>(
@@ -92,9 +98,19 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       syncColors: [syncColors$, setSyncColors],
       syncCursor: [syncCursor$, setSyncCursor],
       syncTooltips: [syncTooltips$, setSyncTooltips],
-      timeRestore: [timeRestore$, setTimeRestore],
       useMargins: [useMargins$, setUseMargins],
-    },
+    } as StateComparators<
+      Pick<
+        DashboardState,
+        | 'description'
+        | 'hidePanelTitles'
+        | 'syncColors'
+        | 'syncCursor'
+        | 'syncTooltips'
+        | 'title'
+        | 'useMargins'
+      >
+    >,
     internalApi: {
       reset: (lastSavedState: DashboardState) => {
         setSettings(lastSavedState);

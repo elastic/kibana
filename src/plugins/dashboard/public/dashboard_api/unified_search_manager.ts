@@ -12,6 +12,7 @@ import {
   BehaviorSubject,
   Observable,
   Subject,
+  Subscription,
   combineLatest,
   finalize,
   of,
@@ -19,12 +20,13 @@ import {
   tap,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
 import { RefreshInterval, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { dataService } from '../services/kibana_services';
 import { DashboardCreationOptions, DashboardState } from './types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -41,105 +43,145 @@ export function initializeUnifiedSearchManager(
   const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(initialState.query);
-  const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
-    initialState.refreshInterval
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+  function setQuery(query: Query | AggregateQuery | undefined) {
+    if (!fastIsEqual(query, query$.value)) {
+      query$.next(query);
+    }
+    const queryOrDefault = query ?? queryString.getDefaultQuery();
+    if (
+      creationOptions?.useUnifiedSearchIntegration &&
+      !fastIsEqual(queryOrDefault, queryString.getQuery())
+    ) {
+      queryString.setQuery(queryOrDefault);
+    }
+  }
+  const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(undefined);
+  function setRefreshInterval(refreshInterval: RefreshInterval | undefined) {
+    if (!fastIsEqual(refreshInterval, refreshInterval$.value)) {
+      refreshInterval$.next(refreshInterval);
+    }
+    if (
+      creationOptions?.useUnifiedSearchIntegration &&
+      timeRestore$.value &&
+      refreshInterval &&
+      !fastIsEqual(refreshInterval, timefilterService.getRefreshInterval())
+    ) {
+      timefilterService.setRefreshInterval(refreshInterval);
+    }
+  }
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+  function setTimeRange(timeRange: TimeRange | undefined) {
+    if (!fastIsEqual(timeRange, timeRange$.value)) {
+      timeRange$.next(timeRange);
+    }
+    if (
+      creationOptions?.useUnifiedSearchIntegration &&
+      timeRestore$.value &&
+      timeRange &&
+      !fastIsEqual(timeRange, timefilterService.getTime())
+    ) {
+      timefilterService.setTime(timeRange);
+    }
+  }
+  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
+    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
   );
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+  function setTimeRestore(timeRestore: boolean) {
+    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
+  }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(initialState.timeslice);
-  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
+    if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
+      unifiedSearchFilters$.next(unifiedSearchFilters);
+    }
+    const filtersOrDefault = unifiedSearchFilters ?? [];
+    if (
+      creationOptions?.useUnifiedSearchIntegration &&
+      !fastIsEqual(filtersOrDefault, filterManager.getFilters())
+    ) {
+      filterManager.setAppFilters(cloneDeep(filtersOrDefault));
+    }
+  }
+
+  setQuery(initialState.query);
+  setRefreshInterval(initialState.refreshInterval);
+  setTimeRange(initialState.timeRange);
+  setUnifiedSearchFilters(initialState.filters);
 
   // --------------------------------------------------------------------------------------
   // Set up control group integration
   // --------------------------------------------------------------------------------------
+  const controlGroupSubscriptions: Subscription = new Subscription();
   const controlGroupFilters$ = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
   );
   const controlGroupTimeslice$ = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
   );
-  const filtersSubscription = combineLatest([
-    unifiedSearchFilters$,
-    controlGroupFilters$,
-  ]).subscribe(([unifiedSearchFilters, controlGroupFilters]) => {
-    filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
-  });
-  const reloadPanelsSubscription = controlGroupFilters$.subscribe(() => panelsReload$.next());
-  const timesliceSubscription = controlGroupTimeslice$.subscribe((timeslice) => {
-    if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
-  });
-  const stopSyncingWithControlGroup = () => {
-    filtersSubscription.unsubscribe();
-    reloadPanelsSubscription.unsubscribe();
-    timesliceSubscription.unsubscribe();
-  };
+  controlGroupSubscriptions.add(
+    combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
+      ([unifiedSearchFilters, controlGroupFilters]) => {
+        filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
+      }
+    )
+  );
+  controlGroupSubscriptions.add(controlGroupFilters$.subscribe(() => panelsReload$.next()));
+  controlGroupSubscriptions.add(
+    controlGroupTimeslice$.subscribe((timeslice) => {
+      if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
+    })
+  );
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
-  let stopSyncingWithUnifiedSearch: (() => void) | undefined;
+  const unifiedSearchSubscriptions: Subscription = new Subscription();
+  let stopSyncingWithUrl: (() => void) | undefined;
   if (
     creationOptions?.useUnifiedSearchIntegration &&
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
   ) {
-    // Set unified search to dashboard state
-    filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
-    queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
-    if (initialState.timeRestore) {
-      if (timeRange$.value) timefilterService.setTime(timeRange$.value);
-      if (refreshInterval$.value) timefilterService.setRefreshInterval(refreshInterval$.value);
-    }
-
     // start syncing global query state with the URL.
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+    const { stop } = syncGlobalQueryStateWithUrl(
       dataService.query,
       creationOptions?.unifiedSearchSettings.kbnUrlStateStorage
     );
+    stopSyncingWithUrl = stop;
 
-    const unifiedSearchFiltersSubscription = filterManager.getUpdates$().subscribe(() => {
-      const nextUnifiedSearchFilters = filterManager.getFilters();
-      if (!fastIsEqual(nextUnifiedSearchFilters, unifiedSearchFilters$.value)) {
-        unifiedSearchFilters$.next(nextUnifiedSearchFilters);
-      }
-    });
-    const querySubscription = queryString.getUpdates$().subscribe(() => {
-      const nextQuery = queryString.getQuery();
-      if (!fastIsEqual(nextQuery, query$.value)) {
-        query$.next(nextQuery);
-      }
-    });
-    const timeRangeSubscription = timefilterService.getTimeUpdate$().subscribe(() => {
-      const nextTimeRange = timefilterService.getTime();
-      if (!fastIsEqual(nextTimeRange, timeRange$.value)) {
-        timeRange$.next(nextTimeRange);
-      }
-    });
-    const refreshIntervalSubscription = timefilterService
-      .getRefreshIntervalUpdate$()
-      .subscribe(() => {
-        const nextRefreshInternal = timefilterService.getRefreshInterval();
-        if (!fastIsEqual(nextRefreshInternal, refreshInterval$.value)) {
-          refreshInterval$.next(nextRefreshInternal);
-        }
-      });
-    const autoRefreshSubscription = timefilterService
-      .getAutoRefreshFetch$()
-      .pipe(
-        tap(() => {
-          controlGroupReload$.next();
-          panelsReload$.next();
-        }),
-        switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
-      )
-      .subscribe();
-    stopSyncingWithUnifiedSearch = () => {
-      stopSyncingQueryServiceStateWithUrl();
-      autoRefreshSubscription.unsubscribe();
-      querySubscription.unsubscribe();
-      refreshIntervalSubscription.unsubscribe();
-      timeRangeSubscription.unsubscribe();
-      unifiedSearchFiltersSubscription.unsubscribe();
-    };
+    unifiedSearchSubscriptions.add(
+      filterManager.getUpdates$().subscribe(() => {
+        setUnifiedSearchFilters(filterManager.getFilters());
+      })
+    );
+    unifiedSearchSubscriptions.add(
+      queryString.getUpdates$().subscribe(() => {
+        setQuery(queryString.getQuery());
+      })
+    );
+    unifiedSearchSubscriptions.add(
+      timefilterService.getTimeUpdate$().subscribe(() => {
+        setTimeRange(timefilterService.getTime());
+      })
+    );
+    unifiedSearchSubscriptions.add(
+      timefilterService.getRefreshIntervalUpdate$().subscribe(() => {
+        setRefreshInterval(timefilterService.getRefreshInterval());
+      })
+    );
+    unifiedSearchSubscriptions.add(
+      timefilterService
+        .getAutoRefreshFetch$()
+        .pipe(
+          tap(() => {
+            controlGroupReload$.next();
+            panelsReload$.next();
+          }),
+          switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
+        )
+        .subscribe()
+    );
   }
 
   return {
@@ -151,39 +193,50 @@ export function initializeUnifiedSearchManager(
       },
       query$,
       refreshInterval$,
+      setFilters: setUnifiedSearchFilters,
+      setQuery,
+      setTimeRange,
       timeRange$,
       timeslice$,
     },
-    comparators: {},
+    comparators: {
+      filters: [unifiedSearchFilters$, setUnifiedSearchFilters, fastIsEqual],
+      query: [query$, setQuery, fastIsEqual],
+      refreshInterval: [
+        refreshInterval$,
+        setRefreshInterval,
+        (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
+          timeRestore$.value ? fastIsEqual(a, b) : true,
+      ],
+      timeRange: [
+        timeRange$,
+        setTimeRange,
+        (a: TimeRange | undefined, b: TimeRange | undefined) =>
+          timeRestore$.value ? fastIsEqual(a, b) : true,
+      ],
+      timeRestore: [timeRestore$, setTimeRestore],
+    } as StateComparators<
+      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'>
+    >,
     internalApi: {
       controlGroupReload$,
       panelsReload$,
       reset: (lastSavedState: DashboardState) => {
-        if (!fastIsEqual(lastSavedState.filters, unifiedSearchFilters$.value)) {
-          unifiedSearchFilters$.next(lastSavedState.filters);
-          filterManager.setAppFilters(cloneDeep(lastSavedState.filters ?? []));
-        }
-        if (!fastIsEqual(lastSavedState.query, query$.value)) {
-          query$.next(lastSavedState.query);
-          queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
-        }
-
-        if (creationOptions?.useUnifiedSearchIntegration && lastSavedState.timeRestore) {
-          if (!fastIsEqual(lastSavedState.timeRange, timeRange$.value)) {
-            timeRange$.next(lastSavedState.timeRange);
-            if (lastSavedState.timeRange) timefilterService.setTime(lastSavedState.timeRange);
-          }
-          if (!fastIsEqual(lastSavedState.refreshInterval, refreshInterval$.value)) {
-            refreshInterval$.next(lastSavedState.refreshInterval);
-            if (lastSavedState.refreshInterval)
-              timefilterService.setRefreshInterval(lastSavedState.refreshInterval);
-          }
+        setQuery(lastSavedState.query);
+        setTimeRestore(lastSavedState.timeRestore);
+        setUnifiedSearchFilters(lastSavedState.filters);
+        if (lastSavedState.timeRestore) {
+          setRefreshInterval(lastSavedState.refreshInterval);
+          setTimeRange(lastSavedState.timeRange);
         }
       },
+      setTimeRestore,
+      timeRestore$,
     },
     cleanup: () => {
-      stopSyncingWithControlGroup();
-      stopSyncingWithUnifiedSearch?.();
+      controlGroupSubscriptions.unsubscribe();
+      unifiedSearchSubscriptions.unsubscribe();
+      stopSyncingWithUrl?.();
     },
   };
 }
