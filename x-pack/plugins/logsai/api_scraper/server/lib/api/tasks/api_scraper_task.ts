@@ -95,7 +95,16 @@ export class ApiScraperTask {
           });
           return acc;
         }, []);
-        await scopedClusterClient.asCurrentUser.bulk({ body, refresh: false });
+        const response = await scopedClusterClient.asCurrentUser.bulk({ body, refresh: false });
+        if (this.logger.isLevelEnabled('trace')) {
+          response.items.forEach((item) => {
+            this.logger.trace(
+              `[${definitionId}] Bulk opperation for ${item.update._id} was "${
+                item.update.result
+              }" ${JSON.stringify(item.update)}`
+            );
+          });
+        }
       }
       const end = Date.now();
       this.logger.info(

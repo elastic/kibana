@@ -24,18 +24,30 @@ const apiMetricSchema = z.object({
   equation: z.string(),
 });
 
-const metadataSchema = z
-  .object({
-    source: z.string(),
-    destination: z.string(),
-    fromRoot: z.boolean().default(false),
-  })
+const metaDataSchemaObj = z.object({
+  source: z.string(),
+  destination: z.string(),
+  fromRoot: z.boolean().default(false),
+  expand: z.optional(
+    z.object({
+      regex: z.string(),
+      map: z.array(z.string()),
+    })
+  ),
+});
+
+type MetadataSchema = z.infer<typeof metaDataSchemaObj>;
+
+const metadataSchema = metaDataSchemaObj
   .or(
-    z.string().transform((value) => ({
-      source: value,
-      destination: value,
-      fromRoot: false,
-    }))
+    z.string().transform(
+      (value) =>
+        ({
+          source: value,
+          destination: value,
+          fromRoot: false,
+        } as MetadataSchema)
+    )
   )
   .transform((metadata) => ({
     ...metadata,

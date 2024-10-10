@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { set } from '@kbn/safer-lodash-set';
 import { evaluate } from '@kbn/tinymath';
 import { JsonObject } from '@kbn/utility-types';
-import { get, isArray, isEmpty } from 'lodash';
+import { get, has, isArray, isEmpty } from 'lodash';
 import { ApiScraperDefinition } from '../../../../../common/types';
 
 const DOT = '.';
@@ -49,6 +49,16 @@ function extractEntities(definition: ApiScraperDefinition, response: any) {
     const metadata = definition.metadata.reduce((acc, def) => {
       if (def.fromRoot) {
         set(acc, def.destination, get(response, def.source));
+      } else if (def.expand != null && has(doc, def.source)) {
+        const source = get(doc, def.source);
+        const regex = new RegExp(def.expand.regex);
+        const matches = regex.exec(source);
+        if (matches) {
+          const extractedValues = matches.slice(1, def.expand.map.length + 1);
+          def.expand.map.forEach((field, index) => {
+            set(acc, field, extractedValues[index]);
+          });
+        }
       } else {
         set(acc, def.destination, get(doc, def.source));
       }

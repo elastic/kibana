@@ -61,7 +61,7 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
       namespace: ADMIN_CONSOLE,
       '@timestamp': event['@timestamp'],
       message,
-      data_stream: { dataset: ADMIN_CONSOLE, namespace: 'default' },
+      data_stream: { dataset: ADMIN_CONSOLE.replaceAll('-', '.'), namespace: 'default' },
     };
 
     return finalDoc;
