@@ -50,7 +50,7 @@ export const normalizeRuleParams = (params: BaseRuleParams): NormalizedRuleParam
 
   return {
     ...params,
-    // These fields are types as optional in the data model, but they are required in our domain
+    // These fields are typed as optional in the data model, but they are required in our domain
     setup: params.setup ?? '',
     relatedIntegrations: params.relatedIntegrations ?? [],
     requiredFields: params.requiredFields ?? [],
