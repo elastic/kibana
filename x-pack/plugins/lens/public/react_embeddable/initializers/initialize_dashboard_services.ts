@@ -10,11 +10,9 @@ import {
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   PublishesPanelTitle,
-  PublishesViewMode,
   PublishesWritablePanelTitle,
   SerializedTitles,
   StateComparators,
-  ViewMode,
   getUnchangingComparator,
   initializeTitles,
 } from '@kbn/presentation-publishing';
@@ -38,7 +36,6 @@ type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensS
 
 export interface DashboardServicesConfig {
   api: PublishesPanelTitle &
-    PublishesViewMode &
     PublishesWritablePanelTitle &
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
@@ -61,9 +58,6 @@ export function initializeDashboardServices(
 ): DashboardServicesConfig {
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
 
-  const [viewMode$, viewModeComparator] = buildObservableVariable<ViewMode | undefined>(
-    internalApi.viewMode$
-  );
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
     initialState.title || initialState.attributes.title
   );
@@ -83,7 +77,6 @@ export function initializeDashboardServices(
     api: {
       defaultPanelTitle: defaultPanelTitle$,
       ...titlesApi,
-      viewMode: viewMode$ as PublishesViewMode['viewMode'],
       libraryId$: stateConfig.api.savedObjectId,
       updateOverrides: internalApi.updateOverrides,
       // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
@@ -158,7 +151,6 @@ export function initializeDashboardServices(
         ...settings,
         palette: initialState.palette,
         overrides: overrides$.getValue(),
-        viewMode: viewMode$.getValue(),
         disableTriggers: disableTriggers$.getValue(),
       };
     },
@@ -172,11 +164,11 @@ export function initializeDashboardServices(
       syncTooltips: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncTooltips'>(),
       executionContext: getUnchangingComparator<LensSharedProps, 'executionContext'>(),
       noPadding: getUnchangingComparator<LensSharedProps, 'noPadding'>(),
+      viewMode: getUnchangingComparator<LensSharedProps, 'viewMode'>(),
       style: getUnchangingComparator<LensSharedProps, 'style'>(),
       className: getUnchangingComparator<LensSharedProps, 'className'>(),
       overrides: overridesComparator,
       disableTriggers: disabledTriggersComparator,
-      viewMode: viewModeComparator,
     },
     cleanup: noop,
   };

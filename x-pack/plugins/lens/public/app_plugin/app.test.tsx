@@ -38,6 +38,7 @@ import faker from 'faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VisualizeEditorContext } from '../types';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(),
@@ -62,6 +63,7 @@ describe('Lens App', () => {
     new Subject<string>(),
     'sessionId-1'
   );
+  beforeAll(() => setMockedPresentationUtilServices());
 
   beforeEach(() => {
     props = {

@@ -18,7 +18,7 @@ import {
 
 import { ExpressionWrapper } from './expression_wrapper';
 import { loadEmbeddableData, hasExpressionParamsToRender } from './data_loader';
-import { isTextBasedLanguage, deserializeState } from './helper';
+import { isTextBasedLanguage, deserializeState, getViewMode } from './helper';
 import { UserMessages } from './user_messages/container';
 import { useMessages } from './user_messages/use_messages';
 import { initializeEditApi } from './initializers/inizialize_edit';
@@ -96,7 +96,6 @@ export const createLensEmbeddableFactory = (
         getState,
         internalApi,
         stateConfig.api,
-        dashboardConfig.api,
         inspectorConfig.api,
         isTextBasedLanguage,
         services,
@@ -121,7 +120,6 @@ export const createLensEmbeddableFactory = (
        */
       function getState(): LensRuntimeState {
         return {
-          ...stateConfig.serialize(),
           ...actionsConfig.serialize(),
           ...editConfig.serialize(),
           ...inspectorConfig.serialize(),
@@ -181,15 +179,14 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const { renderCount$, hasRenderCompleted$, expressionParams$, viewMode$ } = internalApi;
+          const { renderCount$, hasRenderCompleted$, expressionParams$ } = internalApi;
           // Pick up updated params from the observable
           const expressionParams = useStateFromPublishingSubject(expressionParams$);
           // used for functional tests
           const renderCount = useStateFromPublishingSubject(renderCount$);
           // used for reporting/functional tests
           const hasRendered = useStateFromPublishingSubject(hasRenderCompleted$);
-
-          const canEdit = Boolean(api.isEditingEnabled?.() && viewMode$.getValue() === 'edit');
+          const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(parentApi) === 'edit');
 
           const [blockingErrors, warningOrErrors, infoMessages] = useMessages(internalApi);
 

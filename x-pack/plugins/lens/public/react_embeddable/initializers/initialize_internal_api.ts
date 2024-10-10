@@ -6,7 +6,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ViewMode, apiPublishesViewMode } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable } from '../helper';
 import type {
@@ -37,11 +36,6 @@ export function initializeInternalApi(
   const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-  const viewMode$ = new BehaviorSubject<ViewMode | undefined>('view');
-  if (apiPublishesViewMode(parentApi)) {
-    viewMode$.next(parentApi.viewMode.getValue());
-  }
-
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
   const blockingMessages$ = new BehaviorSubject<UserMessage[]>([]);
@@ -57,7 +51,6 @@ export function initializeInternalApi(
     expressionParams$,
     expressionAbortController$,
     renderCount$,
-    viewMode$,
     dataViews: dataViews$,
     // This function is used to force a re-render of the component (i.e. to refresh user messages)
     updateRenderCount: () => renderCount$.next(renderCount$.getValue() + 1),

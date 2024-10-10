@@ -292,7 +292,7 @@ export type LensComponentProps = Simplify<
  */
 export type LensComponentForwardedProps = Pick<
   LensComponentProps,
-  'style' | 'className' | 'noPadding' | 'viewMode' | 'abortController' | 'executionContext'
+  'style' | 'className' | 'noPadding' | 'abortController' | 'executionContext' | 'viewMode'
 >;
 
 /**
@@ -375,7 +375,6 @@ export type LensInternalApi = Simplify<
       expressionAbortController$: PublishingSubject<AbortController | undefined>;
       updateAbortController: (newAbortController: AbortController | undefined) => void;
       renderCount$: PublishingSubject<number>;
-      viewMode$: PublishingSubject<ViewMode | undefined>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       messages$: PublishingSubject<UserMessage[]>;
       blockingMessages$: PublishingSubject<UserMessage[]>;
