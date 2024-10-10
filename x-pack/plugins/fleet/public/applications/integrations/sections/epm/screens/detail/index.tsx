@@ -67,6 +67,8 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { PermissionsError } from '../../../../../fleet/layouts';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -88,6 +90,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 import './index.scss';
+import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -826,7 +829,14 @@ export function Detail() {
             <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
-            <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+            {canReadIntegrationPolicies ? (
+              <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+            ) : (
+              <PermissionsError
+                error="MISSING_PRIVILEGES"
+                requiredFleetRole="Agent Policies Read and Integrations Read"
+              />
+            )}
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />

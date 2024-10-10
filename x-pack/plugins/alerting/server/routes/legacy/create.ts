@@ -44,7 +44,12 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
+export const createAlertRoute = ({
+  router,
+  licenseState,
+  usageCounter,
+  isServerless,
+}: RouteOptions) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -57,6 +62,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         body: bodySchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Create an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

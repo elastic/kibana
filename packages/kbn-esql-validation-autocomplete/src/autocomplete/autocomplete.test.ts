@@ -30,12 +30,21 @@ import {
   PartialSuggestionWithText,
   TIME_PICKER_SUGGESTION,
   setup,
+  attachTriggerCommand,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
 import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
+import { getRecommendedQueries } from './recommended_queries/templates';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
+
+const getRecommendedQueriesSuggestions = (fromCommand: string, timeField?: string) =>
+  getRecommendedQueries({
+    fromCommand,
+    timeField,
+  });
+
 describe('autocomplete', () => {
   type TestArgs = [
     string,
@@ -81,10 +90,11 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
-    testSuggestions(
-      '/',
-      sourceCommands.map((name) => name.toUpperCase() + ' $0')
-    );
+    const recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    testSuggestions('/', [
+      ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
     testSuggestions(
       'from a | /',
       commandDefinitions
@@ -287,7 +297,10 @@ describe('autocomplete', () => {
       'from a | grok key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | grok keywordField/', []);
+    testSuggestions(
+      'from a | grok keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('dissect', () => {
@@ -327,23 +340,10 @@ describe('autocomplete', () => {
       'from a | dissect key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | dissect keywordField/', []);
-  });
-
-  describe('sort', () => {
-    testSuggestions('from a | sort /', [
-      ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | sort keywordField /', ['ASC ', 'DESC ', ',', '| ']);
-    testSuggestions('from a | sort keywordField desc /', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-    // @TODO: improve here
-    // testSuggestions('from a | sort keywordField desc ', ['first', 'last']);
+    testSuggestions(
+      'from a | dissect keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('limit', () => {
@@ -532,10 +532,11 @@ describe('autocomplete', () => {
    */
   describe('Invoke trigger kind (all commands)', () => {
     // source command
-    testSuggestions(
-      'f/',
-      sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`)
-    );
+    let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    testSuggestions('f/', [
+      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
 
     // pipe command
     testSuggestions(
@@ -584,7 +585,13 @@ describe('autocomplete', () => {
     ]);
 
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [',', 'METADATA $0', '| ']);
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+    testSuggestions('FROM index1 M/', [
+      ',',
+      'METADATA $0',
+      '| ',
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -672,23 +679,6 @@ describe('autocomplete', () => {
     // RENAME field AS var0
     testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
 
-    // SORT field
-    testSuggestions('FROM index1 | SORT f/', [
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ...getFieldNamesByType('any').map((field) => `${field} `),
-    ]);
-
-    // SORT field order
-    testSuggestions('FROM index1 | SORT keywordField a/', ['ASC ', 'DESC ', ',', '| ']);
-
-    // SORT field order nulls
-    testSuggestions('FROM index1 | SORT keywordField ASC n/', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
@@ -732,26 +722,16 @@ describe('autocomplete', () => {
      * NOTE: Monaco uses an Invoke trigger kind when the show suggestions action is triggered (e.g. accepting the "FROM" suggestion)
      */
 
-    const attachTriggerCommand = (
-      s: string | PartialSuggestionWithText
-    ): PartialSuggestionWithText =>
-      typeof s === 'string'
-        ? {
-            text: s,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }
-        : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
-
     const attachAsSnippet = (s: PartialSuggestionWithText): PartialSuggestionWithText => ({
       ...s,
       asSnippet: true,
     });
-
+    let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     // Source command
-    testSuggestions(
-      'F/',
-      ['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet)
-    );
+    testSuggestions('F/', [
+      ...['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
 
     // Pipe command
     testSuggestions(
@@ -823,11 +803,14 @@ describe('autocomplete', () => {
       );
     });
 
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+
     // PIPE (|)
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
     // Assignment
@@ -869,6 +852,7 @@ describe('autocomplete', () => {
           ],
         ]
       );
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('index1', 'dateField');
 
       testSuggestions(
         'FROM index1/',
@@ -876,6 +860,7 @@ describe('autocomplete', () => {
           { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -887,12 +872,14 @@ describe('autocomplete', () => {
         ]
       );
 
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('index2', 'dateField');
       testSuggestions(
         'FROM index1, index2/',
         [
           { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -908,6 +895,7 @@ describe('autocomplete', () => {
       // meaning that Monaco by default will only set the replacement
       // range to cover "bar" and not "foo$bar". We have to make sure
       // we're setting it ourselves.
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('foo$bar', 'dateField');
       testSuggestions(
         'FROM foo$bar/',
         [
@@ -930,18 +918,21 @@ describe('autocomplete', () => {
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 6, end: 13 },
           },
+          ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
         undefined,
         [, [{ name: 'foo$bar', hidden: false }]]
       );
 
       // This is an identifier that matches multiple sources
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('i*', 'dateField');
       testSuggestions(
         'FROM i*/',
         [
           { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+          ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -954,11 +945,13 @@ describe('autocomplete', () => {
       );
     });
 
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
     testSuggestions('FROM index1 M/', [
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
       '| ',
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
     describe('ENRICH', () => {
@@ -1014,27 +1007,6 @@ describe('autocomplete', () => {
 
     // LIMIT number
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
-
-    // SORT field
-    testSuggestions(
-      'FROM a | SORT /',
-      [
-        ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ].map(attachTriggerCommand)
-    );
-
-    // SORT field order
-    testSuggestions('FROM a | SORT field /', [
-      ',',
-      ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand),
-    ]);
-
-    // SORT field order nulls
-    testSuggestions('FROM a | SORT field ASC /', [
-      ',',
-      ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand),
-    ]);
 
     // STATS argument
     testSuggestions(
@@ -1251,22 +1223,6 @@ describe('autocomplete', () => {
       'IN $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
-      'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
-      '!= $0',
-      '< $0',
-      '<= $0',
-      '== $0',
-      '> $0',
-      '>= $0',
-      'IN $0',
-    ]);
-    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
       '% $0',

@@ -116,11 +116,13 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/babel-*',
   'packages/*',
   'packages/core/*/*',
+  'x-pack/packages/ai-infra/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
+  'typings/**/*',
 ];
 
 /**

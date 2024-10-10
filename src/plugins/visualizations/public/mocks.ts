@@ -17,7 +17,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
@@ -77,11 +76,10 @@ const createInstance = async () => {
       embeddable: embeddablePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
-      savedObjects: savedObjectsPluginMock.createStartContract(),
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
-      presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
+      presentationUtil: presentationUtilPluginMock.createStartContract(),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),

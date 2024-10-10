@@ -85,8 +85,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: { application },
   } = useKibana();
-  const automatedResponseActionsForMoreRulesEnabled = useIsExperimentalFeatureEnabled(
-    'automatedResponseActionsForMoreRulesEnabled'
+  const automatedResponseActionsForAllRulesEnabled = useIsExperimentalFeatureEnabled(
+    'automatedResponseActionsForAllRulesEnabled'
   );
   const displayActionsOptions = useMemo(
     () => (
@@ -105,7 +105,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
-    if (shouldShowResponseActions(ruleType, automatedResponseActionsForMoreRulesEnabled)) {
+    if (shouldShowResponseActions(ruleType, automatedResponseActionsForAllRulesEnabled)) {
       return (
         <UseArray path="responseActions" initialNumberOfItems={0}>
           {ResponseActionsForm}
@@ -113,7 +113,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       );
     }
     return null;
-  }, [ruleType, automatedResponseActionsForMoreRulesEnabled]);
+  }, [automatedResponseActionsForAllRulesEnabled, ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (

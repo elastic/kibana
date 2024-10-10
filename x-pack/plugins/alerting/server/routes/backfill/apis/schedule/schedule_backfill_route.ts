@@ -22,6 +22,7 @@ export const scheduleBackfillRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
+      options: { access: 'internal' },
       validate: {
         body: scheduleBodySchemaV1,
       },

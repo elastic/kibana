@@ -24,7 +24,7 @@ export const EXPLORER_ACTION = {
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
-};
+} as const;
 
 export const FILTER_ACTION = {
   ADD: '+',

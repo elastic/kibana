@@ -19,3 +19,5 @@ export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   STARTED: 'started',
   STOPPED: 'stopped',
 };
+
+export const MAX_SEARCH_RESPONSE_SIZE = 10_000;

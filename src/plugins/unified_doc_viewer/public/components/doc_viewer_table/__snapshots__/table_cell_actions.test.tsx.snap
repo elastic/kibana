@@ -4,42 +4,22 @@ exports[`TableActions getFieldCellActions should render correctly for undefined 
 Array [
   <ToggleColumn
     Component={[Function]}
+    isEsqlMode={false}
+    onToggleColumn={[MockFunction]}
     row={
-      Object {
-        "action": Object {
-          "flattenedField": "flattenedField",
-          "onFilter": [MockFunction],
-          "onToggleColumn": [MockFunction],
-        },
-        "field": Object {
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
           "displayName": "message",
-          "field": "message",
-          "fieldMapping": Object {
-            "aggregatable": true,
-            "conflictDescriptions": undefined,
-            "count": 0,
-            "customDescription": undefined,
-            "customLabel": undefined,
-            "defaultFormatter": undefined,
-            "esTypes": undefined,
-            "lang": undefined,
-            "name": "message",
-            "readFromDocValues": false,
-            "script": undefined,
-            "scripted": false,
-            "searchable": true,
-            "subType": undefined,
-            "type": "keyword",
-          },
-          "fieldType": "keyword",
-          "onTogglePinned": [MockFunction],
-          "pinned": true,
+          "filterable": false,
+          "name": "message",
           "scripted": false,
+          "type": "string",
         },
-        "value": Object {
-          "formattedValue": "test",
-          "ignored": undefined,
-        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
       }
     }
   />,
@@ -52,83 +32,43 @@ exports[`TableActions getFieldCellActions should render the panels correctly for
 Array [
   <FilterExist
     Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
     row={
-      Object {
-        "action": Object {
-          "flattenedField": "flattenedField",
-          "onFilter": [MockFunction],
-          "onToggleColumn": [MockFunction],
-        },
-        "field": Object {
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
           "displayName": "message",
-          "field": "message",
-          "fieldMapping": Object {
-            "aggregatable": true,
-            "conflictDescriptions": undefined,
-            "count": 0,
-            "customDescription": undefined,
-            "customLabel": undefined,
-            "defaultFormatter": undefined,
-            "esTypes": undefined,
-            "lang": undefined,
-            "name": "message",
-            "readFromDocValues": false,
-            "script": undefined,
-            "scripted": false,
-            "searchable": true,
-            "subType": undefined,
-            "type": "keyword",
-          },
-          "fieldType": "keyword",
-          "onTogglePinned": [MockFunction],
-          "pinned": true,
+          "filterable": false,
+          "name": "message",
           "scripted": false,
+          "type": "string",
         },
-        "value": Object {
-          "formattedValue": "test",
-          "ignored": undefined,
-        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
       }
     }
   />,
   <ToggleColumn
     Component={[Function]}
+    isEsqlMode={false}
+    onToggleColumn={[MockFunction]}
     row={
-      Object {
-        "action": Object {
-          "flattenedField": "flattenedField",
-          "onFilter": [MockFunction],
-          "onToggleColumn": [MockFunction],
-        },
-        "field": Object {
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
           "displayName": "message",
-          "field": "message",
-          "fieldMapping": Object {
-            "aggregatable": true,
-            "conflictDescriptions": undefined,
-            "count": 0,
-            "customDescription": undefined,
-            "customLabel": undefined,
-            "defaultFormatter": undefined,
-            "esTypes": undefined,
-            "lang": undefined,
-            "name": "message",
-            "readFromDocValues": false,
-            "script": undefined,
-            "scripted": false,
-            "searchable": true,
-            "subType": undefined,
-            "type": "keyword",
-          },
-          "fieldType": "keyword",
-          "onTogglePinned": [MockFunction],
-          "pinned": true,
+          "filterable": false,
+          "name": "message",
           "scripted": false,
+          "type": "string",
         },
-        "value": Object {
-          "formattedValue": "test",
-          "ignored": undefined,
-        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
       }
     }
   />,
@@ -141,83 +81,43 @@ exports[`TableActions getFieldValueCellActions should render the panels correctl
 Array [
   <FilterIn
     Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
     row={
-      Object {
-        "action": Object {
-          "flattenedField": "flattenedField",
-          "onFilter": [MockFunction],
-          "onToggleColumn": [MockFunction],
-        },
-        "field": Object {
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
           "displayName": "message",
-          "field": "message",
-          "fieldMapping": Object {
-            "aggregatable": true,
-            "conflictDescriptions": undefined,
-            "count": 0,
-            "customDescription": undefined,
-            "customLabel": undefined,
-            "defaultFormatter": undefined,
-            "esTypes": undefined,
-            "lang": undefined,
-            "name": "message",
-            "readFromDocValues": false,
-            "script": undefined,
-            "scripted": false,
-            "searchable": true,
-            "subType": undefined,
-            "type": "keyword",
-          },
-          "fieldType": "keyword",
-          "onTogglePinned": [MockFunction],
-          "pinned": true,
+          "filterable": false,
+          "name": "message",
           "scripted": false,
+          "type": "string",
         },
-        "value": Object {
-          "formattedValue": "test",
-          "ignored": undefined,
-        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
       }
     }
   />,
   <FilterOut
     Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
     row={
-      Object {
-        "action": Object {
-          "flattenedField": "flattenedField",
-          "onFilter": [MockFunction],
-          "onToggleColumn": [MockFunction],
-        },
-        "field": Object {
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
           "displayName": "message",
-          "field": "message",
-          "fieldMapping": Object {
-            "aggregatable": true,
-            "conflictDescriptions": undefined,
-            "count": 0,
-            "customDescription": undefined,
-            "customLabel": undefined,
-            "defaultFormatter": undefined,
-            "esTypes": undefined,
-            "lang": undefined,
-            "name": "message",
-            "readFromDocValues": false,
-            "script": undefined,
-            "scripted": false,
-            "searchable": true,
-            "subType": undefined,
-            "type": "keyword",
-          },
-          "fieldType": "keyword",
-          "onTogglePinned": [MockFunction],
-          "pinned": true,
+          "filterable": false,
+          "name": "message",
           "scripted": false,
+          "type": "string",
         },
-        "value": Object {
-          "formattedValue": "test",
-          "ignored": undefined,
-        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
       }
     }
   />,

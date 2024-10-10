@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -71,24 +72,47 @@ export const getKBVectorSearchQuery = ({
       ]
     : [];
 
-  const userFilter = [
-    {
-      nested: {
-        path: 'users',
-        query: {
-          bool: {
-            must: [
-              {
-                match: user.profile_uid
-                  ? { 'users.id': user.profile_uid }
-                  : { 'users.name': user.username },
-              },
-            ],
+  const userFilter = {
+    should: [
+      {
+        nested: {
+          path: 'users',
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: user.profile_uid
+                    ? { 'users.id': user.profile_uid }
+                    : { 'users.name': user.username },
+                },
+              ],
+            },
           },
         },
       },
-    },
-  ];
+      {
+        bool: {
+          must_not: [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    filter: {
+                      exists: {
+                        field: 'users',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
 
   return {
     bool: {
@@ -103,9 +127,10 @@ export const getKBVectorSearchQuery = ({
         },
         ...requiredFilter,
         ...resourceFilter,
-        ...userFilter,
       ],
+      ...userFilter,
       filter,
+      minimum_should_match: 1,
     },
   };
 };
@@ -137,7 +162,7 @@ export const getStructuredToolForIndexEntry = ({
   }, {});
 
   return new DynamicStructuredTool({
-    name: indexEntry.name.replaceAll(' ', ''), // Tool names cannot contain spaces, further sanitization possibly needed
+    name: indexEntry.name.replace(/[^a-zA-Z0-9-]/g, ''), // // Tool names expects a string that matches the pattern '^[a-zA-Z0-9-]+$'
     description: indexEntry.description,
     schema: z.object({
       query: z.string().describe(indexEntry.queryDescription),
@@ -165,7 +190,7 @@ export const getStructuredToolForIndexEntry = ({
           standard: {
             query: {
               nested: {
-                path: 'semantic_text.inference.chunks',
+                path: `${indexEntry.field}.inference.chunks`,
                 query: {
                   sparse_vector: {
                     inference_id: elserId,
@@ -196,7 +221,7 @@ export const getStructuredToolForIndexEntry = ({
             }, {});
           }
           return {
-            text: (hit._source as { text: string }).text,
+            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };
         });
 

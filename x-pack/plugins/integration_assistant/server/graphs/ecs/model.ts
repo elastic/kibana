@@ -10,6 +10,7 @@ import { mergeAndChunkSamples } from './chunk';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
 import type { EcsBaseNodeParams } from './types';
+import { removeReservedFields } from './validate';
 
 export function modelSubOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
   return {
@@ -33,7 +34,7 @@ export function modelInput({ state }: EcsBaseNodeParams): Partial<EcsMappingStat
   const sampleChunks = mergeAndChunkSamples(prefixedSamples, state.chunkSize);
   return {
     exAnswer: JSON.stringify(ECS_EXAMPLE_ANSWER, null, 2),
-    ecs: JSON.stringify(ECS_FIELDS, null, 2),
+    ecs: JSON.stringify(removeReservedFields(ECS_FIELDS), null, 2),
     prefixedSamples,
     sampleChunks,
     finalized: false,

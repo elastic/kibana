@@ -9,7 +9,6 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
 
 import { installationStatuses } from '../../../../../../common/constants';
@@ -19,8 +18,9 @@ const installedLabel = i18n.translate('xpack.fleet.packageCard.installedLabel', 
   defaultMessage: 'Installed',
 });
 
-const installStatusMapToColor: Readonly<
-  Record<string, { color: 'success' | 'warning'; iconType: string; title: string }>
+const installStatusMapToColor: Record<
+  string,
+  { color: 'success' | 'warning'; iconType: string; title: string }
 > = {
   installed: {
     color: 'success',

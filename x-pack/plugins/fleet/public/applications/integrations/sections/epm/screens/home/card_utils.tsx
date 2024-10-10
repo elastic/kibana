@@ -44,7 +44,6 @@ export interface IntegrationCardItem {
   // Security Solution uses this prop to determine how many lines the card description should be truncated
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
-  maxCardHeight?: number;
   fromIntegrations?: string;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
@@ -55,6 +54,7 @@ export interface IntegrationCardItem {
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  maxCardHeight?: number;
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;
@@ -120,7 +120,7 @@ export const mapToCard = ({
 
   const cardResult: IntegrationCardItem = {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
-    description: item.description,
+    description: item.description || '',
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,

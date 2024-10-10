@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo } from 'react';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import { selectPanelsById, useSelector } from '../store/redux';
@@ -17,6 +18,7 @@ import { selectPanelsById, useSelector } from '../store/redux';
 export const useExpandableFlyoutState = () => {
   const { urlKey } = useExpandableFlyoutContext();
   // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
-  const id = urlKey || REDUX_ID_FOR_MEMORY_STORAGE;
+  const id = useMemo(() => urlKey || REDUX_ID_FOR_MEMORY_STORAGE, [urlKey]);
+
   return useSelector(selectPanelsById(id));
 };

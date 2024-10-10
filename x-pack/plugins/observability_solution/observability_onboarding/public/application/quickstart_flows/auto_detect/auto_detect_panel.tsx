@@ -58,7 +58,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   );
 
   if (error) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
   const registryIntegrations = installedIntegrations.filter(
@@ -192,6 +192,16 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         initialIsOpen
                       >
                         <GetStartedPanel
+                          onboardingFlowType="auto-detect"
+                          dataset={integration.pkgName}
+                          onboardingId={data?.onboardingFlow?.id}
+                          telemetryEventContext={{
+                            autoDetect: {
+                              installSource: integration.installSource,
+                              pkgVersion: integration.pkgVersion,
+                              title: integration.title,
+                            },
+                          }}
                           integration={integration.pkgName}
                           newTab
                           isLoading={status !== 'dataReceived'}
