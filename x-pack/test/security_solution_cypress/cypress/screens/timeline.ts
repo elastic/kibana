@@ -257,6 +257,9 @@ export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP = `[data-test-sub
 
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
+export const TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER =
+  getDataTestSubjectSelector('row-renderer-switch');
+
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
