@@ -22,7 +22,6 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
 
-// FLAKY: https://github.com/elastic/kibana/issues/187550
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
