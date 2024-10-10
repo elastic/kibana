@@ -135,6 +135,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (!query && !filters.length) {
       return null;
     }
+
+    // Wrapping filters in query object here to avoid schema validation failure
     const transformedFilters = transformQueryFilters(filters);
 
     return {

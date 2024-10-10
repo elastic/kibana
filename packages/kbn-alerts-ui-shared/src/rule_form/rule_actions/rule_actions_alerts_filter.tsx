@@ -94,6 +94,7 @@ export const RuleActionsAlertsFilter = ({
         };
       });
 
+      // Wrapping filters in query object here to avoid schema validation failure
       updateQuery({ filters: updatedFilters });
     },
     [updateQuery]
