@@ -107,6 +107,7 @@ export const Result: React.FC<ResultProps> = ({
                 size="xs"
                 iconType={isExpanded ? 'fold' : 'unfold'}
                 color={isExpanded ? 'danger' : 'primary'}
+                data-test-subj={isExpanded ? 'documentShowLessFields' : 'documentShowMoreFields'}
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
