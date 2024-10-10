@@ -6,7 +6,7 @@
  */
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook, act, waitFor } from '@testing-library/react-hooks';
+import { renderHook as _renderHook } from '@testing-library/react-hooks';
 import { useConsoleManager } from '../console_manager';
 import React from 'react';
 import type {
@@ -22,7 +22,7 @@ import {
   getNewConsoleRegistrationMock,
 } from '../mocks';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import { enterConsoleCommand } from '../../../mocks';
 
 describe('When using ConsoleManager', () => {
