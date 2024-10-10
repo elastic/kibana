@@ -151,17 +151,6 @@ export const initializeCanvas = async (
 export const teardownCanvas = (coreStart: CoreStart) => {
   destroyRegistries();
 
-  // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.
-  // Remove them when Canvas is unmounted.
-  // see: ../canvas_plugin_src/renderers/plot/plugins/index.ts
-  // if (includes($.plot.plugins, size)) {
-  //   remove($.plot.plugins, size);
-  // }
-
-  // if (includes($.plot.plugins, text)) {
-  //   remove($.plot.plugins, text);
-  // }
-
   // TODO: Not cleaning these up temporarily.
   // We have an issue where if requests are inflight, and you navigate away,
   // those requests could still be trying to act on the store and possibly require services.
