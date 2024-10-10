@@ -16,6 +16,7 @@ import supertest from 'supertest';
 import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
