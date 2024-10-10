@@ -32,6 +32,7 @@ export function RuleUpgradeConflictsResolverTab({
     >
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
+      <EuiSpacer size="s" />
       <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
       <RuleUpgradeConflictsResolver ruleUpgradeState={ruleUpgradeState} />
