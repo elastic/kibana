@@ -1,0 +1,7 @@
+For example:
+
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
+----
