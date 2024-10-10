@@ -20,10 +20,6 @@ jest.mock('./agentless_available_callout');
 jest.mock('./installed_integrations_callout');
 jest.mock('./endpoint_callout');
 
-interface MockedConsts {
-  AGENTLESS_LEARN_MORE_LINK: string | null;
-}
-
 describe('IntegrationCardTopCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();

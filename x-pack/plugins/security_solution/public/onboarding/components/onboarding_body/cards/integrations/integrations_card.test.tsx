@@ -12,6 +12,7 @@ jest.mock('./integration_card_grid_tabs');
 
 const props = {
   setComplete: jest.fn(),
+  checkComplete: jest.fn(),
   isCardComplete: jest.fn(),
   setExpandedCardId: jest.fn(),
 };
