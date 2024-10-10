@@ -334,6 +334,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'date',
+                  type: CustomFieldTypes.DATE,
+                  defaultValue: '2018-04-05',
+                  required: true,
+                },
               ],
             },
           })
@@ -367,6 +374,11 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     value: true,
                   },
+                  {
+                    key: 'test_custom_field_3',
+                    type: CustomFieldTypes.DATE,
+                    value: '2018-04-05',
+                  },
                 ],
               },
             ],
@@ -383,6 +395,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.DATE,
+            value: '2018-04-05',
           },
         ]);
       });
@@ -405,6 +422,12 @@ export default ({ getService }: FtrProviderContext): void => {
                   type: CustomFieldTypes.TOGGLE,
                   defaultValue: false,
                   required: true,
+                },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'date',
+                  type: CustomFieldTypes.DATE,
+                  required: false,
                 },
               ],
             },
@@ -444,6 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(patchedCases[0].customFields).to.eql([
           { key: 'test_custom_field_2', type: 'toggle', value: true },
           { key: 'test_custom_field_1', type: 'text', value: null },
+          { key: 'test_custom_field_3', type: 'date', value: null },
         ]);
       });
 
