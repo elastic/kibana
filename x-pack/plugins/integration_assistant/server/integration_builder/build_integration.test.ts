@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { buildPackage, renderPackageManifestYAML } from './build_integration';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
 import { generateUniqueId, ensureDirSync, createSync } from '../util';
@@ -17,6 +18,7 @@ import { createReadme } from './readme_files';
 
 const mockedDataPath = 'path';
 const mockedId = 123;
+
 jest.mock('../util');
 jest.mock('./data_stream');
 jest.mock('./fields');
@@ -32,19 +34,24 @@ jest.mock('./readme_files');
 jest.mock('@kbn/utils', () => ({
   getDataPath: jest.fn(() => mockedDataPath),
 }));
+
 jest.mock('adm-zip', () => {
   return jest.fn().mockImplementation(() => ({
     addLocalFolder: jest.fn(),
     toBuffer: jest.fn(),
   }));
 });
+
 describe('buildPackage', () => {
   const packagePath = `${mockedDataPath}/integration-assistant-${mockedId}`;
   const integrationPath = `${packagePath}/integration-1.0.0`;
+
   const firstDatastreamName = 'datastream_1';
   const secondDatastreamName = 'datastream_2';
+
   const firstDataStreamInputTypes: InputType[] = ['filestream', 'kafka'];
   const secondDataStreamInputTypes: InputType[] = ['kafka'];
+
   const firstDataStreamDocs: Docs = [
     {
       key: 'foo',
@@ -52,6 +59,7 @@ describe('buildPackage', () => {
     },
   ];
   const secondDataStreamDocs: Docs = [{}];
+
   const firstDataStreamPipeline: Pipeline = {
     processors: [
       {
@@ -63,6 +71,7 @@ describe('buildPackage', () => {
     ],
   };
   const secondDataStreamPipeline: Pipeline = { processors: [] };
+
   const firstDataStream: DataStream = {
     name: firstDatastreamName,
     title: 'Datastream_1',
@@ -73,6 +82,7 @@ describe('buildPackage', () => {
     pipeline: firstDataStreamPipeline,
     samplesFormat: { name: 'ndjson', multiline: false },
   };
+
   const secondDataStream: DataStream = {
     name: secondDatastreamName,
     title: 'Datastream_2',
@@ -83,13 +93,17 @@ describe('buildPackage', () => {
     pipeline: secondDataStreamPipeline,
     samplesFormat: { name: 'ndjson', multiline: false },
   };
+
   const firstDatastreamPath = `${integrationPath}/data_stream/${firstDatastreamName}`;
   const secondDatastreamPath = `${integrationPath}/data_stream/${secondDatastreamName}`;
+
   testIntegration.dataStreams = [firstDataStream, secondDataStream];
+
   beforeEach(async () => {
     jest.clearAllMocks();
     await buildPackage(testIntegration);
   });
+
   it('Should create expected directories and files', async () => {
     // Package & integration folders
     expect(ensureDirSync).toHaveBeenCalledWith(packagePath);
@@ -108,22 +122,29 @@ describe('buildPackage', () => {
     // Manifest files
     expect(createSync).toHaveBeenCalledWith(`${integrationPath}/manifest.yml`, expect.any(String));
   });
+
   it('Should create logo files if info is present in the integration', async () => {
     testIntegration.logo = 'logo';
+
     await buildPackage(testIntegration);
+
     expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/img`);
     expect(createSync).toHaveBeenCalledWith(`${integrationPath}/img/logo.svg`, expect.any(Buffer));
   });
+
   it('Should not create logo files if info is not present in the integration', async () => {
     jest.clearAllMocks();
     testIntegration.logo = undefined;
+
     await buildPackage(testIntegration);
+
     expect(ensureDirSync).not.toHaveBeenCalledWith(`${integrationPath}/img`);
     expect(createSync).not.toHaveBeenCalledWith(
       `${integrationPath}/img/logo.svg`,
       expect.any(Buffer)
     );
   });
+
   it('Should call createDataStream for each datastream', async () => {
     expect(createDataStream).toHaveBeenCalledWith(
       'integration',
@@ -136,14 +157,17 @@ describe('buildPackage', () => {
       secondDataStream
     );
   });
+
   it('Should call createAgentInput for each datastream', async () => {
     expect(createAgentInput).toHaveBeenCalledWith(firstDatastreamPath, firstDataStreamInputTypes);
     expect(createAgentInput).toHaveBeenCalledWith(secondDatastreamPath, secondDataStreamInputTypes);
   });
+
   it('Should call createPipeline for each datastream', async () => {
     expect(createPipeline).toHaveBeenCalledWith(firstDatastreamPath, firstDataStreamPipeline);
     expect(createPipeline).toHaveBeenCalledWith(secondDatastreamPath, secondDataStreamPipeline);
   });
+
   it('Should call createFieldMapping for each datastream', async () => {
     expect(createFieldMapping).toHaveBeenCalledWith(
       'integration',
@@ -242,9 +266,12 @@ describe('renderPackageManifestYAML', () => {
         },
       ],
     };
+
     const manifestContent = renderPackageManifestYAML(integration);
+
     // The manifest content must be parseable as YAML.
     const manifest = yaml.safeLoad(manifestContent) as Record<string, unknown>;
+
     expect(manifest).toBeDefined();
     expect(manifest.title).toBe(integration.title);
     expect(manifest.name).toBe(integration.name);
