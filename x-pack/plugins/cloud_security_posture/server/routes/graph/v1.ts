@@ -180,7 +180,7 @@ const createNodes = (
   const { nodesMap, edgeLabelsNodes } = context;
 
   for (const record of records) {
-    const { badge, ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
+    const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
 
