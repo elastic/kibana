@@ -12,8 +12,8 @@ import type {
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
-
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
+
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type { RawKibanaPrivileges } from './raw_kibana_privileges';
 import type { Actions } from '../actions';

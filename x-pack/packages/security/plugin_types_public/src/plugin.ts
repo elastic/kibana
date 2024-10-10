@@ -6,6 +6,7 @@
  */
 
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
+
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import type { AuthorizationServiceSetup, AuthorizationServiceStart } from './authorization';
 import type { SecurityNavControlServiceStart } from './nav_control';

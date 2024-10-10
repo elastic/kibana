@@ -6,9 +6,10 @@
  */
 
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
+
 import type { AuditServiceSetup } from './audit';
-import type { PrivilegeDeprecationsService, AuthorizationServiceSetup } from './authorization';
 import type { AuthenticationServiceStart } from './authentication';
+import type { AuthorizationServiceSetup, PrivilegeDeprecationsService } from './authorization';
 import type { UserProfileServiceStart } from './user_profile';
 
 /**
