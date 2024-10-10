@@ -14,17 +14,11 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { FC } from 'react';
 import type { MinimumTimeRangeOption } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 import type {
   RandomSamplerOption,
   RandomSamplerProbability,
 } from '../../components/log_categorization/sampling_menu/random_sampler';
-
-export type ViewComponent = FC<{
-  interval: string;
-  onRenderComplete?: () => void;
-}>;
 
 export interface PatternAnalysisComponentApi {
   dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['dataViewId']>;

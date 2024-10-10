@@ -54,6 +54,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   onCancel,
 }) => {
   const {
+    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
@@ -135,7 +136,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViewId={dataViewId}>
+          <DataSourceContextProvider dataViews={dataViews} dataViewId={dataViewId}>
             <EuiHorizontalRule margin={'s'} />
             <ChangePointDetectionControlsContextProvider>
               <FormControls

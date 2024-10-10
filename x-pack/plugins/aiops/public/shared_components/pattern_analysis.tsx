@@ -20,7 +20,7 @@ import type {
   RandomSamplerOption,
   RandomSamplerProbability,
 } from '../components/log_categorization/sampling_menu/random_sampler';
-import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysys_component_wrapper';
+import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysis_component_wrapper';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
@@ -143,7 +143,10 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
         <AiopsAppContext.Provider value={aiopsAppContextValue}>
           <DatePickerContextProvider {...datePickerDeps}>
             <ReloadContextProvider reload$={resultObservable$}>
-              <DataSourceContextProvider dataViewId={dataViewId}>
+              <DataSourceContextProvider
+                dataViews={pluginStart.data.dataViews}
+                dataViewId={dataViewId}
+              >
                 <FilterQueryContextProvider timeRange={timeRange}>
                   <PatternAnalysisEmbeddableWrapper
                     dataViewId={dataViewId}
