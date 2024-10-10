@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { Card } from '../card';
 import { DataIngestionHubVideoModal } from './video_modal';

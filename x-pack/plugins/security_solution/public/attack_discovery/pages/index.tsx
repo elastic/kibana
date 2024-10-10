@@ -16,7 +16,7 @@ import {
 import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
