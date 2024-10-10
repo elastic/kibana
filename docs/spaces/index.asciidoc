@@ -38,6 +38,7 @@ You cannot change the space identifier once you create the space.
 ** **Security**: A light navigation menu focused on analytics and Security use cases. Features specific to Observability and Search are hidden.
 ** **Classic**: All features from all solutions are visible by default using the classic, multilayered navigation menus. You can customize which features are visible individually. 
 
+[[spaces-control-feature-visibility]]
 . If you selected the **Classic** solution view, you can customize the **Feature visibility** as you need it to be for that space.
 +
 NOTE: Even when disabled in this menu, some Management features can remain visible to some users depending on their privileges. Additionally, controlling feature visibility is not a security feature. To secure access
