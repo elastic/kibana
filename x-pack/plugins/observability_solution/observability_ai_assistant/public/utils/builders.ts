@@ -7,7 +7,7 @@
 
 import type { FunctionDefinition } from '../../common/functions/types';
 
-export function buildFunction(): FunctionDefinition {
+export function buildFunctionElasticsearch(): FunctionDefinition {
   return {
     name: 'elasticsearch',
     description: 'Call Elasticsearch APIs on behalf of the user',
@@ -29,8 +29,6 @@ export function buildFunction(): FunctionDefinition {
     },
   };
 }
-
-export const buildFunctionElasticsearch = buildFunction;
 
 export function buildFunctionServiceSummary(): FunctionDefinition {
   return {

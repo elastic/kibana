@@ -98,7 +98,7 @@ export class LlmProxy {
         waitForIntercept: () => Promise<LlmResponseSimulator>;
       }
     : {
-        waitAndComplete: () => Promise<void>;
+        completeAfterIntercept: () => Promise<void>;
       } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
@@ -162,7 +162,7 @@ export class LlmProxy {
       : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
 
     return {
-      waitAndComplete: async () => {
+      completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
