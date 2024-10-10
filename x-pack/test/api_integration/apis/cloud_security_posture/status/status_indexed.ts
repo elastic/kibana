@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
       afterEach(async () => {
         await latestFindingsIndex.deleteAll();
         await latestVulnerabilitiesIndex.deleteAll();
-        await _3pIndex.deleteAll();
+        await _3pIndex.destroyIndex();
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });

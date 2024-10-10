@@ -6,9 +6,8 @@
  */
 
 import type { Agent as SuperTestAgent } from 'supertest';
-import expect from '@kbn/expect';
+
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
@@ -187,10 +186,10 @@ export const createUser = async (security: SecurityService, userName: string, ro
   });
 };
 
-export const createCSPOnlyRole = async (
+export const createCSPRole = async (
   security: SecurityService,
   roleName: string,
-  indicesName: string
+  indicesName?: string[]
 ) => {
   await security.role.create(roleName, {
     kibana: [
@@ -199,12 +198,12 @@ export const createCSPOnlyRole = async (
         spaces: ['*'],
       },
     ],
-    ...(indicesName.length !== 0
+    ...(indicesName && indicesName.length > 0
       ? {
           elasticsearch: {
             indices: [
               {
-                names: [indicesName],
+                names: indicesName,
                 privileges: ['read'],
               },
             ],
@@ -220,16 +219,4 @@ export const deleteRole = async (security: SecurityService, roleName: string) =>
 
 export const deleteUser = async (security: SecurityService, userName: string) => {
   await security.user.delete(userName);
-};
-
-export const assertIndexStatus = (
-  indicesDetails: IndexDetails[],
-  indexName: string,
-  expectedStatus: string
-) => {
-  const actualValue = indicesDetails.find((idx) => idx.index === indexName)?.status;
-  expect(actualValue).to.eql(
-    expectedStatus,
-    `expected ${indexName} status to be ${expectedStatus} but got  ${actualValue} instead`
-  );
 };
