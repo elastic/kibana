@@ -72,6 +72,7 @@ import type {
   NotesTelemetryEvents,
   OpenNoteInExpandableFlyoutClickedParams,
 } from './events/notes/types';
+import type { PreviewRuleParams, PreviewRuleTelemetryEvent } from './events/preview_rule/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -91,6 +92,7 @@ export type {
 export * from './events/document_details/types';
 export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
+export * from './events/preview_rule/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -136,6 +138,7 @@ export type TelemetryEventParams =
   | OnboardingHubStepLinkClickedParams
   | ReportManualRuleRunTelemetryEventParams
   | ReportEventLogTelemetryEventParams
+  | PreviewRuleParams
   | NotesTelemetryEventParams;
 
 export interface TelemetryClientStart {
@@ -194,6 +197,9 @@ export interface TelemetryClientStart {
   // new notes
   reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
   reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
+
+  // preview rule
+  reportPreviewRule(params: PreviewRuleParams): void;
 }
 
 export type TelemetryEvent =
@@ -221,4 +227,5 @@ export type TelemetryEvent =
   | OnboardingHubTelemetryEvent
   | ManualRuleRunTelemetryEvent
   | EventLogTelemetryEvent
+  | PreviewRuleTelemetryEvent
   | NotesTelemetryEvents;
