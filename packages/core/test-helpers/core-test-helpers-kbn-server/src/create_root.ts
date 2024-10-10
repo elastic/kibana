@@ -30,6 +30,21 @@ import { Root } from '@kbn/core-root-server-internal';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
+interface XPackSettings {
+  xpack?: {
+    reporting?: {
+      enabled?: boolean;
+    };
+    security?: {
+      experimental?: {
+        fipsMode?: {
+          enabled?: boolean;
+        };
+      };
+    };
+  };
+}
+
 const DEFAULTS_SETTINGS = {
   server: {
     autoListen: true,
@@ -125,6 +140,42 @@ export function createRootWithCorePlugins(
   cliArgs: Partial<CliArgs> = {},
   customKibanaVersion?: string
 ) {
+  let xpackSettings = {} as XPackSettings;
+
+  // createRootWithSettings sets default value to "true", so undefined should be treated as "true".
+  const isExplicitlyNotOss = cliArgs.oss === false;
+  const isFipsEnabled = getFips() === 1;
+
+  if (isExplicitlyNotOss || isFipsEnabled) {
+    xpackSettings = { xpack: {} };
+    if (isExplicitlyNotOss) {
+      xpackSettings = {
+        ...xpackSettings,
+        xpack: {
+          ...xpackSettings.xpack,
+          // reporting loads headless browser, that prevents Node.js process from exiting and causes test flakiness
+          reporting: { enabled: false },
+        },
+      };
+    }
+
+    if (isFipsEnabled) {
+      xpackSettings = {
+        ...xpackSettings,
+        xpack: {
+          ...xpackSettings.xpack,
+          security: {
+            experimental: {
+              fipsMode: {
+                enabled: true,
+              },
+            },
+          },
+        },
+      };
+    }
+  }
+
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
@@ -239,7 +290,13 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = settings.es?.license ?? 'basic';
+  let license = settings.es?.license ?? 'basic';
+
+  // Set license to 'trial' if Node is running in FIPS mode
+  if (getFips() === 1) {
+    license = 'trial';
+  }
+
   const usersToBeAdded = settings.users ?? [];
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
