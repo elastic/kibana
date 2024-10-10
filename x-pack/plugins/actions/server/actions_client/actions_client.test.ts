@@ -373,7 +373,6 @@ describe('create()', () => {
   });
 
   test('creates an action with all given properties', async () => {
-    const preSaveEvent = jest.fn();
     const savedObjectCreateResult = {
       id: '1',
       type: 'type',
@@ -2010,27 +2009,6 @@ describe('delete()', () => {
 
   describe('authorization', () => {
     test('ensures user is authorised to delete actions', async () => {
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'action',
-        attributes: {
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-        },
-        references: [],
-      });
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
@@ -2048,27 +2026,6 @@ describe('delete()', () => {
     });
 
     test(`deletes any existing authorization tokens`, async () => {
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'action',
-        attributes: {
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-        },
-        references: [],
-      });
       await actionsClient.delete({ id: '1' });
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
@@ -2389,7 +2346,6 @@ describe('update()', () => {
   });
 
   test('updates an action with all given properties', async () => {
-    const preSaveEvent = jest.fn();
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',

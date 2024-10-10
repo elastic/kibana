@@ -262,6 +262,7 @@ describe('ConnectorFields renders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
@@ -282,7 +283,7 @@ describe('ConnectorFields renders', () => {
       expect(onSubmit).toBeCalledWith({
         data: {
           config: {
-            inferenceId: 'openai-completion-123',
+            inferenceId: 'openai-completion-4fzzzxjylrx',
             ...openAiConnector.config,
           },
           actionTypeId: openAiConnector.actionTypeId,
