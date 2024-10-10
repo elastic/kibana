@@ -21,6 +21,7 @@ import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
+import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
@@ -39,6 +40,20 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
+const getRuntimeMappingsFromSort = (sort: string[][]) => {
+  return sort.reduce((acc, [field]) => {
+    // TODO: Add proper type for all fields available in the field selector
+    const type: RuntimePrimitiveTypes = field === '@timestamp' ? 'date' : 'keyword';
+
+    return {
+      ...acc,
+      [field]: {
+        type,
+      },
+    };
+  }, {});
+};
+
 export const getFindingsQuery = (
   { query, sort }: UseFindingsOptions,
   rulesStates: CspBenchmarkRulesStates,
@@ -49,6 +64,7 @@ export const getFindingsQuery = (
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
+    runtime_mappings: getRuntimeMappingsFromSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),
     ignore_unavailable: true,
