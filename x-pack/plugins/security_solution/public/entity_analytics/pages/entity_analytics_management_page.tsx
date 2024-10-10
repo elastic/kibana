@@ -21,10 +21,11 @@ export const EntityAnalyticsManagementPage = () => {
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
       <EuiPageHeader
-        data-test-subj="entityAnalyticsManagementPageTitle"
         pageTitle={
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>{ENTITY_ANALYTICS_RISK_SCORE}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
+              {ENTITY_ANALYTICS_RISK_SCORE}
+            </EuiFlexItem>
             <EuiBetaBadge label={BETA} size="s" />
           </EuiFlexGroup>
         }
