@@ -58,7 +58,7 @@
       "matchDepNames": ["@elastic/charts"],
       "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:prev-minor", "Team:Visualizations"],
       "enabled": true
     },
     {
