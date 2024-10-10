@@ -356,6 +356,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<AgentPolicy>
         loading={isLoading}
+        data-test-subj="agentPoliciesTable"
         noItemsMessage={
           isLoading ? (
             <FormattedMessage

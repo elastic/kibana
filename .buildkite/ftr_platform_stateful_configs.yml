@@ -34,7 +34,9 @@ disabled:
 
   # Cypress configs, for now these are still run manually
   - x-pack/test/fleet_cypress/cli_config.ts
+  - x-pack/test/fleet_cypress/cli_config.space_awareness.ts
   - x-pack/test/fleet_cypress/config.ts
+  - x-pack/test/fleet_cypress/config.space_awareness.ts
   - x-pack/test/fleet_cypress/visual_config.ts
 
 defaultQueue: 'n2-4-spot'
