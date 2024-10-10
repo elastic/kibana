@@ -41,7 +41,7 @@ describe('hidden functions', () => {
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
         supportedCommands: ['eval'],
-        ignoreAsSuggestion: true,
+        ignoreAsSuggestion: false,
       },
     ]);
 

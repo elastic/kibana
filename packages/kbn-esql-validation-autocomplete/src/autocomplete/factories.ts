@@ -103,9 +103,10 @@ export const getCompatibleFunctionDefinition = (
 ): SuggestionRawDefinition[] => {
   const fnSupportedByCommand = allFunctions()
     .filter(
-      ({ name, supportedCommands, supportedOptions }) =>
+      ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
         (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name)
+        !ignored.includes(name) &&
+        !ignoreAsSuggestion
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   if (!returnTypes) {
