@@ -79,6 +79,31 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.apm.subFeatureRegistry.settings', {
+        defaultMessage: 'Settings',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'settings_save',
+              name: 'Ability to modify settings',
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              api: ['apm_settings_write'],
+              ui: ['settings:save'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 interface Feature {

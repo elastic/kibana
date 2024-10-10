@@ -15,9 +15,10 @@ import { ConfirmDeleteModal } from './confirm_delete_modal';
 interface Props {
   agentKeys: ApiKey[];
   onKeyDelete: () => void;
+  canManage: boolean;
 }
 
-export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
+export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
   const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
 
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
@@ -54,26 +55,28 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
       },
       render: (date: number) => <TimestampTooltip time={date} />,
     },
-    {
-      actions: [
-        {
-          name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate(
-            'xpack.apm.settings.agentKeys.table.deleteActionDescription',
-            {
-              defaultMessage: 'Delete this APM agent key',
-            }
-          ),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
-        },
-      ],
-    },
   ];
+
+  const actions = {
+    actions: [
+      {
+        name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionDescription', {
+          defaultMessage: 'Delete this APM agent key',
+        }),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
+      },
+    ],
+  };
+
+  if (canManage) {
+    columns.push(actions as EuiBasicTableColumn<ApiKey>);
+  }
 
   const search: EuiInMemoryTableProps<ApiKey>['search'] = {
     box: {
