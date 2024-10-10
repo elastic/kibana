@@ -52,7 +52,7 @@ export type TimedFillPoolResult = WithTaskTiming<ClaimAndFillPoolResult>;
  * @param converter - a function that converts task records to the appropriate task runner
  */
 export async function fillPool(
-  fetchAvailableTasks: () => Observable<Result<ClaimOwnershipResult, FillPoolResult>>,
+  fetchAvailableTasks: () => Promise<Result<ClaimOwnershipResult, FillPoolResult>>,
   converter: (taskInstance: ConcreteTaskInstance) => TaskManagerRunner,
   run: (tasks: TaskManagerRunner[]) => Promise<TaskPoolRunResult>
 ): Promise<TimedFillPoolResult> {

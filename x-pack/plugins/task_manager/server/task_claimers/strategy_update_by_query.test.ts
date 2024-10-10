@@ -174,21 +174,15 @@ describe('TaskClaiming', () => {
         versionConflicts,
       });
 
-      const resultsOrErr = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable(claimingOpts)
-      );
-      for (const resultOrErr of resultsOrErr) {
-        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-          expect(resultOrErr).toBe(undefined);
-        }
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable(claimingOpts);
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
       }
 
-      const results = resultsOrErr.map((resultOrErr) => {
-        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-          expect(resultOrErr).toBe(undefined);
-        }
-        return unwrap(resultOrErr) as ClaimOwnershipResult;
-      });
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
@@ -200,18 +194,19 @@ describe('TaskClaiming', () => {
         max_docs: getCapacity(),
       });
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: getCapacity() });
-      return results.map((result, index) => ({
+      return {
         result,
+        store,
         args: {
-          search: store.fetch.mock.calls[index][0] as SearchOpts & {
+          search: store.fetch.mock.calls[0][0] as SearchOpts & {
             query: MustNotCondition;
           },
-          updateByQuery: store.updateByQuery.mock.calls[index] as [
+          updateByQuery: store.updateByQuery.mock.calls[0] as [
             UpdateByQuerySearchOpts,
             UpdateByQueryOpts
           ],
         },
-      }));
+      };
     }
 
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
@@ -243,11 +238,9 @@ describe('TaskClaiming', () => {
       store.updateByQuery.mockRejectedValue(new Error('Oh no'));
 
       await expect(
-        getAllAsPromise(
-          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-            claimOwnershipUntil: new Date(),
-          })
-        )
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
       ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
@@ -280,13 +273,11 @@ describe('TaskClaiming', () => {
         },
       });
 
-      const [
-        {
-          args: {
-            updateByQuery: [{ query, sort }],
-          },
+      const {
+        args: {
+          updateByQuery: [{ query, sort }],
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           definitions,
         },
@@ -446,7 +437,7 @@ if (doc['task.runAt'].size()!=0) {
           createTaskRunner: jest.fn(),
         },
       });
-      const results = await testClaimAvailableTasks({
+      const { store } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
           definitions,
@@ -470,10 +461,9 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      expect(results.length).toEqual(4);
-
-      expect(results[0].args.updateByQuery[1].max_docs).toEqual(10);
-      expect(results[0].args.updateByQuery[0].script).toMatchObject({
+      expect(store.updateByQuery).toHaveBeenCalledTimes(4);
+      expect(store.updateByQuery.mock.calls[0][1]?.max_docs).toEqual(10);
+      expect(store.updateByQuery.mock.calls[0][0]?.script).toMatchObject({
         source: expect.any(String),
         lang: 'painless',
         params: {
@@ -492,29 +482,28 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      expect(results[1].args.updateByQuery[1].max_docs).toEqual(1);
-      expect(results[1].args.updateByQuery[0].script).toMatchObject({
+      expect(store.updateByQuery.mock.calls[0][1]?.max_docs).toEqual(10);
+      expect(store.updateByQuery.mock.calls[0][0]?.script).toMatchObject({
         source: expect.any(String),
         lang: 'painless',
         params: {
           fieldUpdates,
-          claimableTaskTypes: ['limitedToOne'],
+          claimableTaskTypes: ['unlimited', 'anotherUnlimited', 'finalUnlimited'],
           skippedTaskTypes: [
-            'unlimited',
             'limitedToZero',
-            'anotherUnlimited',
-            'finalUnlimited',
+            'limitedToOne',
             'anotherLimitedToOne',
             'limitedToTwo',
           ],
+          unusedTaskTypes: [],
           taskMaxAttempts: {
-            limitedToOne: maxAttempts,
+            unlimited: maxAttempts,
           },
         },
       });
 
-      expect(results[2].args.updateByQuery[1].max_docs).toEqual(1);
-      expect(results[2].args.updateByQuery[0].script).toMatchObject({
+      expect(store.updateByQuery.mock.calls[2][1]?.max_docs).toEqual(1);
+      expect(store.updateByQuery.mock.calls[2][0]?.script).toMatchObject({
         source: expect.any(String),
         lang: 'painless',
         params: {
@@ -534,8 +523,8 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      expect(results[3].args.updateByQuery[1].max_docs).toEqual(2);
-      expect(results[3].args.updateByQuery[0].script).toMatchObject({
+      expect(store.updateByQuery.mock.calls[3][1]?.max_docs).toEqual(2);
+      expect(store.updateByQuery.mock.calls[3][0]?.script).toMatchObject({
         source: expect.any(String),
         lang: 'painless',
         params: {
@@ -576,7 +565,7 @@ if (doc['task.runAt'].size()!=0) {
           createTaskRunner: jest.fn(),
         },
       });
-      const results = await testClaimAvailableTasks({
+      const { store } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
           definitions,
@@ -640,15 +629,15 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      expect(results.length).toEqual(3);
+      expect(store.updateByQuery).toHaveBeenCalledTimes(3);
 
-      expect(results[0].args.updateByQuery[1].max_docs).toEqual(10);
+      expect(store.updateByQuery.mock.calls[0][1]?.max_docs).toEqual(10);
 
       // only capacity for 3, even though 5 are allowed
-      expect(results[1].args.updateByQuery[1].max_docs).toEqual(3);
+      expect(store.updateByQuery.mock.calls[1][1]?.max_docs).toEqual(3);
 
       // only capacity for 1, even though 2 are allowed
-      expect(results[2].args.updateByQuery[1].max_docs).toEqual(1);
+      expect(store.updateByQuery.mock.calls[2][1]?.max_docs).toEqual(1);
     });
 
     test('it shuffles the types claimed in batches to ensure no type starves another', async () => {
@@ -706,36 +695,50 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      async function getUpdateByQueryScriptParams() {
-        return (
-          await getAllAsPromise(
-            taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-              claimOwnershipUntil: new Date(),
-            })
-          )
-        ).map(
-          (result, index) =>
-            (
-              store.updateByQuery.mock.calls[index][0] as {
-                query: MustNotCondition;
-                size: number;
-                sort: string | string[];
-                script: {
-                  params: {
-                    [claimableTaskTypes: string]: string[];
-                  };
+      // first cycle
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+      expect(store.updateByQuery).toHaveBeenCalledTimes(4);
+      const firstCycle = store.updateByQuery.mock.calls.map(
+        (call) =>
+          (
+            call[0] as {
+              query: MustNotCondition;
+              size: number;
+              sort: string | string[];
+              script: {
+                params: {
+                  [claimableTaskTypes: string]: string[];
                 };
-              }
-            ).script.params.claimableTaskTypes
-        );
-      }
+              };
+            }
+          ).script.params.claimableTaskTypes
+      );
 
-      const firstCycle = await getUpdateByQueryScriptParams();
       store.updateByQuery.mockClear();
-      const secondCycle = await getUpdateByQueryScriptParams();
 
-      expect(firstCycle.length).toEqual(4);
-      expect(secondCycle.length).toEqual(4);
+      // second cycle
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+      expect(store.updateByQuery).toHaveBeenCalledTimes(4);
+      const secondCycle = store.updateByQuery.mock.calls.map(
+        (call) =>
+          (
+            call[0] as {
+              query: MustNotCondition;
+              size: number;
+              sort: string | string[];
+              script: {
+                params: {
+                  [claimableTaskTypes: string]: string[];
+                };
+              };
+            }
+          ).script.params.claimableTaskTypes
+      );
+
       expect(firstCycle).not.toMatchObject(secondCycle);
     });
 
@@ -765,13 +768,11 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      const [
-        {
-          args: {
-            updateByQuery: [{ query, script }],
-          },
+      const {
+        args: {
+          updateByQuery: [{ query, script }],
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           definitions,
           taskManagerId,
@@ -871,13 +872,11 @@ if (doc['task.runAt'].size()!=0) {
         ownerId: taskManagerId,
         retryAt: claimOwnershipUntil,
       };
-      const [
-        {
-          args: {
-            updateByQuery: [{ script }],
-          },
+      const {
+        args: {
+          updateByQuery: [{ script }],
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
         },
@@ -921,14 +920,12 @@ if (doc['task.runAt'].size()!=0) {
           ownerId: taskManagerId,
         }),
       ];
-      const [
-        {
-          result: { docs },
-          args: {
-            search: { query },
-          },
+      const {
+        result: { docs },
+        args: {
+          search: { query },
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
         },
@@ -1022,14 +1019,12 @@ if (doc['task.runAt'].size()!=0) {
           ownerId: taskManagerId,
         }),
       ];
-      const [
-        {
-          result: { docs },
-          args: {
-            search: { query },
-          },
+      const {
+        result: { docs },
+        args: {
+          search: { query },
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
         },
@@ -1135,13 +1130,11 @@ if (doc['task.runAt'].size()!=0) {
         }),
       ];
       const maxDocs = 10;
-      const [
-        {
-          result: {
-            stats: { tasksUpdated, tasksConflicted, tasksClaimed },
-          },
+      const {
+        result: {
+          stats: { tasksUpdated, tasksConflicted, tasksClaimed },
         },
-      ] = await testClaimAvailableTasks({
+      } = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
         },
@@ -1279,11 +1272,9 @@ if (doc['task.runAt'].size()!=0) {
         )
         .toPromise();
 
-      await getFirstAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-          claimOwnershipUntil: new Date(),
-        })
-      );
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       const event = await promise;
       expect(event).toMatchObject(
@@ -1338,15 +1329,4 @@ function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
     },
     instance
   );
-}
-
-function getFirstAsPromise<T>(obs$: Observable<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    obs$.subscribe(resolve, reject);
-  });
-}
-function getAllAsPromise<T>(obs$: Observable<T>): Promise<T[]> {
-  return new Promise((resolve, reject) => {
-    obs$.pipe(toArray()).subscribe(resolve, reject);
-  });
 }

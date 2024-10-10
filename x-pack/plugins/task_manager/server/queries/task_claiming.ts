@@ -8,8 +8,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { Subject, Observable, of } from 'rxjs';
-import { map } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
@@ -168,9 +167,9 @@ export class TaskClaiming {
     return this.events$;
   }
 
-  public claimAvailableTasksIfCapacityIsAvailable(
+  public async claimAvailableTasksIfCapacityIsAvailable(
     claimingOptions: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>
-  ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+  ): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
     if (this.getAvailableCapacity()) {
       const opts: TaskClaimerOpts = {
         batches: this.getClaimingBatches(),
@@ -185,12 +184,12 @@ export class TaskClaiming {
         logger: this.logger,
         taskPartitioner: this.taskPartitioner,
       };
-      return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
+      return asOk(await this.taskClaimer(opts));
     }
     this.logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
-    return of(asErr(FillPoolResult.NoAvailableWorkers));
+    return asErr(FillPoolResult.NoAvailableWorkers);
   }
 }
 
