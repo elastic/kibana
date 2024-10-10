@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -40,6 +40,7 @@ import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
+import { LensTopNavMenuData } from '../types';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -111,7 +112,7 @@ function getLensTopNavConfig(options: {
   showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
   contextFromEmbeddable?: boolean;
-}): TopNavMenuData[] {
+}): LensTopNavMenuData[] {
   const {
     actions,
     savingToLibraryPermitted,
@@ -122,7 +123,7 @@ function getLensTopNavConfig(options: {
     contextFromEmbeddable,
     isByValueMode,
   } = options;
-  const topNavMenu: TopNavMenuData[] = [];
+  const topNavMenu: LensTopNavMenuData[] = [];
 
   const showSaveAndReturn = actions.saveAndReturn.visible;
 
@@ -148,6 +149,7 @@ function getLensTopNavConfig(options: {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
+      mobileIconType: 'exit',
       run: actions.goBack.execute,
       className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
@@ -166,6 +168,7 @@ function getLensTopNavConfig(options: {
 
     topNavMenu.push({
       label: exploreDataInDiscoverLabel,
+      mobileIconType: 'discoverApp',
       run: actions.getUnderlyingDataUrl.execute,
       testId: 'lnsApp_openInDiscover',
       className: 'lnsNavItem__withDivider',
@@ -181,6 +184,7 @@ function getLensTopNavConfig(options: {
     label: i18n.translate('xpack.lens.app.inspect', {
       defaultMessage: 'Inspect',
     }),
+    mobileIconType: 'inspect',
     run: actions.inspect.execute,
     testId: 'lnsApp_inspectButton',
     description: i18n.translate('xpack.lens.app.inspectAriaLabel', {
@@ -194,6 +198,7 @@ function getLensTopNavConfig(options: {
       label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Share',
       }),
+      mobileIconType: 'share',
       run: actions.share.execute,
       testId: 'lnsApp_shareButton',
       description: i18n.translate('xpack.lens.app.shareTitleAria', {
@@ -208,6 +213,7 @@ function getLensTopNavConfig(options: {
     label: i18n.translate('xpack.lens.app.settings', {
       defaultMessage: 'Settings',
     }),
+    mobileIconType: 'gear',
     run: actions.openSettings.execute,
     className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
@@ -221,6 +227,7 @@ function getLensTopNavConfig(options: {
       label: i18n.translate('xpack.lens.app.cancel', {
         defaultMessage: 'Cancel',
       }),
+      mobileIconType: 'crossInCircle',
       run: actions.cancel.execute,
       testId: 'lnsApp_cancelButton',
       description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
@@ -231,6 +238,7 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
+    mobileIconType: 'save',
     iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
       ? 'save'
       : undefined,
@@ -253,6 +261,7 @@ function getLensTopNavConfig(options: {
   if (saveButtonMeta) {
     topNavMenu.push({
       ...saveButtonMeta,
+      mobileIconType: saveButtonMeta.iconType ?? 'save',
       run: actions.saveAndReturn.execute,
       disableButton: !actions.saveAndReturn.enabled,
     });
@@ -462,7 +471,7 @@ export const LensTopNavMenu = ({
     defaultMessage: 'Lens Visualization [{date}]',
     values: { date: moment().toISOString(true) },
   });
-  const additionalMenuEntries = useMemo(() => {
+  const additionalMenuEntries = useMemo<LensTopNavMenuData[] | undefined>(() => {
     if (!visualization.activeId) return undefined;
     const visualizationId = visualization.activeId;
     const entries = topNavMenuEntryGenerators.flatMap((menuEntryGenerator) => {
@@ -527,7 +536,7 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
-  const topNavConfig = useMemo(() => {
+  const topNavConfig = useMemo<LensTopNavMenuData[]>(() => {
     const showReplaceInDashboard =
       initialContext?.originatingApp === 'dashboards' &&
       !(initialInput as LensByReferenceInput)?.savedObjectId;
@@ -1072,6 +1081,7 @@ export const LensTopNavMenu = ({
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
+      useMobileIconTypes={true}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery
           ? 'allowed_by_app_privilege'

@@ -1442,6 +1442,11 @@ export interface SharingSavedObjectProps {
 }
 
 /**
+ * Lens requires the top nav menu data item to provide a `mobileIconType` field
+ */
+export type LensTopNavMenuData = TopNavMenuData & { mobileIconType: string };
+
+/**
  * Configuration of a top nav entry which can be shown for specific scenarios given a certain combination of active datasource and visualization id.
  * This function gets passed the currently active visualization id and state as well as the current datasource states.
  *
@@ -1455,7 +1460,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
-}) => undefined | TopNavMenuData;
+}) => undefined | LensTopNavMenuData;
 
 export interface LensCellValueAction {
   id: string;
