@@ -17,3 +17,5 @@ export type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
+
+export const INFERENCE_ENDPOINTS_UI_FLAG = 'inferenceEndpointsUi:enabled';

@@ -56,7 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await discover.getHitCount()).to.be(totalCount);
   }
 
-  async function checkESQLHistogramVis(timespan: string, totalCount: string) {
+  async function checkESQLHistogramVis(
+    timespan: string,
+    totalCount: string,
+    hasTransformationalCommand = false
+  ) {
     await header.waitUntilLoadingHasFinished();
     await discover.waitUntilSearchingHasFinished();
 
@@ -64,7 +68,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('unifiedHistogramSaveVisualization');
     await testSubjects.existOrFail('unifiedHistogramEditFlyoutVisualization');
     await testSubjects.missingOrFail('unifiedHistogramEditVisualization');
-    await testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorButton');
+    if (hasTransformationalCommand) {
+      await testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorButton');
+    } else {
+      await testSubjects.existOrFail('unifiedHistogramBreakdownSelectorButton');
+    }
     await testSubjects.missingOrFail('unifiedHistogramTimeIntervalSelectorButton');
     expect(await discover.getChartTimespan()).to.be(timespan);
     expect(await discover.getHitCount()).to.be(totalCount);
@@ -310,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -359,7 +367,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -412,7 +420,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -456,7 +464,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await discover.saveSearch('testCustomESQLVis');
