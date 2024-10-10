@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Entity } from '../../../common/entities';
 import { getIdentityFieldValues } from '../../../common/utils/get_identity_fields_values';
 import { useKibana } from '../../hooks/use_kibana';
@@ -15,16 +15,17 @@ import { useKibana } from '../../hooks/use_kibana';
 export function AlertsBadge({ entity }: { entity: Entity }) {
   const identityFieldValues = getIdentityFieldValues({ entity });
   const {
-    services: { share },
+    services: {
+      http: { basePath },
+    },
   } = useKibana();
 
-  const alertsLocator = share.url.locators.get(alertsLocatorID);
-
-  const alertsLink = alertsLocator?.getRedirectUrl({
-    kuery: identityFieldValues.join(' AND '),
-    status: 'active',
-  });
-
+  const activeAlertsHref = basePath.prepend(
+    `/app/observability/alerts?_a=${rison.encode({
+      kuery: identityFieldValues.join(' AND '),
+      status: 'active',
+    })}`
+  );
   return (
     <EuiToolTip
       position="bottom"
@@ -35,7 +36,13 @@ export function AlertsBadge({ entity }: { entity: Entity }) {
         }
       )}
     >
-      <EuiBadge iconType="warning" color="danger" href={alertsLink}>
+      <EuiBadge
+        data-test-subj="inventoryAlertsBadgeLink"
+        iconType="warning"
+        color="danger"
+        iconSide="left"
+        href={activeAlertsHref}
+      >
         {entity.alertsCount}
       </EuiBadge>
     </EuiToolTip>

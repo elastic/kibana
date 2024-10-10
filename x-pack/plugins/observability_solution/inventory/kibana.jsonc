@@ -9,7 +9,6 @@
     "configPath": ["xpack", "inventory"],
     "requiredPlugins": [
       "observabilityShared",
-      "observability",
       "entityManager",
       "inference",
       "dataViews",
