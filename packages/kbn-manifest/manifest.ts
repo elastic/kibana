@@ -45,7 +45,7 @@ const getKibanaJsonc = (flags: Flags, log: ToolingLog): Package[] => {
 export const listManifestFiles = (flags: Flags, log: ToolingLog) => {
   const modules = getPackages(REPO_ROOT);
   modules
-    .filter((module) => module.manifest.type === 'plugin' && !module.manifest.group)
+    .filter((module) => module.manifest.type === 'plugin')
     .forEach((module) => {
       log.info(join(module.directory, MANIFEST_FILE), module.id);
     });
