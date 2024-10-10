@@ -248,6 +248,18 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+            },
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',

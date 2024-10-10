@@ -9,9 +9,9 @@ import React, { useState, useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { reduxDecorator } from '../../../../storybook';
+import { argTypes } from '../../../../storybook/constants';
 
-import { argTypes } from '../../../services/storybook';
-import { getSomeWorkpads } from '../../../services/stubs/workpad';
+import { getSomeWorkpads } from '../../../services/mocks';
 import { WorkpadTable as Component } from './workpad_table';
 import { WorkpadsContext } from './my_workpads';
 

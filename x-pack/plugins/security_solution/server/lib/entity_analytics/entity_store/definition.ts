@@ -27,9 +27,8 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
       'host.type',
       'host.architecture',
     ],
-    history: {
+    latest: {
       timestampField: '@timestamp',
-      interval: '1m',
     },
     version: '1.0.0',
     managed: true,
@@ -44,9 +43,8 @@ export const buildUserEntityDefinition = (space: string): EntityDefinition =>
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
     metadata: ['user.email', 'user.full_name', 'user.hash', 'user.id', 'user.name', 'user.roles'],
-    history: {
+    latest: {
       timestampField: '@timestamp',
-      interval: '1m',
     },
     version: '1.0.0',
     managed: true,

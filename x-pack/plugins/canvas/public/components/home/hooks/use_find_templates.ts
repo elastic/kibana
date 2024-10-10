@@ -6,10 +6,8 @@
  */
 
 import { useCallback } from 'react';
-
-import { useWorkpadService } from '../../../services';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useFindTemplates = () => {
-  const workpadService = useWorkpadService();
-  return useCallback(async () => await workpadService.findTemplates(), [workpadService]);
+  return useCallback(async () => await getCanvasWorkpadService().findTemplates(), []);
 };

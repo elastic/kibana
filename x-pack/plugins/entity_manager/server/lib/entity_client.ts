@@ -41,7 +41,7 @@ export class EntityClient {
     });
 
     if (!installOnly) {
-      await startTransforms(this.options.esClient, definition, this.options.logger);
+      await startTransforms(this.options.esClient, installedDefinition, this.options.logger);
     }
 
     return installedDefinition;

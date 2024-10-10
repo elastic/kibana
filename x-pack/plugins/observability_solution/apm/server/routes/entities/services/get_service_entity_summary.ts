@@ -8,7 +8,6 @@
 import type { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntityLatestServices } from '../get_entity_latest_services';
-import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';
 import { mergeEntities } from '../utils/merge_entities';
 import { MAX_NUMBER_OF_SERVICES } from './get_service_entities';
 
@@ -27,7 +26,7 @@ export function getServiceEntitySummary({ entitiesESClient, environment, service
       serviceName,
     });
 
-    const serviceEntity = calculateAvgMetrics(mergeEntities({ entities: entityLatestServices }));
+    const serviceEntity = mergeEntities({ entities: entityLatestServices });
     return serviceEntity[0];
   });
 }

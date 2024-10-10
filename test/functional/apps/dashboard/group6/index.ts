@@ -37,5 +37,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dashboard_snapshots'));
     loadTestFile(require.resolve('./embeddable_library'));
     loadTestFile(require.resolve('./dashboard_esql_chart'));
+    loadTestFile(require.resolve('./dashboard_esql_no_data'));
   });
 }

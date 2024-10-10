@@ -652,6 +652,7 @@ x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
+x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
@@ -1012,6 +1013,8 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
+
+x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Data Discovery
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
@@ -1480,6 +1483,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/api_integration/test_suites/search @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
+/x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
@@ -1511,7 +1515,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
-/x-pack/test_serverless/api_integration/test_suites/common/platform_security/ @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/security-solution
 

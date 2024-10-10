@@ -67,8 +67,8 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
 }));
 
-jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
-  getFlappingSettings: jest.fn().mockResolvedValue({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
     lookBackWindow: 20,
     statusChangeThreshold: 20,
   }),

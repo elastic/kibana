@@ -60,6 +60,8 @@ export interface KibanaNoDataPageProps {
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
   showPlainSpinner: boolean;
+  /** If the cluster has data, this handler allows the user to try ES|QL */
+  onTryESQL?: () => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
 }

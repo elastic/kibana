@@ -88,7 +88,7 @@ describe('ruleFormAdvancedOptions', () => {
     expect(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch')).not.toBeChecked();
     expect(screen.queryByText('Custom')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSettingsFlappingMessage')).toHaveTextContent(
-      'An alert is flapping if it changes status at least 3 times in the last 10 rule runs.'
+      'All rules (in this space) detect an alert is flapping when it changes status at least 3 times in the last 10 rule runs.'
     );
 
     await userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
@@ -121,7 +121,7 @@ describe('ruleFormAdvancedOptions', () => {
     expect(screen.getByTestId('lookBackWindowRangeInput')).toHaveValue('6');
     expect(screen.getByTestId('statusChangeThresholdRangeInput')).toHaveValue('4');
     expect(screen.getByTestId('ruleSettingsFlappingMessage')).toHaveTextContent(
-      'An alert is flapping if it changes status at least 4 times in the last 6 rule runs.'
+      'This rule detects an alert is flapping if it changes status at least 4 times in the last 6 rule runs.'
     );
 
     await userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
@@ -157,6 +157,10 @@ describe('ruleFormAdvancedOptions', () => {
     expect(screen.queryByText('Custom')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleFormAdvancedOptionsOverrideSwitch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleSettingsFlappingMessage')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('ruleSettingsFlappingFormTooltipButton'));
+
+    expect(screen.getByTestId('ruleSettingsFlappingFormTooltipContent')).toBeInTheDocument();
   });
 
   test('should allow for flapping inputs to be modified', async () => {
