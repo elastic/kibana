@@ -12,7 +12,7 @@ import {
   totalColumnCount,
   toSafeColumnName,
   yieldUniqueColumnNames,
-} from './csv';
+} from './columns';
 
 describe('upperBoundForColumnCount', () => {
   it('should return the correct number of columns for a simple CSV', () => {
