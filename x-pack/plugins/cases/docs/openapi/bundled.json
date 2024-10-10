@@ -288,7 +288,7 @@
         "summary": "Get cases for an alert",
         "operationId": "getCasesByAlertDefaultSpace",
         "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
-        "x-technical-preview": true,
+        "x-state": "Technical preview",
         "tags": [
           "cases"
         ],
@@ -1264,7 +1264,7 @@
       "get": {
         "summary": "Get all alerts for a case",
         "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
-        "x-technical-preview": true,
+        "x-state": "Technical preview",
         "operationId": "getCaseAlertsDefaultSpace",
         "tags": [
           "cases"
@@ -3573,7 +3573,7 @@
       },
       "templates": {
         "type": "array",
-        "x-technical-preview": true,
+        "x-state": "Technical preview",
         "items": {
           "type": "object",
           "properties": {
@@ -3611,7 +3611,7 @@
                 },
                 "customFields": {
                   "type": "array",
-                  "x-technical-preview": true,
+                  "x-state": "Technical preview",
                   "description": "Custom field values in the template.",
                   "items": {
                     "type": "object",
@@ -3976,7 +3976,7 @@
             "maxItems": 1000
           }
         ],
-        "x-technical-preview": true,
+        "x-state": "Technical preview",
         "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
       },
       "alert_indices": {
@@ -3994,13 +3994,13 @@
             "maxItems": 1000
           }
         ],
-        "x-technical-preview": true
+        "x-state": "Technical preview"
       },
       "rule": {
         "title": "Alerting rule",
         "description": "The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "type": "object",
-        "x-technical-preview": true,
+        "x-state": "Technical preview",
         "properties": {
           "id": {
             "description": "The rule identifier.",
