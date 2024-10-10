@@ -90,7 +90,7 @@ export const Overview = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {showAddMetricsCallout && (
+      {showAddMetricsCallout ? (
         <EuiFlexItem grow={false}>
           <AddMetricsCallout
             id={addMetricsCalloutId}
@@ -99,8 +99,7 @@ export const Overview = () => {
             }}
           />
         </EuiFlexItem>
-      )}
-      {!showAddMetricsCallout && (
+      ) : (
         <EuiFlexItem grow={false}>
           <KPIGrid
             assetId={asset.id}
