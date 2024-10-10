@@ -102,10 +102,10 @@ describe('useVirtualDataViewQuery', () => {
       }
     );
 
-    await waitFor(() => result.current.data);
+    await waitFor(() => expect(result.current.data).toBeDefined());
 
     unmount();
 
-    expect(mockDataViewsService.clearInstanceCache).toHaveBeenCalled();
+    await waitFor(() => expect(mockDataViewsService.clearInstanceCache).toHaveBeenCalled());
   });
 });

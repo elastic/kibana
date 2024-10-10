@@ -41,9 +41,9 @@ describe('useGetCaseFileStats', () => {
     renderHook(() => useGetCaseFileStats(hookParams), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitFor(() => null);
-
-    expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
+    await waitFor(() =>
+      expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams)
+    );
   });
 
   it('shows an error toast when filesClient.list throws', async () => {
@@ -57,9 +57,9 @@ describe('useGetCaseFileStats', () => {
     renderHook(() => useGetCaseFileStats(hookParams), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitFor(() => null);
-
-    expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

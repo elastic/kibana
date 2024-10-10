@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useLoadTagsQuery } from './use_load_tags_query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
@@ -66,18 +67,18 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitFor(() => null);
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: 'test',
+          perPage: 50,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        search: 'test',
-        perPage: 50,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual(MOCK_TAGS);
-    expect(result.current.hasNextPage).toEqual(false);
+      expect(result.current.tags).toEqual(MOCK_TAGS);
+      expect(result.current.hasNextPage).toEqual(false);
+    });
   });
 
   it('should support pagination', async () => {
@@ -100,17 +101,17 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitFor(() => null);
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          perPage: 5,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        perPage: 5,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual(['a', 'b', 'c', 'd', 'e']);
-    expect(result.current.hasNextPage).toEqual(true);
+      expect(result.current.tags).toEqual(['a', 'b', 'c', 'd', 'e']);
+      expect(result.current.hasNextPage).toEqual(true);
+    });
 
     loadRuleTags.mockResolvedValue({
       data: ['a', 'b', 'c', 'd', 'e'],
@@ -118,6 +119,7 @@ describe('useLoadTagsQuery', () => {
       perPage: 5,
       total: 10,
     });
+
     result.current.fetchNextPage();
 
     expect(loadRuleTags).toHaveBeenLastCalledWith(
@@ -128,9 +130,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitFor(() => null);
-
-    expect(result.current.hasNextPage).toEqual(false);
+    await waitFor(() => expect(result.current.hasNextPage).toEqual(false));
   });
 
   it('should support pagination when there are no tags', async () => {
@@ -154,17 +154,17 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitFor(() => null);
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          perPage: 5,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        perPage: 5,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual([]);
-    expect(result.current.hasNextPage).toEqual(false);
+      expect(result.current.tags).toEqual([]);
+      expect(result.current.hasNextPage).toEqual(false);
+    });
   });
 
   it('should call onError if API fails', async () => {
