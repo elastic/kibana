@@ -115,15 +115,16 @@ export function DiscoverMainRoute({
    * Helper function to determine when to skip the no data page
    */
   const skipNoDataPage = useCallback(
-    async (nextDataView: DataView | undefined) => {
+    async (nextDataView?: DataView) => {
       try {
-        const isEsqlQuery = isDataSourceType(
-          stateContainer.appState.getState().dataSource,
-          DataSourceType.Esql
-        );
-        const skipDataTest = savedSearchId || isEsqlQuery;
+        const { dataSource } = stateContainer.appState.getState();
+        const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
 
-        if (nextDataView || skipDataTest) {
+        // ES|QL should work without data views
+        // Given we have a saved search id, we can skip the data/data view check, too
+        // A given nextDataView is provided by the user, and therefore we can skip the data/data view check
+
+        if (savedSearchId || isEsqlQuery || nextDataView) {
           if (!isEsqlQuery) {
             await stateContainer.actions.loadDataViewList();
           }
@@ -134,7 +135,7 @@ export function DiscoverMainRoute({
           data.dataViews.hasData.hasUserDataView().catch(() => false),
           data.dataViews.hasData.hasESData().catch(() => false),
           data.dataViews.defaultDataViewExists().catch(() => false),
-          await stateContainer.actions.loadDataViewList(),
+          stateContainer.actions.loadDataViewList(),
         ]);
 
         if (!hasUserDataViewValue || !defaultDataViewExists) {
