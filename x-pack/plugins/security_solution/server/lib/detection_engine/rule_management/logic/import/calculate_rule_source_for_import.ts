@@ -10,8 +10,8 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
+import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';
 
 /**
  * Calculates the rule_source field for a rule being imported
@@ -38,7 +38,7 @@ export const calculateRuleSourceForImport = ({
   // continue to deal only with RuleResponses. The fields missing from the
   // incoming rule are not actually needed for the calculation, but only to
   // satisfy the type system.
-  const ruleResponseForImport = convertPrebuiltRuleAssetToRuleResponse(rule);
+  const ruleResponseForImport = convertRuleToImportToRuleResponse(rule);
   const ruleSource = calculateRuleSourceFromAsset({
     rule: ruleResponseForImport,
     assetWithMatchingVersion,
