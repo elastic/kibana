@@ -26,8 +26,8 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
@@ -93,6 +93,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const {
     application: { capabilities },
     isServerless,
+    http,
   } = useKibana().services;
   const {
     rulesSettings: {
@@ -109,7 +110,8 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
     useResettableState<RulesSettingsQueryDelayProperties>();
 
-  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useGetFlappingSettings({
+  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
+    http,
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
       if (!flappingSettings) {
