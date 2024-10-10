@@ -208,13 +208,17 @@ export class EntityStoreDataClient {
         taskManager,
       });
       logger.info(`Entity store initialized`);
-    } catch (e) {
-      logger.error(`Error initializing entity store for ${entityType}: ${e.message}`);
-      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
 
-      throw e;
+      return updated;
+    } catch (err) {
+      this.options.logger.error(
+        `Error initializing entity store for ${entityType}: ${err.message}`
+      );
+
+      await this.engineClient.update(definition.id, ENGINE_STATUS.ERROR);
+
+      await this.delete(entityType, taskManager, true);
     }
-    return { ...descriptor, ...updated };
   }
 
   public async getExistingEntityDefinition(entityType: EntityType) {
