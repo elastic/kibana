@@ -46,10 +46,10 @@ export const getCypressBaseConfig = (
       viewportHeight: 2160,
       viewportWidth: 3840,
       experimentalStudio: true,
-
       env: {
         grepFilterSpecs: true,
         grepOmitFiltered: true,
+        runnerUi: true,
       },
 
       e2e: {

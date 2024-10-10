@@ -453,7 +453,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
-                    runnerUi: !process.env.CI,
+                    runnerUi: !process.env.CI || cypressConfigFile.env?.runnerUI,
                   });
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
