@@ -35,6 +35,7 @@ import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -58,8 +59,8 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
-const CreateRuleRoute = lazy(() => import('./sections/rule_form/create_rule_route'));
-const EditRuleRoute = lazy(() => import('./sections/rule_form/edit_rule_route'));
+const CreateRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
+const EditRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -125,16 +126,20 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Routes>
-        <Route
-          exact
-          path={createRuleRoute}
-          component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
-        />
-        <Route
-          exact
-          path={editRuleRoute}
-          component={suspendedComponentWithProps(EditRuleRoute, 'xl')}
-        />
+        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+          <Route
+            exact
+            path={createRuleRoute}
+            component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
+          />
+        )}
+        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+          <Route
+            exact
+            path={editRuleRoute}
+            component={suspendedComponentWithProps(EditRuleRoute, 'xl')}
+          />
+        )}
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}

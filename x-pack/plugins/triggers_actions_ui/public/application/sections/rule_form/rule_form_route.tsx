@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/alerts-ui-shared/src/rule_form/rule_form';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
+import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../lib/doc_title';
 
-export const EditRuleRoute = () => {
+export const RuleFormRoute = () => {
   const {
     http,
     i18n,
@@ -27,10 +29,35 @@ export const EditRuleRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    chrome,
+    setBreadcrumbs,
   } = useKibana().services;
 
-  const { state } = useLocation<{ returnApp?: string; returnPath?: string }>();
-  const { returnApp, returnPath } = state || {};
+  const location = useLocation<{ returnApp?: string; returnPath?: string }>();
+  const { id, ruleTypeId } = useParams<{
+    id?: string;
+    ruleTypeId?: string;
+  }>();
+  const { returnApp, returnPath } = location.state || {};
+
+  // Set breadcrumb and page title
+  useEffect(() => {
+    if (id) {
+      setBreadcrumbs([
+        getAlertingSectionBreadcrumb('rules', true),
+        getAlertingSectionBreadcrumb('editRule'),
+      ]);
+      chrome.docTitle.change(getCurrentDocTitle('editRule'));
+    }
+    if (ruleTypeId) {
+      setBreadcrumbs([
+        getAlertingSectionBreadcrumb('rules', true),
+        getAlertingSectionBreadcrumb('createRule'),
+      ]);
+      chrome.docTitle.change(getCurrentDocTitle('createRule'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <IntlProvider locale="en">
@@ -59,9 +86,9 @@ export const EditRuleRoute = () => {
             });
           }
         }}
-        onSubmit={(id) => {
+        onSubmit={(ruleId) => {
           application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(id)}`,
+            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
           });
         }}
       />
@@ -70,4 +97,4 @@ export const EditRuleRoute = () => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export { EditRuleRoute as default };
+export { RuleFormRoute as default };
