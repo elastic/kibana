@@ -61,6 +61,8 @@ Users can access spaces based on the roles that they have.
 * Certain reserved roles can view and access all spaces by default. You can't prevent those roles from accessing a space. Instead, you can grant different roles to your users.
 * When <<kibana-role-management,creating or editing a role>>, you can define which existing spaces that role can access, and with which permissions.
 * When editing a space, you can assign roles to the space and define the permissions within the space for these roles. To do that, go to the **Permissions** tab of the space you're editing.
++
+When a role is assigned to _All Spaces_, you can't remove its access from the space settings. You must instead edit the role to give it more granular access to individual spaces.
 
 [float]
 === Delete a space
