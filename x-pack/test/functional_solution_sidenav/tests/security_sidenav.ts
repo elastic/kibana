@@ -69,6 +69,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await expectNoPageReload();
       });
+
+      it('renders a feedback callout', async () => {
+        await solutionNavigation.sidenav.feedbackCallout.expectExists();
+        await solutionNavigation.sidenav.feedbackCallout.dismiss();
+        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+        await browser.refresh();
+        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
     });
   });
 }
