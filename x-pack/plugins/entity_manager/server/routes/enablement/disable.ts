@@ -51,8 +51,8 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
   }),
   handler: async ({ context, response, params, logger, server }) => {
     try {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const canDisable = await canDisableEntityDiscovery(esClient);
+      const esClientAsCurrentUser = (await context.core).elasticsearch.client.asCurrentUser;
+      const canDisable = await canDisableEntityDiscovery(esClientAsCurrentUser);
       if (!canDisable) {
         return response.forbidden({
           body: {
@@ -62,6 +62,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
+      const esClient = (await context.core).elasticsearch.client.asSecondaryAuthUser;
       const soClient = (await context.core).savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });

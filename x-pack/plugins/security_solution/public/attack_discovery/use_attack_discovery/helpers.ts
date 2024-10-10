@@ -18,6 +18,7 @@ import { isEmpty } from 'lodash/fp';
 enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
+  Other = 'Other',
 }
 
 interface GenAiConfig {
