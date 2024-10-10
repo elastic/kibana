@@ -103,12 +103,13 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     configId: cert.configId,
     monitorTags: cert.tags,
     errorMessage: cert.errorMessage,
+    labels: cert.labels,
   };
 };
 
 export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uuid: string) => ({
-  [CERT_COMMON_NAME]: cert.common_name as unknown as string[],
-  [CERT_ISSUER_NAME]: cert.issuer as unknown as string[],
+  [CERT_COMMON_NAME]: cert.common_name,
+  [CERT_ISSUER_NAME]: cert.issuer,
   [CERT_VALID_NOT_AFTER]: cert.not_after,
   [CERT_VALID_NOT_BEFORE]: cert.not_before,
   [CERT_HASH_SHA256]: cert.sha256,

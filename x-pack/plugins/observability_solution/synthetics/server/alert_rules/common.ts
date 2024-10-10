@@ -556,7 +556,6 @@ export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<MonitorStatusAle
   mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
   shouldWrite: true,
-  useEcs: true,
 };
 
 export function getTimeUnitLabel(timeWindow: TimeWindow) {
