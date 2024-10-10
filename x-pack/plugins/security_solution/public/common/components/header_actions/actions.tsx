@@ -9,8 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import {
   selectNotesByDocumentId,
   selectDocumentNotesBySavedObjectId,
@@ -46,6 +47,8 @@ import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
+import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -111,25 +114,48 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+
+  const { navigateToAnalyzer } = useNavigateToAnalyzer({
+    isFlyoutOpen: false,
+    eventId,
+    indexName: ecsData._index,
+    scopeId: timelineId,
+  });
+
+  const { navigateToSessionView } = useNavigateToSessionView({
+    isFlyoutOpen: false,
+    eventId,
+    indexName: ecsData._index,
+    scopeId: timelineId,
+  });
+
   const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-    const scopedActions = getScopedActions(timelineId);
 
-    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    if (scopedActions) {
-      dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-    }
-    if (timelineId === TimelineId.active) {
-      if (dataGridIsFullScreen) {
-        setTimelineFullScreen(true);
-      }
-      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    if (visualizationInFlyoutEnabled) {
+      navigateToAnalyzer();
     } else {
-      if (dataGridIsFullScreen) {
-        setGlobalFullScreen(true);
+      const scopedActions = getScopedActions(timelineId);
+
+      const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+      if (scopedActions) {
+        dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+      }
+      if (timelineId === TimelineId.active) {
+        if (dataGridIsFullScreen) {
+          setTimelineFullScreen(true);
+        }
+        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+      } else {
+        if (dataGridIsFullScreen) {
+          setGlobalFullScreen(true);
+        }
       }
     }
   }, [
@@ -139,6 +165,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     ecsData._id,
     setTimelineFullScreen,
     setGlobalFullScreen,
+    visualizationInFlyoutEnabled,
+    navigateToAnalyzer,
   ]);
 
   const sessionViewConfig = useMemo(() => {
@@ -169,23 +197,32 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const openSessionView = useCallback(() => {
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-    const scopedActions = getScopedActions(timelineId);
 
-    if (timelineId === TimelineId.active) {
-      if (dataGridIsFullScreen) {
-        setTimelineFullScreen(true);
+    if (
+      visualizationInFlyoutEnabled &&
+      sessionViewConfig !== null &&
+      timelineId !== TableId.kubernetesPageSessions
+    ) {
+      navigateToSessionView();
+    } else {
+      const scopedActions = getScopedActions(timelineId);
+
+      if (timelineId === TimelineId.active) {
+        if (dataGridIsFullScreen) {
+          setTimelineFullScreen(true);
+        }
+        if (sessionViewConfig !== null) {
+          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
+        }
+      } else {
+        if (dataGridIsFullScreen) {
+          setGlobalFullScreen(true);
+        }
       }
       if (sessionViewConfig !== null) {
-        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
-      }
-    } else {
-      if (dataGridIsFullScreen) {
-        setGlobalFullScreen(true);
-      }
-    }
-    if (sessionViewConfig !== null) {
-      if (scopedActions) {
-        dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
+        if (scopedActions) {
+          dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
+        }
       }
     }
   }, [
@@ -195,6 +232,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     setTimelineFullScreen,
     dispatch,
     setGlobalFullScreen,
+    visualizationInFlyoutEnabled,
+    navigateToSessionView,
   ]);
 
   const { activeStep, isTourShown, incrementStep } = useTourContext();
