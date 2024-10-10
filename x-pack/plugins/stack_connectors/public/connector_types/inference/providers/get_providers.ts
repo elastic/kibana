@@ -270,7 +270,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
     {
       provider: 'googlevertexai',
       logo: '', // should be googlevertexai logo here, the hardcoded uses assets/images
-      taskTypes: ['rerank', 'text_embedding'],
+      taskTypes: ['text_embedding', 'rerank'],
       configuration: {
         service_account_json: {
           display: DisplayType.TEXTBOX,
@@ -496,7 +496,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
     {
       provider: 'elasticsearch',
       logo: '', // elasticsearch logo here
-      taskTypes: ['rerank', 'text_embedding'],
+      taskTypes: ['text_embedding', 'rerank'],
       configuration: {
         model_id: {
           display: DisplayType.DROPDOWN,
@@ -923,7 +923,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
     {
       provider: 'alibabacloud-ai-search',
       logo: '', // should be anthropic logo here, the hardcoded uses assets/images
-      taskTypes: ['completion', 'text_embedding', 'rerank', 'sparse_embedding'],
+      taskTypes: ['completion', 'sparse_embedding', 'text_embedding', 'rerank'],
       configuration: {
         api_key: {
           display: DisplayType.TEXTBOX,

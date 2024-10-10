@@ -67,7 +67,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
-    const esClient = services.scopedClusterClient.asCurrentUser;
+    const esClient = services.scopedClusterClient.asInternalUser;
     try {
       const taskSettings = config?.taskTypeConfig
         ? {
@@ -130,7 +130,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   },
   postSaveHook: async ({ config, logger, services, wasSuccessful, isUpdate }) => {
     if (!wasSuccessful && !isUpdate) {
-      const esClient = services.scopedClusterClient.asCurrentUser;
+      const esClient = services.scopedClusterClient.asInternalUser;
       await deleteInferenceEndpoint(
         config.inferenceId,
         config.taskType as InferenceTaskType,
@@ -140,7 +140,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     }
   },
   postDeleteHook: async ({ config, logger, services }) => {
-    const esClient = services.scopedClusterClient.asCurrentUser;
+    const esClient = services.scopedClusterClient.asInternalUser;
     await deleteInferenceEndpoint(
       config.inferenceId,
       config.taskType as InferenceTaskType,
