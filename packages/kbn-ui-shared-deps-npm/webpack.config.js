@@ -143,8 +143,10 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      mainFields: ['browser', 'main', 'module'],
-      // conditionNames: ['require', 'node', 'module', 'import', 'default'],
+      mainFields: ['browser', 'module', 'main'],
+      conditionNames: ['browser', 'module', 'import', 'require', 'default'],
+      // mainFields: ['browser', 'main', 'module'],
+      // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
     },
 
     optimization: {
