@@ -644,3 +644,10 @@ export const fieldLimitMitigationRolloverButton = i18n.translate(
     defaultMessage: 'Rollover',
   }
 );
+
+export const manualMitigationCustomPipelineText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText',
+  {
+    defaultMessage: 'Copy the name below to add or edit the custom pipeline',
+  }
+);

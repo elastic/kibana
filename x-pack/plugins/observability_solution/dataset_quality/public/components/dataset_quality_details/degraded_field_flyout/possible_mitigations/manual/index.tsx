@@ -13,36 +13,40 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
+  EuiCopy,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 import {
+  manualMitigationCustomPipelineText,
   otherMitigationsCustomComponentTemplate,
   otherMitigationsCustomIngestPipeline,
 } from '../../../../../../common/translations';
-import { useDatasetQualityDetailsState, useDegradedFields } from '../../../../../hooks';
+import { useDatasetQualityDetailsState } from '../../../../../hooks';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
 
 export function ManualMitigations() {
+  const { integrationDetails } = useDatasetQualityDetailsState();
+  const isIntegration = !!integrationDetails?.integration;
   return (
     <>
-      <EditComponentTemplate />
+      <EditComponentTemplate isIntegration={isIntegration} />
       <EuiSpacer size="s" />
-      <EditPipeline />
+      <EditPipeline isIntegration={isIntegration} />
     </>
   );
 }
 
-function EditComponentTemplate() {
+function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
   const {
     services: { application },
   } = useKibanaContextForPlugin();
 
-  const { dataStreamSettings, integrationDetails, datasetDetails } =
-    useDatasetQualityDetailsState();
+  const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
-  const isIntegration = !!integrationDetails?.integration;
 
   const onClickHandler = useCallback(async () => {
     await application.navigateToApp(MANAGEMENT_APP_ID, {
@@ -77,15 +81,18 @@ function EditComponentTemplate() {
   );
 }
 
-function EditPipeline() {
+function EditPipeline({ isIntegration }: { isIntegration: boolean }) {
   const {
     services: { application },
   } = useKibanaContextForPlugin();
-  const { degradedFieldAnalysis } = useDegradedFields();
+  const { datasetDetails } = useDatasetQualityDetailsState();
+  const { type, name } = datasetDetails;
+
+  const copyText = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
 
   const onClickHandler = async () => {
     await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: `/ingest/ingest_pipelines/?pipeline=${degradedFieldAnalysis?.defaultPipeline}`,
+      path: '/ingest/ingest_pipelines/?pipeline',
       openInNewTab: true,
     });
   };
@@ -108,6 +115,22 @@ function EditPipeline() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiLink>
+      <EuiSpacer size="s" />
+      <EuiText data-test-subj="datasetQualityManualMitigationsPipelineLinkText" size="xs">
+        <p>{manualMitigationCustomPipelineText}</p>
+        <EuiCopy textToCopy={copyText}>
+          {(copy) => (
+            <EuiButtonEmpty
+              iconType="copy"
+              onClick={copy}
+              data-test-subj="datasetQualityEditPipelineButton"
+              size="s"
+            >
+              {copyText}
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
+      </EuiText>
     </EuiPanel>
   );
 }
