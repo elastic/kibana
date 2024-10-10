@@ -9,7 +9,11 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import { ENTITY_STORE_DEFAULT_INTERVAL, ENTITY_STORE_DEFAULT_SOURCE_INDICES } from '../constants';
+import {
+  DEFAULT_INTERVAL,
+  DEFAULT_LOOKBACK_PERIOD,
+  ENTITY_STORE_DEFAULT_SOURCE_INDICES,
+} from '../constants';
 import { buildEntityDefinitionId, getIdentityFieldForEntityType } from '../utils';
 import type {
   FieldRetentionDefinition,
@@ -61,9 +65,10 @@ export class UnitedEntityDefinition {
       identityFields: [identityField],
       displayNameTemplate: `{{${identityField}}}`,
       metadata,
-      history: {
+      latest: {
         timestampField: '@timestamp',
-        interval: ENTITY_STORE_DEFAULT_INTERVAL,
+        lookbackPeriod: DEFAULT_LOOKBACK_PERIOD,
+        interval: DEFAULT_INTERVAL,
       },
       version: this.version,
       managed: true,

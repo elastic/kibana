@@ -24,7 +24,7 @@ import type {
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { getEntitiesIndexName } from './utils';
+import { buildEntityDefinitionId, getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
@@ -203,6 +203,22 @@ export class EntityStoreDataClient {
     return { ...descriptor, ...updated };
   }
 
+  public async getExistingEntityDefinition(entityType: EntityType) {
+    const entityDefinitionId = buildEntityDefinitionId(entityType, this.options.namespace);
+
+    const {
+      definitions: [definition],
+    } = await this.entityClient.getEntityDefinitions({
+      id: entityDefinitionId,
+    });
+
+    if (!definition) {
+      throw new Error(`Unable to find entity definition for ${entityType}`);
+    }
+
+    return definition;
+  }
+
   public async start(entityType: EntityType, options?: { force: boolean }) {
     const descriptor = await this.engineClient.get(entityType);
 
@@ -212,16 +228,14 @@ export class EntityStoreDataClient {
       );
     }
 
-    const { entityManagerDefinition } = getUnitedEntityDefinition({
-      entityType,
-      namespace: this.options.namespace,
-      fieldHistoryLength: descriptor.fieldHistoryLength,
-    });
-
     this.options.logger.info(
       `In namespace ${this.options.namespace}: Starting entity store for ${entityType}`
     );
-    await this.entityClient.startEntityDefinition(entityManagerDefinition);
+
+    // startEntityDefinition requires more fields than the engine descriptor
+    // provides so we need to fetch the full entity definition
+    const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
+    await this.entityClient.startEntityDefinition(fullEntityDefinition);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
   }
@@ -235,15 +249,13 @@ export class EntityStoreDataClient {
       );
     }
 
-    const { entityManagerDefinition } = getUnitedEntityDefinition({
-      entityType,
-      namespace: this.options.namespace,
-      fieldHistoryLength: descriptor.fieldHistoryLength,
-    });
     this.options.logger.info(
       `In namespace ${this.options.namespace}: Stopping entity store for ${entityType}`
     );
-    await this.entityClient.stopEntityDefinition(entityManagerDefinition);
+    // stopEntityDefinition requires more fields than the engine descriptor
+    // provides so we need to fetch the full entity definition
+    const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
+    await this.entityClient.stopEntityDefinition(fullEntityDefinition);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
   }
