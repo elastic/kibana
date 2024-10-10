@@ -87,6 +87,7 @@ export function getDashboardApi({
       ...DEFAULT_DASHBOARD_INPUT,
     },
     panelsManager,
+    savedObjectId$,
     settingsManager,
     unifiedSearchManager,
   });

@@ -8,14 +8,18 @@
  */
 
 import { BehaviorSubject, Subject, combineLatest, skipWhile, switchMap } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishesSavedObjectId, PublishingSubject } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { omit } from 'lodash';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
+import {
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
 
 export function initializeUnsavedChangesManager({
   anyMigrationRun,
@@ -23,6 +27,7 @@ export function initializeUnsavedChangesManager({
   controlGroupApi$,
   lastSavedState,
   panelsManager,
+  savedObjectId$,
   settingsManager,
   unifiedSearchManager,
 }: {
@@ -31,6 +36,7 @@ export function initializeUnsavedChangesManager({
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedState: DashboardState;
   panelsManager: ReturnType<typeof initializePanelsManager>;
+  savedObjectId$: PublishesSavedObjectId['savedObjectId'];
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }) {
@@ -79,11 +85,18 @@ export function initializeUnsavedChangesManager({
 
     // backup unsaved changes if configured to do so
     if (creationOptions?.useSessionStorageIntegration) {
+      // Current behaviour expects time range not to be backed up. Revisit this?
+      const dashboardStateToBackup = omit(dashboardChanges ?? {}, ['timeRange', 'refreshInterval']);
       const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
       if (controlGroupChanges) {
         reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
       }
-      // backupUnsavedChanges.bind(this)(dashboardChanges, reactEmbeddableChanges);
+
+      getDashboardBackupService().setState(
+        savedObjectId$.value,
+        dashboardStateToBackup,
+        reactEmbeddableChanges
+      );
     }
   });
 
