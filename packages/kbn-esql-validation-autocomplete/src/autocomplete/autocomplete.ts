@@ -18,6 +18,7 @@ import type {
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition } from './types';
 import {
@@ -309,10 +310,16 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 function workoutBuiltinOptions(
   nodeArg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): { skipAssign: boolean } {
+): { skipAssign: boolean; commandsToInclude?: string[] } {
+  const commandsToInclude =
+    nodeArg.subType === 'postfix-unary-expression' ||
+    last(nodeArg.args)?.subtype === 'postfix-unary-expression'
+      ? ['and', 'or']
+      : undefined;
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
     skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
+    commandsToInclude,
   };
 }
 
@@ -432,7 +439,10 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      return def.params[index].type === extractTypeFromASTArg(a, references);
+      return (
+        def.params[index].type === extractTypeFromASTArg(a, references) ||
+        def.params[index].type === 'any'
+      );
     });
   });
   if (!hasCorrectTypes) {
@@ -1024,6 +1034,8 @@ async function getBuiltinFunctionNextArgument(
   const suggestions = [];
   const isFnComplete = isFunctionArgComplete(nodeArg, references);
 
+  // @TODO: remove
+  console.log(`--@@nodeArg`, nodeArg);
   if (isFnComplete.complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
@@ -1104,6 +1116,8 @@ async function getBuiltinFunctionNextArgument(
   }
   return suggestions.map<SuggestionRawDefinition>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
+    // @TODO: remove
+    console.log(`--@@overlap`, overlap);
     return {
       ...s,
       rangeToReplace: {

@@ -207,9 +207,13 @@ export function getOverlapRange(
     }
   }
 
+  const start = Math.min(query.length - overlapLength + 1, query.length);
+  const end = length;
+
+  if (start === end) return { start: start + 1, end: end + 1 };
   return {
-    start: Math.min(query.length - overlapLength + 1, query.length),
-    end: query.length,
+    start,
+    end,
   };
 }
 
