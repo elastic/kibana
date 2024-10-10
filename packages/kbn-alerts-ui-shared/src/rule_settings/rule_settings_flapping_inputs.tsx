@@ -14,7 +14,7 @@ import {
   MAX_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
   MAX_STATUS_CHANGE_THRESHOLD,
-} from '@kbn/alerting-types';
+} from '@kbn/alerting-types/flapping/latest';
 import { i18n } from '@kbn/i18n';
 import { RuleSettingsRangeInput } from './rule_settings_range_input';
 

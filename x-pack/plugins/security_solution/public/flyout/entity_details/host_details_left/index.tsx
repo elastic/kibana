@@ -12,6 +12,7 @@ import {
   getInsightsInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import type { CspInsightLeftPanelSubTab } from '../shared/components/left_panel/left_panel_header';
 import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
@@ -23,8 +24,10 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   name: string;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
+  hasVulnerabilitiesFindings?: boolean;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
+    subTab?: CspInsightLeftPanelSubTab;
   };
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
@@ -39,6 +42,7 @@ export const HostDetailsPanel = ({
   scopeId,
   path,
   hasMisconfigurationFindings,
+  hasVulnerabilitiesFindings,
 }: HostDetailsPanelProps) => {
   const [selectedTabId, setSelectedTabId] = useState(
     path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS
@@ -53,11 +57,12 @@ export const HostDetailsPanel = ({
       : [];
 
     // Determine if the Insights tab should be included
-    const insightsTab = hasMisconfigurationFindings
-      ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
-      : [];
+    const insightsTab =
+      hasMisconfigurationFindings || hasVulnerabilitiesFindings
+        ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
+        : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
-  }, [isRiskScoreExist, name, scopeId, hasMisconfigurationFindings]);
+  }, [isRiskScoreExist, name, scopeId, hasMisconfigurationFindings, hasVulnerabilitiesFindings]);
 
   return (
     <>

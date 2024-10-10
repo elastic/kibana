@@ -8,7 +8,7 @@
  */
 
 import { dockerContainer, DockerContainerMetricsDocument } from './docker_container';
-import { host, HostMetricsDocument } from './host';
+import { host, HostMetricsDocument, minimalHost } from './host';
 import { k8sContainer, K8sContainerMetricsDocument } from './k8s_container';
 import { pod, PodMetricsDocument } from './pod';
 import { awsRds, AWSRdsMetricsDocument } from './aws/rds';
@@ -24,6 +24,7 @@ export type InfraDocument =
 
 export const infra = {
   host,
+  minimalHost,
   pod,
   dockerContainer,
   k8sContainer,

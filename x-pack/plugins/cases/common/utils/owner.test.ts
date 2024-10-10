@@ -42,7 +42,7 @@ describe('owner utils', () => {
 
     it.each(owners)('returns owner %s correctly for consumer', (owner) => {
       for (const consumer of owner.validRuleConsumers ?? []) {
-        const result = getOwnerFromRuleConsumerProducer(consumer);
+        const result = getOwnerFromRuleConsumerProducer({ consumer });
 
         expect(result).toBe(owner.id);
       }
@@ -50,23 +50,33 @@ describe('owner utils', () => {
 
     it.each(owners)('returns owner %s correctly for producer', (owner) => {
       for (const producer of owner.validRuleConsumers ?? []) {
-        const result = getOwnerFromRuleConsumerProducer(undefined, producer);
+        const result = getOwnerFromRuleConsumerProducer({ producer });
 
         expect(result).toBe(owner.id);
       }
     });
 
     it('returns cases as a default owner', () => {
-      const owner = getOwnerFromRuleConsumerProducer();
+      const owner = getOwnerFromRuleConsumerProducer({});
 
       expect(owner).toBe(OWNER_INFO.cases.id);
     });
 
-    it('returns owner as per consumer when both values are passed ', () => {
-      const owner = getOwnerFromRuleConsumerProducer(
-        AlertConsumers.SIEM,
-        AlertConsumers.OBSERVABILITY
-      );
+    it('returns owner as per consumer when both values are passed', () => {
+      const owner = getOwnerFromRuleConsumerProducer({
+        consumer: AlertConsumers.SIEM,
+        producer: AlertConsumers.OBSERVABILITY,
+      });
+
+      expect(owner).toBe(OWNER_INFO.securitySolution.id);
+    });
+
+    it('returns securitySolution owner if project isServerlessSecurity', () => {
+      const owner = getOwnerFromRuleConsumerProducer({
+        consumer: AlertConsumers.OBSERVABILITY,
+        producer: AlertConsumers.OBSERVABILITY,
+        isServerlessSecurity: true,
+      });
 
       expect(owner).toBe(OWNER_INFO.securitySolution.id);
     });

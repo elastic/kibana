@@ -9,5 +9,6 @@
 
 export * from './actions';
 export * from './dev_tools';
+export * from './console_inspector';
 export * from './notification_channel';
 export * from './types';

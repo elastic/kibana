@@ -16,7 +16,6 @@ import type {
 import {
   ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
-  ActionsClientSimpleChatModel,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
@@ -186,14 +185,17 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
-export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
-  llmType === 'openai'
-    ? ActionsClientChatOpenAI
-    : llmType === 'bedrock' && bedrockChatEnabled
-    ? ActionsClientBedrockChatModel
-    : llmType === 'gemini' && bedrockChatEnabled
-    ? ActionsClientChatVertexAI
-    : ActionsClientSimpleChatModel;
+export const getLlmClass = (llmType?: string) => {
+  switch (llmType) {
+    case 'bedrock':
+      return ActionsClientBedrockChatModel;
+    case 'gemini':
+      return ActionsClientChatVertexAI;
+    case 'openai':
+    default:
+      return ActionsClientChatOpenAI;
+  }
+};
 
 export const isOpenSourceModel = (connector?: Connector): boolean => {
   if (connector == null) {
@@ -201,19 +203,25 @@ export const isOpenSourceModel = (connector?: Connector): boolean => {
   }
 
   const llmType = getLlmType(connector.actionTypeId);
-  const connectorApiUrl = connector.config?.apiUrl
-    ? (connector.config.apiUrl as string)
-    : undefined;
+  const isOpenAiType = llmType === 'openai';
+
+  if (!isOpenAiType) {
+    return false;
+  }
   const connectorApiProvider = connector.config?.apiProvider
     ? (connector.config?.apiProvider as OpenAiProviderType)
     : undefined;
+  if (connectorApiProvider === OpenAiProviderType.Other) {
+    return true;
+  }
 
-  const isOpenAiType = llmType === 'openai';
-  const isOpenAI =
-    isOpenAiType &&
-    (!connectorApiUrl ||
-      connectorApiUrl === OPENAI_CHAT_URL ||
-      connectorApiProvider === OpenAiProviderType.AzureAi);
+  const connectorApiUrl = connector.config?.apiUrl
+    ? (connector.config.apiUrl as string)
+    : undefined;
 
-  return isOpenAiType && !isOpenAI;
+  return (
+    !!connectorApiUrl &&
+    connectorApiUrl !== OPENAI_CHAT_URL &&
+    connectorApiProvider !== OpenAiProviderType.AzureAi
+  );
 };

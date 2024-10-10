@@ -900,12 +900,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx"
-              },
-              {
                 "plugin": "@kbn/reporting-public",
                 "path": "packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx"
               }
             ]
           },

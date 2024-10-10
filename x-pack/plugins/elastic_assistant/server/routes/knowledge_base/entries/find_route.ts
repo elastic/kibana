@@ -26,7 +26,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { ESQL_RESOURCE, SECURITY_LABS_RESOURCE } from '../constants';
+import { SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -74,7 +74,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
-          const systemFilter = ` AND kb_resource:"user"`;
+          const systemFilter = ` AND (kb_resource:"user" OR type:"index")`;
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
 
           const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
@@ -108,12 +108,6 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
 
           const systemEntries = [
-            {
-              bucketId: 'esqlDocsId',
-              kbResource: ESQL_RESOURCE,
-              name: 'ES|QL documents',
-              required: true,
-            },
             {
               bucketId: 'securityLabsId',
               kbResource: SECURITY_LABS_RESOURCE,
@@ -166,7 +160,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
               body: {
                 perPage: result.perPage,
                 page: result.page,
-                total: result.total,
+                total: result.total + systemEntries.length,
                 data: [...transformESSearchToKnowledgeBaseEntry(result.data), ...systemEntries],
               },
             });

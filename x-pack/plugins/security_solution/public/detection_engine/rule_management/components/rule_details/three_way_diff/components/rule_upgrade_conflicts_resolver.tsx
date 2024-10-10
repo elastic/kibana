@@ -9,7 +9,7 @@ import React from 'react';
 import type {
   RuleUpgradeState,
   SetRuleFieldResolvedValueFn,
-} from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+} from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 
 interface RuleUpgradeConflictsResolverProps {
@@ -31,6 +31,7 @@ export function RuleUpgradeConflictsResolver({
     <FieldUpgradeConflictsResolver
       key={fieldName}
       fieldName={fieldName}
+      fieldUpgradeState={ruleUpgradeState.fieldsUpgradeState[fieldName]}
       fieldThreeWayDiff={fieldDiff}
       finalDiffableRule={ruleUpgradeState.finalRule}
     />

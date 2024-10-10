@@ -22,6 +22,8 @@ import {
 } from '../../common/hooks';
 import { getAvailableRuleTypes } from '../utils';
 import { RuleTypeRegistryContract } from '../../common';
+import { useFetchFlappingSettings } from '../../common/hooks/use_fetch_flapping_settings';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
 import { useLoadRuleTypeAadTemplateField } from '../../common/hooks/use_load_rule_type_aad_template_fields';
 
 export interface UseLoadDependencies {
@@ -79,6 +81,15 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     toasts,
     filteredRuleTypes,
+  });
+
+  const {
+    data: flappingSettings,
+    isLoading: isLoadingFlappingSettings,
+    isInitialLoading: isInitialLoadingFlappingSettings,
+  } = useFetchFlappingSettings({
+    http,
+    enabled: IS_RULE_SPECIFIC_FLAPPING_ENABLED,
   });
 
   const {
@@ -144,6 +155,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isLoadingUiConfig ||
         isLoadingHealthCheck ||
         isLoadingRuleTypes ||
+        isLoadingFlappingSettings ||
         isLoadingConnectors ||
         isLoadingConnectorTypes ||
         isLoadingAadtemplateFields
@@ -156,6 +168,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isLoadingHealthCheck ||
       isLoadingRule ||
       isLoadingRuleTypes ||
+      isLoadingFlappingSettings ||
       isLoadingConnectors ||
       isLoadingConnectorTypes ||
       isLoadingAadtemplateFields
@@ -166,6 +179,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isLoadingHealthCheck,
     isLoadingRule,
     isLoadingRuleTypes,
+    isLoadingFlappingSettings,
     isLoadingConnectors,
     isLoadingConnectorTypes,
     isLoadingAadtemplateFields,
@@ -178,6 +192,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isInitialLoadingUiConfig ||
         isInitialLoadingHealthCheck ||
         isInitialLoadingRuleTypes ||
+        isInitialLoadingFlappingSettings ||
         isInitialLoadingConnectors ||
         isInitialLoadingConnectorTypes ||
         isInitialLoadingAadTemplateField
@@ -190,6 +205,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isInitialLoadingHealthCheck ||
       isInitialLoadingRule ||
       isInitialLoadingRuleTypes ||
+      isInitialLoadingFlappingSettings ||
       isInitialLoadingConnectors ||
       isInitialLoadingConnectorTypes ||
       isInitialLoadingAadTemplateField
@@ -200,6 +216,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoadingHealthCheck,
     isInitialLoadingRule,
     isInitialLoadingRuleTypes,
+    isInitialLoadingFlappingSettings,
     isInitialLoadingConnectors,
     isInitialLoadingConnectorTypes,
     isInitialLoadingAadTemplateField,
@@ -213,6 +230,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     uiConfig,
     healthCheckError,
     fetchedFormData,
+    flappingSettings,
     connectors,
     connectorTypes,
     aadTemplateFields,

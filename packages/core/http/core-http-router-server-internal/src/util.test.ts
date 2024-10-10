@@ -9,7 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteValidator } from '@kbn/core-http-server';
-import { prepareResponseValidation } from './util';
+import { injectResponseHeaders, prepareResponseValidation } from './util';
+import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
   it('wraps only expected values in "once"', () => {
@@ -47,5 +48,19 @@ describe('prepareResponseValidation', () => {
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);
     expect(validation.response![500].body).toBeUndefined();
+  });
+});
+
+describe('injectResponseHeaders', () => {
+  it('injects an empty value as expected', () => {
+    const result = injectResponseHeaders({}, kibanaResponseFactory.ok());
+    expect(result.options.headers).toEqual({});
+  });
+  it('merges values as expected', () => {
+    const result = injectResponseHeaders(
+      { foo: 'false', baz: 'true' },
+      kibanaResponseFactory.ok({ headers: { foo: 'true', bar: 'false' } })
+    );
+    expect(result.options.headers).toEqual({ foo: 'false', bar: 'false', baz: 'true' });
   });
 });

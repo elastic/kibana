@@ -45,6 +45,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       monitors: savedObjects.map((monitor) =>
         mapSavedObjectToMonitor({
           monitor,
+          internal: request.query?.internal,
         })
       ),
       absoluteTotal,

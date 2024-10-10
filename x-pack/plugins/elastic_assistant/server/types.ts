@@ -42,7 +42,6 @@ import {
   ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
-  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -231,8 +230,7 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI
-  | ActionsClientSimpleChatModel;
+  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;

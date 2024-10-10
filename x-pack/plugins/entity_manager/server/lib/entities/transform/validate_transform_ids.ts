@@ -7,26 +7,14 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { EntityDefinitionIdInvalid } from '../errors/entity_definition_id_invalid';
-import {
-  generateHistoryBackfillTransformId,
-  generateHistoryTransformId,
-  generateLatestTransformId,
-} from '../helpers/generate_component_id';
+import { generateLatestTransformId } from '../helpers/generate_component_id';
 
 const TRANSFORM_ID_MAX_LENGTH = 64;
 
 export function validateDefinitionCanCreateValidTransformIds(definition: EntityDefinition) {
-  const historyTransformId = generateHistoryTransformId(definition);
   const latestTransformId = generateLatestTransformId(definition);
-  const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
 
-  const spareChars =
-    TRANSFORM_ID_MAX_LENGTH -
-    Math.max(
-      historyTransformId.length,
-      latestTransformId.length,
-      historyBackfillTransformId.length
-    );
+  const spareChars = TRANSFORM_ID_MAX_LENGTH - latestTransformId.length;
 
   if (spareChars < 0) {
     throw new EntityDefinitionIdInvalid(

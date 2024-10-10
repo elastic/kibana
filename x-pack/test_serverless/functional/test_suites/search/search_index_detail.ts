@@ -84,7 +84,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
-      it('should show api key', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/194673
+      it.skip('should show api key', async () => {
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);

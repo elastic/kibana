@@ -52,27 +52,21 @@ export function TrainedModelsTableProvider(
           id: string;
           description: string;
           modelTypes: string[];
-          createdAt: string;
           state: string;
         } = {
           id: $tr
             .findTestSubject('mlModelsTableColumnId')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnIdValueId')
             .text()
             .trim(),
           description: $tr
-            .findTestSubject('mlModelsTableColumnDescription')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnId')
+            .findTestSubject('mlModelsTableColumnIdValueDescription')
             .text()
             .trim(),
           modelTypes,
           state: $tr
             .findTestSubject('mlModelsTableColumnDeploymentState')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
-          createdAt: $tr
-            .findTestSubject('mlModelsTableColumnCreatedAt')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -160,12 +154,6 @@ export function TrainedModelsTableProvider(
         `Expected trained model row types to be '${JSON.stringify(
           expectedRow.modelTypes
         )}' (got '${JSON.stringify(modelRow.modelTypes)}')`
-      );
-      // 'Created at' will be different on each run,
-      // so we will just assert that the value is in the expected timestamp format.
-      expect(modelRow.createdAt).to.match(
-        /^\w{3}\s\d+,\s\d{4}\s@\s\d{2}:\d{2}:\d{2}\.\d{3}$/,
-        `Expected trained model row created at time to have same format as 'Dec 5, 2019 @ 12:28:34.594' (got '${modelRow.createdAt}')`
       );
     }
 
@@ -584,9 +572,6 @@ export function TrainedModelsTableProvider(
 
       await mlCommonUI.waitForRefreshButtonEnabled();
 
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been started successfully.`
-      );
       await this.waitForModelsToLoad();
 
       await retry.tryForTime(
@@ -611,10 +596,6 @@ export function TrainedModelsTableProvider(
 
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
-      await mlCommonUI.waitForRefreshButtonEnabled();
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been stopped successfully.`
-      );
       await mlCommonUI.waitForRefreshButtonEnabled();
     }
 

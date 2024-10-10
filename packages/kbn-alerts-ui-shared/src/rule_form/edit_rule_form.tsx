@@ -69,6 +69,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     connectors,
     connectorTypes,
     aadTemplateFields,
+    flappingSettings,
   } = useLoadDependencies({
     http,
     toasts: notifications.toasts,
@@ -89,6 +90,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
         },
       });
     },
@@ -160,6 +162,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
+          flappingSettings,
           showMustacheAutocompleteSwitch,
         }}
       >

@@ -46,7 +46,7 @@ export const Reader = z.object({}).catchall(z.unknown());
  * Provider
  */
 export type Provider = z.infer<typeof Provider>;
-export const Provider = z.enum(['OpenAI', 'Azure OpenAI']);
+export const Provider = z.enum(['OpenAI', 'Azure OpenAI', 'Other']);
 export type ProviderEnum = typeof Provider.enum;
 export const ProviderEnum = Provider.enum;
 

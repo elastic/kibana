@@ -22,12 +22,14 @@ image::user/ml/images/ml-data-visualizer-sample.png[{data-viz} for sample flight
 You can upload different file formats for analysis with the *{data-viz}*.
 
 File formats supported up to 500 MB:
+
 * CSV
 * TSV
 * NDJSON
 * Log files
 
 File formats supported up to 60 MB:
+
 * PDF
 * Microsoft Office files (Word, Excel, PowerPoint)
 * Plain Text (TXT)

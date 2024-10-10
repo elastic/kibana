@@ -34,4 +34,15 @@ export default createTestConfig({
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
+  apps: {
+    serverlessElasticsearch: {
+      pathname: '/app/elasticsearch/getting_started',
+    },
+    elasticsearchStart: {
+      pathname: '/app/elasticsearch/start',
+    },
+    elasticsearchIndices: {
+      pathname: '/app/elasticsearch/indices',
+    },
+  },
 });

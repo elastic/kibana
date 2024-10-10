@@ -24,5 +24,13 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
     async getSetupScreen(): Promise<WebElementWrapper> {
       return await testSubjects.find('logEntryCategoriesSetupPage');
     },
+
+    getNoMlReadPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLReadPrivileges');
+    },
+
+    getNoMlAllPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLAllPrivileges');
+    },
   };
 }

@@ -36,6 +36,8 @@ describe('Get Knowledge Base Status Route', () => {
       isModelInstalled: jest.fn().mockResolvedValue(true),
       isSetupAvailable: jest.fn().mockResolvedValue(true),
       isModelDeployed: jest.fn().mockResolvedValue(true),
+      isSetupInProgress: false,
+      isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
     });
 
     getKnowledgeBaseStatusRoute(server.router);
@@ -44,10 +46,19 @@ describe('Get Knowledge Base Status Route', () => {
   describe('Status codes', () => {
     test('returns 200 if all statuses are false', async () => {
       const response = await server.inject(
-        getGetKnowledgeBaseStatusRequest('esql'),
+        getGetKnowledgeBaseStatusRequest(),
         requestContextMock.convertContext(context)
       );
+
       expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        elser_exists: true,
+        index_exists: true,
+        is_setup_in_progress: false,
+        is_setup_available: true,
+        pipeline_exists: true,
+        security_labs_exists: true,
+      });
     });
   });
 });

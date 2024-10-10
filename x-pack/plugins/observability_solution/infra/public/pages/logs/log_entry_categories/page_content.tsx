@@ -13,14 +13,12 @@ import { isJobStatusWithResults, logEntryCategoriesJobType } from '../../../../c
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
-  MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
 } from '../../../components/logging/log_analysis_setup';
 import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogsPageTemplate } from '../shared/page_template';
@@ -33,11 +31,8 @@ const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle',
 });
 
 export const LogEntryCategoriesPageContent = () => {
-  const {
-    hasLogAnalysisCapabilites,
-    hasLogAnalysisReadCapabilities,
-    hasLogAnalysisSetupCapabilities,
-  } = useLogAnalysisCapabilitiesContext();
+  const { hasLogAnalysisReadCapabilities, hasLogAnalysisSetupCapabilities } =
+    useLogAnalysisCapabilitiesContext();
 
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
@@ -55,22 +50,7 @@ export const LogEntryCategoriesPageContent = () => {
 
   const { idFormats } = useLogMlJobIdFormatsShimContext();
 
-  if (!hasLogAnalysisCapabilites) {
-    return (
-      <SubscriptionSplashPage
-        data-test-subj="logsLogEntryCategoriesPage"
-        pageHeader={{
-          pageTitle: logCategoriesTitle,
-        }}
-      />
-    );
-  } else if (!hasLogAnalysisReadCapabilities) {
-    return (
-      <CategoriesPageTemplate isEmptyState={true}>
-        <MissingResultsPrivilegesPrompt />
-      </CategoriesPageTemplate>
-    );
-  } else if (setupStatus.type === 'initializing') {
+  if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
@@ -115,7 +95,7 @@ export const LogEntryCategoriesPageContent = () => {
 
 const allowedSetupModules = ['logs_ui_categories' as const];
 
-const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+export const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
