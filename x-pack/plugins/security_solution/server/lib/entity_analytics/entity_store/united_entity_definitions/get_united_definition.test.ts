@@ -143,13 +143,6 @@ describe('getUnitedEntityDefinition', () => {
       expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{host.name}}",
-          "history": Object {
-            "interval": "1m",
-            "settings": Object {
-              "lookbackPeriod": "1h",
-            },
-            "timestampField": "@timestamp",
-          },
           "id": "security_host_test",
           "identityFields": Array [
             Object {
@@ -170,6 +163,10 @@ describe('getUnitedEntityDefinition', () => {
             ".asset-criticality.asset-criticality-test",
             "risk-score.risk-score-latest-test",
           ],
+          "latest": Object {
+            "lookbackPeriod": "24h",
+            "timestampField": "@timestamp",
+          },
           "managed": true,
           "metadata": Array [
             Object {
@@ -411,13 +408,6 @@ describe('getUnitedEntityDefinition', () => {
       expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{user.name}}",
-          "history": Object {
-            "interval": "1m",
-            "settings": Object {
-              "lookbackPeriod": "1h",
-            },
-            "timestampField": "@timestamp",
-          },
           "id": "security_user_test",
           "identityFields": Array [
             Object {
@@ -438,6 +428,10 @@ describe('getUnitedEntityDefinition', () => {
             ".asset-criticality.asset-criticality-test",
             "risk-score.risk-score-latest-test",
           ],
+          "latest": Object {
+            "lookbackPeriod": "24h",
+            "timestampField": "@timestamp",
+          },
           "managed": true,
           "metadata": Array [
             Object {
