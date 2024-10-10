@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { useEffect, useRef } from 'react';
 
 import { resolveGridRow } from './resolve_grid_row';
 import { GridLayoutStateManager, GridPanelData } from './types';

@@ -11,7 +11,15 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { GridLayout, type GridLayoutData, type GridLayoutApi } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { EuiButton, EuiPageTemplate, EuiProvider, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPageTemplate,
+  EuiProvider,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
@@ -26,15 +34,29 @@ export const GridExample = () => {
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section color="subdued">
-          <EuiButton
-            onClick={() => {
-              gridLayoutApi?.addNewPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
-            }}
-          >
-            Add a panel
-          </EuiButton>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                onClick={() => {
+                  gridLayoutApi?.addNewPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
+                }}
+              >
+                Add a panel
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                onClick={() => {
+                  console.log(gridLayoutApi?.serializeState());
+                }}
+              >
+                Serialize state
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
+            // onLayoutChange
             ref={setGridLayoutApi}
             renderPanelContents={(id) => {
               return (

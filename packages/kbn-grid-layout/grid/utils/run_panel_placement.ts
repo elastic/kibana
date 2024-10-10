@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { GridRowData } from '..';
-import { DASHBOARD_GRID_COLUMN_COUNT } from './constants';
-import { GridPanelData, PanelPlacementStrategy } from './types';
-import { compactGridRow, resolveGridRow } from './utils/resolve_grid_row';
+import { GridRowData } from '../..';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../constants';
+import { GridPanelData, PanelPlacementStrategy } from '../types';
+import { compactGridRow, resolveGridRow } from './resolve_grid_row';
 
 export const runPanelPlacementStrategy = (
   originalRowData: GridRowData,

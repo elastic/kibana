@@ -16,7 +16,7 @@ import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { compactGridRow } from './resolve_grid_row';
 import { runPanelPlacementStrategy } from './run_panel_placement';
-import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
+import { GridLayoutApi, GridLayoutData, GridRowData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 
@@ -90,6 +90,36 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
             return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
               return prev + Object.keys(row.panels).length;
             }, 0);
+          },
+
+          serializeState: () => {
+            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+
+            const serializePanelRows = (row: GridRowData, rowIndex: number) => {
+              const panels = row.panels;
+              const gridData: { [key: string]: any } = {};
+              Object.keys(panels).forEach((key) => {
+                const panel = panels[key];
+                gridData[key] = {
+                  row: rowIndex,
+                  i: key,
+                  x: panel.column,
+                  y: panel.row,
+                  w: panel.width,
+                  h: panel.height,
+                };
+              });
+              return gridData;
+            };
+
+            return {
+              panels: currentLayout.map(serializePanelRows),
+              rows: currentLayout.map((row, index) => ({
+                i: index,
+                title: row.title,
+                isCollapsed: row.isCollapsed,
+              })),
+            };
           },
         };
       },
