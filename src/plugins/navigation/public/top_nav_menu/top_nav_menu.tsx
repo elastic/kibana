@@ -19,11 +19,23 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
 
+interface TopNavMenuPropsWithMobileIconTypes {
+  /** If `useMobileIconTypes=true`, then each data item requires the mobileIconType field */
+  config?: Array<TopNavMenuData & { mobileIconType: string }>;
+  useMobileIconTypes: true;
+}
+interface TopNavMenuPropsWithoutMobileIconTypes {
+  config?: TopNavMenuData[];
+  useMobileIconTypes?: false;
+}
+type TopNavMenuPropsWithConfig =
+  | TopNavMenuPropsWithMobileIconTypes
+  | TopNavMenuPropsWithoutMobileIconTypes;
+
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
   'kibana' | 'intl' | 'timeHistory'
 > & {
-  config?: TopNavMenuData[];
   badges?: TopNavMenuBadgeProps[];
   showSearchBar?: boolean;
   showQueryInput?: boolean;
@@ -51,7 +63,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
    * ```
    */
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-};
+} & TopNavMenuPropsWithConfig;
 
 /*
  * Top Nav Menu is a convenience wrapper component for:
@@ -65,7 +77,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {
-  const { config, badges, showSearchBar, ...searchBarProps } = props;
+  const { config, useMobileIconTypes, badges, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
     return null;
@@ -76,7 +88,13 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderMenu(className: string): ReactElement | null {
-    return <TopNavMenuItems config={config} className={className} />;
+    return (
+      <TopNavMenuItems
+        config={config}
+        className={className}
+        useMobileIconTypes={useMobileIconTypes}
+      />
+    );
   }
 
   function renderSearchBar(): ReactElement | null {
