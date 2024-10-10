@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('SLO', () => {
     loadTestFile(require.resolve('./create_slo'));
     loadTestFile(require.resolve('./delete_slo'));
+    loadTestFile(require.resolve('./get_slo'));
   });
 }

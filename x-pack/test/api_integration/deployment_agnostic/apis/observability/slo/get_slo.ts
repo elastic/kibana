@@ -1,0 +1,117 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { cleanup, generate } from '@kbn/data-forge';
+import expect from '@kbn/expect';
+import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DEFAULT_SLO } from './fixtures/slo';
+import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const esClient = getService('es');
+  const sloApi = getService('sloApi');
+  const logger = getService('log');
+  const retry = getService('retry');
+  const samlAuth = getService('samlAuth');
+  const dataViewApi = getService('dataViewApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const config = getService('config');
+
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'slo';
+
+  const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+  const DATA_VIEW_ID = 'data-view-id';
+
+  let adminRoleAuthc: RoleCredentials;
+  let internalHeaders: InternalRequestHeader;
+
+  describe('Get SLOs', function () {
+    before(async () => {
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
+
+      await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+
+      await dataViewApi.create({
+        roleAuthc: adminRoleAuthc,
+        name: DATA_VIEW,
+        id: DATA_VIEW_ID,
+        title: DATA_VIEW,
+      });
+
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
+    });
+
+    afterEach(async () => {
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
+    });
+
+    after(async () => {
+      await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
+      await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
+    });
+
+    it('find SLOs', async () => {
+      const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      await sloApi.create(
+        Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),
+        adminRoleAuthc
+      );
+
+      expect(createResponse1).property('id');
+      const sloId1 = createResponse1.id;
+
+      // get the slo by ID
+      const getSloResponse = await sloApi.waitForSloCreated({
+        id: sloId1,
+        roleAuthc: adminRoleAuthc,
+      });
+      // We cannot assert on the summary values itself - it would make the test too flaky
+      // But we can assert on the existence of these fields at least.
+      // On top of whatever the SLO definition contains.
+      expect(getSloResponse).property('summary');
+      expect(getSloResponse).property('meta');
+      expect(getSloResponse).property('instanceId');
+      expect(getSloResponse.budgetingMethod).eql('occurrences');
+      expect(getSloResponse.timeWindow).eql({ duration: '7d', type: 'rolling' });
+
+      await retry.tryForTime(360 * 1000, async () => {
+        let response = await supertestWithoutAuth
+          .get(`/api/observability/slos`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send();
+
+        expect(response.body.results).length(2);
+
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Airrelevant`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(response.body.results).length(1);
+
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Aintegration`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(response.body.results).length(1);
+      });
+    });
+  });
+}
