@@ -16,6 +16,7 @@ import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
@@ -345,6 +346,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     // Offers methods to operate from/on the linked saved object
     HasInPlaceLibraryTransforms &
+    HasLibraryTransforms<LensRuntimeState> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:
@@ -375,6 +377,11 @@ export type LensInternalApi = Simplify<
       renderCount$: PublishingSubject<number>;
       viewMode$: PublishingSubject<ViewMode | undefined>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
+      messages$: PublishingSubject<UserMessage[]>;
+      blockingMessages$: PublishingSubject<UserMessage[]>;
+      updateMessages: (newMessages: UserMessage[]) => void;
+      updateBlockingMessages: (newMessages: UserMessage[]) => void;
+      resetAllMessages: () => void;
     }
 >;
 

@@ -6,32 +6,17 @@
  */
 
 import { partition } from 'lodash';
-import { useEffect, useState } from 'react';
-import type { UserMessage, UserMessagesDisplayLocationId, UserMessagesGetter } from '../../types';
+import { useMemo } from 'react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { LensInternalApi } from '../types';
 
-const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
-  'visualization',
-  'visualizationOnEmbeddable',
-];
-export function useMessages(getUserMessages: UserMessagesGetter, hasRendered: boolean) {
-  const [blockingErrors, setBlockingErrors] = useState<UserMessage[]>([]);
-  const [embeddableMessages, setEmbeddableMessages] = useState<UserMessage[]>([]);
-
-  useEffect(() => {
-    setBlockingErrors(
-      getUserMessages(blockingMessageDisplayLocations, {
-        severity: 'error',
-      })
-    );
-    if (hasRendered) {
-      setEmbeddableMessages(getUserMessages('embeddableBadge'));
-    }
-  }, [getUserMessages, hasRendered]);
-
-  const [warningOrErrorMessages, infoMessages] = partition(
-    embeddableMessages,
-    ({ severity }) => severity !== 'info'
+export function useMessages({ messages$, blockingMessages$ }: LensInternalApi) {
+  const latestMessages = useStateFromPublishingSubject(messages$);
+  const latestBlockingMessages = useStateFromPublishingSubject(blockingMessages$);
+  const [warningOrErrorMessages, infoMessages] = useMemo(
+    () => partition(latestMessages, ({ severity }) => severity !== 'info'),
+    [latestMessages]
   );
 
-  return [blockingErrors, warningOrErrorMessages, infoMessages];
+  return [latestBlockingMessages, warningOrErrorMessages, infoMessages];
 }

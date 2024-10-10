@@ -25,9 +25,14 @@ import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps } from '../types';
+import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import { getUsedDataViews } from './expressions/update_data_views';
+
+const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
+  'visualization',
+  'visualizationOnEmbeddable',
+];
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -44,9 +49,6 @@ export function loadEmbeddableData(
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
   metaInfo?: SharingSavedObjectProps
 ) {
-  // reset the render on reload
-  internalApi.dispatchRenderStart();
-
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
     : ({} as LensPublicCallbacks);
@@ -58,6 +60,17 @@ export function loadEmbeddableData(
     services.spaces,
     metaInfo
   );
+
+  const onRenderComplete = () => {
+    internalApi.dispatchRenderComplete();
+
+    internalApi.updateMessages(getUserMessages('embeddableBadge'));
+    internalApi.updateBlockingMessages(
+      getUserMessages(blockingMessageDisplayLocations, {
+        severity: 'error',
+      })
+    );
+  };
 
   const unifiedSearch$ = new BehaviorSubject<
     Pick<FetchContext, 'query' | 'filters' | 'timeRange' | 'timeslice' | 'searchSessionId'>
@@ -71,6 +84,9 @@ export function loadEmbeddableData(
 
   async function reload() {
     resetRuntimeMessages();
+    internalApi.resetAllMessages();
+    // reset the render on reload
+    internalApi.dispatchRenderStart();
     // notify about data loading
     internalApi.updateDataLoading(true);
 
@@ -119,7 +135,7 @@ export function loadEmbeddableData(
       services,
       getExecutionContext,
       onDataCallback,
-      internalApi.dispatchRenderComplete,
+      onRenderComplete,
       callbacks
     );
 
@@ -138,7 +154,7 @@ export function loadEmbeddableData(
         searchSessionId,
         abortController: internalApi.expressionAbortController$.getValue(),
         getExecutionContext,
-        logError: getLogError(getExecutionContext),
+        logError: getLogError(getExecutionContext, onRenderComplete),
         addUserMessages,
         onRender,
         onData,
@@ -159,7 +175,7 @@ export function loadEmbeddableData(
       internalApi.updateExpressionParams(params);
     } else {
       // trigger a render complete on error
-      internalApi.dispatchRenderComplete();
+      onRenderComplete();
     }
     internalApi.updateAbortController(abortController);
 

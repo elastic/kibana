@@ -8,11 +8,15 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
-export function getLogError(getExecutionContext: () => KibanaExecutionContext | undefined) {
+export function getLogError(
+  getExecutionContext: () => KibanaExecutionContext | undefined,
+  onRenderComplete: () => void
+) {
   return (type: 'runtime' | 'validation') => {
     trackUiCounterEvents(
       type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error',
       getExecutionContext()
     );
+    onRenderComplete();
   };
 }

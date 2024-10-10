@@ -8,6 +8,7 @@
 import { noop } from 'lodash';
 import {
   HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   PublishesPanelTitle,
   PublishesViewMode,
   PublishesWritablePanelTitle,
@@ -40,6 +41,7 @@ export interface DashboardServicesConfig {
     PublishesViewMode &
     PublishesWritablePanelTitle &
     HasInPlaceLibraryTransforms &
+    HasLibraryTransforms<LensRuntimeState> &
     Pick<IntegrationCallbacks, 'updateOverrides'>;
   serialize: () => SerializedProps;
   comparators: StateComparators<SerializedProps>;
@@ -84,6 +86,7 @@ export function initializeDashboardServices(
       viewMode: viewMode$ as PublishesViewMode['viewMode'],
       libraryId$: stateConfig.api.savedObjectId,
       updateOverrides: internalApi.updateOverrides,
+      // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
       saveToLibrary: async (title: string) => {
         const attributes = getLatestState().attributes;
         const savedObjectId = await attributeService.saveToLibrary(
@@ -125,7 +128,13 @@ export function initializeDashboardServices(
         defaultPanelTitle$.next(undefined);
         defaultPanelDescription$.next(undefined);
       },
-      getByValueRuntimeSnapshot(): object {
+      getByValueRuntimeSnapshot: (): Omit<LensRuntimeState, 'savedObjectId'> => {
+        const { savedObjectId, ...rest } = getLatestState();
+        return rest;
+      },
+      // The functions below brings the HasLibraryTransforms compliance (old interface)
+      getByReferenceState: () => getLatestState(),
+      getByValueState: (): Omit<LensRuntimeState, 'savedObjectId'> => {
         const { savedObjectId, ...rest } = getLatestState();
         return rest;
       },

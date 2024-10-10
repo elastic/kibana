@@ -188,12 +188,10 @@ export const createLensEmbeddableFactory = (
           const renderCount = useStateFromPublishingSubject(renderCount$);
           // used for reporting/functional tests
           const hasRendered = useStateFromPublishingSubject(hasRenderCompleted$);
+
           const canEdit = Boolean(api.isEditingEnabled?.() && viewMode$.getValue() === 'edit');
 
-          const [blockingErrors, warningOrErrors, infoMessages] = useMessages(
-            getUserMessages,
-            hasRendered
-          );
+          const [blockingErrors, warningOrErrors, infoMessages] = useMessages(internalApi);
 
           // On unmount call all the cleanups
           useEffect(() => {

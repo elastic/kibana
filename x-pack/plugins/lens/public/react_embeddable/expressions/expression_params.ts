@@ -160,7 +160,7 @@ export async function getExpressionRendererParams(
     injectFilterReferences,
   });
 
-  const newAbortController = new AbortController();
+  const newAbortController = abortController || new AbortController();
 
   const {
     expression,
