@@ -36,33 +36,37 @@ export function EntityName({ entity }: EntityNameProps) {
   const getEntityRedirectUrl = useCallback(() => {
     const type = entity[ENTITY_TYPE];
     // For service, host and container type there is only one identity field
-    const identityField = entity[ENTITY_IDENTITY_FIELDS][0];
+    const identityField = Array.isArray(entity[ENTITY_IDENTITY_FIELDS])
+      ? entity[ENTITY_IDENTITY_FIELDS][0]
+      : entity[ENTITY_IDENTITY_FIELDS];
+    const identityValue = entity[identityField];
 
-    // Any unrecognised types will always return undefined
     switch (type) {
       case 'host':
       case 'container':
         return assetDetailsLocator?.getRedirectUrl({
-          assetId: identityField,
+          assetId: identityValue,
           assetType: type,
         });
 
       case 'service':
         return serviceOverviewLocator?.getRedirectUrl({
-          serviceName: identityField,
+          serviceName: identityValue,
           environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
         });
     }
   }, [entity, assetDetailsLocator, serviceOverviewLocator]);
 
   return (
-    <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl()}>
+    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={0}>
           <EntityIcon entity={entity} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
+          <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
+            {entity[ENTITY_DISPLAY_NAME]}
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiLink>
