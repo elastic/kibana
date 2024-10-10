@@ -9,22 +9,41 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
-import * as consts from '../constants';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
-interface MockedConsts {
-  AGENTLESS_LEARN_MORE_LINK: string | null;
-}
-jest.mock('../constants');
+jest.mock('../../../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+}));
 
 describe('AgentlessAvailableCallout', () => {
+  const mockUseKibana = useKibana as jest.Mock;
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = 'https://www.elastic.co';
+    mockUseKibana.mockReturnValue({
+      services: {
+        docLinks: {
+          links: {
+            fleet: {
+              agentlessBlog: 'https://www.elastic.co/blog',
+            },
+          },
+        },
+      },
+    });
   });
 
-  it('returns null if AGENTLESS_LEARN_MORE_LINK is null', () => {
-    jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = null;
-
+  it('returns null if agentlessBlog is null', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        docLinks: {
+          links: {
+            fleet: {
+              agentlessBlog: null,
+            },
+          },
+        },
+      },
+    });
     const { container } = render(<AgentlessAvailableCallout />, {
       wrapper: TestProviders,
     });
