@@ -19,7 +19,7 @@ const alertsLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.ale
 });
 
 const alertsTooltip = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.alertsTooltip', {
-  defaultMessage: 'Active alerts',
+  defaultMessage: 'The count of the active alerts',
 });
 
 const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {

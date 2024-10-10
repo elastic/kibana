@@ -5,14 +5,12 @@
  * 2.0.
  */
 import {
-  EuiBadge,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
@@ -37,6 +35,7 @@ import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
+import { AlertsBadge } from '../alerts_badge/alerts_badge';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
@@ -129,7 +128,7 @@ export function EntitiesGrid({
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const entity = entities[rowIndex];
+      const entity = entities[rowIndex] as Entity;
       if (entity === undefined) {
         return null;
       }
@@ -137,21 +136,7 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case 'alertsCount':
-          return entity?.alertsCount ? (
-            <EuiToolTip
-              position="bottom"
-              content={i18n.translate(
-                'xpack.inventory.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
-                {
-                  defaultMessage: 'Active alerts',
-                }
-              )}
-            >
-              <EuiBadge iconType="warning" color="danger">
-                {entity.alertsCount}
-              </EuiBadge>
-            </EuiToolTip>
-          ) : null;
+          return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
           const entityType = entity[columnEntityTableId] as EntityType;
