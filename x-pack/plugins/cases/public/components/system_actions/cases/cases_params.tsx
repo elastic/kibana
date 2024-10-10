@@ -39,11 +39,18 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId, featureId }) => {
   const {
+    cloud,
+    data: { dataViews: dataViewsService },
     http,
     notifications: { toasts },
-    data: { dataViews: dataViewsService },
   } = useKibana().services;
-  const owner = getOwnerFromRuleConsumerProducer({ consumer: featureId, producer: producerId });
+
+  const owner = getOwnerFromRuleConsumerProducer({
+    consumer: featureId,
+    producer: producerId,
+    isServerlessSecurity:
+      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+  });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
     http,
