@@ -62,8 +62,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await waitFor(() => null);
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if the data view is not time based', async () => {
@@ -76,8 +75,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await waitFor(() => null);
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if is on text based mode', async () => {
@@ -91,8 +89,7 @@ describe('useEditVisualization', () => {
         isPlainRecord: true,
       })
     );
-    await waitFor(() => null);
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if the time field is not visualizable', async () => {
@@ -111,8 +108,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await waitFor(() => null);
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if there are no compatible actions', async () => {
@@ -125,7 +121,6 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await waitFor(() => null);
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 });

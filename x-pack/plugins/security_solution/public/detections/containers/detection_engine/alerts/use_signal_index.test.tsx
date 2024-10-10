@@ -36,7 +36,7 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    expect(result.current).toEqual({
+    expect(result.all[0]).toEqual({
       createDeSignalIndex: null,
       loading: true,
       signalIndexExists: null,

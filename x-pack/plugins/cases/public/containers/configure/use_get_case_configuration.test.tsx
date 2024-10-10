@@ -40,12 +40,10 @@ describe('Use get case configuration hook', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(targetConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(targetConfiguration));
   });
 
   it('returns the initial configuration if none matches the owner', async () => {
@@ -64,12 +62,10 @@ describe('Use get case configuration hook', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 
   it('returns the initial configuration if none exists', async () => {
@@ -81,12 +77,10 @@ describe('Use get case configuration hook', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 
   it('returns the initial configuration if the owner is undefined', async () => {
@@ -99,11 +93,9 @@ describe('Use get case configuration hook', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 });
