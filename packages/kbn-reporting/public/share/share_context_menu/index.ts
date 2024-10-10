@@ -12,6 +12,7 @@ import * as Rx from 'rxjs';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
 export type StartServices = [
@@ -47,6 +48,7 @@ export interface ExportPanelShareOpts {
 export interface ReportingSharingData {
   title: string;
   reportingDisabled?: boolean;
+  layout?: LayoutParams;
   locatorParams: {
     id: string;
     params: unknown;
