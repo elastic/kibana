@@ -24,6 +24,6 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageReportingApiUrl=http://localhost:8081/api/v1/usage`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081/api/v1/usage`,
   ],
 });
