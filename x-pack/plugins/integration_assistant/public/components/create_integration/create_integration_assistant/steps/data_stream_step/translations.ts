@@ -229,11 +229,21 @@ export const GENERATION_ERROR_TRANSLATION: Record<
       defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
-  [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) =>
-    i18n.translate('xpack.integrationAssistant.errors.uparseableCSV', {
-      values: {
-        exampleReason: attributes.underlyingMessages?.[0] || ERROR_NO_UNDERLYING_MESSAGE_AVAILABLE,
-      },
-      defaultMessage: `Cannot parse the samples as the CSV data (reason: {exampleReason}). Please check the provided samples.`,
-    }),
+  [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
+    if (
+      attributes.underlyingMessages !== undefined &&
+      attributes.underlyingMessages?.length !== 0
+    ) {
+      return i18n.translate('xpack.integrationAssistant.errors.uparseableCSV.withReason', {
+        values: {
+          reason: attributes.underlyingMessages[0],
+        },
+        defaultMessage: `Cannot parse the samples as the CSV data (reason: {reason}). Please check the provided samples.`,
+      });
+    } else {
+      return i18n.translate('xpack.integrationAssistant.errors.uparseableCSV.withoutReason', {
+        defaultMessage: `Cannot parse the samples as the CSV data. Please check the provided samples.`,
+      });
+    }
+  },
 };
