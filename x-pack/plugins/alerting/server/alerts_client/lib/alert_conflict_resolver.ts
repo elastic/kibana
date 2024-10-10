@@ -10,6 +10,12 @@ import {
   BulkResponse,
   BulkOperationContainer,
   MgetResponseItem,
+  BulkCreateOperation,
+  BulkIndexOperation,
+  BulkUpdateOperation,
+  BulkDeleteOperation,
+  BulkOperationType,
+  BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -40,6 +46,13 @@ export interface ResolveAlertConflictsParams {
   ruleType: string;
 }
 
+type BulkOperation =
+  | BulkCreateOperation
+  | BulkIndexOperation
+  | BulkUpdateOperation
+  | BulkDeleteOperation;
+
+type BulkItem = Partial<Record<BulkOperationType, BulkResponseItem>>;
 interface NormalizedBulkRequest {
   op: BulkOperationContainer;
   doc: unknown;
@@ -134,6 +147,28 @@ interface MakeBulkRequestResponse {
   error?: Error;
 }
 
+function getBulkOperation(opContainer?: BulkOperationContainer): BulkOperation | undefined {
+  if (!opContainer) return undefined;
+
+  const operation =
+    opContainer.create || opContainer.index || opContainer.update || opContainer.delete;
+
+  if (!operation) {
+    throw new Error(`Missing bulk op in op container: ${JSON.stringify(opContainer)}`);
+  }
+  return operation;
+}
+
+function getItemInfoFromBulk(item?: BulkItem): BulkResponseItem | undefined {
+  if (!item) return undefined;
+
+  const info = item.create || item.index || item.update || item.delete;
+  if (!info) {
+    throw new Error(`Missing bulk op in bulk request: ${JSON.stringify(item)}`);
+  }
+  return info;
+}
+
 // make the bulk request to fix conflicts
 async function makeBulkRequest(
   esClient: ElasticsearchClient,
@@ -146,7 +181,7 @@ async function makeBulkRequest(
 
   const bulkResponse = await esClient.bulk(updatedBulkRequest);
 
-  const errors = bulkResponse.items.filter((item) => item.index?.error).length;
+  const errors = bulkResponse.items.filter((item) => getItemInfoFromBulk(item)?.error).length;
   return { bulkRequest, bulkResponse, errors };
 }
 
@@ -156,7 +191,7 @@ async function refreshFieldsInDocs(
   freshResponses: MgetResponseItem[]
 ) {
   for (const [conflictRequest, freshResponse] of zip(conflictRequests, freshResponses)) {
-    if (!conflictRequest?.op.index || !freshResponse) continue;
+    if (!conflictRequest || !getBulkOperation(conflictRequest?.op) || !freshResponse) continue;
 
     // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;
@@ -190,7 +225,10 @@ async function refreshFieldsInDocs(
 /** Update the OCC info in the conflict request with the fresh info. */
 async function updateOCC(conflictRequests: NormalizedBulkRequest[], freshDocs: MgetResponseItem[]) {
   for (const [req, freshDoc] of zip(conflictRequests, freshDocs)) {
-    if (!req?.op.index || !freshDoc) continue;
+    if (!req) continue;
+
+    const bulkOperation = getBulkOperation(req?.op);
+    if (!bulkOperation || !freshDoc) continue;
 
     // @ts-expect-error @elastic/elasticsearch _seq_no is not in the type!
     const seqNo: number | undefined = freshDoc._seq_no;
@@ -200,8 +238,8 @@ async function updateOCC(conflictRequests: NormalizedBulkRequest[], freshDocs: M
     if (seqNo === undefined) throw new Error('Unexpected undefined seqNo');
     if (primaryTerm === undefined) throw new Error('Unexpected undefined primaryTerm');
 
-    req.op.index.if_seq_no = seqNo;
-    req.op.index.if_primary_term = primaryTerm;
+    bulkOperation.if_seq_no = seqNo;
+    bulkOperation.if_primary_term = primaryTerm;
   }
 }
 
@@ -213,7 +251,8 @@ async function getFreshDocs(
   const docs: Array<{ _id: string; _index: string }> = [];
 
   conflictRequests.forEach((req) => {
-    const [id, index] = [req.op.index?._id, req.op.index?._index];
+    const bulkOperation = getBulkOperation(req?.op);
+    const [id, index] = [bulkOperation?._id, bulkOperation?._index];
     if (!id || !index) return;
 
     docs.push({ _id: id, _index: index });
@@ -245,9 +284,9 @@ function getConflictRequest(
 
   if (request.length === 0) return [];
 
-  // we only want op: index where the status was 409 / conflict
+  // pick out just the conflicts (409)
   const conflictRequest = zip(request, bulkResponse.items)
-    .filter(([_, res]) => res?.index?.status === 409)
+    .filter(([_, res]) => getItemInfoFromBulk(res)?.status === 409)
     .map(([req, _]) => req!);
 
   return conflictRequest;
@@ -292,9 +331,9 @@ function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
   const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
   const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
   for (const item of sanitizedResponse.items) {
-    const op = item.create || item.index || item.update || item.delete;
+    const op = getItemInfoFromBulk(item);
     if (op?.error) {
-      if (op?.status === 409 && op === item.index) {
+      if (op?.status === 409) {
         stats.conflicts++;
       } else {
         stats.errors++;
