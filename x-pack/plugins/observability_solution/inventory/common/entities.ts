@@ -79,7 +79,7 @@ interface BaseEntity {
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
   [ENTITY_IDENTITY_FIELDS]: string | string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -105,3 +105,9 @@ export interface ContainerEntity extends BaseEntity {
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
+
+export type EntityGroup = {
+  count: number;
+} & {
+  [Field in keyof Entity]?: Entity[Field];
+};
