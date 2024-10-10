@@ -14,8 +14,10 @@ import { i18n } from '@kbn/i18n';
 import * as Constants from '../../../../shared/constants';
 import { ConnectorDeployment } from '../../connector_detail/deployment';
 
+import { ConnectorCreationSteps } from './create_connector';
+
 interface DeploymentStepProps {
-  currentStep: number;
+  currentStep: ConnectorCreationSteps;
   isNextStepEnabled: boolean;
   setCurrentStep: Function;
 }

@@ -34,10 +34,10 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
-import { SelfManagePreference } from './create_connector';
+import { ConnectorCreationSteps, SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
-  currentStep: number;
+  currentStep: ConnectorCreationSteps;
   error?: string | React.ReactNode;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;

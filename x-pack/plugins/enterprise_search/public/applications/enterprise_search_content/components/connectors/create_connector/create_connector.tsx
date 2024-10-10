@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -24,10 +24,9 @@ import {
   EuiSuperSelect,
   EuiText,
   useEuiTheme,
-  EuiStepStatus,
 } from '@elastic/eui';
 
-import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
@@ -36,6 +35,8 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
+import { generateStepState } from '../utils/generate_step_state';
+
 import connectorsBackgroundImage from './assets/connector_logos_comp.png';
 
 import { ConfigurationStep } from './configuration_step';
@@ -43,20 +44,16 @@ import { DeploymentStep } from './deployment_step';
 import { FinishUpStep } from './finish_up_step';
 import { StartStep } from './start_step';
 
+export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 export const CreateConnector: React.FC = () => {
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
 
-  const [startStepStatus, setStartStepStatus] = useState<EuiStepStatus>('current');
-  const [deploymentStepStatus, setDeploymentStepStatus] = useState<EuiStepStatus>('incomplete');
-  const [configurationStepStatus, setConfigurationStepStatus] =
-    useState<EuiStepStatus>('incomplete');
-  const [finishUpStepStatus, setFinishUpStepStatus] = useState<EuiStepStatus>('incomplete');
-  const [currentStep, setCurrentStep] = useState(0);
-  const [configurationStepComplete] = useState(false);
-  const { selectedConnector } = useValues(NewConnectorLogic);
+  const { selectedConnector, currentStep } = useValues(NewConnectorLogic);
+  const { setCurrentStep } = useActions(NewConnectorLogic);
+  const stepStates = generateStepState(currentStep);
 
   useEffect(() => {
     // TODO: separate this to ability and preference
@@ -67,198 +64,86 @@ export const CreateConnector: React.FC = () => {
     }
   }, [selectedConnector]);
 
-  interface CustomEuiStepInterface extends EuiStepInterface {
-    content: JSX.Element;
-  }
-  const selfManagedSteps: CustomEuiStepInterface[] = [
-    {
-      children: <EuiSpacer size="xs" />,
-      content: (
-        <StartStep
-          title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
-            defaultMessage: 'Start',
-          })}
-          currentStep={currentStep}
-          selfManagePreference={selfManagePreference}
-          setCurrentStep={setCurrentStep}
-          onSelfManagePreferenceChange={(preference) => {
-            setSelfManagePreference(preference);
-          }}
-          error={errorToText(error)}
-        />
-      ),
-      status: startStepStatus,
-      title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
-        defaultMessage: 'Start',
-      }),
-    },
-    {
-      children: '',
-      content: (
-        <DeploymentStep
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          isNextStepEnabled={configurationStepComplete}
-        />
-      ),
-
-      status: deploymentStepStatus,
-      title: i18n.translate(
-        'xpack.enterpriseSearch.createConnector.deploymentStep.deploymentLabel',
-        { defaultMessage: 'Deployment' }
-      ),
-    },
-    {
-      children: '',
-      content: (
-        <ConfigurationStep
-          title={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
-            { defaultMessage: 'Configuration' }
-          )}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: configurationStepStatus,
-      title: i18n.translate(
-        'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
-        { defaultMessage: 'Configuration' }
-      ),
-    },
-    {
-      children: '',
-
-      content: (
-        <FinishUpStep
-          title={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
-            { defaultMessage: 'Finish up' }
-          )}
-        />
-      ),
-      status: finishUpStepStatus,
-      title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
-        defaultMessage: 'Finish up',
-      }),
-    },
-  ];
-
-  const elasticManagedSteps: CustomEuiStepInterface[] = [
-    {
-      children: <EuiSpacer size="xs" />,
-      content: (
-        <StartStep
-          title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
-            defaultMessage: 'Start',
-          })}
-          selfManagePreference={selfManagePreference}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          onSelfManagePreferenceChange={(preference) => {
-            setSelfManagePreference(preference);
-          }}
-          error={errorToText(error)}
-        />
-      ),
-      status: startStepStatus,
-      title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
-        defaultMessage: i18n.translate(
-          'xpack.enterpriseSearch.createConnector.startStep.startLabel',
-          {
-            defaultMessage: 'Start',
-          }
+  const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
+    return [
+      {
+        children: null,
+        status: stepStates.start,
+        title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+          defaultMessage: 'Start',
+        }),
+      },
+      ...(selfManaged
+        ? [
+            {
+              children: null,
+              status: stepStates.deployment,
+              title: i18n.translate(
+                'xpack.enterpriseSearch.createConnector.deploymentStep.deploymentLabel',
+                { defaultMessage: 'Deployment' }
+              ),
+            },
+          ]
+        : []),
+      {
+        children: null,
+        status: stepStates.configure,
+        title: i18n.translate(
+          'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+          { defaultMessage: 'Configuration' }
         ),
-      }),
-    },
-    {
-      children: '',
-      content: (
-        <ConfigurationStep
-          title={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
-            { defaultMessage: 'Configuration' }
-          )}
-          // connector={connector}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: configurationStepStatus,
-      title: i18n.translate(
-        'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
-        { defaultMessage: 'Configuration' }
-      ),
-    },
-    {
-      children: '',
-      content: (
-        <FinishUpStep
-          title={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
-            { defaultMessage: 'Finish up' }
-          )}
-        />
-      ),
-      status: finishUpStepStatus,
-      title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
-        defaultMessage: 'Finish up',
-      }),
-    },
-  ];
+      },
 
-  useEffect(() => {
-    if (selfManagePreference === 'selfManaged') {
-      switch (currentStep) {
-        case 0:
-          setStartStepStatus('current');
-          setDeploymentStepStatus('incomplete');
-          setConfigurationStepStatus('incomplete');
-          setFinishUpStepStatus('incomplete');
-          break;
-        case 1:
-          setStartStepStatus('complete');
-          setDeploymentStepStatus('current');
-          setConfigurationStepStatus('incomplete');
-          setFinishUpStepStatus('incomplete');
-          break;
-        case 2:
-          setStartStepStatus('complete');
-          setDeploymentStepStatus('complete');
-          setConfigurationStepStatus('current');
-          setFinishUpStepStatus('incomplete');
-          break;
-        case 3:
-          setStartStepStatus('complete');
-          setDeploymentStepStatus('complete');
-          setConfigurationStepStatus('complete');
-          setFinishUpStepStatus('current');
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (currentStep) {
-        case 0:
-          setStartStepStatus('current');
-          setConfigurationStepStatus('incomplete');
-          setFinishUpStepStatus('incomplete');
-          break;
-        case 1:
-          setStartStepStatus('complete');
-          setConfigurationStepStatus('current');
-          setFinishUpStepStatus('incomplete');
-          break;
-        case 2:
-          setStartStepStatus('complete');
-          setConfigurationStepStatus('complete');
-          setFinishUpStepStatus('current');
-          break;
-        default:
-          break;
-      }
-    }
-  }, [currentStep]);
+      {
+        children: null,
+        status: stepStates.finish,
+        title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+          defaultMessage: 'Finish up',
+        }),
+      },
+    ];
+  };
+
+  const stepContent: Record<'start' | 'deployment' | 'configure' | 'finish', React.Node> = {
+    configure: (
+      <ConfigurationStep
+        title={i18n.translate(
+          'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+          { defaultMessage: 'Configuration' }
+        )}
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+      />
+    ),
+    deployment: (
+      <DeploymentStep
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+        isNextStepEnabled={stepStates.configure === 'complete'}
+      />
+    ),
+    finish: (
+      <FinishUpStep
+        title={i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+          defaultMessage: 'Finish up',
+        })}
+      />
+    ),
+    start: (
+      <StartStep
+        currentStep={currentStep}
+        title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+          defaultMessage: 'Start',
+        })}
+        selfManagePreference={selfManagePreference}
+        setCurrentStep={setCurrentStep}
+        onSelfManagePreferenceChange={(preference) => {
+          setSelfManagePreference(preference);
+        }}
+        error={errorToText(error)}
+      />
+    ),
+  };
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -288,7 +173,9 @@ export const CreateConnector: React.FC = () => {
             color="subdued"
             paddingSize="l"
             css={css`
-              ${currentStep === 0 ? `background-image: url(${connectorsBackgroundImage});` : ''}
+              ${currentStep === 'start'
+                ? `background-image: url(${connectorsBackgroundImage});`
+                : ''}
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
@@ -298,9 +185,7 @@ export const CreateConnector: React.FC = () => {
           >
             <EuiSteps
               titleSize="xxs"
-              steps={
-                selfManagePreference === 'selfManaged' ? selfManagedSteps : elasticManagedSteps
-              }
+              steps={getSteps(selfManagePreference === 'selfManaged')}
               css={() => css`
                 .euiStep__content {
                   padding-block-end: ${euiTheme.size.xs};
@@ -330,7 +215,7 @@ export const CreateConnector: React.FC = () => {
                 <EuiSpacer size="s" />
               </>
             )}
-            {currentStep > 0 && (
+            {currentStep !== 'start' && (
               <>
                 <EuiFormRow
                   label={i18n.translate(
@@ -381,11 +266,7 @@ export const CreateConnector: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         {/* Col 2 */}
-        <EuiFlexItem grow={7}>
-          {selfManagePreference === 'selfManaged'
-            ? selfManagedSteps[currentStep].content
-            : elasticManagedSteps[currentStep].content}
-        </EuiFlexItem>
+        <EuiFlexItem grow={7}>{stepContent[currentStep]}</EuiFlexItem>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>
   );

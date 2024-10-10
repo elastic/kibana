@@ -41,6 +41,7 @@ import {
   ConnectorViewActions,
   ConnectorViewLogic,
 } from '../../connector_detail/connector_view_logic';
+import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
 import { UNIVERSAL_LANGUAGE_VALUE } from '../constants';
 import { LanguageForOptimization } from '../types';
 import { getLanguageForOptimization } from '../utils';
@@ -49,6 +50,7 @@ export interface NewConnectorValues {
   canConfigureConnector: boolean;
   connectorId: string;
   createConnectorApiStatus: Status;
+  currentStep: ConnectorCreationSteps;
   data: IndexExistsApiResponse;
   fullIndexName: string;
   fullIndexNameExists: boolean;
@@ -84,6 +86,7 @@ type NewConnectorActions = Pick<
   createConnector: ({ isSelfManaged }: { isSelfManaged: boolean }) => { isSelfManaged: boolean };
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
+  setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   setSelectedConnector(connector: ConnectorDefinition | null): {
@@ -94,6 +97,7 @@ type NewConnectorActions = Pick<
 export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnectorActions>>({
   actions: {
     createConnector: ({ isSelfManaged }) => ({ isSelfManaged }),
+    setCurrentStep: (step) => ({ step }),
     setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedConnector: (connector) => ({ connector }),
@@ -163,6 +167,15 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
           _: NewConnectorValues['connectorId'],
           { id }: { id: NewConnectorValues['connectorId'] }
         ) => id,
+      },
+    ],
+    currentStep: [
+      'start',
+      {
+        setCurrentStep: (
+          _: NewConnectorValues['currentStep'],
+          { step }: { step: NewConnectorValues['currentStep'] }
+        ) => step,
       },
     ],
     languageSelectValue: [

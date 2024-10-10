@@ -30,8 +30,10 @@ import * as Constants from '../../../../shared/constants';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
+import { ConnectorCreationSteps } from './create_connector';
+
 interface ConfigurationStepProps {
-  currentStep: number;
+  currentStep: ConnectorCreationSteps;
   setCurrentStep: Function;
   title: string;
 }
