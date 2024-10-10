@@ -62,14 +62,16 @@ export function FieldFormWrapper({
     deserializer: deserialize,
     serializer,
     onSubmit: async (formData, isValid) => {
-      if (isValid) {
-        setRuleFieldResolvedValue({
-          ruleId: finalDiffableRule.rule_id,
-          fieldName: fieldName as keyof DiffableAllFields,
-          resolvedValue: formData[fieldName],
-        });
-        setReadOnlyMode();
+      if (!isValid) {
+        return;
       }
+
+      setRuleFieldResolvedValue({
+        ruleId: finalDiffableRule.rule_id,
+        fieldName: fieldName as keyof DiffableAllFields,
+        resolvedValue: formData[fieldName],
+      });
+      setReadOnlyMode();
     },
   });
 
