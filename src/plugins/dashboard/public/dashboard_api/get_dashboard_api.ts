@@ -147,8 +147,8 @@ export function getDashboardApi({
       animatePanelTransforms$,
       getSerializedStateForControlGroup: () => {
         return {
-          rawState: initialState.controlGroupInput
-            ? initialState.controlGroupInput
+          rawState: savedObjectResult?.dashboardInput?.controlGroupInput
+            ? savedObjectResult.dashboardInput.controlGroupInput
             : ({
                 controlStyle: 'oneLine',
                 chainingSystem: 'HIERARCHICAL',
