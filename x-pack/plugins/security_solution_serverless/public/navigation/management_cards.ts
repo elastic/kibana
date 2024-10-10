@@ -21,6 +21,7 @@ const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['cate
 
 export const enableManagementCardsLanding = (services: Services) => {
   const { securitySolution, management, application } = services;
+  const aiAssistantIsEnabled = application.capabilities.observabilityAIAssistant?.show;
 
   securitySolution.getNavLinks$().subscribe((navLinks) => {
     const cardNavDefinitions = navLinks.reduce<Record<string, CardNavExtensionDefinition>>(

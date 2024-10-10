@@ -39,6 +39,8 @@ export const ManagementSettings = React.memo(() => {
     },
     data: { dataViews },
     security,
+    chrome: { setBreadcrumbs },
+    serverless
   } = useKibana().services;
 
   const { data: currentUserAvatar } = useQuery({
@@ -84,6 +86,9 @@ export const ManagementSettings = React.memo(() => {
       <AssistantSettingsManagement
         selectedConversation={currentConversation}
         dataViews={dataViews}
+        navigateToApp={navigateToApp}
+        setBreadcrumbs={setBreadcrumbs}
+        serverless={serverless}
       />
     );
   }

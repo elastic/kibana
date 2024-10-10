@@ -31,6 +31,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
   hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
 

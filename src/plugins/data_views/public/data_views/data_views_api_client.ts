@@ -112,7 +112,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
-        fieldTypes,
+        field_types: fieldTypes,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
         include_empty_fields: includeEmptyFields,

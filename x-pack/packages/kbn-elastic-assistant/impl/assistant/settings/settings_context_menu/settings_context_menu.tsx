@@ -60,10 +60,18 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       [navigateToApp]
     );
 
+    const handleNavigateToAnonymization = useCallback(
+      () =>
+        navigateToApp('management', {
+          path: 'kibana/securityAiAssistantManagement?tab=anonymization',
+        }),
+      [navigateToApp]
+    );
+
     const handleNavigateToKnowledgeBase = useCallback(
       () =>
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'kibana/securityAiAssistantManagement?tab=knowledge_base',
         }),
       [navigateToApp]
     );
@@ -82,7 +90,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
-          onClick={handleNavigateToSettings}
+          onClick={handleNavigateToAnonymization}
           icon={'eye'}
           data-test-subj={'anonymization'}
         >

@@ -52,6 +52,7 @@ import {
   isSystemEntry,
   isKnowledgeBaseEntryCreateProps,
   isKnowledgeBaseEntryResponse,
+  isGlobalEntry,
 } from './helpers';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
@@ -69,6 +70,7 @@ interface Params {
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
+    assistantAvailability: { hasManageGlobalKnowledgeBase },
     http,
     toasts,
   } = useAssistantContext();
@@ -123,27 +125,27 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
 
   // CRUD API accessors
-  const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
+  const { mutateAsync: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
     http,
     toasts,
   });
-  const { mutate: updateEntries, isLoading: isUpdatingEntries } = useUpdateKnowledgeBaseEntries({
+  const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } = useUpdateKnowledgeBaseEntries({
     http,
     toasts,
   });
-  const { mutate: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
+  const { mutateAsync: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
     http,
     toasts,
   });
   const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
 
   // Flyout Save/Cancel Actions
-  const onSaveConfirmed = useCallback(() => {
+  const onSaveConfirmed = useCallback(async () => {
     if (isKnowledgeBaseEntryResponse(selectedEntry)) {
-      updateEntries([selectedEntry]);
+      await updateEntries([selectedEntry]);
       closeFlyout();
     } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      createEntry(selectedEntry);
+      await createEntry(selectedEntry);
       closeFlyout();
     }
   }, [closeFlyout, selectedEntry, createEntry, updateEntries]);
@@ -172,13 +174,14 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry);
+          return !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase: true);
         },
+        // Add delete popover
         onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           deleteEntry({ ids: [id] });
         },
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry);
+          return !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true);
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
@@ -344,7 +347,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry) || isModifyingEntry} // TODO: KB-RBAC disable for global entries if user doesn't have global RBAC
+        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry) || (selectedEntry.users != null && !selectedEntry.users.length && hasManageGlobalKnowledgeBase)}
+        saveButtonLoading={isModifyingEntry}
       >
         <>
           {selectedEntry?.type === DocumentEntryType.value ? (
@@ -353,6 +357,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
               }
+              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
             />
           ) : (
             <IndexEntryEditor
@@ -361,6 +366,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
+              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
             />
           )}
         </>

@@ -104,3 +104,24 @@ export const DELETE = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const ROOT_ASSISTANTS_MANAGEMENT_BREADCRUMB = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.breadcrumb.index',
+  {
+    defaultMessage: 'AI Assistants',
+  }
+);
+
+export const SECURITY_AI_ASSISTANT_BREADCRUMB = i18n.translate(
+  'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.security',
+  {
+    defaultMessage: 'AI Assistant for Security Settings',
+  }
+);
+
+export const SECURITY = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.breadcrumb.security',
+  {
+    defaultMessage: 'Security',
+  }
+);

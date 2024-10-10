@@ -33,6 +33,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
+    hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
   };
 
