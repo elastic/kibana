@@ -7,6 +7,7 @@
 
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { createBrowserHistory } from 'history';
@@ -34,14 +35,14 @@ import { LogRateAnalysisContent } from '../components/log_rate_analysis/log_rate
 /**
  * Only used to initialize internally
  */
-export type LogRateAnalysisPropsWithDeps = LogRateAnalysisProps & {
+export type LogRateAnalysisPropsWithDeps = LogRateAnalysisEmbeddableWrapperProps & {
   coreStart: CoreStart;
   pluginStart: AiopsPluginStartDeps;
 };
 
-export type LogRateAnalysisSharedComponent = FC<LogRateAnalysisProps>;
+export type LogRateAnalysisEmbeddableWrapper = FC<LogRateAnalysisEmbeddableWrapperProps>;
 
-export interface LogRateAnalysisProps {
+export interface LogRateAnalysisEmbeddableWrapperProps {
   dataViewId: string;
   timeRange: TimeRange;
   /**
@@ -63,7 +64,7 @@ export interface LogRateAnalysisProps {
   onError: (error: Error) => void;
 }
 
-const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
+const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
   // Component dependencies
   coreStart,
   pluginStart,
@@ -132,6 +133,20 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
     }
   }, [timeRange]);
 
+  // We use the following pattern to track changes of dataViewId, and if there's
+  // a change, we unmount and remount the complete inner component. This makes
+  // sure the component is reinitialized correctly when the options of the
+  // dashboard panel are used to change the data view. This is a bit of a
+  // workaround since originally log rate analysis was developed as a standalone
+  // page with the expectation that the data view is set once and never changes.
+  const prevDataViewId = usePrevious(dataViewId);
+  const [_, setRerenderFlag] = useState(false);
+  useEffect(() => {
+    if (prevDataViewId && prevDataViewId !== dataViewId) {
+      setRerenderFlag((prev) => !prev);
+    }
+  }, [dataViewId, prevDataViewId]);
+
   // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
@@ -144,28 +159,30 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
         padding: '10px',
       }}
     >
-      <Router history={history}>
-        <ReloadContextProvider reload$={resultObservable$}>
-          <AiopsAppContext.Provider value={aiopsAppContextValue}>
-            <UrlStateProvider>
-              <DataSourceContextProvider
-                dataViews={pluginStart.data.dataViews}
-                dataViewId={dataViewId}
-              >
-                <LogRateAnalysisReduxProvider>
-                  <DatePickerContextProvider {...datePickerDeps}>
-                    <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
-                    <LogRateAnalysisContent />
-                  </DatePickerContextProvider>
-                </LogRateAnalysisReduxProvider>
-              </DataSourceContextProvider>
-            </UrlStateProvider>
-          </AiopsAppContext.Provider>
-        </ReloadContextProvider>
-      </Router>
+      {prevDataViewId === dataViewId && (
+        <Router history={history}>
+          <ReloadContextProvider reload$={resultObservable$}>
+            <AiopsAppContext.Provider value={aiopsAppContextValue}>
+              <UrlStateProvider>
+                <DataSourceContextProvider
+                  dataViews={pluginStart.data.dataViews}
+                  dataViewId={dataViewId}
+                >
+                  <LogRateAnalysisReduxProvider>
+                    <DatePickerContextProvider {...datePickerDeps}>
+                      <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
+                      <LogRateAnalysisContent />
+                    </DatePickerContextProvider>
+                  </LogRateAnalysisReduxProvider>
+                </DataSourceContextProvider>
+              </UrlStateProvider>
+            </AiopsAppContext.Provider>
+          </ReloadContextProvider>
+        </Router>
+      )}
     </div>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export default LogRateAnalysisWrapper;
+export default LogRateAnalysisEmbeddableWrapperWithDeps;
