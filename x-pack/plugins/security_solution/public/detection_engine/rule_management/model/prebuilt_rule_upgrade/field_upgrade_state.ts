@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const FINAL_UPDATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.finalUpdate',
-  {
-    defaultMessage: 'Final update',
-  }
-);
+export enum FieldUpgradeState {
+  Accepted = 'ACCEPTED',
+  SolvableConflict = 'SOLVABLE_CONFLICT',
+  NonSolvableConflict = 'NON_SOLVABLE_CONFLICT',
+}
