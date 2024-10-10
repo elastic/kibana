@@ -41,7 +41,7 @@ describe('useGetIssue', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -99,9 +99,10 @@ describe('useGetIssue', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getIssue api returns successfully but contains an error', async () => {
@@ -125,8 +126,9 @@ describe('useGetIssue', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

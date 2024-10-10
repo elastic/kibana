@@ -48,21 +48,21 @@ describe('UseFindCaseUserActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        ...initialData,
-        data: {
-          userActions: [...findCaseUserActionsResponse.userActions],
-          total: 30,
-          perPage: 10,
-          page: 1,
-        },
-        isError: false,
-        isLoading: false,
-        isFetching: false,
-      })
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          ...initialData,
+          data: {
+            userActions: [...findCaseUserActionsResponse.userActions],
+            total: 30,
+            perPage: 10,
+            page: 1,
+          },
+          isError: false,
+          isLoading: false,
+          isFetching: false,
+        })
+      )
     );
   });
 
@@ -84,12 +84,12 @@ describe('UseFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
-      expect.any(AbortSignal)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
+        expect.any(AbortSignal)
+      )
     );
   });
 
@@ -124,13 +124,13 @@ describe('UseFindCaseUserActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-      expect.any(AbortSignal)
-    );
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
+        expect.any(AbortSignal)
+      );
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

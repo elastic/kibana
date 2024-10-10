@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { renderMutation, renderQuery } from '../../../management/hooks/test_utils';
+import {
+  renderMutation,
+  renderQuery,
+  renderWrappedHook,
+} from '../../../management/hooks/test_utils';
 import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
@@ -78,10 +82,7 @@ describe('useAssetCriticality', () => {
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-      const { mutation } = await renderQuery(
-        () => useAssetCriticalityData({ entity }),
-        'isSuccess'
-      );
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
       await renderMutation(async () =>
         mutation.mutate({
@@ -100,10 +101,7 @@ describe('useAssetCriticality', () => {
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-      const { mutation } = await renderQuery(
-        () => useAssetCriticalityData({ entity }),
-        'isSuccess'
-      );
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
       await renderMutation(async () =>
         mutation.mutate({
