@@ -216,7 +216,10 @@ export function useModelActions({
         },
         available: (item) => {
           return (
-            item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED
+            item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+            !!item.state &&
+            item.state !== MODEL_STATE.DOWNLOADING &&
+            item.state !== MODEL_STATE.NOT_DOWNLOADED
           );
         },
         onClick: async (item) => {
@@ -541,7 +544,7 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
-          defaultMessage: 'Test model',
+          defaultMessage: 'Test',
         }),
         description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test model',

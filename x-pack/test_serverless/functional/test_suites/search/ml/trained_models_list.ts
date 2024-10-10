@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
 
-      it('set correct VCU ranges for start model deployment', async () => {
+      it('sets correct VCU ranges for start model deployment', async () => {
         await ml.trainedModelsTable.openStartDeploymentModal('.elser_model_2');
         await ml.trainedModelsTable.toggleAdvancedConfiguration(true);
 
