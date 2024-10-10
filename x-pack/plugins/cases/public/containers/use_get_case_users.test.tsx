@@ -45,9 +45,9 @@ describe('useGetCaseUsers', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });
