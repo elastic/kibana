@@ -86,7 +86,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
+      {Boolean(title) && (
         <EuiButtonGroup
           isFullWidth
           legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
