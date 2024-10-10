@@ -26,6 +26,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const samlAuth = getService('samlAuth');
+
   // CRUD operations to become public APIs: https://github.com/elastic/kibana/issues/192153
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
@@ -48,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('spaces', function () {
     before(async () => {
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
+        withCommonHeaders: true,
       });
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -242,42 +244,166 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // These tests just test access to API endpoints
+    // These tests just test access to API endpoints, in this case
+    // when accessed without internal headers they will return 400
     // They will be included in deployment agnostic testing once spaces
     // are enabled in production.
     describe(`Access`, () => {
-      it('#copyToSpace', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_copy_saved_objects'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
-      });
-      it('#resolveCopyToSpaceErrors', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_resolve_copy_saved_objects_errors'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
-      });
-      it('#updateObjectsSpaces', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_update_objects_spaces'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
-      });
-      it('#getShareableReferences', async () => {
-        const { body, status } = await supertestAdminWithApiKey
-          .post('/api/spaces/_get_shareable_references')
-          .send({
-            objects: [{ type: 'a', id: 'a' }],
+      describe(`internal`, () => {
+        it('#getActiveSpace requires internal header', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .get('/internal/spaces/_active_space')
+            .set(samlAuth.getCommonRequestHeader()));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [get] exists but is not available with the current configuration'
+            ),
           });
-        svlCommonApi.assertResponseStatusCode(200, status, body);
+          expect(status).toBe(400);
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .get('/internal/spaces/_active_space')
+            .set(samlAuth.getInternalRequestHeader()));
+          // expect success because we're using the internal header
+          expect(body).toEqual(
+            expect.objectContaining({
+              id: 'default',
+            })
+          );
+          expect(status).toBe(200);
+        });
+
+        it('#copyToSpace requires internal header', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_copy_saved_objects'
+          ));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .post('/api/spaces/_copy_saved_objects')
+            .set(samlAuth.getInternalRequestHeader()));
+
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+
+          // expect 400 for missing body
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request body]: expected a plain object value, but found [null] instead.',
+          });
+        });
+
+        it('#resolveCopyToSpaceErrors requires internal header', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_resolve_copy_saved_objects_errors'
+          ));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .post('/api/spaces/_resolve_copy_saved_objects_errors')
+            .set(samlAuth.getInternalRequestHeader()));
+
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+
+          // expect 400 for missing body
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request body]: expected a plain object value, but found [null] instead.',
+          });
+        });
+
+        it('#updateObjectsSpaces requires internal header', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_update_objects_spaces'
+          ));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .post('/api/spaces/_update_objects_spaces')
+            .set(samlAuth.getInternalRequestHeader()));
+
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+
+          // expect 400 for missing body
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request body]: expected a plain object value, but found [null] instead.',
+          });
+        });
+
+        it('#getShareableReferences requires internal header', async () => {
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_get_shareable_references'
+          ));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+
+          ({ body, status } = await supertestAdminWithApiKey
+            .post('/api/spaces/_get_shareable_references')
+            .set(samlAuth.getInternalRequestHeader())
+            .send({
+              objects: [{ type: 'a', id: 'a' }],
+            }));
+
+          svlCommonApi.assertResponseStatusCode(200, status, body);
+        });
       });
-      it('#disableLegacyUrlAliases', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_disable_legacy_url_aliases'
-        );
-        // without a request body we would normally a 400 bad request if the endpoint was registered
-        svlCommonApi.assertApiNotFound(body, status);
+
+      describe(`disabled`, () => {
+        it('#disableLegacyUrlAliases', async () => {
+          const { body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_disable_legacy_url_aliases'
+          );
+          // without a request body we would normally a 400 bad request if the endpoint was registered
+          svlCommonApi.assertApiNotFound(body, status);
+        });
       });
     });
   });

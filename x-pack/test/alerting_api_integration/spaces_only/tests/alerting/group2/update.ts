@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  resetRulesSettings,
+} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -174,6 +180,233 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         statusCode: 400,
         error: 'Bad Request',
         message: 'Group is not defined in action test-id',
+      });
+    });
+
+    describe('update rule flapping', () => {
+      afterEach(async () => {
+        await resetRulesSettings(supertest, 'space1');
+      });
+
+      it('should allow flapping to be updated', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData());
+
+        expect(response.body.flapping).eql(undefined);
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        const { body: updatedRule } = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 5,
+              status_change_threshold: 5,
+            },
+          });
+
+        expect(updatedRule.flapping).eql({
+          look_back_window: 5,
+          status_change_threshold: 5,
+        });
+      });
+
+      it('should allow flapping to be removed via update', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              flapping: {
+                look_back_window: 5,
+                status_change_threshold: 5,
+              },
+            })
+          );
+
+        expect(response.body.flapping).eql({
+          look_back_window: 5,
+          status_change_threshold: 5,
+        });
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        const { body: updatedRule } = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: null,
+          });
+
+        expect(updatedRule.flapping).eql(null);
+      });
+
+      it('should throw if flapping is updated when global flapping is off', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData());
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            enabled: false,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 5,
+              status_change_threshold: 5,
+            },
+          })
+          .expect(400);
+      });
+
+      it('should allow rule to be updated when global flapping is off if not updating flapping', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              flapping: {
+                look_back_window: 5,
+                status_change_threshold: 5,
+              },
+            })
+          );
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            enabled: false,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'updated name 1',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+          })
+          .expect(200);
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'updated name 2',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 5,
+              status_change_threshold: 5,
+            },
+          })
+          .expect(200);
+      });
+
+      it('should throw if flapping is invalid', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData());
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 5,
+              status_change_threshold: 10,
+            },
+          })
+          .expect(400);
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: -5,
+              status_change_threshold: -5,
+            },
+          })
+          .expect(400);
       });
     });
 

@@ -24,9 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataViews = getService('dataViews');
 
-  // Failing: See https://github.com/elastic/kibana/issues/194043
-  // Failing: See https://github.com/elastic/kibana/issues/194043
-  describe.skip('extension getRowIndicatorProvider', () => {
+  describe('extension getRowIndicatorProvider', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
@@ -130,6 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       anchorCell = await dataGrid.getCellElement(0, 0);
       anchorColorIndicator = await anchorCell.findByTestSubject(
