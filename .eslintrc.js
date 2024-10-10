@@ -131,6 +131,15 @@ const VENN_DIAGRAM_HEADER = `
   */
 `;
 
+const REACT_MONACO_EDITOR_HEADER = `
+/*
+ * This file is forked from the react-monaco-editor project (https://github.com/react-monaco-editor/react-monaco-editor),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See \`packages/shared-ux/code_editor/impl/monaco_editor/LICENSE\` for more information.
+ */
+ `;
+
 /** Packages which should not be included within production code. */
 const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
   pkg.isDevOnly() ? pkg.normalizedRepoRelativeDir : []
@@ -352,6 +361,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -388,6 +398,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -431,6 +442,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -464,6 +476,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -494,6 +507,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -523,6 +537,7 @@ module.exports = {
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -556,6 +571,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -585,6 +601,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               VENN_DIAGRAM_HEADER,
+              REACT_MONACO_EDITOR_HEADER,
             ],
           },
         ],
@@ -624,6 +641,39 @@ module.exports = {
       },
     },
 
+    /**
+     * react-monaco-editor fork requires special license headers
+     */
+    {
+      files: ['packages/shared-ux/code_editor/impl/react_monaco_editor/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: REACT_MONACO_EDITOR_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
     /**
      * Allow default exports
      */

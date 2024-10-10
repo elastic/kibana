@@ -8,8 +8,8 @@
  */
 
 import React, { useEffect, KeyboardEventHandler } from 'react';
-import { type MonacoEditorProps } from 'react-monaco-editor';
 import { monaco } from '@kbn/monaco';
+import type { MonacoEditorProps } from '@kbn/code-editor/react_monaco_editor';
 
 function createEditorInstance() {
   const keyDownListeners: Array<(e?: unknown) => void> = [];
