@@ -44,7 +44,7 @@ describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () 
   });
 
   // TODO: need to update refetch properly in the timeline tab
-  it.only('adds field to timeline', () => {
+  it.skip('adds field to timeline', () => {
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();

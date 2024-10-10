@@ -434,9 +434,10 @@ export const scrollAlertTableColumnIntoViewAndTest = (
     interval: 500,
     timeout: 12000,
   });
+  // We remove the horizontal scrollbar from the table after scrolling
+  // so `realHover` doesn't conflict with it when attempting to click elements in the table
   cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
   testCallback();
-  cy.get('.euiDataGrid__virtualized').invoke('removeAttr', 'style', 'overflow-x: hidden');
 };
 
 export const waitForPageFilters = () => {

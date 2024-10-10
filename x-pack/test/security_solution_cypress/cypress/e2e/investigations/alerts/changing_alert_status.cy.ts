@@ -157,7 +157,6 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/173597
   context('Closing alerts', () => {
     beforeEach(() => {
       login();
