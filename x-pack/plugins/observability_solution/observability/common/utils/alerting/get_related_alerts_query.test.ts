@@ -100,4 +100,19 @@ describe('getRelatedAlertKuery', () => {
     // Should be able to parse keury without throwing error
     fromKueryExpression(kuery!);
   });
+
+  it('should not include service.name twice', () => {
+    const serviceNameGroups = [{ field: 'service.name', value: 'myServiceName' }];
+    const serviceNameSharedFields = [{ name: SERVICE_NAME, value: `my-${SERVICE_NAME}` }];
+    const kuery = getRelatedAlertKuery({
+      groups: serviceNameGroups,
+      sharedFields: serviceNameSharedFields,
+    });
+    expect(kuery).toEqual(
+      `(service.name: "myServiceName" or kibana.alert.group.value: "myServiceName")`
+    );
+
+    // Should be able to parse keury without throwing error
+    fromKueryExpression(kuery!);
+  });
 });

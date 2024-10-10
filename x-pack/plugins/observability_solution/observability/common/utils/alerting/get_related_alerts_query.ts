@@ -90,10 +90,13 @@ export const getRelatedAlertKuery = ({ tags, groups, ruleId, sharedFields }: Pro
       })) ??
     [];
   const ruleKueries = (ruleId && [`(${ALERT_RULE_UUID}: "${ruleId}")`]) ?? [];
+  const groupFields = groups?.map((group) => group.field) ?? [];
   const sharedFieldsKueries =
-    sharedFields?.map((field) => {
-      return `(${field.name}: "${field.value}")`;
-    }) ?? [];
+    sharedFields
+      ?.filter((field) => !groupFields.includes(field.name))
+      .map((field) => {
+        return `(${field.name}: "${field.value}")`;
+      }) ?? [];
 
   const tagKueriesStr = tagKueries.length > 0 ? [`(${tagKueries.join(' or ')})`] : [];
   const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
