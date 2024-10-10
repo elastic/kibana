@@ -21,9 +21,10 @@ import * as i18n from './translations';
 interface Props {
   entry?: DocumentEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>;
+  hasManageGlobalKnowledgeBase: boolean;
 }
 
-export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }) => {
+export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry, hasManageGlobalKnowledgeBase }) => {
   // Name
   const setName = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -40,7 +41,6 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntr
       })),
     [setEntry]
   );
-  // TODO: KB-RBAC Disable global option if no RBAC
   const sharingOptions = [
     {
       value: i18n.SHARING_PRIVATE_OPTION_LABEL,
@@ -67,6 +67,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntr
           {i18n.SHARING_GLOBAL_OPTION_LABEL}
         </EuiText>
       ),
+      disabled: !hasManageGlobalKnowledgeBase
     },
   ];
   const selectedSharingOption =

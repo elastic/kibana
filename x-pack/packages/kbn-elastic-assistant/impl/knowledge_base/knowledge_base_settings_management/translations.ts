@@ -259,7 +259,7 @@ export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionHelpLabel',
   {
     defaultMessage:
-      'A description of the type of data in this index and/or when the assistant should look for data here.',
+      'Describe when this custom knowledge should be used during a conversation. Ex: "Use this index to answer any question related to asset information"',
   }
 );
 
@@ -273,7 +273,8 @@ export const ENTRY_QUERY_DESCRIPTION_INPUT_LABEL = i18n.translate(
 export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
-    defaultMessage: 'Any instructions for extracting the search query from the user request.',
+    defaultMessage:
+      'Describe what query should be constructed by the model to retrieve this custom knowledge Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
   }
 );
 

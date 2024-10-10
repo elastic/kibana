@@ -36,13 +36,14 @@ const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-bas
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
+  modalMode?: boolean;
 }
 
 /**
  * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
+  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
     const { http, toasts } = useAssistantContext();
     const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
@@ -194,10 +195,10 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        <AlertsSettings
+        {!modalMode && <AlertsSettings
           knowledgeBase={knowledgeBase}
           setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />
+        />}
       </>
     );
   }

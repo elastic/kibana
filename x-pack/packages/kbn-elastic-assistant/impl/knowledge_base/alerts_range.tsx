@@ -31,6 +31,7 @@ export const AlertsRange: React.FC<Props> = React.memo(
     return (
       <EuiRange
         aria-label={ALERTS_RANGE}
+        fullWidth
         compressed={compressed}
         data-test-subj="alertsRange"
         id={inputRangeSliderId}

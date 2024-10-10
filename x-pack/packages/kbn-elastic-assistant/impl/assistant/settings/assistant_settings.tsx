@@ -384,6 +384,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   <KnowledgeBaseSettings
                     knowledgeBase={knowledgeBase}
                     setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+                    modalMode={true}
                   />
                 )}
                 {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}

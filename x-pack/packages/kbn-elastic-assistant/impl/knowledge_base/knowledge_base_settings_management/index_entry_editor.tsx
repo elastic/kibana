@@ -12,9 +12,11 @@ import {
   EuiFormRow,
   EuiComboBoxOptionOption,
   EuiText,
+  EuiTextArea,
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
+import { useAsync } from 'react-use';
 import React, { useCallback } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -24,9 +26,10 @@ interface Props {
   dataViews: DataViewsContract;
   entry?: IndexEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
+  hasManageGlobalKnowledgeBase: boolean;
 }
 
-export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry, setEntry }) => {
+export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase }) => {
   // Name
   const setName = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -43,7 +46,6 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
       })),
     [setEntry]
   );
-  // TODO: KB-RBAC Disable global option if no RBAC
   const sharingOptions = [
     {
       value: i18n.SHARING_PRIVATE_OPTION_LABEL,
@@ -70,19 +72,30 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
           {i18n.SHARING_GLOBAL_OPTION_LABEL}
         </EuiText>
       ),
+      disabled: !hasManageGlobalKnowledgeBase,
     },
   ];
   const selectedSharingOption =
     entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
   // Index
-  // TODO: For index field autocomplete
-  // const indexOptions = useMemo(() => {
-  //   const indices = await dataViews.getIndices({
-  //     pattern: e[0]?.value ?? '',
-  //     isRollupIndex: () => false,
-  //   });
-  // }, [dataViews]);
+  const indexOptions = useAsync(async () => {
+    const indices = await dataViews.getIndices({
+      pattern: '*',
+      isRollupIndex: () => false,
+    });
+
+    return indices.map((index) => ({label: index.name, value: index.name}));
+  }, [dataViews]);
+
+  const fieldOptions = useAsync(async () => {
+    const fields = await dataViews.getFieldsForWildcard({ pattern: entry?.index ?? '', fieldTypes: ['semantic_text'] });
+
+    const semanticFields = fields.filter((field) => field.esTypes?.includes('semantic_text'));
+
+    return semanticFields.map((field) => ({label: field.name, value: field.name}));
+  }, [entry]);
+
   const setIndex = useCallback(
     async (e: Array<EuiComboBoxOptionOption<string>>) => {
       setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
@@ -103,12 +116,28 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
     };
 
     setIndex([newOption]);
+    setField([{ label: '', value: ''}])
+  };
+
+  const onCreateFieldOption = (searchValue: string) => {
+    const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+    if (!normalizedSearchValue) {
+      return;
+    }
+
+    const newOption: EuiComboBoxOptionOption<string> = {
+      label: searchValue,
+      value: searchValue,
+    };
+
+    setField([newOption]);
   };
 
   // Field
   const setField = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, field: e.target.value })),
+    async (e: Array<EuiComboBoxOptionOption<string>>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, field: e[0]?.value  })),
     [setEntry]
   );
 
@@ -121,7 +150,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
 
   // Query Description
   const setQueryDescription = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
       setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
     [setEntry]
   );
@@ -156,6 +185,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
           singleSelection={{ asPlainText: true }}
           onCreateOption={onCreateOption}
           fullWidth
+          options={indexOptions.value ?? []}
           selectedOptions={
             entry?.index
               ? [
@@ -170,12 +200,25 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
         />
       </EuiFormRow>
       <EuiFormRow label={i18n.ENTRY_FIELD_INPUT_LABEL} fullWidth>
-        <EuiFieldText
-          name="field"
-          placeholder={i18n.ENTRY_FIELD_PLACEHOLDER}
+      <EuiComboBox
+          aria-label={i18n.ENTRY_FIELD_PLACEHOLDER}
+          isClearable={true}
+          singleSelection={{ asPlainText: true }}
+          onCreateOption={onCreateFieldOption}
           fullWidth
-          value={entry?.field}
+          options={fieldOptions.value ?? []}
+          selectedOptions={
+            entry?.field
+              ? [
+                  {
+                    label: entry?.field,
+                    value: entry?.field,
+                  },
+                ]
+              : []
+          }
           onChange={setField}
+          isDisabled={!entry?.index}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -195,11 +238,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
         helpText={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
         fullWidth
       >
-        <EuiFieldText
+        <EuiTextArea
           name="description"
-          fullWidth
           value={entry?.queryDescription}
           onChange={setQueryDescription}
+          fullWidth
+          rows={2}
         />
       </EuiFormRow>
       <EuiFormRow

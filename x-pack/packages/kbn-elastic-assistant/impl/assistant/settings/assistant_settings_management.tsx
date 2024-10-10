@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
-
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Conversation } from '../../..';
@@ -32,10 +32,15 @@ import {
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
+import { KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
+  navigateToApp: NonNullable<KibanaServices['application']>['navigateToApp'];
+  setBreadcrumbs: NonNullable<KibanaServices['chrome']>['setBreadcrumbs'];
+  serverless?: ServerlessPluginStart
 }
 
 /**
@@ -43,14 +48,14 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, selectedConversation: defaultSelectedConversation }) => {
+  ({ dataViews, selectedConversation: defaultSelectedConversation, navigateToApp, setBreadcrumbs, serverless }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
-
+    const [searchParams, setSearchParams] = useSearchParams();
     const { data: connectors } = useLoadConnectors({
       http,
     });
@@ -60,10 +65,38 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const headerIconShadow = useEuiShadow('s');
 
     useEffect(() => {
-      if (selectedSettingsTab == null) {
+      if (serverless) {
+        serverless.setBreadcrumbs([
+          {
+            text: i18n.SECURITY_AI_ASSISTANT_BREADCRUMB
+          },
+        ]);
+      } else {
+        setBreadcrumbs([
+          {
+            text: i18n.ROOT_ASSISTANTS_MANAGEMENT_BREADCRUMB,
+            onClick: (e) => {
+              e.preventDefault();
+              navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            },
+          },
+          {
+            text: i18n.SECURITY
+          },
+        ]);
+      }
+    }, [navigateToApp, serverless, setBreadcrumbs]);
+
+
+    useEffect(() => {
+      if (searchParams.get('tab')) {
+        setSelectedSettingsTab(searchParams.get('tab') ?? CONNECTORS_TAB);
+        return;
+      } else {
+        setSearchParams({ tab: CONNECTORS_TAB });
         setSelectedSettingsTab(CONNECTORS_TAB);
       }
-    }, [selectedSettingsTab, setSelectedSettingsTab]);
+    }, [searchParams]);
 
     const tabsConfig = useMemo(
       () => [
@@ -107,7 +140,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       return tabsConfig.map((t) => ({
         ...t,
         'data-test-subj': `settingsPageTab-${t.id}`,
-        onClick: () => setSelectedSettingsTab(t.id),
+        onClick: () => {
+          setSearchParams({ tab: t.id });
+          setSelectedSettingsTab(t.id)
+        },
         isSelected: t.id === selectedSettingsTab,
       }));
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
