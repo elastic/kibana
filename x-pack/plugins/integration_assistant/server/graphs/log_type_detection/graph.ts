@@ -10,7 +10,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
-import { handleCSV } from './csv';
+import { handleCSV } from '../csv/csv';
 import { ESProcessorItem, SamplesFormat } from '../../../common';
 import { getKVGraph } from '../kv/graph';
 import { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
