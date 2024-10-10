@@ -12,7 +12,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
-import { createFieldUpgradeSpecifier } from './create_field_upgrade_specifier';
+import { createFieldNameUpgradeSpecifier } from './create_field_upgrade_specifier';
 import { mapDiffableRuleFieldValueToRuleSchemaFormat } from './diffable_rule_fields_mappings';
 import { getFieldPredefinedValue } from './get_field_predefined_value';
 import { getValueFromRuleTriad, getValueFromMergedVersion } from './get_value_from_rule_version';
@@ -58,21 +58,20 @@ export const getValueForField = ({
   }
 
   // Handle SPECIFIC_RULES mode
-  const rule = requestBody.rules.find((r) => r.rule_id === upgradeableRule.target.rule_id);
+  const ruleUpgradeSpecifier = requestBody.rules.find(
+    (r) => r.rule_id === upgradeableRule.target.rule_id
+  );
 
-  const fieldUpgradeSpecifier = createFieldUpgradeSpecifier({
-    fieldName,
-    rule,
-    globalPickVersion,
-    ruleId: upgradeableRule.target.rule_id,
-    targetRuleType: upgradeableRule.target.type,
-  });
-
-  if (!fieldUpgradeSpecifier) {
-    throw new Error(
-      `Missing field upgrade specifier for field '${fieldName}' in: ${upgradeableRule.target.rule_id}`
-    );
+  if (!ruleUpgradeSpecifier) {
+    throw new Error(`Rule payload for upgradable rule ${upgradeableRule.target.rule_id} not found`);
   }
+
+  const fieldUpgradeSpecifier = createFieldNameUpgradeSpecifier({
+    fieldName,
+    ruleUpgradeSpecifier,
+    targetRuleType: upgradeableRule.target.type,
+    globalPickVersion,
+  });
 
   if (fieldUpgradeSpecifier.pick_version === 'RESOLVED') {
     const resolvedValue = fieldUpgradeSpecifier.resolved_value;
