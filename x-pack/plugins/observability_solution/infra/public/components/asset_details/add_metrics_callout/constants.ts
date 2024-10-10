@@ -42,7 +42,7 @@ const hostDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'logs' }),
+        href: locator?.getRedirectUrl({ category: 'logs' }) || '',
         label: defaultPrimaryActionLabel,
       },
       secondary: {
@@ -61,7 +61,7 @@ const containerDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'infra' }),
+        href: locator?.getRedirectUrl({ category: 'infra' }) || '',
         label: defaultPrimaryActionLabel,
       },
       link: {
