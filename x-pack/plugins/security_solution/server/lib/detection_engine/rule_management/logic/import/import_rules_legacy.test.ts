@@ -11,10 +11,12 @@ import { getImportRulesSchemaMock } from '../../../../../../common/api/detection
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
 
-import { importRules } from './import_rules_utils';
-import { createBulkErrorObject } from '../../../routes/utils';
+import { createRuleImportErrorObject } from './errors';
 
-describe('importRules', () => {
+// eslint-disable-next-line no-restricted-imports
+import { importRulesLegacy } from './import_rules_legacy';
+
+describe('importRulesLegacy', () => {
   const { clients, context } = requestContextMock.createTools();
   const ruleToImport = getImportRulesSchemaMock();
 
@@ -27,9 +29,8 @@ describe('importRules', () => {
   });
 
   it('returns an empty rules response if no rules to import', async () => {
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
@@ -38,39 +39,18 @@ describe('importRules', () => {
     expect(result).toEqual([]);
   });
 
-  it('returns 400 error if "ruleChunks" includes Error', async () => {
-    const result = await importRules({
-      ruleChunks: [[new Error('error importing')]],
-      rulesResponseAcc: [],
-      overwriteRules: false,
-      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      savedObjectsClient,
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error importing',
-          status_code: 400,
-        },
-        rule_id: '(unknown id)',
-      },
-    ]);
-  });
-
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
     clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
-      throw createBulkErrorObject({
+      throw createRuleImportErrorObject({
         ruleId: ruleToImport.rule_id,
-        statusCode: 409,
+        type: 'conflict',
         message: `rule_id: "${ruleToImport.rule_id}" already exists`,
       });
     });
 
     const ruleChunk = [ruleToImport];
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [ruleChunk],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
@@ -94,14 +74,37 @@ describe('importRules', () => {
     });
 
     const ruleChunk = [ruleToImport];
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [ruleChunk],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
     });
 
     expect(result).toEqual([{ rule_id: ruleToImport.rule_id, status_code: 200 }]);
+  });
+
+  it('rejects a prebuilt rule specifying an immutable value of true', async () => {
+    const prebuiltRuleToImport = {
+      ...getImportRulesSchemaMock(),
+      immutable: true,
+      version: 1,
+    };
+    const result = await importRulesLegacy({
+      ruleChunks: [[prebuiltRuleToImport]],
+      overwriteRules: false,
+      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      savedObjectsClient,
+    });
+
+    expect(result).toEqual([
+      {
+        error: {
+          message: `Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: ${prebuiltRuleToImport.rule_id}]`,
+          status_code: 400,
+        },
+        rule_id: prebuiltRuleToImport.rule_id,
+      },
+    ]);
   });
 });
