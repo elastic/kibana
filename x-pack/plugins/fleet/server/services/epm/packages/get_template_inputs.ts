@@ -115,34 +115,36 @@ export async function getTemplateInputs(
 
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
 
-  const packageComments = buildIndexedPackage(packageInfo);
+  const indexedInputsAndStreams = buildIndexedPackage(packageInfo);
 
-  // Add a placeholder <VAR_NAME> to all variables without default value
-  for (const inputWithStreamIds of inputsWithStreamIds) {
-    const inputId = inputWithStreamIds.policy_template
-      ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
-      : inputWithStreamIds.type;
+  if (format === 'yml') {
+    // Add a placeholder <VAR_NAME> to all variables without default value
+    for (const inputWithStreamIds of inputsWithStreamIds) {
+      const inputId = inputWithStreamIds.policy_template
+        ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
+        : inputWithStreamIds.type;
 
-    const packageInput = packageComments[inputId];
-    if (!packageInput) {
-      continue;
-    }
-
-    for (const [inputVarKey, inputVarValue] of Object.entries(inputWithStreamIds.vars ?? {})) {
-      const varDef = packageInput.vars?.find((_varDef) => _varDef.name === inputVarKey);
-      if (varDef) {
-        addPlaceholderIfNeeded(varDef, inputVarValue);
-      }
-    }
-    for (const stream of inputWithStreamIds.streams) {
-      const packageStream = packageInput.streams[stream.id];
-      if (!packageStream) {
+      const packageInput = indexedInputsAndStreams[inputId];
+      if (!packageInput) {
         continue;
       }
-      for (const [streamVarKey, streamVarValue] of Object.entries(stream.vars ?? {})) {
-        const varDef = packageStream.vars?.find((_varDef) => _varDef.name === streamVarKey);
+
+      for (const [inputVarKey, inputVarValue] of Object.entries(inputWithStreamIds.vars ?? {})) {
+        const varDef = packageInput.vars?.find((_varDef) => _varDef.name === inputVarKey);
         if (varDef) {
-          addPlaceholderIfNeeded(varDef, streamVarValue);
+          addPlaceholderIfNeeded(varDef, inputVarValue);
+        }
+      }
+      for (const stream of inputWithStreamIds.streams) {
+        const packageStream = packageInput.streams[stream.id];
+        if (!packageStream) {
+          continue;
+        }
+        for (const [streamVarKey, streamVarValue] of Object.entries(stream.vars ?? {})) {
+          const varDef = packageStream.vars?.find((_varDef) => _varDef.name === streamVarKey);
+          if (varDef) {
+            addPlaceholderIfNeeded(varDef, streamVarValue);
+          }
         }
       }
     }
@@ -204,7 +206,7 @@ function addPlaceholderIfNeeded(
 function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStreamIndexed {
   return (
     packageInfo.policy_templates?.reduce<PackageWithInputAndStreamIndexed>(
-      (inputComments, policyTemplate) => {
+      (inputsAcc, policyTemplate) => {
         const inputs = getNormalizedInputs(policyTemplate);
 
         inputs.forEach((packageInput) => {
@@ -231,19 +233,22 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
             return acc;
           }, {});
 
-          inputComments[inputId] = {
+          inputsAcc[inputId] = {
             ...packageInput,
             streams,
           };
         });
-        return inputComments;
+        return inputsAcc;
       },
       {}
     ) ?? {}
   );
 }
 
-function addCommentsToYaml(yaml: string, packageComments: PackageWithInputAndStreamIndexed) {
+function addCommentsToYaml(
+  yaml: string,
+  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed
+) {
   const doc = yamlDoc.parseDocument(yaml);
   // Add input and streams comments
   const yamlInputs = doc.get('inputs');
@@ -257,7 +262,7 @@ function addCommentsToYaml(yaml: string, packageComments: PackageWithInputAndStr
         return;
       }
       const inputId = inputIdNode.value as string;
-      const pkgInput = packageComments[inputId];
+      const pkgInput = packageIndexInputAndStreams[inputId];
       if (pkgInput) {
         inputItem.commentBefore = ` ${pkgInput.title} ${
           pkgInput.description ? ` ${pkgInput.description}` : ''
