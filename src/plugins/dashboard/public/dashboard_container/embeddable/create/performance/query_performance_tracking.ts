@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, map, pairwise, startWith, switchMap, skipWhile } from 'rxjs';
+import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
@@ -46,6 +46,9 @@ export function startQueryPerformanceTracking(
         return childPhaseEventTrackers;
       }),
       switchMap((children) => {
+        if (children.length === 0) {
+          return of([]); // map to empty stream
+        }
         // Map to new stream of phase-events for each embeddable
         return combineLatest(children.map((child) => child.phase$));
       }),
@@ -78,6 +81,7 @@ export function startQueryPerformanceTracking(
         isFirstDashboardLoadOfSession = false;
         dashboard.firstLoad = false;
       }
+
       if (queryHasStarted) {
         dashboard.lastLoadStartTime = now;
         return;
