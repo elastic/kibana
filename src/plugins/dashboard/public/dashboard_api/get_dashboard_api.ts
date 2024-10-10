@@ -55,14 +55,14 @@ export function getDashboardApi({
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const viewMode$ = new BehaviorSubject<ViewMode>(initialState.viewMode);
 
-  let breakCircularDepUntilEmbeddableLoaded: (id: string) => Promise<undefined> = async (
+  let untilEmbeddableLoadedBreakCircularDep: (id: string) => Promise<undefined> = async (
     id: string
   ) => undefined;
-  const trackPanel = initializeTrackPanel(breakCircularDepUntilEmbeddableLoaded);
+  const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
   const panelsManager = initializePanelsManager(initialState.panels, trackPanel, (id: string) =>
     getReferencesForPanelId(id, references)
   );
-  breakCircularDepUntilEmbeddableLoaded = panelsManager.api.untilEmbeddableLoaded;
+  untilEmbeddableLoadedBreakCircularDep = panelsManager.api.untilEmbeddableLoaded;
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupApi$,
