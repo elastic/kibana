@@ -47,7 +47,6 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
       content: 'System',
     },
   }),
-  setScope: jest.fn(),
   getScope: jest.fn(),
 };
 

@@ -345,10 +345,6 @@ class ChatService {
     );
   };
 
-  public setScope(scope: AssistantScope) {
-    this.scope$.next(scope);
-  }
-
   public getScope() {
     return this.scope$.value;
   }

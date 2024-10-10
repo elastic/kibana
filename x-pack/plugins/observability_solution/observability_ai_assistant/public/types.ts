@@ -87,7 +87,6 @@ export interface ObservabilityAIAssistantChatService {
     response: { data?: string; content?: string },
     onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
-  setScope: (scope: AssistantScope) => void;
   getScope: () => AssistantScope;
 }
 
@@ -125,7 +124,9 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  scope?: AssistantScope;
+}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};

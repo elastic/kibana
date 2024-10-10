@@ -21,11 +21,13 @@ export function createService({
   coreStart,
   enabled,
   scope,
+  scopeIsMutable,
 }: {
   analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
   scope: AssistantScope;
+  scopeIsMutable: boolean;
 }): ObservabilityAIAssistantService {
   const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
 
@@ -101,7 +103,11 @@ export function createService({
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },
-    setScope: (newScope: AssistantScope) => scope$.next(newScope),
+    setScope: (newScope: AssistantScope) => {
+      if (!scopeIsMutable) {
+        scope$.next(newScope);
+      }
+    },
     getScope: () => scope$.value,
     scope$,
   };

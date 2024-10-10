@@ -62,9 +62,9 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
 
   useEffect(() => {
     if (scope) {
-      chatService.value?.setScope(scope);
+      service.setScope(scope);
     }
-  }, [scope, chatService.value]);
+  }, [scope, service]);
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 

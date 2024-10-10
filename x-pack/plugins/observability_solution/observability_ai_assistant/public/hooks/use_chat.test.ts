@@ -40,7 +40,6 @@ const mockChatService: MockedChatService = {
     },
   }),
   getScope: jest.fn(),
-  setScope: jest.fn(),
 };
 
 const addErrorMock = jest.fn();
