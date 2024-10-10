@@ -1076,7 +1076,7 @@ describe('find()', () => {
       const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
 
       expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
-        `"((alert.attributes.tags: ['bar'] OR alert.attributes.alertTypeId: foo OR alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+        `"((alert.attributes.tags: ['bar'] AND alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
       );
     });
   });

@@ -121,7 +121,7 @@ export async function findRules<Params extends RuleParams = never>(
   const consumersFilter = buildConsumersFilter(consumers);
   const combinedFilters = combineFilters(
     [filterKueryNode, ruleTypeIdsFilter, consumersFilter],
-    'or'
+    'and'
   );
 
   const finalFilter = combineFilterWithAuthorizationFilter(
