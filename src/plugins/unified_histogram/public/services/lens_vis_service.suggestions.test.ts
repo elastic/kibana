@@ -12,6 +12,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService suggestions', () => {
@@ -198,6 +199,11 @@ describe('LensVisService suggestions', () => {
   });
 
   test('should return histogramSuggestion if no suggestions returned by the api with the breakdown field if it is given', async () => {
+    const breakdown = convertDatatableColumnToDataViewFieldSpec({
+      name: 'var0',
+      id: 'var0',
+      meta: { type: 'number' },
+    });
     const lensVis = await getLensVisMock({
       filters: [],
       query: { esql: 'from the-data-view | limit 100' },
@@ -207,7 +213,7 @@ describe('LensVisService suggestions', () => {
         from: '2023-09-03T08:00:00.000Z',
         to: '2023-09-04T08:56:28.274Z',
       },
-      breakdownField: { name: 'var0' } as DataViewField,
+      breakdownField: breakdown as DataViewField,
       columns: [
         {
           id: 'var0',

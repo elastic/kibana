@@ -32,7 +32,7 @@ export const isESQLColumnSortable = (column: DatatableColumn): boolean => {
   }
 
   // we don't allow sorting on tsdb counter fields
-  if (column.meta?.esType?.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
+  if (column.meta?.esType && column.meta?.esType?.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
     return false;
   }
 
