@@ -43,8 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         this.tags('skipFIPS');
         it('should not render', async () => {
           await PageObjects.common.navigateToApp('management');
-          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+          const sections = await managementMenu.getSections();
+
+          const sectionIds = sections.map((section) => section.sectionId);
+          expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
+
+          const dataSection = sections.find((section) => section.sectionId === 'data');
+          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
         });
       });
     });
