@@ -66,7 +66,7 @@ export const CreateIndexForm = ({
       usageTracker.click(AnalyticsEvents.startCreateIndexClick);
 
       if (defaultIndexName !== formState.indexName) {
-        usageTracker.count(AnalyticsEvents.startCreateIndexPageModifyIndexName);
+        usageTracker.click(AnalyticsEvents.startCreateIndexPageModifyIndexName);
       }
 
       createIndex({ indexName: formState.indexName });
