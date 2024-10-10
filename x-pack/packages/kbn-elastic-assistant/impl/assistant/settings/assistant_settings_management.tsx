@@ -34,6 +34,7 @@ import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_
 import { EvaluationSettings } from '.';
 import { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { SettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;
@@ -90,10 +91,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     useEffect(() => {
       if (searchParams.get('tab')) {
-        setSelectedSettingsTab(searchParams.get('tab') ?? CONNECTORS_TAB);
+        setSelectedSettingsTab(searchParams.get('tab') as SettingsTabs ?? CONNECTORS_TAB);
         return;
       } else {
-        setSearchParams({ tab: CONNECTORS_TAB });
+        // setSearchParams({ tab: CONNECTORS_TAB });
         setSelectedSettingsTab(CONNECTORS_TAB);
       }
     }, [searchParams]);
@@ -141,7 +142,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         ...t,
         'data-test-subj': `settingsPageTab-${t.id}`,
         onClick: () => {
-          setSearchParams({ tab: t.id });
+          // setSearchParams({ tab: t.id });
           setSelectedSettingsTab(t.id)
         },
         isSelected: t.id === selectedSettingsTab,

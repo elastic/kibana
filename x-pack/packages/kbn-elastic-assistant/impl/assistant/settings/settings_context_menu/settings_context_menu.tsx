@@ -20,7 +20,8 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
-import { AlertSettingsModal } from '../alerts_settings/alerts_modal';
+import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
+import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 
 interface Params {
   isDisabled?: boolean;
@@ -42,6 +43,10 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
     const closeAlertSettingsModal = () => setIsAlertsSettingsModalVisible(false);
     const showAlertSettingsModal = () => setIsAlertsSettingsModalVisible(true);
+
+    const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
+    const closeAnonymizationModal = () => setIsAnonymizationModalVisible(false);
+    const showAnonymizationModal = () => setIsAnonymizationModalVisible(true);
 
     const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
 
@@ -67,10 +72,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     );
 
     const handleNavigateToAnonymization = useCallback(
-      () =>
-        navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement?tab=anonymization',
-        }),
+      () => {
+          showAnonymizationModal();
+          closePopover()},
       [navigateToApp]
     );
 
@@ -182,8 +186,12 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           />
         </EuiPopover>
         {isAlertsSettingsModalVisible && (
-          <AlertSettingsModal onClose={closeAlertSettingsModal} />
+          <AlertsSettingsModal onClose={closeAlertSettingsModal} />
         )}
+        {isAnonymizationModalVisible && (
+        <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+        )
+      }
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             title={i18n.RESET_CONVERSATION}

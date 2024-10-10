@@ -7,7 +7,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useSettingsUpdater } from '../use_settings_updater/use_settings_updater';
 import { AlertsSettings } from './alerts_settings';
@@ -19,17 +18,14 @@ type AlertSettingsModalProps = {
 }
 
 export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
-  const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
-  const modalTitleId = useGeneratedHtmlId();
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, saveSettings } = useSettingsUpdater({},{page:1, perPage:10, total:0, data: []},true,true);
 
   return (
         <EuiModal
-          aria-labelledby={modalTitleId}
           onClose={onClose}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>
+            <EuiModalHeaderTitle >
               {ALERTS_LABEL}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -43,7 +39,6 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
             <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
             <EuiButton
               type="submit"
-              form={modalFormId}
               onClick={() => {
                 saveSettings();
                 onClose();
