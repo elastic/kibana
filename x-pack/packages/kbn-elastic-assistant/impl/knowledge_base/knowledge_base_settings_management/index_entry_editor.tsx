@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiComboBoxOptionOption,
   EuiText,
+  EuiTextArea,
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
@@ -149,7 +150,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
 
   // Query Description
   const setQueryDescription = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
       setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
     [setEntry]
   );
@@ -237,11 +238,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
         helpText={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
         fullWidth
       >
-        <EuiFieldText
+        <EuiTextArea
           name="description"
-          fullWidth
           value={entry?.queryDescription}
           onChange={setQueryDescription}
+          fullWidth
+          rows={2}
         />
       </EuiFormRow>
       <EuiFormRow
