@@ -47,23 +47,15 @@ export const useDashboardMenuItems = ({
    */
   const dashboardApi = useDashboardApi();
 
-  const [
-    dashboardTitle,
-    hasOverlays,
-    hasRunMigrations,
-    hasUnsavedChanges,
-    lastSavedId,
-    managed,
-    viewMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.panelTitle,
-    dashboardApi.hasOverlays$,
-    dashboardApi.hasRunMigrations$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
-    dashboardApi.managed$,
-    dashboardApi.viewMode
-  );
+  const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.panelTitle,
+      dashboardApi.hasOverlays$,
+      dashboardApi.hasRunMigrations$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId,
+      dashboardApi.viewMode
+    );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -273,7 +265,7 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService ? [menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
-    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
     return [
@@ -284,7 +276,7 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, managed, showResetChange, resetChangesMenuItem]);
+  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

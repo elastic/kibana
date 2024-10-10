@@ -8,14 +8,10 @@
  */
 
 import { cloneDeep, omit } from 'lodash';
-import { Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
   DashboardContainerInput,
@@ -26,112 +22,22 @@ import {
   DEFAULT_DASHBOARD_INPUT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
-  GLOBAL_STATE_STORAGE_KEY,
   PanelPlacementStrategy,
 } from '../../../dashboard_constants';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management_service/types';
-import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
+import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
-import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import type { DashboardCreationOptions } from '../../..';
-import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
-import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
-import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { InitialComponentState } from '../../../dashboard_api/get_dashboard_api';
-
-/**
- * Builds a new Dashboard from scratch.
- */
-export const createDashboard = async (
-  creationOptions?: DashboardCreationOptions,
-  dashboardCreationStartTime?: number,
-  savedObjectId?: string
-): Promise<DashboardContainer | undefined> => {
-  // --------------------------------------------------------------------------------------
-  // Create method which allows work to be done on the dashboard container when it's ready.
-  // --------------------------------------------------------------------------------------
-  const dashboardContainerReady$ = new Subject<DashboardContainer>();
-  const untilDashboardReady = () =>
-    new Promise<DashboardContainer>((resolve) => {
-      const subscription = dashboardContainerReady$.subscribe((container) => {
-        subscription.unsubscribe();
-        resolve(container);
-      });
-    });
-
-  // --------------------------------------------------------------------------------------
-  // Lazy load required systems and Dashboard saved object.
-  // --------------------------------------------------------------------------------------
-  const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewExistsPromise = dataService.dataViews.defaultDataViewExists();
-  const dashboardContentManagementService = getDashboardContentManagementService();
-  const dashboardSavedObjectPromise = dashboardContentManagementService.loadDashboardState({
-    id: savedObjectId,
-  });
-
-  const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
-    reduxEmbeddablePackagePromise,
-    dashboardSavedObjectPromise,
-    defaultDataViewExistsPromise /* the result is not used, but the side effect of setting the default data view is needed. */,
-  ]);
-
-  // --------------------------------------------------------------------------------------
-  // Initialize Dashboard integrations
-  // --------------------------------------------------------------------------------------
-  const initializeResult = await initializeDashboard({
-    loadDashboardReturn: savedObjectResult,
-    untilDashboardReady,
-    creationOptions,
-  });
-  if (!initializeResult) return;
-  const { input, searchSessionId } = initializeResult;
-
-  // --------------------------------------------------------------------------------------
-  // Build the dashboard container.
-  // --------------------------------------------------------------------------------------
-  const initialComponentState: InitialComponentState = {
-    anyMigrationRun: savedObjectResult.anyMigrationRun ?? false,
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
-    lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_INPUT,
-      id: input.id,
-    },
-    lastSavedId: savedObjectId,
-    managed: savedObjectResult.managed ?? false,
-  };
-
-  const dashboardContainer = new DashboardContainer(
-    input,
-    reduxEmbeddablePackage,
-    searchSessionId,
-    dashboardCreationStartTime,
-    undefined,
-    creationOptions,
-    initialComponentState
-  );
-
-  // --------------------------------------------------------------------------------------
-  // Start the diffing integration after all other integrations are set up.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((container) => {
-    startDiffingDashboardState.bind(container)(creationOptions);
-  });
-
-  dashboardContainerReady$.next(dashboardContainer);
-  return dashboardContainer;
-};
 
 /**
  * Initializes a Dashboard and starts all of its integrations
@@ -145,19 +51,12 @@ export const initializeDashboard = async ({
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
 }) => {
-  const {
-    queryString,
-    filterManager,
-    timefilter: { timefilter: timefilterService },
-  } = dataService.query;
   const dashboardBackupService = getDashboardBackupService();
 
   const {
     getInitialInput,
     searchSessionSettings,
-    unifiedSearchSettings,
     validateLoadedSavedObject,
-    useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
 
@@ -275,60 +174,6 @@ export const initializeDashboard = async ({
     dashboard.savedObjectReferences = loadDashboardReturn?.references;
     dashboard.controlGroupInput = loadDashboardReturn?.dashboardInput?.controlGroupInput;
   });
-
-  // --------------------------------------------------------------------------------------
-  // Set up unified search integration.
-  // --------------------------------------------------------------------------------------
-  if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
-    const {
-      query,
-      filters,
-      timeRestore,
-      timeRange: savedTimeRange,
-      refreshInterval: savedRefreshInterval,
-    } = initialDashboardInput;
-    const { kbnUrlStateStorage } = unifiedSearchSettings;
-
-    // apply filters and query to the query service
-    filterManager.setAppFilters(cloneDeep(filters ?? []));
-    queryString.setQuery(query ?? queryString.getDefaultQuery());
-
-    /**
-     * Get initial time range, and set up dashboard time restore if applicable
-     */
-    const initialTimeRange: TimeRange = (() => {
-      // if there is an explicit time range in the URL it always takes precedence.
-      const urlOverrideTimeRange =
-        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
-      if (urlOverrideTimeRange) return urlOverrideTimeRange;
-
-      // if this Dashboard has timeRestore return the time range that was saved with the dashboard.
-      if (timeRestore && savedTimeRange) return savedTimeRange;
-
-      // otherwise fall back to the time range from the timefilterService.
-      return timefilterService.getTime();
-    })();
-    initialDashboardInput.timeRange = initialTimeRange;
-    if (timeRestore) {
-      if (savedTimeRange) timefilterService.setTime(savedTimeRange);
-      if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
-    }
-
-    // start syncing global query state with the URL.
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      dataService.query,
-      kbnUrlStateStorage
-    );
-
-    untilDashboardReady().then((dashboardContainer) => {
-      const stopSyncingUnifiedSearchState =
-        syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
-      dashboardContainer.stopSyncingWithUnifiedSearch = () => {
-        stopSyncingUnifiedSearchState();
-        stopSyncingQueryServiceStateWithUrl();
-      };
-    });
-  }
 
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
@@ -451,35 +296,19 @@ export const initializeDashboard = async ({
   });
 
   // --------------------------------------------------------------------------------------
-  // Start the data views integration.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.integrationSubscriptions.add(
-      startSyncingDashboardDataViews.bind(dashboardContainer)()
-    );
-  });
-
-  // --------------------------------------------------------------------------------------
   // Start performance tracker
   // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) =>
+  /* untilDashboardReady().then((dashboardContainer) =>
     dashboardContainer.integrationSubscriptions.add(
       startQueryPerformanceTracking(dashboardContainer)
     )
-  );
-
-  // --------------------------------------------------------------------------------------
-  // Start animating panel transforms 500 ms after dashboard is created.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.setAnimatePanelTransforms(true), 500)
-  );
+  );*/
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
   let initialSearchSessionId;
-  if (searchSessionSettings) {
+  /* if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
@@ -503,7 +332,7 @@ export const initializeDashboard = async ({
         creationOptions?.searchSessionSettings
       );
     });
-  }
+  }*/
 
   if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
