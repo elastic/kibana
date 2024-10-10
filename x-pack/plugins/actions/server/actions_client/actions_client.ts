@@ -96,6 +96,8 @@ import { connectorFromSavedObject, isConnectorDeprecated } from '../application/
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
 import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
 import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
+import { isPreconfigured } from '../lib/is_preconfigured';
+import { isSystemAction } from '../lib/is_system_action';
 
 interface Action extends ConnectorUpdate {
   actionTypeId: string;
@@ -719,6 +721,21 @@ export class ActionsClient {
     includeSystemActionTypes = false,
   }: ListTypesParams = {}): Promise<ConnectorType[]> {
     return listTypes(this.context, { featureId, includeSystemActionTypes });
+  }
+
+  public isActionTypeEnabled(
+    actionTypeId: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
+    return this.context.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+  }
+
+  public isPreconfigured(connectorId: string): boolean {
+    return isPreconfigured(this.context, connectorId);
+  }
+
+  public isSystemAction(connectorId: string): boolean {
+    return isSystemAction(this.context, connectorId);
   }
 
   public async getGlobalExecutionLogWithAuth({
