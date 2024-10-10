@@ -17,7 +17,6 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
@@ -106,7 +105,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
           <EuiFlexItem grow={false}>
             <MetadataPopover {...metaData} />
           </EuiFlexItem>
-        )} 
+        )}
       </EuiFlexGroup>
     </div>
   );

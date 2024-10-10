@@ -43,12 +43,6 @@
   padding: 0 $euiSizeS $euiSizeXS 0;
 }
 
-.resultHeaderContainer {
-  position: sticky;
-  top: 48px; // height of top bar, otherwise it's behind it
-  z-index: 9999;
-}
-
 .euiToken.resultField__token {
   display: flex;
   align-items: center;
