@@ -27,9 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
-import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
-import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
@@ -57,7 +55,6 @@ export const StartStep: React.FC<StartStepProps> = ({
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
-  const { isGenerateLoading } = useValues(DeploymentLogic);
 
   const {
     fullIndexName,
@@ -66,9 +63,10 @@ export const StartStep: React.FC<StartStepProps> = ({
     canConfigureConnector,
     selectedConnector,
     generatedConfigData,
+    isGenerateLoading,
+    isCreateLoading,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector } = useActions(NewConnectorLogic);
-  const { makeRequest } = useActions(AddConnectorApiLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -259,20 +257,15 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiButton
                 data-test-subj="enterpriseSearchStartStepNextButton"
                 onClick={() => {
-                  setCurrentStep(currentStep + 1);
                   if (selectedConnector && selectedConnector.name) {
-                    makeRequest({
-                      deleteExistingConnector: false,
-                      indexName: fullIndexName,
-                      isNative: false,
-                      language: null,
-                      name: fullIndexName,
-                      serviceType: selectedConnector.serviceType,
+                    createConnector({
+                      isSelfManaged: false,
                     });
                   }
                 }}
                 fill
                 disabled={!canConfigureConnector}
+                isLoading={isCreateLoading || isGenerateLoading}
               >
                 {Constants.NEXT_BUTTON_LABEL}
               </EuiButton>
@@ -339,7 +332,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                       disabled={!canConfigureConnector}
                       fill
                       iconType="sparkles"
-                      isLoading={isGenerateLoading}
+                      isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
                         createConnector({
                           isSelfManaged: false,
@@ -355,7 +348,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManualConfiguration isDisabled={!canConfigureConnector} />
+                    <ManualConfiguration
+                      isDisabled={isGenerateLoading || isCreateLoading || !canConfigureConnector}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

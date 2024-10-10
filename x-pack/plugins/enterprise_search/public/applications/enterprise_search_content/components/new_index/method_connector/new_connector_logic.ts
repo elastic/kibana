@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { Connector } from '@kbn/search-connectors';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
+import { Status } from '../../../../../../common/types/api';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   AddConnectorApiLogic,
@@ -47,10 +48,12 @@ import { getLanguageForOptimization } from '../utils';
 export interface NewConnectorValues {
   canConfigureConnector: boolean;
   connectorId: string;
+  createConnectorApiStatus: Status;
   data: IndexExistsApiResponse;
   fullIndexName: string;
   fullIndexNameExists: boolean;
   fullIndexNameIsValid: boolean;
+  generateConfigurationStatus: Status;
   generatedConfigData:
     | {
         apiKey: APIKeyResponse['apiKey'];
@@ -59,6 +62,8 @@ export interface NewConnectorValues {
       }
     | undefined;
   generatedNameData: GenerateConnectorNamesApiResponse | undefined;
+  isCreateLoading: boolean;
+  isGenerateLoading: boolean;
   language: LanguageForOptimization;
   languageSelectValue: string;
   rawName: string;
@@ -112,7 +117,9 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       GenerateConnectorNamesApiLogic,
       ['data as generatedNameData'],
       GenerateConfigApiLogic,
-      ['data as generatedConfigData'],
+      ['data as generatedConfigData', 'status as generateConfigurationStatus'],
+      AddConnectorApiLogic,
+      ['status as createConnectorApiStatus'],
     ],
   },
   listeners: ({ actions, values }) => ({
@@ -203,6 +210,14 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       // TODO: remove this if not used
       () => [selectors.fullIndexName],
       (fullIndexName) => isValidIndexName(fullIndexName),
+    ],
+    isCreateLoading: [
+      () => [selectors.createConnectorApiStatus],
+      (status) => status === Status.LOADING,
+    ],
+    isGenerateLoading: [
+      () => [selectors.generateConfigurationStatus],
+      (status) => status === Status.LOADING,
     ],
     language: [
       // TODO: remove this if not used

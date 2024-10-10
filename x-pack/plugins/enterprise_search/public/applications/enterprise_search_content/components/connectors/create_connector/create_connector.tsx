@@ -13,7 +13,6 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -31,7 +30,6 @@ import {
 import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
 
-import * as Constants from '../../../../shared/constants';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
@@ -57,7 +55,7 @@ export const CreateConnector: React.FC = () => {
     useState<EuiStepStatus>('incomplete');
   const [finishUpStepStatus, setFinishUpStepStatus] = useState<EuiStepStatus>('incomplete');
   const [currentStep, setCurrentStep] = useState(0);
-  const [configurationStepComplete, setConfigurationStepComplete] = useState(false);
+  const [configurationStepComplete] = useState(false);
   const { selectedConnector } = useValues(NewConnectorLogic);
 
   useEffect(() => {
@@ -101,7 +99,6 @@ export const CreateConnector: React.FC = () => {
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={configurationStepComplete}
-          setNextStepEnabled={setConfigurationStepComplete}
         />
       ),
 
@@ -299,22 +296,6 @@ export const CreateConnector: React.FC = () => {
               border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >
-            {currentStep > 0 && (
-              <>
-                <EuiFlexGroup>
-                  <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchCreateConnectorBackButton"
-                    iconType="arrowLeft"
-                    size="s"
-                    onClick={() => setCurrentStep(currentStep - 1)}
-                  >
-                    {Constants.BACK_BUTTON_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexGroup>
-                <EuiSpacer size="xl" />
-              </>
-            )}
-
             <EuiSteps
               titleSize="xxs"
               steps={

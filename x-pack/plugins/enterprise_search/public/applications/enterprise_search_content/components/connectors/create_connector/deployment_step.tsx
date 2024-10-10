@@ -7,16 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-// import { useLocation } from 'react-router-dom';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiButton, EuiFlexGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -27,14 +18,12 @@ interface DeploymentStepProps {
   currentStep: number;
   isNextStepEnabled: boolean;
   setCurrentStep: Function;
-  setNextStepEnabled: Function;
 }
 
 export const DeploymentStep: React.FC<DeploymentStepProps> = ({
   currentStep,
   setCurrentStep,
   isNextStepEnabled,
-  setNextStepEnabled,
 }) => {
   useEffect(() => {
     setTimeout(() => {
@@ -47,26 +36,6 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <ConnectorDeployment />
-      <EuiButtonEmpty
-        size="s"
-        data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-        onClick={() => {
-          setNextStepEnabled(true);
-          setTimeout(() => {
-            window.scrollTo({
-              behavior: 'smooth',
-              top: window.innerHeight,
-            });
-          }, 100);
-        }}
-      >
-        {i18n.translate(
-          'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
-          {
-            defaultMessage: 'Simulate: Connected',
-          }
-        )}
-      </EuiButtonEmpty>
       <EuiFlexItem>
         <EuiPanel
           hasShadow={false}
