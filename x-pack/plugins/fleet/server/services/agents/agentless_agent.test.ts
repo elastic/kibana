@@ -389,12 +389,10 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    jest
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
     const deleteAgentlessAgentReturnValue = await agentlessAgentService.deleteAgentlessAgent(
-      'mocked-agentless-agent-policy-id',
+      'mocked-agentless-agent-policy-id'
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
@@ -433,7 +431,7 @@ describe('Agentless Agent service', () => {
       .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
 
     const deleteAgentlessAgentReturnValue = await agentlessAgentService.deleteAgentlessAgent(
-      'mocked-agentless-agent-policy-id',
+      'mocked-agentless-agent-policy-id'
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
