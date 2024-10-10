@@ -29,7 +29,7 @@ import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/typ
 import {
   getTimeseriesExplorerStyles,
   getAnnotationStyles,
-} from '../../application/timeseriesexplorer';
+} from '../../application/timeseriesexplorer/styles';
 
 const containerPadding = 20;
 const minElemAndChartDiff = 20;
