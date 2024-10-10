@@ -120,7 +120,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const paramsSchema = (config.validate as any).params;
 
-    expect(config.options).toEqual({ tags: ['access:manageSpaces'] });
+    expect(config.options).toEqual({ tags: ['access:manage_manageSpaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: expected value of type [string] but got [undefined]"`
     );

@@ -11,6 +11,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { privilegesFactory } from './privileges';
 import { licenseMock } from '../__fixtures__/licensing.mock';
 import { Actions } from '../actions';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 
 const actions = new Actions();
 
@@ -615,10 +616,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -787,10 +790,12 @@ describe('features', () => {
 
         const expectedActions = [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -946,7 +951,9 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
           actions.ui.get('catalogue', 'read-catalogue-1'),
           actions.ui.get('catalogue', 'read-catalogue-2'),
@@ -1065,7 +1072,9 @@ describe('features', () => {
 
         const expectedActions = [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
           actions.ui.get('catalogue', 'read-catalogue-2'),
           actions.ui.get('management', 'read-management', 'read-management-2'),
@@ -1163,10 +1172,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1181,7 +1192,9 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
@@ -1232,10 +1245,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1250,7 +1265,9 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
@@ -1330,10 +1347,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1348,7 +1367,9 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
@@ -1400,10 +1421,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1418,7 +1441,9 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
@@ -1499,10 +1524,12 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1517,7 +1544,9 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectDecryptedTelemetry
+            ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
+            : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
@@ -1767,10 +1796,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -1782,7 +1811,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
@@ -1926,10 +1955,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -1959,7 +1988,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -2162,10 +2191,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2176,7 +2205,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
@@ -2301,10 +2330,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2334,7 +2363,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
@@ -2480,10 +2509,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2494,7 +2523,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
@@ -2617,10 +2646,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2650,7 +2679,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -2832,10 +2861,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2865,7 +2894,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -3066,10 +3095,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3099,7 +3128,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -3336,10 +3365,10 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
-        actions.api.get('features'),
-        actions.api.get('taskManager'),
-        actions.api.get('manageSpaces'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'features'),
+        actions.api.get(ApiOperation.Manage, 'taskManager'),
+        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3387,7 +3416,7 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.api.get('decryptedTelemetry'),
+        actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
