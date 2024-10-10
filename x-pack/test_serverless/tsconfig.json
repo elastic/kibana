@@ -98,5 +98,6 @@
     "@kbn/console-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/security-plugin-types-common",
   ]
 }
