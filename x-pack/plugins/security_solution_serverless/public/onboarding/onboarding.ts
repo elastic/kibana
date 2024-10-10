@@ -13,5 +13,6 @@ export const setOnboardingSettings = (services: Services) => {
 
   securitySolution.setOnboardingSettings({
     userUrl: getCloudUrl('usersAndRoles', cloud),
+    isAgentlessAvailable: true,
   });
 };

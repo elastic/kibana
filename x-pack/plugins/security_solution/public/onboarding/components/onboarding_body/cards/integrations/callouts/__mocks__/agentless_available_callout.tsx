@@ -6,8 +6,5 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
 
-export const getDummyAdditionalBadge = () => {
-  return <EuiBadge color="warning">{'Dummy badge'}</EuiBadge>;
-};
+export const AgentlessAvailableCallout = () => <div data-test-subj="agentlessAvailableCallout" />;

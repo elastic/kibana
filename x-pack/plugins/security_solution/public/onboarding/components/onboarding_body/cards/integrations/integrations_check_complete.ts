@@ -5,23 +5,63 @@
  * 2.0.
  */
 
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
+import { EPM_API_ROUTES, installationStatuses } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { getDummyAdditionalBadge } from './integrations_header_badges';
+import { AGENT_INDEX } from './constants';
+import type { StartServices } from '../../../../../types';
 
-export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async () => {
-  // implement this function
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve({
-          isComplete: true,
-          completeBadgeText: '3 integrations installed',
-          additionalBadges: [getDummyAdditionalBadge()],
-          metadata: {
-            integrationsInstalled: 3,
-          },
-        }),
-      2000
-    )
+export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async (
+  services: StartServices
+) => {
+  const packageData = await services.http.get<GetPackagesResponse>(
+    EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
+    {
+      version: '2023-10-31',
+    }
   );
+
+  const agentsData = await lastValueFrom(
+    services.data.search.search({
+      params: { index: AGENT_INDEX, body: { size: 1 } },
+    })
+  );
+
+  const installed = packageData?.items?.filter(
+    (pkg) =>
+      pkg.status === installationStatuses.Installed ||
+      pkg.status === installationStatuses.InstallFailed
+  );
+  const isComplete = installed && installed.length > 0;
+  const agentsDataAvailable = !!agentsData?.rawResponse?.hits?.total;
+  const isAgentRequired = isComplete && !agentsDataAvailable;
+
+  const completeBadgeText = i18n.translate(
+    'xpack.securitySolution.onboarding.integrationsCard.badge.completeText',
+    {
+      defaultMessage: '{count} {count, plural, one {integration} other {integrations}} added',
+      values: { count: installed.length },
+    }
+  );
+
+  if (!isComplete) {
+    return {
+      isComplete,
+      metadata: {
+        installedIntegrationsCount: 0,
+        isAgentRequired: false,
+      },
+    };
+  }
+
+  return {
+    isComplete,
+    completeBadgeText,
+    metadata: {
+      installedIntegrationsCount: installed.length,
+      isAgentRequired,
+    },
+  };
 };
