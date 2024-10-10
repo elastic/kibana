@@ -10,7 +10,6 @@ import { act, waitFor } from '@testing-library/react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { SessionStorageType } from './use_markdown_session_storage';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
-import { waitForComponentToUpdate } from '../../common/test_utils';
 
 describe('useMarkdownSessionStorage', () => {
   const field = {
@@ -102,8 +101,6 @@ describe('useMarkdownSessionStorage', () => {
       jest.advanceTimersByTime(1000);
     });
 
-    await waitForComponentToUpdate();
-
     await waitFor(() => {
       expect(result.current.hasConflicts).toBe(false);
       expect(sessionStorage.getItem(sessionKey)).toBe(specialCharsValue);
@@ -129,8 +126,6 @@ describe('useMarkdownSessionStorage', () => {
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-
-    await waitForComponentToUpdate();
 
     await waitFor(() => {
       expect(result.current.hasConflicts).toBe(false);
@@ -172,8 +167,6 @@ describe('useMarkdownSessionStorage', () => {
         }
       );
 
-      await waitForComponentToUpdate();
-
       await waitFor(() => {
         expect(field.setValue).toHaveBeenCalled();
       });
@@ -181,8 +174,6 @@ describe('useMarkdownSessionStorage', () => {
       act(() => {
         jest.advanceTimersByTime(1000);
       });
-
-      await waitForComponentToUpdate();
 
       await waitFor(() => {
         expect(result.current.hasConflicts).toBe(false);
@@ -200,8 +191,6 @@ describe('useMarkdownSessionStorage', () => {
         }
       );
 
-      await waitForComponentToUpdate();
-
       await waitFor(() => {
         expect(field.setValue).toHaveBeenCalled();
       });
@@ -215,8 +204,6 @@ describe('useMarkdownSessionStorage', () => {
       act(() => {
         jest.advanceTimersByTime(1000);
       });
-
-      await waitForComponentToUpdate();
 
       await waitFor(() => {
         expect(result.current.hasConflicts).toBe(false);

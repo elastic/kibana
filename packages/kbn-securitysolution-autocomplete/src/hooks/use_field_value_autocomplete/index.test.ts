@@ -80,11 +80,12 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-    await waitFor(() => expect(getValueSuggestionsMock).not.toHaveBeenCalled());
-
-    expect(result.current).toEqual(expectedResult);
+      expect(result.current).toEqual(expectedResult);
+      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    });
   });
 
   test('does not call autocomplete service if "selectedField" is undefined', async () => {
@@ -103,10 +104,12 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
-    await waitFor(() => expect(getValueSuggestionsMock).not.toHaveBeenCalled());
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-    expect(result.current).toEqual(expectedResult);
+      expect(result.current).toEqual(expectedResult);
+      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    });
   });
 
   test('does not call autocomplete service if "indexPattern" is undefined', async () => {
@@ -125,10 +128,12 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-    await waitFor(() => expect(getValueSuggestionsMock).not.toHaveBeenCalled());
-    expect(result.current).toEqual(expectedResult);
+      expect(result.current).toEqual(expectedResult);
+      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    });
   });
 
   test('it uses full path name for nested fields to fetch suggestions', async () => {
@@ -194,10 +199,12 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
-    await waitFor(() => expect(getValueSuggestionsMock).not.toHaveBeenCalled());
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
-    expect(result.current).toEqual(expectedResult);
+      expect(result.current).toEqual(expectedResult);
+      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    });
   });
 
   test('returns "isSuggestingValues" of false to note that autocomplete service is not in use if no autocomplete suggestions available', async () => {
@@ -218,10 +225,12 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
-    await waitFor(() => expect(suggestionsMock).toHaveBeenCalled());
-    expect(result.current).toEqual(expectedResult);
+      expect(suggestionsMock).toHaveBeenCalled();
+      expect(result.current).toEqual(expectedResult);
+    });
   });
 
   test('returns suggestions', async () => {
@@ -241,24 +250,23 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [
-      false,
-      true,
-      ['value 1', 'value 2'],
-      result.current[3],
-    ];
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [
+        false,
+        true,
+        ['value 1', 'value 2'],
+        result.current[3],
+      ];
 
-    await waitFor(() =>
       expect(getValueSuggestionsMock).toHaveBeenCalledWith({
         field: getField('@tags'),
         indexPattern: stubIndexPatternWithFields,
         query: '',
         signal,
         useTimeRange: false,
-      })
-    );
-
-    expect(result.current).toEqual(expectedResult);
+      });
+      expect(result.current).toEqual(expectedResult);
+    });
   });
 
   test('returns new suggestions on subsequent calls', async () => {
@@ -290,15 +298,16 @@ describe('use_field_value_autocomplete', () => {
       });
     }
 
-    const expectedResult: UseFieldValueAutocompleteReturn = [
-      false,
-      true,
-      ['value 1', 'value 2'],
-      result.current[3],
-    ];
+    await waitFor(() => {
+      const expectedResult: UseFieldValueAutocompleteReturn = [
+        false,
+        true,
+        ['value 1', 'value 2'],
+        result.current[3],
+      ];
 
-    await waitFor(() => expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2));
-
-    expect(result.current).toEqual(expectedResult);
+      expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2);
+      expect(result.current).toEqual(expectedResult);
+    });
   });
 });

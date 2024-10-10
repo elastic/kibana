@@ -29,12 +29,12 @@ describe('useGetCategories', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitFor(() => null);
-
-    expect(spyOnGetCategories).toBeCalledWith({
-      signal: abortCtrl.signal,
-      owner: [SECURITY_SOLUTION_OWNER],
-    });
+    await waitFor(() =>
+      expect(spyOnGetCategories).toBeCalledWith({
+        signal: abortCtrl.signal,
+        owner: [SECURITY_SOLUTION_OWNER],
+      })
+    );
   });
 
   it('displays an error toast when an error occurs', async () => {
@@ -50,8 +50,6 @@ describe('useGetCategories', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitFor(() => null);
-
-    expect(addError).toBeCalled();
+    await waitFor(() => expect(addError).toBeCalled());
   });
 });

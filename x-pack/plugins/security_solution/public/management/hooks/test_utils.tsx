@@ -43,7 +43,7 @@ export const renderQuery = async (
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
-  await waitFor(() => resultHook.current[waitForHook]);
+  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy());
   return resultHook.current;
 };
 
@@ -59,3 +59,5 @@ export const renderMutation = async (
   });
   return resultHook.current;
 };
+
+export const renderWrappedHook = renderMutation;
