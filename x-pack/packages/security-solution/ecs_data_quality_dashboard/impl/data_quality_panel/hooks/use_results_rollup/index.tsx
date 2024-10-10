@@ -35,12 +35,12 @@ import type {
   TelemetryEvents,
 } from '../../types';
 import {
-  getIncompatibleMappingsFields,
-  getIncompatibleValuesFields,
-  getSameFamilyFields,
-} from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
+  getEscapedIncompatibleMappingsFields,
+  getEscapedIncompatibleValuesFields,
+  getEscapedSameFamilyFields,
+} from './utils/metadata';
 import { UseResultsRollupReturnValue } from './types';
-import { useIsMounted } from '../use_is_mounted';
+import { useIsMountedRef } from '../use_is_mounted_ref';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
 import { getIlmPhase } from '../../utils/get_ilm_phase';
 
@@ -53,7 +53,7 @@ interface Props {
   isILMAvailable: boolean;
 }
 const useStoredPatternResults = (patterns: string[], toasts: IToasts, httpFetch: HttpHandler) => {
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const [storedPatternResults, setStoredPatternResults] = useState<
     Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
   >([]);
@@ -208,13 +208,13 @@ export const useResultsRollup = ({
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: getTotalPatternSameFamily(results),
-            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
+            sameFamilyFields: getEscapedSameFamilyFields(partitionedFieldMetadata.sameFamily),
             sizeInBytes: getSizeInBytes({ stats, indexName }),
             timeConsumedMs: requestTime,
-            unallowedMappingFields: getIncompatibleMappingsFields(
+            unallowedMappingFields: getEscapedIncompatibleMappingsFields(
               partitionedFieldMetadata.incompatible
             ),
-            unallowedValueFields: getIncompatibleValuesFields(
+            unallowedValueFields: getEscapedIncompatibleValuesFields(
               partitionedFieldMetadata.incompatible
             ),
           };
@@ -253,17 +253,34 @@ export const useResultsRollup = ({
     setPatternIndexNames({});
   }, [ilmPhases, patterns]);
 
-  return {
-    onCheckCompleted,
-    patternIndexNames,
-    patternRollups,
-    totalDocsCount,
-    totalIncompatible,
-    totalIndices,
-    totalIndicesChecked,
-    totalSameFamily,
-    totalSizeInBytes,
-    updatePatternIndexNames,
-    updatePatternRollup,
-  };
+  const useResultsRollupReturnValue = useMemo(
+    () => ({
+      onCheckCompleted,
+      patternIndexNames,
+      patternRollups,
+      totalDocsCount,
+      totalIncompatible,
+      totalIndices,
+      totalIndicesChecked,
+      totalSameFamily,
+      totalSizeInBytes,
+      updatePatternIndexNames,
+      updatePatternRollup,
+    }),
+    [
+      onCheckCompleted,
+      patternIndexNames,
+      patternRollups,
+      totalDocsCount,
+      totalIncompatible,
+      totalIndices,
+      totalIndicesChecked,
+      totalSameFamily,
+      totalSizeInBytes,
+      updatePatternIndexNames,
+      updatePatternRollup,
+    ]
+  );
+
+  return useResultsRollupReturnValue;
 };
