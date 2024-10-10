@@ -46,8 +46,6 @@ describe('useGetActionLicense', () => {
     renderHook(() => useGetActionLicense(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitFor(() => null);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

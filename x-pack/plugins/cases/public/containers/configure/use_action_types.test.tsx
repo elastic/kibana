@@ -47,7 +47,7 @@ describe('useActionTypes', () => {
     renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitFor(() => null, { timeout: 2000 });
-    expect(addErrorMock).toHaveBeenCalled();
+
+    await waitFor(() => expect(addErrorMock).toHaveBeenCalled());
   });
 });

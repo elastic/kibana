@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
@@ -82,19 +83,21 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-    await waitFor(() => null);
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-      expect.objectContaining({
-        searchText: '',
-        typesFilter: [],
-        actionTypesFilter: [],
-        ruleExecutionStatusesFilter: [],
-        ruleLastRunOutcomesFilter: [],
-        ruleStatusesFilter: [],
-        tagsFilter: [],
-      })
+    await waitFor(() =>
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+        expect.objectContaining({
+          searchText: '',
+          typesFilter: [],
+          actionTypesFilter: [],
+          ruleExecutionStatusesFilter: [],
+          ruleLastRunOutcomesFilter: [],
+          ruleStatusesFilter: [],
+          tagsFilter: [],
+        })
+      )
     );
+
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 
@@ -119,19 +122,21 @@ describe('useLoadRuleAggregations', () => {
     });
 
     rerender();
-    await waitFor(() => null);
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-      expect.objectContaining({
-        searchText: 'test',
-        typesFilter: ['type1', 'type2'],
-        actionTypesFilter: ['action1', 'action2'],
-        ruleExecutionStatusesFilter: ['status1', 'status2'],
-        ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
-        tagsFilter: ['tag1', 'tag2'],
-        ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
-      })
+    await waitFor(() =>
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+        expect.objectContaining({
+          searchText: 'test',
+          typesFilter: ['type1', 'type2'],
+          actionTypesFilter: ['action1', 'action2'],
+          ruleExecutionStatusesFilter: ['status1', 'status2'],
+          ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
+          tagsFilter: ['tag1', 'tag2'],
+          ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        })
+      )
     );
+
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 

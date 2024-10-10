@@ -54,13 +54,13 @@ describe('usePrivateLocationsAPI', () => {
       })
     );
 
-    await waitFor(() => null);
-
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        loading: false,
-        privateLocations: [],
-      })
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          loading: false,
+          privateLocations: [],
+        })
+      )
     );
   });
 
@@ -82,18 +82,18 @@ describe('usePrivateLocationsAPI', () => {
       });
     });
 
-    await waitFor(() => null);
-
-    expect(addAPI).toHaveBeenCalledWith({
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      label: 'new',
-      agentPolicyId: 'newPolicy',
+    await waitFor(() => {
+      expect(addAPI).toHaveBeenCalledWith({
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        label: 'new',
+        agentPolicyId: 'newPolicy',
+      });
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(getServiceLocations());
     });
-    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
-    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 
   it('deletes location on delete', async () => {
@@ -107,10 +107,10 @@ describe('usePrivateLocationsAPI', () => {
       result.current.onDelete('Test');
     });
 
-    await waitFor(() => null);
-
-    expect(deletedAPI).toHaveBeenLastCalledWith('Test');
-    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
-    expect(dispatch).toBeCalledWith(getServiceLocations());
+    await waitFor(() => {
+      expect(deletedAPI).toHaveBeenLastCalledWith('Test');
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(getServiceLocations());
+    });
   });
 });

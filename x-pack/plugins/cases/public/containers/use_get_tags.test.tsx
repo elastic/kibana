@@ -45,7 +45,6 @@ describe('useGetTags', () => {
     renderHook(() => useGetTags(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
-    await waitFor(() => null);
-    expect(addError).toBeCalled();
+    await waitFor(() => expect(addError).toBeCalled());
   });
 });

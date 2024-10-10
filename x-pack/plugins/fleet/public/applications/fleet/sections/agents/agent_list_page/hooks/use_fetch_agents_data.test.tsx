@@ -155,26 +155,20 @@ describe('useFetchAgentsData', () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() => useFetchAgentsData());
 
-    await waitFor(() => null);
-
-    expect(renderer.history.location.search).toEqual('');
+    await waitFor(() => expect(renderer.history.location.search).toEqual(''));
 
     // Set search
     await act(async () => {
       result.current.setSearch('active:true');
     });
 
-    await waitFor(() => null);
-
-    expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue');
+    await waitFor(() => expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue'));
 
     // Clear search
     await act(async () => {
       result.current.setSearch('');
     });
 
-    await waitFor(() => null);
-
-    expect(renderer.history.location.search).toEqual('');
+    await waitFor(() => expect(renderer.history.location.search).toEqual(''));
   });
 });

@@ -291,11 +291,10 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.isLoading).toBeTruthy();
 
     rerender();
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.rulesState.isLoading).toBeFalsy());
 
     expect(result.current.rulesState.initialLoad).toBeFalsy();
     expect(result.current.hasData).toBeTruthy();
-    expect(result.current.rulesState.isLoading).toBeFalsy();
 
     expect(onPage).toBeCalledTimes(0);
     expect(loadRulesWithKueryFilter).toBeCalledWith(
@@ -344,24 +343,24 @@ describe('useLoadRules', () => {
     });
 
     rerender();
-    await waitFor(() => null);
-
-    expect(loadRulesWithKueryFilter).toBeCalledWith(
-      expect.objectContaining({
-        page: {
-          index: 0,
-          size: 25,
-        },
-        searchText: 'test',
-        typesFilter: ['type1', 'type2'],
-        actionTypesFilter: ['action1', 'action2'],
-        ruleExecutionStatusesFilter: ['status1', 'status2'],
-        ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
-        ruleParamsFilter: {},
-        ruleStatusesFilter: ['enabled', 'snoozed'],
-        tagsFilter: ['tag1', 'tag2'],
-        sort: { field: 'name', direction: 'asc' },
-      })
+    await waitFor(() =>
+      expect(loadRulesWithKueryFilter).toBeCalledWith(
+        expect.objectContaining({
+          page: {
+            index: 0,
+            size: 25,
+          },
+          searchText: 'test',
+          typesFilter: ['type1', 'type2'],
+          actionTypesFilter: ['action1', 'action2'],
+          ruleExecutionStatusesFilter: ['status1', 'status2'],
+          ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+          ruleParamsFilter: {},
+          ruleStatusesFilter: ['enabled', 'snoozed'],
+          tagsFilter: ['tag1', 'tag2'],
+          sort: { field: 'name', direction: 'asc' },
+        })
+      )
     );
   });
 
@@ -399,12 +398,12 @@ describe('useLoadRules', () => {
     );
 
     rerender();
-    await waitFor(() => null);
-
-    expect(onPage).toHaveBeenCalledWith({
-      index: 0,
-      size: 25,
-    });
+    await waitFor(() =>
+      expect(onPage).toHaveBeenCalledWith({
+        index: 0,
+        size: 25,
+      })
+    );
   });
 
   it('should call onError if API fails', async () => {
@@ -466,9 +465,7 @@ describe('useLoadRules', () => {
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitFor(() => null);
-
-      expect(result.current.hasData).toBeFalsy();
+      await waitFor(() => expect(result.current.hasData).toBeFalsy());
     });
 
     it('hasData should be false, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
@@ -501,9 +498,7 @@ describe('useLoadRules', () => {
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitFor(() => null);
-
-      expect(result.current.hasData).toBeFalsy();
+      await waitFor(() => expect(result.current.hasData).toBeFalsy());
     });
   });
 });

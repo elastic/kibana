@@ -22,7 +22,7 @@ jest.mock('../../../../../hooks/use_authz', () => ({
 describe('useFleetServerUnhealthy', () => {
   const testRenderer = createFleetTestRendererMock();
 
-  it('should return isUnHealthy:false with an online fleet slerver', async () => {
+  it('should return isUnHealthy:false with an online fleet server', async () => {
     jest.mocked(sendGetEnrollmentSettings).mockResolvedValueOnce({
       error: null,
       data: {
@@ -47,12 +47,11 @@ describe('useFleetServerUnhealthy', () => {
     });
 
     const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await testRenderer.waitFor(() => null);
-    expect(result.current.isLoading).toBeFalsy();
+    await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.isUnhealthy).toBeFalsy();
   });
 
-  it('should return isUnHealthy:true with only one offline fleet slerver', async () => {
+  it('should return isUnHealthy:true with only one offline fleet server', async () => {
     jest.mocked(sendGetEnrollmentSettings).mockResolvedValue({
       error: null,
       data: {
@@ -63,8 +62,7 @@ describe('useFleetServerUnhealthy', () => {
       },
     });
     const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await testRenderer.waitFor(() => null);
-    expect(result.current.isLoading).toBeFalsy();
+    await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.isUnhealthy).toBeTruthy();
   });
 
@@ -74,8 +72,7 @@ describe('useFleetServerUnhealthy', () => {
       data: null,
     });
     const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await testRenderer.waitFor(() => null);
-    expect(result.current.isLoading).toBeFalsy();
+    await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();
   });

@@ -139,9 +139,7 @@ describe('useFetch', () => {
       result.current.fetch(parameters);
     });
 
-    await waitFor(() => null);
-
-    expect(result.current.data).toEqual(undefined);
+    await waitFor(() => expect(result.current.data).toEqual(undefined));
   });
 
   it('should ignore state change if error but component is unmounted', async () => {
@@ -158,9 +156,7 @@ describe('useFetch', () => {
       result.current.fetch(parameters);
     });
 
-    await waitFor(() => null);
-
-    expect(result.current.error).toEqual(undefined);
+    await waitFor(() => expect(result.current.error).toEqual(undefined));
   });
 
   it('should abort initial request if fetch is called', async () => {
@@ -174,9 +170,9 @@ describe('useFetch', () => {
       return response;
     });
 
-    await waitFor(() => null);
-
-    expect(firstAbortCtrl.signal.aborted).toEqual(true);
+    await waitFor(() => {
+      expect(firstAbortCtrl.signal.aborted).toEqual(true);
+    });
 
     abortSpy.mockRestore();
   });
@@ -221,12 +217,12 @@ describe('useFetch', () => {
         initialParameters: parameters,
       });
 
-      await waitFor(() => null);
-
-      expect(mockFetchFn).toHaveBeenCalledTimes(1);
-      expect(mockStartTracking).toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toHaveBeenCalledTimes(1);
-      expect(mockStartTracking).toHaveBeenCalledWith({ name: requestName });
+      await waitFor(() => {
+        expect(mockFetchFn).toHaveBeenCalledTimes(1);
+        expect(mockStartTracking).toHaveBeenCalledTimes(1);
+        expect(mockEndTracking).toHaveBeenCalledTimes(1);
+        expect(mockStartTracking).toHaveBeenCalledWith({ name: requestName });
+      });
 
       await act(async () => {
         result.current.fetch(parameters);
@@ -245,10 +241,10 @@ describe('useFetch', () => {
         result.current.fetch(parameters);
       });
 
-      await waitFor(() => null);
-
-      expect(mockEndTracking).toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toHaveBeenCalledWith('success');
+      await waitFor(() => {
+        expect(mockEndTracking).toHaveBeenCalledTimes(1);
+        expect(mockEndTracking).toHaveBeenCalledWith('success');
+      });
     });
 
     it('should end aborted', async () => {
@@ -266,10 +262,10 @@ describe('useFetch', () => {
         result.current.fetch(parameters);
       });
 
-      await waitFor(() => null);
-
-      expect(mockEndTracking).toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toHaveBeenCalledWith('aborted');
+      await waitFor(() => {
+        expect(mockEndTracking).toHaveBeenCalledTimes(1);
+        expect(mockEndTracking).toHaveBeenCalledWith('aborted');
+      });
 
       abortSpy.mockRestore();
     });
@@ -285,10 +281,10 @@ describe('useFetch', () => {
         result.current.fetch(parameters);
       });
 
-      await waitFor(() => null);
-
-      expect(mockEndTracking).toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toHaveBeenCalledWith('error');
+      await waitFor(() => {
+        expect(mockEndTracking).toHaveBeenCalledTimes(1);
+        expect(mockEndTracking).toHaveBeenCalledWith('error');
+      });
     });
   });
 });

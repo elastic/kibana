@@ -22,7 +22,14 @@ jest.mock('@kbn/elastic-assistant', () => ({
 jest.mock('../common/hooks/use_experimental_features');
 
 describe('AssistantOverlay', () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        cacheTime: Infinity,
+        retry: false,
+      },
+    },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

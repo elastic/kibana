@@ -41,15 +41,11 @@ describe('useFetchAlertData', () => {
   });
 
   it('initially is not loading and does not have data', async () => {
-    await act(async () => {
-      const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-        useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([false, {}]);
-    });
+    expect(result.current).toEqual([false, {}]);
   });
 
   it('returns no data when an error occurs', async () => {
@@ -57,43 +53,35 @@ describe('useFetchAlertData', () => {
       throw new Error('an http error');
     });
 
-    await act(async () => {
-      const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-        useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([false, {}]);
-    });
+    await waitFor(() => expect(result.current).toEqual([false, {}]));
   });
 
   it('retrieves the alert data', async () => {
-    await act(async () => {
-      const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-        useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitFor(() => null);
-      await waitFor(() => null);
-
+    await waitFor(() =>
       expect(result.current).toEqual([
         false,
         { '123': { _id: '123', _index: 'index', testField: 'test' } },
-      ]);
-    });
+      ])
+    );
   });
 
   it('does not populate the results when the request is canceled', async () => {
-    await act(async () => {
-      const { result, unmount } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-        useFetchAlertData(testIds)
-      );
+    const { result, unmount } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitFor(() => null);
+    act(() => {
       unmount();
-
-      expect(result.current).toEqual([false, {}]);
     });
+
+    expect(result.current).toEqual([false, {}]);
   });
 });

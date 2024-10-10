@@ -71,6 +71,8 @@ describe('useCriticalAlerts', () => {
       wrapper: wrapperContainer,
     });
 
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+
     expect(result.current).toEqual({
       stat: '-',
       isLoading: true,
@@ -97,22 +99,23 @@ describe('useCriticalAlerts', () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '100',
-      isLoading: false,
-      percentage: {
-        percent: '+100.0%',
-        color: 'danger',
-        note: i18n.STAT_DIFFERENCE({
-          upOrDown: 'up',
-          percentageChange: '100.0%',
-          stat: '50',
-          statType: 'open critical alert count',
-        }),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '100',
+        isLoading: false,
+        percentage: {
+          percent: '+100.0%',
+          color: 'danger',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'up',
+            percentageChange: '100.0%',
+            stat: '50',
+            statType: 'open critical alert count',
+          }),
+        },
+        ...basicData,
+      })
+    );
   });
   it('finds negative percentage change', async () => {
     mockUseQueryAlerts.mockImplementation((args) =>
@@ -129,22 +132,23 @@ describe('useCriticalAlerts', () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '50',
-      isLoading: false,
-      percentage: {
-        percent: '-50.0%',
-        color: 'success',
-        note: i18n.STAT_DIFFERENCE({
-          upOrDown: 'down',
-          percentageChange: '50.0%',
-          stat: '100',
-          statType: 'open critical alert count',
-        }),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '50',
+        isLoading: false,
+        percentage: {
+          percent: '-50.0%',
+          color: 'success',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'down',
+            percentageChange: '50.0%',
+            stat: '100',
+            statType: 'open critical alert count',
+          }),
+        },
+        ...basicData,
+      })
+    );
   });
   it('finds zero percentage change', async () => {
     mockUseQueryAlerts.mockImplementation((args) => ({
@@ -154,17 +158,18 @@ describe('useCriticalAlerts', () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '100',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('open critical alert count'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '100',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('open critical alert count'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null data - current time range', async () => {
     mockUseQueryAlerts.mockImplementation((args) =>
@@ -181,17 +186,18 @@ describe('useCriticalAlerts', () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA_CURRENT('alerts'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA_CURRENT('alerts'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null data - compare time range', async () => {
     mockUseQueryAlerts.mockImplementation((args) =>
@@ -208,17 +214,18 @@ describe('useCriticalAlerts', () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '100',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA_COMPARE('alerts'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '100',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA_COMPARE('alerts'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null data - current & compare time range', async () => {
     mockUseQueryAlerts.mockImplementation((args) =>
@@ -237,18 +244,20 @@ describe('useCriticalAlerts', () => {
     const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '100',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('open critical alert count'),
-      },
-      ...basicData,
-    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '100',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('open critical alert count'),
+        },
+        ...basicData,
+      })
+    );
+
     ourProps = {
       ...props,
       from: '2020-09-08T08:20:18.966Z',
@@ -257,17 +266,18 @@ describe('useCriticalAlerts', () => {
       toCompare: '2020-09-08T08:20:18.966Z',
     };
     rerender();
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('alerts'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('alerts'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles undefined data - current & compare time range', async () => {
     mockUseQueryAlerts.mockImplementation((args) =>
@@ -286,17 +296,18 @@ describe('useCriticalAlerts', () => {
     const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '100',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('open critical alert count'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '100',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('open critical alert count'),
+        },
+        ...basicData,
+      })
+    );
     ourProps = {
       ...props,
       from: '2020-09-08T08:20:18.966Z',
@@ -305,16 +316,17 @@ describe('useCriticalAlerts', () => {
       toCompare: '2020-09-08T08:20:18.966Z',
     };
     rerender();
-    await waitFor(() => null);
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('alerts'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('alerts'),
+        },
+        ...basicData,
+      })
+    );
   });
 });

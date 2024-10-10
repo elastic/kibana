@@ -118,7 +118,7 @@ describe('useTimelineTypes', () => {
       );
       await waitFor(() => null);
 
-      const { container } = render(result.current.timelineTabs);
+      render(result.current.timelineTabs);
 
       fireEvent(
         screen.getByTestId('timeline-tab-default'),

@@ -52,10 +52,13 @@ describe('usePersistExceptionItem', () => {
 
     await act(async () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
-      rerender();
     });
 
-    expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
+    rerender();
+
+    await waitFor(() =>
+      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]])
+    );
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
@@ -67,7 +70,9 @@ describe('usePersistExceptionItem', () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
     });
 
-    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+    await waitFor(() =>
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]])
+    );
   });
 
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
@@ -86,14 +91,14 @@ describe('usePersistExceptionItem', () => {
       result.current[1]({ ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
     });
 
-    await waitFor(() => null);
-
-    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-    expect(addExceptionListItem).not.toHaveBeenCalled();
-    expect(updateExceptionListItem).toHaveBeenCalledWith({
-      http: mockKibanaHttpService,
-      listItem: getUpdateExceptionListItemSchemaMock(),
-      signal: new AbortController().signal,
+    await waitFor(() => {
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+      expect(addExceptionListItem).not.toHaveBeenCalled();
+      expect(updateExceptionListItem).toHaveBeenCalledWith({
+        http: mockKibanaHttpService,
+        listItem: getUpdateExceptionListItemSchemaMock(),
+        signal: new AbortController().signal,
+      });
     });
   });
 
@@ -111,14 +116,14 @@ describe('usePersistExceptionItem', () => {
       // before the call goes through
       result.current[1]({ ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
     });
-    await waitFor(() => null);
-
-    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-    expect(updateExceptionListItem).not.toHaveBeenCalled();
-    expect(addExceptionListItem).toHaveBeenCalledWith({
-      http: mockKibanaHttpService,
-      listItem: getCreateExceptionListItemSchemaMock(),
-      signal: new AbortController().signal,
+    await waitFor(() => {
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+      expect(updateExceptionListItem).not.toHaveBeenCalled();
+      expect(addExceptionListItem).toHaveBeenCalledWith({
+        http: mockKibanaHttpService,
+        listItem: getCreateExceptionListItemSchemaMock(),
+        signal: new AbortController().signal,
+      });
     });
   });
 
@@ -133,9 +138,9 @@ describe('usePersistExceptionItem', () => {
     await act(async () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
     });
-    await waitFor(() => null);
-
-    expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
-    expect(onError).toHaveBeenCalledWith(error);
+    await waitFor(() => {
+      expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
+      expect(onError).toHaveBeenCalledWith(error);
+    });
   });
 });
