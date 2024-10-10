@@ -17,10 +17,10 @@ export const deleteInferenceEndpoint = async (
   client: ElasticsearchClient,
   type: string,
   id: string,
-  showUsage?: boolean
+  scanUsage?: boolean
 ) => {
   if (isTaskType(type)) {
-    if (showUsage) {
+    if (scanUsage) {
       return await client.inference.delete({ inference_id: id, task_type: type, dry_run: true });
     }
     return await client.inference.delete({ inference_id: id, task_type: type, force: true });
