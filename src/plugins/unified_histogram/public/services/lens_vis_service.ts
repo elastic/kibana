@@ -9,7 +9,11 @@
 
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
-import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import {
+  removeDropCommandsFromESQLQuery,
+  appendToESQLQuery,
+  isESQLColumnSortable,
+} from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -554,9 +558,10 @@ export class LensVisService {
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
-    // sorting by geo_point is not supported
+
+    // sort by breakdown column if it's sortable
     const sortBy =
-      breakdownColumn && breakdownColumn?.meta?.type !== 'geo_point'
+      breakdownColumn && isESQLColumnSortable(breakdownColumn)
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
