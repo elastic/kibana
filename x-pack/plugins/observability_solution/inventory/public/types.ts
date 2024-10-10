@@ -39,7 +39,7 @@ export interface InventoryStartDependencies {
   data: DataPublicPluginStart;
   entityManager: EntityManagerPublicPluginStart;
   share: SharePluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface InventoryPublicSetup {}

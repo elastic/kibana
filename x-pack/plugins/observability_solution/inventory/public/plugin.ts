@@ -17,7 +17,7 @@ import {
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { from, map, mergeMap } from 'rxjs';
+import { from, map, mergeMap, of } from 'rxjs';
 import { createCallInventoryAPI } from './api';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 import { InventoryServices } from './services/types';
@@ -57,15 +57,19 @@ export class InventoryPlugin
     const getStartServices = coreSetup.getStartServices();
 
     const hideInventory$ = from(getStartServices).pipe(
-      mergeMap(([coreStart, pluginsStart]) =>
-        from(pluginsStart.spaces.getActiveSpace()).pipe(
-          map(
-            (space) =>
-              space.disabledFeatures.includes(INVENTORY_APP_ID) ||
-              !coreStart.application.capabilities.inventory.show
-          )
-        )
-      )
+      mergeMap(([coreStart, pluginsStart]) => {
+        if (pluginsStart.spaces) {
+          return from(pluginsStart.spaces.getActiveSpace()).pipe(
+            map(
+              (space) =>
+                space.disabledFeatures.includes(INVENTORY_APP_ID) ||
+                !coreStart.application.capabilities.inventory.show
+            )
+          );
+        }
+
+        return of(!coreStart.application.capabilities.inventory.show);
+      })
     );
 
     const sections$ = hideInventory$.pipe(
