@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const FINAL_UPDATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.finalUpdate',
-  {
-    defaultMessage: 'Final update',
-  }
-);
+export * from './field_upgrade_state';
+export * from './fields_upgrade_state';
+export * from './rule_upgrade_state';
+export * from './rules_upgrade_state';
+export * from './set_rule_field_resolved_value';

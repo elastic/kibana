@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
+import type { RuleUpgradeState } from './rule_upgrade_state';
 
-export const FINAL_UPDATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.finalUpdate',
-  {
-    defaultMessage: 'Final update',
-  }
-);
+export type RulesUpgradeState = Record<RuleSignatureId, RuleUpgradeState>;
