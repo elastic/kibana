@@ -119,7 +119,7 @@ describe('PackagePolicyActionsMenu', () => {
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+      const upgradeButton = utils.getByTestId('UpgradeIntegrationPolicy');
       expect(upgradeButton).toBeDisabled();
     });
   });
