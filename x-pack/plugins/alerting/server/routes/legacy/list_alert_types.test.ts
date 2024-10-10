@@ -42,7 +42,7 @@ describe('listAlertTypesRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
     expect(config.options?.access).toBe('public');
 
-    const listTypes = [
+    const listTypes: RegistryAlertTypeWithAuth[] = [
       {
         id: '1',
         name: 'name',
@@ -67,9 +67,10 @@ describe('listAlertTypesRoute', () => {
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
         validLegacyConsumers: [],
-      } as RegistryAlertTypeWithAuth,
+      },
     ];
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
@@ -165,7 +166,7 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -222,7 +223,7 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -243,7 +244,7 @@ describe('listAlertTypesRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set([]));
+    rulesClient.listRuleTypes.mockResolvedValueOnce([]);
 
     listAlertTypesRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];

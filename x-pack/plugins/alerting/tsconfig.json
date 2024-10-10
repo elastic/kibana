@@ -71,6 +71,7 @@
     "@kbn/search-types",
     "@kbn/alerting-state-types",
     "@kbn/core-security-server",
+    "@kbn/security-plugin-types-server",
     "@kbn/core-http-server",
     "@kbn/zod",
     "@kbn/core-saved-objects-base-server-internal"

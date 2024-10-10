@@ -19,7 +19,7 @@ export interface UseFindAlertsQueryProps {
   http: HttpStart;
   toasts: ToastsStart;
   enabled?: boolean;
-  params: ISearchRequestParams & { feature_ids?: string[] };
+  params: ISearchRequestParams & { rule_type_ids?: string[] };
 }
 
 /**

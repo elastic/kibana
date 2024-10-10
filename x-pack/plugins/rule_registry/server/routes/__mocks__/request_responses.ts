@@ -12,7 +12,7 @@ export const getReadIndexRequest = () =>
   requestMock.create({
     method: 'get',
     path: `${BASE_RAC_ALERTS_API_PATH}/index`,
-    query: { features: 'siem' },
+    query: { ruleTypeIds: 'siem.esqlRule' },
   });
 
 export const getReadRequest = () =>
@@ -33,18 +33,11 @@ export const getUpdateRequest = () =>
     },
   });
 
-export const getReadFeatureIdsRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
-    query: { registrationContext: ['security'] },
-  });
-
 export const getO11yBrowserFields = () =>
   requestMock.create({
     method: 'get',
     path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
-    query: { featureIds: ['apm', 'logs'] },
+    query: { ruleTypeIds: ['apm.anomaly', 'logs.alert.document.count'] },
   });
 
 export const getMetricThresholdAADFields = () =>
@@ -59,7 +52,13 @@ export const getAlertsGroupAggregationsRequest = () =>
     method: 'post',
     path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
     body: {
-      featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+      ruleTypeIds: [
+        'apm.anomaly',
+        'logs.alert.document.count',
+        'metrics.alert.threshold',
+        'slo.rules.burnRate',
+        'xpack.uptime.alerts.durationAnomaly',
+      ],
       groupByField: 'kibana.alert.rule.name',
       aggregations: {
         unitsCount: {

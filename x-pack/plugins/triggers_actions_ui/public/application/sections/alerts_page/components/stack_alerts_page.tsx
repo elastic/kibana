@@ -21,6 +21,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
+  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery } from '@kbn/es-query';
@@ -31,7 +32,6 @@ import { NoPermissionPrompt } from '../../../components/prompts/no_permission_pr
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
 import { alertProducersData } from '../../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -46,6 +46,7 @@ import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query'
 import { nonNullable } from '../../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
+import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
@@ -76,61 +77,47 @@ const PageContent = () => {
     alertsTableConfigurationRegistry,
   } = useKibana().services;
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [activeFeatureFilters, setActiveFeatureFilters] = useState<AlertConsumers[]>([]);
+  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>([]);
+  const ruleStats = useRuleStats({ ruleTypeIds });
 
-  const ruleStats = useRuleStats();
   const {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
-  const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
-  const browsingSiem = useMemo(
-    () => activeFeatureFilters.length === 1 && activeFeatureFilters[0] === AlertConsumers.SIEM,
-    [activeFeatureFilters]
-  );
-  const filteringBySolution = useMemo(
-    () => activeFeatureFilters.length > 0,
-    [activeFeatureFilters.length]
-  );
-  const featureIds = useMemo(
-    () =>
-      filteringBySolution
-        ? browsingSiem
-          ? [AlertConsumers.SIEM]
-          : activeFeatureFilters
-        : NON_SIEM_FEATURE_IDS,
-    [activeFeatureFilters, browsingSiem, filteringBySolution]
-  );
+  const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
+  const filteringBySolution = ruleTypeIds.length > 0;
+  const browsingSiem = filteringBySolution && ruleTypeIds.every(isSiemRuleType);
+  const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
+
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
-    if (Object.values(ruleTypeIdsByFeatureId).length > 0) {
+    if (ruleTypeIdsByFeatureIdEntries.length > 0) {
       filters.push(
-        ...Object.entries(ruleTypeIdsByFeatureId)
-          .map(([featureId, ruleTypeIds]) => {
-            const producerData = alertProducersData[featureId as AlertConsumers];
+        ...ruleTypeIdsByFeatureIdEntries
+          .map(([featureId, _ruleTypeIds]) => {
+            const producerData = alertProducersData[featureId as AlertsTableSupportedConsumers];
             if (!producerData) {
               return null;
             }
+
             const filterLabel = getFeatureFilterLabel(producerData.displayName);
             const disabled =
               filteringBySolution && featureId === AlertConsumers.SIEM
                 ? !browsingSiem
                 : browsingSiem;
+
             return {
               name: filterLabel,
               icon: producerData.icon,
-              filter: createRuleTypesFilter(
-                producerData.subFeatureIds ?? [featureId as AlertConsumers],
-                filterLabel,
-                ruleTypeIds
-              ),
+              filter: createRuleTypesFilter(_ruleTypeIds, filterLabel),
               disabled,
             };
           })
           .filter(nonNullable)
       );
     }
+
     filters.push({
       title: i18n.translate('xpack.triggersActionsUI.sections.globalAlerts.quickFilters.status', {
         defaultMessage: 'Status',
@@ -142,7 +129,8 @@ const PageContent = () => {
       })),
     });
     return filters;
-  }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureId]);
+  }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureIdEntries]);
+
   const tableConfigurationId = useMemo(
     // TODO in preparation for using solution-specific configurations
     () => ALERT_TABLE_GLOBAL_CONFIG_ID,
@@ -183,22 +171,22 @@ const PageContent = () => {
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">
           <UrlSyncedAlertsSearchBar
             appName={ALERTS_PAGE_ID}
-            featureIds={featureIds}
+            ruleTypeIds={ruleTypeIds}
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
-            onActiveFeatureFiltersChange={setActiveFeatureFilters}
+            onRuleTypesChanged={setRuleTypeIds}
             onEsQueryChange={setEsQuery}
           />
           <Suspense fallback={<EuiLoadingSpinner />}>
             <AlertsTable
               // Here we force a rerender when switching feature ids to prevent the data grid
               // columns alignment from breaking after a change in the number of columns
-              key={featureIds.join()}
+              key={ruleTypeIds.join()}
               id="stack-alerts-page-table"
               configurationId={tableConfigurationId}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              featureIds={featureIds}
+              ruleTypeIds={ruleTypeIds}
               query={esQuery}
               showAlertStatusWithFlapping
               initialPageSize={20}

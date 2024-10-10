@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
@@ -25,7 +24,6 @@ export interface RuleActionsAlertsFilterProps {
   action: RuleAction;
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
-  featureIds: ValidFeatureId[];
   ruleTypeId?: string;
   plugins?: {
     http: RuleFormPlugins['http'];
@@ -39,7 +37,6 @@ export const RuleActionsAlertsFilter = ({
   action,
   onChange,
   appName,
-  featureIds,
   ruleTypeId,
   plugins: propsPlugins,
 }: RuleActionsAlertsFilterProps) => {
@@ -110,7 +107,6 @@ export const RuleActionsAlertsFilter = ({
             unifiedSearchBar={unifiedSearch.ui.SearchBar}
             dataViewsService={dataViews}
             appName={appName}
-            featureIds={featureIds}
             ruleTypeId={ruleTypeId}
             disableQueryLanguageSwitcher={true}
             query={query.kql}

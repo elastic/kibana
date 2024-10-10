@@ -59,6 +59,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     maxControls = Infinity,
     ControlGroupRenderer,
     Storage,
+    ruleTypeIds,
     storageKey,
   } = props;
 
@@ -80,8 +81,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi>();
 
   const localStoragePageFilterKey = useMemo(
-    () => storageKey ?? `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`,
-    [featureIds, spaceId, storageKey]
+    () => storageKey ?? `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`,
+    [ruleTypeIds, spaceId, storageKey]
   );
 
   const currentFiltersRef = useRef<Filter[]>();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -37,6 +37,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
@@ -60,7 +61,7 @@ import { uiSettings } from './ui_settings';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -71,7 +72,7 @@ interface PluginSetup {
 }
 
 interface PluginStart {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
 }
@@ -84,6 +85,11 @@ const o11yRuleTypes = [
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
+
+const alertingFeatures = o11yRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [observabilityFeatureId, ALERTING_FEATURE_ID],
+}));
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
@@ -240,7 +246,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
-        alerting: o11yRuleTypes,
+        alerting: alertingFeatures,
         privileges: {
           all: {
             app: [observabilityFeatureId],
@@ -252,10 +258,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                all: o11yRuleTypes,
+                all: alertingFeatures,
               },
               alert: {
-                all: o11yRuleTypes,
+                all: alertingFeatures,
               },
             },
             ui: ['read', 'write'],
@@ -270,10 +276,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                read: o11yRuleTypes,
+                read: alertingFeatures,
               },
               alert: {
-                read: o11yRuleTypes,
+                read: alertingFeatures,
               },
             },
             ui: ['read'],

@@ -23,7 +23,7 @@ import { groupingSearchResponse } from '../mocks/grouping_query.mock';
 import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
-  mockFeatureIds,
+  mockRuleTypeIds,
   mockDate,
   mockGroupingProps,
   mockGroupingId,
@@ -146,7 +146,7 @@ describe('AlertsGrouping', () => {
       expect.objectContaining({
         params: {
           aggregations: {},
-          featureIds: mockFeatureIds,
+          ruleTypeIds: mockRuleTypeIds,
           groupByField: 'kibana.alert.rule.name',
           filters: [
             {

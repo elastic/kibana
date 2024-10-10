@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
@@ -21,14 +21,14 @@ import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
-const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
+const EMPTY_RULE_TYPE_IDS: string[] = [];
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 // Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds = EMPTY_FEATURE_IDS,
+  ruleTypeIds = EMPTY_RULE_TYPE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -57,7 +57,7 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    featureIds,
+    ruleTypeIds,
     http,
     dataViewsService,
     toasts,
@@ -80,7 +80,7 @@ export function AlertsSearchBar({
   });
 
   const isSecurity =
-    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
+    (ruleTypeIds && ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0])) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

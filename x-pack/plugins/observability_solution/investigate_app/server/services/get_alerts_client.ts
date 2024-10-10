@@ -8,6 +8,13 @@
 import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import {
+  APM_RULE_TYPE_IDS,
+  INFRA_RULE_TYPE_IDS,
+  LOG_RULE_TYPE_IDS,
+  SLO_RULE_TYPE_IDS,
+  UPTIME_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import { InvestigateAppRouteHandlerResources } from '../routes/types';
 
 export type AlertsClient = Awaited<ReturnType<typeof getAlertsClient>>;
@@ -19,12 +26,11 @@ export async function getAlertsClient({
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
   const alertsIndices = await alertsClient.getAuthorizedAlertsIndices([
-    'logs',
-    'infrastructure',
-    'apm',
-    'slo',
-    'uptime',
-    'observability',
+    ...LOG_RULE_TYPE_IDS,
+    ...INFRA_RULE_TYPE_IDS,
+    ...APM_RULE_TYPE_IDS,
+    ...SLO_RULE_TYPE_IDS,
+    ...UPTIME_RULE_TYPE_IDS,
   ]);
 
   if (!alertsIndices || isEmpty(alertsIndices)) {

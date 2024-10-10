@@ -297,7 +297,7 @@ describe.skip('rules_list component empty', () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
     ]);
-    renderWithProviders(<RulesList filterConsumers={['observability']} />);
+    renderWithProviders(<RulesList ruleTypeIds={['observability']} />);
     await expect(
       screen.findByText('Rule notifications are stopped while maintenance windows are running.')
     ).rejects.toThrow();

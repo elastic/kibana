@@ -19,6 +19,7 @@ import {
   STACK_MONITORING_DISPLAY_NAME,
   UPTIME_DISPLAY_NAME,
 } from '../translations';
+import { AlertsTableSupportedConsumers } from './types';
 
 interface AlertProducerData {
   displayName: string;
@@ -36,10 +37,9 @@ export const observabilityFeatureIds: AlertConsumers[] = [
 ];
 
 export const stackFeatureIds: AlertConsumers[] = [AlertConsumers.STACK_ALERTS, AlertConsumers.ML];
-
 export const [_, ...observabilityApps] = observabilityFeatureIds;
 
-export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
+export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProducerData> = {
   [AlertConsumers.OBSERVABILITY]: {
     displayName: OBSERVABILITY_DISPLAY_NAME,
     icon: 'logoObservability',
@@ -85,5 +85,10 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
   [AlertConsumers.EXAMPLE]: {
     displayName: 'Example',
     icon: 'beaker',
+  },
+  [AlertConsumers.DISCOVER]: {
+    displayName: STACK_DISPLAY_NAME,
+    icon: 'managementApp',
+    subFeatureIds: stackFeatureIds,
   },
 };

@@ -12,7 +12,7 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -54,17 +54,15 @@ async function fetchRules({
   http: HttpSetup;
   signal?: AbortSignal;
 }) {
-  const filter = 'alert.attributes.alertTypeId:slo.rules.burnRate';
-
-  const query = {
+  const body = {
     search,
-    filter,
     fields: ['id', 'params.windows', 'name'],
     per_page: 1000,
+    rule_type_ids: ['slo.rules.burnRate'],
   };
 
-  const response = await http.get<RuleApiResponse>(`${BASE_ALERTING_API_PATH}/rules/_find`, {
-    query,
+  const response = await http.post<RuleApiResponse>(INTERNAL_ALERTING_API_FIND_RULES_PATH, {
+    body: JSON.stringify({ ...body }),
     signal,
   });
 

@@ -14,7 +14,7 @@ import {
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_UUID, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
@@ -31,10 +31,7 @@ import {
 import { getCertSummary, setTLSRecoveredAlertsContext } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
-import {
-  SYNTHETICS_ALERT_RULE_TYPES,
-  TLS_CERTIFICATE,
-} from '../../../common/constants/synthetics_alerts';
+import { TLS_CERTIFICATE } from '../../../common/constants/synthetics_alerts';
 import { generateAlertMessage, SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';

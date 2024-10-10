@@ -6,7 +6,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_feature_id';
+import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_rule_type_ids';
 import { requestContextMock } from './__mocks__/request_context';
 import { getO11yBrowserFields } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
@@ -42,12 +42,12 @@ describe('getBrowserFieldsByFeatureId', () => {
           requestMock.create({
             method: 'get',
             path,
-            query: { featureIds: undefined },
+            query: { ruleTypeIds: undefined },
           }),
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"featureIds\\"'"`
+        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
       );
     });
 

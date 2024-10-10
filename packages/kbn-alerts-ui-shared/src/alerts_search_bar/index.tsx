@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
@@ -19,12 +19,10 @@ import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../c
 export type { AlertsSearchBarProps } from './types';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
-const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
 
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds = EMPTY_FEATURE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -45,7 +43,7 @@ export const AlertsSearchBar = ({
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    featureIds,
+    ruleTypeIds: ruleTypeId != null ? [ruleTypeId] : [],
     http,
     toasts,
     dataViewsService,
@@ -74,7 +72,7 @@ export const AlertsSearchBar = ({
   });
 
   const isSecurity =
-    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
+    (ruleTypeId && isSiemRuleType(ruleTypeId)) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

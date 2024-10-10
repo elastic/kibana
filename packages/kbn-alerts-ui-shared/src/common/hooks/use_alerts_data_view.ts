@@ -10,7 +10,7 @@
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { DataViewBase } from '@kbn/es-query';
@@ -26,12 +26,12 @@ export interface UseAlertsDataViewParams {
 
   // Params
   /**
-   * Array of feature ids used for authorization and area-based filtering
+   * Array of rule type ids used for authorization and area-based filtering
    *
    * Security data views must be requested in isolation (i.e. `['siem']`). If mixed with
-   * other feature ids, the resulting data view will be empty.
+   * other rule type ids, the resulting data view will be empty.
    */
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
 }
 
 export interface UseAlertsDataViewResult {
@@ -93,11 +93,11 @@ export const useAlertsDataView = ({
   http,
   dataViewsService,
   toasts,
-  featureIds,
+  ruleTypeIds,
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
-  const includesSecurity = featureIds.includes(AlertConsumers.SIEM);
-  const isOnlySecurity = featureIds.length === 1 && includesSecurity;
-  const hasMixedFeatureIds = featureIds.length > 1 && includesSecurity;
+  const includesSecurity = ruleTypeIds.some(isSiemRuleType);
+  const isOnlySecurity = ruleTypeIds.length > 0 && ruleTypeIds.every(isSiemRuleType);
+  const hasMixedFeatureIds = !isOnlySecurity && includesSecurity;
 
   const {
     data: indexNames,
@@ -105,10 +105,10 @@ export const useAlertsDataView = ({
     isLoading: isLoadingIndexNames,
     isInitialLoading: isInitialLoadingIndexNames,
   } = useFetchAlertsIndexNamesQuery(
-    { http, featureIds },
+    { http, ruleTypeIds },
     {
       // Don't fetch index names when featureIds includes both Security Solution and other features
-      enabled: !!featureIds.length && (isOnlySecurity || !includesSecurity),
+      enabled: !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity),
     }
   );
 
@@ -118,10 +118,10 @@ export const useAlertsDataView = ({
     isLoading: isLoadingFields,
     isInitialLoading: isInitialLoadingFields,
   } = useFetchAlertsFieldsQuery(
-    { http, featureIds },
+    { http, ruleTypeIds },
     {
       // Don't fetch fields when featureIds includes Security Solution
-      enabled: !!featureIds.length && !includesSecurity,
+      enabled: !!ruleTypeIds.length && !includesSecurity,
     }
   );
 
@@ -167,7 +167,7 @@ export const useAlertsDataView = ({
 
   return useMemo(() => {
     let isLoading: boolean;
-    if (!featureIds.length || hasMixedFeatureIds) {
+    if (!ruleTypeIds.length || hasMixedFeatureIds) {
       isLoading = false;
     } else {
       if (isOnlySecurity) {
@@ -180,13 +180,14 @@ export const useAlertsDataView = ({
           isLoadingFields;
       }
     }
+
     return {
       dataView,
       isLoading,
     };
   }, [
     dataView,
-    featureIds.length,
+    ruleTypeIds.length,
     hasMixedFeatureIds,
     isInitialLoadingFields,
     isInitialLoadingIndexNames,
