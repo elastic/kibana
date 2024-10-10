@@ -10,28 +10,40 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AlertsPopover } from './open_alerts_popover';
-import { discoverServiceMock } from '../../../../__mocks__/services';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { dataViewWithNoTimefieldMock } from '../../../../__mocks__/data_view_no_timefield';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { AppMenuActionsMenuPopover } from './run_app_menu_action';
+import { getAlertsAppMenuItem } from './get_alerts';
+import { discoverServiceMock } from '../../../../../__mocks__/services';
+import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 
 const mount = (dataView = dataViewMock, isEsqlMode = false) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.actions.setDataView(dataView);
+
+  const getDiscoverParamsMock = () => ({
+    dataView,
+    adHocDataViews: [],
+    isEsqlMode,
+    services: discoverServiceMock,
+    onNewSearch: jest.fn(),
+    onOpenSavedSearch: jest.fn(),
+    onUpdateAdHocDataViews: jest.fn(),
+  });
+
+  const alertsAppMenuItem = getAlertsAppMenuItem({
+    getDiscoverParams: getDiscoverParamsMock,
+    stateContainer,
+  });
+
   return mountWithIntl(
-    <KibanaContextProvider services={discoverServiceMock}>
-      <AlertsPopover
-        stateContainer={stateContainer}
-        anchorElement={document.createElement('div')}
-        adHocDataViews={[]}
-        isEsqlMode={isEsqlMode}
-        services={discoverServiceMock}
-        onClose={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <AppMenuActionsMenuPopover
+      anchorElement={document.createElement('div')}
+      appMenuItem={alertsAppMenuItem}
+      services={discoverServiceMock}
+      onClose={jest.fn()}
+    />
   );
 };
 

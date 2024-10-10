@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { getFieldValue, RowControlColumn } from '@kbn/discover-utils';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
+import { AppMenuActionType, getFieldValue, RowControlColumn } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -70,6 +70,70 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           });
 
           return prevValue.docViewsRegistry(registry);
+        },
+      };
+    },
+    getAppMenu: (prev) => (params) => {
+      const prevValue = prev(params);
+      return {
+        appMenuRegistry: (registry) => {
+          registry.registerCustomAction({
+            id: 'example-custom-action1',
+            type: AppMenuActionType.custom,
+            label: 'Custom 1',
+            actions: [
+              {
+                id: 'example-custom-action11',
+                type: AppMenuActionType.custom,
+                controlProps: {
+                  label: 'Custom 11',
+                  onClick: () => {
+                    alert('Example custom action 11 clicked');
+                  },
+                },
+              },
+              {
+                id: 'example-custom-action12',
+                type: AppMenuActionType.custom,
+                controlProps: {
+                  label: 'Custom 12',
+                  onClick: () => {
+                    alert('Example custom action 12 clicked');
+                  },
+                },
+              },
+            ],
+          });
+
+          registry.registerCustomAction({
+            id: 'example-custom-action2',
+            type: AppMenuActionType.custom,
+            controlProps: {
+              label: 'Custom 2',
+              onClick: ({ onFinishAction }) => {
+                return (
+                  <EuiFlyout onClose={onFinishAction}>
+                    <div>Example custom action 2 clicked</div>
+                  </EuiFlyout>
+                );
+              },
+            },
+          });
+
+          registry.registerCustomActionUnderAlerts({
+            id: 'example-custom-action3',
+            type: AppMenuActionType.custom,
+            order: 101,
+            controlProps: {
+              label: 'Custom 3',
+              onClick: ({ onFinishAction }) => {
+                alert('Example custom action 3 clicked');
+                onFinishAction();
+              },
+            },
+          });
+
+          return prevValue.appMenuRegistry(registry);
         },
       };
     },

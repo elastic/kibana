@@ -14,7 +14,7 @@ import type {
   UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -23,6 +23,30 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverServices } from '../build_services';
+
+/**
+ * Supports extending the Discover app menu
+ */
+export interface AppMenuExtension {
+  /**
+   * Supports extending the app menu with additional actions
+   * @param prevRegistry The app menu registry
+   * @returns The updated app menu registry
+   */
+  appMenuRegistry: (prevRegistry: AppMenuRegistry) => AppMenuRegistry;
+}
+
+/**
+ * Parameters passed to the app menu extension
+ */
+export interface AppMenuExtensionParams {
+  isEsqlMode: boolean;
+  services: DiscoverServices;
+  dataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+}
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -283,4 +307,15 @@ export interface Profile {
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * App Menu (Top Nav actions)
+   */
+
+  /**
+   * Supports extending the app menu with additional actions
+   * @param params The doc viewer extension parameters
+   * @returns The doc viewer extension
+   */
+  getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
 }

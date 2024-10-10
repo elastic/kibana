@@ -7,36 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTopNavLinks } from './get_top_nav_links';
+import React from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { useTopNavLinks } from './use_top_nav_links';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
-const services = {
-  capabilities: {
-    discover: {
-      save: true,
+describe('useTopNavLinks', () => {
+  const services = {
+    ...createDiscoverServicesMock(),
+    capabilities: {
+      discover: {
+        save: true,
+      },
     },
-  },
-  uiSettings: {
-    get: jest.fn(() => true),
-  },
-} as unknown as DiscoverServices;
+    uiSettings: {
+      get: jest.fn(() => true),
+    },
+  } as unknown as DiscoverServices;
 
-const state = {} as unknown as DiscoverStateContainer;
+  const state = getDiscoverStateMock({ isTimeBased: true });
+  state.actions.setDataView(dataViewMock);
 
-test('getTopNavLinks result', () => {
-  const topNavLinks = getTopNavLinks({
-    dataView: dataViewMock,
-    onOpenInspector: jest.fn(),
-    services,
-    state,
-    isEsqlMode: false,
-    adHocDataViews: [],
-    topNavCustomization: undefined,
-    shouldShowESQLToDataViewTransitionModal: false,
-  });
-  expect(topNavLinks).toMatchInlineSnapshot(`
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+  };
+
+  test('useTopNavLinks result', () => {
+    const topNavLinks = renderHook(
+      () =>
+        useTopNavLinks({
+          dataView: dataViewMock,
+          onOpenInspector: jest.fn(),
+          services,
+          state,
+          isEsqlMode: false,
+          adHocDataViews: [],
+          topNavCustomization: undefined,
+          shouldShowESQLToDataViewTransitionModal: false,
+        }),
+      {
+        wrapper: Wrapper,
+      }
+    ).result.current;
+    expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
         "color": "text",
@@ -49,7 +66,16 @@ test('getTopNavLinks result', () => {
         "tooltip": "ES|QL is Elastic's powerful new piped query language.",
       },
       Object {
+        "description": "Open Inspector for search",
+        "id": "inspect",
+        "label": "Inspect",
+        "run": [Function],
+        "testId": "openInspectorButton",
+      },
+      Object {
         "description": "New Search",
+        "iconOnly": true,
+        "iconType": "plus",
         "id": "new",
         "label": "New",
         "run": [Function],
@@ -57,6 +83,8 @@ test('getTopNavLinks result', () => {
       },
       Object {
         "description": "Open Saved Search",
+        "iconOnly": true,
+        "iconType": "folderOpen",
         "id": "open",
         "label": "Open",
         "run": [Function],
@@ -64,17 +92,12 @@ test('getTopNavLinks result', () => {
       },
       Object {
         "description": "Share Search",
+        "iconOnly": true,
+        "iconType": "link",
         "id": "share",
         "label": "Share",
         "run": [Function],
         "testId": "shareTopNavButton",
-      },
-      Object {
-        "description": "Open Inspector for search",
-        "id": "inspect",
-        "label": "Inspect",
-        "run": [Function],
-        "testId": "openInspectorButton",
       },
       Object {
         "description": "Save Search",
@@ -87,20 +110,26 @@ test('getTopNavLinks result', () => {
       },
     ]
   `);
-});
-
-test('getTopNavLinks result for ES|QL mode', () => {
-  const topNavLinks = getTopNavLinks({
-    dataView: dataViewMock,
-    onOpenInspector: jest.fn(),
-    services,
-    state,
-    isEsqlMode: true,
-    adHocDataViews: [],
-    topNavCustomization: undefined,
-    shouldShowESQLToDataViewTransitionModal: false,
   });
-  expect(topNavLinks).toMatchInlineSnapshot(`
+
+  test('useTopNavLinks result for ES|QL mode', () => {
+    const topNavLinks = renderHook(
+      () =>
+        useTopNavLinks({
+          dataView: dataViewMock,
+          onOpenInspector: jest.fn(),
+          services,
+          state,
+          isEsqlMode: true,
+          adHocDataViews: [],
+          topNavCustomization: undefined,
+          shouldShowESQLToDataViewTransitionModal: false,
+        }),
+      {
+        wrapper: Wrapper,
+      }
+    ).result.current;
+    expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
         "color": "text",
@@ -113,7 +142,16 @@ test('getTopNavLinks result for ES|QL mode', () => {
         "tooltip": "Switch to KQL or Lucene syntax.",
       },
       Object {
+        "description": "Open Inspector for search",
+        "id": "inspect",
+        "label": "Inspect",
+        "run": [Function],
+        "testId": "openInspectorButton",
+      },
+      Object {
         "description": "New Search",
+        "iconOnly": true,
+        "iconType": "plus",
         "id": "new",
         "label": "New",
         "run": [Function],
@@ -121,6 +159,8 @@ test('getTopNavLinks result for ES|QL mode', () => {
       },
       Object {
         "description": "Open Saved Search",
+        "iconOnly": true,
+        "iconType": "folderOpen",
         "id": "open",
         "label": "Open",
         "run": [Function],
@@ -128,17 +168,12 @@ test('getTopNavLinks result for ES|QL mode', () => {
       },
       Object {
         "description": "Share Search",
+        "iconOnly": true,
+        "iconType": "link",
         "id": "share",
         "label": "Share",
         "run": [Function],
         "testId": "shareTopNavButton",
-      },
-      Object {
-        "description": "Open Inspector for search",
-        "id": "inspect",
-        "label": "Inspect",
-        "run": [Function],
-        "testId": "openInspectorButton",
       },
       Object {
         "description": "Save Search",
@@ -151,4 +186,5 @@ test('getTopNavLinks result for ES|QL mode', () => {
       },
     ]
   `);
+  });
 });
