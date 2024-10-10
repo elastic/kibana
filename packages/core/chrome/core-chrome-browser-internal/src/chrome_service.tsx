@@ -8,11 +8,13 @@
  */
 
 import React, { useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { setEuiDevProviderWarning } from '@elastic/eui';
+import { EuiButtonIcon, EuiProvider, setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -35,6 +37,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  ChromeNavControls,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -55,6 +58,7 @@ import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const IS_FULLSCREEN_MODE_KEY = 'core.chrome.isFullScreenMode';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -132,6 +136,52 @@ export class ChromeService {
   }
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
+
+  private initFullScreenMode(
+    navControls: ChromeNavControls,
+    chromeStyle$: Observable<ChromeStyle>
+  ) {
+    /**
+     * Fullscreen mode requires user interaction.
+     */
+    const isFullScreenMode$ = new BehaviorSubject(
+      localStorage.getItem(IS_FULLSCREEN_MODE_KEY) === 'true'
+    );
+    const setIsFullScreenMode = (isFullScreenMode: boolean) => {
+      localStorage.setItem(IS_FULLSCREEN_MODE_KEY, JSON.stringify(isFullScreenMode));
+      isFullScreenMode$.next(isFullScreenMode);
+    };
+
+    chromeStyle$.subscribe((chromeStyle) => {
+      // rendering the full screen button depends on knowing the chrome style
+      navControls.registerRight({
+        order: 3000, // appear to the left of the user avatar icon
+        mount: (targetDomElement) => {
+          ReactDOM.render(
+            <EuiProvider
+              globalStyles={false}
+              colorMode={chromeStyle === 'classic' ? 'dark' : 'light'}
+            >
+              <EuiButtonIcon
+                iconType="fullScreen"
+                color="text"
+                onClick={() => setIsFullScreenMode(!isFullScreenMode$.value)}
+                aria-label={i18n.translate(
+                  'core.ui.primaryNav.project.headerSection.enterFullScreen',
+                  { defaultMessage: 'Enter full screeen' }
+                )}
+              />
+            </EuiProvider>,
+            targetDomElement
+          );
+
+          return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+        },
+      });
+    });
+
+    return { isFullScreenMode$, setIsFullScreenMode };
+  }
 
   /**
    * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
@@ -307,6 +357,11 @@ export class ChromeService {
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
+    const { isFullScreenMode$, setIsFullScreenMode } = this.initFullScreenMode(
+      navControls,
+      chromeStyle$
+    );
+
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
       helpExtension$.next(undefined);
@@ -385,6 +440,7 @@ export class ChromeService {
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
         const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+        const isFullScreenMode = useObservable(isFullScreenMode$, false);
 
         if (!isVisible) {
           return (
@@ -431,6 +487,8 @@ export class ChromeService {
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
                 helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
                 helpMenuLinks$={helpMenuLinks$}
+                isFullScreenMode={isFullScreenMode}
+                setIsFullScreenMode={setIsFullScreenMode}
                 navControlsLeft$={navControls.getLeft$()}
                 navControlsCenter$={navControls.getCenter$()}
                 navControlsRight$={navControls.getRight$()}
@@ -469,6 +527,8 @@ export class ChromeService {
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
             helpMenuLinks$={helpMenuLinks$}
+            isFullScreenMode={isFullScreenMode}
+            setIsFullScreenMode={setIsFullScreenMode}
             homeHref={http.basePath.prepend('/app/home')}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             navLinks$={navLinks.getNavLinks$()}
