@@ -129,7 +129,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   suggestionsSize?: SuggestionsListSize;
   suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
-  shouldExecuteFilterManagerUpdate?: boolean;
 
   /**
    * Disables all inputs and interactive elements,
@@ -414,19 +413,9 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     });
   };
 
-  public onFiltersChange = (filters: Filter[]) => {
-    const mappedFilters = structuredClone(filters);
-
-    if (this.props.shouldExecuteFilterManagerUpdate) {
-      this.services.data.query.filterManager.setFilters(mappedFilters);
-    }
-
-    this.props.onFiltersUpdated?.(mappedFilters);
-  };
-
   public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
     // clean up all filters
-    this.onFiltersChange([]);
+    this.props.onFiltersUpdated?.([]);
     this.setState(
       {
         query: query as QT,
@@ -557,7 +546,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         saveFormComponent={saveQueryFormComponent}
         toggleFilterBarMenuPopover={this.toggleFilterBarMenuPopover}
         openQueryBarMenu={this.state.openQueryBarMenu}
-        onFiltersUpdated={this.onFiltersChange}
+        onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
         additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? {}}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -592,7 +581,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
-          onFiltersUpdated={this.onFiltersChange}
+          onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
@@ -604,7 +593,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         <FilterBar
           afterQueryBar
           filters={this.props.filters!}
-          onFiltersUpdated={this.onFiltersChange}
+          onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
@@ -658,7 +647,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           filters={this.props.filters!}
-          onFiltersUpdated={this.onFiltersChange}
+          onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}

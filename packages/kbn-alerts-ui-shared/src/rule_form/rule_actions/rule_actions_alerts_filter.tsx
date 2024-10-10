@@ -31,7 +31,7 @@ export interface RuleActionsAlertsFilterProps {
     http: RuleFormPlugins['http'];
     notifications: RuleFormPlugins['notifications'];
     unifiedSearch: RuleFormPlugins['unifiedSearch'];
-    dataViews: RuleFormPlugins['dataViews'];
+    data: RuleFormPlugins['data'];
   };
 }
 
@@ -48,7 +48,7 @@ export const RuleActionsAlertsFilter = ({
     http,
     notifications: { toasts },
     unifiedSearch,
-    dataViews,
+    data,
   } = propsPlugins || plugins;
 
   const [query, setQuery] = useState(action.alertsFilter?.query ?? DEFAULT_QUERY);
@@ -119,7 +119,7 @@ export const RuleActionsAlertsFilter = ({
             http={http}
             toasts={toasts}
             unifiedSearchBar={unifiedSearch.ui.SearchBar}
-            dataViewsService={dataViews}
+            dataService={data}
             appName={appName}
             featureIds={featureIds}
             ruleTypeId={ruleTypeId}

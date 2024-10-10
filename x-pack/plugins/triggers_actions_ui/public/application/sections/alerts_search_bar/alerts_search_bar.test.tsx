@@ -9,12 +9,14 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { AlertsSearchBar } from './alerts_search_bar';
 
+const mockDataPlugin = dataPluginMock.createStartContract();
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('../../hooks/use_load_rule_types_query');
 jest.mock('../../hooks/use_rule_aad_fields');
@@ -64,6 +66,7 @@ describe('AlertsSearchBar', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
       services: {
+        data: mockDataPlugin,
         unifiedSearch: {
           ui: {
             SearchBar: jest.fn().mockImplementation((props) => (
@@ -145,6 +148,7 @@ describe('AlertsSearchBar', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        data: mockDataPlugin,
         unifiedSearch: {
           ui: {
             SearchBar: jest.fn().mockImplementation((props) => (
@@ -180,6 +184,7 @@ describe('AlertsSearchBar', () => {
 
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
+      expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
     });
   });
 });

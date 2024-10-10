@@ -354,6 +354,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
+    it('should create an alert with DSL filter for conditional action', async () => {
+      const alertName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(alertName);
+
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
+
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      const filter = `{
+        "bool": {
+          "filter": [{ "term": { "kibana.alert.rule.consumer": "*" } }]
+        }
+      }`;
+      await filterBar.addDslFilter(filter, true);
+
+      await testSubjects.click('saveRuleButton');
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await testSubjects.click('editActionHoverButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.scrollIntoView('globalQueryBar');
+
+      await filterBar.hasFilter('query', filter, true);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);
@@ -567,9 +618,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('triggersActionsAlerts');
 
-      const filter = `
-      {
-        "bool":{"filter":[{"term":{"kibana.alert.rule.name":"${ruleName}"}}]}
+      const filter = `{
+        "bool": {
+          "filter": [{ "term": { "kibana.alert.rule.name": "${ruleName}" } }]
+        }
       }`;
 
       await filterBar.addDslFilter(filter, true);
