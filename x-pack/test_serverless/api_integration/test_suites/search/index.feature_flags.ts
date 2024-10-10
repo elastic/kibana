@@ -10,6 +10,5 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless search API - feature flags', function () {
     loadTestFile(require.resolve('./search_indices'));
-    loadTestFile(require.resolve('./platform_security'));
   });
 }
