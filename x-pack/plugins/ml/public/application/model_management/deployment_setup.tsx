@@ -631,6 +631,7 @@ interface StartDeploymentModalProps {
   cloudInfo: CloudInfo;
   deploymentParamsMapper: DeploymentParamsMapper;
   showNodeInfo: boolean;
+  nlpSettings: NLPSettings;
 }
 
 /**
@@ -646,6 +647,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   cloudInfo,
   deploymentParamsMapper,
   showNodeInfo,
+  nlpSettings,
 }) => {
   const isUpdate = !!initialParams;
 
@@ -654,20 +656,22 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       deploymentParamsMapper.mapApiToUiDeploymentParams(v)
     );
 
+    const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
+
     return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
       ? {
           deploymentId: `${model.model_id}_search`,
           optimized: 'optimizedForSearch',
-          vCPUUsage: 'medium',
+          vCPUUsage: defaultVCPUUsage,
           adaptiveResources: true,
         }
       : {
           deploymentId: `${model.model_id}_ingest`,
           optimized: 'optimizedForIngest',
-          vCPUUsage: 'medium',
+          vCPUUsage: defaultVCPUUsage,
           adaptiveResources: true,
         };
-  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats]);
+  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats, showNodeInfo]);
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
@@ -722,7 +726,9 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
-          disableAdaptiveResourcesControl={!showNodeInfo}
+          disableAdaptiveResourcesControl={
+            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+          }
           deploymentsParams={model.stats?.deployment_stats.reduce<
             Record<string, DeploymentParamsUI>
           >((acc, curr) => {
@@ -837,6 +843,7 @@ export const getUserInputModelDeploymentParamsProvider =
         const modalSession = overlays.openModal(
           toMountPoint(
             <StartUpdateDeploymentModal
+              nlpSettings={nlpSettings}
               showNodeInfo={showNodeInfo}
               deploymentParamsMapper={deploymentParamsMapper}
               cloudInfo={cloudInfo}
