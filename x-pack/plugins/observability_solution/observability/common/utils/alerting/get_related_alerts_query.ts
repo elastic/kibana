@@ -57,8 +57,8 @@ interface AlertFields {
 
 export const getSharedFields = (alertFields: AlertFields = {}) => {
   const matchedFields: Field[] = [];
-  ALL_SHARED_FIELDS.forEach((source: string) => {
-    Object.keys(alertFields).forEach((field: any) => {
+  ALL_SHARED_FIELDS.forEach((source) => {
+    Object.keys(alertFields).forEach((field) => {
       if (source === field) {
         const fieldValue = alertFields[field];
         matchedFields.push({
