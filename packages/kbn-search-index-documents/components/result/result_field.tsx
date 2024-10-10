@@ -10,7 +10,11 @@
 import React from 'react';
 
 import {
+  EuiBadge,
   EuiCodeBlock,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiTableRow,
   EuiTableRowCell,
@@ -19,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { ResultFieldProps } from './result_types';
 
 const iconMap: Record<string, string> = {
@@ -60,13 +65,84 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'questionInCircle';
 
+const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector', 'sparse_vector'];
+
+interface ResultValueProps {
+  fieldValue: string;
+  fieldType: string;
+  isExpanded?: boolean;
+}
+
+const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpanded = false }) => {
+  if (
+    isExpanded &&
+    fieldType &&
+    (['object', 'array', 'nested'].includes(fieldType) || Array.isArray(fieldValue))
+  ) {
+    return (
+      <EuiCodeBlock language="json" transparentBackground fontSize="s">
+        {fieldValue}
+      </EuiCodeBlock>
+    );
+  } else if (PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType)) {
+    return (
+      <>
+        <EuiText size="s" color="default">
+          {fieldValue}
+        </EuiText>
+        {fieldType === 'dense_vector' && (
+          <div className={'denseVectorFieldValue'}>
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiBadge color="hollow">
+                  {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
+                    defaultMessage: '{value} dims',
+                    values: {
+                      value: JSON.parse(fieldValue).length,
+                    },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCopy textToCopy={fieldValue}>
+                  {(copy) => (
+                    <EuiIcon
+                      type="copyClipboard"
+                      onClick={copy}
+                      data-test-subj="copyDenseVector"
+                      aria-label={i18n.translate(
+                        'searchIndexDocuments.result.value.denseVector.copy',
+                        {
+                          defaultMessage: 'Copy vector',
+                        }
+                      )}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        )}
+      </>
+    );
+  } else {
+    return (
+      <EuiText size="s" color="default">
+        {fieldValue}
+      </EuiText>
+    );
+  }
+};
+
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
   fieldName,
   fieldValue,
-  fieldType,
+  fieldType = 'object',
   isExpanded,
 }) => {
+  const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
+
   return (
     <EuiTableRow className="resultField">
       <EuiTableRowCell className="resultFieldRowCell" width={euiThemeVars.euiSizeL} valign="middle">
@@ -79,31 +155,16 @@ export const ResultField: React.FC<ResultFieldProps> = ({
       </EuiTableRowCell>
       <EuiTableRowCell
         className="resultFieldRowCell"
-        width="25%"
+        width="20%"
         truncateText={!isExpanded}
         valign="middle"
       >
-        <EuiText size="xs">{fieldName}</EuiText>
+        <EuiText size="s" color="default">
+          {fieldName}
+        </EuiText>
       </EuiTableRowCell>
-      <EuiTableRowCell
-        className="resultFieldRowCell"
-        width={euiThemeVars.euiSizeXXL}
-        valign="middle"
-      >
-        <EuiIcon type="sortRight" color="subdued" />
-      </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={!isExpanded} valign="middle">
-        {(fieldType === 'object' ||
-          fieldType === 'array' ||
-          fieldType === 'nested' ||
-          Array.isArray(fieldValue)) &&
-        isExpanded ? (
-          <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
-            {fieldValue}
-          </EuiCodeBlock>
-        ) : (
-          <EuiText size="xs">{fieldValue}</EuiText>
-        )}
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+        <ResultValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
       </EuiTableRowCell>
     </EuiTableRow>
   );
