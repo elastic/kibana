@@ -134,6 +134,13 @@ export class EntityStoreDataClient {
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
+
+    this.asyncSetup();
+
+    return descriptor;
+  }
+
+  private async asyncSetup() {
     const unitedDefinition = getUnitedEntityDefinition({
       entityType,
       namespace,
@@ -141,65 +148,72 @@ export class EntityStoreDataClient {
     });
     const { entityManagerDefinition } = unitedDefinition;
 
-    await this.entityClient.createEntityDefinition({
-      definition: {
-        ...entityManagerDefinition,
-        filter,
-        indexPatterns: indexPattern
-          ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
-          : entityManagerDefinition.indexPatterns,
-      },
-      installOnly: true,
-    });
-    debugLog(`Created entity definition`);
+    try {
+      await this.entityClient.createEntityDefinition({
+        definition: {
+          ...entityManagerDefinition,
+          filter,
+          indexPatterns: indexPattern
+            ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
+            : entityManagerDefinition.indexPatterns,
+        },
+        installOnly: true,
+      });
+      debugLog(`Created entity definition`);
 
-    // the index must be in place with the correct mapping before the enrich policy is created
-    // this is because the enrich policy will fail if the index does not exist with the correct fields
-    await createEntityIndexComponentTemplate({
-      unitedDefinition,
-      esClient,
-    });
-    debugLog(`Created entity index component template`);
-    await createEntityIndex({
-      entityType,
-      esClient,
-      namespace,
-      logger,
-    });
-    debugLog(`Created entity index`);
+      // the index must be in place with the correct mapping before the enrich policy is created
+      // this is because the enrich policy will fail if the index does not exist with the correct fields
+      await createEntityIndexComponentTemplate({
+        unitedDefinition,
+        esClient,
+      });
+      debugLog(`Created entity index component template`);
+      await createEntityIndex({
+        entityType,
+        esClient,
+        namespace,
+        logger,
+      });
+      debugLog(`Created entity index`);
 
-    // we must create and execute the enrich policy before the pipeline is created
-    // this is because the pipeline will fail if the enrich index does not exist
-    await createFieldRetentionEnrichPolicy({
-      unitedDefinition,
-      esClient,
-    });
-    debugLog(`Created field retention enrich policy`);
-    await executeFieldRetentionEnrichPolicy({
-      unitedDefinition,
-      esClient,
-      logger,
-    });
-    debugLog(`Executed field retention enrich policy`);
-    await createPlatformPipeline({
-      debugMode: pipelineDebugMode,
-      unitedDefinition,
-      logger,
-      esClient,
-    });
-    debugLog(`Created @platform pipeline`);
+      // we must create and execute the enrich policy before the pipeline is created
+      // this is because the pipeline will fail if the enrich index does not exist
+      await createFieldRetentionEnrichPolicy({
+        unitedDefinition,
+        esClient,
+      });
+      debugLog(`Created field retention enrich policy`);
+      await executeFieldRetentionEnrichPolicy({
+        unitedDefinition,
+        esClient,
+        logger,
+      });
+      debugLog(`Executed field retention enrich policy`);
+      await createPlatformPipeline({
+        debugMode: pipelineDebugMode,
+        unitedDefinition,
+        logger,
+        esClient,
+      });
+      debugLog(`Created @platform pipeline`);
 
-    // finally start the entity definition now that everything is in place
-    const updated = await this.start(entityType, { force: true });
-    debugLog(`Started entity definition`);
+      // finally start the entity definition now that everything is in place
+      const updated = await this.start(entityType, { force: true });
+      debugLog(`Started entity definition`);
 
-    // the task will execute the enrich policy on a schedule
-    await startEntityStoreFieldRetentionEnrichTask({
-      namespace,
-      logger,
-      taskManager,
-    });
-    logger.info(`Entity store initialized`);
+      // the task will execute the enrich policy on a schedule
+      await startEntityStoreFieldRetentionEnrichTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      logger.info(`Entity store initialized`);
+    } catch (e) {
+      logger.error(`Error initializing entity store for ${entityType}: ${e.message}`);
+      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
+
+      throw e;
+    }
     return { ...descriptor, ...updated };
   }
 
