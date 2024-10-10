@@ -40,6 +40,9 @@ module.exports = () => ({
         // Need this since we are using TypeScript 3.9+
         require.resolve('@babel/plugin-proposal-private-methods'),
 
+        // Needed for ??= usage in our vega-* dependencies
+        require.resolve('@babel/plugin-transform-logical-assignment-operators'),
+
         // It enables the @babel/runtime so we can decrease the bundle sizes of the produced outputs
         [
           require.resolve('@babel/plugin-transform-runtime'),
