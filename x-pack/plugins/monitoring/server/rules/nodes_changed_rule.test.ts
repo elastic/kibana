@@ -205,8 +205,8 @@ describe('NodesChangedAlert', () => {
             'Nodes changed alert is firing for testCluster. The following Elasticsearch nodes have been added: none / removed: none / restarted: test. [View nodes](elasticsearch/nodes)',
           internalShortMessage:
             'Nodes changed alert is firing for testCluster. Verify that you added, removed, or restarted nodes.',
-          added: '',
-          removed: '',
+          added: 'none',
+          removed: 'none',
           restarted: 'test',
           clusterName,
           state: 'firing',
