@@ -108,7 +108,6 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    // mainFields: ['browser', 'main', 'module'],
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     // mainFields: ['browser', 'main', 'module'],

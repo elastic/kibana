@@ -296,8 +296,6 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
-        child_process: false,
-        fs: false,
       },
     },
 
