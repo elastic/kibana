@@ -14,12 +14,13 @@ import {
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { AntivirusRegistrationModes } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
-  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import {
   disableProtections,
@@ -48,10 +49,25 @@ export const createDefaultPolicy = (
     cloud?.isServerlessEnabled
   );
 
-  let defaultPolicyPerType: PolicyConfig =
-    config?.type === 'cloud'
-      ? getCloudPolicyConfig(factoryPolicy)
-      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+  const getDefaultPolicy = (): PolicyConfig => {
+    // Please keep explicit structure for better readability
+    // Cloud Protection (not the environment)
+    if (config?.type === 'cloud') {
+      return getCloudPolicyConfig(factoryPolicy);
+    }
+    // Endpoint Protection
+    if (config?.type === 'endpoint') {
+      return getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+    }
+    // Cloud environment, managed onboarding hence no inputs and therefore no config.type
+    if (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) {
+      return getCloudPolicyConfig(factoryPolicy);
+    }
+    // Default to Endpoint Protection if no type is provided
+    return getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+  };
+
+  let defaultPolicyPerType = getDefaultPolicy();
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
@@ -139,7 +155,7 @@ const getEndpointPolicyWithIntegrationConfig = (
 };
 
 /**
- * Retrieve policy for cloud based on the on the cloud integration config
+ * Retrieve policy for cloud based on the cloud integration config
  */
 const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
   // Disabling all protections, since it's not yet supported on Cloud integrations
@@ -152,6 +168,14 @@ const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
       events: {
         ...policyWithDisabledProtections.linux.events,
         session_data: true,
+      },
+    },
+    windows: {
+      ...policyWithDisabledProtections.windows,
+      antivirus_registration: {
+        ...policyWithDisabledProtections.windows.antivirus_registration,
+        enabled: false,
+        mode: AntivirusRegistrationModes.sync,
       },
     },
   };
