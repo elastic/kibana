@@ -362,13 +362,23 @@ export function Detail() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="default">
-                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
-                          defaultMessage: 'Elastic Agent',
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
+                    {packageInfo?.type === 'content' ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
+                            defaultMessage: 'Content only',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ) : (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                            defaultMessage: 'Elastic Agent',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
                         <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
