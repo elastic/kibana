@@ -25,8 +25,7 @@ export async function getEntityGroupsBy({
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   field: string;
-  sortField?: string;
-  sortDirection?: string;
+  sortDirection?: 'asc' | 'desc' | undefined;
   kuery?: string;
 }) {
   const groups = await inventoryEsClient.esql('get_entities_groups', {
@@ -35,7 +34,7 @@ export async function getEntityGroupsBy({
         | ${getEntityTypesWhereClause(defaultEntityTypes)}
         | ${getEntityDefinitionIdWhereClause()}
         | STATS count = COUNT(*) by ${field}
-        | SORT ${sortField} ${sortDirection}
+        | SORT ${field} ${sortDirection}
         | LIMIT ${MAX_NUMBER_OF_ENTITIES}
       `,
     filter: {
