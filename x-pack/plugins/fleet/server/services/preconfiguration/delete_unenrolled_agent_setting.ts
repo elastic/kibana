@@ -10,21 +10,30 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { settingsService } from '..';
 import type { FleetConfigType } from '../../config';
 
-export function getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig(config?: FleetConfigType) {
-  return config.enableDeleteUnenrolledAgents ?? false;
+export function getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig(
+  config?: FleetConfigType
+): boolean | undefined {
+  return config.enableDeleteUnenrolledAgents;
 }
 
 export async function ensureDeleteUnenrolledAgentsSetting(
   soClient: SavedObjectsClientContract,
-  enableDeleteUnenrolledAgents: boolean
+  enableDeleteUnenrolledAgents?: boolean
 ) {
-  if (enableDeleteUnenrolledAgents) {
-    await settingsService.saveSettings(soClient, {
-      delete_unenrolled_agents: true,
-    });
-  } else {
-    await settingsService.saveSettings(soClient, {
-      delete_unenrolled_agents: false,
-    });
+  if (enableDeleteUnenrolledAgents === undefined) {
+    const settings = await settingsService.getSettingsOrUndefined(soClient);
+    if (!settings?.delete_unenrolled_agents?.is_preconfigured) {
+      return;
+    }
   }
+  await settingsService.saveSettings(
+    soClient,
+    {
+      delete_unenrolled_agents: {
+        enabled: !!enableDeleteUnenrolledAgents,
+        is_preconfigured: enableDeleteUnenrolledAgents !== undefined,
+      },
+    },
+    { fromSetup: true }
+  );
 }

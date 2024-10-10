@@ -102,7 +102,10 @@ describe('DeleteUnenrolledAgentsTask', () => {
 
     it('Should delete unenrolled agents', async () => {
       mockSettingsService.getSettingsOrUndefined.mockResolvedValue({
-        delete_unenrolled_agents: true,
+        delete_unenrolled_agents: {
+          enabled: true,
+          is_preconfigured: false,
+        },
         id: '1',
       });
 
@@ -120,7 +123,10 @@ describe('DeleteUnenrolledAgentsTask', () => {
 
     it('Should exit if delete unenrolled agents flag is false', async () => {
       mockSettingsService.getSettingsOrUndefined.mockResolvedValue({
-        delete_unenrolled_agents: false,
+        delete_unenrolled_agents: {
+          enabled: false,
+          is_preconfigured: false,
+        },
         id: '1',
       });
 

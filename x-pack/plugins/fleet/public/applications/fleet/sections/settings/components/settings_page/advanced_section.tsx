@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiForm,
   EuiFormRow,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -30,7 +31,10 @@ import {
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const authz = useAuthz();
   const { docLinks, notifications } = useStartServices();
-  const deleteUnenrolledAgents = useGetSettings().data?.item?.delete_unenrolled_agents ?? false;
+  const deleteUnenrolledAgents =
+    useGetSettings().data?.item?.delete_unenrolled_agents?.enabled ?? false;
+  const isPreconfigured =
+    useGetSettings().data?.item?.delete_unenrolled_agents?.is_preconfigured ?? false;
   const [deleteUnenrolledAgentsChecked, setDeleteUnenrolledAgentsChecked] =
     React.useState<boolean>(deleteUnenrolledAgents);
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
@@ -46,7 +50,10 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
       try {
         setDeleteUnenrolledAgentsChecked(deleteFlag);
         const res = await mutateSettingsAsync({
-          delete_unenrolled_agents: deleteFlag,
+          delete_unenrolled_agents: {
+            enabled: deleteFlag,
+            is_preconfigured: false,
+          },
         });
 
         if (res.error) {
@@ -105,17 +112,27 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
           }
         >
           <EuiFormRow label="">
-            <EuiSwitch
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
-                  defaultMessage="Delete unenrolled agents"
-                />
+            <EuiToolTip
+              content={
+                isPreconfigured
+                  ? i18n.translate('xpack.fleet.settings.advancedSection.preconfiguredTitle', {
+                      defaultMessage: 'This setting is preconfigured and cannot be updated.',
+                    })
+                  : undefined
               }
-              checked={deleteUnenrolledAgentsChecked}
-              onChange={(e) => updateSettings(e.target.checked)}
-              disabled={!authz.fleet.allSettings}
-            />
+            >
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
+                    defaultMessage="Delete unenrolled agents"
+                  />
+                }
+                checked={deleteUnenrolledAgentsChecked}
+                onChange={(e) => updateSettings(e.target.checked)}
+                disabled={!authz.fleet.allSettings || isPreconfigured}
+              />
+            </EuiToolTip>
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiForm>

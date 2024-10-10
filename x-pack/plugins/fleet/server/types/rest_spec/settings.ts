@@ -40,7 +40,12 @@ export const PutSettingsRequestSchema = {
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
-    delete_unenrolled_agents: schema.maybe(schema.boolean()),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 };
 
@@ -67,7 +72,12 @@ export const SettingsResponseSchema = schema.object({
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),
     use_space_awareness_migration_started_at: schema.maybe(schema.string()),
-    delete_unenrolled_agents: schema.maybe(schema.boolean()),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 });
 

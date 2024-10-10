@@ -135,7 +135,7 @@ export class DeleteUnenrolledAgentsTask {
     soClient: SavedObjectsClientContract
   ): Promise<boolean> {
     const settings = await settingsService.getSettingsOrUndefined(soClient);
-    return settings?.delete_unenrolled_agents ?? false;
+    return settings?.delete_unenrolled_agents?.enabled ?? false;
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
