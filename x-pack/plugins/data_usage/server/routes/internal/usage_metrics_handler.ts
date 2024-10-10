@@ -55,9 +55,7 @@ export const getUsageMetricsHandler = (
       const processedMetrics = transformMetricsData(metrics);
 
       return response.ok({
-        body: {
-          ...processedMetrics,
-        },
+        body: processedMetrics,
       });
     } catch (error) {
       logger.error(`Error retrieving usage metrics: ${error.message}`);
