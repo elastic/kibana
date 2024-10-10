@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { type CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -23,20 +24,31 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion } from '../../../../hooks';
+import { useAgentVersion, useGetOutputs } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics } from '../../../../../../../common/types';
+import type { AgentMetrics, Output } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
 
-const VERSION_FIELD = 'local_metadata.elastic.agent.version';
-const HOSTNAME_FIELD = 'local_metadata.host.hostname';
+const AGENTS_TABLE_FIELDS = {
+  ACTIVE: 'active',
+  HOSTNAME: 'local_metadata.host.hostname',
+  POLICY: 'policy_id',
+  METRICS: 'metrics',
+  VERSION: 'local_metadata.elastic.agent.version',
+  LAST_CHECKIN: 'last_checkin',
+  OUTPUT_INTEGRATION: 'output_integrations',
+  OUTPUT_MONITORING: 'output_monitoring',
+};
+
 function safeMetadata(val: any) {
   if (typeof val !== 'string') {
     return '-';
@@ -95,6 +107,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
+  const outputsRequest = useGetOutputs();
+  const allOutputs = outputsRequest?.data?.items ?? [];
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
@@ -140,9 +154,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     },
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<Agent>> = [
     {
-      field: 'active',
+      field: AGENTS_TABLE_FIELDS.ACTIVE,
       sortable: false,
       width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
@@ -151,7 +165,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
-      field: HOSTNAME_FIELD,
+      field: AGENTS_TABLE_FIELDS.HOSTNAME,
       sortable: true,
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
@@ -171,7 +185,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       ),
     },
     {
-      field: 'policy_id',
+      field: AGENTS_TABLE_FIELDS.POLICY,
       sortable: true,
       truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
@@ -208,7 +222,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     ...(displayAgentMetrics
       ? [
           {
-            field: 'metrics',
+            field: AGENTS_TABLE_FIELDS.METRICS,
             sortable: false,
             name: (
               <EuiToolTip
@@ -234,7 +248,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               ),
           },
           {
-            field: 'metrics',
+            field: AGENTS_TABLE_FIELDS.METRICS,
             sortable: false,
             name: (
               <EuiToolTip
@@ -264,19 +278,56 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           },
         ]
       : []),
-
     {
-      field: 'last_checkin',
+      field: AGENTS_TABLE_FIELDS.LAST_CHECKIN,
       sortable: true,
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
-      width: '180px',
-      render: (lastCheckin: string, agent: any) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
+      width: '100px',
+      render: (lastCheckin: string) =>
+        lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
     },
     {
-      field: VERSION_FIELD,
+      field: AGENTS_TABLE_FIELDS.OUTPUT_INTEGRATION,
+      sortable: true,
+      name: i18n.translate('xpack.fleet.agentList.integrationsOutputTitle', {
+        defaultMessage: 'Output for integrations',
+      }),
+      width: '180px',
+      render: (outputs: Output[], agent: Agent) => {
+        const agentPolicy = agent?.policy_id
+          ? agentPoliciesIndexedById[agent.policy_id]
+          : undefined;
+        return (
+          <>
+            <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />
+          </>
+        );
+      },
+    },
+    {
+      field: AGENTS_TABLE_FIELDS.OUTPUT_MONITORING,
+      sortable: true,
+      name: i18n.translate('xpack.fleet.agentList.monitoringOutputTitle', {
+        defaultMessage: 'Output for Monitoring',
+      }),
+      width: '180px',
+      render: (outputs: Output[], agent: Agent) => {
+        const agentPolicy = agent?.policy_id
+          ? agentPoliciesIndexedById[agent.policy_id]
+          : undefined;
+        return (
+          <AgentPolicyOutputsSummary
+            outputs={allOutputs}
+            agentPolicy={agentPolicy}
+            monitoring={true}
+          />
+        );
+      },
+    },
+    {
+      field: AGENTS_TABLE_FIELDS.VERSION,
       sortable: true,
       width: '220px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
