@@ -85,7 +85,16 @@ export const RuleActionsAlertsFilter = ({
 
   const onFiltersUpdated = useCallback(
     (filters: Filter[]) => {
-      updateQuery({ filters });
+      const updatedFilters = filters.map((filter) => {
+        const { $state, meta, ...rest } = filter;
+        return {
+          $state,
+          meta,
+          query: filter?.query ? { ...filter.query } : { ...rest },
+        };
+      });
+
+      updateQuery({ filters: updatedFilters });
     },
     [updateQuery]
   );

@@ -8,7 +8,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Filter, FILTERS, FilterStateStore } from './types';
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 
 /** @public */
 export type CustomFilter = Filter;
@@ -27,21 +27,20 @@ export type CustomFilter = Filter;
  */
 export function buildCustomFilter(
   indexPatternString: string,
-  query: estypes.QueryDslQueryContainer,
+  queryDsl: estypes.QueryDslQueryContainer,
   disabled: boolean,
   negate: boolean,
   alias: string | null,
   store: FilterStateStore
 ): Filter {
-  return {
-    query,
-    meta: {
-      index: indexPatternString,
-      type: FILTERS.CUSTOM,
-      disabled,
-      negate,
-      alias,
-    },
-    $state: { store },
+  const meta: FilterMeta = {
+    index: indexPatternString,
+    type: FILTERS.CUSTOM,
+    disabled,
+    negate,
+    alias,
   };
+  const filter: Filter = { ...queryDsl, meta };
+  filter.$state = { store };
+  return filter;
 }
