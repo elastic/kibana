@@ -46,7 +46,7 @@ import { useFlyoutModalVisibility } from '../../assistant/common/components/assi
 import { IndexEntryEditor } from './index_entry_editor';
 import { DocumentEntryEditor } from './document_entry_editor';
 import { KnowledgeBaseSettings } from '../knowledge_base_settings';
-import { ESQL_RESOURCE, SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
+import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
   isSystemEntry,
@@ -73,7 +73,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
 
   // Only needed for legacy settings management
