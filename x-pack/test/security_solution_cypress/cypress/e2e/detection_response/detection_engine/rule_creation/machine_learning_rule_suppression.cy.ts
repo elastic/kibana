@@ -13,7 +13,6 @@ import {
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
@@ -129,9 +128,6 @@ describe(
                 'have.text',
                 'Suppress and group alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);
@@ -163,9 +159,6 @@ describe(
                 'have.text',
                 'Do not suppress alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);
