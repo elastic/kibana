@@ -110,6 +110,7 @@ export const GridRow = forwardRef<
                 activePanelId={activePanelId}
                 renderPanelContents={renderPanelContents}
                 setInteractionEvent={(partialInteractionEvent) => {
+                  console.log('setInteractionEvent=');
                   if (partialInteractionEvent) {
                     setInteractionEvent({
                       ...partialInteractionEvent,

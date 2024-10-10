@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { resolveGridRow } from './resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
