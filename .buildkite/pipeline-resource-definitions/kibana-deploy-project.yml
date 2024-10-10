@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-deploy-project
+  name: bk-kibana-deploy-project-form-pr
   description: 'Builds and deploys a Kibana serverless project from a PR'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-deploy-project'
+    - url: 'https://buildkite.com/elastic/kibana-deploy-project-from-pr'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,7 +15,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / deploy project
+      name: kibana / deploy project from PR
       description: 'Builds and deploys a Kibana serverless project from a PR'
     spec:
       env:
@@ -25,7 +25,7 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/serverless_deployment/project-build-and-deploy.yml
+      pipeline_file: .buildkite/pipelines/serverless_deployment/project-build-and-deploy-pr.yml
       skip_intermediate_builds: true
       provider_settings:
         prefix_pull_request_fork_branch_names: false
