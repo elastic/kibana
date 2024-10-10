@@ -48,6 +48,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const owner = getOwnerFromRuleConsumerProducer({
     consumer: featureId,
     producer: producerId,
+    // This is a workaround for a very specific bug with the cases action in serverless security
+    // More info here: https://github.com/elastic/kibana/issues/195599
     isServerlessSecurity:
       cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
   });
