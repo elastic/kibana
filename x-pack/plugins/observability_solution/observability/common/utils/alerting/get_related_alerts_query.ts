@@ -24,19 +24,19 @@ interface Props {
 }
 
 // APM rules
-const SERVICE_NAME = 'service.name';
+export const SERVICE_NAME = 'service.name';
 // Synthetics rules
-const MONITOR_ID = 'monitor.id';
+export const MONITOR_ID = 'monitor.id';
 // - location
-const OBSERVER_NAME = 'observer.name';
+export const OBSERVER_NAME = 'observer.name';
 // Inventory rule
-const HOST = 'host.name';
-const KUBERNETES_POD = 'kubernetes.pod.uid';
-const DOCKER_CONTAINER = 'container.id';
-const EC2_INSTANCE = 'cloud.instance.id';
-const S3_BUCKETS = 'aws.s3.bucket.name';
-const RDS_DATABASES = 'aws.rds.db_instance.arn';
-const SQS_QUEUES = 'aws.sqs.queue.name';
+export const HOST = 'host.name';
+export const KUBERNETES_POD = 'kubernetes.pod.uid';
+export const DOCKER_CONTAINER = 'container.id';
+export const EC2_INSTANCE = 'cloud.instance.id';
+export const S3_BUCKETS = 'aws.s3.bucket.name';
+export const RDS_DATABASES = 'aws.rds.db_instance.arn';
+export const SQS_QUEUES = 'aws.sqs.queue.name';
 
 const ALL_SHARED_FIELDS = [
   SERVICE_NAME,
