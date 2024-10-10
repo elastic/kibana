@@ -30,10 +30,6 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
 
-  const defaultDataStreamPrivileges = {
-    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
-  };
-
   async function callApi(
     dataStream: string,
     roleAuthc: RoleCredentials,
