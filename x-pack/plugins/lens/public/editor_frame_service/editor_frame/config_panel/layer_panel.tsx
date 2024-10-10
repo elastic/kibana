@@ -39,6 +39,7 @@ import {
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { getLongMessage } from '../../../user_messages_utils';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -573,10 +574,7 @@ export function LayerPanel(props: LayerPanelProps) {
                                     ? {
                                         severity: firstMessage.severity,
                                         content:
-                                          firstMessage.shortMessage ||
-                                          (typeof firstMessage.longMessage === 'function'
-                                            ? firstMessage.longMessage()
-                                            : firstMessage.longMessage),
+                                          firstMessage.shortMessage || getLongMessage(firstMessage),
                                       }
                                     : undefined
                                 }

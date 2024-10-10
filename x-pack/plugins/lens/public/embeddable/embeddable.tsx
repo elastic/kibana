@@ -146,6 +146,7 @@ import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { TextBasedPersistedState } from '../datasources/text_based/types';
+import { getLongMessage } from '../user_messages_utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -263,11 +264,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {firstError ? (
               <>
-                <p>
-                  {typeof firstError.longMessage === 'function'
-                    ? firstError.longMessage()
-                    : firstError.longMessage}
-                </p>
+                <p>{getLongMessage(firstError)}</p>
                 {errors.length > 1 && !canFixInLens ? (
                   <p>
                     <FormattedMessage

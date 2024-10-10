@@ -21,6 +21,7 @@ import type { FramePublicAPI, IndexPattern } from '../../types';
 import { TermsIndexPatternColumn } from './operations';
 import { FormBasedLayer } from './types';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
+import { getLongMessage } from '../../user_messages_utils';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -125,11 +126,7 @@ describe('indexpattern_datasource utils', () => {
 
         expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
-        render(
-          <I18nProvider>
-            {typeof longMessage === 'function' ? longMessage() : longMessage}
-          </I18nProvider>
-        );
+        render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
 
         expect(screen.getByTestId('lnsPrecisionWarningEnableAccuracy')).toBeInTheDocument();
         await userEvent.click(screen.getByTestId('lnsPrecisionWarningEnableAccuracy'));
@@ -155,9 +152,7 @@ describe('indexpattern_datasource utils', () => {
         expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
         const { container } = render(
-          <I18nProvider>
-            {typeof longMessage === 'function' ? longMessage() : longMessage}
-          </I18nProvider>
+          <I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>
         );
         expect(container).toHaveTextContent(
           'might be an approximation. For more precise results, try increasing the number of Top Values or using Filters instead.'
@@ -199,11 +194,7 @@ describe('indexpattern_datasource utils', () => {
 
       expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
-      render(
-        <I18nProvider>
-          {typeof longMessage === 'function' ? longMessage() : longMessage}
-        </I18nProvider>
-      );
+      render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
       await userEvent.click(screen.getByText('Rank by rarity'));
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
