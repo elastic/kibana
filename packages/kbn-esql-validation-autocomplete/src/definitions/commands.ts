@@ -173,6 +173,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
+    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
