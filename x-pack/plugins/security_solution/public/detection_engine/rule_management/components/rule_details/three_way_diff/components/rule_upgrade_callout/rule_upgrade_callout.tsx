@@ -64,7 +64,12 @@ export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps
   }
 
   return (
-    <EuiCallOut title={i18n.RULE_IS_READY_FOR_UPGRADE} iconType="warning" color="success" size="s">
+    <EuiCallOut
+      title={i18n.RULE_IS_READY_FOR_UPGRADE}
+      iconType="checkInCircleFilled"
+      color="success"
+      size="s"
+    >
       <p>{i18n.RULE_IS_READY_FOR_UPGRADE_DESCRIPTION}</p>
     </EuiCallOut>
   );

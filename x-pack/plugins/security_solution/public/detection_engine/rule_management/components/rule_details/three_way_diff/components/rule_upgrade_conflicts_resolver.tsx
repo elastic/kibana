@@ -6,20 +6,16 @@
  */
 
 import React from 'react';
-import type {
-  RuleUpgradeState,
-  SetRuleFieldResolvedValueFn,
-} from '../../../../model/prebuilt_rule_upgrade';
+import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
+import { HIDDEN_FIELDS } from './constants';
 
 interface RuleUpgradeConflictsResolverProps {
   ruleUpgradeState: RuleUpgradeState;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolver({
   ruleUpgradeState,
-  setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverProps): JSX.Element {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as Array<
     [
@@ -27,15 +23,20 @@ export function RuleUpgradeConflictsResolver({
       Required<typeof ruleUpgradeState.diff.fields>[keyof typeof ruleUpgradeState.diff.fields]
     ]
   >;
-  const fields = fieldDiffEntries.map(([fieldName, fieldDiff]) => (
-    <FieldUpgradeConflictsResolver
-      key={fieldName}
-      fieldName={fieldName}
-      fieldUpgradeState={ruleUpgradeState.fieldsUpgradeState[fieldName]}
-      fieldThreeWayDiff={fieldDiff}
-      finalDiffableRule={ruleUpgradeState.finalRule}
-    />
-  ));
+
+  const fields = fieldDiffEntries
+    .filter(([fieldName]) => {
+      /* Remove fields that aren't supposed to be displayed */
+      return HIDDEN_FIELDS.has(fieldName) === false;
+    })
+    .map(([fieldName, fieldDiff]) => (
+      <FieldUpgradeConflictsResolver
+        key={fieldName}
+        fieldName={fieldName}
+        fieldUpgradeState={ruleUpgradeState.fieldsUpgradeState[fieldName]}
+        fieldThreeWayDiff={fieldDiff}
+      />
+    ));
 
   return <>{fields}</>;
 }

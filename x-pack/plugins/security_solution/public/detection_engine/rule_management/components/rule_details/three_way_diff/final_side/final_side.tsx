@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
-import { FieldReadOnly } from '../final_readonly/field_readonly';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
+import { FinalReadOnly } from '../final_readonly/final_readonly';
+import { FinalEdit } from '../final_edit/final_edit';
+import { FinalSideMode } from './constants';
 
 interface FinalSideProps {
   fieldName: string;
-  finalDiffableRule: DiffableRule;
 }
 
-export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX.Element {
+export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
+  const [mode, setMode] = React.useState<FinalSideMode>(FinalSideMode.READONLY); // TODO: Replace with state from context
+  const setReadOnlyMode = useCallback(() => setMode(FinalSideMode.READONLY), []);
+  const setEditMode = useCallback(() => setMode(FinalSideMode.EDIT), []);
+
   return (
     <>
       <SideHeader>
@@ -29,7 +33,11 @@ export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX
           </h3>
         </EuiTitle>
       </SideHeader>
-      <FieldReadOnly fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
+      {mode === FinalSideMode.EDIT ? (
+        <FinalEdit fieldName={fieldName} setReadOnlyMode={setReadOnlyMode} />
+      ) : (
+        <FinalReadOnly fieldName={fieldName} setEditMode={setEditMode} />
+      )}
     </>
   );
 }

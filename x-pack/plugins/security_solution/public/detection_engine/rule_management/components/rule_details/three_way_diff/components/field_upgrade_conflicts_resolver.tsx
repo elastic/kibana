@@ -11,7 +11,6 @@ import { css } from '@emotion/css';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
 import type {
   DiffableAllFields,
-  DiffableRule,
   RuleFieldsDiff,
   ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
@@ -20,22 +19,23 @@ import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade'
 import { ComparisonSide } from '../comparison_side/comparison_side';
 import { FinalSide } from '../final_side/final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
+import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FieldUpgradeConflictsResolverProps<FieldName extends keyof RuleFieldsDiff> {
   fieldName: FieldName;
   fieldUpgradeState: FieldUpgradeState;
   fieldThreeWayDiff: RuleFieldsDiff[FieldName];
-  finalDiffableRule: DiffableRule;
 }
 
 export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFieldsDiff>({
   fieldName,
   fieldUpgradeState,
   fieldThreeWayDiff,
-  finalDiffableRule,
 }: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
+
+  const { finalDiffableRule } = useDiffableRuleContext();
 
   return (
     <>
@@ -65,7 +65,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFields
             `}
           />
           <EuiFlexItem grow={1}>
-            <FinalSide fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
+            <FinalSide fieldName={fieldName} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SplitAccordion>
