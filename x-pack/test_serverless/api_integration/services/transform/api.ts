@@ -267,7 +267,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async stopTransform(transformId: string) {
       log.debug(`Stopping transform '${transformId}' ...`);
-      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_stop`);
+      const { body, status } = await esSupertest.post(
+        `/_transform/${transformId}/_stop?force=true`
+      );
+      this.assertResponseStatusCode(200, status, body);
+    },
+
+    async deleteTransform(transformId: string) {
+      log.debug(`Deleting transform '${transformId}' ...`);
+      const { body, status } = await esSupertest.delete(`/_transform/${transformId}`);
       this.assertResponseStatusCode(200, status, body);
     },
 

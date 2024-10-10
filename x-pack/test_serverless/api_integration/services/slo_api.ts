@@ -6,8 +6,11 @@
  */
 
 import {
+  CreateSLOInput,
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
+  FindSLODefinitionsResponse,
+  UpdateSLOInput,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
 import type { RoleCredentials } from '../../shared/services';
@@ -40,30 +43,6 @@ export interface SloBurnRateRuleParams {
   dependencies?: Dependency[];
 }
 
-interface SloParams {
-  id?: string;
-  name: string;
-  description: string;
-  indicator: {
-    type: 'sli.kql.custom';
-    params: {
-      index: string;
-      good: string;
-      total: string;
-      timestampField: string;
-    };
-  };
-  timeWindow: {
-    duration: string;
-    type: string;
-  };
-  budgetingMethod: string;
-  objective: {
-    target: number;
-  };
-  groupBy: string;
-}
-
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body
 >;
@@ -71,14 +50,15 @@ type FetchHistoricalSummaryParams = t.OutputOf<
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const retry = getService('retry');
   const requestTimeout = 30 * 1000;
   const retryTimeout = 180 * 1000;
 
   return {
-    async create(slo: SloParams, roleAuthc: RoleCredentials) {
-      const { body } = await supertest
+    async create(slo: CreateSLOInput, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -87,19 +67,43 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
+    async update(
+      { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/observability/slos/${sloId}`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(slo);
+
+      return body;
+    },
+
     async delete({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .delete(`/api/observability/slos/${sloId}`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       return response;
     },
 
+    async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_definitions`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
     async fetchHistoricalSummary(
       params: FetchHistoricalSummaryParams,
       roleAuthc: RoleCredentials
     ): Promise<FetchHistoricalSummaryResponse> {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/internal/observability/slos/_historical_summary`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -119,7 +123,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .delete(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -133,16 +137,33 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
     async waitForSloCreated({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       if (!sloId) {
-        throw new Error(`'sloId is undefined`);
+        throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .get(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
           throw new Error(`No slo with id ${sloId} found`);
+        }
+        return response.body;
+      });
+    },
+
+    async waitForSloReseted(sloId: string, roleAuthc: RoleCredentials) {
+      if (!sloId) {
+        throw new Error('sloId is undefined');
+      }
+      return await retry.tryForTime(retryTimeout, async () => {
+        const response = await supertestWithoutAuth
+          .post(`/api/observability/slos/${sloId}/_reset`)
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
+          .timeout(requestTimeout);
+        if (response.body.id === undefined) {
+          throw new Error(`Error reseting ${sloId}`);
         }
         return response.body;
       });
@@ -193,6 +214,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         return response;
       });
     },
+
     async deleteAllSLOs() {
       const response = await supertest
         .get(`/api/observability/slos/_definitions`)
