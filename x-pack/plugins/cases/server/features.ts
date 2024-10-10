@@ -16,7 +16,7 @@ import {
   APP_ID,
   FEATURE_ID,
   REOPEN_CASES_CAPABILITY,
-  COMMENT_CASES_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
 } from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
 
@@ -144,7 +144,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             privileges: [
               {
                 api: apiTags.all,
-                id: COMMENT_CASES_CAPABILITY,
+                id: CREATE_COMMENT_CAPABILITY,
                 name: i18n.translate('xpack.cases.features.addCommentsSubFeatureDetails', {
                   defaultMessage: 'Add comments to cases',
                 }),

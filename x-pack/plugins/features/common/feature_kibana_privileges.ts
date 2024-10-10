@@ -216,7 +216,25 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     settings?: readonly string[];
+    /**
+     * List of case owners whose users should have createComment access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    createComment: ['securitySolution']
+     *  }
+     * ```
+     */
     createComment?: readonly string[];
+    /**
+     * List of case owners whose users should have reopenCases access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    reopenCases: ['securitySolution']
+     *  }
+     * ```
+     */
     reopenCases?: readonly string[];
   };
 

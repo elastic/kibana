@@ -15,7 +15,7 @@ import {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
   REOPEN_CASES_CAPABILITY,
-  COMMENT_CASES_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
 } from '../../../common/constants';
 
 export const getUICapabilities = (
@@ -29,7 +29,7 @@ export const getUICapabilities = (
   const connectors = !!featureCapabilities?.[CASES_CONNECTORS_CAPABILITY];
   const settings = !!featureCapabilities?.[CASES_SETTINGS_CAPABILITY];
   const reopenCases = !!featureCapabilities?.[REOPEN_CASES_CAPABILITY];
-  const createComment = !!featureCapabilities?.[COMMENT_CASES_CAPABILITY];
+  const createComment = !!featureCapabilities?.[CREATE_COMMENT_CAPABILITY];
 
   const all =
     create &&
