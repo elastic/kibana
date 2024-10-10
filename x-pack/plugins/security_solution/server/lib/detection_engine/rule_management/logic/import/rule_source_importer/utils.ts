@@ -7,7 +7,11 @@
 
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { RuleSpecifier } from './types';
+
+export interface RuleSpecifier {
+  rule_id: string;
+  version: number | undefined;
+}
 
 /**
  * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets matching those

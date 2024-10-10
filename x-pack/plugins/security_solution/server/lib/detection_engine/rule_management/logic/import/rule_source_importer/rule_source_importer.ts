@@ -22,8 +22,8 @@ import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
 import { calculateRuleSourceForImport } from '../calculate_rule_source_for_import';
-import type { CalculatedRuleSource, IRuleSourceImporter, RuleSpecifier } from './types';
-import { fetchAvailableRuleAssetIds, fetchMatchingAssets } from './utils';
+import type { CalculatedRuleSource, IRuleSourceImporter } from './rule_source_importer_interface';
+import { type RuleSpecifier, fetchAvailableRuleAssetIds, fetchMatchingAssets } from './utils';
 
 /**
  *

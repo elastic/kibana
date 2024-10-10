@@ -11,11 +11,6 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../../common/api/detection_engine';
 
-export interface RuleSpecifier {
-  rule_id: string;
-  version: number | undefined;
-}
-
 export interface CalculatedRuleSource {
   ruleSource: RuleSource;
   immutable: boolean;
