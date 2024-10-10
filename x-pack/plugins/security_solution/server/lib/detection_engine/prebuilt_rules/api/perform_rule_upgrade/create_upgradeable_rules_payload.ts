@@ -16,7 +16,7 @@ import {
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
-import { CREATE_PROPS_FIELD_NAMES_BY_RULE_TYPE_MAP } from './create_props_to_rule_type_map';
+import { FIELD_NAMES_BY_RULE_TYPE_MAP } from './create_props_to_rule_type_map';
 import { calculateRuleFieldsDiff } from '../../logic/diff/calculation/calculate_rule_fields_diff';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
@@ -42,7 +42,7 @@ export const createModifiedPrebuiltRuleAssets = ({
     (processedRules, upgradeableRule) => {
       const targetRuleType = upgradeableRule.target.type;
       const ruleId = upgradeableRule.target.rule_id;
-      const fieldNames = CREATE_PROPS_FIELD_NAMES_BY_RULE_TYPE_MAP.get(targetRuleType);
+      const fieldNames = FIELD_NAMES_BY_RULE_TYPE_MAP.get(targetRuleType);
 
       try {
         if (fieldNames === undefined) {

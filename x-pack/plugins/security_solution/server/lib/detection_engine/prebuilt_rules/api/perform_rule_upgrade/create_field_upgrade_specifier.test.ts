@@ -23,21 +23,21 @@ describe('createFieldUpgradeSpecifier', () => {
   it('should return rule-specific pick version when no specific fields are defined', () => {
     const result = createFieldUpgradeSpecifier({
       ...defaultArgs,
-      rule: {
+      ruleUpgradeSpecifier: {
         rule_id: 'rule-1',
         pick_version: PickVersionValuesEnum.BASE,
         revision: 1,
         version: 1,
       },
     });
-    expect(result).toEqual({ fieldName: 'name', pick_version: PickVersionValuesEnum.BASE });
+    expect(result).toEqual({ pick_version: PickVersionValuesEnum.BASE });
   });
 
   it('should return field-specific pick version when defined', () => {
     const result = createFieldUpgradeSpecifier({
       ...defaultArgs,
       fieldName: 'description',
-      rule: {
+      ruleUpgradeSpecifier: {
         rule_id: 'rule-1',
         pick_version: PickVersionValuesEnum.TARGET,
         revision: 1,
@@ -46,7 +46,6 @@ describe('createFieldUpgradeSpecifier', () => {
       },
     });
     expect(result).toEqual({
-      fieldName: 'description',
       pick_version: PickVersionValuesEnum.CURRENT,
     });
   });
@@ -55,7 +54,7 @@ describe('createFieldUpgradeSpecifier', () => {
     const result = createFieldUpgradeSpecifier({
       ...defaultArgs,
       fieldName: 'description',
-      rule: {
+      ruleUpgradeSpecifier: {
         rule_id: 'rule-1',
         revision: 1,
         version: 1,
@@ -65,41 +64,30 @@ describe('createFieldUpgradeSpecifier', () => {
       },
     });
     expect(result).toEqual({
-      fieldName: 'description',
       pick_version: 'RESOLVED',
       resolved_value: 'New description',
     });
-  });
-
-  it('should throw error for SPECIFIC_RULES mode with non-existent rule', () => {
-    expect(() =>
-      createFieldUpgradeSpecifier({
-        ...defaultArgs,
-        ruleId: 'non-existent-rule',
-        rule: undefined,
-      })
-    ).toThrowError('Rule payload for upgradable rule non-existent-rule not found');
   });
 
   it('should handle fields that require mapping', () => {
     const result = createFieldUpgradeSpecifier({
       ...defaultArgs,
       fieldName: 'index' as keyof PrebuiltRuleAsset,
-      rule: {
+      ruleUpgradeSpecifier: {
         rule_id: 'rule-1',
         revision: 1,
         version: 1,
         fields: { data_source: { pick_version: PickVersionValuesEnum.CURRENT } },
       },
     });
-    expect(result).toEqual({ fieldName: 'index', pick_version: PickVersionValuesEnum.CURRENT });
+    expect(result).toEqual({ pick_version: PickVersionValuesEnum.CURRENT });
   });
 
   it('should fall back to rule-level pick version when field is not specified', () => {
     const result = createFieldUpgradeSpecifier({
       ...defaultArgs,
       fieldName: 'description',
-      rule: {
+      ruleUpgradeSpecifier: {
         rule_id: 'rule-1',
         pick_version: PickVersionValuesEnum.TARGET,
         revision: 1,
@@ -108,7 +96,6 @@ describe('createFieldUpgradeSpecifier', () => {
       },
     });
     expect(result).toEqual({
-      fieldName: 'description',
       pick_version: PickVersionValuesEnum.TARGET,
     });
   });
@@ -119,7 +106,7 @@ describe('createFieldUpgradeSpecifier', () => {
       createFieldUpgradeSpecifier({
         ...defaultArgs,
         targetRuleType: 'eql',
-        rule: {
+        ruleUpgradeSpecifier: {
           rule_id: 'rule-1',
           revision: 1,
           version: 1,

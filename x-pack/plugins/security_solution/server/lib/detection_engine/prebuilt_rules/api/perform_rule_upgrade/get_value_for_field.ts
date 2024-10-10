@@ -58,21 +58,20 @@ export const getValueForField = ({
   }
 
   // Handle SPECIFIC_RULES mode
-  const rule = requestBody.rules.find((r) => r.rule_id === upgradeableRule.target.rule_id);
+  const ruleUpgradeSpecifier = requestBody.rules.find(
+    (r) => r.rule_id === upgradeableRule.target.rule_id
+  );
+
+  if (!ruleUpgradeSpecifier) {
+    throw new Error(`Rule payload for upgradable rule ${upgradeableRule.target.rule_id} not found`);
+  }
 
   const fieldUpgradeSpecifier = createFieldUpgradeSpecifier({
     fieldName,
-    rule,
-    globalPickVersion,
-    ruleId: upgradeableRule.target.rule_id,
+    ruleUpgradeSpecifier,
     targetRuleType: upgradeableRule.target.type,
+    globalPickVersion,
   });
-
-  if (!fieldUpgradeSpecifier) {
-    throw new Error(
-      `Missing field upgrade specifier for field '${fieldName}' in: ${upgradeableRule.target.rule_id}`
-    );
-  }
 
   if (fieldUpgradeSpecifier.pick_version === 'RESOLVED') {
     const resolvedValue = fieldUpgradeSpecifier.resolved_value;

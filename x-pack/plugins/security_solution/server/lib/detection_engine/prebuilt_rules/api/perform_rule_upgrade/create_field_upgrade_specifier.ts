@@ -7,20 +7,19 @@
 import { assertDiffableFieldsMatchRuleType } from './assert_diffable_fields_match_rule_type';
 import {
   type UpgradeSpecificRulesRequest,
-  type PickVersionValues,
-  type RuleSignatureId,
   type RuleFieldsToUpgrade,
   type DiffableRuleTypes,
+  type FieldUpgradeSpecifier,
+  type PickVersionValues,
 } from '../../../../../../common/api/detection_engine';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { mapRuleFieldToDiffableRuleField } from './diffable_rule_fields_mappings';
 
 interface CreateFieldUpgradeSpecifierArgs {
   fieldName: keyof PrebuiltRuleAsset;
-  rule?: UpgradeSpecificRulesRequest['rules'][number];
-  globalPickVersion: PickVersionValues;
-  ruleId: RuleSignatureId;
+  ruleUpgradeSpecifier: UpgradeSpecificRulesRequest['rules'][number];
   targetRuleType: DiffableRuleTypes;
+  globalPickVersion: PickVersionValues;
 }
 
 /**
@@ -32,25 +31,19 @@ interface CreateFieldUpgradeSpecifierArgs {
  */
 export const createFieldUpgradeSpecifier = ({
   fieldName,
-  rule,
-  globalPickVersion,
-  ruleId,
+  ruleUpgradeSpecifier,
   targetRuleType,
-}: CreateFieldUpgradeSpecifierArgs) => {
-  if (!rule) {
-    throw new Error(`Rule payload for upgradable rule ${ruleId} not found`);
-  }
-
-  if (!rule.fields || Object.keys(rule.fields).length === 0) {
+  globalPickVersion,
+}: CreateFieldUpgradeSpecifierArgs): FieldUpgradeSpecifier<unknown> => {
+  if (!ruleUpgradeSpecifier.fields || Object.keys(ruleUpgradeSpecifier.fields).length === 0) {
     return {
-      fieldName,
-      pick_version: rule.pick_version ?? globalPickVersion,
+      pick_version: ruleUpgradeSpecifier.pick_version ?? globalPickVersion,
     };
   }
 
-  assertDiffableFieldsMatchRuleType(Object.keys(rule.fields), targetRuleType);
+  assertDiffableFieldsMatchRuleType(Object.keys(ruleUpgradeSpecifier.fields), targetRuleType);
 
-  const fieldsToUpgradePayload = rule.fields as Record<
+  const fieldsToUpgradePayload = ruleUpgradeSpecifier.fields as Record<
     string,
     RuleFieldsToUpgrade[keyof RuleFieldsToUpgrade]
   >;
@@ -64,18 +57,16 @@ export const createFieldUpgradeSpecifier = ({
 
   if (fieldUpgradeSpecifier?.pick_version === 'RESOLVED') {
     return {
-      fieldName,
-      pick_version: fieldUpgradeSpecifier.pick_version,
+      pick_version: 'RESOLVED',
       resolved_value: fieldUpgradeSpecifier.resolved_value,
     };
   }
 
   return {
-    fieldName,
     pick_version:
       // If there's no matching specific field upgrade specifier in the payload,
       // we fallback to a rule level pick_version. Since this is also optional,
       // we default to the global pick_version.
-      fieldUpgradeSpecifier?.pick_version ?? rule.pick_version ?? globalPickVersion,
+      fieldUpgradeSpecifier?.pick_version ?? ruleUpgradeSpecifier.pick_version ?? globalPickVersion,
   };
 };

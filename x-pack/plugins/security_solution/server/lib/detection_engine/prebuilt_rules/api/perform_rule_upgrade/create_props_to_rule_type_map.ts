@@ -40,4 +40,4 @@ function createRuleTypeToCreateRulePropsMap() {
  * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
  * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
  */
-export const CREATE_PROPS_FIELD_NAMES_BY_RULE_TYPE_MAP = createRuleTypeToCreateRulePropsMap();
+export const FIELD_NAMES_BY_RULE_TYPE_MAP = createRuleTypeToCreateRulePropsMap();
