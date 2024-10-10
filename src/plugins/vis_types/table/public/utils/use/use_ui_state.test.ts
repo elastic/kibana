@@ -62,18 +62,18 @@ describe('useUiState', () => {
       updateOnChange();
     });
 
-    await waitFor(() => null);
-
     // should update local state with new values
-    expect(result.current).toEqual({
-      columnsWidth: [],
-      sort: {
-        columnIndex: 1,
-        direction: 'asc',
-      },
-      setColumnsWidth: expect.any(Function),
-      setSort: expect.any(Function),
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        columnsWidth: [],
+        sort: {
+          columnIndex: 1,
+          direction: 'asc',
+        },
+        setColumnsWidth: expect.any(Function),
+        setSort: expect.any(Function),
+      })
+    );
 
     act(() => {
       updateOnChange();

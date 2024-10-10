@@ -52,10 +52,10 @@ describe('useGetCaseFiles', () => {
     renderHook(() => useGetCaseFiles(hookParams), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitFor(() => null);
-
-    expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls filesClient.list with correct arguments', async () => {
@@ -63,8 +63,8 @@ describe('useGetCaseFiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
+    await waitFor(() =>
+      expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams)
+    );
   });
 });

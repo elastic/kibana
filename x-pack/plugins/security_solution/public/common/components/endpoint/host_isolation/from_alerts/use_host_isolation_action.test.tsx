@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type React from 'react';
+import { act } from '@testing-library/react';
 import type { UseHostIsolationActionProps } from './use_host_isolation_action';
 import { useHostIsolationAction } from './use_host_isolation_action';
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../../mock/endpoint';
@@ -15,7 +16,6 @@ import type { AlertTableContextMenuItem } from '../../../../../detections/compon
 import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import type React from 'react';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -184,16 +184,24 @@ describe('useHostIsolationAction', () => {
   });
 
   it('should call un-isolate API when agent is currently isolated', async () => {
-    apiMock.responseProvider.getAgentStatus.mockReturnValue(
-      agentStatusMocks.generateAgentStatusApiResponse({
-        data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
-      })
-    );
+    apiMock.responseProvider.getAgentStatus.mockImplementation(({ query }) => {
+      const agentId = (query!.agentIds as string[])[0];
+
+      return agentStatusMocks.generateAgentStatusApiResponse({
+        data: { [agentId]: { isolated: true } },
+      });
+    });
+
     const { result } = render();
 
-    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
+    await appContextMock.waitFor(() => {
+      expect(apiMock.responseProvider.getAgentStatus).toHaveBeenCalled();
+      expect(result.current[0].onClick).toBeDefined();
+    });
 
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    act(() => {
+      result.current[0].onClick!({} as unknown as React.MouseEvent);
+    });
 
     await appContextMock.waitFor(() =>
       expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost')

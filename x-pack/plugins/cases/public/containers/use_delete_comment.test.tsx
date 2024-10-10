@@ -58,12 +58,12 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitFor(() => null);
-
-    expect(spyOnDeleteComment).toBeCalledWith({
-      caseId: basicCaseId,
-      commentId,
-    });
+    await waitFor(() =>
+      expect(spyOnDeleteComment).toBeCalledWith({
+        caseId: basicCaseId,
+        commentId,
+      })
+    );
   });
 
   it('refreshes the case page view after delete', async () => {
@@ -71,15 +71,15 @@ describe('useDeleteComment', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    result.current.mutate({
-      caseId: basicCaseId,
-      commentId,
-      successToasterTitle,
+    act(() => {
+      result.current.mutate({
+        caseId: basicCaseId,
+        commentId,
+        successToasterTitle,
+      });
     });
 
-    await waitFor(() => null);
-
-    expect(useRefreshCaseViewPage()).toBeCalled();
+    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
   });
 
   it('shows a success toaster correctly', async () => {
@@ -95,12 +95,12 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitFor(() => null);
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Deleted',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Deleted',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('sets isError when fails to delete a case', async () => {
@@ -111,20 +111,22 @@ describe('useDeleteComment', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    result.current.mutate({
-      caseId: basicCaseId,
-      commentId,
-      successToasterTitle,
+    act(() => {
+      result.current.mutate({
+        caseId: basicCaseId,
+        commentId,
+        successToasterTitle,
+      });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => {
+      expect(spyOnDeleteComment).toBeCalledWith({
+        caseId: basicCaseId,
+        commentId,
+      });
 
-    expect(spyOnDeleteComment).toBeCalledWith({
-      caseId: basicCaseId,
-      commentId,
+      expect(addError).toHaveBeenCalled();
+      expect(result.current.isError).toBe(true);
     });
-
-    expect(addError).toHaveBeenCalled();
-    expect(result.current.isError).toBe(true);
   });
 });
