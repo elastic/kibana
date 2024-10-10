@@ -25,7 +25,7 @@ import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
-import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { hasMetrics } from '../../utils/get_data_stream_types';
 import { INTEGRATIONS } from '../../constants';
 import { useIntegrationCheck } from '../../hooks/use_integration_check';
@@ -40,7 +40,7 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
-  const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
+  const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.type === 'host' ? asset.name : asset.id,
   });

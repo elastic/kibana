@@ -15,15 +15,15 @@ const EntityDataStreamSchema = z.union([
   z.literal(EntityDataStreamType.LOGS),
 ]);
 
-const AssetEntitySummarySchema = z.object({
+const EntitySummarySchema = z.object({
   entityType: EntityTypeSchema,
   entityId: z.string(),
   sourceDataStreams: z.array(EntityDataStreamSchema),
 });
 
-export type AssetEntitySummary = z.infer<typeof AssetEntitySummarySchema>;
+export type EntitySummary = z.infer<typeof EntitySummarySchema>;
 
-export function useAssetEntitySummary({
+export function useEntitySummary({
   entityType,
   entityId,
 }: {
@@ -40,7 +40,7 @@ export function useAssetEntitySummary({
         method: 'GET',
       });
 
-      return AssetEntitySummarySchema.parse(response);
+      return EntitySummarySchema.parse(response);
     },
     [entityType, entityId]
   );

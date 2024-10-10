@@ -29,7 +29,7 @@ import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
-import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { hasMetrics } from '../../utils/get_data_stream_types';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
@@ -37,7 +37,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const { euiTheme } = useEuiTheme();
     const { asset, renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
-    const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
+    const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
       entityType: asset.type,
       entityId: asset.type === 'host' ? asset.name : asset.id,
     });

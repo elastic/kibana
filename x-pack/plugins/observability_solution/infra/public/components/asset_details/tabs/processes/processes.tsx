@@ -39,7 +39,7 @@ import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
-import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { hasMetrics } from '../../utils/get_data_stream_types';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -55,7 +55,7 @@ export const Processes = () => {
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
-  const { dataStreams, status: dataStreamsStatus } = useAssetEntitySummary({
+  const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: 'host',
     entityId: asset.name,
   });
