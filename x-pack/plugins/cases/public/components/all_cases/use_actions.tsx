@@ -83,7 +83,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
     ];
 
-    if (canUpdate) {
+    if (statusAction.canUpdateStatus) {
       mainPanelItems.push({
         name: (
           <FormattedMessage
@@ -97,7 +97,8 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         key: `case-action-status-panel-${theCase.id}`,
         'data-test-subj': `case-action-status-panel-${theCase.id}`,
       });
-
+    }
+    if (severityAction.canUpdateSeverity) {
       mainPanelItems.push({
         name: (
           <FormattedMessage
@@ -137,13 +138,14 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
 
-    if (canUpdate) {
+    if (statusAction.canUpdateStatus) {
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
         items: statusAction.getActions([theCase]),
       });
-
+    }
+    if (severityAction.canUpdateSeverity) {
       panelsToBuild.push({
         id: 2,
         title: i18n.SEVERITY,
@@ -232,7 +234,7 @@ interface UseBulkActionsProps {
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete;
+  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCases;
 
   return {
     actions: shouldShowActions

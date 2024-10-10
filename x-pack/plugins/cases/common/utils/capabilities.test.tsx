@@ -18,12 +18,18 @@ describe('createUICapabilities', () => {
           "push_cases",
           "cases_connectors",
         ],
+        "createComment": Array [
+          "create_comment",
+        ],
         "delete": Array [
           "delete_cases",
         ],
         "read": Array [
           "read_cases",
           "cases_connectors",
+        ],
+        "reopenCases": Array [
+          "reopen_cases",
         ],
         "settings": Array [
           "cases_settings",

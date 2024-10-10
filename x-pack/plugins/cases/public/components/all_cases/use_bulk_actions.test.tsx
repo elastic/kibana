@@ -53,47 +53,6 @@ describe('useBulkActions', () => {
               "id": 0,
               "items": Array [
                 Object {
-                  "data-test-subj": "case-bulk-action-status",
-                  "disabled": false,
-                  "key": "case-bulk-action-status",
-                  "name": "Status",
-                  "panel": 1,
-                },
-                Object {
-                  "data-test-subj": "case-bulk-action-severity",
-                  "disabled": false,
-                  "key": "case-bulk-action-severity",
-                  "name": "Severity",
-                  "panel": 2,
-                },
-                Object {
-                  "data-test-subj": "bulk-actions-separator",
-                  "isSeparator": true,
-                  "key": "bulk-actions-separator",
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-tags",
-                  "disabled": false,
-                  "icon": <EuiIcon
-                    size="m"
-                    type="tag"
-                  />,
-                  "key": "cases-bulk-action-tags",
-                  "name": "Edit tags",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-assignees",
-                  "disabled": false,
-                  "icon": <EuiIcon
-                    size="m"
-                    type="userAvatar"
-                  />,
-                  "key": "cases-bulk-action-assignees",
-                  "name": "Edit assignees",
-                  "onClick": [Function],
-                },
-                Object {
                   "data-test-subj": "cases-bulk-action-delete",
                   "disabled": false,
                   "icon": <EuiIcon
@@ -111,74 +70,6 @@ describe('useBulkActions', () => {
                 },
               ],
               "title": "Actions",
-            },
-            Object {
-              "id": 1,
-              "items": Array [
-                Object {
-                  "data-test-subj": "cases-bulk-action-status-open",
-                  "disabled": true,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-status-open",
-                  "name": "Open",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-status-in-progress",
-                  "disabled": false,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-status-in-progress",
-                  "name": "In progress",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-status-closed",
-                  "disabled": false,
-                  "icon": "empty",
-                  "key": "cases-bulk-status-action",
-                  "name": "Closed",
-                  "onClick": [Function],
-                },
-              ],
-              "title": "Status",
-            },
-            Object {
-              "id": 2,
-              "items": Array [
-                Object {
-                  "data-test-subj": "cases-bulk-action-severity-low",
-                  "disabled": true,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-severity-low",
-                  "name": "Low",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-severity-medium",
-                  "disabled": false,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-severity-medium",
-                  "name": "Medium",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-severity-high",
-                  "disabled": false,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-severity-high",
-                  "name": "High",
-                  "onClick": [Function],
-                },
-                Object {
-                  "data-test-subj": "cases-bulk-action-severity-critical",
-                  "disabled": false,
-                  "icon": "empty",
-                  "key": "cases-bulk-action-severity-critical",
-                  "name": "Critical",
-                  "onClick": [Function],
-                },
-              ],
-              "title": "Severity",
             },
           ],
         }

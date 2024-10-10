@@ -14,6 +14,8 @@ import {
   PUSH_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
+  REOPEN_CASES_CAPABILITY,
+  COMMENT_CASES_CAPABILITY,
 } from '../../../common/constants';
 
 export const getUICapabilities = (
@@ -26,8 +28,19 @@ export const getUICapabilities = (
   const push = !!featureCapabilities?.[PUSH_CASES_CAPABILITY];
   const connectors = !!featureCapabilities?.[CASES_CONNECTORS_CAPABILITY];
   const settings = !!featureCapabilities?.[CASES_SETTINGS_CAPABILITY];
+  const reopenCases = !!featureCapabilities?.[REOPEN_CASES_CAPABILITY];
+  const createComment = !!featureCapabilities?.[COMMENT_CASES_CAPABILITY];
 
-  const all = create && read && update && deletePriv && push && connectors && settings;
+  const all =
+    create &&
+    read &&
+    update &&
+    deletePriv &&
+    push &&
+    connectors &&
+    settings &&
+    reopenCases &&
+    createComment;
 
   return {
     all,
@@ -38,5 +51,7 @@ export const getUICapabilities = (
     push,
     connectors,
     settings,
+    reopenCases,
+    createComment,
   };
 };

@@ -23,6 +23,7 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
+import { useUserPermissions } from '../user_actions/use_user_permissions';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -67,6 +68,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [caseData.settings, onUpdateField]
   );
 
+  const { canChangeStatus: disableStatusMenu } = useUserPermissions({ status: caseData.status });
+
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       <EuiFlexItem
@@ -83,7 +86,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
-            disabled={!permissions.update}
+            disabled={disableStatusMenu}
             isLoading={isLoading}
             onStatusChanged={onStatusChanged}
           />

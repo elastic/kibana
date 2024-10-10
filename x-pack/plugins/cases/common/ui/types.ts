@@ -11,6 +11,8 @@ import type {
   DELETE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
+  COMMENT_CASES_CAPABILITY,
+  REOPEN_CASES_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -305,6 +307,8 @@ export interface CasesPermissions {
   push: boolean;
   connectors: boolean;
   settings: boolean;
+  reopenCases: boolean;
+  createComment: boolean;
 }
 
 export interface CasesCapabilities {
@@ -315,4 +319,6 @@ export interface CasesCapabilities {
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
   [CASES_SETTINGS_CAPABILITY]: boolean;
+  [COMMENT_CASES_CAPABILITY]: boolean;
+  [REOPEN_CASES_CAPABILITY]: boolean;
 }

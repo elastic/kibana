@@ -55,6 +55,8 @@ export {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
   CASES_SETTINGS_CAPABILITY,
+  COMMENT_CASES_CAPABILITY,
+  REOPEN_CASES_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
