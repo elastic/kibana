@@ -23,8 +23,8 @@ import { RiskScoreUpdatePanel } from '../components/risk_score_update_panel';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
-import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
-import { EntityStoreDashboardPanel } from '../components/entity_store/components/dashboard_panel';
+
+import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_panels';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
@@ -57,16 +57,12 @@ const EntityAnalyticsComponent = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EntityStoreDashboardPanel />
+                  <EntityStoreDashboardPanels />
                 </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-                </EuiFlexItem>
+                {/* <EuiFlexItem>
+                  <EntityAnalyticsRiskScores />
+                </EuiFlexItem> */}
 
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />
