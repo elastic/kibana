@@ -167,6 +167,11 @@ export default async () => {
         // configure security reponse header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        // normally below is injected by control plane
+        `--xpack.cloud.serverless.project_id=fakeprojectid`,
+        `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
+        `--xpack.cloud.projects_url=/projects/`,
+        `--xpack.cloud.organization_url=/account/members`,
       ],
     },
 
