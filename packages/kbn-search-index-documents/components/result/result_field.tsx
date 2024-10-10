@@ -87,7 +87,9 @@ const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpa
   } else if (PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType)) {
     return (
       <>
-        <EuiText size="s" color="default">{fieldValue}</EuiText>
+        <EuiText size="s" color="default">
+          {fieldValue}
+        </EuiText>
         {fieldType === 'dense_vector' && (
           <div className={'denseVectorFieldValue'}>
             <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
@@ -107,6 +109,7 @@ const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpa
                     <EuiIcon
                       type="copyClipboard"
                       onClick={copy}
+                      data-test-subj="copyDenseVector"
                       aria-label={i18n.translate(
                         'searchIndexDocuments.result.value.denseVector.copy',
                         {
@@ -123,7 +126,11 @@ const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpa
       </>
     );
   } else {
-    return <EuiText size="s" color="default">{fieldValue}</EuiText>;
+    return (
+      <EuiText size="s" color="default">
+        {fieldValue}
+      </EuiText>
+    );
   }
 };
 
@@ -152,7 +159,9 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         truncateText={!isExpanded}
         valign="middle"
       >
-        <EuiText size="s" color="default">{fieldName}</EuiText>
+        <EuiText size="s" color="default">
+          {fieldName}
+        </EuiText>
       </EuiTableRowCell>
       <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
         <ResultValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />

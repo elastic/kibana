@@ -12,5 +12,5 @@ export {
   resultMetaData,
   resultToFieldFromMappingResponse,
   resultToFieldFromMappings as resultToField,
-  reorderFieldsInImportance as reorderFieldsInImportance,
+  reorderFieldsInImportance,
 } from './result_metadata';
