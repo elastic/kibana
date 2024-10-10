@@ -20,5 +20,6 @@
   ],
   "kbn_references": [
     "@kbn/monaco",
+    "@kbn/code-editor",
   ]
 }
