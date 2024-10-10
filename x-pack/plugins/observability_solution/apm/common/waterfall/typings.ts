@@ -33,6 +33,7 @@ export interface WaterfallTransaction {
     coldstart?: boolean;
   };
   span?: {
+    id?: string;
     links?: SpanLink[];
   };
 }
@@ -74,6 +75,7 @@ export interface WaterfallError {
   trace?: { id: string };
   transaction?: { id: string };
   parent?: { id: string };
+  span?: { id?: string };
   error: {
     id: string;
     log?: {

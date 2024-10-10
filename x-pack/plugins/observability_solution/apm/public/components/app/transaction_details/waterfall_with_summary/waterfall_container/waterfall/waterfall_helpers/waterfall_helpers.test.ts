@@ -22,9 +22,11 @@ import {
   updateTraceTreeNode,
   IWaterfallNode,
   IWaterfallNodeFlatten,
+  getErrorItem,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
+  WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
@@ -977,6 +979,209 @@ describe('waterfall_helpers', () => {
             hasInitializedChildren: false,
           })
         );
+      });
+    });
+
+    describe('getErrorItem', () => {
+      const items = [
+        {
+          docType: 'transaction',
+          doc: {
+            transaction: {
+              id: 'transactionEntryId',
+              name: 'transactionEntry',
+            },
+            span: {
+              id: 'spanId',
+            },
+            timestamp: {
+              us: 1728561267262487,
+            },
+          },
+          id: 'spanId',
+          duration: 11882,
+        },
+        {
+          docType: 'span',
+          doc: {
+            span: {
+              name: 'childOtel',
+              id: 'childId',
+            },
+            timestamp: {
+              us: 1728561267262497,
+            },
+            parent: {
+              id: 'spanId',
+            },
+          },
+          id: 'childId',
+          parentId: 'spanId',
+          parent: {
+            docType: 'transaction',
+            doc: {
+              transaction: {
+                id: 'spanId',
+                name: 'parent',
+              },
+              span: {
+                id: 'spanId',
+              },
+              timestamp: {
+                us: 1728561267262487,
+              },
+              trace: {
+                id: 'traceId',
+              },
+            },
+            id: 'spanId',
+          },
+        },
+        {
+          docType: 'span',
+          doc: {
+            span: {
+              name: 'childApm',
+              id: 'childId',
+            },
+            timestamp: {
+              us: 1728561267262497,
+            },
+            trace: {
+              id: 'traceId',
+            },
+            parent: {
+              id: 'spanId',
+            },
+          },
+          id: 'childId',
+          parentId: 'spanId',
+          parent: {
+            docType: 'transaction',
+            doc: {
+              transaction: {
+                id: 'spanId',
+                name: 'parent',
+              },
+              span: {
+                id: 'spanId',
+              },
+              timestamp: {
+                us: 1728561267262487,
+              },
+              trace: {
+                id: 'traceId',
+              },
+            },
+            id: 'spanId',
+          },
+        },
+      ] as unknown as IWaterfallSpanOrTransaction[];
+      it('should return the parent if the parent id is present in the error (otel + apm server case)', () => {
+        const error = {
+          error: {
+            grouping_key: '14f4d08792a45fce53a46c93851e36e1',
+            exception: [
+              {
+                type: '*errors.errorString',
+                handled: true,
+                message: 'boom',
+              },
+            ],
+            id: 'af2a24b8d8fed8bf6d027f24117fc729',
+          },
+          timestamp: {
+            us: 1728561267273422,
+          },
+          trace: {
+            id: 'traceId',
+          },
+          service: {
+            name: 'sendotlp-otel-apm-server',
+          },
+          processor: {
+            event: 'error',
+          },
+          parent: {
+            id: 'childId',
+          },
+        } as WaterfallError;
+
+        expect(getErrorItem(error, items)).toMatchObject({
+          parentId: 'childId',
+          docType: 'error',
+          doc: error,
+        });
+      });
+      it('should return the parent if the span id is present in the error (otel native data case)', () => {
+        const error = {
+          error: {
+            grouping_key: '14f4d08792a45fce53a46c93851e36e1',
+            exception: [
+              {
+                type: '*errors.errorString',
+                handled: true,
+                message: 'boom',
+              },
+            ],
+            id: '312895daf95d975e2fd2d6c6c2f9d2d5',
+          },
+          timestamp: {
+            us: 1728561267273422,
+          },
+          trace: {
+            id: 'traceId',
+          },
+          service: {
+            name: 'sendotlp-otel-collector',
+          },
+          processor: {
+            event: 'error',
+          },
+          span: {
+            id: 'childId',
+          },
+        } as WaterfallError;
+
+        expect(getErrorItem(error, items)).toMatchObject({
+          parentId: 'childId',
+          docType: 'error',
+          doc: error,
+        });
+      });
+      it('should return the parent/parentId as undefined if the span id/parent id is not present in the error', () => {
+        const error = {
+          error: {
+            grouping_key: '14f4d08792a45fce53a46c93851e36e1',
+            exception: [
+              {
+                type: '*errors.errorString',
+                handled: true,
+                message: 'boom',
+              },
+            ],
+            id: '312895daf95d975e2fd2d6c6c2f9d2d5',
+          },
+          timestamp: {
+            us: 1728561267273422,
+          },
+          trace: {
+            id: 'traceId',
+          },
+          service: {
+            name: 'sendotlp-no-parent',
+          },
+          processor: {
+            event: 'error',
+          },
+        } as WaterfallError;
+
+        expect(getErrorItem(error, items)).toMatchObject({
+          parentId: undefined,
+          parent: undefined,
+          docType: 'error',
+          doc: error,
+        });
       });
     });
   });

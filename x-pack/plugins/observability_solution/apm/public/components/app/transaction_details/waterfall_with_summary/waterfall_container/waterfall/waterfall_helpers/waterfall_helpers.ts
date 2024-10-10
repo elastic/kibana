@@ -161,15 +161,15 @@ function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWat
   };
 }
 
-function getErrorItem(
+export function getErrorItem(
   error: WaterfallError,
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
-  const parent = items.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
-    | IWaterfallSpanOrTransaction
-    | undefined;
+  const parent = items.find(
+    (waterfallItem) => waterfallItem.id === (error.parent?.id ?? error.span?.id)
+  ) as IWaterfallSpanOrTransaction | undefined;
 
   const errorItem: IWaterfallError = {
     docType: 'error',
