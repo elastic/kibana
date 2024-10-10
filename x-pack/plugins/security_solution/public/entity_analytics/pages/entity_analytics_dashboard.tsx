@@ -32,7 +32,7 @@ const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
 
-  const isEntityStoreEnabled = useIsExperimentalFeatureEnabled('entityStoreEnabled');
+  const isEntityStoreDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
 
   return (
     <>
@@ -71,7 +71,7 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsAnomalies />
                 </EuiFlexItem>
 
-                {isEntityStoreEnabled ? (
+                {!isEntityStoreDisabled ? (
                   <EuiFlexItem>
                     <EntitiesList />
                   </EuiFlexItem>
