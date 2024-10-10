@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export interface ArtifactManifest {
-  formatVersion: string;
-  productName: string;
-  productVersion: string;
-}
+import type { ArtifactManifest } from '@kbn/product-doc-common';
 
 export const getArtifactManifest = ({
   productName,

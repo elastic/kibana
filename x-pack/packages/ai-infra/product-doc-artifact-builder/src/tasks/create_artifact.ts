@@ -8,9 +8,9 @@
 import Path from 'path';
 import AdmZip from 'adm-zip';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getArtifactName } from '@kbn/product-doc-common';
 import { getArtifactMappings } from '../artifact/mappings';
 import { getArtifactManifest } from '../artifact/manifest';
-import { getArtifactName } from '../artifact/artifact_name';
 
 export const createArtifact = async ({
   productName,

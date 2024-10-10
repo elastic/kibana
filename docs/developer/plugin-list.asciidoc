@@ -767,6 +767,10 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
+|This plugin contains the registry for the knowledge base.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
