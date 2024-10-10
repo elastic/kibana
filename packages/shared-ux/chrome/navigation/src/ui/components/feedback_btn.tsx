@@ -39,6 +39,7 @@ export const FeedbackBtn: FC = () => {
         margin: `0 ${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.m}`,
       }}
       onDismiss={onDismiss}
+      data-test-subj="sideNavfeedbackCallout"
     >
       <EuiText size="s" color="dimgrey">
         {i18n.translate('sharedUXPackages.chrome.sideNavigation.feedbackCallout.title', {
