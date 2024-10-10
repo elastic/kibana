@@ -19,8 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useAgentless } from '../hooks/setup_technology';
-
+import { useAgentless } from '../../../../../hooks';
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';

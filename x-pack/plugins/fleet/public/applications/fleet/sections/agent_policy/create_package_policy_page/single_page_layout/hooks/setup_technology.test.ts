@@ -6,134 +6,32 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
 import { waitFor } from '@testing-library/react';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
-
-import { SetupTechnology } from '../../../../../../../../common/types';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import { sendGetOneAgentPolicy, useStartServices, useConfig } from '../../../../../hooks';
-import { SelectedPolicyTab } from '../../components';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
-import { useAgentless, useSetupTechnology } from './setup_technology';
+import { SetupTechnology } from '../../../../../../../../common/types';
+import { sendGetOneAgentPolicy } from '../../../../../hooks';
+import { useAgentless } from '../../../../../../../hooks';
+import { SelectedPolicyTab } from '../../components';
 
-jest.mock('../../../../../services');
+import { useSetupTechnology } from './setup_technology';
+
+jest.mock('../../../../../../../services');
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   sendGetOneAgentPolicy: jest.fn(),
-  useStartServices: jest.fn(),
-  useConfig: jest.fn(),
+}));
+jest.mock('../../../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../../../hooks'),
+  useAgentless: jest.fn(),
 }));
 jest.mock('../../../../../../../../common/services/generate_new_agent_policy');
 
 type MockFn = jest.MockedFunction<any>;
 
-describe('useAgentless', () => {
-  const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-
-  beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-    (useConfig as MockFn).mockReturnValue({
-      agentless: undefined,
-    } as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: false,
-        isCloudEnabled: false,
-      },
-    });
-    jest.clearAllMocks();
-  });
-
-  it('should not return isAgentless when agentless is not enabled', () => {
-    const { result } = renderHook(() => useAgentless());
-
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
-  });
-
-  it('should return isAgentlessEnabled as falsy if agentless.enabled is true and experimental feature agentless is truthy without cloud or serverless', () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-      },
-    } as any);
-
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
-    const { result } = renderHook(() => useAgentless());
-
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
-  });
-
-  it('should return isAgentlessEnabled and isAgentlessApiEnabled as truthy with isCloudEnabled', () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-      },
-    } as any);
-
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: false,
-        isCloudEnabled: true,
-      },
-    });
-
-    const { result } = renderHook(() => useAgentless());
-
-    expect(result.current.isAgentlessEnabled).toBeTruthy();
-    expect(result.current.isAgentlessApiEnabled).toBeTruthy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
-  });
-  it('should return isAgentlessEnabled and isDefaultAgentlessPolicyEnabled as truthy with isServerlessEnabled and experimental feature agentless is truthy', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: true,
-    } as any);
-
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: true,
-        isCloudEnabled: false,
-      },
-    });
-
-    const { result } = renderHook(() => useAgentless());
-
-    expect(result.current.isAgentlessEnabled).toBeTruthy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeTruthy();
-  });
-
-  it('should return isAgentlessEnabled as falsy and isDefaultAgentlessPolicyEnabled as falsy with isServerlessEnabled and experimental feature agentless is falsy', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: true,
-        isCloudEnabled: false,
-      },
-    });
-
-    const { result } = renderHook(() => useAgentless());
-
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
-  });
-});
-
+// TODO: Fix mocks
 describe('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
@@ -146,26 +44,12 @@ describe('useSetupTechnology', () => {
   };
   const packagePolicyMock = createPackagePolicyMock();
 
-  const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: true,
-    } as any);
-    (useConfig as MockFn).mockReturnValue({
-      agentless: undefined,
-    } as any);
     (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
       data: {
         item: { id: 'agentless-policy-id' },
       },
     });
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: true,
-      },
-    });
-
     (generateNewAgentPolicyWithDefaults as MockFn).mockReturnValue({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
@@ -174,9 +58,11 @@ describe('useSetupTechnology', () => {
   });
 
   it('should initialize with default values when agentless is disabled', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: false,
+    });
 
     const { result } = renderHook(() =>
       useSetupTechnology({
@@ -193,6 +79,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: true,
+    });
+
     const { waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -209,18 +101,10 @@ describe('useSetupTechnology', () => {
   });
 
   it('should set agentless setup technology if agent policy supports agentless in edit page', async () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-        api: {
-          url: 'https://agentless.api.url',
-        },
-      },
-    } as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isCloudEnabled: true,
-      },
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: true,
+      isDefaultAgentlessPolicyEnabled: false,
     });
     const { result } = renderHook(() =>
       useSetupTechnology({
@@ -238,19 +122,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url', async () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-        api: {
-          url: 'https://agentless.api.url',
-        },
-      },
-    } as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isCloudEnabled: true,
-      },
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: true,
+      isDefaultAgentlessPolicyEnabled: false,
     });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -276,19 +153,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update agentless policy name to match integration name if agentless is enabled', async () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-        api: {
-          url: 'https://agentless.api.url',
-        },
-      },
-    } as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isCloudEnabled: true,
-      },
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: true,
+      isDefaultAgentlessPolicyEnabled: false,
     });
+
     const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -331,11 +201,10 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url is not defined', async () => {
-    (useConfig as MockFn).mockReturnValue({} as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isCloudEnabled: true,
-      },
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: false,
     });
 
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -359,10 +228,10 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isServerlessEnabled: false,
-      },
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: false,
     });
 
     const { result } = renderHook(() =>
@@ -380,6 +249,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: true,
+    });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -401,6 +276,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: true,
+    });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -432,9 +313,11 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not update agent policy and selected policy tab when agentless is disabled', async () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: false,
+    });
 
     const { result } = renderHook(() =>
       useSetupTechnology({
@@ -456,6 +339,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: true,
+    });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -481,6 +370,12 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
+    (useAgentless as MockFn).mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessApiEnabled: false,
+      isDefaultAgentlessPolicyEnabled: true,
+    });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,

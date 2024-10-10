@@ -7,77 +7,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useConfig } from '../../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
-import type {
-  AgentPolicy,
-  NewAgentPolicy,
-  NewPackagePolicy,
-  PackageInfo,
-} from '../../../../../types';
+import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
-import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
+import { sendGetOneAgentPolicy } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
+import { useAgentless } from '../../../../../../../hooks';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
-import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../../../../../common/services/agentless_policy_helper';
-
-export const useAgentless = () => {
-  const config = useConfig();
-  const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
-  const { cloud } = useStartServices();
-  const isServerless = !!cloud?.isServerlessEnabled;
-  const isCloud = !!cloud?.isCloudEnabled;
-
-  const isAgentlessApiEnabled = (isCloud || isServerless) && config.agentless?.enabled;
-  const isDefaultAgentlessPolicyEnabled =
-    !isAgentlessApiEnabled && isServerless && agentlessExperimentalFeatureEnabled;
-
-  const isAgentlessEnabled = isAgentlessApiEnabled || isDefaultAgentlessPolicyEnabled;
-
-  const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
-    if (!agentPolicy) return false;
-    return (
-      isAgentlessEnabled &&
-      (agentPolicy?.id === AGENTLESS_POLICY_ID || !!agentPolicy?.supports_agentless)
-    );
-  };
-
-  // When an integration has at least a policy template enabled for agentless
-  const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
-    if (
-      isAgentlessEnabled &&
-      packageInfo?.policy_templates &&
-      packageInfo?.policy_templates.length > 0 &&
-      !!packageInfo?.policy_templates.find(
-        (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
-      )
-    ) {
-      return true;
-    }
-    return false;
-  };
-
-  // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
-  const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
-    return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
-  };
-  return {
-    isAgentlessApiEnabled,
-    isDefaultAgentlessPolicyEnabled,
-    isAgentlessEnabled,
-    isAgentlessAgentPolicy,
-    isAgentlessIntegration,
-    isAgentlessPackagePolicy,
-  };
-};
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
+import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../../../../../common/services/agentless_helper';
 
 export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicies,
   setSelectedPolicyTab,
-  packageInfo,
   packagePolicy,
   isEditPage,
   agentPolicies,
@@ -86,7 +29,6 @@ export function useSetupTechnology({
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
-  packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
