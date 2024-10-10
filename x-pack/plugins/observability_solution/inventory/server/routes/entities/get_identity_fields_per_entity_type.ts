@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { Entity, EntityType } from '../../../common/entities';
-import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '../../../common/es_fields/entities';
 
 export type IdentityFieldsPerEntityType = Map<EntityType, string[]>;
 

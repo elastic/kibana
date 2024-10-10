@@ -12,17 +12,15 @@ import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CONTAINER_ID,
-} from '@kbn/observability-shared-plugin/common';
-import { isRight } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
-import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_IDENTITY_FIELDS,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from './es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { isRight } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 
 export const entityTypeRt = t.union([
   t.literal('service'),

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ENTITY_IDENTITY_FIELDS } from '@kbn/observability-shared-plugin/common';
 import { Entity } from '../entities';
-import { ENTITY_IDENTITY_FIELDS } from '../es_fields/entities';
 
 export function getIdentityFieldValues({ entity }: { entity: Entity }) {
   const mapping: string[] = [];

@@ -8,6 +8,7 @@
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
@@ -16,7 +17,6 @@ import {
   type EntityColumnIds,
 } from '../../../common/entities';
 import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
-import { ENTITY_LAST_SEEN } from '../../../common/es_fields/entities';
 
 export async function getLatestEntities({
   inventoryEsClient,

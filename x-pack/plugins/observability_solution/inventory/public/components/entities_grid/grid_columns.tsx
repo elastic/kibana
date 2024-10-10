@@ -12,7 +12,7 @@ import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
 
 const alertsLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.alertsLabel', {
   defaultMessage: 'Alerts',

@@ -6,7 +6,7 @@
  */
 
 import { EntityType } from '../../../common/entities'; // Adjust the import path accordingly
-import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '../../../common/es_fields/entities';
+import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 describe('getIdentityFields', () => {
