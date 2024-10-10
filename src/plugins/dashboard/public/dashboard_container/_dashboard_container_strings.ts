@@ -90,6 +90,11 @@ export const backupServiceStrings = {
       defaultMessage: 'Error encountered while backing up view mode: {message}',
       values: { message },
     }),
+  filtersStorageError: (message: string) =>
+    i18n.translate('dashboard.filtersBackup.error', {
+      defaultMessage: 'Error encountered while backing up filters: {message}',
+      values: { message },
+    }),
   getPanelsGetError: (message: string) =>
     i18n.translate('dashboard.panelStorageError.getError', {
       defaultMessage: 'Error encountered while fetching unsaved changes: {message}',

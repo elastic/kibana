@@ -52,6 +52,7 @@ import {
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
 import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export interface DashboardAppProps {
   history: History;
@@ -122,6 +123,7 @@ export function DashboardApp({
     const getInitialInput = () => {
       const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
       const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      const filters = getDashboardBackupService().getFilters();
 
       // Override all state with URL + Locator input
       return {
@@ -134,6 +136,7 @@ export function DashboardApp({
         screenshotModeService.getScreenshotContext('layout') === 'print'
           ? { viewMode: ViewMode.PRINT }
           : {}),
+        filters,
       };
     };
 
