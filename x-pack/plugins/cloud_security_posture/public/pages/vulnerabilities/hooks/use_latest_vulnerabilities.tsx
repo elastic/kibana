@@ -23,6 +23,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
@@ -52,6 +53,25 @@ const getMultiFieldsSort = (sort: string[][]) => {
   });
 };
 
+const getRuntimeMappingsFromSort = (sort: string[][]) => {
+  return sort.reduce((acc, [field]) => {
+    // TODO: Add proper type for all fields available in the field selector
+    const type: RuntimePrimitiveTypes =
+      field === VULNERABILITY_FIELDS.SCORE_BASE
+        ? 'double'
+        : field === '@timestamp'
+        ? 'date'
+        : 'keyword';
+
+    return {
+      ...acc,
+      [field]: {
+        type,
+      },
+    };
+  }, {});
+};
+
 export const getVulnerabilitiesQuery = (
   { query, sort }: VulnerabilitiesQuery,
   pageParam: number
@@ -59,6 +79,7 @@ export const getVulnerabilitiesQuery = (
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   ignore_unavailable: true,
   sort: getMultiFieldsSort(sort),
+  runtime_mappings: getRuntimeMappingsFromSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {
     ...query,

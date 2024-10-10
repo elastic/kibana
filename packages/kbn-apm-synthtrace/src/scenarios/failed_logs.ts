@@ -8,6 +8,7 @@
  */
 
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
+import { merge } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
@@ -19,22 +20,65 @@ import {
   MORE_THAN_1024_CHARS,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import { LogsIndex } from '../lib/logs/logs_synthtrace_es_client';
+
+const processors = [
+  {
+    script: {
+      tag: 'normalize log level',
+      lang: 'painless',
+      source: `
+        String level = ctx['log.level'];
+        if ('0'.equals(level)) {
+          ctx['log.level'] = 'info';
+        } else if ('1'.equals(level)) {
+          ctx['log.level'] = 'debug';
+        } else if ('2'.equals(level)) {
+          ctx['log.level'] = 'warning';
+        } else if ('3'.equals(level)) {
+          ctx['log.level'] = 'error';
+        } else {
+          throw new Exception("Not a valid log level");
+        }
+      `,
+    },
+  },
+];
 
 // Logs Data logic
 const MESSAGE_LOG_LEVELS = [
-  { message: 'A simple log', level: 'info' },
+  { message: 'A simple log', level: '0' },
   {
     message: 'Another log message',
-    level: 'debug',
+    level: '1',
   },
-  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+  {
+    message: 'A log message generated from a warning',
+    level: '2',
+  },
+  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: '3' },
 ];
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
   return {
     bootstrap: async ({ logsEsClient }) => {
+      await logsEsClient.createCustomPipeline(processors);
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+
+      await logsEsClient.updateIndexTemplate(
+        isLogsDb ? IndexTemplateName.LogsDb : LogsIndex,
+        (template) => {
+          const next = {
+            name: LogsIndex,
+            data_stream: {
+              failure_store: true,
+            },
+          };
+
+          return merge({}, template, next);
+        }
+      );
     },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
@@ -92,12 +136,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           logMessage: { level, message },
           commonLongEntryFields,
         } = constructLogsCommonData();
-        const isMalformed = i % 60 === 0;
+        const isFailed = i % 60 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.2')
           .message(message)
-          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : level) // "ignore_above": 1024 in mapping
+          .logLevel(isFailed ? '4' : level) // "script_exception": Not a valid log level
           .service(serviceName)
           .defaults(commonLongEntryFields)
           .timestamp(timestamp);
@@ -111,11 +155,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           commonLongEntryFields,
         } = constructLogsCommonData();
         const isMalformed = i % 10 === 0;
+        const isFailed = i % 80 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.3')
           .message(message)
-          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : level) // "ignore_above": 1024 in mapping
+          .logLevel(isFailed ? '5' : level) // "script_exception": Not a valid log level
           .service(serviceName)
           .defaults({
             ...commonLongEntryFields,

@@ -29,6 +29,7 @@ export {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  isESQLColumnSortable,
   TextBasedLanguages,
 } from './src';
 

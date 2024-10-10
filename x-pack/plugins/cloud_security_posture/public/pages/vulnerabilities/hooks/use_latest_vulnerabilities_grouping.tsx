@@ -95,6 +95,51 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
+ * Get runtime mappings for the given group field
+ * Some fields require additional runtime mappings to aggregate additional information
+ * Fallback to keyword type to support custom fields grouping
+ */
+const getRuntimeMappingsByGroupField = (
+  field: string
+): Record<string, { type: 'keyword' }> | undefined => {
+  switch (field) {
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return {
+        [VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
+          type: 'keyword',
+        },
+        [VULNERABILITY_FIELDS.CLOUD_PROVIDER]: {
+          type: 'keyword',
+        },
+      };
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
+      return {
+        [VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME]: {
+          type: 'keyword',
+        },
+        [VULNERABILITY_FIELDS.RESOURCE_ID]: {
+          type: 'keyword',
+        },
+      };
+    case VULNERABILITY_GROUPING_OPTIONS.CVE:
+      return {
+        [VULNERABILITY_GROUPING_OPTIONS.CVE]: {
+          type: 'keyword',
+        },
+        [VULNERABILITY_FIELDS.DESCRIPTION]: {
+          type: 'keyword',
+        },
+      };
+    default:
+      return {
+        [field]: {
+          type: 'keyword',
+        },
+      };
+  }
+};
+
+/**
  * Type Guard for checking if the given source is a VulnerabilitiesRootGroupingAggregation
  */
 export const isVulnerabilitiesRootGroupingAggregation = (
@@ -163,6 +208,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

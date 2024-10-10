@@ -34,7 +34,7 @@ import {
 describe(
   'Backfill groups',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   function () {
     before(() => {
