@@ -17,12 +17,14 @@ export function createReadme(packageDir: string, integrationName: string, fields
 
 function createPackageReadme(packageDir: string, integrationName: string, fields: object[]) {
   const dirPath = joinPath(packageDir, 'docs/');
-  createReadmeFile(dirPath, 'package_rdm.md.njk', integrationName, fields);
+  // The readme nunjucks template files should be named in the format `somename_readme.md.njk` and not just `readme.md.njk`
+  // since any file with `readme.*` pattern is skipped in build process in buildkite.
+  createReadmeFile(dirPath, 'package_readme.md.njk', integrationName, fields);
 }
 
 function createBuildReadme(packageDir: string, integrationName: string, fields: object[]) {
   const dirPath = joinPath(packageDir, '_dev/build/docs/');
-  createReadmeFile(dirPath, 'build_rdm.md.njk', integrationName, fields);
+  createReadmeFile(dirPath, 'build_readme.md.njk', integrationName, fields);
 }
 
 function createReadmeFile(
