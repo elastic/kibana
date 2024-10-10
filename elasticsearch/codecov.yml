@@ -1,0 +1,14 @@
+comment: off
+
+coverage:
+  precision: 2
+  round: down
+  range: "95...100"
+
+  status:
+    project: yes
+    patch: yes
+    changes: no
+
+ignore:
+  - "api"

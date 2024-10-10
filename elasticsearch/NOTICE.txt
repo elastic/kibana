@@ -1,0 +1,2 @@
+Elasticsearch JavaScript Client
+Copyright 2022 Elasticsearch B.V.
