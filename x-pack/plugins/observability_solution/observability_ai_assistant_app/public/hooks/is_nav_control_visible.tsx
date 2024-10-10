@@ -32,7 +32,9 @@ function getVisibility(
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
-  return categoryId === DEFAULT_APP_CATEGORIES.observability.id;
+  return [DEFAULT_APP_CATEGORIES.observability.id, DEFAULT_APP_CATEGORIES.search.id].includes(
+    categoryId
+  );
 }
 
 export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {

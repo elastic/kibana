@@ -8,6 +8,8 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -19,7 +21,6 @@ import type {
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
   AdHocInstruction,
-  AssistantScope,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -76,6 +77,7 @@ export interface ObservabilityAIAssistantChatService {
     filter?: string;
     scope: AssistantScope;
   }) => FunctionDefinition[];
+  functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
   getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
@@ -83,9 +85,9 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler,
-    scope?: AssistantScope
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
+  getScope: () => AssistantScope;
 }
 
 export interface ObservabilityAIAssistantConversationService {
@@ -102,7 +104,9 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
-  scope: AssistantScope;
+  scope$: BehaviorSubject<AssistantScope>;
+  setScope: (scope: AssistantScope) => void;
+  getScope: () => AssistantScope;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -120,7 +124,9 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  scope?: AssistantScope;
+}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};

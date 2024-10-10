@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -28,7 +29,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, AssistantScope, Instruction } from '../../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
@@ -137,6 +138,7 @@ function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
   disableFunctions,
+  scope,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
@@ -145,13 +147,14 @@ function getFunctionDefinitions({
     | {
         except: string[];
       };
+  scope: AssistantScope;
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
   let systemFunctions = functionClient
-    .getFunctions()
+    .getFunctions({ scope })
     .map((fn) => fn.definition)
     .filter(
       (def) =>
@@ -213,6 +216,7 @@ export function continueConversation({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
+    scope,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
