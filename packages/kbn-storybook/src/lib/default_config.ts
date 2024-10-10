@@ -9,7 +9,7 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import type { StorybookConfig } from '@storybook/core-common';
+import type { StorybookConfig } from '@storybook/react-webpack5';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './constants';
@@ -119,7 +119,7 @@ export const defaultConfig: StorybookConfig = {
         fs: false,
       },
     };
-    config.watch = true;
+    config.watch = false;
     config.watchOptions = {
       ...config.watchOptions,
       ignored: IGNORE_GLOBS,
