@@ -19,6 +19,7 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/p
 
 export interface InternalState {
   dataView: DataView | undefined;
+  isLoading: boolean;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
@@ -32,6 +33,7 @@ export interface InternalState {
 export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
+  setIsLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
@@ -71,6 +73,7 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
+      isLoading: true,
       isDataViewLoading: false,
       adHocDataViews: [],
       savedDataViews: [],
@@ -89,6 +92,10 @@ export function getInternalStateContainer() {
       setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
         ...prevState,
         isDataViewLoading: loading,
+      }),
+      setIsLoading: (prevState: InternalState) => (isLoading: boolean) => ({
+        ...prevState,
+        isLoading,
       }),
       setIsESQLToDataViewTransitionModalVisible:
         (prevState: InternalState) => (isVisible: boolean) => ({
