@@ -2370,8 +2370,16 @@
   "ingest_manager_settings": {
     "properties": {
       "delete_unenrolled_agents": {
-        "index": false,
-        "type": "boolean"
+        "properties": {
+          "enabled": {  
+            "index": false,
+            "type": "boolean" 
+          },
+          "is_preconfigured": { 
+            "index": false,
+            "type": "boolean" 
+          }
+        }
       },
       "fleet_server_hosts": {
         "type": "keyword"
