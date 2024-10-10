@@ -34,6 +34,7 @@ xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
+xpack.searchIndices.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch

@@ -18,13 +18,25 @@ import type {
 import { initQueryClient } from './services/query_client';
 import { INDICES_APP_ID, START_APP_ID } from '../common';
 import { INDICES_APP_BASE, START_APP_BASE } from './routes';
+import { isGlobalEmptyStateEnabled } from './feature_flags';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
 {
+  private pluginEnabled: boolean = false;
+
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>
   ): SearchIndicesPluginSetup {
+    if (!isGlobalEmptyStateEnabled(core.uiSettings)) {
+      return {
+        enabled: this.pluginEnabled,
+        startAppId: START_APP_ID,
+        startRoute: START_APP_BASE,
+      };
+    }
+    this.pluginEnabled = true;
+
     const queryClient = initQueryClient(core.notifications.toasts);
 
     core.application.register({
@@ -72,7 +84,7 @@ export class SearchIndicesPlugin
   public start(core: CoreStart): SearchIndicesPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
     return {
-      enabled: true,
+      enabled: this.pluginEnabled,
       startAppId: START_APP_ID,
       startRoute: START_APP_BASE,
     };
