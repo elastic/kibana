@@ -12,15 +12,16 @@ import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
 import { FinalReadOnly } from '../final_readonly/final_readonly';
 import { FinalEdit } from '../final_edit/final_edit';
+import { FinalSideMode } from './constants';
 
 interface FinalSideProps {
   fieldName: string;
 }
 
 export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
-  const [mode, setMode] = React.useState<'readonly' | 'edit'>('readonly'); // This is temporary, will be replaced with state from the context
-  const setReadOnlyMode = useCallback(() => setMode('readonly'), []);
-  const setEditMode = useCallback(() => setMode('edit'), []);
+  const [mode, setMode] = React.useState<FinalSideMode>(FinalSideMode.READONLY); // TODO: Replace with state from context
+  const setReadOnlyMode = useCallback(() => setMode(FinalSideMode.READONLY), []);
+  const setEditMode = useCallback(() => setMode(FinalSideMode.EDIT), []);
 
   return (
     <>
@@ -32,7 +33,7 @@ export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
           </h3>
         </EuiTitle>
       </SideHeader>
-      {mode === 'edit' ? (
+      {mode === FinalSideMode.EDIT ? (
         <FinalEdit fieldName={fieldName} setReadOnlyMode={setReadOnlyMode} />
       ) : (
         <FinalReadOnly fieldName={fieldName} setEditMode={setEditMode} />
