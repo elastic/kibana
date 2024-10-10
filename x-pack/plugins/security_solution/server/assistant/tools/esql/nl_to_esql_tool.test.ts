@@ -40,61 +40,17 @@ describe('NaturalLanguageESQLTool', () => {
     request,
     inference,
     connectorId,
+    isEnabledKnowledgeBase: true,
+    modelExists: true,
   };
 
   describe('isSupported', () => {
-    it('returns false if isEnabledKnowledgeBase is false', () => {
-      const params = {
-        isEnabledKnowledgeBase: false,
-        modelExists: true,
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(false);
-    });
-
-    it('returns false if modelExists is false (the ELSER model is not installed)', () => {
-      const params = {
-        isEnabledKnowledgeBase: true,
-        modelExists: false, // <-- ELSER model is not installed
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(false);
-    });
-
-    it('returns true if isEnabledKnowledgeBase and modelExists are true', () => {
-      const params = {
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(true);
+    it('returns true if connectorId and inference have values', () => {
+      expect(NL_TO_ESQL_TOOL.isSupported(rest)).toBe(true);
     });
   });
 
   describe('getTool', () => {
-    it('returns null if isEnabledKnowledgeBase is false', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: false,
-        modelExists: true,
-        ...rest,
-      });
-
-      expect(tool).toBeNull();
-    });
-
-    it('returns null if modelExists is false (the ELSER model is not installed)', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: false, // <-- ELSER model is not installed
-        ...rest,
-      });
-
-      expect(tool).toBeNull();
-    });
-
     it('returns null if inference plugin is not provided', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
         isEnabledKnowledgeBase: true,
