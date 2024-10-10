@@ -301,8 +301,8 @@ export class LogstashPipelineQueueSizeMetric extends LogstashMetric {
       },
     };
     this.calculation = (bucket: object) => {
-      const legacyQueueSize = _.get(bucket, 'pipelines.total_queue_size_for_node.value');
-      const mbQueueSize = _.get(bucket, 'pipelines_mb.total_queue_size_for_node.value');
+      const legacyQueueSize = _.get(bucket, 'pipelines.total_queue_size_for_node.value', 0);
+      const mbQueueSize = _.get(bucket, 'pipelines_mb.total_queue_size_for_node.value', 0);
       return Math.max(legacyQueueSize, mbQueueSize);
     };
   }

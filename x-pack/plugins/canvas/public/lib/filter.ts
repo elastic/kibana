@@ -65,7 +65,7 @@ const excludeFiltersByGroups = (filters: Ast[], filterExprAst: AstFunction) => {
   const groupsToExclude = filterExprAst.arguments.group ?? [];
   const removeUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
-    const groups: string[] = get(filter, 'chain[0].arguments.filterGroup', []).filter(
+    const groups: string[] = (get(filter, 'chain[0].arguments.filterGroup', []) as string[]).filter(
       (group: string) => group !== ''
     );
     const noNeedToExcludeByGroup = !(
@@ -89,7 +89,7 @@ const includeFiltersByGroups = (
   const groupsToInclude = filterExprAst.arguments.group ?? [];
   const includeOnlyUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
-    const groups: string[] = get(filter, 'chain[0].arguments.filterGroup', []).filter(
+    const groups: string[] = (get(filter, 'chain[0].arguments.filterGroup', []) as string[]).filter(
       (group: string) => group !== ''
     );
     const needToIncludeByGroup =

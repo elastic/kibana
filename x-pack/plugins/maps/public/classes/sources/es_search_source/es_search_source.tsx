@@ -695,6 +695,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
+    // @ts-expect-error hit's type is `SearchHit<{}>` while `flattenHit` expects `Record<string, unknown[]>`
     const properties = indexPattern.flattenHit(hit) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {

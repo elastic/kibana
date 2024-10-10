@@ -38,7 +38,7 @@ export const getFlotAxisConfig = (
 
   const config: Config = { show: true };
 
-  const axisType = get(columns, `${axis}.type`);
+  const axisType = get(columns, [axis, `type`]);
 
   if (isAxisConfig(argValue)) {
     const { position, min, max, tickSize } = argValue;

@@ -131,7 +131,7 @@ describe('processVersionedRouter', () => {
       {}
     );
 
-    expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
+    expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json; Elastic-Api-Version=2023-10-31',
       'application/test+json; Elastic-Api-Version=2024-12-31',
     ]);
@@ -142,7 +142,7 @@ describe('processVersionedRouter', () => {
       createOperationIdCounter(),
       { version: '2023-10-31' }
     );
-    expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
+    expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json; Elastic-Api-Version=2023-10-31',
     ]);
   });

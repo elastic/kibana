@@ -44,8 +44,8 @@ export const getLogRateAnalysisEQQuery = (
     return;
   }
 
-  const group: Group[] | undefined = get(alert, 'fields["kibana.alert.group"]');
-  const optionalFilter: string | undefined = get(params.searchConfiguration, 'query.query');
+  const group = get(alert, 'fields["kibana.alert.group"]') as Group[] | undefined;
+  const optionalFilter = get(params.searchConfiguration, 'query.query') as string | undefined;
   const groupByFilters = getGroupFilters(group);
   const boolQuery = buildEsQuery({
     kuery: getKuery(params.criteria[0].metrics, optionalFilter),
