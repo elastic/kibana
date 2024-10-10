@@ -16,8 +16,8 @@ import {
   BarePinnedEventWithoutExternalRefs,
   TimelineWithoutExternalRefs,
 } from '@kbn/security-solution-plugin/common/api/timeline';
-import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
-import { getSavedObjectFromES } from '../../../../utils';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import { getSavedObjectFromES } from '../../../utils';
 
 interface TimelineWithoutSavedQueryId {
   [timelineSavedObjectType]: TimelineWithoutExternalRefs;
@@ -34,7 +34,7 @@ interface PinnedEventWithoutTimelineId {
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const supertest = getService('supertest');
 
-  describe('Timeline migrations', () => {
+  describe('@skipInServerless Timeline migrations', () => {
     const esArchiver = getService('esArchiver');
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');
