@@ -8,7 +8,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  DataGridDensity,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
@@ -16,6 +20,7 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
@@ -94,6 +99,30 @@ export interface DefaultAppStateExtension {
    * * 1-20: number of lines to display
    */
   rowHeight?: number;
+}
+
+/**
+ * Parameters passed to the cell renderers extension
+ */
+export interface CellRenderersExtensionParams {
+  /**
+   * Available actions for cell renderers
+   */
+  actions: {
+    addFilter?: DocViewFilterFn;
+  };
+  /**
+   * The current data view
+   */
+  dataView: DataView;
+  /**
+   * The current density applied to the data grid component
+   */
+  density: DataGridDensity | undefined;
+  /**
+   * The current row height mode applied to the data grid component
+   */
+  rowHeight: number | undefined;
 }
 
 /**
@@ -216,7 +245,7 @@ export interface Profile {
    * Gets a map of column names to custom cell renderers to use in the data grid
    * @returns The custom cell renderers to use in the data grid
    */
-  getCellRenderers: () => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
 
   /**
    * Gets a row indicator provider, allowing rows in the data grid to be given coloured highlights

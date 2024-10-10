@@ -130,6 +130,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableVisualizationsInFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -505,6 +509,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
     },
+  },
+  'observability:enableLogsStream': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
     type: 'keyword',
