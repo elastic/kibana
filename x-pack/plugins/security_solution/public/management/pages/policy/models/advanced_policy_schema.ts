@@ -1996,4 +1996,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related <network or process> events into fewer aggregate events. Default is true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related <network or process> events into fewer aggregate events. Default is true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related <network or process> events into fewer aggregate events. Default is true.',
+      }
+    ),
+  },
 ];
