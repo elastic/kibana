@@ -61,20 +61,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const { http, uiSettings, notifications, ...startServices } = coreStart;
-      const { lens, data, usageCollection, fieldFormats } = pluginStart;
-
-      const deps = {
-        http,
-        uiSettings,
-        data,
-        notifications,
-        lens,
-        usageCollection,
-        fieldFormats,
-        ...startServices,
-      };
-
       const {
         api: timeRangeApi,
         comparators: timeRangeComparators,
@@ -93,8 +79,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await deps.data.dataViews.get(
-          state.dataViewId ?? (await deps.data.dataViews.getDefaultId())
+        await pluginStart.data.dataViews.get(
+          state.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId())
         ),
       ]);
 
