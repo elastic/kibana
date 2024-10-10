@@ -16,11 +16,9 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
-    "@kbn/core-plugins-server",
     "@kbn/core-plugins-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-mocks",
@@ -40,6 +38,7 @@
     "@kbn/server-route-repository-client",
     "@kbn/shared-ux-router",
     "@kbn/zod",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-saved-objects-server"
   ]
 }

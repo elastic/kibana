@@ -44,7 +44,7 @@ export class EntityClient {
     if (!installOnly) {
       await startTransforms(
         this.options.scopedClusterClient.asSecondaryAuthUser,
-        definition,
+        installedDefinition,
         this.options.logger
       );
     }
@@ -80,11 +80,15 @@ export class EntityClient {
     page = 1,
     perPage = 10,
     includeState = false,
+    type,
+    builtIn,
   }: {
     id?: string;
     page?: number;
     perPage?: number;
     includeState?: boolean;
+    type?: string;
+    builtIn?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
       esClient: this.options.scopedClusterClient.asCurrentUser,
@@ -93,6 +97,8 @@ export class EntityClient {
       perPage,
       id,
       includeState,
+      type,
+      builtIn,
     });
 
     return { definitions };

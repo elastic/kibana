@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { TimelineType, TimelineResponse } from '../model/components.gen';
+import { TimelineType, PersistTimelineResponse } from '../model/components.gen';
 
 export type CleanDraftTimelinesRequestBody = z.infer<typeof CleanDraftTimelinesRequestBody>;
 export const CleanDraftTimelinesRequestBody = z.object({
@@ -25,10 +25,4 @@ export const CleanDraftTimelinesRequestBody = z.object({
 export type CleanDraftTimelinesRequestBodyInput = z.input<typeof CleanDraftTimelinesRequestBody>;
 
 export type CleanDraftTimelinesResponse = z.infer<typeof CleanDraftTimelinesResponse>;
-export const CleanDraftTimelinesResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
-  }),
-});
+export const CleanDraftTimelinesResponse = PersistTimelineResponse;

@@ -203,29 +203,41 @@ export class RiskScoreDataClient {
     const addError = (e: Error) => errors.push(e);
 
     await esClient.transform
-      .deleteTransform({
-        transform_id: getLatestTransformId(namespace),
-        delete_dest_index: true,
-        force: true,
-      })
+      .deleteTransform(
+        {
+          transform_id: getLatestTransformId(namespace),
+          delete_dest_index: true,
+          force: true,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.indices
-      .deleteDataStream({
-        name: indexPatterns.alias,
-      })
+      .deleteDataStream(
+        {
+          name: indexPatterns.alias,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.indices
-      .deleteIndexTemplate({
-        name: indexPatterns.template,
-      })
+      .deleteIndexTemplate(
+        {
+          name: indexPatterns.template,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.cluster
-      .deleteComponentTemplate({
-        name: mappingComponentName,
-      })
+      .deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     return errors;
