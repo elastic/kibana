@@ -156,6 +156,9 @@ components:
         samplesFormat:
           $ref: "#/components/schemas/SamplesFormat"
           description: The format of log samples in this dataStream.
+        celInput:
+          $ref: "./cel_input_attributes.schema.yaml#/components/schemas/CelInput"
+          description: The optional CEL input configuration for the dataStream.
 
     Integration:
       type: object
