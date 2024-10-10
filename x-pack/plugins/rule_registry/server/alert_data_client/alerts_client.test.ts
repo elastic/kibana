@@ -147,5 +147,98 @@ describe('AlertsClient', () => {
         }
       `);
     });
+
+    it('creates the consumers filter correctly', async () => {
+      await alertsClient.find({ consumers: ['test-consumer-1', 'test-consumer-2'] });
+
+      expect(esClientMock.search.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "_source": undefined,
+            "aggs": undefined,
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "arguments": Array [
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "alert.attributes.alertTypeId",
+                          },
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "test-rule-type-1",
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
+                      },
+                      Object {
+                        "arguments": Array [
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "alert.attributes.consumer",
+                          },
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "foo",
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
+                      },
+                    ],
+                    "function": "and",
+                    "type": "function",
+                  },
+                  Object {
+                    "term": Object {
+                      "kibana.space_ids": "space-1",
+                    },
+                  },
+                  Object {
+                    "terms": Object {
+                      "kibana.alert.rule.consumer": Array [
+                        "test-consumer-1",
+                        "test-consumer-2",
+                      ],
+                    },
+                  },
+                ],
+                "must": Array [],
+                "must_not": Array [],
+                "should": Array [],
+              },
+            },
+            "runtime_mappings": undefined,
+            "size": undefined,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "asc",
+                  "unmapped_type": "date",
+                },
+              },
+            ],
+            "track_total_hits": undefined,
+          },
+          "ignore_unavailable": true,
+          "index": ".alerts-*",
+          "seq_no_primary_term": true,
+        }
+      `);
+    });
   });
 });

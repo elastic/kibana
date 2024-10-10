@@ -63,6 +63,7 @@ import {
   MAX_PAGINATED_ALERTS,
 } from './constants';
 import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
+import { getConsumersFilter } from '../lib/get_consumers_filter';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -134,6 +135,7 @@ interface GetAlertSummaryParams {
   gte: string;
   lte: string;
   ruleTypeIds: string[];
+  consumers?: string[];
   filter?: estypes.QueryDslQueryContainer[];
   fixedInterval?: string;
 }
@@ -150,6 +152,7 @@ interface SearchAlertsParams {
   sort?: estypes.SortOptions[];
   lastSortIds?: Array<string | number>;
   ruleTypeIds?: string[];
+  consumers?: string[];
   runtimeMappings?: MappingRuntimeFields;
 }
 
@@ -291,6 +294,7 @@ export class AlertsClient {
     sort,
     lastSortIds = [],
     ruleTypeIds,
+    consumers,
     runtimeMappings,
   }: SearchAlertsParams) {
     try {
@@ -311,7 +315,8 @@ export class AlertsClient {
           alertSpaceId,
           operation,
           config,
-          ruleTypeIds
+          ruleTypeIds,
+          consumers
         ),
         aggs,
         _source,
@@ -454,12 +459,14 @@ export class AlertsClient {
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
     config: EsQueryConfig,
-    ruleTypeIds?: string[]
+    ruleTypeIds?: string[],
+    consumers?: string[]
   ) {
     try {
       const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       const ruleTypeIdsFilter = getRuleTypeIdsFilter(ruleTypeIds) as unknown as Filter;
+      const consumersFilter = getConsumersFilter(consumers) as unknown as Filter;
 
       let esQuery;
 
@@ -474,7 +481,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [authzFilter, spacesFilter, ruleTypeIdsFilter],
+        [authzFilter, spacesFilter, ruleTypeIdsFilter, consumersFilter],
         config
       );
 
@@ -638,6 +645,7 @@ export class AlertsClient {
     gte,
     lte,
     ruleTypeIds,
+    consumers,
     filter,
     fixedInterval = '1m',
   }: GetAlertSummaryParams) {
@@ -709,6 +717,7 @@ export class AlertsClient {
         },
         size: 0,
         ruleTypeIds,
+        consumers,
       });
 
       let activeAlertCount = 0;
@@ -980,6 +989,7 @@ export class AlertsClient {
   >({
     aggs,
     ruleTypeIds,
+    consumers,
     index,
     query,
     search_after: searchAfter,
@@ -991,6 +1001,7 @@ export class AlertsClient {
   }: {
     aggs?: object;
     ruleTypeIds?: string[];
+    consumers?: string[];
     index?: string;
     query?: object;
     search_after?: Array<string | number>;
@@ -1011,6 +1022,7 @@ export class AlertsClient {
 
       const alertsSearchResponse = await this.searchAlerts<TAggregations>({
         ruleTypeIds,
+        consumers,
         query,
         aggs,
         _source,
@@ -1041,6 +1053,7 @@ export class AlertsClient {
    */
   public async getGroupAggregations({
     ruleTypeIds,
+    consumers,
     groupByField,
     aggregations,
     filters,
@@ -1049,9 +1062,13 @@ export class AlertsClient {
     sort = [{ unitsCount: { order: 'desc' } }],
   }: {
     /**
-     * The rule type IDs the alerts belong to, used for authorization
+     * The rule type IDs the alerts belong to. Used for filtering.
      */
     ruleTypeIds: string[];
+    /**
+     * The consumers the alerts belong to. Used for filtering.
+     */
+    consumers?: string[];
     /**
      * The field to group by
      * @example "kibana.alert.rule.name"
@@ -1094,6 +1111,7 @@ export class AlertsClient {
       { groupByFields: estypes.AggregationsMultiBucketAggregateBase<{ key: string }> }
     >({
       ruleTypeIds,
+      consumers,
       aggs: {
         groupByFields: {
           terms: {
