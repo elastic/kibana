@@ -36619,7 +36619,16 @@ paths:
                     type: object
                     properties:
                       delete_unenrolled_agents:
-                        type: boolean
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
@@ -36713,7 +36722,16 @@ paths:
                 additional_yaml_config:
                   type: string
                 delete_unenrolled_agents:
-                  type: boolean
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
+                  required:
+                    - enabled
+                    - is_preconfigured
                 fleet_server_hosts:
                   items:
                     format: uri
@@ -36743,7 +36761,16 @@ paths:
                     type: object
                     properties:
                       delete_unenrolled_agents:
-                        type: boolean
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
