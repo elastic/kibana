@@ -22,9 +22,9 @@ export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX
   return (
     <>
       <SideHeader>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h3>
-            {i18n.UPGRADED_VERSION}
+            {i18n.FINAL_UPDATE}
             <FinalSideHelpInfo />
           </h3>
         </EuiTitle>
