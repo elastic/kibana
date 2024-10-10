@@ -35,5 +35,9 @@
     "@kbn/es-query",
     "@kbn/router-utils",
     "@kbn/share-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/data-service",
+    "@kbn/discover-utils",
   ]
 }

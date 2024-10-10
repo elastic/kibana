@@ -48,5 +48,7 @@
     "@kbn/observability-logs-overview",
     "@kbn/charts-plugin",
     "@kbn/core-ui-settings-common",
+    "@kbn/field-formats-plugin",
+    "@kbn/discover-plugin",
   ]
 }

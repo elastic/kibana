@@ -11,8 +11,10 @@
     "requiredPlugins": [
       "charts",
       "data",
+      "fieldFormats", 
       "dataViews",
       "discoverShared",
+      "discover",
       "logsDataAccess",
       "observabilityShared",
       "share",

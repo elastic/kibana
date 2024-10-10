@@ -109,30 +109,32 @@ export function CellActionsPopover({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiPopoverFooter>
-        <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
-          <EuiButtonEmpty
-            key="addToFilterAction"
-            size="s"
-            iconType="plusInCircle"
-            aria-label={actionFilterForText(value)}
-            onClick={makeFilterHandlerByOperator('+')}
-            data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
-          >
-            {filterForText}
-          </EuiButtonEmpty>
-          <EuiButtonEmpty
-            key="removeFromFilterAction"
-            size="s"
-            iconType="minusInCircle"
-            aria-label={actionFilterOutText(value)}
-            onClick={makeFilterHandlerByOperator('-')}
-            data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
-          >
-            {filterOutText}
-          </EuiButtonEmpty>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
+      {onFilter ? (
+        <EuiPopoverFooter>
+          <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
+            <EuiButtonEmpty
+              key="addToFilterAction"
+              size="s"
+              iconType="plusInCircle"
+              aria-label={actionFilterForText(value)}
+              onClick={makeFilterHandlerByOperator('+')}
+              data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
+            >
+              {filterForText}
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              key="removeFromFilterAction"
+              size="s"
+              iconType="minusInCircle"
+              aria-label={actionFilterOutText(value)}
+              onClick={makeFilterHandlerByOperator('-')}
+              data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
+            >
+              {filterOutText}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      ) : null}
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (
