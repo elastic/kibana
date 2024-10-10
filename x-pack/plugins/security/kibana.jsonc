@@ -24,7 +24,8 @@
       "management",
       "usageCollection",
       "spaces",
-      "share"
+      "share",
+      "advancedSettings"
     ],
     "requiredBundles": [
       "kibanaReact",

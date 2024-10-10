@@ -15,8 +15,12 @@ import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-ty
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { InPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import { BottomBarContent } from './bottom_bar/bottom_bar_content';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
+
+export const SettingFlyoutFooterPortal = createHtmlPortalNode();
 
 /**
  * Props for a {@link Form} component.
@@ -84,6 +88,10 @@ export const Form = (props: FormProps) => {
 
   const categorizedFields = categorizeFields(fields);
 
+  const isInFlyout =
+    !window.location.pathname.includes('/kibana/settings') &&
+    window.location.pathname.includes('/app');
+
   return (
     <Fragment>
       <FieldCategories
@@ -96,15 +104,30 @@ export const Form = (props: FormProps) => {
           unsavedChanges,
         }}
       />
-      {!isEmpty(unsavedChanges) && (
-        <BottomBar
-          onSaveAll={saveAll}
-          onClearAllUnsaved={clearAllUnsaved}
-          hasInvalidChanges={hasInvalidChanges}
-          isLoading={isLoading}
-          unsavedChangesCount={unsavedChangesCount}
-          hiddenChangesCount={hiddenChangesCount}
-        />
+      {isInFlyout ? (
+        <InPortal node={SettingFlyoutFooterPortal}>
+          <BottomBarContent
+            onSaveAll={saveAll}
+            onClearAllUnsaved={clearAllUnsaved}
+            hasInvalidChanges={hasInvalidChanges}
+            isLoading={isLoading}
+            unsavedChangesCount={unsavedChangesCount}
+            hiddenChangesCount={hiddenChangesCount}
+          />
+        </InPortal>
+      ) : (
+        <>
+          {!isEmpty(unsavedChanges) && (
+            <BottomBar
+              onSaveAll={saveAll}
+              onClearAllUnsaved={clearAllUnsaved}
+              hasInvalidChanges={hasInvalidChanges}
+              isLoading={isLoading}
+              unsavedChangesCount={unsavedChangesCount}
+              hiddenChangesCount={hiddenChangesCount}
+            />
+          )}
+        </>
       )}
     </Fragment>
   );

@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
 
+import { SettingsFlyout } from './settings_flyout';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
@@ -75,6 +76,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = useState(false);
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
@@ -167,30 +169,56 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     'data-test-subj': 'logoutLink',
   });
 
-  return (
-    <EuiPopover
-      id="headerUserMenu"
-      ownFocus
-      button={button}
-      isOpen={isPopoverOpen}
-      anchorPosition="downRight"
-      repositionOnScroll
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      buffer={0}
-    >
-      <EuiContextMenu
-        className="chrNavControl__userMenu"
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            title: displayName,
-            content: <ContextMenuContent items={items} />,
-          },
-        ]}
-        data-test-subj="userMenu"
+  items.push({
+    name: (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.settingsLinkText"
+        defaultMessage="Advanced settings"
       />
-    </EuiPopover>
+    ),
+    icon: (
+      <EuiIcon
+        type="gear"
+        size="m"
+        onClick={() => {
+          setIsPopoverOpen(false);
+          setIsSettingsFlyoutOpen(true);
+        }}
+      />
+    ),
+    onClick: () => {
+      setIsPopoverOpen(false);
+      setIsSettingsFlyoutOpen(true);
+    },
+  });
+
+  return (
+    <>
+      <EuiPopover
+        id="headerUserMenu"
+        ownFocus
+        button={button}
+        isOpen={isPopoverOpen}
+        anchorPosition="downRight"
+        repositionOnScroll
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        buffer={0}
+      >
+        <EuiContextMenu
+          className="chrNavControl__userMenu"
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              title: displayName,
+              content: <ContextMenuContent items={items} />,
+            },
+          ]}
+          data-test-subj="userMenu"
+        />
+      </EuiPopover>
+      {isSettingsFlyoutOpen && <SettingsFlyout onClose={() => setIsSettingsFlyoutOpen(false)} />}
+    </>
   );
 };

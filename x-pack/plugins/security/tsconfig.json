@@ -87,6 +87,11 @@
     "@kbn/security-role-management-model",
     "@kbn/security-ui-components",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/management-settings-section-registry",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-application",
   ],
   "exclude": [
     "target/**/*",
