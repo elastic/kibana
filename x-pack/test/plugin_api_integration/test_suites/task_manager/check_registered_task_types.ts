@@ -61,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.gemini',
         'actions:.gen-ai',
         'actions:.index',
+        'actions:.inference',
         'actions:.jira',
         'actions:.observability-ai-assistant',
         'actions:.opsgenie',
