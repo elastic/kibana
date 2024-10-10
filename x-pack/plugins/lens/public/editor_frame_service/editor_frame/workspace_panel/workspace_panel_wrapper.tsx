@@ -149,7 +149,7 @@ export function WorkspacePanelWrapper({
       ? `${maxDimensions.x.value}${unitToCSSUnit[maxDimensions.x.unit]}`
       : '';
     visDimensionsCSS.maxHeight = maxDimensions.y
-      ? `${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]}`
+      ? `min(100%, ${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]})`
       : '';
   }
 
@@ -161,7 +161,6 @@ export function WorkspacePanelWrapper({
       ? `${minDimensions.y.value}${unitToCSSUnit[minDimensions.y.unit]}`
       : '';
   }
-
   return (
     <EuiPageTemplate
       direction="column"
@@ -258,8 +257,8 @@ export function WorkspacePanelWrapper({
             grow={false}
             css={{
               flexGrow: 0,
-              height: '100%',
               width: '100%',
+              height: '100%',
               ...visDimensionsCSS,
             }}
           >
