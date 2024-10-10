@@ -101,6 +101,7 @@ import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
+import { getLongMessage } from '../../user_messages_utils';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -995,7 +996,7 @@ function getLayerErrorMessages(
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 values={{
                   position: index + 1,
-                  wrappedMessage: <>{error.longMessage}</>,
+                  wrappedMessage: getLongMessage(error),
                 }}
               />
             ),
