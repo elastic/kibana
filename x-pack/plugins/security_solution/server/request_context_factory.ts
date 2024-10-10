@@ -11,6 +11,7 @@ import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
+
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -76,6 +77,12 @@ export class RequestContextFactory implements IRequestContextFactory {
     const licensing = await context.licensing;
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
+    const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asInternalUser,
+      request
+    );
+
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
 
@@ -86,6 +93,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       kibanaBranch: options.kibanaBranch,
       buildFlavor: options.buildFlavor,
     });
+    const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
@@ -111,7 +119,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getFrameworkRequest: () => frameworkRequest,
 
-      getAppClient: () => appClientFactory.create(request),
+      getAppClient,
 
       getSpaceId,
 
@@ -199,6 +207,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
+          dataViewsService,
+          appClient: getAppClient(),
           esClient,
           logger,
           soClient,

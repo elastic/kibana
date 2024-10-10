@@ -9,19 +9,26 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { EngineDataviewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
+import type { AppClient } from '../../..';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 
-import type {
-  EntityType,
-  InspectQuery,
-} from '../../../../common/api/entity_analytics/entity_store/common.gen';
-
+import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import { type InspectQuery } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
+import {
+  buildEntityDefinitionId,
+  buildIndexPatterns,
+  getEntitiesIndexName,
+  getEntityDefinition,
+  isPromiseFulfilled,
+  isPromiseRejected,
+} from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
@@ -32,6 +39,8 @@ interface EntityStoreClientOpts {
   assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  dataViewsService: DataViewsService;
+  appClient: AppClient;
 }
 
 interface SearchEntitiesParams {
@@ -66,7 +75,12 @@ export class EntityStoreDataClient {
       );
     }
 
-    const definition = getEntityDefinition(entityType, this.options.namespace);
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
 
     logger.info(
       `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
@@ -82,13 +96,20 @@ export class EntityStoreDataClient {
           : definition.indexPatterns,
       },
     });
-    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    const updated = await this.engineClient.update(definition.id, {
+      status: ENGINE_STATUS.STARTED,
+    });
 
     return { ...descriptor, ...updated };
   }
 
   public async start(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType, this.options.namespace);
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -103,12 +124,16 @@ export class EntityStoreDataClient {
     );
     await this.options.entityClient.startEntityDefinition(definition);
 
-    return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    return this.engineClient.update(definition.id, { status: ENGINE_STATUS.STARTED });
   }
 
   public async stop(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType, this.options.namespace);
-
+    const definition = await getEntityDefinition(
+      entityType,
+      this.options.namespace,
+      this.options.dataViewsService,
+      this.options.appClient
+    );
     const descriptor = await this.engineClient.get(entityType);
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
@@ -122,7 +147,7 @@ export class EntityStoreDataClient {
     );
     await this.options.entityClient.stopEntityDefinition(definition);
 
-    return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
+    return this.engineClient.update(definition.id, { status: ENGINE_STATUS.STOPPED });
   }
 
   public async get(entityType: EntityType) {
@@ -134,7 +159,7 @@ export class EntityStoreDataClient {
   }
 
   public async delete(entityType: EntityType, deleteData: boolean) {
-    const { id } = getEntityDefinition(entityType, this.options.namespace);
+    const id = buildEntityDefinitionId(entityType, this.options.namespace);
 
     this.options.logger.info(
       `In namespace ${this.options.namespace}: Deleting entity store for ${entityType}`
@@ -178,5 +203,104 @@ export class EntityStoreDataClient {
     };
 
     return { records, total, inspect };
+  }
+
+  public async applyDataViewIndices(): Promise<{
+    successes: EngineDataviewUpdateResult[];
+    errors: Error[];
+  }> {
+    const { entityClient, logger } = this.options;
+    logger.info(
+      `In namespace ${this.options.namespace}: Applying data view indices to the entity store`
+    );
+
+    const { engines } = await this.engineClient.list();
+
+    const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = await engines.map(
+      async (engine) => {
+        const id = buildEntityDefinitionId(engine.type, this.options.namespace);
+        const originalStatus = engine.status;
+
+        if (
+          originalStatus === ENGINE_STATUS.INSTALLING ||
+          originalStatus === ENGINE_STATUS.UPDATING
+        ) {
+          throw new Error(
+            `Error updating entity store: There is an changes already in progress for engine ${id}`
+          );
+        }
+
+        const indexPatterns = await buildIndexPatterns(
+          this.options.namespace,
+          this.options.appClient,
+          this.options.dataViewsService
+        );
+        const indexPattern = indexPatterns.join(',');
+
+        // Skip update if index patterns are the same
+        if (engine.indexPattern === indexPattern) {
+          return { id, changes: {} };
+        }
+
+        // Update savedObject status
+        await this.engineClient.update(id, {
+          status: ENGINE_STATUS.UPDATING,
+        });
+
+        try {
+          const { definitions } = await entityClient.getEntityDefinitions({
+            perPage: 1,
+            includeState: false,
+            id,
+          });
+
+          // Aborts because the definition for the current type is not installed
+          if (definitions.length === 0) {
+            throw new Error(`Unable to find entity definition with [${id}]`);
+          }
+          const [definition] = definitions;
+
+          // Update entity manager definition
+          await entityClient.updateInEntityDefinition({
+            id,
+            definitionUpdate: {
+              ...definition,
+              indexPatterns,
+            },
+            installOnly: originalStatus === ENGINE_STATUS.STOPPED,
+          });
+
+          // Restore the savedObject status and set the new index pattern
+          await this.engineClient.update(definition.id, {
+            status: originalStatus,
+            indexPattern,
+          });
+
+          return { id, changes: { indexPattern } };
+        } catch (error) {
+          // Rollback the engine initial status when the update fails
+          await this.engineClient.update(id, {
+            status: originalStatus,
+          });
+
+          throw error;
+        }
+      }
+    );
+
+    const updatedDefinitions = await Promise.allSettled(updateDefinitionPromises);
+
+    const updateErrors = updatedDefinitions
+      .filter(isPromiseRejected)
+      .map((result) => result.reason);
+
+    const updateSuccesses = updatedDefinitions
+      .filter(isPromiseFulfilled<EngineDataviewUpdateResult>)
+      .map((result) => result.value);
+
+    return {
+      successes: updateSuccesses,
+      errors: updateErrors,
+    };
   }
 }

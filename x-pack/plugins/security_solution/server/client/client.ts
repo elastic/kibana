@@ -35,6 +35,7 @@ export class AppClient {
     this.alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
     this.signalsIndex = `${configuredSignalsIndex}-${spaceId}`;
     this.previewIndex = `${DEFAULT_PREVIEW_INDEX}-${spaceId}`;
+    // here
     this.sourcererDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
     this.spaceId = spaceId;
     this.kibanaVersion = kibanaVersion;
