@@ -29,7 +29,6 @@ import { getTimeline } from '../../../objects/timeline';
 import { hostsUrl } from '../../../urls/navigation';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176945
 const mockTimeline = getTimeline();
 describe('Timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -54,7 +53,7 @@ describe('Timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
-  it.only('should persist timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+  it('should persist timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
     saveTimeline();
     cy.wait('@updateTimeline');

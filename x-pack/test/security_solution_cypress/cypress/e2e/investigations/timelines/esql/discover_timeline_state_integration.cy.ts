@@ -70,7 +70,6 @@ const handleIntercepts = () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/180755
 describe(
   'Discover Timeline State Integration',
   {

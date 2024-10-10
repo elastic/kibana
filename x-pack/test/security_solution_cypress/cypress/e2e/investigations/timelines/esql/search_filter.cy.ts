@@ -71,7 +71,7 @@ describe(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
     });
 
-    it.only('should remove the query when the back button is pressed after adding a query', () => {
+    it('should remove the query when the back button is pressed after adding a query', () => {
       addDiscoverEsqlQuery(esqlQuery);
       cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
         const currentQuery = subj.text();
