@@ -27,9 +27,8 @@ import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
 import type { MlClient } from './ml_client';
-import { getMlClient } from './ml_client';
+import { MlAuditLogger, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
-import { MlAuditLogger } from './ml_client/ml_audit_logger';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;

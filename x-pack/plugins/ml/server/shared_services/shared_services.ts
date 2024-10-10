@@ -50,7 +50,7 @@ import {
   MLUISettingsClientUninitialized,
 } from './errors';
 import type { MlClient } from '../lib/ml_client';
-import { getMlClient } from '../lib/ml_client';
+import { getMlClient, MlAuditLogger } from '../lib/ml_client';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlAlertingServiceProvider } from './providers/alerting_service';
@@ -60,7 +60,6 @@ import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service'
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
-import { MlAuditLogger } from '../lib/ml_client/ml_audit_logger';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
