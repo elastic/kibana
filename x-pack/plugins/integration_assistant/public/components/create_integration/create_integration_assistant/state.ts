@@ -51,7 +51,11 @@ export const reducer = (state: State, action: Action): State => {
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
     case 'SET_GENERATED_RESULT':
-      return { ...state, result: action.payload };
+      return {
+        ...state,
+        // keep original result as the samplesFormat is not always included in the payload
+        result: state.result ? { ...state.result, ...action.payload } : action.payload,
+      };
     default:
       return state;
   }

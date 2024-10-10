@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query } from '../../../../rule_definition_section';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleEsqlQuery } from '../../../../../../../../../common/api/detection_engine';
 
 interface EsqlQueryReadonlyProps {
-  esqlQuery: DiffableAllFields['esql_query'];
+  esqlQuery: RuleEsqlQuery;
 }
 
 export function EsqlQueryReadOnly({ esqlQuery }: EsqlQueryReadonlyProps) {

@@ -548,9 +548,6 @@ export function isVariable(
 ): column is ESQLVariable {
   return Boolean(column && 'location' in column);
 }
-export function hasCCSSource(name: string) {
-  return name.includes(':');
-}
 
 /**
  * This will return the name without any quotes.
@@ -638,6 +635,16 @@ export function isRestartingExpression(text: string) {
 export function findPreviousWord(text: string) {
   const words = text.split(/\s+/);
   return words[words.length - 2];
+}
+
+/**
+ * Returns the word at the end of the text if there is one.
+ * @param text
+ * @returns
+ */
+export function findFinalWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 1];
 }
 
 export function shouldBeQuotedSource(text: string) {

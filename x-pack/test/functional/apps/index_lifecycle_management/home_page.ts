@@ -68,6 +68,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         snapshotRepository: repoName,
       });
 
+      await retry.waitFor('policy flyout', async () => {
+        return (await pageObjects.indexLifecycleManagement.flyoutHeaderText()) === policyName;
+      });
+
+      await pageObjects.indexLifecycleManagement.closePolicyFlyout();
+
       await retry.waitFor('navigation back to home page.', async () => {
         return (
           (await pageObjects.indexLifecycleManagement.pageHeaderText()) ===

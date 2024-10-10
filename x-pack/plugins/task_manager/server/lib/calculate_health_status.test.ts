@@ -56,10 +56,11 @@ const config = {
   },
   worker_utilization_running_average_window: 5,
   metrics_reset_interval: 3000,
-  claim_strategy: 'default',
+  claim_strategy: 'update_by_query',
   request_timeouts: {
     update_by_query: 1000,
   },
+  auto_calculate_default_ech_capacity: false,
 };
 
 const getStatsWithTimestamp = ({
@@ -78,7 +79,7 @@ const getStatsWithTimestamp = ({
         timestamp,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'default',
+          claim_strategy: 'update_by_query',
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,

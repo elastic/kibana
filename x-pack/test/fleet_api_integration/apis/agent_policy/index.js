@@ -12,5 +12,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./agent_policy_datastream_permissions'));
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./agent_policy_root_integrations'));
+    loadTestFile(require.resolve('./create_standalone_api_key'));
   });
 }

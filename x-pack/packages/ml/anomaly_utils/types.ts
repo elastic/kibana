@@ -343,7 +343,7 @@ export interface MlAnomaliesTableRecord {
   /**
    * Returns true if the job has the model plot enabled
    */
-  modelPlotEnabled: boolean;
+  modelPlotEnabled?: boolean;
 }
 
 /**

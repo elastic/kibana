@@ -51,7 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearConversations(es);
     });
 
-    describe('when creating private and public user instructions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/192222
+    describe.skip('when creating private and public user instructions', () => {
       before(async () => {
         await clearKnowledgeBase(es);
 
@@ -249,6 +250,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               connectorId,
               persist: true,
               screenContexts: [],
+              scope: 'observability',
             },
           },
         }).expect(200);

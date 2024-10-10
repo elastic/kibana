@@ -66,6 +66,11 @@ export const kafkaPartitionType = {
   Hash: 'hash',
 } as const;
 
+export const kafkaTopicsType = {
+  Static: 'static',
+  Dynamic: 'dynamic',
+} as const;
+
 export const kafkaTopicWhenType = {
   Equals: 'equals',
   Contains: 'contains',
@@ -131,6 +136,27 @@ export const RESERVED_CONFIG_YML_KEYS = [
   'queue.mem.flush.min_events',
   'queue.mem.flush.timeout',
   'worker',
+];
+
+export const kafkaTopicsOptions = [
+  {
+    id: kafkaTopicsType.Static,
+    label: 'Static Topic',
+    'data-test-subj': 'kafkaTopicStaticRadioButton',
+  },
+  {
+    id: kafkaTopicsType.Dynamic,
+    label: 'Dynamic Topic',
+    'data-test-subj': 'kafkaTopicDynamicRadioButton',
+  },
+];
+
+export const KAFKA_DYNAMIC_FIELDS = [
+  'data_stream.type',
+  'data_stream.dataset',
+  'data_stream.namespace',
+  '@timestamp',
+  'event.dataset',
 ];
 
 export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [

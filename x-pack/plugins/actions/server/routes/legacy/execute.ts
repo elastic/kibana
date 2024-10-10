@@ -14,6 +14,7 @@ import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../ty
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { asHttpRequestExecutionSource } from '../../lib/action_execution_source';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { connectorResponseSchemaV1 } from '../../../common/routes/connector/response';
 
 const paramSchema = schema.object({
   id: schema.string({
@@ -47,6 +48,7 @@ export const executeActionRoute = (
         response: {
           200: {
             description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
           },
         },
       },

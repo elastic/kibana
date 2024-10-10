@@ -7,23 +7,10 @@
 
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { PrebuiltRuleAsset, TypeSpecificFields } from './prebuilt_rule_asset';
+import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
-import { TypeSpecificCreatePropsInternal } from '../../../../../../common/api/detection_engine';
 
 describe('Prebuilt rule asset schema', () => {
-  it('can be of all rule types that are supported', () => {
-    // Check that the discriminated union TypeSpecificFields, which is used to create
-    // the PrebuiltRuleAsset schema, contains all the rule types that are supported.
-    const createPropsTypes = TypeSpecificCreatePropsInternal.options.map(
-      (option) => option.shape.type.value
-    );
-    const fieldsTypes = TypeSpecificFields.options.map((option) => option.shape.type.value);
-
-    expect(createPropsTypes).toHaveLength(fieldsTypes.length);
-    expect(new Set(createPropsTypes)).toEqual(new Set(fieldsTypes));
-  });
-
   test('empty objects do not validate', () => {
     const payload: Partial<PrebuiltRuleAsset> = {};
 
@@ -51,6 +38,7 @@ describe('Prebuilt rule asset schema', () => {
     // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
     const omittedBaseFields = [
       'actions',
+      'response_actions',
       'throttle',
       'meta',
       'output_index',

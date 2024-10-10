@@ -15,7 +15,7 @@ import { fetchRuleTypeAadTemplateFields, getDescription } from '../apis';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   enabled: boolean;
 }
 
@@ -23,6 +23,9 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
   const { http, ruleTypeId, enabled } = props;
 
   const queryFn = () => {
+    if (!ruleTypeId) {
+      return;
+    }
     return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
   };
 
@@ -35,7 +38,7 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
     queryKey: ['useLoadRuleTypeAadTemplateField', ruleTypeId],
     queryFn,
     select: (dataViewFields) => {
-      return dataViewFields.map<ActionVariable>((d) => ({
+      return dataViewFields?.map<ActionVariable>((d) => ({
         name: d.name,
         description: getDescription(d.name, EcsFlat),
       }));

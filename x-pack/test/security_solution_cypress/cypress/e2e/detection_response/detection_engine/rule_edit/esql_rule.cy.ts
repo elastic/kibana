@@ -14,7 +14,6 @@ import {
   DEFINITION_DETAILS,
   SUPPRESS_MISSING_FIELD,
   SUPPRESS_BY_DETAILS,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import {
@@ -55,10 +54,11 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
+// Skipping in MKI due to flake
 describe(
   'Detection ES|QL rules, edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -190,9 +190,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

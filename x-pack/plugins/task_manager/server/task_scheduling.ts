@@ -7,7 +7,6 @@
 
 import { filter, take } from 'rxjs';
 import pMap from 'p-map';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, flatten, pick } from 'lodash';
@@ -40,6 +39,7 @@ import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
+import { ErrorOutput } from './lib/bulk_operation_buffer';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -63,7 +63,7 @@ export interface BulkUpdateTaskResult {
   /**
    * list of failed tasks and errors caused failure
    */
-  errors: Array<{ type: string; id: string; error: SavedObjectError }>;
+  errors: ErrorOutput[];
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];

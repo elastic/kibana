@@ -6,7 +6,7 @@
  */
 
 import { expectParseSuccess } from '@kbn/zod-helpers';
-import { AnalyzeLogsRequestBody } from './analyze_logs_route';
+import { AnalyzeLogsRequestBody } from './analyze_logs_route.gen';
 import { getAnalyzeLogsRequestBody } from '../model/api_test.mock';
 
 describe('Analyze Logs request schema', () => {

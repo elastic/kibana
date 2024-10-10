@@ -68,13 +68,13 @@ import {
   SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
+import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
 import {
   EventCategoryOverride,
   TiebreakerField,
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
-import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
@@ -117,6 +117,7 @@ export const BaseOptionalFields = z.object({
   meta: RuleMetadata.optional(),
   investigation_fields: InvestigationFields.optional(),
   throttle: RuleActionThrottle.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
@@ -160,7 +161,7 @@ export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
-  rule_source: RuleSource.optional(),
+  rule_source: RuleSource,
   updated_at: z.string().datetime(),
   updated_by: z.string(),
   created_at: z.string().datetime(),
@@ -261,7 +262,6 @@ export const QueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
-  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -312,7 +312,6 @@ export const SavedQueryRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
-  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
   query: RuleQuery.optional(),
 });

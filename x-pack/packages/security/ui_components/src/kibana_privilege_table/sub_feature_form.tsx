@@ -13,7 +13,7 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -33,10 +33,23 @@ interface Props {
   privilegeIndex: number;
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
+  categoryId?: string;
 }
 
 export const SubFeatureForm = (props: Props) => {
   const groupsWithPrivileges = props.subFeature.getPrivilegeGroups();
+  const subFeatureNameTestId = useMemo(() => {
+    // Removes anything that is not a Number, Letter or space and replaces it with _
+    return props.subFeature.name.toLowerCase().replace(/[^\w\d]/g, '_');
+  }, [props.subFeature.name]);
+  const getTestId = useCallback(
+    (suffix: string = '') => {
+      return `${props.categoryId ? `${props.categoryId}_` : ''}${
+        props.featureId
+      }_${subFeatureNameTestId}${suffix ? `_${suffix}` : ''}`;
+    },
+    [props.categoryId, props.featureId, subFeatureNameTestId]
+  );
 
   const getTooltip = () => {
     if (!props.subFeature.privilegesTooltip) {
@@ -55,6 +68,7 @@ export const SubFeatureForm = (props: Props) => {
         type="iInCircle"
         color="subdued"
         content={tooltipContent}
+        anchorProps={{ 'data-test-subj': getTestId('nameTooltip') }}
       />
     );
   };
@@ -63,11 +77,11 @@ export const SubFeatureForm = (props: Props) => {
     return null;
   }
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" data-test-subj={getTestId()}>
       <EuiFlexItem grow={3}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem>
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj={getTestId('name')}>
               {props.subFeature.name} {getTooltip()}
             </EuiText>
           </EuiFlexItem>
@@ -85,7 +99,9 @@ export const SubFeatureForm = (props: Props) => {
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem grow={2} data-test-subj={getTestId('privilegeGroup')}>
+        {groupsWithPrivileges.map(renderPrivilegeGroup)}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 

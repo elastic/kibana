@@ -187,7 +187,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
-    (event: any) => {
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
 
       if (logsDataView?.id) {
@@ -372,33 +372,31 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     interval,
   });
 
+  const timestamp = useMemo(() => {
+    const dateTime = lastResultsData?.['@timestamp'];
+    if (!dateTime) return undefined;
+
+    return Array.isArray(dateTime) ? dateTime[0] : dateTime;
+  }, [lastResultsData]);
+
   if (isLoading) {
     return <EuiLoadingSpinner />;
-  }
-
-  if (!lastResultsData) {
-    return <>{'-'}</>;
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
-        {lastResultsData?.['@timestamp'] ? (
+        {timestamp ? (
           <EuiToolTip
             content={
               <>
-                <FormattedDate
-                  value={lastResultsData['@timestamp']}
-                  year="numeric"
-                  month="short"
-                  day="2-digit"
-                />{' '}
-                <FormattedTime value={lastResultsData['@timestamp']} timeZoneName="short" />
+                <FormattedDate value={timestamp} year="numeric" month="short" day="2-digit" />{' '}
+                <FormattedTime value={timestamp} timeZoneName="short" />
               </>
             }
           >
             <div data-test-subj="last-results-date">
-              <FormattedRelative value={lastResultsData['@timestamp']} />
+              <FormattedRelative value={timestamp} />
             </div>
           </EuiToolTip>
         ) : (
@@ -584,7 +582,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
 
-  const renderQueryColumn = useCallback((query: string, item: any) => {
+  const renderQueryColumn = useCallback((query: string, item: PackQueryFormData) => {
     const singleLine = removeMultilines(query);
     const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
@@ -618,7 +616,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderLastResultsColumn = useCallback(
-    (item: any) => (
+    (item: PackQueryFormData) => (
       <ScheduledQueryLastResults
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
@@ -627,19 +625,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [packName]
   );
   const renderDocsColumn = useCallback(
-    (item: any) => (
+    (item: PackQueryFormData) => (
       <DocsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
     [packName]
   );
   const renderAgentsColumn = useCallback(
-    (item: any) => (
+    (item: PackQueryFormData) => (
       <AgentsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
     [packName]
   );
   const renderErrorsColumn = useCallback(
-    (item: any) => (
+    (item: PackQueryFormData) => (
       <ErrorsColumnResults
         queryId={item.id}
         interval={item.interval}
@@ -652,12 +650,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => <PackViewInDiscoverAction item={item} packName={packName} />,
+    (item: PackQueryFormData) => <PackViewInDiscoverAction item={item} packName={packName} />,
     [packName]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => <PackViewInLensAction item={item} packName={packName} />,
+    (item: PackQueryFormData) => <PackViewInLensAction item={item} packName={packName} />,
     [packName]
   );
 

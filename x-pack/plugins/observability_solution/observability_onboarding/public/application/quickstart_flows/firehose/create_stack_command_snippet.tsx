@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
@@ -14,19 +13,20 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
   FIREHOSE_LOGS_STREAM_NAME,
   FIREHOSE_METRICS_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import { DownloadTemplateCallout } from './download_template_callout';
 import { buildCreateStackCommand, buildStackStatusCommand } from './utils';
 
 interface Props {
   encodedApiKey: string;
-  onboardingId: string;
   elasticsearchUrl: string;
   templateUrl: string;
   isCopyPrimaryAction: boolean;
@@ -57,7 +57,7 @@ export function CreateStackCommandSnippet({
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamDescription"
-            defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack that includes a Firehose delivery, backup S3 bucket, CloudWatch subscription filter and metrics stream along with required IAM roles."
+            defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket, CloudWatch subscription filter and metrics stream along with required IAM roles."
             values={{
               awsCLIInstallGuideLink: (
                 <EuiLink
@@ -74,6 +74,10 @@ export function CreateStackCommandSnippet({
               ),
             }}
           />
+        </p>
+
+        <p>
+          <DownloadTemplateCallout />
         </p>
       </EuiText>
 
@@ -94,7 +98,15 @@ export function CreateStackCommandSnippet({
 
       <EuiSpacer />
 
-      <EuiAccordion id={stackStatusAccordionId} buttonContent="Check stack status">
+      <EuiAccordion
+        id={stackStatusAccordionId}
+        buttonContent={i18n.translate(
+          'xpack.observability_onboarding.firehosePanel.stackStatusAccordionButtonLabel',
+          {
+            defaultMessage: 'Check status of the CloudFormation stack',
+          }
+        )}
+      >
         <EuiSpacer size="xs" />
         <EuiCodeBlock language="text" paddingSize="m" fontSize="m" isCopyable>
           {stackStatusCommand}

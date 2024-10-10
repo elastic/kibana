@@ -43,6 +43,7 @@ export const StepDetailsLinkIcon = ({
         iconType="apmTrace"
         href={stepDetailsLink}
       >
+        {/* @ts-expect-error Type '(stepIndex?: number) => string' is not assignable to type 'ReactNode'.*/}
         {label ?? VIEW_DETAILS}
       </EuiButtonEmpty>
     );

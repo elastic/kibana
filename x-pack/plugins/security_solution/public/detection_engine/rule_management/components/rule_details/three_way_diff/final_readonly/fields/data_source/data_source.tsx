@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleDataSource } from '../../../../../../../../../common/api/detection_engine';
 import { Index, DataViewId, DataViewIndexPattern } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import { assertUnreachable } from '../../../../../../../../../common/utility_types';
 
 interface DataSourceReadOnlyProps {
-  dataSource: DiffableAllFields['data_source'];
+  dataSource?: RuleDataSource;
 }
 
 export function DataSourceReadOnly({ dataSource }: DataSourceReadOnlyProps) {

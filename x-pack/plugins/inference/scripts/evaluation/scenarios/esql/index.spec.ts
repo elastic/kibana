@@ -8,11 +8,10 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { mapValues, pick } from 'lodash';
 import { firstValueFrom, lastValueFrom, filter } from 'rxjs';
 import { naturalLanguageToEsql } from '../../../../server/tasks/nl_to_esql';
 import { chatClient, evaluationClient, logger } from '../../services';
-import { loadDocuments } from '../../../../server/tasks/nl_to_esql/load_documents';
+import { EsqlDocumentBase } from '../../../../server/tasks/nl_to_esql/doc_base';
 import { isOutputCompleteEvent } from '../../../../common';
 
 interface TestCase {
@@ -113,13 +112,9 @@ const retrieveUsedCommands = async ({
 
   const output = commandsListOutput.output;
 
-  const keywords = [
-    ...(output.commands ?? []),
-    ...(output.functions ?? []),
-    'SYNTAX',
-    'OVERVIEW',
-    'OPERATORS',
-  ].map((keyword) => keyword.toUpperCase());
+  const keywords = [...(output.commands ?? []), ...(output.functions ?? [])].map((keyword) =>
+    keyword.toUpperCase()
+  );
 
   return keywords;
 };
@@ -140,15 +135,15 @@ async function evaluateEsqlQuery({
 
   logger.debug(`Received response: ${answer}`);
 
-  const [systemMessage, esqlDocs] = await loadDocuments();
+  const docBase = await EsqlDocumentBase.load();
 
   const usedCommands = await retrieveUsedCommands({
     question,
     answer,
-    esqlDescription: systemMessage,
+    esqlDescription: docBase.getSystemMessage(),
   });
 
-  const requestedDocumentation = mapValues(pick(esqlDocs, usedCommands), ({ data }) => data);
+  const requestedDocumentation = docBase.getDocumentation(usedCommands);
 
   const evaluation = await evaluationClient.evaluate({
     input: `

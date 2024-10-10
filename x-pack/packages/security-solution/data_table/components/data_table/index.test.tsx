@@ -139,9 +139,9 @@ describe('DataTable', () => {
       wrapper.update();
       expect(
         wrapper
-          .find('[data-test-subj="dataGridRowCell"]')
+          .find('div[data-test-subj="dataGridRowCell"]')
           .at(0)
-          .find('.euiDataGridRowCell__content')
+          .find('div.euiDataGridRowCell__content')
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
