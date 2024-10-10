@@ -63,6 +63,12 @@ interface ConstructorParams {
   coreContext: CoreContext;
 }
 
+const consoleMethods = ['warn', 'error'] as const;
+const consolePlaceholders = ['s', 'd', 'i', 'f', 'o'] as const;
+const placeholderRegex = new RegExp(`%([${consolePlaceholders.join('')}])(?![a-z])`, 'g');
+type ConsoleMethod = (typeof consoleMethods)[number];
+type ConsolePlaceholder = (typeof consolePlaceholders)[number];
+
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
 }
@@ -180,7 +186,8 @@ export class ChromeService {
 
   // Ensure developers are notified if working in a context that lacks the EUI Provider.
   private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
-    const isDev = this.params.coreContext.env.mode.name === 'development';
+    const isDev = this.params.coreContext.env.mode.dev;
+
     if (isDev) {
       setEuiDevProviderWarning((providerError) => {
         const errorObject = new Error(providerError.toString());
@@ -222,6 +229,88 @@ export class ChromeService {
     }
   };
 
+  private handleConsoleMessages = (notifications: NotificationsStart) => {
+    const isDev = this.params.coreContext.env.mode.dev;
+
+    if (!isDev) {
+      return;
+    }
+
+    const console = window.console;
+
+    if (!console) {
+      return;
+    }
+
+    const intercept = (method: ConsoleMethod) => {
+      const original = console[method];
+
+      console[method] = function (...args) {
+        original.apply(console, args);
+
+        let message = args.shift() + '';
+
+        if (args.length) {
+          // Drop the stacktrace.
+          args.pop();
+
+          // Console methods use string subsitutions, so this implements that functionality
+          message = message.replace(placeholderRegex, (_s, param) => {
+            let arg;
+
+            if (!args.length) {
+              return '';
+            }
+
+            arg = args.shift();
+
+            switch (param as ConsolePlaceholder) {
+              case 'd':
+              case 'i':
+                arg = typeof arg === 'boolean' ? (arg ? 1 : 0) : parseInt(arg, 10);
+                return isNaN(arg) ? '0' : arg + '';
+              case 'f':
+                arg = typeof arg === 'boolean' ? (arg ? 1 : 0) : parseFloat(arg);
+                return isNaN(arg) ? '0.000000' : arg.toFixed(6) + '';
+              case 'o': // might consider `JSON.stringify(arg, null, 2)`
+              case 's':
+              default:
+                return arg + '';
+            }
+          });
+
+          if (message) {
+            args.unshift(message);
+          }
+
+          message = args.join(' ').replace(/\s*$/, ' ');
+        }
+
+        // Only post a toast if it's an error or warning.
+        if (method === 'error') {
+          notifications.toasts.addDanger({
+            title: 'Error in console',
+            text: message,
+          });
+        } else if (method === 'warn') {
+          notifications.toasts.addWarning({
+            title: 'Warning in console',
+            text: message,
+          });
+        }
+      };
+
+      // @ts-expect-error
+      console[method].__KIBANA_CONSOLE_REPLACED__ = true;
+      // @ts-expect-error
+      console[method].__KIBANA_ORIGINAL_METHOD__ = original;
+    };
+
+    consoleMethods.forEach((method) => {
+      intercept(method);
+    });
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -238,6 +327,7 @@ export class ChromeService {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
     this.handleEuiDevProviderWarning(notifications);
+    this.handleConsoleMessages(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
