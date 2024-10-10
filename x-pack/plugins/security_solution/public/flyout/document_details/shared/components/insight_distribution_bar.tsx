@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import {
   EuiFlexGroup,
@@ -17,8 +17,7 @@ import {
   type EuiFlexGroupProps,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-
-const COUNT_LIMIT = 999;
+import { FormattedCount } from '../../../../common/components/formatted_number';
 
 export interface InsightDistributionBarProps {
   /**
@@ -54,10 +53,6 @@ export const InsightDistributionBar: React.FC<InsightDistributionBarProps> = ({
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const countStr = useMemo(() => {
-    return count >= COUNT_LIMIT ? `${COUNT_LIMIT}+` : `${count}`;
-  }, [count]);
-
   return (
     <EuiFlexGroup direction={direction} data-test-subj={dataTestSubj} responsive={false}>
       <EuiFlexItem>
@@ -80,7 +75,9 @@ export const InsightDistributionBar: React.FC<InsightDistributionBarProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-badge`}>
-            <EuiBadge color="hollow">{countStr}</EuiBadge>
+            <EuiBadge color="hollow">
+              <FormattedCount count={count} />
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

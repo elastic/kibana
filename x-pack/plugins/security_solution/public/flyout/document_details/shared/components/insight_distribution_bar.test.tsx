@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InsightDistributionBar } from './insight_distribution_bar';
+import { TestProviders } from '../../../../common/mock';
 
 const title = 'test title';
 const count = 10;
@@ -28,7 +29,9 @@ const stats = [
 describe('<InsightDistributionBar />', () => {
   it('should render', () => {
     const { getByTestId, getByText } = render(
-      <InsightDistributionBar title={title} stats={stats} count={count} data-test-subj={testId} />
+      <TestProviders>
+        <InsightDistributionBar title={title} stats={stats} count={count} data-test-subj={testId} />
+      </TestProviders>
     );
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByText(title)).toBeInTheDocument();
