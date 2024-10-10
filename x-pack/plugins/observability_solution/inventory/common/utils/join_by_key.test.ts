@@ -8,101 +8,101 @@
 import { joinByKey } from './join_by_key';
 
 describe('joinByKey', () => {
-  // it('joins by a string key', () => {
-  //   const joined = joinByKey(
-  //     [
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         avg: 10,
-  //       },
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         count: 12,
-  //       },
-  //       {
-  //         serviceName: 'opbeans-java',
-  //         avg: 11,
-  //       },
-  //       {
-  //         serviceName: 'opbeans-java',
-  //         p95: 18,
-  //       },
-  //     ],
-  //     'serviceName'
-  //   );
+  it('joins by a string key', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-node',
+          avg: 10,
+        },
+        {
+          serviceName: 'opbeans-node',
+          count: 12,
+        },
+        {
+          serviceName: 'opbeans-java',
+          avg: 11,
+        },
+        {
+          serviceName: 'opbeans-java',
+          p95: 18,
+        },
+      ],
+      'serviceName'
+    );
 
-  //   expect(joined.length).toBe(2);
+    expect(joined.length).toBe(2);
 
-  //   expect(joined).toEqual([
-  //     {
-  //       serviceName: 'opbeans-node',
-  //       avg: 10,
-  //       count: 12,
-  //     },
-  //     {
-  //       serviceName: 'opbeans-java',
-  //       avg: 11,
-  //       p95: 18,
-  //     },
-  //   ]);
-  // });
+    expect(joined).toEqual([
+      {
+        serviceName: 'opbeans-node',
+        avg: 10,
+        count: 12,
+      },
+      {
+        serviceName: 'opbeans-java',
+        avg: 11,
+        p95: 18,
+      },
+    ]);
+  });
 
-  // it('joins by a record key', () => {
-  //   const joined = joinByKey(
-  //     [
-  //       {
-  //         key: {
-  //           serviceName: 'opbeans-node',
-  //           transactionName: '/api/opbeans-node',
-  //         },
-  //         avg: 10,
-  //       },
-  //       {
-  //         key: {
-  //           serviceName: 'opbeans-node',
-  //           transactionName: '/api/opbeans-node',
-  //         },
-  //         count: 12,
-  //       },
-  //       {
-  //         key: {
-  //           serviceName: 'opbeans-java',
-  //           transactionName: '/api/opbeans-java',
-  //         },
-  //         avg: 11,
-  //       },
-  //       {
-  //         key: {
-  //           serviceName: 'opbeans-java',
-  //           transactionName: '/api/opbeans-java',
-  //         },
-  //         p95: 18,
-  //       },
-  //     ],
-  //     'key'
-  //   );
+  it('joins by a record key', () => {
+    const joined = joinByKey(
+      [
+        {
+          key: {
+            serviceName: 'opbeans-node',
+            transactionName: '/api/opbeans-node',
+          },
+          avg: 10,
+        },
+        {
+          key: {
+            serviceName: 'opbeans-node',
+            transactionName: '/api/opbeans-node',
+          },
+          count: 12,
+        },
+        {
+          key: {
+            serviceName: 'opbeans-java',
+            transactionName: '/api/opbeans-java',
+          },
+          avg: 11,
+        },
+        {
+          key: {
+            serviceName: 'opbeans-java',
+            transactionName: '/api/opbeans-java',
+          },
+          p95: 18,
+        },
+      ],
+      'key'
+    );
 
-  //   expect(joined.length).toBe(2);
+    expect(joined.length).toBe(2);
 
-  //   expect(joined).toEqual([
-  //     {
-  //       key: {
-  //         serviceName: 'opbeans-node',
-  //         transactionName: '/api/opbeans-node',
-  //       },
-  //       avg: 10,
-  //       count: 12,
-  //     },
-  //     {
-  //       key: {
-  //         serviceName: 'opbeans-java',
-  //         transactionName: '/api/opbeans-java',
-  //       },
-  //       avg: 11,
-  //       p95: 18,
-  //     },
-  //   ]);
-  // });
+    expect(joined).toEqual([
+      {
+        key: {
+          serviceName: 'opbeans-node',
+          transactionName: '/api/opbeans-node',
+        },
+        avg: 10,
+        count: 12,
+      },
+      {
+        key: {
+          serviceName: 'opbeans-java',
+          transactionName: '/api/opbeans-java',
+        },
+        avg: 11,
+        p95: 18,
+      },
+    ]);
+  });
 
   it('joins by multiple keys', () => {
     const data = [
@@ -159,66 +159,66 @@ describe('joinByKey', () => {
     ]);
   });
 
-  // it('uses the custom merge fn to replace items', () => {
-  //   const joined = joinByKey(
-  //     [
-  //       {
-  //         serviceName: 'opbeans-java',
-  //         values: ['a'],
-  //       },
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         values: ['a'],
-  //       },
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         values: ['b'],
-  //       },
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         values: ['c'],
-  //       },
-  //     ],
-  //     'serviceName',
-  //     (a, b) => ({
-  //       ...a,
-  //       ...b,
-  //       values: a.values.concat(b.values),
-  //     })
-  //   );
+  it('uses the custom merge fn to replace items', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-java',
+          values: ['a'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['a'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['b'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['c'],
+        },
+      ],
+      'serviceName',
+      (a, b) => ({
+        ...a,
+        ...b,
+        values: a.values.concat(b.values),
+      })
+    );
 
-  //   expect(joined.find((item) => item.serviceName === 'opbeans-node')?.values).toEqual([
-  //     'a',
-  //     'b',
-  //     'c',
-  //   ]);
-  // });
+    expect(joined.find((item) => item.serviceName === 'opbeans-node')?.values).toEqual([
+      'a',
+      'b',
+      'c',
+    ]);
+  });
 
-  // it('deeply merges objects', () => {
-  //   const joined = joinByKey(
-  //     [
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         properties: {
-  //           foo: '',
-  //         },
-  //       },
-  //       {
-  //         serviceName: 'opbeans-node',
-  //         properties: {
-  //           bar: '',
-  //         },
-  //       },
-  //     ],
-  //     'serviceName'
-  //   );
+  it('deeply merges objects', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            foo: '',
+          },
+        },
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            bar: '',
+          },
+        },
+      ],
+      'serviceName'
+    );
 
-  //   expect(joined[0]).toEqual({
-  //     serviceName: 'opbeans-node',
-  //     properties: {
-  //       foo: '',
-  //       bar: '',
-  //     },
-  //   });
-  // });
+    expect(joined[0]).toEqual({
+      serviceName: 'opbeans-node',
+      properties: {
+        foo: '',
+        bar: '',
+      },
+    });
+  });
 });
