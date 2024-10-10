@@ -24,7 +24,7 @@ export const PreviewFooter = memo(({ ruleId }: { ruleId: string }) => {
         <EuiFlexItem grow={false}>
           <EuiLink
             href={href}
-            target={'_blank'}
+            target="_blank"
             external={false}
             data-test-subj={RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID}
           >
