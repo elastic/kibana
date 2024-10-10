@@ -102,6 +102,8 @@ export const getMockLensApi = (
   updateAttributes: jest.fn(),
   updateSavedObjectId: jest.fn(),
   updateOverrides: jest.fn(),
+  getByReferenceState: jest.fn(),
+  getByValueState: jest.fn(),
 });
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');

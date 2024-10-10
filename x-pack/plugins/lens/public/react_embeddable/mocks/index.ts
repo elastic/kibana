@@ -86,6 +86,8 @@ const LensApiMock: LensApi = {
   updateAttributes: jest.fn(),
   updateSavedObjectId: jest.fn(),
   updateOverrides: jest.fn(),
+  getByReferenceState: jest.fn(),
+  getByValueState: jest.fn(),
 };
 
 const LensSerializedStateMock: LensSerializedState = {
