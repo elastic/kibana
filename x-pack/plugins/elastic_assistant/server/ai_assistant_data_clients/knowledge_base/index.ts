@@ -26,7 +26,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { AssistantToolParams, GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
@@ -203,17 +202,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    *
    * @param options
    * @param options.soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
-   * @param options.installEsqlDocs Whether to install ESQL documents as part of setup (e.g. not needed in test env)
    *
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
     soClient,
-    installEsqlDocs = true,
     installSecurityLabsDocs = true,
   }: {
     soClient: SavedObjectsClientContract;
-    installEsqlDocs?: boolean;
     installSecurityLabsDocs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
@@ -257,15 +253,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      if (installEsqlDocs) {
-        const kbDocsLoaded = await this.isESQLDocsLoaded();
-        if (!kbDocsLoaded) {
-          this.options.logger.debug(`Loading KB docs...`);
-          await loadESQL(this, this.options.logger);
-        } else {
-          this.options.logger.debug(`Knowledge Base docs already loaded!`);
-        }
-      }
 
       if (installSecurityLabsDocs) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
