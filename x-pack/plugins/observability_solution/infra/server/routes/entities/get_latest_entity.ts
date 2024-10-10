@@ -46,10 +46,11 @@ export async function getLatestEntity({
 
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
-        | WHERE ${ENTITY_TYPE} == "${entityType}"
-        | WHERE ${hostOrContainerIdentityField} == "${entityId}"
+        | WHERE ${ENTITY_TYPE} == ?
+        | WHERE ${hostOrContainerIdentityField} == ?
         | KEEP ${SOURCE_DATA_STREAM_TYPE}
       `,
+    params: [entityType, entityId],
   });
 
   return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse)[0];
