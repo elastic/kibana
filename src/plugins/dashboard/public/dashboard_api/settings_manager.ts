@@ -54,7 +54,7 @@ export function initializeSettingsManager({
     initialState?.useMargins ?? DEFAULT_DASHBOARD_INPUT.useMargins
   );
   function setUseMargins(useMargins: boolean) {
-    if (useMargins !== useMargins) useMargins$.next(useMargins);
+    if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
 
   function setSettings(settings: DashboardStateFromSettingsFlyout) {
