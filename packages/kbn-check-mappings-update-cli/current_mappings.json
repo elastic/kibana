@@ -2371,13 +2371,13 @@
     "properties": {
       "delete_unenrolled_agents": {
         "properties": {
-          "enabled": {  
+          "enabled": {
             "index": false,
-            "type": "boolean" 
+            "type": "boolean"
           },
-          "is_preconfigured": { 
+          "is_preconfigured": {
             "index": false,
-            "type": "boolean" 
+            "type": "boolean"
           }
         }
       },
