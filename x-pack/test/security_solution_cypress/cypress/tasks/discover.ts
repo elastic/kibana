@@ -43,6 +43,10 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
+export const assertFieldsAreLoaded = () => {
+  cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
+};
+
 export const fillEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
