@@ -3499,10 +3499,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-runner@link:packages/kbn-bazel-runner":
-  version "0.0.0"
-  uid ""
-
 "@kbn/bfetch-error@link:packages/kbn-bfetch-error":
   version "0.0.0"
   uid ""

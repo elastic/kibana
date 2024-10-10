@@ -78,13 +78,8 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
 
   log.info(`building packages/${packageName}`);
 
-  await execa('ls', ['-la', `node_modules/.bin/`], {
-    stdio: 'inherit',
-    cwd: REPO_ROOT,
-  });
-
   try {
-    const result = await execa('webpack-cli', argsProcessed, {
+    const result = await execa('node_modules/.bin/webpack-cli', argsProcessed, {
       stdio: 'inherit',
       env: { ...process.env, ...env },
     });
@@ -95,7 +90,7 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
   }
 
   try {
-    const result = await execa('webpack-cli', argsProcessed, {
+    const result = await execa('node_modules/.bin/webpack-cli', argsProcessed, {
       stdio: 'inherit',
       env: { ...process.env, ...env },
       cwd: REPO_ROOT,
@@ -103,7 +98,7 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
     log.success(`build successful with cwd set to root.`);
     return result;
   } catch (e) {
-    log.error(`webpack build failed: ${e}`);
+    log.error(`webpack build failed with set cwd: ${e}`);
   }
 }
 
