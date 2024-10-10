@@ -75,7 +75,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   lastReloadRequestTime,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, storage, unifiedSearch } =
+    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
       pluginStart;
 
     return {
@@ -84,6 +84,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       usageCollection,
       fieldFormats,
       charts,
+      share,
       storage,
       unifiedSearch,
       ...coreStart,
