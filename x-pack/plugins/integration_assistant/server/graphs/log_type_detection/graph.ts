@@ -128,6 +128,6 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
       }
     );
 
-  const compiledLogFormatDetectionGraph = workflow.compile();
+  const compiledLogFormatDetectionGraph = workflow.compile().withConfig({ runName: 'Log Format' });
   return compiledLogFormatDetectionGraph;
 }

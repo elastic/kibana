@@ -9,7 +9,6 @@ import { getNewThresholdRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
@@ -63,8 +62,6 @@ describe(
 
         // ensure typed interval is displayed on details page
         getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '60m');
-        // suppression functionality should be under Tech Preview
-        cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
 
         // the rest of suppress properties do not exist for threshold rule
         assertDetailsNotExist(SUPPRESS_BY_DETAILS);

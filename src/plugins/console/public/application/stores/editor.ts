@@ -12,7 +12,6 @@ import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
-import { SenseEditor } from '../models';
 import { SHELL_TAB_ID } from '../containers/main/constants';
 import { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
 import { RequestToRestore } from '../../types';
@@ -39,7 +38,7 @@ export const initialValue: Store = produce<Store>(
 );
 
 export type Action =
-  | { type: 'setInputEditor'; payload: SenseEditor | MonacoEditorActionsProvider }
+  | { type: 'setInputEditor'; payload: MonacoEditorActionsProvider }
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings }
   | { type: 'setCurrentView'; payload: string }

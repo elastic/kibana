@@ -13,6 +13,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
 import type { ITelemetryClient } from '../public/services/telemetry/types';
 
@@ -33,5 +34,6 @@ export function getMockInventoryContext(): InventoryKibanaContext {
       fetch: jest.fn(),
       stream: jest.fn(),
     },
+    spaces: {} as unknown as SpacesPluginStart,
   };
 }

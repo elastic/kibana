@@ -9,7 +9,6 @@ import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
@@ -81,9 +80,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

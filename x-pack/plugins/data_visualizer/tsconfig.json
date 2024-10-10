@@ -12,7 +12,6 @@
     "types/**/*"
   ],
   "kbn_references": [
-    "@kbn/ace",
     "@kbn/aiops-components",
     "@kbn/charts-plugin",
     "@kbn/cloud-plugin",
@@ -32,7 +31,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/es-types",
-    "@kbn/es-ui-shared-plugin",
     "@kbn/esql-utils",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",

@@ -80,6 +80,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             ],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -138,6 +142,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -185,6 +193,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -231,6 +243,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -278,6 +294,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -324,6 +344,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -371,6 +395,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -424,6 +452,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -480,6 +512,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -522,6 +558,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -564,6 +604,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onActiveAlert',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)

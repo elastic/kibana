@@ -44,6 +44,7 @@ import type {
   ReportManualRuleRunOpenModalParams,
   ReportEventLogShowSourceEventDateRangeParams,
   ReportEventLogFilterByRunTypeParams,
+  PreviewRuleParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -210,5 +211,9 @@ export class TelemetryClient implements TelemetryClientStart {
     params: AddNoteFromExpandableFlyoutClickedParams
   ) => {
     this.analytics.reportEvent(TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked, params);
+  };
+
+  public reportPreviewRule = (params: PreviewRuleParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.PreviewRule, params);
   };
 }

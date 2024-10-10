@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { ConfirmModal } from '../../confirm_modal';
-import { FoundWorkpad } from '../../../services/workpad';
+import { FoundWorkpad } from '../../../services/canvas_workpad_service';
 
 export interface Props {
   workpads: FoundWorkpad[];

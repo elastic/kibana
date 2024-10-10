@@ -2395,6 +2395,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.calloutTopSpacerSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "calloutTopSpacerSize",
+            "description": [],
+            "signature": [
+              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.PackageListGridProps.showCardLabels",
             "type": "CompoundType",
             "tags": [],
@@ -2522,6 +2536,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showSearchTools",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.sortByFeaturedIntegrations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortByFeaturedIntegrations",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -28533,7 +28561,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; version: string; name: string; title: string; description?: string | undefined; internal?: boolean | undefined; path?: string | undefined; download?: string | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; internal?: boolean | undefined; download?: string | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

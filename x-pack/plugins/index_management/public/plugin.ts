@@ -19,6 +19,7 @@ import {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
+import { IndexManagementLocator } from '@kbn/index-management-shared-types';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -29,6 +30,7 @@ import { PLUGIN } from '../common/constants/plugin';
 import { IndexMapping } from './application/sections/home/index_list/details_page/with_context_components/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
+import { IndexManagementLocatorDefinition } from './locator';
 
 export class IndexMgmtUIPlugin
   implements
@@ -40,6 +42,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
     enableIndexActions: boolean;
@@ -112,9 +115,16 @@ export class IndexMgmtUIPlugin
       });
     }
 
+    this.locator = plugins.share.url.locators.create(
+      new IndexManagementLocatorDefinition({
+        managementAppLocator: plugins.management.locator,
+      })
+    );
+
     return {
       apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
+      locator: this.locator,
     };
   }
 

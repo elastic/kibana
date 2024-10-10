@@ -15,7 +15,6 @@ import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type {
-  AsyncPlugin,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializer,
@@ -58,8 +57,7 @@ export class PluginWrapper<
 
   private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-    | PrebootPlugin<TSetup, TPluginsSetup>
-    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+    | PrebootPlugin<TSetup, TPluginsSetup>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);

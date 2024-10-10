@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const aceEditor = getService('aceEditor');
+  const monacoEditor = getService('monacoEditor');
   const editorTestSubjectSelector = 'searchProfilerEditor';
 
   return {
@@ -19,10 +19,10 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.exists(editorTestSubjectSelector);
     },
     async setQuery(query: any) {
-      await aceEditor.setValue(editorTestSubjectSelector, JSON.stringify(query));
+      await monacoEditor.setCodeEditorValue(JSON.stringify(query), 0);
     },
     async getQuery() {
-      return JSON.parse(await aceEditor.getValue(editorTestSubjectSelector));
+      return JSON.parse(await monacoEditor.getCodeEditorValue(0));
     },
     async setIndexName(indexName: string) {
       await testSubjects.setValue('indexName', indexName);
@@ -36,6 +36,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
     },
     async getProfileContent() {
       const profileTree = await find.byClassName('prfDevTool__main__profiletree');
+      // const profileTree = await find.byClassName('prfDevTool__page');
       return profileTree.getVisibleText();
     },
     getUrlWithIndexAndQuery({ indexName, query }: { indexName: string; query: any }) {
@@ -43,7 +44,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       return `/searchprofiler?index=${indexName}&load_from=${searchQueryURI}`;
     },
     async editorHasParseErrors() {
-      return await aceEditor.hasParseErrors(editorTestSubjectSelector);
+      return await monacoEditor.getCurrentMarkers(editorTestSubjectSelector);
     },
     async editorHasErrorNotification() {
       const notification = await testSubjects.find('noShardsNotification');

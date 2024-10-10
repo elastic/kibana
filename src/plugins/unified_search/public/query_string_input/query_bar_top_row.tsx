@@ -778,6 +778,13 @@ export const QueryBarTopRow = React.memo(
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover
                   onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+                  onESQLQuerySubmit={(queryString: string) => {
+                    onSubmit({
+                      query: { esql: queryString } as QT,
+                      dateRange: dateRangeRef.current,
+                    });
+                  }}
+                  adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
               <EuiFlexItem
