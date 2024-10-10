@@ -51,7 +51,6 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       selectedPanelNode,
       setSelectedPanelNode: chrome.sideNav.setPanelSelectedNode,
       isFeedbackBtnVisible$: chrome.sideNav.getIsFeedbackBtnVisible$(),
-      setIsFeedbackBtnVisible: chrome.sideNav.setIsFeedbackBtnVisible,
     }),
     [
       activeNodes$,
