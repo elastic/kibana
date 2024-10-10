@@ -50,8 +50,7 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../ur
 
 const mockTimeline = getTimeline();
 
-// FLAKY: https://github.com/elastic/kibana/issues/180688
-describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
+describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     deleteTimelines();
   });
