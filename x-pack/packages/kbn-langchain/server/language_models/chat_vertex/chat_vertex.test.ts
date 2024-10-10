@@ -12,6 +12,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiContent } from '@langchain/google-common';
 
 const connectorId = 'mock-connector-id';
 
@@ -204,7 +205,10 @@ describe('ActionsClientChatVertexAI', () => {
       const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
 
       await actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager);
-      const params = actionsClient.execute.mock.calls[0][0].params.subActionParams;
+      const params = actionsClient.execute.mock.calls[0][0].params.subActionParams as unknown as {
+        messages: GeminiContent[];
+        systemInstruction: string;
+      };
       expect(params.messages.length).toEqual(1);
       expect(params.messages[0].parts.length).toEqual(1);
       expect(params.systemInstruction).toEqual(systemInstruction);
@@ -217,7 +221,8 @@ describe('ActionsClientChatVertexAI', () => {
         callOptions,
         callRunManager
       );
-      const messages = actionsClient.execute.mock.calls[0][0].params.subActionParams.messages;
+      const { messages } = actionsClient.execute.mock.calls[0][0].params
+        .subActionParams as unknown as { messages: GeminiContent[] };
       expect(messages.length).toEqual(1);
       expect(messages[0].parts.length).toEqual(2);
     });
