@@ -20,5 +20,5 @@ export const DATA_FORGE_CONFIG: PartialConfig = {
       ],
     },
   ],
-  indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
+  indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1 },
 };
