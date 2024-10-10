@@ -93,7 +93,6 @@ export class PerAlertActionScheduler<
   public async generateExecutables({
     activeCurrentAlerts,
     recoveredCurrentAlerts,
-    throttledSummaryActions,
   }: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>
   > {
@@ -137,6 +136,7 @@ export class PerAlertActionScheduler<
           this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
           this.isExecutableActiveAlert({ alert, action })
         ) {
+          this.addSummarizedAlerts({ alert, summarizedAlerts });
           executables.push({ action, alert });
         }
       }
@@ -144,6 +144,7 @@ export class PerAlertActionScheduler<
       if (this.isRecoveredAction(action.group)) {
         for (const alert of Object.values(recoveredCurrentAlerts)) {
           if (this.isExecutableAlert({ alert, action, summarizedAlerts })) {
+            this.addSummarizedAlerts({ alert, summarizedAlerts });
             executables.push({ action, alert });
           }
         }
@@ -162,48 +163,25 @@ export class PerAlertActionScheduler<
     action: RuleAction;
     summarizedAlerts: CombinedSummarizedAlerts | null;
   }) {
-    const alertId = alert.getId();
-
-    if (this.hasActiveMaintenanceWindow({ alert, action })) {
-      return false;
-    }
-
-    if (alert.isFilteredOut(summarizedAlerts)) {
-      return false;
-    }
-
-    if (this.isAlertMuted(alertId)) {
-      return false;
-    }
-
-    // only actions with notifyWhen set to "on status change" should return
-    // notifications for flapping pending recovered alerts
-    if (
-      alert.getPendingRecoveredCount() > 0 &&
-      action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
-    ) {
-      return false;
-    }
-
-    if (summarizedAlerts) {
-      const alertAsData = summarizedAlerts.all.data.find(
-        (alertHit: AlertHit) => alertHit._id === alert.getUuid()
-      );
-      if (alertAsData) {
-        alert.setAlertAsData(alertAsData);
-      }
-    }
-
-    return true;
+    return (
+      !this.hasActiveMaintenanceWindow({ alert, action }) &&
+      !this.isAlertMuted(alert) &&
+      !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
+      !alert.isFilteredOut(summarizedAlerts)
+    );
   }
 
   private isExecutableActiveAlert({
     alert,
     action,
   }: {
-    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds>;
     action: RuleAction;
   }) {
+    if (!alert.hasScheduledActions()) {
+      return false;
+    }
+
     const alertsActionGroup = alert.getScheduledActionOptions()?.actionGroup;
 
     if (!this.isValidActionGroup(alertsActionGroup as ActionGroupIds)) {
@@ -257,14 +235,17 @@ export class PerAlertActionScheduler<
       }
     }
 
-    return alert.hasScheduledActions();
+    return true;
   }
 
   private isRecoveredAction(actionGroup: string) {
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
   }
 
-  private isAlertMuted(alertId: string) {
+  private isAlertMuted(
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
+  ) {
+    const alertId = alert.getId();
     const muted = this.mutedAlertIdsSet.has(alertId);
     if (muted) {
       if (
@@ -308,6 +289,41 @@ export class PerAlertActionScheduler<
       return true;
     }
 
+    return false;
+  }
+
+  private addSummarizedAlerts({
+    alert,
+    summarizedAlerts,
+  }: {
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    summarizedAlerts: CombinedSummarizedAlerts | null;
+  }) {
+    if (summarizedAlerts) {
+      const alertAsData = summarizedAlerts.all.data.find(
+        (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+      );
+      if (alertAsData) {
+        alert.setAlertAsData(alertAsData);
+      }
+    }
+  }
+
+  private hasPendingCountButNotNotifyOnChange({
+    alert,
+    action,
+  }: {
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    action: RuleAction;
+  }) {
+    // only actions with notifyWhen set to "on status change" should return
+    // notifications for flapping pending recovered alerts
+    if (
+      alert.getPendingRecoveredCount() > 0 &&
+      action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+    ) {
+      return true;
+    }
     return false;
   }
 }

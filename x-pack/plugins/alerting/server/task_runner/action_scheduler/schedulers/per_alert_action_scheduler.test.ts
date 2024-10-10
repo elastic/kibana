@@ -258,6 +258,27 @@ describe('Per-Alert Action Scheduler', () => {
       ]);
     });
 
+    test('should skip generating executable when alert has no scheduled actions', async () => {
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const newAlertWithNoScheduledAction = generateAlert({
+        id: 1,
+        scheduleActions: false,
+      });
+      const alertsWithInvalidActionGroup = { ...newAlertWithNoScheduledAction, ...newAlert2 };
+      const executables = await scheduler.generateExecutables({
+        activeCurrentAlerts: alertsWithInvalidActionGroup,
+        recoveredCurrentAlerts: {},
+        throttledSummaryActions: {},
+      });
+
+      expect(executables).toHaveLength(2);
+
+      expect(executables).toEqual([
+        { action: rule.actions[0], alert: alerts['2'] },
+        { action: rule.actions[1], alert: alerts['2'] },
+      ]);
+    });
+
     test('should skip generating executable when alert has pending recovered count greater than 0 and notifyWhen is onActiveAlert', async () => {
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const newAlertWithPendingRecoveredCount = generateAlert({
