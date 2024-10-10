@@ -5,22 +5,21 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
 
-export const withLazyHook = <D extends {}, P extends {}>(
-  Component: React.ComponentType<PropsWithChildren<D & P>>,
-  moduleImport: () => Promise<P>,
+export const withLazyHook = <P extends {}, PInjected extends keyof P>(
+  Component: React.ComponentType<P>,
+  hookImport: () => Promise<Pick<P, PInjected>>,
   fallback: React.ReactNode = null
 ) => {
-  return React.memo(function WithLazy(props: D) {
-    const [lazyModuleProp, setLazyModuleProp] = useState<P>();
+  return React.memo<Omit<P, PInjected>>(function WithLazyHook(props) {
+    const [lazyHookProp, setLazyHookProp] = useState<Pick<P, PInjected>>();
 
     useEffect(() => {
-      moduleImport().then((module) => {
-        setLazyModuleProp(() => module);
+      hookImport().then((hook) => {
+        setLazyHookProp(() => hook);
       });
     }, []);
 
-    return lazyModuleProp ? <Component {...lazyModuleProp} {...props} /> : <>{fallback}</>;
+    return lazyHookProp ? <Component {...(props as P)} {...lazyHookProp} /> : <>{fallback}</>;
   });
 };
