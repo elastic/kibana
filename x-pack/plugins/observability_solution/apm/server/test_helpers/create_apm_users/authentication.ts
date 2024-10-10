@@ -100,19 +100,25 @@ export const customRoles = {
     },
   },
   [ApmCustomRolename.apmAllPrivilegesWithoutWriteSettings]: {
+    elasticsearch: {
+      cluster: ['manage_api_key'],
+    },
     kibana: [
       {
         base: [],
-        feature: { apm: ['minimal_all'] },
+        feature: { apm: ['minimal_all'], ml: ['all'] },
         spaces: ['*'],
       },
     ],
   },
   [ApmCustomRolename.apmReadPrivilegesWithWriteSettings]: {
+    elasticsearch: {
+      cluster: ['manage_api_key'],
+    },
     kibana: [
       {
         base: [],
-        feature: { apm: ['minimal_read', 'settings_save'] },
+        feature: { apm: ['minimal_read', 'settings_save'], ml: ['all'] },
         spaces: ['*'],
       },
     ],

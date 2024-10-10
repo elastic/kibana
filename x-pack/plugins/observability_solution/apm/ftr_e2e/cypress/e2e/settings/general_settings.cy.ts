@@ -18,7 +18,7 @@ const getAbleToModifyCase = () => {
 };
 
 const getUnableToModifyCase = () => {
-  return it('should not be able to modify settings', () => {
+  it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[name="Inspect ES queries"]');
     button.should('be.disabled');

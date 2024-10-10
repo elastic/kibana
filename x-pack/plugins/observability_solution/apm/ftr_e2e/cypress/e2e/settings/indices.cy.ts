@@ -22,7 +22,7 @@ const getAbleToModifyCase = () => {
 };
 
 const getUnableToModifyCase = () => {
-  return it('should not be able to modify settings', () => {
+  it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const input = cy.get('input[name="error"]');
     input.should('be.disabled');
