@@ -66,7 +66,7 @@ export const DashboardViewportComponent = () => {
     dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
-    dashboardApi.useMargins$
+    dashboardApi.settings.useMargins$
   );
 
   const panelCount = useMemo(() => {

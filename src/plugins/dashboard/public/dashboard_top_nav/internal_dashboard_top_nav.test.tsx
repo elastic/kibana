@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';

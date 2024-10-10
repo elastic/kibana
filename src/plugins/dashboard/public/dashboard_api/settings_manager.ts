@@ -77,11 +77,11 @@ export function initializeSettingsManager(initialState?: DashboardState) {
         syncColors$,
         syncCursor$,
         syncTooltips$,
+        useMargins$,
       },
       setSettings,
       setTags,
       timeRestore$,
-      useMargins$,
     },
     internalApi: {
       reset: (lastSavedState: DashboardState) => {

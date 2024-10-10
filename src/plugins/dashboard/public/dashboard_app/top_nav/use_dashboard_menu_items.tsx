@@ -47,21 +47,15 @@ export const useDashboardMenuItems = ({
    */
   const dashboardApi = useDashboardApi();
 
-  const [
-    dashboardTitle,
-    hasOverlays,
-    hasRunMigrations,
-    hasUnsavedChanges,
-    lastSavedId,
-    viewMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.panelTitle,
-    dashboardApi.hasOverlays$,
-    dashboardApi.hasRunMigrations$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
-    dashboardApi.viewMode
-  );
+  const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.panelTitle,
+      dashboardApi.hasOverlays$,
+      dashboardApi.hasRunMigrations$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId,
+      dashboardApi.viewMode
+    );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**

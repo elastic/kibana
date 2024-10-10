@@ -346,15 +346,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [
-    hasUnsavedChanges,
-    viewMode,
-    hasRunMigrations,
-    dashboardApi.isManaged,
-    isPopoverOpen,
-    dashboardApi,
-    maybeRedirect,
-  ]);
+  }, [hasUnsavedChanges, viewMode, hasRunMigrations, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   return (
     <div className="dashboardTopNav">
