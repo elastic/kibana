@@ -42,7 +42,7 @@ export const Overview = () => {
   const isFullPageView = renderMode.mode === 'page';
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: asset.type,
-    entityId: asset.type === 'host' ? asset.name : asset.id,
+    entityId: asset.id,
   });
   const addMetricsCalloutId: AddMetricsCalloutKey =
     asset.type === 'host' ? 'hostOverview' : 'containerOverview';

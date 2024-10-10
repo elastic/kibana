@@ -39,7 +39,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
     const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
       entityType: asset.type,
-      entityId: asset.type === 'host' ? asset.name : asset.id,
+      entityId: asset.id,
     });
 
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
