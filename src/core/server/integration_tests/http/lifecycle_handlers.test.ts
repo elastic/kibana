@@ -27,7 +27,7 @@ const nameHeader = 'kbn-name';
 const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
-const internalProductHeader = 'x-elastic-internal-origin';
+const internalOriginHeader = 'x-elastic-internal-origin';
 const internalProductQueryParam = 'elasticInternalOrigin';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
@@ -280,30 +280,30 @@ describe('core lifecycle handlers', () => {
         .expect(400);
     });
 
-    it('accepts requests with the internal product header to internal routes', async () => {
+    it('accepts requests with the internal origin header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product header to public routes', async () => {
+    it('accepts requests with the internal origin header to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testPublicRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to internal routes', async () => {
+    it('accepts requests with the internal origin query param to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to public routes', async () => {
+    it('accepts requests with the internal origin query param to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
@@ -362,7 +362,7 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
     it('accepts requests with the internal product header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .expect(200, 'ok()');
       expect(logger.warn).toHaveBeenCalledTimes(0);
       expect(logger.error).toHaveBeenCalledTimes(0);
