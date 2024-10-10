@@ -59,7 +59,7 @@ import { RootProfileService } from './context_awareness/profiles/root_profile';
 import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
 import { ProfilesManager } from './context_awareness/profiles_manager';
-import { DiscoverEBTManager } from './services/discover_ebt_manager';
+import { DiscoverEBTManager } from './services/telemetry';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana

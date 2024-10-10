@@ -40,6 +40,20 @@ import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 
+const mockOnInitialRenderCompleteMock = jest.fn();
+const mockUseReportPageRenderComplete = jest.fn((isReady: boolean) => {
+  return mockOnInitialRenderCompleteMock;
+});
+jest.mock('../../../../services/telemetry', () => {
+  const originalModule = jest.requireActual('../../../../services/telemetry');
+  return {
+    ...originalModule,
+    useReportPageRenderComplete: (isReady: boolean) => {
+      return mockUseReportPageRenderComplete(isReady);
+    },
+  };
+});
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
@@ -139,6 +153,16 @@ async function mountComponent(
 }
 
 describe('Discover component', () => {
+  beforeEach(() => {
+    mockUseReportPageRenderComplete.mockClear();
+    mockOnInitialRenderCompleteMock.mockClear();
+  });
+
+  it('should render', async () => {
+    await mountComponent(dataViewWithTimefieldMock);
+    expect(mockOnInitialRenderCompleteMock).toHaveBeenCalled();
+  }, 10000);
+
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
@@ -185,5 +209,7 @@ describe('Discover component', () => {
     expect(component.find(ErrorCallout)).toHaveLength(1);
     expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
     expect(component.find(PanelsToggle).prop('renderedFor')).toBe('prompt');
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   }, 10000);
 });

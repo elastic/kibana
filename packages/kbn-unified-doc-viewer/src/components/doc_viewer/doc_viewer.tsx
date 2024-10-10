@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
@@ -25,7 +25,7 @@ export interface DocViewerProps extends DocViewRenderProps {
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
+export function DocViewer({ docViews, onInitialRenderComplete, ...renderProps }: DocViewerProps) {
   const tabs = docViews
     .filter(({ enabled }) => enabled) // Filter out disabled doc views
     .map(({ id, title, render, component }: DocView) => {
@@ -54,6 +54,14 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
     },
     [setInitialTabId]
   );
+
+  const isInitialRenderCompleteRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (!isInitialRenderCompleteRef.current && onInitialRenderComplete) {
+      isInitialRenderCompleteRef.current = true;
+      onInitialRenderComplete();
+    }
+  }, [onInitialRenderComplete]);
 
   if (!tabs.length) {
     // There's a minimum of 2 tabs active in Discover.
