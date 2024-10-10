@@ -9,10 +9,20 @@ import { Client } from '@elastic/elasticsearch';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import {
   getPrebuiltRuleMock,
+  getPrebuiltRuleMockOfType,
   getPrebuiltRuleWithExceptionsMock,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { TypeSpecificFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
+
+const ruleAssetSavedObjectESFields = {
+  type: 'security-rule',
+  references: [],
+  coreMigrationVersion: '8.6.0',
+  updated_at: '2022-11-01T12:56:39.717Z',
+  created_at: '2022-11-01T12:56:39.717Z',
+};
 
 /**
  * A helper function to create a rule asset saved object
@@ -22,11 +32,20 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
  */
 export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleAsset>) => ({
   'security-rule': getPrebuiltRuleMock(overrideParams),
-  type: 'security-rule',
-  references: [],
-  coreMigrationVersion: '8.6.0',
-  updated_at: '2022-11-01T12:56:39.717Z',
-  created_at: '2022-11-01T12:56:39.717Z',
+  ...ruleAssetSavedObjectESFields,
+});
+
+/**
+ * A helper function to create a rule asset saved object
+ *
+ * @param overrideParams Params to override the default mock
+ * @returns Created rule asset saved object
+ */
+export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificFields>(
+  type: T['type']
+) => ({
+  'security-rule': getPrebuiltRuleMockOfType<T>(type),
+  ...ruleAssetSavedObjectESFields,
 });
 
 export const SAMPLE_PREBUILT_RULES = [
