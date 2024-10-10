@@ -256,6 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
+      getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     savedObjects: {
@@ -373,6 +374,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
+      getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {

@@ -9,7 +9,7 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import apm from 'elastic-apm-node';
-import { HistoryWindow, HISTORY_WINDOW_SIZE_LONG, HISTORY_WINDOW_SIZE_MED, HISTORY_WINDOW_SIZE_SHORT } from '../history_window';
+import { EluMetrics } from '@kbn/core-metrics-server';
 
 interface ELUHistoryResponse {
   /**
@@ -18,30 +18,17 @@ interface ELUHistoryResponse {
    *         actual time range covered is determined by our collection interval (configured via `ops.interval`, default 5s)
    *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
    */
-  history: {
-    /** The history for the short window */
-    short: number;
-    /** The history for the medium window */
-    medium: number;
-    /** The history for the long window */
-    long: number;
-  };
+  history: EluMetrics;
 }
 
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluHistoryRoute(router: IRouter, eluHistoryWindow: HistoryWindow) {
+export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
   // Report the same metrics to APM
-  apm.registerMetric('elu.history.short', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT)
-  );
-  apm.registerMetric('elu.history.medium', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED)
-  );
-  apm.registerMetric('elu.history.long', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG)
-  );
+  apm.registerMetric('elu.history.short', () => elu().short);
+  apm.registerMetric('elu.history.medium', () => elu().medium);
+  apm.registerMetric('elu.history.long', () => elu().long);
 
   router.versioned
     .get({
@@ -59,11 +46,7 @@ export function registerEluHistoryRoute(router: IRouter, eluHistoryWindow: Histo
       },
       async (ctx, req, res) => {
         const body: ELUHistoryResponse = {
-          history: {
-            short: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT),
-            medium: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED),
-            long: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG),
-          },
+          history: elu(),
         };
         return res.ok({ body });
       }

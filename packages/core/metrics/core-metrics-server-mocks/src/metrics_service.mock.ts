@@ -33,6 +33,7 @@ export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {
     collectionInterval: 30000,
+    getEluMetrics$: jest.fn(),
     getOpsMetrics$: jest.fn(),
   };
 
