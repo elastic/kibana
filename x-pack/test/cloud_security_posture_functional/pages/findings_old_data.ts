@@ -75,14 +75,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await findings.waitForPluginInitialized();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await findings.index.remove();
+      await findings.vulnerabilitiesIndex.remove();
     });
 
     describe('Findings page with old data', () => {
       it('returns no Findings KSPM', async () => {
-        // Prepare mocked findings
-        await findings.index.remove();
         await findings.index.add(dataOldKspm);
 
         await findings.navigateToLatestFindingsPage();
@@ -90,8 +89,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CSPM', async () => {
-        // Prepare mocked findings
-        await findings.index.remove();
         await findings.index.add(dataOldCspm);
 
         await findings.navigateToLatestFindingsPage();
@@ -99,8 +96,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CNVM', async () => {
-        // Prepare mocked findings
-        await findings.vulnerabilitiesIndex.remove();
         await findings.vulnerabilitiesIndex.add(dataOldCnvm);
 
         await findings.navigateToLatestVulnerabilitiesPage();
