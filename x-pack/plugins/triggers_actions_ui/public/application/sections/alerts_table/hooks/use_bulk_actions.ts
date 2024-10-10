@@ -7,7 +7,7 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   AlertsTableConfigurationRegistry,
@@ -305,10 +305,7 @@ export function useBulkActions({
   });
 
   const initialItems = useMemo(() => {
-    return [
-      ...caseBulkActions,
-      ...(ruleTypeIds?.some((ruleTypeId) => ruleTypeId.includes('siem')) ? [] : untrackBulkActions),
-    ];
+    return [...caseBulkActions, ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions)];
   }, [caseBulkActions, ruleTypeIds, untrackBulkActions]);
 
   const bulkActions = useMemo(() => {

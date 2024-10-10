@@ -90,6 +90,7 @@ describe('CaseUI View Page activity tab', () => {
         alertsTableConfigurationRegistry: expect.anything(),
         configurationId: 'case-details-alerts-observability',
         ruleTypeIds: ['log-threshold'],
+        consumers: ['observability'],
         id: 'case-details-alerts-observability',
         query: {
           ids: {

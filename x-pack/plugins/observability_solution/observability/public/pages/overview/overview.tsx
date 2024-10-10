@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../../../common/constants';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  observabilityAlertFeatureIds,
+} from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
 import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
@@ -239,6 +242,7 @@ export function OverviewPage() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              consumers={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}

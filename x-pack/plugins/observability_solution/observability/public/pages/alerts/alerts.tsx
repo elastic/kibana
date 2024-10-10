@@ -285,6 +285,7 @@ function InternalAlertsPage() {
                     <AlertsStateTable
                       id={ALERTS_TABLE_ID}
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+                      consumers={observabilityAlertFeatureIds}
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       showAlertStatusWithFlapping

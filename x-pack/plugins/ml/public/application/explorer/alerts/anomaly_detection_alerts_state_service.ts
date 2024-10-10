@@ -30,6 +30,7 @@ import {
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
   ML_RULE_TYPE_IDS,
+  ML_VALID_CONSUMERS,
 } from '../../../../common/constants/alerts';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
@@ -176,6 +177,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
               .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
                 {
                   ruleTypeIds: ML_RULE_TYPE_IDS,
+                  consumers: ML_VALID_CONSUMERS,
                   query,
                 },
                 { strategy: 'privateRuleRegistryAlertsSearchStrategy' }

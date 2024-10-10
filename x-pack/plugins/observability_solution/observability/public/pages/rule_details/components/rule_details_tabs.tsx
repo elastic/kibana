@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
+import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
@@ -95,6 +96,7 @@ export function RuleDetailsTabs({
                   configurationId={RULE_DETAILS_ALERTS_TABLE_CONFIG_ID}
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
+                  consumers={observabilityAlertFeatureIds}
                   query={esQuery}
                   showAlertStatusWithFlapping
                   cellContext={{ observabilityRuleTypeRegistry }}

@@ -36,9 +36,13 @@ export interface SearchAlertsParams {
 
   // Parameters
   /**
-   * Array of rule type ids used for authorization and area-based filtering
+   * Array of rule type ids used area-based filtering
    */
   ruleTypeIds: string[];
+  /**
+   * Array of consumers used area-based filtering
+   */
+  consumers?: string[];
   /**
    * ES query to perform on the affected alert indices
    */
@@ -80,6 +84,7 @@ export const searchAlerts = ({
   data,
   signal,
   ruleTypeIds,
+  consumers,
   fields,
   query,
   sort,
@@ -92,6 +97,7 @@ export const searchAlerts = ({
       .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
         {
           ruleTypeIds,
+          consumers,
           fields,
           query,
           pagination: { pageIndex, pageSize },

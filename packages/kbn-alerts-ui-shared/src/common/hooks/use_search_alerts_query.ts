@@ -30,6 +30,7 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
 export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
   const {
     ruleTypeIds,
+    consumers,
     fields,
     query = {
       bool: {},
@@ -50,6 +51,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         data,
         signal,
         ruleTypeIds,
+        consumers,
         fields,
         query,
         sort,

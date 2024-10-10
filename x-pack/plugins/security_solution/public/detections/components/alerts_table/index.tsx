@@ -12,7 +12,7 @@ import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -277,6 +277,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+      consumers: [AlertConsumers.SIEM],
       query: finalBoolQuery,
       gridStyle,
       shouldHighlightRow,

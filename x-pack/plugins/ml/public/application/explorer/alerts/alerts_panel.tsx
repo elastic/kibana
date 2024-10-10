@@ -19,6 +19,7 @@ import { ALERT_STATUS_ACTIVE, type AlertStatus } from '@kbn/rule-data-utils';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import React, { type FC, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
 import { ML_RULE_TYPE_IDS } from '../../../../common';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
@@ -49,6 +50,7 @@ export const AlertsPanel: FC = () => {
     configurationId: ML_ALERTS_CONFIG_ID,
     id: `ml-details-alerts`,
     ruleTypeIds: ML_RULE_TYPE_IDS,
+    consumers: ML_VALID_CONSUMERS,
     query: alertsQuery,
     showAlertStatusWithFlapping: true,
     cellContext: {

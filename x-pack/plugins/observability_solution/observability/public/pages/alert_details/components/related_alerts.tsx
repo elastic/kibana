@@ -12,7 +12,10 @@ import { ALERT_END, ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../../../../common/constants';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  observabilityAlertFeatureIds,
+} from '../../../../common/constants';
 import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
@@ -122,6 +125,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
                 <AlertsStateTable
                   id={ALERTS_TABLE_ID}
                   ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+                  consumers={observabilityAlertFeatureIds}
                   configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   showAlertStatusWithFlapping

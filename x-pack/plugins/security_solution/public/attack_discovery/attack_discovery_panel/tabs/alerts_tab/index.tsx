@@ -10,6 +10,7 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import React, { useMemo } from 'react';
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -46,6 +47,7 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
       configurationId: configId,
       id: `attack-discovery-alerts-${attackDiscovery.id}`,
       ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+      consumers: [AlertConsumers.SIEM],
       query: alertIdsQuery,
       showAlertStatusWithFlapping: false,
     }),

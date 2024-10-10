@@ -12,6 +12,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
+  AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { JobsHealthTests } from '../types/alerts';
@@ -22,6 +23,7 @@ export const ML_ALERT_TYPES = {
 } as const;
 
 export const ML_RULE_TYPE_IDS = Object.values(ML_ALERT_TYPES);
+export const ML_VALID_CONSUMERS = [AlertConsumers.ML];
 
 export type MlAlertType = (typeof ML_ALERT_TYPES)[keyof typeof ML_ALERT_TYPES];
 

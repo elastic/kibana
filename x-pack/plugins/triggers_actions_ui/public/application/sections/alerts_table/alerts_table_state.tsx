@@ -68,6 +68,7 @@ export type AlertsTableStateProps = {
   configurationId: string;
   id: string;
   ruleTypeIds: string[];
+  consumers?: string[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   initialPageSize?: number;
   browserFields?: BrowserFields;
@@ -192,6 +193,7 @@ const AlertsTableStateWithQueryProvider = memo(
     configurationId,
     id,
     ruleTypeIds,
+    consumers,
     query,
     initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
     leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -300,6 +302,7 @@ const AlertsTableStateWithQueryProvider = memo(
 
     const [queryParams, setQueryParams] = useState({
       ruleTypeIds,
+      consumers,
       fields,
       query,
       sort,
@@ -311,6 +314,7 @@ const AlertsTableStateWithQueryProvider = memo(
     useEffect(() => {
       setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
         ruleTypeIds,
+        consumers,
         fields,
         query,
         sort,
@@ -318,6 +322,7 @@ const AlertsTableStateWithQueryProvider = memo(
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
           ruleTypeIds,
+          consumers,
           fields,
           query,
           sort,
@@ -327,7 +332,7 @@ const AlertsTableStateWithQueryProvider = memo(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [ruleTypeIds, fields, query, runtimeMappings, sort]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers]);
 
     const {
       data: alertsData,

@@ -126,6 +126,7 @@ export const AlertsOverview = ({
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
           ruleTypeIds={INFRA_RULE_TYPE_IDS}
+          consumers={[AlertConsumers.INFRASTRUCTURE]}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}

@@ -58,6 +58,7 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
         caseData.owner === SECURITY_SOLUTION_OWNER
           ? SECURITY_SOLUTION_RULE_TYPE_IDS
           : alertData?.ruleTypeIds ?? [],
+      consumers: alertData?.featureIds,
       query: alertIdsQuery,
       showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
       onLoaded: onAlertsTableLoaded,
@@ -67,6 +68,7 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
       configId,
       caseData.owner,
       alertData?.ruleTypeIds,
+      alertData?.featureIds,
       alertIdsQuery,
       onAlertsTableLoaded,
     ]

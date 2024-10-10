@@ -80,6 +80,7 @@ export const AlertsTabContent = () => {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
               ruleTypeIds={INFRA_RULE_TYPE_IDS}
+              consumers={[AlertConsumers.INFRASTRUCTURE]}
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
