@@ -8,13 +8,12 @@
 import { omit } from 'lodash';
 import { SavedObjectReference } from '@kbn/core/server';
 import { injectReferencesIntoActions } from '../../../rules_client/common';
-import { RuleAttributes } from '../../../data/rule/types';
 import { RawRule } from '../../../types';
 import { RuleDomain } from '../types';
 
 interface Args {
   ruleId: string;
-  actions: RuleAttributes['actions'] | RawRule['actions'];
+  actions: RawRule['actions'];
   isSystemAction: (connectorId: string) => boolean;
   omitGeneratedValues?: boolean;
   references?: SavedObjectReference[];
@@ -42,8 +41,8 @@ export const transformRawActionsToDomainActions = ({
         uuid: action.uuid,
         ...(action.frequency ? { frequency: action.frequency } : {}),
         ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
-        ...(action.useAlertDataAsTemplate
-          ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
+        ...(action.useAlertDataForTemplate
+          ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
           : {}),
       };
 
@@ -54,7 +53,7 @@ export const transformRawActionsToDomainActions = ({
       return defaultAction;
     });
 
-  return ruleDomainActions;
+  return ruleDomainActions as RuleDomain['actions'];
 };
 
 export const transformRawActionsToDomainSystemActions = ({
@@ -76,8 +75,8 @@ export const transformRawActionsToDomainSystemActions = ({
         params: action.params,
         actionTypeId: action.actionTypeId,
         uuid: action.uuid,
-        ...(action.useAlertDataAsTemplate
-          ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
+        ...(action.useAlertDataForTemplate
+          ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
           : {}),
       };
     });

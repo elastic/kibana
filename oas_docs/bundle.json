@@ -2002,80 +2002,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -2242,6 +2175,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -2249,6 +2183,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -2256,6 +2191,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -2263,6 +2199,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -2270,6 +2207,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -2277,6 +2215,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -2291,6 +2230,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -2298,6 +2238,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -2305,6 +2246,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -3240,80 +3182,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -3480,6 +3355,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -3487,6 +3363,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -3494,6 +3371,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -3501,6 +3379,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -3508,6 +3387,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -3515,6 +3395,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -3529,6 +3410,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -3536,6 +3418,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -3543,6 +3426,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -4461,80 +4345,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -4701,6 +4518,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -4708,6 +4526,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -4715,6 +4534,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -4722,6 +4542,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -4729,6 +4550,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -4736,6 +4558,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -4750,6 +4573,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -4757,6 +4581,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -4764,6 +4589,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -5948,80 +5774,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -6188,6 +5947,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -6195,6 +5955,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -6202,6 +5963,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -6209,6 +5971,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -6216,6 +5979,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -6223,6 +5987,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -6237,6 +6002,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -6244,6 +6010,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -6251,6 +6018,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
