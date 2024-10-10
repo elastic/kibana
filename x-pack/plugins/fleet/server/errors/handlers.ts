@@ -45,6 +45,7 @@ import {
   PackageSavedObjectConflictError,
   FleetTooManyRequestsError,
   AgentlessPolicyExistsRequestError,
+  PackagePolicyContentPackageError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -82,6 +83,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyRequestError) {
+    return 400;
+  }
+  if (error instanceof PackagePolicyContentPackageError) {
     return 400;
   }
   // Unauthorized

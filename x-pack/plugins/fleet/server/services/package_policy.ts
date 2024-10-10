@@ -240,6 +240,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
             prerelease: true,
           })
         : undefined);
@@ -463,6 +464,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
             prerelease: true,
           })
         : undefined;
