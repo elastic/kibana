@@ -174,7 +174,7 @@ export class DeploymentParamsMapper {
   public getVCURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
     // general purpose (c6gd) 1VCU = 1GB RAM / 0.5 vCPU
     // vector optimized (r6gd) 1VCU = 1GB RAM / 0.125 vCPU
-    const vCPUBreakpoints = this.serverlessVCPUBreakpoints[vCPUUsage];
+    const vCPUBreakpoints = this.vCpuBreakpoints[vCPUUsage];
 
     return Object.entries(vCPUBreakpoints).reduce((acc, [key, val]) => {
       // as we can't retrieve Search project configuration, we assume that the vector optimized instance is used
@@ -191,8 +191,8 @@ export class DeploymentParamsMapper {
     input: DeploymentParamsUI
   ): MlStartTrainedModelDeploymentRequestNew {
     const resultInput: DeploymentParamsUI = Object.create(input);
-    if (!this.showNodeInfo) {
-      // Enforce adaptive resources for serverless
+    if (!this.showNodeInfo && this.nlpSettings?.modelDeployment.allowStaticAllocations === false) {
+      // Enforce adaptive resources for serverless projects with prohibited static allocations
       resultInput.adaptiveResources = true;
     }
 
@@ -203,7 +203,7 @@ export class DeploymentParamsMapper {
       deployment_id: resultInput.deploymentId,
       priority: 'normal',
       threads_per_allocation: this.getNumberOfThreads(resultInput),
-      ...(resultInput.adaptiveResources || !this.showNodeInfo
+      ...(resultInput.adaptiveResources
         ? {
             adaptive_allocations: {
               enabled: true,
