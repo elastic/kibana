@@ -15,6 +15,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
+import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ComparisonSide } from '../comparison_side/comparison_side';
 import { FinalSide } from '../final_side/final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
@@ -22,11 +23,13 @@ import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FieldUpgradeConflictsResolverProps<FieldName extends keyof RuleFieldsDiff> {
   fieldName: FieldName;
+  fieldUpgradeState: FieldUpgradeState;
   fieldThreeWayDiff: RuleFieldsDiff[FieldName];
 }
 
 export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFieldsDiff>({
   fieldName,
+  fieldUpgradeState,
   fieldThreeWayDiff,
 }: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
@@ -37,7 +40,12 @@ export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFields
   return (
     <>
       <SplitAccordion
-        header={<FieldUpgradeConflictsResolverHeader fieldName={fieldName} />}
+        header={
+          <FieldUpgradeConflictsResolverHeader
+            fieldName={fieldName}
+            fieldUpgradeState={fieldUpgradeState}
+          />
+        }
         initialIsOpen={hasConflict}
         data-test-subj="ruleUpgradePerFieldDiff"
       >

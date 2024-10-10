@@ -19,7 +19,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
@@ -31,6 +31,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const utils = getService('securitySolutionUtils');
+  const samlAuth = getService('samlAuth');
 
   interface ApiCallsInterface {
     method: keyof Pick<TestAgent, 'post' | 'get'>;
@@ -70,7 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: METADATA_TRANSFORMS_STATUS_ROUTE,
+        path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        version: '1',
         body: undefined,
       },
       {
@@ -210,6 +212,11 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await t1AnalystSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -246,6 +253,11 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -283,6 +295,11 @@ export default function ({ getService }: FtrProviderContext) {
           await endpointOperationsAnalystSupertest[apiListItem.method](
             replacePathIds(apiListItem.path)
           )
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(200);
@@ -304,6 +321,11 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await adminSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });

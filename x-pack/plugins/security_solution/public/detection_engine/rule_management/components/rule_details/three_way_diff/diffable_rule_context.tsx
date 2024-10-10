@@ -8,7 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import type { DiffableRule } from '../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../common/utils/invariant';
-import type { SetRuleFieldResolvedValueFn } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { SetRuleFieldResolvedValueFn } from '../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';
 
 type ParamsWithoutRuleId = Omit<Parameters<SetRuleFieldResolvedValueFn>[0], 'ruleId'>;
 
