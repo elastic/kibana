@@ -111,7 +111,6 @@ export function AlertDetails() {
   const { euiTheme } = useEuiTheme();
 
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
@@ -285,13 +284,7 @@ export function AlertDetails() {
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
-      content: (
-        <RelatedAlerts
-          alert={alertDetail?.formatted}
-          kuery={relatedAlertsKuery}
-          setRelatedAlertsKuery={setRelatedAlertsKuery}
-        />
-      ),
+      content: <RelatedAlerts alert={alertDetail?.formatted} />,
     },
   ];
 
