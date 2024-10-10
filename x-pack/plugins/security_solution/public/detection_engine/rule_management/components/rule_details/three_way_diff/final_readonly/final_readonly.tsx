@@ -8,6 +8,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { FieldReadOnly } from './field_readonly';
+import * as i18n from '../translations';
 
 interface FinalReadOnlyProps {
   fieldName: string;
@@ -18,7 +19,7 @@ export function FinalReadOnly({ fieldName, setEditMode }: FinalReadOnlyProps) {
   return (
     <>
       <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
-        {'Edit'}
+        {i18n.EDIT_BUTTON_LABEL}
       </EuiButtonEmpty>
       <FieldReadOnly fieldName={fieldName} />
     </>

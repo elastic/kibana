@@ -15,6 +15,7 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import { useFinalEditContext } from './final_edit_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
+import * as i18n from '../translations';
 
 interface FieldFormWrapperProps {
   component: React.ComponentType<{
@@ -83,10 +84,10 @@ export function FieldFormWrapper({
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
-          {'Cancel'}
+          {i18n.CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={isValid === false}>
-          {'Save'}
+          {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>
       <Form form={form}>
