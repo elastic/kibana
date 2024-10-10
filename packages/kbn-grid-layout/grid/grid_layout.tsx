@@ -94,32 +94,33 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
 
           serializeState: () => {
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+            return currentLayout;
 
-            const serializePanelRows = (row: GridRowData, rowIndex: number) => {
-              const panels = row.panels;
-              const gridData: { [key: string]: any } = {};
-              Object.keys(panels).forEach((key) => {
-                const panel = panels[key];
-                gridData[key] = {
-                  row: rowIndex,
-                  i: key,
-                  x: panel.column,
-                  y: panel.row,
-                  w: panel.width,
-                  h: panel.height,
-                };
-              });
-              return gridData;
-            };
+            // const serializePanelRows = (row: GridRowData, rowIndex: number) => {
+            //   const panels = row.panels;
+            //   const gridData: { [key: string]: any } = {};
+            //   Object.keys(panels).forEach((key) => {
+            //     const panel = panels[key];
+            //     gridData[key] = {
+            //       row: rowIndex,
+            //       i: key,
+            //       x: panel.column,
+            //       y: panel.row,
+            //       w: panel.width,
+            //       h: panel.height,
+            //     };
+            //   });
+            //   return gridData;
+            // };
 
-            return {
-              panels: currentLayout.map(serializePanelRows),
-              rows: currentLayout.map((row, index) => ({
-                i: index,
-                title: row.title,
-                isCollapsed: row.isCollapsed,
-              })),
-            };
+            // return {
+            //   panels: currentLayout.map(serializePanelRows),
+            //   rows: currentLayout.map((row, index) => ({
+            //     i: index,
+            //     title: row.title,
+            //     isCollapsed: row.isCollapsed,
+            //   })),
+            // };
           },
         };
       },
