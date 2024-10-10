@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useForm, Form } from '../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../shared_imports';
@@ -47,22 +47,21 @@ export function FieldFormWrapper({
 
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
-  const deserialize = (defaultValue: FormData): FormData => {
-    if (!deserializer) {
-      return defaultValue;
-    }
+  const deserialize = useCallback(
+    (defaultValue: FormData): FormData => {
+      if (!deserializer) {
+        return defaultValue;
+      }
 
-    const rule = finalDiffableRule as Record<string, unknown>;
-    const fieldValue = rule[fieldName] as FormData;
-    return deserializer(fieldValue, finalDiffableRule);
-  };
+      const rule = finalDiffableRule as Record<string, unknown>;
+      const fieldValue = rule[fieldName] as FormData;
+      return deserializer(fieldValue, finalDiffableRule);
+    },
+    [deserializer, fieldName, finalDiffableRule]
+  );
 
-  const { form } = useForm({
-    schema: fieldFormSchema,
-    defaultValue: getDefaultValue(fieldName, finalDiffableRule),
-    deserializer: deserialize,
-    serializer,
-    onSubmit: async (formData, isValid) => {
+  const handleSubmit = useCallback(
+    async (formData: FormData, isValid: boolean) => {
       if (!isValid) {
         return;
       }
@@ -74,6 +73,15 @@ export function FieldFormWrapper({
       });
       setReadOnlyMode();
     },
+    [fieldName, finalDiffableRule.rule_id, setReadOnlyMode, setRuleFieldResolvedValue]
+  );
+
+  const { form } = useForm({
+    schema: fieldFormSchema,
+    defaultValue: getDefaultValue(fieldName, finalDiffableRule),
+    deserializer: deserialize,
+    serializer,
+    onSubmit: handleSubmit,
   });
 
   const [validity, setValidity] = useState<boolean | undefined>(undefined);
