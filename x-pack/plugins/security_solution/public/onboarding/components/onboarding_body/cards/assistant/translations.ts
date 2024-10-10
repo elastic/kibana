@@ -18,7 +18,7 @@ export const ASSISTANT_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.description',
   {
     defaultMessage:
-      'The Elastic AI connector is currently configured, powered by OpenAI gpt 4.0 for optimal performance. Select the provider to add your own AI Connector.',
+      'Choose and configure any AI provider available to use with Elastic AI Assistant.',
   }
 );
 

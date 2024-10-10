@@ -34,7 +34,7 @@ export const AssistantCard: OnboardingCardComponent = ({
   const aiConnectors = checkCompleteMetadata?.connectors as AIConnector[];
 
   return (
-    <OnboardingCardContentPanel paddingSize="s">
+    <OnboardingCardContentPanel style={{ paddingTop: 0 }}>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">

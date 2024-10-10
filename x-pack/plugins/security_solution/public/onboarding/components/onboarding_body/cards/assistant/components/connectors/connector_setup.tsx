@@ -87,7 +87,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
             }))}
           />
         ) : (
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="l">
             {actionTypes?.map((actionType: ActionType) => (
               <EuiFlexItem key={actionType.id}>
                 <EuiLink

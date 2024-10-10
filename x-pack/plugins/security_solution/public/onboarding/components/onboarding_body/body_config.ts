@@ -12,7 +12,6 @@ import { dashboardsCardConfig } from './cards/dashboards';
 import { rulesCardConfig } from './cards/rules';
 import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
-import { attackDiscoveryCardConfig } from './cards/attack_discovery';
 
 export const bodyConfig: OnboardingGroupConfig[] = [
   {
@@ -31,6 +30,6 @@ export const bodyConfig: OnboardingGroupConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.discoverGroup.title', {
       defaultMessage: 'Discover Elastic AI',
     }),
-    cards: [assistantCardConfig, attackDiscoveryCardConfig],
+    cards: [assistantCardConfig],
   },
 ];
