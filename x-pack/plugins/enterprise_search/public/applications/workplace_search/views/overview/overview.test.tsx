@@ -69,4 +69,40 @@ describe('Overview', () => {
 
     expect(wrapper.find(OnboardingSteps)).toHaveLength(0);
   });
+
+  describe('deprecation callout', () => {
+    it('renders the deprecation callout', () => {
+      setMockValues({ dataLoading: false, organization: { kibanaUIsEnabled: true } });
+      const wrapper = shallow(<Overview />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('dismisses the deprecation callout', () => {
+      setMockValues({ dataLoading: false, organization: { kibanaUIsEnabled: true } });
+
+      const wrapper = shallow(<Overview />);
+
+      sessionStorage.setItem('workplaceSearchHideDeprecationCallout', 'false');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+
+      wrapper
+        .find('EnterpriseSearchDeprecationCallout')
+        .dive()
+        .find('EuiCallOut')
+        .simulate('dismiss');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+      expect(sessionStorage.getItem('workplaceSearchHideDeprecationCallout')).toEqual('true');
+    });
+
+    it('does not render the deprecation callout if dismissed', () => {
+      setMockValues({
+        dataLoading: false,
+        hideOnboarding: true,
+        organization: { kibanaUIsEnabled: true },
+      });
+      const wrapper = shallow(<Overview />);
+      sessionStorage.setItem('workplaceSearchHideDeprecationCallout', 'true');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+    });
+  });
 });

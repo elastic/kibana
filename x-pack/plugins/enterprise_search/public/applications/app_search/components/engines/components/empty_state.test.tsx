@@ -9,9 +9,10 @@ import { setMockValues, mockTelemetryActions } from '../../../../__mocks__/kea_l
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { mount, shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta';
 
@@ -72,6 +73,44 @@ describe('EmptyState', () => {
 
     it('renders a prompt to contact the App Search admin', () => {
       expect(wrapper.find('[data-test-subj="NonAdminEmptyEnginesPrompt"]')).toHaveLength(1);
+    });
+  });
+
+  describe('deprecation callout', () => {
+    it('renders the deprecation callout when user can manage engines', () => {
+      setMockValues({ myRole: { canManageEngines: true } });
+      const wrapper = shallow(<EmptyState />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('renders the deprecation callout when user cannot manage engines', () => {
+      setMockValues({ myRole: { canManageEngines: false } });
+      const wrapper = shallow(<EmptyState />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('dismisses the deprecation callout', () => {
+      setMockValues({ myRole: { canManageEngines: false } });
+
+      const wrapper = mount(
+        <IntlProvider locale="en">
+          <EmptyState />
+        </IntlProvider>
+      );
+
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'false');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+
+      wrapper.find('button[data-test-subj="euiDismissCalloutButton"]').simulate('click');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+      expect(sessionStorage.getItem('appSearchHideDeprecationCallout')).toEqual('true');
+    });
+
+    it('does not render the deprecation callout if dismissed', () => {
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'true');
+      setMockValues({ myRole: { canManageEngines: true } });
+      const wrapper = shallow(<EmptyState />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
     });
   });
 });

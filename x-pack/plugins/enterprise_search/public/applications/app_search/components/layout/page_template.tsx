@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 import useObservable from 'react-use/lib/useObservable';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { EnterpriseSearchDeprecationCallout } from '../../../shared/deprecation_callout/deprecation_callout';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
@@ -36,6 +37,15 @@ export const AppSearchPageTemplate: React.FC<
     };
   }, [chromeStyle, navItems, updateSideNavDefinition]);
 
+  const [showDeprecationCallout, setShowDeprecationCallout] = React.useState(
+    !sessionStorage.getItem('appSearchHideDeprecationCallout')
+  );
+
+  const onDismissDeprecationCallout = () => {
+    setShowDeprecationCallout(false);
+    sessionStorage.setItem('appSearchHideDeprecationCallout', 'true');
+  };
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
@@ -48,6 +58,11 @@ export const AppSearchPageTemplate: React.FC<
       hideEmbeddedConsole
     >
       {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
+      {showDeprecationCallout ? (
+        <EnterpriseSearchDeprecationCallout onDismissAction={onDismissDeprecationCallout} />
+      ) : (
+        <></>
+      )}
       {children}
     </EnterpriseSearchPageTemplateWrapper>
   );

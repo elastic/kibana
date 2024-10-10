@@ -13,8 +13,10 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { of } from 'rxjs';
+
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
@@ -79,5 +81,33 @@ describe('AppSearchPageTemplate', () => {
     );
     expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('isLoading')).toEqual(false);
     expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('emptyState')).toEqual(<div />);
+  });
+
+  describe('deprecation callout', () => {
+    it('renders the deprecation callout', () => {
+      const wrapper = shallow(<AppSearchPageTemplate />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('dismisses the deprecation callout', () => {
+      const wrapper = mount(
+        <IntlProvider locale="en">
+          <AppSearchPageTemplate />
+        </IntlProvider>
+      );
+
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'false');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+
+      wrapper.find('button[data-test-subj="euiDismissCalloutButton"]').simulate('click');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+      expect(sessionStorage.getItem('appSearchHideDeprecationCallout')).toEqual('true');
+    });
+
+    it('does not render the deprecation callout if dismissed', () => {
+      const wrapper = shallow(<AppSearchPageTemplate />);
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'true');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+    });
   });
 });
