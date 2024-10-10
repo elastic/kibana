@@ -103,4 +103,4 @@ export {
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
 export { FieldValueSelection, FieldValueSuggestions } from './components';
 
-export { AddDataPanel } from './components/add_data_panel';
+export { AddDataPanel, type AddDataPanelProps } from './components/add_data_panel';

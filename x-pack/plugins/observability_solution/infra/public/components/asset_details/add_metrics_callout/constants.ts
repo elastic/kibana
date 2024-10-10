@@ -7,7 +7,7 @@
 
 import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public/components/add_data_panel';
+import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 export type AddMetricsCalloutKey =
