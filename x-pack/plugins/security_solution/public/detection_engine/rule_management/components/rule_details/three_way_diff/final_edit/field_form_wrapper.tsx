@@ -47,13 +47,13 @@ export function FieldFormWrapper({
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
   const deserialize = (defaultValue: FormData): FormData => {
-    if (deserializer) {
-      const rule = finalDiffableRule as Record<string, unknown>;
-      const fieldValue = rule[fieldName] as FormData;
-      return deserializer(fieldValue, finalDiffableRule);
+    if (!deserializer) {
+      return defaultValue;
     }
 
-    return defaultValue;
+    const rule = finalDiffableRule as Record<string, unknown>;
+    const fieldValue = rule[fieldName] as FormData;
+    return deserializer(fieldValue, finalDiffableRule);
   };
 
   const { form } = useForm({
