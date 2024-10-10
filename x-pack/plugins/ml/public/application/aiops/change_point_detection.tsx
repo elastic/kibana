@@ -64,7 +64,6 @@ export const ChangePointDetectionPage: FC = () => {
               'i18n',
               'lens',
               'notifications',
-              'presentationUtil',
               'share',
               'storage',
               'theme',

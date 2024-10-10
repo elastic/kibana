@@ -74,23 +74,25 @@ export const useUpdateUserProfile = ({
           {
             title: notificationTitle,
             text: (
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <p>{pageReloadText}</p>
-                  <EuiButton
-                    size="s"
-                    onClick={() => window.location.reload()}
-                    data-test-subj="windowReloadButton"
-                  >
-                    {i18n.translate(
-                      'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
-                      {
-                        defaultMessage: 'Reload page',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <>
+                <p>{pageReloadText}</p>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => window.location.reload()}
+                      data-test-subj="windowReloadButton"
+                    >
+                      {i18n.translate(
+                        'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
+                        {
+                          defaultMessage: 'Reload page',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
             ),
           },
           {

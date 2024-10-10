@@ -5,7 +5,23 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "searchInferenceEndpoints",
+        "id": "def-public.INFERENCE_ENDPOINTS_UI_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "INFERENCE_ENDPOINTS_UI_FLAG",
+        "description": [],
+        "signature": [
+          "\"inferenceEndpointsUi:enabled\""
+        ],
+        "path": "x-pack/plugins/search_inference_endpoints/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "searchInferenceEndpoints",

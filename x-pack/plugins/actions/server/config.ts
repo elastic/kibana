@@ -147,7 +147,7 @@ export const configSchema = schema.object({
   ),
   usage: schema.maybe(
     schema.object({
-      cert: schema.maybe(
+      ca: schema.maybe(
         schema.object({
           path: schema.string(),
         })

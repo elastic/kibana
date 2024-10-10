@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
-import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
-import { pluginServices } from '../../services';
+import { EnvironmentName, Project, ProjectID, ProjectStatus, SolutionName } from '../../../common';
 import { LabsStrings } from '../../i18n';
 
+import { getPresentationLabsService } from '../../services/presentation_labs_service';
 import { ProjectList } from './project_list';
 
 const { Flyout: strings } = LabsStrings.Components;
@@ -56,12 +56,11 @@ export const getOverridenCount = (projects: Record<ProjectID, Project>) =>
 
 export const LabsFlyout = (props: Props) => {
   const { solutions, onEnabledCountChange = () => {}, onClose } = props;
-  const { labs: labsService } = pluginServices.getHooks();
-  const { getProjects, setProjectStatus, reset } = labsService.useService();
+  const labsService = useMemo(() => getPresentationLabsService(), []);
 
-  const [projects, setProjects] = useState(getProjects());
+  const [projects, setProjects] = useState(labsService.getProjects());
   const [overrideCount, setOverrideCount] = useState(getOverridenCount(projects));
-  const initialStatus = useRef(getProjects());
+  const initialStatus = useRef(labsService.getProjects());
 
   const isChanged = hasStatusChanged(initialStatus.current, projects);
 
@@ -74,8 +73,8 @@ export const LabsFlyout = (props: Props) => {
   }, [onEnabledCountChange, overrideCount]);
 
   const onStatusChange = (id: ProjectID, env: EnvironmentName, enabled: boolean) => {
-    setProjectStatus(id, env, enabled);
-    setProjects(getProjects());
+    labsService.setProjectStatus(id, env, enabled);
+    setProjects(labsService.getProjects());
   };
 
   let footer: ReactNode = null;
@@ -83,8 +82,8 @@ export const LabsFlyout = (props: Props) => {
   const resetButton = (
     <EuiButtonEmpty
       onClick={() => {
-        reset();
-        setProjects(getProjects());
+        labsService.reset();
+        setProjects(labsService.getProjects());
       }}
       isDisabled={!overrideCount}
     >

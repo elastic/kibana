@@ -73,7 +73,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
-        CODEQL_BRANCHES: 7.17,8.x,main
+        CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
+        CODE_SCANNING_ES_API_KEY: ${{secrets.CODE_SCANNING_ES_API_KEY}}
+        CODE_SCANNING_BRANCHES: 7.17,8.x,main
       run: |
         npm ci --omit=dev
         node codeql-alert

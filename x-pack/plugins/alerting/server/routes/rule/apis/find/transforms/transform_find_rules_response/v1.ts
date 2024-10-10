@@ -16,6 +16,7 @@ import {
   transformRuleActionsV1,
   transformMonitoringV1,
   transformRuleLastRunV1,
+  transformFlappingV1,
 } from '../../../../transforms';
 
 export const transformPartialRule = <Params extends RuleParams = never>(
@@ -78,6 +79,7 @@ export const transformPartialRule = <Params extends RuleParams = never>(
       ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
       : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
+    ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;

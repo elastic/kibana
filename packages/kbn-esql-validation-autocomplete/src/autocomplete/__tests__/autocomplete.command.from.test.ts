@@ -9,6 +9,7 @@
 
 import { METADATA_FIELDS } from '../../shared/constants';
 import { setup, indexes, integrations } from './helpers';
+import { getRecommendedQueries } from '../recommended_queries/templates';
 
 const visibleIndices = indexes
   .filter(({ hidden }) => !hidden)
@@ -72,8 +73,17 @@ describe('autocomplete.suggest', () => {
       const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
       test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
+        const recommendedQueries = getRecommendedQueries({
+          fromCommand: '',
+          timeField: 'dateField',
+        });
         const { assertSuggestions } = await setup();
-        const expected = ['METADATA $0', ',', '| '].sort();
+        const expected = [
+          'METADATA $0',
+          ',',
+          '| ',
+          ...recommendedQueries.map((query) => query.queryString),
+        ].sort();
 
         await assertSuggestions('from a, b /', expected);
       });

@@ -14,18 +14,11 @@ import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CDR_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
-} from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
 import { showErrorToast } from '../..';
-import {
-  getFindingsCountAggQueryVulnerabilities,
-  getVulnerabilitiesAggregationCount,
-} from '../utils/hooks_utils';
+import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
@@ -35,30 +28,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
-
-const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
-  index: CDR_VULNERABILITIES_INDEX_PATTERN,
-  size: 0,
-  aggs: getFindingsCountAggQueryVulnerabilities(),
-  ignore_unavailable: true,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
-  },
-});
 
 export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
   const {
@@ -73,7 +42,7 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options),
+          params: getVulnerabilitiesQuery(options, true),
         })
       );
 

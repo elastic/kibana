@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -33,6 +34,7 @@ import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_
 import { EvaluationSettings } from '.';
 
 interface Props {
+  dataViews: DataViewsContract;
   selectedConversation: Conversation;
 }
 
@@ -41,7 +43,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ selectedConversation: defaultSelectedConversation }) => {
+  ({ dataViews, selectedConversation: defaultSelectedConversation }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -158,7 +160,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
           {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
-          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && <KnowledgeBaseSettingsManagement />}
+          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+            <KnowledgeBaseSettingsManagement dataViews={dataViews} />
+          )}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
       </>

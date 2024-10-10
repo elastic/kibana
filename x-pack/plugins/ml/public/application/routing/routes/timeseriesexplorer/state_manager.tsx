@@ -216,6 +216,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   );
 
   useEffect(() => {
+    if (selectedForecastIdProp !== selectedForecastId) {
+      setSelectedForecastIdProp(undefined);
+    }
+
     if (
       autoZoomDuration !== undefined &&
       boundsMinMs !== undefined &&
@@ -223,9 +227,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       selectedJob !== undefined &&
       selectedForecastId !== undefined
     ) {
-      if (selectedForecastIdProp !== selectedForecastId) {
-        setSelectedForecastIdProp(undefined);
-      }
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
         .then((resp) => {

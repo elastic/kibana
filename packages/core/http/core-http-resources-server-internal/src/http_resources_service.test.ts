@@ -69,6 +69,23 @@ describe('HttpResources service', () => {
           expect(registeredRouteConfig.options?.access).toBe('internal');
         });
 
+        it('registration defaults to excluded from OAS', () => {
+          register({ ...routeConfig, options: { access: 'internal' } }, async (ctx, req, res) =>
+            res.ok()
+          );
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.excludeFromOAS).toBe(true);
+        });
+
+        it('registration allows being included in OAS', () => {
+          register(
+            { ...routeConfig, options: { access: 'internal', excludeFromOAS: false } },
+            async (ctx, req, res) => res.ok()
+          );
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.excludeFromOAS).toBe(false);
+        });
+
         describe('renderCoreApp', () => {
           it('formats successful response', async () => {
             register(routeConfig, async (ctx, req, res) => {

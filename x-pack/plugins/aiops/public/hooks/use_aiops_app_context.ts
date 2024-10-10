@@ -24,7 +24,6 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -105,7 +104,6 @@ export interface AiopsAppContextValue {
    * Internationalisation service
    */
   i18n: CoreStart['i18n'];
-  presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
   cases?: CasesPublicStart;
   isServerless?: boolean;
