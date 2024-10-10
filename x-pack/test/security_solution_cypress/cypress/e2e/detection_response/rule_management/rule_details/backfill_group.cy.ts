@@ -34,14 +34,7 @@ import {
 describe(
   'Backfill groups',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   function () {
     before(() => {
