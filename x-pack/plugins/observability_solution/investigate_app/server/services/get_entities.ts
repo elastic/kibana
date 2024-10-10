@@ -61,7 +61,6 @@ export async function getEntitiesWithSource({
           identityFields: entity?.entity.identityFields,
           id: entity?.entity.id,
           definitionId: entity?.entity.definitionId,
-          firstSeenTimestamp: entity?.entity.firstSeenTimestamp,
           lastSeenTimestamp: entity?.entity.lastSeenTimestamp,
           displayName: entity?.entity.displayName,
           metrics: entity?.entity.metrics,
