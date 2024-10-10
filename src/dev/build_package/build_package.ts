@@ -78,6 +78,25 @@ async function buildPackage(packageRoot: string, log: ToolingLog) {
 
   log.info(`building packages/${packageName}`);
 
+  // eslint-disable-next-line no-console
+  console.log('Hello! I am the build script!', {
+    packageRoot,
+    packageName,
+    packageFolder,
+    buildFile,
+    webpackBuildOptions,
+    webpackArgs,
+    commandName,
+    env,
+    outPath,
+    argsProcessed,
+    cwd: process.cwd(),
+  });
+
+  const lsResult = await execa('ls', ['-la', 'node_modules/.bin']);
+  // eslint-disable-next-line no-console
+  console.log(lsResult.stdout);
+
   return execa('webpack-cli', argsProcessed, {
     stdio: 'inherit',
     env: { ...process.env, ...env },

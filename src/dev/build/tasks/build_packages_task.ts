@@ -103,12 +103,12 @@ function excludeDirsByName(name: string) {
 }
 
 export const BuildPackages: Task = {
-  description: 'Building distributable versions of Bazel packages',
+  description: 'Building distributable versions of packages',
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
-    log.info(`Building Bazel artifacts which are necessary for the build`);
+    log.info(`Building webpack artifacts which are necessary for the build`);
     await buildWebpackBundles(log, { quiet: false });
 
     const transformConfig: TransformConfig = {
