@@ -975,6 +975,12 @@ module.exports = {
       },
     },
     {
+      files: ['x-pack/plugins/search*/**/*.tsx', 'x-pack/packages/search/**/*.tsx'],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
+      },
+    },
+    {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
