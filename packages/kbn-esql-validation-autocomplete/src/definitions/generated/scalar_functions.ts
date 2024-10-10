@@ -524,6 +524,8 @@ const categorizeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.categorize', {
     defaultMessage: 'Categorizes text messages.',
   }),
+  ignoreAsSuggestion: true,
+
   alias: undefined,
   signatures: [
     {
@@ -3607,7 +3609,7 @@ const mvFirstDefinition: FunctionDefinition = {
   name: 'mv_first',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_first', {
     defaultMessage:
-      "Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the minimum value use `MV_MIN` instead of\n`MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_FIRST`.",
+      'Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.',
   }),
   alias: undefined,
   signatures: [
@@ -3764,7 +3766,7 @@ const mvLastDefinition: FunctionDefinition = {
   name: 'mv_last',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_last', {
     defaultMessage:
-      "Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the maximum value use `MV_MAX` instead of\n`MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_LAST`.",
+      'Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.',
   }),
   alias: undefined,
   signatures: [
@@ -4474,7 +4476,7 @@ const mvSliceDefinition: FunctionDefinition = {
   name: 'mv_slice',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_slice', {
     defaultMessage:
-      'Returns a subset of the multivalued field using the start and end index values.',
+      'Returns a subset of the multivalued field using the start and end index values.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
   }),
   alias: undefined,
   signatures: [
@@ -5511,6 +5513,8 @@ const qstrDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
+  ignoreAsSuggestion: true,
+
   alias: undefined,
   signatures: [
     {
