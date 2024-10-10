@@ -20,7 +20,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
   const bannerTitle = i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventMergingBanner.title',
     {
-      defaultMessage: "We've recently made changes to Linux event collection",
+      defaultMessage: "We've recently changed Linux event collection",
     }
   );
 
@@ -29,7 +29,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.eventMergingBanner.body"
-          defaultMessage="Elastic Agent 8.16+ will produce less telemetry without reducing system visibility, which may impact existing event filters. To learn more about these changes and how to adjust your settings, visit our {documentation}."
+          defaultMessage="Elastic Agent 8.16+ produces less telemetry without reducing system visibility, which may impact existing event filters. For more about these changes and how to adjust your settings, visit our {documentation}."
           values={{
             documentation: (
               <EuiLink
