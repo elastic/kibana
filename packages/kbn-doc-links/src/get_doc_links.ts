@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
   const SERVERLESS_OBSERVABILITY_DOCS = `${SERVERLESS_DOCS}observability/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
+  const SEARCH_LABS_BLOG = `${ELASTIC_WEBSITE_URL}search-labs/blog/`;
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
@@ -143,6 +144,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
       relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
       resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
+      searchLabsEvolutionBlog: `${SEARCH_LABS_BLOG}evolution-app-search-elasticsearch`,
       searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
       security: `${APP_SEARCH_DOCS}security-and-users.html`,
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
@@ -258,6 +260,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html`,
       privateSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
+      searchLabsEvolutionBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
       serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
       sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,

@@ -11,6 +11,8 @@ import { EuiCallOut, EuiButton, EuiLink, EuiFlexItem, EuiFlexGroup, EuiSpacer } 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../doc_links';
+
 interface DeprecationCalloutProps {
   onDismissAction: () => void;
 }
@@ -41,7 +43,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
           workplaceSearchBlogUrl: (
             <EuiLink
               data-test-subj="workplaceSearch-deprecationCallout-blog-link"
-              href="https://www.elastic.co/blog/evolution-workplace-search-private-data-elasticsearch"
+              href={docLinks.workplaceSearchEvolutionBlog}
               target="_blank"
               data-telemetry-id="workplaceSearch-deprecationCallout-blog-viewLink"
             >
@@ -53,7 +55,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
           appSearchBlogUrl: (
             <EuiLink
               data-test-subj="appSearch-deprecationCallout-blog-link"
-              href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
+              href={docLinks.appSearchEvolutionBlog}
               target="_blank"
               data-telemetry-id="appSearch-deprecationCallout-blog-viewLink"
             >
@@ -68,7 +70,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href="https://www.elastic.co/search-labs/blog/evolution-app-search-elasticsearch"
+            href={docLinks.appSearchEvolutionBlog}
             color="warning"
             iconType="popout"
             iconSide="right"
