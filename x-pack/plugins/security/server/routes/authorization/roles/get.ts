@@ -33,7 +33,17 @@ export function defineGetRolesRoutes({
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            params: schema.object({ name: schema.string({ minLength: 1 }) }),
+            params: schema.object({
+              name: schema.string({
+                meta: { description: 'The role name.' },
+                minLength: 1,
+              }),
+            }),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },
