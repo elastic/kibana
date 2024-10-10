@@ -8,16 +8,18 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
   const daysToMillisecond = (days: number) => days * 24 * 60 * 60 * 1000;
+  const RETENTION = 90;
 
   const dataOldKspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(91)).toString(),
+      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -37,7 +39,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   const dataOldCspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(91)).toString(),
+      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -52,6 +54,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+    },
+  ];
+
+  const dataOldCnvm = [
+    {
+      ...vulnerabilitiesLatestMock[0],
+      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
     },
   ];
 
@@ -86,6 +95,15 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await findings.index.add(dataOldCspm);
 
         await findings.navigateToLatestFindingsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await findings.isLatestFindingsTableThere()).to.be(false);
+      });
+      it('returns no Findings CNVM', async () => {
+        // Prepare mocked findings
+        await findings.vulnerabilitiesIndex.remove();
+        await findings.vulnerabilitiesIndex.add(dataOldCnvm);
+
+        await findings.navigateToLatestVulnerabilitiesPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
