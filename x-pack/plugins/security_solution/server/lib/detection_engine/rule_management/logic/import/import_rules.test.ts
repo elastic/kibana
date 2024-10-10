@@ -47,7 +47,7 @@ describe('importRules', () => {
         message: 'import error',
       }),
       createRuleImportErrorObject({
-        ruleId: 'rule-id',
+        ruleId: 'rule-id-2',
         message: 'import error',
       }),
     ]);
@@ -70,6 +70,43 @@ describe('importRules', () => {
       {
         error: {
           message: 'import error',
+          status_code: 400,
+        },
+        rule_id: 'rule-id-2',
+      },
+    ]);
+  });
+
+  it('returns multiple errors for the same rule if client import returns generic errors', async () => {
+    detectionRulesClient.importRules.mockResolvedValueOnce([
+      createRuleImportErrorObject({
+        ruleId: 'rule-id',
+        message: 'import error',
+      }),
+      createRuleImportErrorObject({
+        ruleId: 'rule-id',
+        message: 'import error 2',
+      }),
+    ]);
+
+    const result = await importRules({
+      ruleChunks: [[ruleToImport]],
+      overwriteRules: false,
+      detectionRulesClient,
+      ruleSourceImporter: mockRuleSourceImporter,
+    });
+
+    expect(result).toEqual([
+      {
+        error: {
+          message: 'import error',
+          status_code: 400,
+        },
+        rule_id: 'rule-id',
+      },
+      {
+        error: {
+          message: 'import error 2',
           status_code: 400,
         },
         rule_id: 'rule-id',
