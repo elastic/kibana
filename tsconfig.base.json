@@ -6,8 +6,6 @@
       // START AUTOMATED PACKAGE LISTING
       "@kbn/aad-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/aad"],
       "@kbn/aad-fixtures-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/aad/*"],
-      "@kbn/ace": ["packages/kbn-ace"],
-      "@kbn/ace/*": ["packages/kbn-ace/*"],
       "@kbn/actions-plugin": ["x-pack/plugins/actions"],
       "@kbn/actions-plugin/*": ["x-pack/plugins/actions/*"],
       "@kbn/actions-simulators-plugin": ["x-pack/test/alerting_api_integration/common/plugins/actions_simulators"],

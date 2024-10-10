@@ -6,7 +6,6 @@
 ####
 
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
-packages/kbn-ace @elastic/kibana-management
 x-pack/plugins/actions @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 packages/kbn-actions-types @elastic/response-ops
