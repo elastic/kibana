@@ -15,7 +15,10 @@ import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
-type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
+export type VegaVisType = new (
+  el: HTMLDivElement,
+  fireEvent: IInterpreterRenderHandlers['event']
+) => {
   render(visData: VegaParser): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
