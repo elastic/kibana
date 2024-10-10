@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuditLogger, CoreAuditService } from '@kbn/core/server';
+import type { AuditLogger, CoreAuditService, EcsEvent } from '@kbn/core/server';
+import type { ArrayElement } from '@kbn/utility-types';
 import type { MlClient, MlClientParams } from './types';
 import {
   getADJobIdsFromRequest,
@@ -16,49 +17,64 @@ import {
 } from './ml_client';
 
 type TaskTypeAD =
-  | 'put_ad_job'
-  | 'delete_ad_job'
-  | 'delete_model_snapshot'
-  | 'open_ad_job'
-  | 'close_ad_job'
-  | 'update_ad_job'
-  | 'reset_ad_job'
-  | 'revert_ad_snapshot'
-  | 'put_ad_datafeed'
-  | 'delete_ad_datafeed'
-  | 'start_ad_datafeed'
-  | 'stop_ad_datafeed'
-  | 'update_ad_datafeed'
-  | 'put_calendar'
-  | 'delete_calendar'
-  | 'put_calendar_job'
-  | 'delete_calendar_job'
-  | 'post_calendar_events'
-  | 'delete_calendar_event'
-  | 'put_filter'
-  | 'update_filter'
-  | 'delete_filter'
-  | 'forecast'
-  | 'delete_forecast';
+  | 'ml_put_ad_job'
+  | 'ml_delete_ad_job'
+  | 'ml_delete_model_snapshot'
+  | 'ml_open_ad_job'
+  | 'ml_close_ad_job'
+  | 'ml_update_ad_job'
+  | 'ml_reset_ad_job'
+  | 'ml_revert_ad_snapshot'
+  | 'ml_put_ad_datafeed'
+  | 'ml_delete_ad_datafeed'
+  | 'ml_start_ad_datafeed'
+  | 'ml_stop_ad_datafeed'
+  | 'ml_update_ad_datafeed'
+  | 'ml_put_calendar'
+  | 'ml_delete_calendar'
+  | 'ml_put_calendar_job'
+  | 'ml_delete_calendar_job'
+  | 'ml_post_calendar_events'
+  | 'ml_delete_calendar_event'
+  | 'ml_put_filter'
+  | 'ml_update_filter'
+  | 'ml_delete_filter'
+  | 'ml_forecast'
+  | 'ml_delete_forecast';
 
 type TaskTypeDFA =
-  | 'put_dfa_job'
-  | 'delete_dfa_job'
-  | 'start_dfa_job'
-  | 'stop_dfa_job'
-  | 'update_dfa_job';
+  | 'ml_put_dfa_job'
+  | 'ml_delete_dfa_job'
+  | 'ml_start_dfa_job'
+  | 'ml_stop_dfa_job'
+  | 'ml_update_dfa_job';
 
 type TaskTypeNLP =
-  | 'put_trained_model'
-  | 'delete_trained_model'
-  | 'start_trained_model_deployment'
-  | 'stop_trained_model_deployment'
-  | 'update_trained_model_deployment'
-  | 'infer_trained_model';
+  | 'ml_put_trained_model'
+  | 'ml_delete_trained_model'
+  | 'ml_start_trained_model_deployment'
+  | 'ml_stop_trained_model_deployment'
+  | 'ml_update_trained_model_deployment'
+  | 'ml_infer_trained_model';
 
 type TaskType = TaskTypeAD | TaskTypeDFA | TaskTypeNLP;
 
 const APPLICATION = 'elastic/ml';
+const CATEGORY = 'database';
+
+const EVENT_TYPES: Record<string, ArrayElement<EcsEvent['type']>> = {
+  creation: 'creation',
+  deletion: 'deletion',
+  change: 'change',
+  access: 'access',
+} as const;
+type EventTypes = keyof typeof EVENT_TYPES;
+
+interface MlLogEntry {
+  event: EcsEvent;
+  message: string;
+  labels: { application: typeof APPLICATION };
+}
 
 export class MlAuditLogger {
   private auditLogger: AuditLogger;
@@ -88,196 +104,280 @@ export class MlAuditLogger {
 
   private logSuccess(taskType: TaskType, p: MlClientParams) {
     const entry = this.createLogEntry(taskType, p, true);
-    this.auditLogger.log(entry);
+    if (entry) {
+      this.auditLogger.log(entry);
+    }
   }
   private logFailure(taskType: TaskType, p: MlClientParams) {
     const entry = this.createLogEntry(taskType, p, false);
-    this.auditLogger.log(entry);
+    if (entry) {
+      this.auditLogger.log(entry);
+    }
   }
 
-  private createLogEntry(taskType: TaskType, p: MlClientParams, success: boolean) {
-    return {
-      event: { action: taskType, outcome: success ? 'success' : 'failure' },
-      message: this.createMessage(taskType, p),
-      labels: {
-        application: APPLICATION,
-      },
-    };
+  private createLogEntry(
+    taskType: TaskType,
+    p: MlClientParams,
+    success: boolean
+  ): MlLogEntry | undefined {
+    try {
+      const { message, type } = this.createPartialLogEntry(taskType, p);
+      return {
+        event: {
+          action: taskType,
+          type,
+          category: [CATEGORY],
+          outcome: success ? 'success' : 'failure',
+        },
+        message,
+        labels: {
+          application: APPLICATION,
+        },
+      };
+    } catch (error) {
+      // if an unknown task type is passed, we won't log anything
+    }
   }
 
-  private createMessage(taskType: TaskType, p: MlClientParams): string {
+  private createPartialLogEntry(
+    taskType: TaskType,
+    p: MlClientParams
+  ): { message: string; type: EventTypes[] } {
     switch (taskType) {
       /* Anomaly Detection */
-      case 'put_ad_job': {
+      case 'ml_put_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Creating anomaly detection job ${jobId}`;
+        return { message: `Creating anomaly detection job ${jobId}`, type: [EVENT_TYPES.creation] };
       }
-      case 'delete_ad_job': {
+      case 'ml_delete_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Deleting anomaly detection job ${jobId}`;
+        return { message: `Deleting anomaly detection job ${jobId}`, type: [EVENT_TYPES.deletion] };
       }
-      case 'delete_model_snapshot': {
+      case 'ml_delete_model_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
         const [params] = p as Parameters<MlClient['deleteModelSnapshot']>;
         const snapshotId = params.snapshot_id;
-        return `Deleting model snapshot ${snapshotId} from job ${jobId}`;
+        return {
+          message: `Deleting model snapshot ${snapshotId} from job ${jobId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
-      case 'open_ad_job': {
+      case 'ml_open_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Opening anomaly detection job ${jobId}`;
+        return { message: `Opening anomaly detection job ${jobId}`, type: [EVENT_TYPES.change] };
       }
-      case 'close_ad_job': {
+      case 'ml_close_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Closing anomaly detection job ${jobId}`;
+        return { message: `Closing anomaly detection job ${jobId}`, type: [EVENT_TYPES.change] };
       }
-      case 'update_ad_job': {
+      case 'ml_update_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Updating anomaly detection job ${jobId}`;
+        return { message: `Updating anomaly detection job ${jobId}`, type: [EVENT_TYPES.change] };
       }
-      case 'reset_ad_job': {
+      case 'ml_reset_ad_job': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Resetting anomaly detection job ${jobId}`;
+        return { message: `Resetting anomaly detection job ${jobId}`, type: [EVENT_TYPES.change] };
       }
-      case 'revert_ad_snapshot': {
+      case 'ml_revert_ad_snapshot': {
         const [jobId] = getADJobIdsFromRequest(p);
         const [params] = p as Parameters<MlClient['revertModelSnapshot']>;
         const snapshotId = params.snapshot_id;
-        return `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}`;
+        return {
+          message: `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'put_ad_datafeed': {
+      case 'ml_put_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Creating anomaly detection datafeed ${datafeedId} for job ${jobId}`;
+        return {
+          message: `Creating anomaly detection datafeed ${datafeedId} for job ${jobId}`,
+          type: [EVENT_TYPES.creation],
+        };
       }
-      case 'delete_ad_datafeed': {
+      case 'ml_delete_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return `Deleting anomaly detection datafeed ${datafeedId}`;
+        return {
+          message: `Deleting anomaly detection datafeed ${datafeedId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
-      case 'start_ad_datafeed': {
+      case 'ml_start_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return `Starting anomaly detection datafeed ${datafeedId}`;
+        return {
+          message: `Starting anomaly detection datafeed ${datafeedId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'stop_ad_datafeed': {
+      case 'ml_stop_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return `Stopping anomaly detection datafeed ${datafeedId}`;
+        return {
+          message: `Stopping anomaly detection datafeed ${datafeedId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'update_ad_datafeed': {
+      case 'ml_update_ad_datafeed': {
         const [datafeedId] = getDatafeedIdsFromRequest(p);
-        return `Updating anomaly detection datafeed ${datafeedId}`;
+        return {
+          message: `Updating anomaly detection datafeed ${datafeedId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'put_calendar': {
+      case 'ml_put_calendar': {
         const [params] = p as Parameters<MlClient['putCalendar']>;
         const calendarId = params.calendar_id;
         // @ts-expect-error body is optional
         const jobIds = (params.body ?? params).job_ids;
-        return `Creating calendar ${calendarId} ${jobIds ? `with job(s) ${jobIds}` : ''}`;
+        return {
+          message: `Creating calendar ${calendarId} ${jobIds ? `with job(s) ${jobIds}` : ''}`,
+          type: [EVENT_TYPES.creation],
+        };
       }
-      case 'delete_calendar': {
+      case 'ml_delete_calendar': {
         const [params] = p as Parameters<MlClient['deleteCalendar']>;
         const calendarId = params.calendar_id;
-        return `Deleting calendar ${calendarId}`;
+        return { message: `Deleting calendar ${calendarId}`, type: [EVENT_TYPES.deletion] };
       }
-      case 'put_calendar_job': {
+      case 'ml_put_calendar_job': {
         const [params] = p as Parameters<MlClient['putCalendarJob']>;
         const calendarId = params.calendar_id;
         const jobIds = params.job_id;
-        return `Adding job(s) ${jobIds} to calendar ${calendarId}`;
+        return {
+          message: `Adding job(s) ${jobIds} to calendar ${calendarId}`,
+          type: [EVENT_TYPES.creation],
+        };
       }
-      case 'delete_calendar_job': {
+      case 'ml_delete_calendar_job': {
         const [params] = p as Parameters<MlClient['deleteCalendarJob']>;
         const calendarId = params.calendar_id;
         const jobIds = params.job_id;
-        return `Removing job(s) ${jobIds} from calendar ${calendarId}`;
+        return {
+          message: `Removing job(s) ${jobIds} from calendar ${calendarId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
-      case 'post_calendar_events': {
+      case 'ml_post_calendar_events': {
         const [params] = p as Parameters<MlClient['postCalendarEvents']>;
         const calendarId = params.calendar_id;
         // @ts-expect-error body is optional
         const eventsCount = (params.body ?? params).events;
-        return `Adding ${eventsCount} event(s) to calendar ${calendarId}`;
+        return {
+          message: `Adding ${eventsCount} event(s) to calendar ${calendarId}`,
+          type: [EVENT_TYPES.creation],
+        };
       }
-      case 'delete_calendar_event': {
+      case 'ml_delete_calendar_event': {
         const [params] = p as Parameters<MlClient['deleteCalendarEvent']>;
         const calendarId = params.calendar_id;
         const eventId = params.event_id;
-        return `Removing event(s) ${eventId} from calendar ${calendarId}`;
+        return {
+          message: `Removing event(s) ${eventId} from calendar ${calendarId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
-      case 'put_filter': {
+      case 'ml_put_filter': {
         const [params] = p as Parameters<MlClient['putFilter']>;
         const filterId = params.filter_id;
-        return `Creating filter ${filterId}`;
+        return { message: `Creating filter ${filterId}`, type: [EVENT_TYPES.creation] };
       }
-      case 'update_filter': {
+      case 'ml_update_filter': {
         const [params] = p as Parameters<MlClient['updateFilter']>;
         const filterId = params.filter_id;
-        return `Updating filter ${filterId}`;
+        return { message: `Updating filter ${filterId}`, type: [EVENT_TYPES.change] };
       }
-      case 'delete_filter': {
+      case 'ml_delete_filter': {
         const [params] = p as Parameters<MlClient['deleteFilter']>;
         const filterId = params.filter_id;
-        return `Deleting filter ${filterId}`;
+        return { message: `Deleting filter ${filterId}`, type: [EVENT_TYPES.deletion] };
       }
-      case 'forecast': {
+      case 'ml_forecast': {
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Forecasting for job ${jobId}`;
+        return { message: `Forecasting for job ${jobId}`, type: [EVENT_TYPES.creation] };
       }
-      case 'delete_forecast': {
+      case 'ml_delete_forecast': {
         const [params] = p as Parameters<MlClient['deleteForecast']>;
         const forecastId = params.forecast_id;
         const [jobId] = getADJobIdsFromRequest(p);
-        return `Deleting forecast ${forecastId} for job ${jobId}`;
+        return {
+          message: `Deleting forecast ${forecastId} for job ${jobId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
 
       /* Data Frame Analytics */
-      case 'put_dfa_job': {
+      case 'ml_put_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return `Creating data frame analytics job ${analyticsId}`;
+        return {
+          message: `Creating data frame analytics job ${analyticsId}`,
+          type: [EVENT_TYPES.creation],
+        };
       }
-      case 'delete_dfa_job': {
+      case 'ml_delete_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return `Deleting data frame analytics job ${analyticsId}`;
+        return {
+          message: `Deleting data frame analytics job ${analyticsId}`,
+          type: [EVENT_TYPES.deletion],
+        };
       }
-      case 'start_dfa_job': {
+      case 'ml_start_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return `Starting data frame analytics job ${analyticsId}`;
+        return {
+          message: `Starting data frame analytics job ${analyticsId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'stop_dfa_job': {
+      case 'ml_stop_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return `Stopping data frame analytics job ${analyticsId}`;
+        return {
+          message: `Stopping data frame analytics job ${analyticsId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'update_dfa_job': {
+      case 'ml_update_dfa_job': {
         const [analyticsId] = getDFAJobIdsFromRequest(p);
-        return `Updating data frame analytics job ${analyticsId}`;
+        return {
+          message: `Updating data frame analytics job ${analyticsId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
 
       /* Trained Models */
-      case 'put_trained_model': {
+      case 'ml_put_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Creating trained model ${modelId}`;
+        return { message: `Creating trained model ${modelId}`, type: [EVENT_TYPES.creation] };
       }
-      case 'delete_trained_model': {
+      case 'ml_delete_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Deleting trained model ${modelId}`;
+        return { message: `Deleting trained model ${modelId}`, type: [EVENT_TYPES.deletion] };
       }
-      case 'start_trained_model_deployment': {
+      case 'ml_start_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Starting trained model deployment for model ${modelId}`;
+        return {
+          message: `Starting trained model deployment for model ${modelId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'stop_trained_model_deployment': {
+      case 'ml_stop_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Stopping trained model deployment for model ${modelId}`;
+        return {
+          message: `Stopping trained model deployment for model ${modelId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'update_trained_model_deployment': {
+      case 'ml_update_trained_model_deployment': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Updating trained model deployment for model ${modelId}`;
+        return {
+          message: `Updating trained model deployment for model ${modelId}`,
+          type: [EVENT_TYPES.change],
+        };
       }
-      case 'infer_trained_model': {
+      case 'ml_infer_trained_model': {
         const [modelId] = getModelIdsFromRequest(p);
-        return `Inferring trained model ${modelId}`;
+        return { message: `Inferring trained model ${modelId}`, type: [EVENT_TYPES.access] };
       }
 
       default:
-        return `Unknown ML task ${taskType}`;
+        throw new Error(`Unsupported task type: ${taskType}`);
     }
   }
 }
