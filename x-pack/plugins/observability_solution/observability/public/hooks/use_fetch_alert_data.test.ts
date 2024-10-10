@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
@@ -40,15 +41,11 @@ describe('useFetchAlertData', () => {
   });
 
   it('initially is not loading and does not have data', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, Record<string, unknown>]>(
-        () => useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([false, {}]);
-    });
+    expect(result.current).toEqual([false, {}]);
   });
 
   it('returns no data when an error occurs', async () => {
@@ -56,44 +53,35 @@ describe('useFetchAlertData', () => {
       throw new Error('an http error');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, Record<string, unknown>]>(
-        () => useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([false, {}]);
-    });
+    await waitFor(() => expect(result.current).toEqual([false, {}]));
   });
 
   it('retrieves the alert data', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, Record<string, unknown>]>(
-        () => useFetchAlertData(testIds)
-      );
+    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
+    await waitFor(() =>
       expect(result.current).toEqual([
         false,
         { '123': { _id: '123', _index: 'index', testField: 'test' } },
-      ]);
-    });
+      ])
+    );
   });
 
   it('does not populate the results when the request is canceled', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate, unmount } = renderHook<
-        string,
-        [boolean, Record<string, unknown>]
-      >(() => useFetchAlertData(testIds));
+    const { result, unmount } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+      useFetchAlertData(testIds)
+    );
 
-      await waitForNextUpdate();
+    act(() => {
       unmount();
-
-      expect(result.current).toEqual([false, {}]);
     });
+
+    expect(result.current).toEqual([false, {}]);
   });
 });

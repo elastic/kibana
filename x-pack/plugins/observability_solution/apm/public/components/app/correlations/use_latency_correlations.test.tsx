@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+
+import { act, waitFor } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -22,7 +24,7 @@ import { fromQuery } from '../../shared/links/url_helpers';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import type { APIEndpoint } from '../../../../server';
 
-function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
+function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
       await delay(100);
@@ -131,7 +133,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
       });
 
@@ -253,7 +255,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
         initialProps: {
           error: true,
@@ -277,7 +279,7 @@ describe('useLatencyCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
       });
 

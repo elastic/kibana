@@ -6,6 +6,8 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 
+import { waitFor } from '@testing-library/react';
+
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -31,12 +33,11 @@ describe('useGetCaseUserActionsStats', () => {
   });
 
   it('returns proper state on getCaseUserActionsStats', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useGetCaseUserActionsStats(basicCase.id),
-      { wrapper: appMockRender.AppWrapper }
-    );
+    const { result } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -61,25 +62,23 @@ describe('useGetCaseUserActionsStats', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+    renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCaseUserActionsStats');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+    renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal)));
   });
 });

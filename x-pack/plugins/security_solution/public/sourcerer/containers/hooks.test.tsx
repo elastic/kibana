@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { useSourcererDataView } from '.';
@@ -137,8 +137,12 @@ jest.mock('../../common/lib/kibana', () => ({
                     type: 'keyword',
                   },
                 }),
+                toSpec: () => ({
+                  id: dataViewId,
+                }),
               })
           ),
+          getExistingIndices: jest.fn(() => [] as string[]),
         },
         indexPatterns: {
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
@@ -159,28 +163,22 @@ describe('Sourcerer Hooks', () => {
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
-    await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
-      await waitForNextUpdate();
-      rerender();
-      expect(mockDispatch).toBeCalledTimes(3);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
-        payload: { id: 'security-solution', loading: true },
-      });
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'timeline',
-          selectedDataViewId: 'security-solution',
-          selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
-        },
-      });
+    const { rerender } = renderHook(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+    await waitFor(() => null);
+    rerender();
+    expect(mockDispatch.mock.calls[0][0]).toEqual({
+      type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+      payload: { id: 'security-solution', loading: true },
+    });
+    expect(mockDispatch.mock.calls[1][0]).toEqual({
+      type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+      payload: {
+        id: 'timeline',
+        selectedDataViewId: 'security-solution',
+        selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
+      },
     });
   });
   it('sets signal index name', async () => {
@@ -202,47 +200,42 @@ describe('Sourcerer Hooks', () => {
         },
       },
     });
-    await act(async () => {
-      mockUseUserInfo.mockImplementation(() => ({
-        ...userInfoState,
-        loading: false,
-        signalIndexName: mockSourcererState.signalIndexName,
-      }));
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
-      await waitForNextUpdate();
-      rerender();
-      await waitFor(() => {
-        expect(mockDispatch.mock.calls[3][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { loading: true },
-        });
-        expect(mockDispatch.mock.calls[4][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-          payload: { signalIndexName: mockSourcererState.signalIndexName },
-        });
-        expect(mockDispatch.mock.calls[5][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
-          payload: {
-            id: mockSourcererState.defaultDataView.id,
-            loading: true,
-          },
-        });
-        expect(mockDispatch.mock.calls[6][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_DATA_VIEWS',
-          payload: mockNewDataViews,
-        });
-        expect(mockDispatch.mock.calls[7][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { loading: false },
-        });
-        expect(mockDispatch).toHaveBeenCalledTimes(8);
-        expect(mockSearch).toHaveBeenCalledTimes(2);
+    mockUseUserInfo.mockImplementation(() => ({
+      ...userInfoState,
+      loading: false,
+      signalIndexName: mockSourcererState.signalIndexName,
+    }));
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+    await waitFor(() => null);
+    rerender();
+    await waitFor(() => {
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { loading: true },
       });
+      expect(mockDispatch.mock.calls[4][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
+        payload: { signalIndexName: mockSourcererState.signalIndexName },
+      });
+      expect(mockDispatch.mock.calls[5][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+        payload: {
+          id: mockSourcererState.defaultDataView.id,
+          loading: true,
+        },
+      });
+      expect(mockDispatch.mock.calls[6][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_DATA_VIEWS',
+        payload: mockNewDataViews,
+      });
+      expect(mockDispatch.mock.calls[7][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { loading: false },
+      });
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -302,16 +295,14 @@ describe('Sourcerer Hooks', () => {
         },
       },
     });
-    await act(async () => {
-      renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+    renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
 
-      await waitFor(() => {
-        expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
-          text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
-          title: 'Write role required to generate data',
-        });
+    await waitFor(() => {
+      expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
+        text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+        title: 'Write role required to generate data',
       });
     });
   });
@@ -333,27 +324,25 @@ describe('Sourcerer Hooks', () => {
         },
       },
     });
-    await act(async () => {
-      mockUseUserInfo.mockImplementation(() => ({
-        ...userInfoState,
-        loading: false,
-        signalIndexName: mockSourcererState.signalIndexName,
-      }));
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
 
-      await waitForNextUpdate();
-      rerender();
+    mockUseUserInfo.mockImplementation(() => ({
+      ...userInfoState,
+      loading: false,
+      signalIndexName: mockSourcererState.signalIndexName,
+    }));
 
-      await waitFor(() => {
-        expect(mockCreateSourcererDataView).toHaveBeenCalled();
-        expect(mockAddError).not.toHaveBeenCalled();
-      });
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
+
+    await waitFor(() => null);
+
+    rerender();
+
+    await waitFor(() => null);
+
+    expect(mockCreateSourcererDataView).toHaveBeenCalled();
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 
   it('does call addError if updateSourcererDataView receives a non-abort error', async () => {
@@ -375,66 +364,54 @@ describe('Sourcerer Hooks', () => {
         },
       },
     });
-    await act(async () => {
-      mockUseUserInfo.mockImplementation(() => ({
-        ...userInfoState,
-        loading: false,
-        signalIndexName: mockSourcererState.signalIndexName,
-      }));
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
+    mockUseUserInfo.mockImplementation(() => ({
+      ...userInfoState,
+      loading: false,
+      signalIndexName: mockSourcererState.signalIndexName,
+    }));
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
 
-      await waitForNextUpdate();
-      rerender();
+    await waitFor(() => null);
+    rerender();
 
-      await waitFor(() => {
-        expect(mockAddError).toHaveBeenCalled();
-      });
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalled();
     });
   });
 
   it('handles detections page', async () => {
-    await act(async () => {
-      mockUseUserInfo.mockImplementation(() => ({
-        ...userInfoState,
-        signalIndexName: mockSourcererState.signalIndexName,
-        isSignalIndexExists: true,
-      }));
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(SourcererScopeName.detections),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
-      await waitForNextUpdate();
-      rerender();
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'detections',
-          selectedDataViewId: mockSourcererState.defaultDataView.id,
-          selectedPatterns: [mockSourcererState.signalIndexName],
-        },
-      });
+    mockUseUserInfo.mockImplementation(() => ({
+      ...userInfoState,
+      signalIndexName: mockSourcererState.signalIndexName,
+      isSignalIndexExists: true,
+    }));
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(
+      () => useInitSourcerer(SourcererScopeName.detections),
+      {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      }
+    );
+    await waitFor(() => null);
+    rerender();
+    expect(mockDispatch.mock.calls[3][0]).toEqual({
+      type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+      payload: {
+        id: 'detections',
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: [mockSourcererState.signalIndexName],
+      },
     });
   });
   it('index field search is not repeated when default and timeline have same dataViewId', async () => {
-    await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
-      await waitForNextUpdate();
-      rerender();
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledTimes(1);
-      });
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+    await waitFor(() => null);
+    rerender();
+    await waitFor(() => {
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
   it('index field search called twice when default and timeline have different dataViewId', async () => {
@@ -451,18 +428,13 @@ describe('Sourcerer Hooks', () => {
         },
       },
     });
-    await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-        () => useInitSourcerer(),
-        {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        }
-      );
-      await waitForNextUpdate();
-      rerender();
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledTimes(2);
-      });
+    const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+    await waitFor(() => null);
+    rerender();
+    await waitFor(() => {
+      expect(mockSearch).toHaveBeenCalledTimes(2);
     });
   });
   describe('initialization settings', () => {
@@ -476,21 +448,16 @@ describe('Sourcerer Hooks', () => {
       }));
     });
     it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-          () => useInitSourcerer(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        await waitFor(() => {
-          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
-            dataViewId: mockSourcererState.defaultDataView.id,
-            needToBeInit: false,
-            scopeId: SourcererScopeName.default,
-          });
+      const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      await waitFor(() => {
+        expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+          dataViewId: mockSourcererState.defaultDataView.id,
+          needToBeInit: false,
+          scopeId: SourcererScopeName.default,
         });
       });
     });
@@ -510,21 +477,16 @@ describe('Sourcerer Hooks', () => {
           },
         },
       });
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-          () => useInitSourcerer(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        await waitFor(() => {
-          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
-            dataViewId: mockSourcererState.defaultDataView.id,
-            needToBeInit: true,
-            scopeId: SourcererScopeName.default,
-          });
+      const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      await waitFor(() => {
+        expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+          dataViewId: mockSourcererState.defaultDataView.id,
+          needToBeInit: true,
+          scopeId: SourcererScopeName.default,
         });
       });
     });
@@ -549,22 +511,17 @@ describe('Sourcerer Hooks', () => {
           },
         },
       });
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-          () => useInitSourcerer(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        await waitFor(() => {
-          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
-            dataViewId: 'something-weird',
-            needToBeInit: true,
-            scopeId: SourcererScopeName.timeline,
-            skipScopeUpdate: false,
-          });
+      const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      await waitFor(() => {
+        expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+          dataViewId: 'something-weird',
+          needToBeInit: true,
+          scopeId: SourcererScopeName.timeline,
+          skipScopeUpdate: false,
         });
       });
     });
@@ -589,22 +546,17 @@ describe('Sourcerer Hooks', () => {
           },
         },
       });
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-          () => useInitSourcerer(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        await waitFor(() => {
-          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
-            dataViewId: 'something-weird',
-            needToBeInit: true,
-            scopeId: SourcererScopeName.timeline,
-            skipScopeUpdate: true,
-          });
+      const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      await waitFor(() => {
+        expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+          dataViewId: 'something-weird',
+          needToBeInit: true,
+          scopeId: SourcererScopeName.timeline,
+          skipScopeUpdate: true,
         });
       });
     });
@@ -633,21 +585,16 @@ describe('Sourcerer Hooks', () => {
           },
         },
       });
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<React.PropsWithChildren<{}>, void>(
-          () => useInitSourcerer(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        await waitFor(() => {
-          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
-            dataViewId: 'something-weird',
-            needToBeInit: false,
-            scopeId: SourcererScopeName.timeline,
-          });
+      const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      await waitFor(() => {
+        expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+          dataViewId: 'something-weird',
+          needToBeInit: false,
+          scopeId: SourcererScopeName.timeline,
         });
       });
     });
@@ -655,51 +602,49 @@ describe('Sourcerer Hooks', () => {
 
   describe('useSourcererDataView', () => {
     it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
-      await act(async () => {
-        store = createMockStore({
-          ...mockGlobalState,
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.default]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                selectedPatterns: [
-                  '-packetbeat-*',
-                  'endgame-*',
-                  'auditbeat-*',
-                  'filebeat-*',
-                  'winlogbeat-*',
-                  '-filebeat-*',
-                  'packetbeat-*',
-                  'traces-apm*',
-                  'apm-*-transaction*',
-                ],
-              },
+      store = createMockStore({
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              selectedPatterns: [
+                '-packetbeat-*',
+                'endgame-*',
+                'auditbeat-*',
+                'filebeat-*',
+                'winlogbeat-*',
+                '-filebeat-*',
+                'packetbeat-*',
+                'traces-apm*',
+                'apm-*-transaction*',
+              ],
             },
           },
-        });
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<{}>,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
-          '-filebeat-*',
-          '-packetbeat-*',
-        ]);
-        expect(result.current.indexPattern).toHaveProperty('getName');
+        },
       });
+      const { result, rerender } = renderHook<
+        React.PropsWithChildren<SourcererScopeName>,
+        SelectedDataView
+      >(() => useSourcererDataView(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitFor(() => null);
+      rerender();
+      expect(result.current.selectedPatterns).toEqual([
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
+        '-filebeat-*',
+        '-packetbeat-*',
+      ]);
+      expect(result.current.indexPattern).toHaveProperty('getName');
     });
 
     it('should update the title and name of the data view according to the selected patterns', async () => {

@@ -38,10 +38,12 @@ describe('useAgentSoftLimit', () => {
         total: 5,
       },
     } as any);
-    const { result, waitForNextUpdate } = renderer.renderHook(() => useAgentSoftLimit());
-    await waitForNextUpdate();
+    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toBeCalled());
 
-    expect(mockedSendGetAgents).toBeCalled();
+    // re-render so cache is updated to value from most recent call
+    rerender();
+
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(false);
   });
 
@@ -53,10 +55,12 @@ describe('useAgentSoftLimit', () => {
         total: 15,
       },
     } as any);
-    const { result, waitForNextUpdate } = renderer.renderHook(() => useAgentSoftLimit());
-    await waitForNextUpdate();
+    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toBeCalled());
 
-    expect(mockedSendGetAgents).toBeCalled();
+    // re-render so cache is updated to value from most recent call
+    rerender();
+
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(true);
   });
 });

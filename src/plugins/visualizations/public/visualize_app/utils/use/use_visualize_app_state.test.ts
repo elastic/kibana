@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
@@ -159,11 +160,11 @@ describe('useVisualizeAppState', () => {
 
     it('should successfully update vis state and set up app state container', async () => {
       stateContainerGetStateMock.mockImplementation(() => state);
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
@@ -183,11 +184,11 @@ describe('useVisualizeAppState', () => {
         ...visualizeAppStateStub,
         query: { query: 'test', language: 'kuery' },
       }));
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {

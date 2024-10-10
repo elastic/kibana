@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import {
   DeleteConversationParams,
@@ -32,8 +33,8 @@ describe('conversations api', () => {
     await act(async () => {
       const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
-      const { waitForNextUpdate } = renderHook(() => deleteConversation(deleteProps));
-      await waitForNextUpdate();
+      renderHook(() => deleteConversation(deleteProps));
+      await waitFor(() => null);
 
       expect(deleteProps.http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/current_user/conversations/test',
@@ -58,8 +59,8 @@ describe('conversations api', () => {
   it('should call api to get conversation', async () => {
     await act(async () => {
       const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
-      const { waitForNextUpdate } = renderHook(() => getConversationById(getProps));
-      await waitForNextUpdate();
+      renderHook(() => getConversationById(getProps));
+      await waitFor(() => null);
 
       expect(getProps.http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/current_user/conversations/test',

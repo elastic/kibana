@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { PropsWithChildren } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import type { ReturnSignalIndex } from './use_signal_index';
 import { useSignalIndex } from './use_signal_index';
@@ -31,35 +32,29 @@ describe('useSignalIndex', () => {
   });
 
   test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        createDeSignalIndex: null,
-        loading: true,
-        signalIndexExists: null,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+
+    expect(result.current).toEqual({
+      createDeSignalIndex: null,
+      loading: true,
+      signalIndexExists: null,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
     });
   });
 
   test('fetch alerts info', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
       expect(result.current).toEqual({
         createDeSignalIndex: result.current.createDeSignalIndex,
         loading: false,
@@ -71,48 +66,45 @@ describe('useSignalIndex', () => {
   });
 
   test('make sure that createSignalIndex is giving back the signal info', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
       }
-      await waitForNextUpdate();
+    );
+    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+
+    await act(async () => {
+      await result.current.createDeSignalIndex();
+    });
+
+    await waitFor(() =>
       expect(result.current).toEqual({
         createDeSignalIndex: result.current.createDeSignalIndex,
         loading: false,
         signalIndexExists: true,
         signalIndexName: 'mock-signal-index',
         signalIndexMappingOutdated: false,
-      });
-    });
+      })
+    );
   });
 
   test('make sure that createSignalIndex have been called when trying to create signal index', async () => {
     const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
+
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
       }
-      await waitForNextUpdate();
-      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
+    );
+    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+
+    await act(async () => {
+      await result.current.createDeSignalIndex();
     });
+
+    await waitFor(() => expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1));
   });
 
   test('if there is an error during createSignalIndex, we should get back signalIndexExists === false && signalIndexName == null', async () => {
@@ -120,27 +112,28 @@ describe('useSignalIndex', () => {
     spyOnCreateSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
       }
+    );
+
+    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+
+    await act(async () => {
+      await result.current.createDeSignalIndex();
+    });
+
+    await waitFor(() =>
       expect(result.current).toEqual({
         createDeSignalIndex: result.current.createDeSignalIndex,
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
         signalIndexMappingOutdated: null,
-      });
-    });
+      })
+    );
   });
 
   test('if there is an error when fetching alerts info, signalIndexExists === false && signalIndexName == null', async () => {
@@ -148,24 +141,28 @@ describe('useSignalIndex', () => {
     spyOnGetSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
+      }
+    );
+
+    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      await result.current.createDeSignalIndex();
+    });
+
+    await waitFor(() =>
       expect(result.current).toEqual({
         createDeSignalIndex: result.current.createDeSignalIndex,
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
         signalIndexMappingOutdated: null,
-      });
-    });
+      })
+    );
   });
 
   test('should not make API calls when signal index already stored in sourcerer', async () => {
@@ -175,16 +172,14 @@ describe('useSignalIndex', () => {
       .mockReturnValue('mock-signal-index-from-sourcerer');
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-        () => useSignalIndex(),
-        {
-          wrapper: TestProvidersWithPrivileges,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
+      () => useSignalIndex(),
+      {
+        wrapper: TestProvidersWithPrivileges,
+      }
+    );
+
+    await waitFor(() => {
       expect(spyOnGetSignalIndex).not.toHaveBeenCalled();
       expect(result.current).toEqual({
         createDeSignalIndex: result.current.createDeSignalIndex,

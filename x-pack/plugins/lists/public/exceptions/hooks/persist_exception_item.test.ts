@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import * as api from '@kbn/securitysolution-list-api';
 import { PersistHookProps } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -45,51 +46,52 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
+    const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
+
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<
-        PersistHookProps,
-        ReturnPersistExceptionItem
-      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
-
-      await waitForNextUpdate();
       result.current[1](getCreateExceptionListItemSchemaMock());
-      rerender();
-
-      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
+
+    rerender();
+
+    await waitFor(() =>
+      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]])
+    );
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        PersistHookProps,
-        ReturnPersistExceptionItem
-      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
-
-      await waitForNextUpdate();
       result.current[1](getCreateExceptionListItemSchemaMock());
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
+
+    await waitFor(() =>
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]])
+    );
   });
 
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        PersistHookProps,
-        ReturnPersistExceptionItem
-      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitForNextUpdate();
+    await waitFor(() => null);
+
+    await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
       // entries have been enriched with ids to ensure that they get stripped
       // before the call goes through
       result.current[1]({ ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
-      await waitForNextUpdate();
+    });
 
+    await waitFor(() => {
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
       expect(addExceptionListItem).not.toHaveBeenCalled();
       expect(updateExceptionListItem).toHaveBeenCalledWith({
@@ -103,19 +105,18 @@ describe('usePersistExceptionItem', () => {
   test('it invokes "addExceptionListItem" when payload does not have "id"', async () => {
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        PersistHookProps,
-        ReturnPersistExceptionItem
-      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitForNextUpdate();
+    await waitFor(() => null);
+    await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
       // entries have been enriched with ids to ensure that they get stripped
       // before the call goes through
       result.current[1]({ ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
-      await waitForNextUpdate();
-
+    });
+    await waitFor(() => {
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
       expect(updateExceptionListItem).not.toHaveBeenCalled();
       expect(addExceptionListItem).toHaveBeenCalledWith({
@@ -129,17 +130,15 @@ describe('usePersistExceptionItem', () => {
   test('"onError" callback is invoked and "isSaved" is "false" when api call fails', async () => {
     const error = new Error('persist rule failed');
     jest.spyOn(api, 'addExceptionListItem').mockRejectedValue(error);
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
+    await waitFor(() => null);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        PersistHookProps,
-        ReturnPersistExceptionItem
-      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
-
-      await waitForNextUpdate();
       result.current[1](getCreateExceptionListItemSchemaMock());
-      await waitForNextUpdate();
-
+    });
+    await waitFor(() => {
       expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
       expect(onError).toHaveBeenCalledWith(error);
     });

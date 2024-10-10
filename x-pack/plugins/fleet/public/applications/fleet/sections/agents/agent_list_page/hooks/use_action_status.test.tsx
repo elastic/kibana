@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 
@@ -63,20 +64,15 @@ describe('useActionStatus', () => {
 
   it('should refresh statuses on refresh flag', async () => {
     let refresh = false;
-    await act(async () => {
-      const result = renderHook(() => useActionStatus(mockOnAbortSuccess, refresh, 20, null));
-      refresh = true;
-      result.rerender();
-    });
-    expect(mockSendGetActionStatus).toHaveBeenCalledTimes(5);
+    const result = renderHook(() => useActionStatus(mockOnAbortSuccess, refresh, 20, null));
+    refresh = true;
+    result.rerender();
+    await waitFor(() => expect(mockSendGetActionStatus).toHaveBeenCalled());
   });
 
   it('should post cancel and invoke callback on cancel upgrade', async () => {
     mockSendPostCancelAction.mockResolvedValue({});
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade(mockActionStatuses[0]);
     });
@@ -89,10 +85,7 @@ describe('useActionStatus', () => {
 
   it('should post cancel and invoke callback on cancel upgrade - plural', async () => {
     mockSendPostCancelAction.mockResolvedValue({});
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade({ ...mockActionStatuses[0], nbAgentsAck: 0 });
     });
@@ -106,10 +99,7 @@ describe('useActionStatus', () => {
   it('should report error on cancel upgrade failure', async () => {
     const error = new Error('error');
     mockSendPostCancelAction.mockRejectedValue(error);
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade(mockActionStatuses[0]);
     });

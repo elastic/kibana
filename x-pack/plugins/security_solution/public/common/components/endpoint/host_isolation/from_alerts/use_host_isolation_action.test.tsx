@@ -87,26 +87,28 @@ describe('useHostIsolationAction', () => {
         });
       }
 
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
 
-      expect(result.current).toEqual([
-        buildExpectedMenuItemResult({
-          ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
-        }),
-      ]);
+      await appContextMock.waitFor(() =>
+        expect(result.current).toEqual([
+          buildExpectedMenuItemResult({
+            ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
+          }),
+        ])
+      );
     }
   );
 
   it('should call `closePopover` callback when menu item `onClick` is called', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
+
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.closePopover).toHaveBeenCalled();
   });
 
-  it('should NOT return the menu item for Events', () => {
+  it('should NOT return the menu item for Events', async () => {
     hookProps.detailsData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
       'kibana.alert.rule.uuid': undefined,
     });
@@ -135,12 +137,14 @@ describe('useHostIsolationAction', () => {
   it('should return disabled menu item while loading agent status', async () => {
     const { result } = render();
 
-    expect(result.current).toEqual([
-      buildExpectedMenuItemResult({
-        disabled: true,
-        toolTipContent: LOADING_ENDPOINT_DATA_TOOLTIP,
-      }),
-    ]);
+    await appContextMock.waitFor(() =>
+      expect(result.current).toEqual([
+        buildExpectedMenuItemResult({
+          disabled: true,
+          toolTipContent: LOADING_ENDPOINT_DATA_TOOLTIP,
+        }),
+      ])
+    );
   });
 
   it.each(['endpoint', 'non-endpoint'])(
@@ -156,22 +160,24 @@ describe('useHostIsolationAction', () => {
       if (type === 'non-endpoint') {
         hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
       }
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
-
-      expect(result.current).toEqual([
-        buildExpectedMenuItemResult({
-          disabled: true,
-          toolTipContent:
-            type === 'endpoint' ? HOST_ENDPOINT_UNENROLLED_TOOLTIP : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-        }),
-      ]);
+      const { result } = render();
+      await appContextMock.waitFor(() =>
+        expect(result.current).toEqual([
+          buildExpectedMenuItemResult({
+            disabled: true,
+            toolTipContent:
+              type === 'endpoint'
+                ? HOST_ENDPOINT_UNENROLLED_TOOLTIP
+                : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+          }),
+        ])
+      );
     }
   );
 
   it('should call isolate API when agent is currently NOT isolated', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
@@ -183,10 +189,14 @@ describe('useHostIsolationAction', () => {
         data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
       })
     );
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+
+    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
+
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
-    expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');
+    await appContextMock.waitFor(() =>
+      expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost')
+    );
   });
 });
