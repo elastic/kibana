@@ -312,7 +312,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Impact of inputs', () => {
-    it.only('should recover from invalid kql Query result', () => {
+    it('should recover from invalid kql Query result', () => {
       // do an invalid search
       kqlSearch('\\');
       refreshPage();
