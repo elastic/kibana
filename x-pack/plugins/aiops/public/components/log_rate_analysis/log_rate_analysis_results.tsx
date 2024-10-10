@@ -17,6 +17,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -331,11 +332,19 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           )}
           {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="aiopsLogRateAnalysisOptionsButton"
-                iconType="gear"
-                onClick={onEmbeddableOptionsClickHandler}
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonTooltip', {
+                  defaultMessage:
+                    'Options to customize the analysis, such as filtering fields and grouping.',
+                })}
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogRateAnalysisOptionsButton"
+                  iconType="controlsHorizontal"
+                  onClick={onEmbeddableOptionsClickHandler}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </>
