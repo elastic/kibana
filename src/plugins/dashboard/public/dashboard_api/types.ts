@@ -10,6 +10,7 @@
 import {
   CanExpandPanels,
   HasRuntimeChildState,
+  HasSaveNotification,
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
@@ -125,6 +126,7 @@ export interface DashboardState {
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasRuntimeChildState &
+  HasSaveNotification &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
@@ -166,7 +168,6 @@ export type DashboardApi = CanExpandPanels &
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setTags: (tags: string[]) => void;
-    useMargins$: PublishingSubject<boolean | undefined>;
 
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;

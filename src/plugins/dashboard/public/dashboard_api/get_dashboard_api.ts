@@ -19,7 +19,7 @@ import {
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
-import { initializeUnsavedChanges } from './unsaved_changes';
+import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
@@ -75,6 +75,17 @@ export function getDashboardApi({
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     creationOptions
   );
+  const unsavedChangesManager = initializeUnsavedChangesManager({
+    anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
+    creationOptions,
+    controlGroupApi$,
+    lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
+      ...DEFAULT_DASHBOARD_INPUT,
+    },
+    panelsManager,
+    settingsManager,
+    unifiedSearchManager,
+  });
 
   // --------------------------------------------------------------------------------------
   // Start animating panel transforms 500 ms after dashboard is created.
@@ -89,17 +100,9 @@ export function getDashboardApi({
       ...settingsManager.api,
       ...trackPanel,
       ...unifiedSearchManager.api,
+      ...unsavedChangesManager.api,
       ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
-      ...initializeUnsavedChanges({
-        anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
-        controlGroupApi$,
-        lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-          ...DEFAULT_DASHBOARD_INPUT,
-        },
-        panelsManager,
-        settingsManager,
-        unifiedSearchManager,
-      }),
+
       controlGroupApi$,
       fullScreenMode$,
       getAppContext: () => {
@@ -162,6 +165,7 @@ export function getDashboardApi({
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       unifiedSearchManager.cleanup();
+      unsavedChangesManager.cleanup();
     },
   };
 }

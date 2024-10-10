@@ -9,6 +9,7 @@
 
 import { BehaviorSubject, merge } from 'rxjs';
 import { v4 } from 'uuid';
+import fastIsEqual from 'fast-deep-equal';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
@@ -38,6 +39,9 @@ export function initializePanelsManager(
     [key: string]: unknown;
   }>({});
   const panels$ = new BehaviorSubject(initialPanels);
+  function setPanels(panels: DashboardPanelMap) {
+    if (panels !== panels$.value) panels$.next(panels);
+  }
   let restoredRuntimeState: UnsavedPanelState = {};
 
   function setRuntimeStateForChild(childId: string, state: object) {
@@ -112,7 +116,7 @@ export function initializePanelsManager(
         if (panelPackage.initialState) {
           setRuntimeStateForChild(newId, panelPackage.initialState);
         }
-        panels$.next({ ...otherPanels, [newId]: newPanel });
+        setPanels({ ...otherPanels, [newId]: newPanel });
         if (displaySuccessMessage) {
           coreServices.notifications.toasts.addSuccess({
             title: getPanelAddedSuccessString(newPanel.explicitInput.title),
@@ -160,7 +164,7 @@ export function initializePanelsManager(
         const panels = { ...panels$.value };
         if (panels[id]) {
           delete panels[id];
-          panels$.next(panels);
+          setPanels(panels);
         }
         const children = { ...children$.value };
         if (children[id]) {
@@ -177,7 +181,7 @@ export function initializePanelsManager(
         const id = v4();
         const oldPanel = panels[idToRemove];
         delete panels[idToRemove];
-        panels$.next({
+        setPanels({
           ...panels,
           [id]: {
             ...oldPanel,
@@ -195,11 +199,33 @@ export function initializePanelsManager(
         await untilEmbeddableLoaded(id);
         return id;
       },
-      setPanels: (panels: DashboardPanelMap) => {
-        panels$.next(panels);
-      },
+      setPanels,
       setRuntimeStateForChild,
       untilEmbeddableLoaded,
+    },
+    comparators: {
+      panels: [
+        panels$,
+        setPanels,
+        (a: DashboardPanelMap, b: DashboardPanelMap) => {
+          const aKeys = Object.keys(a);
+          const bKeys = Object.keys(b);
+          if (!fastIsEqual(aKeys, bKeys)) {
+            return false;
+          }
+
+          for (let i = 0; i < aKeys.length; i++) {
+            const panelId = aKeys[i];
+            const panelA = a[panelId];
+            const panelB = b[panelId];
+            if (panelA.type !== panelB.type || !fastIsEqual(panelA.gridData, panelB.gridData)) {
+              return false;
+            }
+          }
+
+          return true;
+        },
+      ],
     },
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
@@ -209,7 +235,7 @@ export function initializePanelsManager(
         });
       },
       reset: (lastSavedState: DashboardState) => {
-        panels$.next(lastSavedState.panels);
+        setPanels(lastSavedState.panels);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;

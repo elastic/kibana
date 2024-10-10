@@ -40,6 +40,9 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   const timeRestore$ = new BehaviorSubject<boolean | undefined>(
     initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
   );
+  function setTimeRestore(timeRestore: boolean) {
+    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
+  }
   const titleManager = initializeTitles(initialState ?? {});
   const useMargins$ = new BehaviorSubject<boolean>(
     initialState?.useMargins ?? DEFAULT_DASHBOARD_INPUT.useMargins
@@ -53,6 +56,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     setSyncCursor(settings.syncCursor);
     setSyncTooltips(settings.syncTooltips);
     setTags(settings.tags);
+    setTimeRestore(settings.timeRestore);
     setUseMargins(settings.useMargins);
     titleManager.titlesApi.setHidePanelTitle(settings.hidePanelTitles);
     titleManager.titlesApi.setPanelDescription(settings.description);
@@ -82,6 +86,14 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       setSettings,
       setTags,
       timeRestore$,
+    },
+    comparators: {
+      ...titleManager.titleComparators,
+      syncColors: [syncColors$, setSyncColors],
+      syncCursor: [syncCursor$, setSyncCursor],
+      syncTooltips: [syncTooltips$, setSyncTooltips],
+      timeRestore: [timeRestore$, setTimeRestore],
+      useMargins: [useMargins$, setUseMargins],
     },
     internalApi: {
       reset: (lastSavedState: DashboardState) => {

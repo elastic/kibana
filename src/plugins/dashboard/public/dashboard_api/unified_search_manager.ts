@@ -154,6 +154,7 @@ export function initializeUnifiedSearchManager(
       timeRange$,
       timeslice$,
     },
+    comparators: {},
     internalApi: {
       controlGroupReload$,
       panelsReload$,
