@@ -42,7 +42,7 @@ export const startQueryPerformanceTracking = (
     const duration =
       loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-    reportPerformanceMetricEvent(coreServices.analytics, {
+    const e = {
       eventName: DASHBOARD_LOADED_EVENT,
       duration,
       key1: 'time_to_data',
@@ -51,14 +51,21 @@ export const startQueryPerformanceTracking = (
       value2: panelCount,
       key4: 'load_type',
       value4: loadTypesMapping[loadType],
-    });
+    };
+
+    reportPerformanceMetricEvent(coreServices.analytics, e);
   };
 
   return dashboard.children$
     .pipe(
       switchMap((children) => {
         const childPhaseEventTrackers: PublishesPhaseEvents[] = [];
-        for (const child of Object.values(children)) {
+        const values = Object.values(children);
+        if (values.length !== dashboard.getPanelCount()) {
+          // test fix
+          return of([]);
+        }
+        for (const child of values) {
           if (apiPublishesPhaseEvents(child)) childPhaseEventTrackers.push(child);
         }
         if (childPhaseEventTrackers.length === 0) return of([]);
