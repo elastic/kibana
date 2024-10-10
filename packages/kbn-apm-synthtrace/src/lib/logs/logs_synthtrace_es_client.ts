@@ -73,28 +73,37 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       >['index_template']
     ) => estypes.IndicesPutIndexTemplateRequest
   ) {
-    const response = await this.client.indices.getIndexTemplate({
-      name: indexName,
-    });
+    try {
+      const response = await this.client.indices.getIndexTemplate({
+        name: indexName,
+      });
 
-    await Promise.all(
-      response.index_templates.map((template) => {
-        return this.client.indices.putIndexTemplate({
-          ...modify(template.index_template),
-          name: template.name,
-        });
-      })
-    );
+      await Promise.all(
+        response.index_templates.map((template) => {
+          return this.client.indices.putIndexTemplate({
+            ...modify(template.index_template),
+            name: template.name,
+          });
+        })
+      );
 
-    this.logger.info(`Updated ${indexName} index template`);
+      this.logger.info(`Updated ${indexName} index template`);
+    } catch (err) {
+      this.logger.error(`Update index template failed: ${indexName} - ${err.message}`);
+    }
   }
 
   async createCustomPipeline(processors: IngestProcessorContainer[]) {
-    this.client.ingest.putPipeline({
-      id: LogsCustom,
-      processors,
-      version: 1,
-    });
+    try {
+      this.client.ingest.putPipeline({
+        id: LogsCustom,
+        processors,
+        version: 1,
+      });
+      this.logger.info(`Custom pipeline created: ${LogsCustom}`);
+    } catch (err) {
+      this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
+    }
   }
 }
 
