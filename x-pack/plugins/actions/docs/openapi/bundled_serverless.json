@@ -1562,6 +1562,38 @@
           }
         }
       },
+      "config_properties_slack_api": {
+        "title": "Connector request properties for a Slack connector",
+        "description": "Defines properties for connectors when type is `.slack_api`.",
+        "type": "object",
+        "properties": {
+          "allowedChannels": {
+            "type": "array",
+            "description": "A list of valid Slack channels.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name"
+              ],
+              "maxItems": 25,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The Slack channel ID.",
+                  "example": "C123ABC456",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The Slack channel name.",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      },
       "secrets_properties_slack_api": {
         "title": "Connector secrets properties for a Web API Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
@@ -1578,7 +1610,7 @@
       },
       "create_connector_request_slack_api": {
         "title": "Create Slack connector request",
-        "description": "The Slack connector uses Slack Incoming Webhooks.",
+        "description": "The Slack connector uses an API method to send Slack messages.",
         "type": "object",
         "required": [
           "connector_type_id",
@@ -1586,6 +1618,9 @@
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3038,6 +3073,9 @@
           "name"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3709,6 +3747,9 @@
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "name": {
             "type": "string",
             "description": "The display name for the connector."

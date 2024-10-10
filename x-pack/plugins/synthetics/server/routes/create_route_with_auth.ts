@@ -11,20 +11,23 @@ import {
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
 } from '../../common/constants';
-import { SyntheticsRestApiRouteFactory, SyntheticsRoute, SyntheticsRouteHandler } from './types';
+import {
+  SupportedMethod,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRoute,
+  SyntheticsRouteHandler,
+} from './types';
 
-function getWriteAccessFlag(method: string, writeAccessOverride?: boolean, writeAccess?: boolean) {
-  // if route includes an override, skip write-only access with `undefined`
-  // otherwise, if route is not a GET, require write access
-  // if route is get, use writeAccess value with `false` as default
-  return writeAccessOverride === true ? undefined : method !== 'GET' ? true : writeAccess ?? false;
+function getDefaultWriteAccessFlag(method: SupportedMethod) {
+  // if the method is not GET, it defaults to requiring write access
+  return method !== 'GET';
 }
 
 export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
   const restRoute = routeCreator();
-  const { handler, method, path, options, writeAccess, writeAccessOverride, ...rest } = restRoute;
+  const { handler, method, path, options, writeAccess, ...rest } = restRoute;
   const licenseCheckHandler: SyntheticsRouteHandler<ClientContract> = async ({
     context,
     response,
@@ -56,7 +59,7 @@ export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
     options,
     handler: licenseCheckHandler,
     ...rest,
-    writeAccess: getWriteAccessFlag(method, writeAccessOverride, writeAccess),
+    writeAccess: writeAccess ?? getDefaultWriteAccessFlag(method),
   };
 };
 

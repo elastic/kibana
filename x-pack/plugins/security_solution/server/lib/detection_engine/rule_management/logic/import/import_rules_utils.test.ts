@@ -13,14 +13,15 @@ import {
   getRuleMock,
   getEmptyFindResult,
   getFindResultWithSingleHit,
+  getFindResultWithMultiHits,
 } from '../../../routes/__mocks__/request_responses';
 
 import { createRules } from '../crud/create_rules';
-import { patchRules } from '../crud/patch_rules';
+import { updateRules } from '../crud/update_rules';
 import { importRules } from './import_rules_utils';
 
 jest.mock('../crud/create_rules');
-jest.mock('../crud/patch_rules');
+jest.mock('../crud/update_rules');
 
 describe('importRules', () => {
   const mlAuthz = {
@@ -74,14 +75,7 @@ describe('importRules', () => {
 
   it('creates rule if no matching existing rule found', async () => {
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -91,21 +85,14 @@ describe('importRules', () => {
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
     expect(createRules).toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
   it('reports error if "overwriteRules" is "false" and matching rule found', async () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -120,11 +107,49 @@ describe('importRules', () => {
       },
     ]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
-  it('patches rule if "overwriteRules" is "true" and matching rule found', async () => {
+  it('updates rule if "overwriteRules" is "true" and matching rule found', async () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+    const result = await importRules({
+      ruleChunks: [
+        [
+          getImportRulesSchemaMock({
+            rule_id: 'rule-1',
+          }),
+        ],
+      ],
+      rulesResponseAcc: [],
+      mlAuthz,
+      overwriteRules: true,
+      rulesClient: context.alerting.getRulesClient(),
+      existingLists: {},
+    });
+
+    expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
+    expect(createRules).not.toHaveBeenCalled();
+    expect(updateRules).toHaveBeenCalled();
+  });
+
+  /**
+   * Existing rule may have nullable fields set to a value (e.g. `timestamp_override` is set to `some.value`) but
+   * a rule to import doesn't have these fields set (e.g. `timestamp_override` is NOT present at all in the ndjson file).
+   * We expect the updated rule won't have such fields preserved (e.g. `timestamp_override` will be removed).
+   *
+   * Unit test is only able to check `updateRules()` receives a proper update object.
+   */
+  it('ensures overwritten rule DOES NOT preserve fields missed in the imported rule when "overwriteRules" is "true" and matching rule found', async () => {
+    const existingRule = getRuleMock(
+      getQueryRuleParams({
+        timestampOverride: 'some.value',
+      })
+    );
+
+    clients.rulesClient.find.mockResolvedValue(
+      getFindResultWithMultiHits({ data: [existingRule] })
+    );
 
     const result = await importRules({
       ruleChunks: [
@@ -144,21 +169,21 @@ describe('importRules', () => {
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).toHaveBeenCalled();
+    expect(updateRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleUpdate: expect.not.objectContaining({
+          timestamp_override: expect.anything(),
+          timestampOverride: expect.anything(),
+        }),
+      })
+    );
   });
 
   it('reports error if rulesClient throws', async () => {
     clients.rulesClient.find.mockRejectedValue(new Error('error reading rule'));
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
@@ -176,21 +201,14 @@ describe('importRules', () => {
       },
     ]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
   it('reports error if "createRules" throws', async () => {
     (createRules as jest.Mock).mockRejectedValue(new Error('error creating rule'));
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -209,19 +227,12 @@ describe('importRules', () => {
     ]);
   });
 
-  it('reports error if "patchRules" throws', async () => {
-    (patchRules as jest.Mock).mockRejectedValue(new Error('error patching rule'));
+  it('reports error if "updateRules" throws', async () => {
+    (updateRules as jest.Mock).mockRejectedValue(new Error('import rule error'));
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
@@ -232,7 +243,7 @@ describe('importRules', () => {
     expect(result).toEqual([
       {
         error: {
-          message: 'error patching rule',
+          message: 'import rule error',
           status_code: 400,
         },
         rule_id: 'rule-1',

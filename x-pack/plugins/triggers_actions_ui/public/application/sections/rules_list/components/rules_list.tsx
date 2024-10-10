@@ -363,8 +363,7 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
-    ...filters,
-    typesFilter: rulesTypesFilter,
+    filters: { ...filters, types: rulesTypesFilter },
   });
 
   const handleUpdateFiltersEffect = useCallback(

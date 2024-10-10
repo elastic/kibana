@@ -8,9 +8,9 @@
 import React, { memo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
-import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
+import type { SelectedDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';
 import { BlockListForm } from '../management/pages/blocklist/view/components/blocklist_form';
@@ -46,7 +46,7 @@ const ThreatIntelligence = memo(() => {
     getFiltersGlobalComponent: () => FiltersGlobal,
     getPageWrapper: () => SecuritySolutionPageWrapper,
     licenseService,
-    sourcererDataView: sourcererDataView as unknown as SourcererDataView,
+    sourcererDataView: sourcererDataView as unknown as SelectedDataView,
     getUseInvestigateInTimeline: useInvestigateInTimeline,
 
     blockList: {

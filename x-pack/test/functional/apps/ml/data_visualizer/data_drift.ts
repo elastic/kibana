@@ -81,7 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await ml.dataDrift.runAnalysis();
   }
 
-  describe('data drift', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('data drift', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');

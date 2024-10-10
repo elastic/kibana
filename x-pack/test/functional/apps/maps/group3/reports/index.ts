@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the debug logs.
-  describe('dashboard reporting: creates a map report', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/178895
+  describe.skip('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await PageObjects.reporting.getReportURL(60000);

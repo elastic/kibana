@@ -7,17 +7,19 @@
 
 import type { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 
-export const getPrebuiltRuleMock = (): PrebuiltRuleAsset => ({
-  description: 'some description',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'query',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: 'rule-1',
-  version: 1,
-});
+export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): PrebuiltRuleAsset =>
+  ({
+    description: 'some description',
+    name: 'Query with a rule id',
+    query: 'user.name: root or user.name: admin',
+    severity: 'high',
+    type: 'query',
+    risk_score: 55,
+    language: 'kuery',
+    rule_id: 'rule-1',
+    version: 1,
+    ...rewrites,
+  } as PrebuiltRuleAsset);
 
 export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleAsset => ({
   description: 'A rule with an exception list',

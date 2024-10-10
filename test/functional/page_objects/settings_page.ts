@@ -212,14 +212,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
-    await this.retry.try(async () => {
-      expect(
+    await this.retry.waitFor('active save button', async () => {
+      return (
         (
           await this.find.allByCssSelector(
             '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
           )
-        ).length
-      ).to.be(1);
+        ).length === 1
+      );
     });
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -584,7 +584,13 @@ export class SettingsPageObject extends FtrService {
     await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
+    let hasSubmittedTheForm = false;
+
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // the flyout got closed
+        return;
+      }
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
@@ -595,6 +601,8 @@ export class SettingsPageObject extends FtrService {
       }
       const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
       await indexPatternSaveBtn.click();
+
+      hasSubmittedTheForm = true;
 
       const form = await this.testSubjects.findAll('indexPatternEditorForm');
       const hasValidationErrors =

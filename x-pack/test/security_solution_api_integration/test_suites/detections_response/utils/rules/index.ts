@@ -43,5 +43,7 @@ export * from './get_simple_ml_rule';
 export * from './remove_server_generated_properties_including_rule_id';
 export * from './get_simple_rule_output_without_rule_id';
 export * from './get_simple_rule_without_rule_id';
-
+export * from './rule_to_update_schema';
+export * from './update_rule';
 export * from './prebuilt_rules';
+export * from './check_investigation_field_in_so';

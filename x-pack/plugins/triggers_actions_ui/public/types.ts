@@ -782,14 +782,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  actionTypes: string[];
-  ruleExecutionStatuses: string[];
-  ruleLastRunOutcomes: string[];
-  ruleParams: Record<string, string | number | object>;
-  ruleStatuses: RuleStatus[];
-  searchText: string;
-  tags: string[];
-  types: string[];
+  actionTypes?: string[];
+  ruleExecutionStatuses?: string[];
+  ruleLastRunOutcomes?: string[];
+  ruleParams?: Record<string, string | number | object>;
+  ruleStatuses?: RuleStatus[];
+  searchText?: string;
+  tags?: string[];
+  types?: string[];
   kueryNode?: KueryNode;
 }
 

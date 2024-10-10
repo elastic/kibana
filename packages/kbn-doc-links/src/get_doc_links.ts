@@ -19,6 +19,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const meta = getDocLinksMeta({ kibanaBranch, buildFlavor });
 
   const DOC_LINK_VERSION = meta.version;
+  const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
@@ -731,7 +732,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
       pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
       pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
-      csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${DOC_LINK_VERSION}/ecs-converting.html`,
+      csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
       processors: `${ELASTICSEARCH_DOCS}processors.html`,
       remove: `${ELASTICSEARCH_DOCS}remove-processor.html`,
@@ -784,7 +785,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
     },
     ecs: {
-      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/index.html`,
     },
     clients: {
       /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */

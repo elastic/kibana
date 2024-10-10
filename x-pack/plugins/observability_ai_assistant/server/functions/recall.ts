@@ -17,6 +17,7 @@ import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_c
 import { processOpenAiStream } from '../../common/utils/process_openai_stream';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { streamIntoObservable } from '../service/util/stream_into_observable';
+import { parseSuggestionScores } from './parse_suggestion_scores';
 
 export function registerRecallFunction({
   client,
@@ -106,13 +107,7 @@ export function registerRecallFunction({
 
       resources.logger.debug(JSON.stringify(suggestions, null, 2));
 
-      if (suggestions.length === 0) {
-        return {
-          content: [] as unknown as Serializable,
-        };
-      }
-
-      const relevantDocuments = await scoreSuggestions({
+      const { relevantDocuments, scores } = await scoreSuggestions({
         suggestions,
         queries: queriesOrUserPrompt,
         messages,
@@ -121,11 +116,21 @@ export function registerRecallFunction({
         signal,
       });
 
+      if (scores.length === 0) {
+        return {
+          content: { learnings: relevantDocuments as unknown as Serializable },
+          data: {
+            scores,
+            suggestions,
+          },
+        };
+      }
+
       resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
       resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
-        content: relevantDocuments as unknown as Serializable,
+        content: { learnings: relevantDocuments as unknown as Serializable },
       };
     }
   );
@@ -243,17 +248,16 @@ async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-  const scores = scoresAsString.split('\n').map((line) => {
-    const [index, score] = line
-      .split(',')
-      .map((value) => value.trim())
-      .map(Number);
-
-    return { id: suggestions[index].id, score };
+  const scores = parseSuggestionScores(scoresAsString).map(({ index, score }) => {
+    return {
+      id: suggestions[index].id,
+      score,
+    };
   });
 
   if (scores.length === 0) {
-    return [];
+    // seemingly invalid or no scores, return all
+    return { relevantDocuments: suggestions, scores: [] };
   }
 
   const suggestionIds = suggestions.map((document) => document.id);
@@ -269,5 +273,5 @@ async function scoreSuggestions({
     relevantDocumentIds.includes(suggestion.id)
   );
 
-  return relevantDocuments;
+  return { relevantDocuments, scores };
 }

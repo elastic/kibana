@@ -7,17 +7,19 @@
 
 import type { RuleToImport } from './rule_to_import';
 
-export const getImportRulesSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
-  description: 'some description',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'query',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: ruleId,
-  immutable: false,
-});
+export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): RuleToImport =>
+  ({
+    description: 'some description',
+    name: 'Query with a rule id',
+    query: 'user.name: root or user.name: admin',
+    severity: 'high',
+    type: 'query',
+    risk_score: 55,
+    language: 'kuery',
+    rule_id: 'rule-1',
+    immutable: false,
+    ...rewrites,
+  } as RuleToImport);
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
   id: '6afb8ce1-ea94-4790-8653-fd0b021d2113',
@@ -47,42 +49,46 @@ export const rulesToNdJsonString = (rules: RuleToImport[]) => {
  * @param ruleIds Array of ruleIds with which to generate rule JSON
  */
 export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
-  const rules = ruleIds.map((ruleId) => getImportRulesSchemaMock(ruleId));
+  const rules = ruleIds.map((ruleId) => getImportRulesSchemaMock({ rule_id: ruleId }));
   return rulesToNdJsonString(rules);
 };
 
-export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
-  description: 'some description',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'threat_match',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: ruleId,
-  threat_index: ['index-123'],
-  threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
-  threat_query: '*:*',
-  threat_filters: [
-    {
-      bool: {
-        must: [
-          {
-            query_string: {
-              query: 'host.name: linux',
-              analyze_wildcard: true,
-              time_zone: 'Zulu',
+export const getImportThreatMatchRulesSchemaMock = (
+  rewrites?: Partial<RuleToImport>
+): RuleToImport =>
+  ({
+    description: 'some description',
+    name: 'Query with a rule id',
+    query: 'user.name: root or user.name: admin',
+    severity: 'high',
+    type: 'threat_match',
+    risk_score: 55,
+    language: 'kuery',
+    rule_id: 'rule-1',
+    threat_index: ['index-123'],
+    threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
+    threat_query: '*:*',
+    threat_filters: [
+      {
+        bool: {
+          must: [
+            {
+              query_string: {
+                query: 'host.name: linux',
+                analyze_wildcard: true,
+                time_zone: 'Zulu',
+              },
             },
-          },
-        ],
-        filter: [],
-        should: [],
-        must_not: [],
+          ],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
       },
-    },
-  ],
-  immutable: false,
-});
+    ],
+    immutable: false,
+    ...rewrites,
+  } as RuleToImport);
 
 export const webHookConnector = {
   id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
@@ -104,8 +110,7 @@ export const webHookConnector = {
 
 export const ruleWithConnectorNdJSON = (): string => {
   const items = [
-    {
-      ...getImportRulesSchemaMock(),
+    getImportRulesSchemaMock({
       actions: [
         {
           group: 'default',
@@ -114,7 +119,7 @@ export const ruleWithConnectorNdJSON = (): string => {
           params: {},
         },
       ],
-    },
+    }),
     webHookConnector,
   ];
   const stringOfExceptions = items.map((item) => JSON.stringify(item));

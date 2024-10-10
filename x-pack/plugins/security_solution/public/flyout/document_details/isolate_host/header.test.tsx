@@ -13,6 +13,9 @@ import { PanelHeader } from './header';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 jest.mock('./context');
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 const renderPanelHeader = () =>
   render(

@@ -37,8 +37,8 @@ export async function getBulkAssets(
         type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
         updatedAt: obj.updated_at,
         attributes: {
-          title: obj.attributes.title,
-          description: obj.attributes.description,
+          title: obj.attributes?.title,
+          description: obj.attributes?.description,
         },
       };
     });
