@@ -31,6 +31,7 @@ interface CreateExecuteFunctionOptions {
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
+  uuid?: string;
   spaceId: string;
   apiKey: string | null;
   executionId: string;
@@ -71,6 +72,7 @@ export interface ExecutionResponse {
 
 export interface ExecutionResponseItem {
   id: string;
+  uuid?: string;
   actionTypeId: string;
   response: ExecutionResponseType;
 }
@@ -197,12 +199,14 @@ export function createBulkExecutionEnqueuerFunction({
       items: runnableActions
         .map((a) => ({
           id: a.id,
+          uuid: a.uuid,
           actionTypeId: a.actionTypeId,
           response: ExecutionResponseType.SUCCESS,
         }))
         .concat(
           actionsOverLimit.map((a) => ({
             id: a.id,
+            uuid: a.uuid,
             actionTypeId: a.actionTypeId,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
           }))
