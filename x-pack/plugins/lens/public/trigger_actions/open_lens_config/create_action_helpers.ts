@@ -117,7 +117,10 @@ export async function executeCreateAction({
   const attrs = getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
-    suggestion: firstSuggestion,
+    suggestion: {
+      ...firstSuggestion,
+      title: '', // when creating a new panel, we don't want to use the title from the suggestion
+    },
     dataView,
   });
 
