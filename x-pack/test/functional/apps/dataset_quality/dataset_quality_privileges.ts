@@ -211,6 +211,7 @@ async function createDatasetQualityUserWithRole(
     kibana: [
       {
         feature: {
+          dataQuality: ['all'],
           discover: ['all'],
           fleet: ['none'],
         },
