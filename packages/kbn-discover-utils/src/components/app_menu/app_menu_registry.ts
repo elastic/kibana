@@ -22,7 +22,7 @@ export class AppMenuRegistry {
     this.appMenuItems = assignOrderToActions(primaryAndSecondaryActions);
   }
 
-  public registerCustomAction(appMenuItem: AppMenuAction) {
+  public registerCustomAction(appMenuItem: AppMenuAction | AppMenuPopoverActions) {
     this.appMenuItems.push(appMenuItem);
   }
 
@@ -30,7 +30,7 @@ export class AppMenuRegistry {
     const alertsMenuItem = this.appMenuItems.find((item) => item.id === AppMenuActionId.alerts);
     if (alertsMenuItem && isAppMenuActionsPopover(alertsMenuItem)) {
       // insert the custom action before the last item in the alerts menu
-      alertsMenuItem.actions.splice(alertsMenuItem.actions.length - 1, 0, appMenuItem);
+      alertsMenuItem.actions.push(appMenuItem);
     }
   }
 
@@ -53,8 +53,10 @@ function isAppMenuActionsPopover(appMenuItem: AppMenuItem): appMenuItem is AppMe
   return 'actions' in appMenuItem;
 }
 
+const FALLBACK_ORDER = Number.MAX_SAFE_INTEGER;
+
 function sortByOrder(a: AppMenuItem, b: AppMenuItem): number {
-  return (a.order ?? 0) - (b.order ?? 0);
+  return (a.order ?? FALLBACK_ORDER) - (b.order ?? FALLBACK_ORDER);
 }
 
 function sortAppMenuItems(appMenuItems: AppMenuItem[]): AppMenuItem[] {
