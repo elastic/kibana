@@ -14,6 +14,7 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
       })
     ).not.toThrow();
   });
@@ -24,6 +25,7 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: 'ingest_rate',
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
       })
     ).not.toThrow();
   });
@@ -34,17 +36,7 @@ describe('usage_metrics schemas', () => {
         from: new Date().toISOString(),
         to: new Date().toISOString(),
         metricTypes: ['ingest_rate', 'storage_retained', 'index_rate'],
-      })
-    ).not.toThrow();
-  });
-
-  it('should accept a single string as `dataStreams` in request query', () => {
-    expect(() =>
-      UsageMetricsRequestSchema.query.validate({
-        from: new Date().toISOString(),
-        to: new Date().toISOString(),
-        metricTypes: 'storage_retained',
-        dataStreams: 'data_stream_1',
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
       })
     ).not.toThrow();
   });
@@ -68,10 +60,10 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: [],
       })
-    ).toThrowError('expected value of type [string] but got [Array]');
+    ).toThrowError('[dataStreams]: array size is [0], but cannot be smaller than [1]');
   });
 
-  it('should error if `dataStream` is given an empty string', () => {
+  it('should error if `dataStream` is given type not array', () => {
     expect(() =>
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
@@ -79,7 +71,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: '  ',
       })
-    ).toThrow('[dataStreams] must have at least one value');
+    ).toThrow('[dataStreams]: could not parse array value from json input');
   });
 
   it('should error if `dataStream` is given an empty item in the list', () => {
@@ -90,7 +82,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: ['ds_1', '  '],
       })
-    ).toThrow('[dataStreams] list can not contain empty values');
+    ).toThrow('[dataStreams]: [dataStreams] list cannot contain empty values');
   });
 
   it('should error if `metricTypes` is empty string', () => {
@@ -98,19 +90,21 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: new Date().toISOString(),
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ' ',
       })
     ).toThrow();
   });
 
-  it('should error if `metricTypes` is empty item', () => {
+  it('should error if `metricTypes` contains an empty item', () => {
     expect(() =>
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: new Date().toISOString(),
-        metricTypes: [' ', 'storage_retained'],
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
+        metricTypes: [' ', 'storage_retained'], // First item is invalid
       })
-    ).toThrow('[metricTypes] list can not contain empty values');
+    ).toThrowError(/list cannot contain empty values/);
   });
 
   it('should error if `metricTypes` is not a valid value', () => {
@@ -118,6 +112,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: new Date().toISOString(),
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: 'foo',
       })
     ).toThrow(
@@ -130,6 +125,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: new Date().toISOString(),
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow(
@@ -142,6 +138,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: 1010,
         to: new Date().toISOString(),
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow('[from]: expected value of type [string] but got [number]');
@@ -152,6 +149,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: 1010,
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow('[to]: expected value of type [string] but got [number]');
@@ -162,6 +160,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: ' ',
         to: new Date().toISOString(),
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow('[from]: Date ISO string must not be empty');
@@ -172,6 +171,7 @@ describe('usage_metrics schemas', () => {
       UsageMetricsRequestSchema.query.validate({
         from: new Date().toISOString(),
         to: '   ',
+        dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow('[to]: Date ISO string must not be empty');
