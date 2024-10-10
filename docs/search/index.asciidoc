@@ -26,7 +26,7 @@ Use the following table to find links to the appropriate documentation, API refe
 | Name               | API reference           | Documentation         | Release notes
 
 | Connectors
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/8.15/connector-apis.html[API reference]
+| {ref}/connector-apis.html[API reference]
 | {ref}/es-connectors.html[Elastic Connectors]
 | {ref}/es-connectors-release-notes.html[Elasticsearch guide]
 
@@ -37,28 +37,28 @@ Use the following table to find links to the appropriate documentation, API refe
 
 | Playground
 | N/A
-| <<playground,Documentation>>
-| <<release-notes, Kibana guide>>
+| {kibana-ref}/playground.html[Documentation]
+| {kibana-ref}/release-notes.html[Kibana guide]
 
 | Search Applications
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/search-application-apis.html[API reference]
-| link:https://www.elastic.co/guide/en/enterprise-search/current/app-search-workplace-search.html[Documentation]
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/es-release-notes.html[Elasticsearch guide]
+| {ref}/search-application-apis.html[API reference]
+| {enterprise-search-ref}/app-search-workplace-search.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
 
 | Behavioral Analytics
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-apis.html[API reference]
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-start.html[Documentation]
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/es-release-notes.html[Elasticsearch guide]
+| {ref}/behavioral-analytics-apis.html[API reference]
+| {ref}/behavioral-analytics-start.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
 
 | Inference Endpoints
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html[API reference]
-| <<inference-endpoints,Documentation>>
-| link:https://www.elastic.co/guide/en/elasticsearch/reference/current/es-release-notes.html[Elasticsearch guide]
+| {ref}/inference-apis.html[API reference]
+| {kibana-ref}/inference-endpoints.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
 
 | Console
 | N/A
-| <<console-kibana,Documentation>>
-| <<release-notes, Kibana guide>>
+| {kibana-ref}/console-kibana.html[Documentation]
+| {kibana-ref}/release-notes.html[Kibana guide]
 
 | Search UI
 | https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
