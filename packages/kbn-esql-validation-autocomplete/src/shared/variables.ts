@@ -47,9 +47,7 @@ function addToVariables(
  * Determines the type of the expression
  *
  * TODO - this function needs a lot of work. For example, it needs to find the best-matching function signature
- * which it isn't currently doing.
- * @param root
- * @returns
+ * which it isn't currently doing. See https://github.com/elastic/kibana/issues/195682
  */
 function getExpressionType(
   root: ESQLAstItem,
