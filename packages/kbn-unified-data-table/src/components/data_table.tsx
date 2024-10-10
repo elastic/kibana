@@ -871,6 +871,7 @@ export const UnifiedDataTable = ({
   const columnsVisibility = useMemo(
     () => ({
       visibleColumns,
+      canDragAndDropColumns: true,
       setVisibleColumns: (newColumns: string[]) => {
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
         onSetColumns(newColumns, dontModifyColumns);
