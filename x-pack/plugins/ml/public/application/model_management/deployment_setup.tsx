@@ -353,7 +353,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         }
       }
     } else if (!showNodeInfo) {
-      // Running a Search project in serverless
+      // Running in serverless
       const vcuRange = deploymentParamsMapper.getVCURange(config.vCPUUsage);
 
       if (config.adaptiveResources) {
@@ -571,8 +571,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           <EuiSpacer size={'s'} />
 
           <EuiFormHelpText id={'vCpuRangeHelp'}>
-            <EuiCallOut size="s">
-              <p>{helperText}</p>
+            <EuiCallOut size="s" data-test-subj="mlModelsStartDeploymentModalVCPUHelperText">
+              {helperText}
             </EuiCallOut>
           </EuiFormHelpText>
         </EuiPanel>

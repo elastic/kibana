@@ -27,6 +27,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.trainedModels.assertStats(1);
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
+
+      it('set correct VCU ranges for start model deployment', async () => {
+        await ml.trainedModelsTable.openStartDeploymentModal('.elser_model_2');
+        await ml.trainedModelsTable.toggleAdvancedConfiguration(true);
+
+        await ml.testExecution.logTestStep('should have correct default VCU level');
+        // Assert that the default selected level is Low
+        await ml.trainedModelsTable.assertVCPULevel('low');
+        // Assert VCU levels values
+        await ml.trainedModelsTable.assertVCPUHelperText(
+          'This level limits resources to 16 VCUs, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.'
+        );
+
+        await ml.testExecution.logTestStep(
+          'should set control to high VCU level and update helper text'
+        );
+        await ml.trainedModelsTable.setVCPULevel('high');
+        await ml.trainedModelsTable.assertVCPUHelperText(
+          'Your model will scale up to a maximum of 4096 VCUs per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.'
+        );
+      });
     });
   });
 }
