@@ -23,7 +23,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
-import { useUiSetting$, useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../common/constants';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
@@ -33,7 +33,7 @@ export const AssetCriticalityUploadPage = () => {
   const { docLinks } = useKibana().services;
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+  const isAssetCriticalityEnabled = true;
   const {
     data: privileges,
     error: privilegesError,

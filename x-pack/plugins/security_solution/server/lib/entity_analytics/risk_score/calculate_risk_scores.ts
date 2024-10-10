@@ -175,7 +175,7 @@ const processScores = async ({
     return [];
   }
 
-  const isAssetCriticalityEnabled = await assetCriticalityService.isEnabled();
+  const isAssetCriticalityEnabled: boolean = true;
   if (!isAssetCriticalityEnabled) {
     return buckets.map((bucket) =>
       formatForResponse({ bucket, now, identifierField, includeNewFields: false })
