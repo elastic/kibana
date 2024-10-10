@@ -9,6 +9,7 @@ import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observabili
 import { i18n } from '@kbn/i18n';
 import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { OnboardingFlow } from '../../shared/templates/no_data_config';
 
 export type AddMetricsCalloutKey =
   | 'hostOverview'
@@ -42,7 +43,7 @@ const hostDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'logs' }) || '',
+        href: locator?.getRedirectUrl({ category: OnboardingFlow.Hosts }) || '',
         label: defaultPrimaryActionLabel,
       },
       secondary: {
@@ -61,7 +62,7 @@ const containerDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'infra' }) || '',
+        href: locator?.getRedirectUrl({ category: OnboardingFlow.Infra }) || '',
         label: defaultPrimaryActionLabel,
       },
       link: {
