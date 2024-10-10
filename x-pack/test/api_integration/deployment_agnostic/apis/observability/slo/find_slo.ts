@@ -31,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   let internalHeaders: InternalRequestHeader;
 
-  describe('Get SLOs', function () {
+  describe('Find SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalHeaders = samlAuth.getInternalRequestHeader();
@@ -58,29 +58,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await sloApi.deleteAllSLOs(adminRoleAuthc);
     });
 
-    it('get SLO by id', async () => {
+    it('searches SLOs', async () => {
       const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
-      await sloApi.create(
+      const createResponse2 = await sloApi.create(
         Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),
         adminRoleAuthc
       );
 
-      expect(createResponse1).property('id');
       const sloId1 = createResponse1.id;
+      const sloId2 = createResponse2.id;
 
-      // get the slo by ID
-      const getSloResponse = await sloApi.waitForSloCreated({
-        id: sloId1,
-        roleAuthc: adminRoleAuthc,
+      // search SLOs
+      await retry.tryForTime(360 * 1000, async () => {
+        let response = await supertestWithoutAuth
+          .get(`/api/observability/slos`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send();
+
+        expect(response.body.results).length(2);
+
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Airrelevant`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(response.body.results).length(1);
+        expect(response.body.results[0].id).eql(sloId2);
+
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Aintegration`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(response.body.results).length(1);
+        expect(response.body.results[0].id).eql(sloId1);
+
+        return true;
       });
-      // We cannot assert on the summary values itself - it would make the test too flaky
-      // But we can assert on the existence of these fields at least.
-      // On top of whatever the SLO definition contains.
-      expect(getSloResponse).property('summary');
-      expect(getSloResponse).property('meta');
-      expect(getSloResponse).property('instanceId');
-      expect(getSloResponse.budgetingMethod).eql('occurrences');
-      expect(getSloResponse.timeWindow).eql({ duration: '7d', type: 'rolling' });
     });
   });
 }
