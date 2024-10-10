@@ -140,6 +140,7 @@ enabled:
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
+  - x-pack/test/api_integration/apis/data_views/config.ts
   - x-pack/test/api_integration/apis/es/config.ts
   - x-pack/test/api_integration/apis/features/config.ts
   - x-pack/test/api_integration/apis/file_upload/config.ts
