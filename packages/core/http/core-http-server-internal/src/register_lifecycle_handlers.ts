@@ -25,6 +25,7 @@ export const registerCoreHandlers = (
   env: Env,
   log: Logger
 ) => {
+  log.info(`Registering Core HTTP lifecycle handlers with config: ${JSON.stringify(config)}`);
   // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
   // add extra request checks stuff
@@ -38,5 +39,5 @@ export const registerCoreHandlers = (
     );
   }
   // add check on header if the route is internal
-  registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config)); // strictly speaking, we should have access to route.options.access from the request on postAuth
+  registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config, log)); // strictly speaking, we should have access to route.options.access from the request on postAuth
 };
