@@ -8,7 +8,13 @@
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { ENTITIES_LATEST_ALIAS, MAX_NUMBER_OF_ENTITIES } from '../../../common/entities';
+import {
+  ENTITIES_LATEST_ALIAS,
+  EntityGroup,
+  MAX_NUMBER_OF_ENTITIES,
+  defaultEntityTypes,
+} from '../../../common/entities';
+import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
 
 export async function getEntityGroupsBy({
   inventoryEsClient,
@@ -26,6 +32,8 @@ export async function getEntityGroupsBy({
   const groups = await inventoryEsClient.esql('get_entities_groups', {
     query: `
         FROM ${ENTITIES_LATEST_ALIAS}
+        | ${getEntityTypesWhereClause(defaultEntityTypes)}
+        | ${getEntityDefinitionIdWhereClause()}
         | STATS count = COUNT(*) by ${field}
         | SORT ${sortField} ${sortDirection}
         | LIMIT ${MAX_NUMBER_OF_ENTITIES}
@@ -37,5 +45,5 @@ export async function getEntityGroupsBy({
     },
   });
 
-  return esqlResultToPlainObjects(groups);
+  return esqlResultToPlainObjects<EntityGroup>(groups);
 }
