@@ -38,6 +38,7 @@ import {
   SPAN_SYNC,
   SPAN_TYPE,
   TIMESTAMP,
+  TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
@@ -98,6 +99,7 @@ export async function getTraceItems({
       size: 1000,
       _source: [
         TIMESTAMP,
+        TIMESTAMP_US,
         TRACE_ID,
         TRANSACTION_ID,
         PARENT_ID,
@@ -229,6 +231,7 @@ async function getTraceDocsPerPage({
     search_after: searchAfter,
     _source: [
       TIMESTAMP,
+      TIMESTAMP_US,
       TRACE_ID,
       PARENT_ID,
       SERVICE_NAME,
