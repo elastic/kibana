@@ -12,7 +12,6 @@ import {
 import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { getEntityLatestServices } from './get_entity_latest_services';
 import type { EntityLatestServiceRaw } from './types';
-import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
 export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
   if (!start || !end) {
@@ -64,30 +63,5 @@ export async function getEntities({
     serviceName,
   });
 
-  const serviceEntitiesHistoryMetricsMap = entityLatestServices.length
-    ? await getEntityHistoryServicesMetrics({
-        start,
-        end,
-        entitiesESClient,
-        entityIds: entityLatestServices.map((latestEntity) => latestEntity.entity.id),
-        size,
-      })
-    : undefined;
-
-  return entityLatestServices.map((latestEntity) => {
-    const historyEntityMetrics = serviceEntitiesHistoryMetricsMap?.[latestEntity.entity.id];
-    return {
-      ...latestEntity,
-      entity: {
-        ...latestEntity.entity,
-        metrics: historyEntityMetrics || {
-          latency: undefined,
-          logErrorRate: undefined,
-          failedTransactionRate: undefined,
-          logRate: undefined,
-          throughput: undefined,
-        },
-      },
-    };
-  });
+  return entityLatestServices;
 }

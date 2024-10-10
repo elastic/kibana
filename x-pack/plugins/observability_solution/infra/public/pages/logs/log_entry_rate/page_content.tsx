@@ -18,14 +18,12 @@ import {
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
-  MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
 } from '../../../components/logging/log_analysis_setup';
 import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
@@ -36,16 +34,13 @@ import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_for
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
+const logsAnomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
   defaultMessage: 'Anomalies',
 });
 
 export const LogEntryRatePageContent = memo(() => {
-  const {
-    hasLogAnalysisCapabilites,
-    hasLogAnalysisReadCapabilities,
-    hasLogAnalysisSetupCapabilities,
-  } = useLogAnalysisCapabilitiesContext();
+  const { hasLogAnalysisReadCapabilities, hasLogAnalysisSetupCapabilities } =
+    useLogAnalysisCapabilitiesContext();
 
   const {
     fetchJobStatus: fetchLogEntryCategoriesJobStatus,
@@ -96,22 +91,7 @@ export const LogEntryRatePageContent = memo(() => {
 
   const { idFormats } = useLogMlJobIdFormatsShimContext();
 
-  if (!hasLogAnalysisCapabilites) {
-    return (
-      <SubscriptionSplashPage
-        data-test-subj="logsLogEntryRatePage"
-        pageHeader={{
-          pageTitle: anomaliesTitle,
-        }}
-      />
-    );
-  } else if (!hasLogAnalysisReadCapabilities) {
-    return (
-      <AnomaliesPageTemplate isEmptyState={true}>
-        <MissingResultsPrivilegesPrompt />
-      </AnomaliesPageTemplate>
-    );
-  } else if (
+  if (
     logEntryCategoriesSetupStatus.type === 'initializing' ||
     logEntryRateSetupStatus.type === 'initializing'
   ) {
@@ -137,7 +117,7 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={anomaliesTitle} />
+        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={logsAnomaliesTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );
@@ -159,7 +139,7 @@ export const LogEntryRatePageContent = memo(() => {
   }
 });
 
-const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+export const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
@@ -172,7 +152,7 @@ const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
         rest.isEmptyState
           ? undefined
           : {
-              pageTitle: anomaliesTitle,
+              pageTitle: logsAnomaliesTitle,
             }
       }
       {...rest}

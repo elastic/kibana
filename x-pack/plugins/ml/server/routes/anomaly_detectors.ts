@@ -13,6 +13,7 @@ import type { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
+  deleteForecastSchema,
   jobIdSchema,
   getBucketsSchema,
   getOverallBucketsSchema,
@@ -370,6 +371,41 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const body = await mlClient.validateDetector({ body: request.body });
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .delete({
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast/{forecastId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canDeleteForecast'],
+      },
+      summary: 'Deletes specified forecast for specified job',
+      description: 'Deletes a specified forecast for the specified anomaly detection job.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: deleteForecastSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const { jobId, forecastId } = request.params;
+          const body = await mlClient.deleteForecast({
+            job_id: jobId,
+            forecast_id: forecastId,
+          });
           return response.ok({
             body,
           });
