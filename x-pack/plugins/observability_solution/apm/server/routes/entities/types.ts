@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { EntityMetrics } from '../../../common/entities/types';
 
 export enum EntityType {
   SERVICE = 'service',
@@ -30,5 +29,4 @@ interface Entity {
   lastSeenTimestamp: string;
   firstSeenTimestamp: string;
   identityFields: string[];
-  metrics: EntityMetrics;
 }
