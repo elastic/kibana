@@ -32,24 +32,27 @@ describe('useTopNavLinks', () => {
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
-  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
   };
 
   test('useTopNavLinks result', () => {
-    const topNavLinks = renderHook(useTopNavLinks, {
-      initialProps: {
-        dataView: dataViewMock,
-        onOpenInspector: jest.fn(),
-        services,
-        state,
-        isEsqlMode: false,
-        adHocDataViews: [],
-        topNavCustomization: undefined,
-        shouldShowESQLToDataViewTransitionModal: false,
-      },
-      wrapper: Wrapper,
-    }).result.current;
+    const topNavLinks = renderHook(
+      () =>
+        useTopNavLinks({
+          dataView: dataViewMock,
+          onOpenInspector: jest.fn(),
+          services,
+          state,
+          isEsqlMode: false,
+          adHocDataViews: [],
+          topNavCustomization: undefined,
+          shouldShowESQLToDataViewTransitionModal: false,
+        }),
+      {
+        wrapper: Wrapper,
+      }
+    ).result.current;
     expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -110,19 +113,22 @@ describe('useTopNavLinks', () => {
   });
 
   test('useTopNavLinks result for ES|QL mode', () => {
-    const topNavLinks = renderHook(useTopNavLinks, {
-      initialProps: {
-        dataView: dataViewMock,
-        onOpenInspector: jest.fn(),
-        services,
-        state,
-        isEsqlMode: true,
-        adHocDataViews: [],
-        topNavCustomization: undefined,
-        shouldShowESQLToDataViewTransitionModal: false,
-      },
-      wrapper: Wrapper,
-    }).result.current;
+    const topNavLinks = renderHook(
+      () =>
+        useTopNavLinks({
+          dataView: dataViewMock,
+          onOpenInspector: jest.fn(),
+          services,
+          state,
+          isEsqlMode: true,
+          adHocDataViews: [],
+          topNavCustomization: undefined,
+          shouldShowESQLToDataViewTransitionModal: false,
+        }),
+      {
+        wrapper: Wrapper,
+      }
+    ).result.current;
     expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
