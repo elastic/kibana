@@ -50,7 +50,7 @@ export function getDashboardApi({
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(false);
-  const managed$ = new BehaviorSubject(savedObjectResult?.managed ?? false);
+  const isManaged = savedObjectResult?.managed ?? false;
   const references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const viewMode$ = new BehaviorSubject<ViewMode>(initialState.viewMode);
@@ -112,7 +112,7 @@ export function getDashboardApi({
         };
       },
       isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
-      managed$,
+      isManaged,
       runInteractiveSave: async () => {
         throw new Error('runInteractiveSave not implemented');
       },
@@ -121,11 +121,10 @@ export function getDashboardApi({
       },
       savedObjectId: savedObjectId$,
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
-      setManaged: (managed: boolean) => managed$.next(managed),
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
       setViewMode: (viewMode: ViewMode) => {
         // block the Dashboard from entering edit mode if this Dashboard is managed.
-        if (managed$.value && viewMode?.toLowerCase() === 'edit') {
+        if (isManaged && viewMode?.toLowerCase() === 'edit') {
           return;
         }
         viewMode$.next(viewMode);

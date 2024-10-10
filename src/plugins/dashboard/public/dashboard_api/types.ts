@@ -153,7 +153,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
-    managed$: PublishingSubject<boolean>;
+    isManaged: boolean;
     panels$: PublishingSubject<DashboardPanelMap>;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;

@@ -53,7 +53,7 @@ describe('Internal dashboard top nav', () => {
     const container = buildMockDashboard();
     const dashboardApi = {
       ...container,
-      managed$: new BehaviorSubject(true),
+      isManaged: true,
     } as unknown as DashboardApi;
     const component = render(
       <DashboardContext.Provider value={dashboardApi}>

@@ -92,7 +92,6 @@ export function InternalDashboardTopNav({
     hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
-    managed,
     query,
     title,
     viewMode,
@@ -103,7 +102,6 @@ export function InternalDashboardTopNav({
     dashboardApi.hasRunMigrations$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
-    dashboardApi.managed$,
     dashboardApi.query$,
     dashboardApi.panelTitle,
     dashboardApi.viewMode
@@ -300,7 +298,7 @@ export function InternalDashboardTopNav({
     }
 
     const { showWriteControls } = getDashboardCapabilities();
-    if (showWriteControls && managed) {
+    if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
@@ -352,7 +350,7 @@ export function InternalDashboardTopNav({
     hasUnsavedChanges,
     viewMode,
     hasRunMigrations,
-    managed,
+    dashboardApi.isManaged,
     isPopoverOpen,
     dashboardApi,
     maybeRedirect,
