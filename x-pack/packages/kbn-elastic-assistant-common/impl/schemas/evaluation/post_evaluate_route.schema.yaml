@@ -61,6 +61,8 @@ components:
             type: string
         datasetName:
           type: string
+        evaluatorConnectorId:
+          type: string
         connectorIds:
           type: array
           items:
