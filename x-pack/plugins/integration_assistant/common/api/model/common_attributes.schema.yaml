@@ -78,10 +78,10 @@ components:
           description: For some formats, specifies whether the samples can be multiline.
         header: 
           type: boolean
-          description: For CSV format, specifies whether the samples have a header row.
+          description: For CSV format, specifies whether the samples have a header row. For other formats, specifies the presence of header in each row.
         columns:
           type: array
-          description: For CSV format, specifies the columns guessed at by the LLM.
+          description: For CSV format, specifies the column names proposed by the LLM.
           items:
             type: string
         json_path:
