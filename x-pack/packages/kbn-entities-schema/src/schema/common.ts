@@ -142,13 +142,6 @@ export const metadataSchema = z
 
 export type MetadataField = z.infer<typeof metadataSchema>;
 
-export const identityFieldsSchema = z
-  .object({
-    field: z.string(),
-    optional: z.boolean(),
-  })
-  .or(z.string().transform((value) => ({ field: value, optional: false })));
-
 const semVerRegex = new RegExp(/^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$/);
 export const semVerSchema = z.string().refine((maybeSemVer) => semVerRegex.test(maybeSemVer), {
   message:

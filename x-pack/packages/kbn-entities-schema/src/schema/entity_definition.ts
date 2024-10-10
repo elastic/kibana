@@ -12,7 +12,6 @@ import {
   metadataSchema,
   filterSchema,
   durationSchema,
-  identityFieldsSchema,
   semVerSchema,
 } from './common';
 
@@ -24,7 +23,7 @@ export const entityDefinitionSchema = z.object({
   type: z.string(),
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
-  identityFields: z.array(identityFieldsSchema),
+  identityFields: z.array(z.string()),
   displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),

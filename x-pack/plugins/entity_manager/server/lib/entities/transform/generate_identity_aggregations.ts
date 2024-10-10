@@ -11,17 +11,17 @@ export function generateIdentityAggregations(definition: EntityDefinition) {
   return definition.identityFields.reduce(
     (aggs, identityField) => ({
       ...aggs,
-      [`entity.identity.${identityField.field}`]: {
+      [`entity.identity.${identityField}`]: {
         filter: {
           exists: {
-            field: identityField.field,
+            field: identityField,
           },
         },
         aggs: {
           top_metric: {
             top_metrics: {
               metrics: {
-                field: identityField.field,
+                field: identityField,
               },
               sort: '_score',
             },

@@ -32,13 +32,9 @@ export function generateLatestTransform(
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
-  if (definition.identityFields.some(({ optional }) => !optional)) {
-    definition.identityFields
-      .filter(({ optional }) => !optional)
-      .forEach(({ field }) => {
-        filter.push({ exists: { field } });
-      });
-  }
+  definition.identityFields.forEach((field) => {
+    filter.push({ exists: { field } });
+  });
 
   filter.push({
     range: {
@@ -105,10 +101,10 @@ const generateTransformPutRequest = ({
     pivot: {
       group_by: {
         ...definition.identityFields.reduce(
-          (acc, id) => ({
+          (acc, field) => ({
             ...acc,
-            [`entity.identity.${id.field}`]: {
-              terms: { field: id.field, missing_bucket: id.optional },
+            [`entity.identity.${field}`]: {
+              terms: { field },
             },
           }),
           {}
