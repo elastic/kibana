@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Bazel from '../lib/bazel.mjs';
-
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'watch',
@@ -24,9 +22,9 @@ export const command = {
     id: 'total',
   },
 
-  async run({ args, log }) {
-    await Bazel.watch(log, {
-      offline: args.getBooleanValue('offline') ?? true,
-    });
-  },
+  // async run({ args, log }) {
+  //   await Bazel.watch(log, {
+  //     offline: args.getBooleanValue('offline') ?? true,
+  //   });
+  // },
 };

@@ -23,6 +23,5 @@
     "@kbn/ci-stats-reporter",
     "@kbn/repo-packages",
     "@kbn/some-dev-log",
-    "@kbn/bazel-runner"
   ]
 }
