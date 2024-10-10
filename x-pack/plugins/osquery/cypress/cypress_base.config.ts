@@ -43,8 +43,8 @@ export const getCypressBaseConfig = (
         openMode: 0,
       },
       videoCompression: 15,
-      viewportHeight: 1080,
-      viewportWidth: 1920,
+      viewportHeight: 2160,
+      viewportWidth: 3840,
       experimentalStudio: true,
 
       env: {
