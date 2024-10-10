@@ -22,6 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { EntityType } from '@kbn/observability-shared-plugin/common';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { parseSearchString } from './parse_search_string';
@@ -56,7 +57,7 @@ export const Processes = () => {
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
-    entityType: 'host',
+    entityType: EntityType.HOST,
     entityId: asset.name,
   });
 
