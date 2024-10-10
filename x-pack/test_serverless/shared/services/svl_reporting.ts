@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
@@ -37,22 +36,27 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
-      const { status, body } = await supertestWithoutAuth
+      const { body }: { status: number; body: ReportingJobResponse } = await supertestWithoutAuth
         .post(requestPath)
         .set(internalReqHeader)
         .set(roleAuthc.apiKeyHeader)
-        .send({ jobParams: rison.encode(job) });
+        .send({ jobParams: rison.encode(job) })
+        .expect(200);
 
-      expect(status).to.be(200);
+      log.info(
+        `ReportingAPI.createReportJobInternal created report job` +
+          ` ${body.job.id} with ApiKey ${roleAuthc.apiKey.name}`
+      );
 
       return {
-        job: (body as ReportingJobResponse).job,
-        path: (body as ReportingJobResponse).path,
+        job: body.job,
+        path: body.path,
       };
     },
 
     /*
-     * This function is only used in the API tests
+     * If a test requests a report, it must wait for the job to finish before deleting the report.
+     * Otherwise, report task success metrics will be affected.
      */
     async waitForJobToFinish(
       downloadReportPath: string,
@@ -60,6 +64,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
+      log.debug(`ReportingAPI.waitForJobToFinish ${downloadReportPath}`);
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
