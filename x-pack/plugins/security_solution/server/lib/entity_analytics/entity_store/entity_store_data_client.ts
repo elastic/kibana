@@ -108,7 +108,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger, esClient, namespace, taskManager } = this.options;
+    const { logger } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -123,8 +123,6 @@ export class EntityStoreDataClient {
     logger.info(
       `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
     );
-    const debugLog = (message: string) =>
-      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
     const descriptor = await this.engineClient.init(entityType, {
       filter,
@@ -135,12 +133,27 @@ export class EntityStoreDataClient {
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
 
-    this.asyncSetup();
+    this.asyncSetup(
+      entityType,
+      fieldHistoryLength,
+      this.options.taskManager,
+      indexPattern,
+      filter,
+      pipelineDebugMode
+    );
 
     return descriptor;
   }
 
-  private async asyncSetup() {
+  private async asyncSetup(
+    entityType: EntityType,
+    fieldHistoryLength: number,
+    taskManager: TaskManagerStartContract,
+    indexPattern: string,
+    filter: string,
+    pipelineDebugMode: boolean
+  ) {
+    const { esClient, logger, namespace } = this.options;
     const unitedDefinition = getUnitedEntityDefinition({
       entityType,
       namespace,
@@ -148,7 +161,14 @@ export class EntityStoreDataClient {
     });
     const { entityManagerDefinition } = unitedDefinition;
 
+    const debugLog = (message: string) =>
+      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
+
     try {
+      // clean up any existing entity store
+      await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
+
+      // set up the entity manager definition
       await this.entityClient.createEntityDefinition({
         definition: {
           ...entityManagerDefinition,
@@ -215,9 +235,9 @@ export class EntityStoreDataClient {
         `Error initializing entity store for ${entityType}: ${err.message}`
       );
 
-      await this.engineClient.update(definition.id, ENGINE_STATUS.ERROR);
+      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
 
-      await this.delete(entityType, taskManager, true);
+      await this.delete(entityType, taskManager, { deleteData: true, deleteEngine: false });
     }
   }
 
@@ -289,9 +309,10 @@ export class EntityStoreDataClient {
   public async delete(
     entityType: EntityType,
     taskManager: TaskManagerStartContract,
-    deleteData: boolean
+    options = { deleteData: false, deleteEngine: true }
   ) {
     const { namespace, logger, esClient } = this.options;
+    const { deleteData, deleteEngine } = options;
     const descriptor = await this.engineClient.maybeGet(entityType);
     const unitedDefinition = getUnitedEntityDefinition({
       entityType,
@@ -331,6 +352,10 @@ export class EntityStoreDataClient {
           logger,
         });
       }
+
+      if (descriptor && deleteEngine) {
+        await this.engineClient.delete(entityType);
+      }
       // if the last engine then stop the task
       const { engines } = await this.engineClient.list();
       if (engines.length === 0) {
@@ -339,10 +364,6 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
-      }
-
-      if (descriptor) {
-        await this.engineClient.delete(entityType);
       }
 
       return { deleted: true };
