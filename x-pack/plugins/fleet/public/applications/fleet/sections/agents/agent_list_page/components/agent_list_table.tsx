@@ -29,8 +29,10 @@ import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics } from '../../../../../../../common/types';
+import type { AgentMetrics, Output } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -107,27 +109,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   const latestAgentVersion = useAgentVersion();
   const outputsRequest = useGetOutputs();
   const allOutputs = outputsRequest?.data?.items ?? [];
-  const defaultOutput = allOutputs.find((item) => item.is_default);
 
-  const getOutput = (policyId?: string) => {
-    if (!policyId)
-      return {
-        dataOutput: defaultOutput,
-        monitoringOutput: defaultOutput,
-      };
-
-    const agentPolicy = agentPoliciesIndexedById[policyId];
-    const dataOutput = !!agentPolicy?.data_output_id
-      ? allOutputs.find((item) => item.id === agentPolicy.data_output_id)
-      : defaultOutput;
-    const monitoringOutput = !!agentPolicy?.monitoring_output_id
-      ? allOutputs.find((item) => item.id === agentPolicy.monitoring_output_id)
-      : defaultOutput;
-    return {
-      dataOutput,
-      monitoringOutput,
-    };
-  };
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
     if (!agent.policy_id) return true;
@@ -313,15 +295,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Output for integrations',
       }),
       width: '180px',
-      render: (policyId: string, agent: Agent) => {
-        const { dataOutput } = getOutput(agent?.policy_id);
+      render: (outputs: Output[], agent: Agent) => {
+        const agentPolicy = agent?.policy_id
+          ? agentPoliciesIndexedById[agent.policy_id]
+          : undefined;
         return (
           <>
-            {dataOutput?.name ? (
-              <EuiText size="s" className="eui-textNoWrap">
-                {dataOutput.name}
-              </EuiText>
-            ) : undefined}
+            <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />
           </>
         );
       },
@@ -333,16 +313,16 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Output for Monitoring',
       }),
       width: '180px',
-      render: (policyId: string, agent: Agent) => {
-        const { monitoringOutput } = getOutput(agent?.policy_id);
+      render: (outputs: Output[], agent: Agent) => {
+        const agentPolicy = agent?.policy_id
+          ? agentPoliciesIndexedById[agent.policy_id]
+          : undefined;
         return (
-          <>
-            {monitoringOutput?.name ? (
-              <EuiText size="s" className="eui-textNoWrap">
-                {monitoringOutput.name}
-              </EuiText>
-            ) : undefined}
-          </>
+          <AgentPolicyOutputsSummary
+            outputs={allOutputs}
+            agentPolicy={agentPolicy}
+            monitoring={true}
+          />
         );
       },
     },
