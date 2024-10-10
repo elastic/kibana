@@ -59,8 +59,6 @@ interface AdditionalOptionsConnectorFieldsProps {
   taskTypeOptions: TaskTypeOption[];
 }
 
-// const InferenceAPIConnectorFields
-
 export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnectorFieldsProps> = ({
   config,
   readOnly,

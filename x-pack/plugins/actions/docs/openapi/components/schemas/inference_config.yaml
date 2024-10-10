@@ -4,6 +4,7 @@ type: object
 required:
   - provider
   - taskType
+  - inferenceId
 properties:
   provider:
     type: string

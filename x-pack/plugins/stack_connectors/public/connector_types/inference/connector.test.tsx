@@ -9,7 +9,7 @@ import React from 'react';
 
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { DisplayType, FieldType } from '../lib/dynamic_config/types';
@@ -272,9 +272,7 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -340,10 +338,8 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
-          delay: 10,
-        });
+      await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        delay: 10,
       });
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));

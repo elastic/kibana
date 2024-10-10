@@ -17,7 +17,6 @@ import {
   keys,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -40,15 +39,15 @@ import { DEFAULT_TASK_TYPE } from './constants';
 import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { SelectableProvider } from './providers/selectable';
 import { Config, Secrets } from './types';
-import {
-  generateInferenceEndpointId,
-  getTaskTypeOptions,
-  getNonEmptyValidator,
-  TaskTypeOption,
-} from './helpers';
+import { generateInferenceEndpointId, getTaskTypeOptions, TaskTypeOption } from './helpers';
 import { useProviders } from './providers/get_providers';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { AdditionalOptionsConnectorFields } from './additional_options_fields';
+import {
+  getProviderConfigHiddenField,
+  getProviderSecretsHiddenField,
+  getTaskTypeConfigHiddenField,
+} from './hidden_fields';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -350,69 +349,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     ]
   );
 
-  const providerSecretsHiddenField = (
-    <UseField
-      path="secrets.providerSecrets"
-      component={HiddenField}
-      config={{
-        validations: [
-          {
-            validator: getNonEmptyValidator(
-              providerSchema,
-              setRequiredProviderFormFields,
-              isSubmitting,
-              true
-            ),
-            isBlocking: true,
-          },
-        ],
-      }}
-    />
-  );
-  const providerConfigHiddenField = (
-    <UseField
-      path="config.providerConfig"
-      component={HiddenField}
-      config={{
-        validations: [
-          {
-            validator: getNonEmptyValidator(
-              providerSchema,
-              setRequiredProviderFormFields,
-              isSubmitting
-            ),
-            isBlocking: true,
-          },
-        ],
-      }}
-    />
-  );
-
-  const taskTypeConfigHiddenField = (
-    <UseField
-      path="config.taskTypeConfig"
-      component={HiddenField}
-      config={{
-        validations: [
-          {
-            validator: getNonEmptyValidator(
-              taskTypeSchema,
-              (requiredFormFields) => {
-                const formFields = [
-                  ...requiredFormFields,
-                  ...(taskTypeSchema ?? []).filter((f) => !f.required),
-                ];
-                setTaskTypeFormFields(formFields.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-              },
-              isSubmitting
-            ),
-            isBlocking: true,
-          },
-        ],
-      }}
-    />
-  );
-
   return (
     <>
       <UseField
@@ -486,9 +422,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           />
           <EuiSpacer size="l" />
           <EuiHorizontalRule />
-          {providerSecretsHiddenField}
-          {providerConfigHiddenField}
-          {taskTypeConfigHiddenField}
+          {getProviderSecretsHiddenField(
+            providerSchema,
+            setRequiredProviderFormFields,
+            isSubmitting
+          )}
+          {getProviderConfigHiddenField(
+            providerSchema,
+            setRequiredProviderFormFields,
+            isSubmitting
+          )}
+          {getTaskTypeConfigHiddenField(taskTypeSchema, setTaskTypeFormFields, isSubmitting)}
         </>
       ) : null}
     </>
