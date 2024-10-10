@@ -42,9 +42,9 @@ export type OpenTelemetryAgentName =
   | 'otlp'
   | `opentelemetry/${string}`
   | `otlp/${string}`;
+export const OPEN_TELEMETRY_BASE_AGENT_NAMES: OpenTelemetryAgentName[] = ['otlp', 'opentelemetry'];
 export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
-  'otlp',
-  'opentelemetry',
+  ...OPEN_TELEMETRY_BASE_AGENT_NAMES,
   'opentelemetry/cpp',
   'opentelemetry/dotnet',
   'opentelemetry/erlang',
