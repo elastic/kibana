@@ -8,20 +8,20 @@
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
 
-import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
+import { EntitySecurityException } from '../../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../../lib/entities/errors/invalid_transform_error';
+import { readEntityDefinition } from '../../../lib/entities/read_entity_definition';
 
-import { deleteIngestPipelines } from '../../lib/entities/delete_ingest_pipeline';
-import { deleteIndices } from '../../lib/entities/delete_index';
-import { createAndInstallIngestPipelines } from '../../lib/entities/create_and_install_ingest_pipeline';
-import { createAndInstallTransforms } from '../../lib/entities/create_and_install_transform';
-import { startTransforms } from '../../lib/entities/start_transforms';
-import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
+import { deleteIngestPipelines } from '../../../lib/entities/delete_ingest_pipeline';
+import { deleteIndices } from '../../../lib/entities/delete_index';
+import { createAndInstallIngestPipelines } from '../../../lib/entities/create_and_install_ingest_pipeline';
+import { createAndInstallTransforms } from '../../../lib/entities/create_and_install_transform';
+import { startTransforms } from '../../../lib/entities/start_transforms';
+import { EntityDefinitionNotFound } from '../../../lib/entities/errors/entity_not_found';
 
-import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
-import { deleteTransforms } from '../../lib/entities/delete_transforms';
-import { stopTransforms } from '../../lib/entities/stop_transforms';
+import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
+import { deleteTransforms } from '../../../lib/entities/delete_transforms';
+import { stopTransforms } from '../../../lib/entities/stop_transforms';
 
 export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition/{id}/_reset',

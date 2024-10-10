@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { createEntityDefinitionRoute } from './create';
-import { deleteEntityDefinitionRoute } from './delete';
-import { getEntityDefinitionRoute } from './get';
-import { resetEntityDefinitionRoute } from './reset';
-import { updateEntityDefinitionRoute } from './update';
+import { createEntityDefinitionRoute } from './definition/create';
+import { deleteEntityDefinitionRoute } from './definition/delete';
+import { resetEntityDefinitionRoute } from './definition/reset';
+import { updateEntityDefinitionRoute } from './definition/update';
+import { getEntityDefinitionRoute } from './definition/get';
+import { findEntityDefinitionsRoute } from './definition/find';
+
+import { findEntitiesRoute } from './find';
 
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
   ...deleteEntityDefinitionRoute,
-  ...getEntityDefinitionRoute,
   ...resetEntityDefinitionRoute,
   ...updateEntityDefinitionRoute,
+  ...getEntityDefinitionRoute,
+  ...findEntityDefinitionsRoute,
+  ...findEntitiesRoute,
 };

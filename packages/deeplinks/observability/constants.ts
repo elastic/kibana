@@ -23,6 +23,8 @@ export const OBSERVABILITY_ONBOARDING_APP_ID = 'observabilityOnboarding';
 
 export const SLO_APP_ID = 'slo';
 
+export const ENTITY_MANAGER_APP_ID = 'entityManager';
+
 export const AI_ASSISTANT_APP_ID = 'observabilityAIAssistant';
 
 export const INVESTIGATE_APP_ID = 'investigate';

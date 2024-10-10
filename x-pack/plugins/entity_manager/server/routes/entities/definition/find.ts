@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
-import { z } from '@kbn/zod';
-import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
-/**
- * @openapi
+import { findEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { z } from '@kbn/zod';
+import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
+
+/** @openapi
  * /internal/entities/definition:
  *   get:
  *     description: Get all installed entity definitions.
@@ -48,22 +48,15 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                     allOf:
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
  */
-export const getEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'GET /internal/entities/definition/{id?}',
+export const findEntityDefinitionsRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/definition',
   params: z.object({
-    query: getEntityDefinitionQuerySchema,
-    path: z.object({ id: z.optional(z.string()) }),
+    query: findEntityDefinitionQuerySchema,
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
       const client = await getScopedClient({ request });
-      const result = await client.getEntityDefinitions({
-        id: params.path?.id,
-        page: params.query.page,
-        perPage: params.query.perPage,
-        includeState: params.query.includeState,
-      });
-
+      const result = await client.getEntityDefinitions(params.query);
       return response.ok({ body: result });
     } catch (e) {
       logger.error(e);
