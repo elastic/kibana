@@ -172,7 +172,7 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const REOPEN_CASES_CAPABILITY = 'reopen_cases' as const;
-export const COMMENT_CASES_CAPABILITY = 'create_comment' as const;
+export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 
 /**
  * Cases API Tags

@@ -14,7 +14,7 @@ import {
   UPDATE_CASES_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
   REOPEN_CASES_CAPABILITY,
-  COMMENT_CASES_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
 } from '../constants';
 
 export interface CasesUiCapabilities {
@@ -41,5 +41,5 @@ export const createUICapabilities = (): CasesUiCapabilities => ({
   delete: [DELETE_CASES_CAPABILITY] as const,
   settings: [CASES_SETTINGS_CAPABILITY] as const,
   reopenCases: [REOPEN_CASES_CAPABILITY] as const,
-  createComment: [COMMENT_CASES_CAPABILITY] as const,
+  createComment: [CREATE_COMMENT_CAPABILITY] as const,
 });
