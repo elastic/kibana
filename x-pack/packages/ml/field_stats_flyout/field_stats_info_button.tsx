@@ -88,6 +88,7 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         defaultMessage: '(no data found in 1000 sample records)',
       })
     : '';
+
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -135,7 +136,6 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         grow={false}
         css={{
           paddingRight: themeVars.euiTheme.euiSizeXS,
-          paddingBottom: themeVars.euiTheme.euiSizeXS,
         }}
       >
         <FieldIcon
@@ -150,7 +150,6 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         aria-label={label}
         title={label}
         className="euiComboBoxOption__content"
-        css={{ paddingBottom: themeVars.euiTheme.euiSizeXS }}
       >
         {label}
       </EuiText>
