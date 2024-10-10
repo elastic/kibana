@@ -8324,12 +8324,12 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@playwright/test@=1.46.0":
-  version "1.46.0"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.46.0.tgz#ccea6d22c40ee7fa567e4192fafbdf2a907e2714"
-  integrity sha512-/QYft5VArOrGRP5pgkrfKksqsKA6CEFyGQ/gjNe6q0y4tZ1aaPfq4gIjudr1s3D+pXyrPRdsy4opKDrjBabE5w==
+"@playwright/test@=1.47.2":
+  version "1.47.2"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.47.2.tgz#dbe7051336bfc5cc599954214f9111181dbc7475"
+  integrity sha512-jTXRsoSPONAs8Za9QEQdyjFn+0ZQFjCiIztAIF6bi1HqhBzG9Ma7g1WotyiGqFSBRZjIEqMdT8RUlbk1QVhzCQ==
   dependencies:
-    playwright "1.46.0"
+    playwright "1.47.2"
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
   version "0.5.7"
@@ -25534,12 +25534,12 @@ playwright-chromium@=1.45.1:
   dependencies:
     playwright-core "1.45.1"
 
-playwright-chromium@=1.46.0:
-  version "1.46.0"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.46.0.tgz#f24228fec92b380ccc8f5f365b897e9d88b612f6"
-  integrity sha512-UTHYZsr49XFYRQkpCfaHxL63vfu6uThxR1DrNwnU6qik/OworFcugTOJMWFMoop3QP+ThU8laAMumauLdLZXCQ==
+playwright-chromium@=1.47.2:
+  version "1.47.2"
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.47.2.tgz#c441712c82c619f1a36cdf7d1818d06b4c88b52c"
+  integrity sha512-vznuubrx3+C50JYMKbqfJOaHhr3dcxxzudvvYoKVA7FoJVFx4wzwCSbguitzUc5ppmsyyMMGMmD21br9CZlvMg==
   dependencies:
-    playwright-core "1.46.0"
+    playwright-core "1.47.2"
 
 playwright-core@1.45.1, playwright-core@=1.45.1:
   version "1.45.1"
@@ -25551,12 +25551,17 @@ playwright-core@1.46.0:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.46.0.tgz#2336ac453a943abf0dc95a76c117f9d3ebd390eb"
   integrity sha512-9Y/d5UIwuJk8t3+lhmMSAJyNP1BUC/DqP3cQJDQQL/oWqAiuPTLgy7Q5dzglmTLwcBRdetzgNM/gni7ckfTr6A==
 
-playwright@1.46.0, playwright@=1.46.0:
-  version "1.46.0"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.46.0.tgz#c7ff490deae41fc1e814bf2cb62109dd9351164d"
-  integrity sha512-XYJ5WvfefWONh1uPAUAi0H2xXV5S3vrtcnXe6uAOgdGi3aSpqOSXX08IAjXW34xitfuOJsvXU5anXZxPSEQiJw==
+playwright-core@1.47.2:
+  version "1.47.2"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.47.2.tgz#7858da9377fa32a08be46ba47d7523dbd9460a4e"
+  integrity sha512-3JvMfF+9LJfe16l7AbSmU555PaTl2tPyQsVInqm3id16pdDfvZ8TTZ/pyzmkbDrZTQefyzU7AIHlZqQnxpqHVQ==
+
+playwright@1.47.2:
+  version "1.47.2"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.47.2.tgz#155688aa06491ee21fb3e7555b748b525f86eb20"
+  integrity sha512-nx1cLMmQWqmA3UsnjaaokyoUpdVaaDhJhMoxX2qj3McpjnsqFHs516QAKYhqHAgOP+oCFTEOCOAaD1RgD/RQfA==
   dependencies:
-    playwright-core "1.46.0"
+    playwright-core "1.47.2"
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -25566,6 +25571,15 @@ playwright@=1.45.1:
   integrity sha512-Hjrgae4kpSQBr98nhCj3IScxVeVUixqj+5oyif8TdIn2opTCPEzqAqNMeK42i3cWDCVu9MI+ZsGWw+gVR4ISBg==
   dependencies:
     playwright-core "1.45.1"
+  optionalDependencies:
+    fsevents "2.3.2"
+
+playwright@=1.46.0:
+  version "1.46.0"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.46.0.tgz#c7ff490deae41fc1e814bf2cb62109dd9351164d"
+  integrity sha512-XYJ5WvfefWONh1uPAUAi0H2xXV5S3vrtcnXe6uAOgdGi3aSpqOSXX08IAjXW34xitfuOJsvXU5anXZxPSEQiJw==
+  dependencies:
+    playwright-core "1.46.0"
   optionalDependencies:
     fsevents "2.3.2"
 
