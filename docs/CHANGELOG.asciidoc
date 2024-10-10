@@ -243,7 +243,7 @@ The Uptime app is already hidden from Kibana when there is no recent Heartbeat d
 [%collapsible]
 ====
 *Details* +
-Search Sessions is now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue executing as long as a user is waiting on-screen for results.
+Search sessions are now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue running as long as a user is waiting on-screen for results.
 ====
 
 [float]
