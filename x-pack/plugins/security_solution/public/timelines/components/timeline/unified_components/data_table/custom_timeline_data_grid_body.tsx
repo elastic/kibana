@@ -121,9 +121,6 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
-    .unifiedDataTable__rowControl {
-      margin-top: -4px;
-    }
   }
 `;
 

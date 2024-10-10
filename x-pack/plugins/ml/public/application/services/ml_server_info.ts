@@ -13,6 +13,8 @@ export interface CloudInfo {
   isCloud: boolean;
   isCloudTrial: boolean;
   deploymentId: string | null;
+  cloudUrl: string | null;
+  isMlAutoscalingEnabled: boolean;
 }
 
 let defaults: MlServerDefaults = {
@@ -26,6 +28,8 @@ const cloudInfo: CloudInfo = {
   isCloud: false,
   isCloudTrial: false,
   deploymentId: null,
+  cloudUrl: null,
+  isMlAutoscalingEnabled: false,
 };
 
 export async function loadMlServerInfo(mlApi: MlApi) {

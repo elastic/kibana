@@ -4,60 +4,73 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
-import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_index';
+
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CodeSample } from '../shared/code_sample';
 import { LanguageSelector } from '../shared/language_selector';
 
 import { CreateIndexFormState } from './types';
+import { useStartPageCodingExamples } from './hooks/use_coding_examples';
+import { APIKeyCallout } from './api_key_callout';
 
 export interface CreateIndexCodeViewProps {
   createIndexForm: CreateIndexFormState;
+  changeCodingLanguage: (language: AvailableLanguages) => void;
+  canCreateApiKey?: boolean;
 }
 
-// TODO: this will be dynamic based on stack / es3 & onboarding token
-const SelectedCodeExamples = DenseVectorSeverlessCodeExamples;
-
-export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProps) => {
+export const CreateIndexCodeView = ({
+  createIndexForm,
+  changeCodingLanguage,
+  canCreateApiKey,
+}: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
+  const selectedCodeExamples = useStartPageCodingExamples();
 
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<AvailableLanguages>(getDefaultCodingLanguage);
+  const { codingLanguage: selectedLanguage } = createIndexForm;
   const onSelectLanguage = useCallback(
     (value: AvailableLanguages) => {
-      setSelectedLanguage(value);
+      changeCodingLanguage(value);
       usageTracker.count([
         AnalyticsEvents.startCreateIndexLanguageSelect,
         `${AnalyticsEvents.startCreateIndexLanguageSelect}_${value}`,
       ]);
     },
-    [usageTracker]
+    [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
-    return SelectedCodeExamples[selectedLanguage];
-  }, [selectedLanguage]);
+    return selectedCodeExamples[selectedLanguage];
+  }, [selectedLanguage, selectedCodeExamples]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
+      {canCreateApiKey && (
+        <EuiFlexItem grow={true}>
+          <APIKeyCallout apiKey={apiKey} />
+        </EuiFlexItem>
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
@@ -69,7 +82,7 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
         {selectedLanguage === 'curl' && (
           <EuiFlexItem grow={false}>
             <TryInConsoleButton
-              request={SelectedCodeExamples.sense.createIndex(codeParams)}
+              request={selectedCodeExamples.sense.createIndex(codeParams)}
               application={application}
               sharePlugin={share}
               consolePlugin={consolePlugin}
@@ -93,6 +106,7 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
         />
       )}
       <CodeSample
+        id="createIndex"
         title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
           defaultMessage: 'Connect and create an index',
         })}
@@ -102,8 +116,7 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
           usageTracker.click([
             AnalyticsEvents.startCreateIndexCodeCopy,
             `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}`,
-            // TODO: vector should be a parameter when have multiple options
-            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}_vector`,
+            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}_${selectedCodeExamples.exampleType}`,
           ]);
         }}
       />

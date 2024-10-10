@@ -72,7 +72,9 @@ it('is disabled by default', async () => {
 });
 
 it('handles requests when enabled', async () => {
-  const server = await startService({ config: { server: { oas: { enabled: true } } } });
+  const server = await startService({
+    config: { server: { oas: { enabled: true }, restrictInternalApis: false } },
+  });
   const result = await supertest(server.listener).get('/api/oas');
   expect(result.status).toBe(200);
 });
@@ -157,7 +159,7 @@ it.each([
   'can filter paths based on query params $queryParam',
   async ({ queryParam, includes, excludes }) => {
     const server = await startService({
-      config: { server: { oas: { enabled: true } } },
+      config: { server: { oas: { enabled: true }, restrictInternalApis: false } },
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
         router1.get(
@@ -191,7 +193,9 @@ it('only accepts "public" or "internal" for "access" query param', async () => {
   const server = await startService({ config: { server: { oas: { enabled: true } } } });
   const result = await supertest(server.listener).get('/api/oas').query({ access: 'invalid' });
   expect(result.body.message).toBe(
-    'Invalid access query parameter. Must be one of "public" or "internal".'
+    `[access]: types that failed validation:
+- [access.0]: expected value to equal [public]
+- [access.1]: expected value to equal [internal]`
   );
   expect(result.status).toBe(400);
 });

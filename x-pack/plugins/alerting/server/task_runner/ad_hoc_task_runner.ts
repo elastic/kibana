@@ -180,6 +180,7 @@ export class AdHocTaskRunner implements CancellableTask {
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       namespace: this.context.spaceIdToNamespace(adHocRunData.spaceId),
+      request: fakeRequest,
       ruleId: rule.id,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,

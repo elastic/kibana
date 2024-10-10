@@ -36,13 +36,13 @@ export class DatasetQualityPlugin
   public start(core: CoreStart, plugins: DatasetQualityStartDeps): DatasetQualityPluginStart {
     const telemetryClient = this.telemetry.start();
 
-    const dataStreamStatsClient = new DataStreamsStatsService().start({
+    const dataStreamStatsService = new DataStreamsStatsService().start({
       http: core.http,
-    }).client;
+    });
 
-    const dataStreamDetailsClient = new DataStreamDetailsService().start({
+    const dataStreamDetailsService = new DataStreamDetailsService().start({
       http: core.http,
-    }).client;
+    });
 
     const DatasetQuality = createDatasetQuality({
       core,
@@ -52,7 +52,7 @@ export class DatasetQualityPlugin
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
-      dataStreamStatsClient,
+      dataStreamStatsService,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
@@ -64,8 +64,8 @@ export class DatasetQualityPlugin
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
       core,
       plugins,
-      dataStreamStatsClient,
-      dataStreamDetailsClient,
+      dataStreamStatsService,
+      dataStreamDetailsService,
     });
 
     return {
