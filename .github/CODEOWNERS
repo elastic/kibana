@@ -595,7 +595,7 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-packages/kbn-manifest @elastic/appex-sharedux
+packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-presentation
 x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
 src/plugins/maps_ems @elastic/kibana-presentation
