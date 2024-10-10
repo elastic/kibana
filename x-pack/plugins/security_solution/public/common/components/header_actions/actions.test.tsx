@@ -20,7 +20,6 @@ import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
 import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
-// import { useUiSetting$ } from '../../lib/kibana';
 
 const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
 jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
@@ -154,7 +153,6 @@ describe('Actions', () => {
         incrementStep: incrementStepMock,
         isTourShown: () => true,
       });
-      // (useUiSetting$ as jest.Mock).mockReturnValue([true]);
       jest.clearAllMocks();
     });
 
