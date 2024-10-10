@@ -37,6 +37,7 @@ components:
         - installing
         - started
         - stopped
+        - error
 
     IndexPattern:
       type: string
