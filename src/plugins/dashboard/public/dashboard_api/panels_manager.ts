@@ -11,7 +11,7 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
 import { DefaultEmbeddableApi, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
@@ -125,6 +125,20 @@ export function initializePanelsManager(
       },
       canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
       children$,
+      getDashboardPanelFromId: async (panelId: string) => {
+        const panel = panels$.value[panelId];
+        const child = children$.value[panelId];
+        if (!child || !panel) throw new PanelNotFoundError();
+        const serialized = apiHasSerializableState(child)
+          ? await child.serializeState()
+          : { rawState: {} };
+        return {
+          type: panel.type,
+          explicitInput: { ...panel.explicitInput, ...serialized.rawState },
+          gridData: panel.gridData,
+          references: serialized.references,
+        };
+      },
       getPanelCount: () => {
         return Object.keys(panels$.value).length;
       },

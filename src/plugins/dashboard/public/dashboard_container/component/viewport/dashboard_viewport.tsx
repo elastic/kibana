@@ -58,7 +58,6 @@ export const DashboardViewportComponent = () => {
     panels,
     viewMode,
     useMargins,
-    uuid,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -67,8 +66,7 @@ export const DashboardViewportComponent = () => {
     dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
-    dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.useMargins$
   );
 
   const panelCount = useMemo(() => {
@@ -125,7 +123,7 @@ export const DashboardViewportComponent = () => {
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={uuid}
+            key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}

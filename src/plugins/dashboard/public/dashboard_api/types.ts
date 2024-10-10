@@ -20,6 +20,7 @@ import {
   EmbeddableAppContext,
   HasAppContext,
   HasType,
+  HasUniqueId,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesPanelDescription,
@@ -126,6 +127,7 @@ export type DashboardApi = CanExpandPanels &
   HasRuntimeChildState &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
+  HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
@@ -165,8 +167,6 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setTags: (tags: string[]) => void;
     useMargins$: PublishingSubject<boolean | undefined>;
-    // TODO replace with HasUniqueId once dashboard is refactored and navigateToDashboard is removed
-    uuid$: PublishingSubject<string>;
 
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;

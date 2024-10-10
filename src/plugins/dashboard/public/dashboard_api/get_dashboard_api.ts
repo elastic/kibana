@@ -95,7 +95,6 @@ export function getDashboardApi({
         controlGroupApi$,
         lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
           ...DEFAULT_DASHBOARD_INPUT,
-          id: v4(),
         },
         panelsManager,
         settingsManager,
@@ -114,6 +113,12 @@ export function getDashboardApi({
       },
       isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
       managed$,
+      runInteractiveSave: async () => {
+        throw new Error('runInteractiveSave not implemented');
+      },
+      runQuickSave: async () => {
+        throw new Error('runQuickSave not implemented');
+      },
       savedObjectId: savedObjectId$,
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
       setManaged: (managed: boolean) => managed$.next(managed),
@@ -126,6 +131,7 @@ export function getDashboardApi({
         viewMode$.next(viewMode);
       },
       type: DASHBOARD_API_TYPE as 'dashboard',
+      uuid: v4(),
       viewMode: viewMode$,
     } as Omit<DashboardApi, 'reload$'>,
     internalApi: {
