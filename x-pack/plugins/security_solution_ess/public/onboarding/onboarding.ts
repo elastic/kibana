@@ -12,5 +12,6 @@ export const setOnboardingSettings = (services: Services) => {
 
   securitySolution.setOnboardingSettings({
     userUrl: application.getUrlForApp('management', { path: 'security/users/create' }),
+    isAgentlessAvailable: false,
   });
 };
