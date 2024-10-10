@@ -37,13 +37,13 @@ describe('useGetCasesMetrics', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(spy).toHaveBeenCalledWith({
-      http: expect.anything(),
-      signal: abortCtrl.signal,
-      query: { owner: [SECURITY_SOLUTION_OWNER] },
-    });
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        http: expect.anything(),
+        signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -55,8 +55,6 @@ describe('useGetCasesMetrics', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

@@ -48,9 +48,7 @@ describe('useAsync', () => {
       act(() => {
         result.current.start(args);
       });
-      await waitFor(() => null, { timeout });
-
-      expect(fn).toHaveBeenCalled();
+      await waitFor(() => expect(fn).toHaveBeenCalled(), { timeout });
     },
     timeout
   );
@@ -62,9 +60,7 @@ describe('useAsync', () => {
     act(() => {
       result.current.start(args);
     });
-    await waitFor(() => null, { timeout });
-
-    expect(fn).toHaveBeenCalledWith(expectedArgs);
+    await waitFor(() => expect(fn).toHaveBeenCalledWith(expectedArgs), { timeout });
   });
 
   it(
@@ -76,10 +72,13 @@ describe('useAsync', () => {
       act(() => {
         result.current.start(args);
       });
-      await waitFor(() => null, { timeout });
-
-      expect(result.current.result).toEqual({ resolved: 'value' });
-      expect(result.current.error).toBeUndefined();
+      await waitFor(
+        () => {
+          expect(result.current.result).toEqual({ resolved: 'value' });
+          expect(result.current.error).toBeUndefined();
+        },
+        { timeout }
+      );
     },
     timeout
   );
@@ -94,10 +93,13 @@ describe('useAsync', () => {
         result.current.start(args);
       });
 
-      await waitFor(() => null, { timeout });
-
-      expect(result.current.result).toBeUndefined();
-      expect(result.current.error).toEqual(new Error('whoops'));
+      await waitFor(
+        () => {
+          expect(result.current.result).toBeUndefined();
+          expect(result.current.error).toEqual(new Error('whoops'));
+        },
+        { timeout }
+      );
     },
     timeout
   );
@@ -117,9 +119,7 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
 
       act(() => resolve());
-      await waitFor(() => null, { timeout });
-
-      expect(result.current.loading).toBe(false);
+      await waitFor(() => expect(result.current.loading).toBe(false), { timeout });
     },
     timeout
   );
@@ -139,10 +139,13 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
 
       act(() => resolve('result'));
-      await waitFor(() => null, { timeout });
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.result).toBe('result');
+      await waitFor(
+        () => {
+          expect(result.current.loading).toBe(false);
+          expect(result.current.result).toBe('result');
+        },
+        { timeout }
+      );
 
       act(() => {
         result.current.start(args);
@@ -151,10 +154,13 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
       expect(result.current.result).toBe(undefined);
       act(() => resolve('result'));
-      await waitFor(() => null, { timeout });
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.result).toBe('result');
+      await waitFor(
+        () => {
+          expect(result.current.loading).toBe(false);
+          expect(result.current.result).toBe('result');
+        },
+        { timeout }
+      );
     },
     timeout
   );

@@ -170,22 +170,22 @@ describe('useTimelineEvents', () => {
     await waitFor(() => null);
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
-    await waitFor(() => null);
-
-    expect(mockSearch).toHaveBeenCalledTimes(2);
-    expect(result.current).toEqual([
-      DataLoadingState.loaded,
-      {
-        events: mockEvents,
-        id: TimelineId.active,
-        inspect: result.current[1].inspect,
-        loadPage: result.current[1].loadPage,
-        pageInfo: result.current[1].pageInfo,
-        refetch: result.current[1].refetch,
-        totalCount: 32,
-        refreshedAt: result.current[1].refreshedAt,
-      },
-    ]);
+    await waitFor(() => {
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      expect(result.current).toEqual([
+        DataLoadingState.loaded,
+        {
+          events: mockEvents,
+          id: TimelineId.active,
+          inspect: result.current[1].inspect,
+          loadPage: result.current[1].loadPage,
+          pageInfo: result.current[1].pageInfo,
+          refetch: result.current[1].refetch,
+          totalCount: 32,
+          refreshedAt: result.current[1].refreshedAt,
+        },
+      ]);
+    });
   });
 
   test('Mock cache for active timeline when switching page', async () => {
@@ -268,8 +268,7 @@ describe('useTimelineEvents', () => {
     act(() => {
       result.current[1].loadPage(4);
     });
-    await waitFor(() => null);
-    expect(mockSearch).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
   });
 
   test('should query again when a new field is added', async () => {
@@ -296,9 +295,7 @@ describe('useTimelineEvents', () => {
       fields: ['@timestamp', 'event.kind', 'event.category'],
     });
 
-    await waitFor(() => null);
-
-    expect(mockSearch).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
   });
 
   test('should not query again when a field is removed', async () => {
@@ -320,9 +317,7 @@ describe('useTimelineEvents', () => {
 
     rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
-    await waitFor(() => null);
-
-    expect(mockSearch).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
   });
   test('should not query again when a removed field is added back', async () => {
     const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
@@ -353,9 +348,7 @@ describe('useTimelineEvents', () => {
 
     // since there is no new update in useEffect, it should throw an timeout error
     // await expect(waitFor(() => null)).rejects.toThrowError();
-    await waitFor(() => null);
-
-    expect(mockSearch).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
   });
 
   describe('Fetch Notes', () => {
@@ -367,10 +360,10 @@ describe('useTimelineEvents', () => {
         }
       );
 
-      await waitFor(() => null);
-
-      expect(mockSearch).toHaveBeenCalledTimes(1);
-      expect(onLoadMock).toHaveBeenNthCalledWith(1, expect.objectContaining(mockEvents));
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+        expect(onLoadMock).toHaveBeenNthCalledWith(1, expect.objectContaining(mockEvents));
+      });
     });
   });
 });

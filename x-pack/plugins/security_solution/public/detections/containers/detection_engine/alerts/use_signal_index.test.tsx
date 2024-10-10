@@ -36,15 +36,13 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    await waitFor(() =>
-      expect(result.current).toEqual({
-        createDeSignalIndex: null,
-        loading: true,
-        signalIndexExists: null,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      })
-    );
+    expect(result.current).toEqual({
+      createDeSignalIndex: null,
+      loading: true,
+      signalIndexExists: null,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
+    });
   });
 
   test('fetch alerts info', async () => {
@@ -55,14 +53,15 @@ describe('useSignalIndex', () => {
       }
     );
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    expect(result.current).toEqual({
-      createDeSignalIndex: result.current.createDeSignalIndex,
-      loading: false,
-      signalIndexExists: true,
-      signalIndexName: 'mock-signal-index',
-      signalIndexMappingOutdated: false,
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: true,
+        signalIndexName: 'mock-signal-index',
+        signalIndexMappingOutdated: false,
+      });
     });
   });
 
@@ -79,13 +78,15 @@ describe('useSignalIndex', () => {
       await result.current.createDeSignalIndex();
     });
 
-    expect(result.current).toEqual({
-      createDeSignalIndex: result.current.createDeSignalIndex,
-      loading: false,
-      signalIndexExists: true,
-      signalIndexName: 'mock-signal-index',
-      signalIndexMappingOutdated: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: true,
+        signalIndexName: 'mock-signal-index',
+        signalIndexMappingOutdated: false,
+      })
+    );
   });
 
   test('make sure that createSignalIndex have been called when trying to create signal index', async () => {
@@ -124,13 +125,15 @@ describe('useSignalIndex', () => {
       await result.current.createDeSignalIndex();
     });
 
-    expect(result.current).toEqual({
-      createDeSignalIndex: result.current.createDeSignalIndex,
-      loading: false,
-      signalIndexExists: false,
-      signalIndexName: null,
-      signalIndexMappingOutdated: null,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: false,
+        signalIndexName: null,
+        signalIndexMappingOutdated: null,
+      })
+    );
   });
 
   test('if there is an error when fetching alerts info, signalIndexExists === false && signalIndexName == null', async () => {
@@ -151,13 +154,15 @@ describe('useSignalIndex', () => {
       await result.current.createDeSignalIndex();
     });
 
-    expect(result.current).toEqual({
-      createDeSignalIndex: result.current.createDeSignalIndex,
-      loading: false,
-      signalIndexExists: false,
-      signalIndexName: null,
-      signalIndexMappingOutdated: null,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: false,
+        signalIndexName: null,
+        signalIndexMappingOutdated: null,
+      })
+    );
   });
 
   test('should not make API calls when signal index already stored in sourcerer', async () => {
@@ -174,14 +179,15 @@ describe('useSignalIndex', () => {
       }
     );
 
-    await waitFor(() => expect(spyOnGetSignalIndex).not.toHaveBeenCalled());
-
-    expect(result.current).toEqual({
-      createDeSignalIndex: result.current.createDeSignalIndex,
-      loading: false,
-      signalIndexExists: true,
-      signalIndexName: 'mock-signal-index-from-sourcerer',
-      signalIndexMappingOutdated: false,
+    await waitFor(() => {
+      expect(spyOnGetSignalIndex).not.toHaveBeenCalled();
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: true,
+        signalIndexName: 'mock-signal-index-from-sourcerer',
+        signalIndexMappingOutdated: false,
+      });
     });
   });
 });

@@ -84,7 +84,7 @@ describe('useLoadRuleAggregations', () => {
 
     rerender();
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
         expect.objectContaining({
           searchText: '',
@@ -95,10 +95,9 @@ describe('useLoadRuleAggregations', () => {
           ruleStatusesFilter: [],
           tagsFilter: [],
         })
-      )
-    );
-
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+      );
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call loadRuleAggregation API with params and handle result', async () => {
@@ -123,7 +122,7 @@ describe('useLoadRuleAggregations', () => {
 
     rerender();
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
         expect.objectContaining({
           searchText: 'test',
@@ -134,10 +133,9 @@ describe('useLoadRuleAggregations', () => {
           tagsFilter: ['tag1', 'tag2'],
           ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
         })
-      )
-    );
-
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+      );
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call onError if API fails', async () => {

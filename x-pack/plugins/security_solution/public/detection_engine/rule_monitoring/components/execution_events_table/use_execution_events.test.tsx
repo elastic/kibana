@@ -59,28 +59,28 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitFor(() => null);
-
-    // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(true);
-    expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual({
-      events: [
-        {
-          timestamp: '2021-12-29T10:42:59.996Z',
-          sequence: 0,
-          level: LogLevelEnum.info,
-          type: RuleExecutionEventTypeEnum['status-change'],
-          execution_id: 'execution-id-1',
-          message: 'Rule changed status to "succeeded". Rule execution completed without errors',
+    await waitFor(() => {
+      // It switches to a success state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(true);
+      expect(result.current.isError).toEqual(false);
+      expect(result.current.data).toEqual({
+        events: [
+          {
+            timestamp: '2021-12-29T10:42:59.996Z',
+            sequence: 0,
+            level: LogLevelEnum.info,
+            type: RuleExecutionEventTypeEnum['status-change'],
+            execution_id: 'execution-id-1',
+            message: 'Rule changed status to "succeeded". Rule execution completed without errors',
+          },
+        ],
+        pagination: {
+          page: 1,
+          per_page: 20,
+          total: 1,
         },
-      ],
-      pagination: {
-        page: 1,
-        per_page: 20,
-        total: 1,
-      },
+      });
     });
   });
 
@@ -96,18 +96,18 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitFor(() => null);
+    await waitFor(() => {
+      // It switches to an error state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(false);
+      expect(result.current.isError).toEqual(true);
+      expect(result.current.error).toEqual(exception);
 
-    // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(false);
-    expect(result.current.isError).toEqual(true);
-    expect(result.current.error).toEqual(exception);
-
-    // And shows a toast with the caught exception
-    expect(useToasts().addError).toHaveBeenCalledTimes(1);
-    expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch rule execution events',
+      // And shows a toast with the caught exception
+      expect(useToasts().addError).toHaveBeenCalledTimes(1);
+      expect(useToasts().addError).toHaveBeenCalledWith(exception, {
+        title: 'Failed to fetch rule execution events',
+      });
     });
   });
 });
