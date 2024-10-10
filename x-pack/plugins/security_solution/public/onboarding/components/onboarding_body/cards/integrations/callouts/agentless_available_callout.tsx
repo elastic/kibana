@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import { CardCallOut } from '../../common/card_callout';
 
