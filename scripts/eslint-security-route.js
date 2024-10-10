@@ -55,7 +55,7 @@ router.get({
 2. You might need to update your tests to reflect the new security configuration:
   - If you have tests that rely on checking \`access\` tags.
   - If you have snapshot tests that include the route definition.
-  - If you have FTR tests that rely on checking unauthorized error message. (The error changed to also include missing privileges)
+  - If you have FTR tests that rely on checking unauthorized error message. The error message changed to also include missing privileges.
 
 ## Any questions?
 If you have any questions or need help with API authorization, please reach out to the \`@elastic/kibana-security\` team.
