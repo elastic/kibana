@@ -46,11 +46,18 @@ export const editGlobalParam = async ({
     }
   );
 
-export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> =>
-  apiService.delete(
+export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> => {
+  if (ids.length === 1) {
+    return apiService.delete(`${SYNTHETICS_API_URLS.PARAMS}/${ids[0]}`, {
+      version: INITIAL_REST_VERSION,
+    });
+  }
+
+  return apiService.post(
     SYNTHETICS_API_URLS.PARAMS,
     { version: INITIAL_REST_VERSION },
     {
       ids,
     }
   );
+};

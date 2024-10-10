@@ -11,47 +11,27 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { DeleteParamsResponse } from '../../../../common/runtime_types';
 
-export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
   unknown,
   unknown,
   { ids: string[] }
 > = () => ({
-  method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PARAMS + '/{id?}',
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete',
   validate: {},
   validation: {
     request: {
-      body: schema.nullable(
-        schema.object({
-          ids: schema.arrayOf(schema.string()),
-        })
-      ),
-      params: schema.object({
-        id: schema.maybe(schema.string()),
+      body: schema.object({
+        ids: schema.arrayOf(schema.string()),
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, response }) => {
+  handler: async ({ savedObjectsClient, request }) => {
     const { ids } = request.body;
-    const { id: queryId } = request;
-
-    if (ids && queryId) {
-      return response.badRequest({
-        body: 'Both query and body parameters cannot be provided',
-      });
-    }
-
-    const idsToDelete = ids ?? [queryId];
-
-    if (idsToDelete.length === 0) {
-      return response.badRequest({
-        body: 'At least one id must be provided',
-      });
-    }
 
     const result = await savedObjectsClient.bulkDelete(
-      idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
+      ids.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
