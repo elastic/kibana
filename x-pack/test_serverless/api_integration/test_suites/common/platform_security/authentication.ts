@@ -17,6 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/authentication', function () {
+    // see details: https://github.com/elastic/kibana/issues/195869
+    this.tags(['failsOnMKI']);
     before(async () => {
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer');
