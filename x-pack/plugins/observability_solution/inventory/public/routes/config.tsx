@@ -33,8 +33,7 @@ const inventoryRoutes = {
         t.partial({
           entityTypes: entityTypesRt,
           kuery: t.string,
-          groupSortField: t.string,
-          groupSortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          viewType: t.union([t.literal('groupBy'), t.literal('list')]),
         }),
       ]),
     }),
