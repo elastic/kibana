@@ -1643,10 +1643,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@67.0.1":
-  version "67.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-67.0.1.tgz#17ba397a97f207f99b6f682f136dde0aef474b57"
-  integrity sha512-6H9DUxm1vwp/R78PAx/zkBKechXF0g1LQuflfpfxMFplwRRw7OTz9cMMRjvrqUp1bVhkp9yLb4CWao+HWaIofA==
+"@elastic/charts@68.0.0":
+  version "68.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.0.tgz#a61cc39d6b139006946a134f372c6af5e09fbadb"
+  integrity sha512-qtlI5U9olt9Y5ZkVUwy9VT2uvU8WzmCTYLjCM+l3b1g4ek0WW1ehZxaJha2Esqe5+QPSBH9LrVzBTayQbbprUA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -3295,10 +3295,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ace@link:packages/kbn-ace":
-  version "0.0.0"
-  uid ""
-
 "@kbn/actions-plugin@link:x-pack/plugins/actions":
   version "0.0.0"
   uid ""
@@ -3316,6 +3312,10 @@
   uid ""
 
 "@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
   version "0.0.0"
   uid ""
 
@@ -5876,6 +5876,10 @@
   uid ""
 
 "@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-logs-overview@link:x-pack/packages/observability/logs_overview":
   version "0.0.0"
   uid ""
 
@@ -12105,6 +12109,14 @@
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.0.0"
 
+"@xstate5/react@npm:@xstate/react@^4.1.2":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-4.1.2.tgz#4bfcdf2d9e9ef1eaea7388d1896649345e6679cd"
+  integrity sha512-orAidFrKCrU0ZwN5l/ABPlBfW2ziRDT2RrYoktRlZ0WRoLvA2E/uAC1JpZt43mCLtc8jrdwYCgJiqx1V8NvGTw==
+  dependencies:
+    use-isomorphic-layout-effect "^1.1.2"
+    use-sync-external-store "^1.2.0"
+
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@xtuc/ieee754/-/ieee754-1.2.0.tgz#eef014a3145ae477a1cbc00cd1e552336dceb790"
@@ -13566,11 +13578,6 @@ brace-expansion@^2.0.1:
   integrity sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==
   dependencies:
     balanced-match "^1.0.0"
-
-brace@0.11.1, brace@^0.11.1:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/brace/-/brace-0.11.1.tgz#4896fcc9d544eef45f4bb7660db320d3b379fe58"
-  integrity sha1-SJb8ydVE7vRfS7dmDbMg07N5/lg=
 
 braces@^2.3.1:
   version "2.3.2"
@@ -16314,7 +16321,7 @@ diacritics@^1.3.0:
   resolved "https://registry.yarnpkg.com/diacritics/-/diacritics-1.3.0.tgz#3efa87323ebb863e6696cebb0082d48ff3d6f7a1"
   integrity sha1-PvqHMj67hj5mls67AILUj/PW96E=
 
-diff-match-patch@^1.0.0, diff-match-patch@^1.0.4, diff-match-patch@^1.0.5:
+diff-match-patch@^1.0.0, diff-match-patch@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
   integrity sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==
@@ -26605,17 +26612,6 @@ re2js@0.4.2:
   resolved "https://registry.yarnpkg.com/re2js/-/re2js-0.4.2.tgz#e344697e64d128ea65c121d6581e67ee5bfa5feb"
   integrity sha512-wuv0p0BGbrVIkobV8zh82WjDurXko0QNCgaif6DdRAljgVm2iio4PVYCwjAxGaWen1/QZXWDM67dIslmz7AIbA==
 
-react-ace@^7.0.5:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/react-ace/-/react-ace-7.0.5.tgz#798299fd52ddf3a3dcc92afc5865538463544f01"
-  integrity sha512-3iI+Rg2bZXCn9K984ll2OF4u9SGcJH96Q1KsUgs9v4M2WePS4YeEHfW2nrxuqJrAkE5kZbxaCE79k6kqK0YBjg==
-  dependencies:
-    brace "^0.11.1"
-    diff-match-patch "^1.0.4"
-    lodash.get "^4.4.2"
-    lodash.isequal "^4.5.0"
-    prop-types "^15.7.2"
-
 react-clientside-effect@^1.2.6:
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/react-clientside-effect/-/react-clientside-effect-1.2.6.tgz#29f9b14e944a376b03fb650eed2a754dd128ea3a"
@@ -32799,6 +32795,11 @@ xpath@^0.0.33:
   version "0.0.33"
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.33.tgz#5136b6094227c5df92002e7c3a13516a5074eb07"
   integrity sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==
+
+"xstate5@npm:xstate@^5.18.1", xstate@^5.18.1:
+  version "5.18.1"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.18.1.tgz#c4d43ceaba6e6c31705d36bd96e285de4be4f7f4"
+  integrity sha512-m02IqcCQbaE/kBQLunwub/5i8epvkD2mFutnL17Oeg1eXTShe1sRF4D5mhv1dlaFO4vbW5gRGRhraeAD5c938g==
 
 xstate@^4.38.2:
   version "4.38.2"
