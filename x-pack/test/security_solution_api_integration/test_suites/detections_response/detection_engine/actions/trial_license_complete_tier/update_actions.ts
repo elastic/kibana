@@ -39,6 +39,20 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @ess update_actions', () => {
     describe('updating actions', () => {
+      before(async () => {
+        await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });
+        await es.indices.create({
+          index: 'logs-test',
+          mappings: {
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+            },
+          },
+        });
+      });
+
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);

@@ -26,7 +26,7 @@ export function getCustomQueryRuleParams(
     risk_score: 1,
     rule_id: 'rule-1',
     severity: 'high',
-    index: ['*'],
+    index: ['logs-*'],
     interval: '100m',
     from: 'now-6m',
     author: [],
