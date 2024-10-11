@@ -42,10 +42,10 @@ export const isOnlyAgentlessIntegration = (
 };
 
 export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemplate) => {
-  return (
+  return Boolean(
     policyTemplate.deployment_modes &&
-    policyTemplate.deployment_modes.agentless.enabled === true &&
-    (!policyTemplate.deployment_modes.default ||
-      policyTemplate.deployment_modes.default.enabled === false)
+      policyTemplate.deployment_modes.agentless.enabled === true &&
+      (!policyTemplate.deployment_modes.default ||
+        policyTemplate.deployment_modes.default.enabled === false)
   );
 };
