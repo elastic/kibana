@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getRedactVariables, getStateVarsAndDefaultValues } from './cel_input';
+import { getRedactVariables, getStateVarsAndDefaultValues } from './util';
 import {
   celStateDetailsMockedResponse,
   celStateSettings,
   celRedact,
-} from '../../__jest__/fixtures/cel';
+} from '../../../__jest__/fixtures/cel';
 
 describe('getCelInputDetails', () => {
   beforeEach(async () => {

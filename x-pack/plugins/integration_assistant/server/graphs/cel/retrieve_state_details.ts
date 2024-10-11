@@ -10,15 +10,14 @@ import { CelInputState } from '../../types';
 import { EX_ANSWER_CONFIG } from './constants';
 import { CEL_CONFIG_DETAILS_PROMPT } from './prompts';
 import { CelInputNodeParams, CelInputStateDetails } from './types';
-import { getRedactVariables, getStateVarsAndDefaultValues } from '../../util/cel_input';
+import { getRedactVariables, getStateVarsAndDefaultValues } from './util';
 
 export async function handleGetStateDetails({
   state,
   model,
 }: CelInputNodeParams): Promise<Partial<CelInputState>> {
-  const getConfigDetailsPrompt = CEL_CONFIG_DETAILS_PROMPT;
   const outputParser = new JsonOutputParser();
-  const celConfigGraph = getConfigDetailsPrompt.pipe(model).pipe(outputParser);
+  const celConfigGraph = CEL_CONFIG_DETAILS_PROMPT.pipe(model).pipe(outputParser);
 
   const stateDetails = (await celConfigGraph.invoke({
     state_variables: state.stateVarNames,

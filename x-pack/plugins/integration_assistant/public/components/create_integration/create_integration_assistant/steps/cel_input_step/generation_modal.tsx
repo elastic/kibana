@@ -161,7 +161,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
     });
 
     return (
-      <EuiModal onClose={onClose} data-test-subj="generationModal">
+      <EuiModal onClose={onClose} data-test-subj="celGenerationModal">
         <EuiModalHeader css={headerCss}>
           <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -173,7 +173,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                   title={i18n.GENERATION_ERROR}
                   color="danger"
                   iconType="alert"
-                  data-test-subj="generationErrorCallout"
+                  data-test-subj="celGenerationErrorCallout"
                 >
                   {error}
                 </EuiCallOut>
@@ -206,7 +206,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
           {error ? (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="refresh" onClick={retry} data-test-subj="retryButton">
+                <EuiButtonEmpty iconType="refresh" onClick={retry} data-test-subj="retryCelButton">
                   {i18n.RETRY}
                 </EuiButtonEmpty>
               </EuiFlexItem>

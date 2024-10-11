@@ -16,6 +16,7 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
 export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -81,6 +82,9 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
 
           return res.ok({ body: CelInputResponse.parse(results) });
         } catch (e) {
+          if (isErrorThatHandlesItsOwnResponse(e)) {
+            return e.sendResponse(res);
+          }
           return res.badRequest({ body: e });
         }
       })

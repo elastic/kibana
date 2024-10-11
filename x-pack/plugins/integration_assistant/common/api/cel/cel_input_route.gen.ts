@@ -22,7 +22,7 @@ import { CelInputAPIResponse } from '../model/response_schemas.gen';
 
 export type CelInputRequestBody = z.infer<typeof CelInputRequestBody>;
 export const CelInputRequestBody = z.object({
-  dataStreamName: DataStreamName.optional(),
+  dataStreamName: DataStreamName,
   apiDefinition: ApiDefinition,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

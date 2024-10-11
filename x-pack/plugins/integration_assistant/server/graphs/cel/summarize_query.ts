@@ -14,9 +14,8 @@ export async function handleSummarizeQuery({
   state,
   model,
 }: CelInputNodeParams): Promise<Partial<CelInputState>> {
-  const summarizeQueryPrompt = CEL_QUERY_SUMMARY_PROMPT;
   const outputParser = new StringOutputParser();
-  const celSummarizeGraph = summarizeQueryPrompt.pipe(model).pipe(outputParser);
+  const celSummarizeGraph = CEL_QUERY_SUMMARY_PROMPT.pipe(model).pipe(outputParser);
 
   const apiQuerySummary = await celSummarizeGraph.invoke({
     data_stream_name: state.dataStreamName,

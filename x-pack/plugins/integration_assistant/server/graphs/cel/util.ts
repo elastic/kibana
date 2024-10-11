@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CelInputStateDetails } from '../graphs/cel/types';
+import { CelInputStateDetails } from './types';
 
 /**
  * Gets a list of variables that require redaction from agent logs for the CEL input.

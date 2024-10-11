@@ -19,6 +19,7 @@ paths:
               type: object
               required:
                 - apiDefinition
+                - dataStreamName
                 - connectorId
               properties:
                 dataStreamName:

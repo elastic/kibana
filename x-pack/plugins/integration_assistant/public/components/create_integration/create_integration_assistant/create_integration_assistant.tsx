@@ -93,17 +93,17 @@ export const CreateIntegrationAssistant = React.memo(() => {
             />
           )}
           {state.step === 5 &&
-            (!isGenerateCelEnabled ? (
-              <DeployStep
-                integrationSettings={state.integrationSettings}
-                result={state.result}
-                connector={state.connector}
-              />
-            ) : (
+            (isGenerateCelEnabled ? (
               <CelInputStep
                 integrationSettings={state.integrationSettings}
                 connector={state.connector}
                 isGenerating={state.isGenerating}
+              />
+            ) : (
+              <DeployStep
+                integrationSettings={state.integrationSettings}
+                result={state.result}
+                connector={state.connector}
               />
             ))}
 

@@ -39,7 +39,7 @@ export const CelInputStep = React.memo<CelInputStepProps>(
     }, [setIsGenerating]);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
         <EuiFlexItem>
           <StepContentWrapper title={i18n.CEL_INPUT_TITLE} subtitle={i18n.CEL_INPUT_DESCRIPTION}>
             <EuiPanel hasShadow={false} hasBorder>

@@ -24,6 +24,6 @@ describe('Testing cel handler', () => {
   it('handleBuildProgram()', async () => {
     const response = await handleBuildProgram({ state, model });
     expect(response.currentProgram).toStrictEqual('my_cel_program');
-    expect(response.lastExecutedChain).toBe('buildProgram');
+    expect(response.lastExecutedChain).toBe('buildCelProgram');
   });
 });

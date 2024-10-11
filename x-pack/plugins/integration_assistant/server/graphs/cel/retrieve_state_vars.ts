@@ -15,9 +15,8 @@ export async function handleGetStateVariables({
   state,
   model,
 }: CelInputNodeParams): Promise<Partial<CelInputState>> {
-  const getStateVarsPrompt = CEL_STATE_PROMPT;
   const outputParser = new JsonOutputParser();
-  const celStateGraph = getStateVarsPrompt.pipe(model).pipe(outputParser);
+  const celStateGraph = CEL_STATE_PROMPT.pipe(model).pipe(outputParser);
 
   const celState = await celStateGraph.invoke({
     cel_program: state.currentProgram,

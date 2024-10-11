@@ -15,9 +15,8 @@ export async function handleBuildProgram({
   state,
   model,
 }: CelInputNodeParams): Promise<Partial<CelInputState>> {
-  const programPrompt = CEL_BASE_PROGRAM_PROMPT;
   const outputParser = new StringOutputParser();
-  const celProgramGraph = programPrompt.pipe(model).pipe(outputParser);
+  const celProgramGraph = CEL_BASE_PROGRAM_PROMPT.pipe(model).pipe(outputParser);
 
   const program = await celProgramGraph.invoke({
     data_stream_name: state.dataStreamName,
@@ -29,6 +28,6 @@ export async function handleBuildProgram({
 
   return {
     currentProgram: program.trim(),
-    lastExecutedChain: 'buildProgram',
+    lastExecutedChain: 'buildCelProgram',
   };
 }
