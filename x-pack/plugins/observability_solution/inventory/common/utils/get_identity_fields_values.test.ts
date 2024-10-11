@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Entity } from '../entities';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
-} from '../es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { Entity } from '../entities';
 import { getIdentityFieldValues } from './get_identity_fields_values';
 
 const commonEntityFields = {
