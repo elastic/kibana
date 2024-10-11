@@ -81,8 +81,6 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const isAssetCriticalityEnabled = true;
-
   const columns = useMemo(() => buildColumns(true), []);
 
   const rows = useMemo(
