@@ -27,35 +27,35 @@ export const packagePolicyV15AdvancedFieldsForEndpointV816: SavedObjectModelData
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    policy.windows.advanced = {
-      set_extended_host_information: true,
-      ...policy.windows.advanced,
+    for (const os of ['windows', 'mac', 'linux']) {
+      const policyPerOs = policy[os];
 
-      events: {
-        aggregate_process: false,
-        ...policy.windows.advanced?.events,
-      },
-    };
+      policyPerOs.advanced = {
+        set_extended_host_information: true,
+        ...policyPerOs.advanced,
 
-    policy.mac.advanced = {
-      set_extended_host_information: true,
-      ...policy.mac.advanced,
+        events: {
+          aggregate_process: false,
+          ...policyPerOs.advanced?.events,
 
-      events: {
-        aggregate_process: false,
-        ...policy.mac.advanced?.events,
-      },
-    };
+          hash: {
+            md5: true,
+            sha1: true,
+            ...policyPerOs.advanced?.events?.hash,
+          },
+        },
 
-    policy.linux.advanced = {
-      set_extended_host_information: true,
-      ...policy.linux.advanced,
+        alerts: {
+          ...policyPerOs.advanced?.alerts,
 
-      events: {
-        aggregate_process: false,
-        ...policy.linux.advanced?.events,
-      },
-    };
+          hash: {
+            md5: true,
+            sha1: true,
+            ...policyPerOs.advanced?.alerts?.hash,
+          },
+        },
+      };
+    }
   }
 
   return { attributes: updatedPackagePolicyDoc.attributes };

@@ -81,6 +81,10 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
       name                               | path                                        | backfill
       ${'aggregate_process'}             | ${'advanced.events.aggregate_process'}      | ${false}
       ${'set_extended_host_information'} | ${'advanced.set_extended_host_information'} | ${true}
+      ${'alerts.hash.md5'}               | ${'advanced.alerts.hash.md5'}               | ${true}
+      ${'alerts.hash.sha1'}              | ${'advanced.alerts.hash.sha1'}              | ${true}
+      ${'events.hash.md5'}               | ${'advanced.events.hash.md5'}               | ${true}
+      ${'events.hash.sha1'}              | ${'advanced.events.hash.sha1'}              | ${true}
     `(
       'backfilling `$name` with `$backfill`',
       ({ path, backfill }: { path: string; backfill: boolean }) => {
