@@ -10,9 +10,13 @@ import type {
   CustomRequestHandlerContext,
   IRouter,
   LoggerFactory,
+  Logger,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { Observable } from 'rxjs';
 import { DataUsageConfigType } from '../config';
 
 export interface DataUsageSetupDependencies {
@@ -36,7 +40,26 @@ export type DataUsageRequestHandlerContext = CustomRequestHandlerContext<{
 
 export type DataUsageRouter = IRouter<DataUsageRequestHandlerContext>;
 
+export interface AutoOpsConfig {
+  enabled?: boolean;
+  api?: {
+    url?: string;
+    tls?: {
+      certificate?: string;
+      key?: string;
+      ca?: string;
+    };
+  };
+}
+
 export interface DataUsageContext {
   logFactory: LoggerFactory;
+  config$?: Observable<DataUsageConfigType>;
+  configInitialValue: DataUsageConfigType;
   serverConfig: DeepReadonly<DataUsageConfigType>;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
+  cloud?: CloudSetup;
+  logger?: Logger;
 }

@@ -37,11 +37,18 @@ export class DataUsagePlugin
     this.logger = context.logger.get();
 
     this.logger.debug('data usage plugin initialized');
+
     this.dataUsageContext = {
+      config$: context.config.create<DataUsageConfigType>(),
+      configInitialValue: context.config.get(),
       logFactory: context.logger,
       get serverConfig() {
         return serverConfig;
       },
+      kibanaVersion: context.env.packageInfo.version,
+      kibanaBranch: context.env.packageInfo.branch,
+      kibanaInstanceId: context.env.instanceUuid,
+      logger: context.logger.get(),
     };
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
