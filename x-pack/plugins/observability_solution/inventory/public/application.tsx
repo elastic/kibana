@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { css } from '@emotion/css';
 import type { InventoryStartDependencies } from './types';
 import { InventoryServices } from './services/types';
 import { AppRoot } from './components/app_root';
@@ -25,12 +24,6 @@ export const renderApp = ({
 } & { appMountParameters: AppMountParameters }) => {
   const { element } = appMountParameters;
 
-  const appWrapperClassName = css`
-    overflow: auto;
-  `;
-  const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-  appWrapperElement.classList.add(appWrapperClassName);
-
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
       <AppRoot
@@ -44,6 +37,5 @@ export const renderApp = ({
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
   };
 };
