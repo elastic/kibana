@@ -73,16 +73,25 @@ export const GEOIP_NAME_OPTIONS = [
 ];
 export const IPINFO_NAME_OPTIONS = [
   {
-    value: 'Privacy-Detection',
-    text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.ipinfo.privacyDetectionDatabaseName',
-      {
-        defaultMessage: 'Privacy detection',
-      }
-    ),
+    value: 'asn',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeAsnDatabaseName', {
+      defaultMessage: 'Free IP to ASN ',
+    }),
   },
   {
-    value: 'IP-Geolocation',
+    value: 'country',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeCountryDatabaseName', {
+      defaultMessage: 'Free IP to Country',
+    }),
+  },
+  {
+    value: 'standard_asn',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.asnDatabaseName', {
+      defaultMessage: 'ASN',
+    }),
+  },
+  {
+    value: 'standard_location',
     text: i18n.translate(
       'xpack.ingestPipelines.manageProcessors.ipinfo.ipGeolocationDatabaseName',
       {
@@ -91,10 +100,13 @@ export const IPINFO_NAME_OPTIONS = [
     ),
   },
   {
-    value: 'ASN',
-    text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.asnDatabaseName', {
-      defaultMessage: 'ASN',
-    }),
+    value: 'standard_privacy',
+    text: i18n.translate(
+      'xpack.ingestPipelines.manageProcessors.ipinfo.privacyDetectionDatabaseName',
+      {
+        defaultMessage: 'Privacy detection',
+      }
+    ),
   },
 ];
 

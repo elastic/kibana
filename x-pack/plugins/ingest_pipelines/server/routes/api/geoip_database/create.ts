@@ -26,9 +26,11 @@ const bodySchema = schema.object({
     schema.literal('GeoIP2-Enterprise'),
     schema.literal('GeoIP2-ISP'),
     // ipinfo names
-    schema.literal('Free IP to ASN'),
-    schema.literal('Free IP to Country'),
-    schema.literal('Free IP to Country + IP to ASN'),
+    schema.literal('asn'),
+    schema.literal('country'),
+    schema.literal('standard_asn'),
+    schema.literal('standard_location'),
+    schema.literal('standard_privacy'),
   ]),
 });
 
