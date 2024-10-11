@@ -42,6 +42,8 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { requiredOptional } from '@kbn/zod-helpers';
@@ -109,6 +111,7 @@ export interface BuildAlertFieldsProps {
     severityOverride: string;
     riskScoreOverride: number;
   };
+  intendedTimestamp: Date | undefined;
 }
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
@@ -169,6 +172,7 @@ export const buildAlertFields = ({
   publicBaseUrl,
   alertTimestampOverride,
   overrides,
+  intendedTimestamp,
 }: BuildAlertFieldsProps): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -283,6 +287,8 @@ export const buildAlertFields = ({
     [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp ? intendedTimestamp.toISOString() : timestamp,
+    [ALERT_RULE_EXECUTION_TYPE]: intendedTimestamp ? 'manual' : 'scheduled',
   };
 };
 
