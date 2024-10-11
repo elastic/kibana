@@ -24,17 +24,20 @@ const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
 `;
 
+const NODE_WIDTH = 91;
+const NODE_HEIGHT = 88;
+
 export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>
-      {!interactive || (
+      {interactive && (
         <PentagonShapeOnHover
-          width="91"
-          height="88"
-          viewBox="0 0 91 88"
+          width={NODE_WIDTH}
+          height={NODE_HEIGHT}
+          viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -60,11 +63,11 @@ export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
         />
         {icon && <NodeIcon x="12.5" y="14.5" icon={icon} color={color} />}
       </NodeShapeSvg>
-      {!interactive || (
+      {interactive && (
         <NodeButton
-          onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={`${91 - NodeButton.ExpandButtonSize / 2}px`}
-          y={`${(88 - NodeButton.ExpandButtonSize) / 2}px`}
+          onClick={(e) => expandButtonClick?.(e, props)}
+          x={`${NODE_WIDTH - NodeButton.ExpandButtonSize / 2}px`}
+          y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
       <Handle

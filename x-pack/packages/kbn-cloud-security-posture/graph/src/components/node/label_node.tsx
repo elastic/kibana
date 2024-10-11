@@ -15,7 +15,7 @@ export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
 
   return (
     <LabelNodeContainer>
-      {!interactive || <LabelShapeOnHover color={color} />}
+      {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
         {Boolean(label) ? label : id}
       </LabelShape>

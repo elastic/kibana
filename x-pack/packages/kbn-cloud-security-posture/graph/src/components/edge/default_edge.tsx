@@ -28,9 +28,8 @@ export function DefaultEdge({
   const color: Color = data?.color ?? 'primary';
 
   const [edgePath] = getBezierPath({
-    sourceX:
-      sourceX -
-      getShapeHandlePosition(data?.sourceShape) * (data?.sourceShape === 'group' ? -1 : 1),
+    // sourceX and targetX are adjusted to account for the shape handle position
+    sourceX: sourceX - getShapeHandlePosition(data?.sourceShape),
     sourceY,
     sourcePosition,
     targetX: targetX + getShapeHandlePosition(data?.targetShape),
@@ -40,7 +39,7 @@ export function DefaultEdge({
       0.1 *
       (data?.sourceShape === 'group' ||
       (data?.sourceShape === 'label' && data?.targetShape === 'group')
-        ? -1
+        ? -1 // We flip direction when the edge is between parent node to child nodes (groups always contain children in our graph)
         : 1),
   });
 
