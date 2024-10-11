@@ -12,12 +12,22 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
+
+export interface IndexManagementLocatorParams extends SerializableRecord {
+  page: 'data_streams_details';
+  dataStreamName?: string;
+}
+
+export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
+  locator?: IndexManagementLocator;
 }
 
 export interface IndexManagementPluginStart {

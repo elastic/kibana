@@ -70,3 +70,5 @@ spec:
           # Optionally, set schedule-specific env-vars here
           env:
             SCHEDULED: 'true'
+      tags:
+        - kibana
