@@ -87,8 +87,8 @@ export function DiscoverMainRoute({
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [noDataState, setNoDataState] = useState({
-    hasESData: true,
-    hasUserDataView: true,
+    hasESData: false,
+    hasUserDataView: false,
     showNoDataPage: false,
   });
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
