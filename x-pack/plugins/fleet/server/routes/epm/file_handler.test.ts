@@ -15,7 +15,7 @@ import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_p
 import { getFile, getInstallation } from '../../services/epm/packages/get';
 import type { FleetRequestHandlerContext } from '../..';
 import { appContextService } from '../../services';
-import { unpackBufferEntries } from '../../services/epm/archive';
+import { unpackArchiveEntriesIntoMemory } from '../../services/epm/archive';
 import { getAsset } from '../../services/epm/archive/storage';
 
 import { getFileHandler } from './file_handler';
@@ -29,7 +29,7 @@ jest.mock('../../services/epm/packages/get');
 const mockedGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedGetInstallation = jest.mocked(getInstallation);
 const mockedGetFile = jest.mocked(getFile);
-const mockedUnpackBufferEntries = jest.mocked(unpackBufferEntries);
+const mockedUnpackBufferEntries = jest.mocked(unpackArchiveEntriesIntoMemory);
 const mockedGetAsset = jest.mocked(getAsset);
 
 function mockContext() {

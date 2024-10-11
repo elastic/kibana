@@ -40,7 +40,10 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
+import {
+  type CustomPackageDatasetConfiguration,
+  type EnsurePackageResult,
+} from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
