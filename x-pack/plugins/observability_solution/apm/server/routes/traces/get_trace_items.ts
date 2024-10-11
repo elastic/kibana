@@ -159,6 +159,10 @@ export async function getTraceItems({
 
     const waterfallErrorEvent: WaterfallError = {
       ...event,
+      parent: {
+        ...event?.parent,
+        id: event?.parent?.id ?? event?.span?.id,
+      },
       error: {
         ...(event.error ?? {}),
         exception:

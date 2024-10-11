@@ -27,6 +27,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
   ERROR_STACK_TRACE,
+  SPAN_ID,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -79,6 +80,7 @@ export async function getErrorSampleDetails({
 
   const optionalFields = asMutableArray([
     TRANSACTION_ID,
+    SPAN_ID,
     AGENT_VERSION,
     PROCESSOR_NAME,
     ERROR_STACK_TRACE,
@@ -129,7 +131,7 @@ export async function getErrorSampleDetails({
 
   const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
-  const transactionId = errorFromFields.transaction?.id;
+  const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace.id;
 
   let transaction: Transaction | undefined;
