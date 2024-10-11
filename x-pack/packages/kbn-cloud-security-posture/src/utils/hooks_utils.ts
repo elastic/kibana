@@ -9,8 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
@@ -103,7 +102,7 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
@@ -182,7 +181,7 @@ const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query'
         {
           range: {
             '@timestamp': {
-              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
