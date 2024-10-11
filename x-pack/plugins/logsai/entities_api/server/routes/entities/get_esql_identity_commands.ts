@@ -6,7 +6,17 @@
  */
 
 import { compact, uniq, uniqBy } from 'lodash';
-import { EntityGrouping, Pivot, EntityFilter, PivotEntity } from '../../../common/entities';
+import {
+  EntityGrouping,
+  Pivot,
+  EntityFilter,
+  PivotEntity,
+  EntityTypeDefinition,
+  DefinitionEntity,
+  Entity,
+  IEntity,
+  EntityDisplayNameTemplate,
+} from '../../../common/entities';
 import { escapeColumn, escapeString } from '../../../common/utils/esql_escape';
 
 const ENTITY_MISSING_VALUE_STRING = '__EMPTY__';
@@ -14,14 +24,43 @@ export const ENTITY_ID_SEPARATOR = '@';
 const ENTITY_KEYS_SEPARATOR = '/';
 const ENTITY_ID_LIST_SEPARATOR = ';';
 
+export function entityFromIdentifiers({
+  entity,
+  typeDefinition,
+  definitionEntities,
+}: {
+  entity: IEntity;
+  typeDefinition: EntityTypeDefinition | undefined;
+  definitionEntities: Map<string, DefinitionEntity>;
+}): Entity | undefined {
+  if (definitionEntities.has(entity.key)) {
+    return definitionEntities.get(entity.key)!;
+  }
+
+  if (!typeDefinition) {
+    return undefined;
+  }
+
+  const next = pivotEntityFromTypeAndKey({
+    type: entity.type,
+    key: entity.key,
+    identityFields: typeDefinition.pivot.identityFields,
+    displayNameTemplate: typeDefinition.displayNameTemplate,
+  });
+
+  return next;
+}
+
 export function pivotEntityFromTypeAndKey({
   type,
   key,
   identityFields,
+  displayNameTemplate,
 }: {
   type: string;
   key: string;
   identityFields: string[];
+  displayNameTemplate: EntityDisplayNameTemplate | undefined;
 }): PivotEntity {
   const sortedIdentityFields = identityFields.concat().sort();
 
@@ -35,12 +74,22 @@ export function pivotEntityFromTypeAndKey({
 
   const id = `${type}${ENTITY_ID_SEPARATOR}${key}}`;
 
+  let displayName = key;
+
+  if (displayNameTemplate) {
+    displayName = displayNameTemplate.concat
+      .map((part) => {
+        return 'literal' in part ? part.literal : part.field;
+      })
+      .join('');
+  }
+
   return {
     id,
     type,
     key,
     identity,
-    displayName: key,
+    displayName,
   };
 }
 

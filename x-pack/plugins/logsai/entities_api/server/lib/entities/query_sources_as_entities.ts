@@ -6,11 +6,19 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from '@kbn/logging';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { isEmpty, omit, partition, pick, pickBy, uniq } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { EntityDataSource, EntityFilter, EntityGrouping, IEntity } from '../../../common/entities';
-import { escapeColumn } from '../../../common/utils/esql_escape';
+import {
+  DefinitionEntity,
+  EntityDataSource,
+  EntityDisplayNameTemplate,
+  EntityFilter,
+  EntityGrouping,
+  EntityTypeDefinition,
+  IEntity,
+} from '../../../common/entities';
+import { escapeColumn, escapeString } from '../../../common/utils/esql_escape';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
 import {
@@ -69,6 +77,16 @@ function getLookupCommands(table: EntityLookupTable<string>) {
   ];
 }
 
+function getConcatExpressionFromDisplayNameTemplate(
+  displayNameTemplate: EntityDisplayNameTemplate
+) {
+  return `CONCAT(
+    ${displayNameTemplate.concat
+      .map((part) => ('literal' in part ? escapeString(part.literal) : escapeColumn(part.field)))
+      .join(', ')}
+  )`;
+}
+
 export async function querySourcesAsEntities<
   TEntityColumnMap extends EntityColumnMap | undefined = undefined,
   TLookupColumnName extends string = never
@@ -76,6 +94,7 @@ export async function querySourcesAsEntities<
   esClient,
   logger,
   sources,
+  typeDefinitions,
   groupings,
   columns,
   rangeQuery,
@@ -89,7 +108,8 @@ export async function querySourcesAsEntities<
   esClient: ObservabilityElasticsearchClient;
   logger: Logger;
   sources: EntityDataSource[];
-  groupings: EntityGrouping[];
+  groupings: Array<EntityGrouping | DefinitionEntity>;
+  typeDefinitions: EntityTypeDefinition[];
   columns?: TEntityColumnMap;
   rangeQuery: QueryDslQueryContainer;
   filters?: QueryDslQueryContainer[];
@@ -212,6 +232,20 @@ export async function querySourcesAsEntities<
     commands.push(...getLookupCommands(table));
   });
 
+  typeDefinitions.forEach((typeDefinition) => {
+    if (typeDefinition.displayNameTemplate) {
+      commands.push(`EVAL entity.displayName = CASE(
+        entity.type == ${escapeString(
+          typeDefinition.pivot.type
+        )} AND ${typeDefinition.pivot.identityFields
+        .map((field) => `${escapeColumn(field)} IS NOT NULL`)
+        .join(' AND ')},
+        ${getConcatExpressionFromDisplayNameTemplate(typeDefinition.displayNameTemplate)},
+        entity.displayName
+      )`);
+    }
+  });
+
   if (postFilter) {
     commands.push(postFilter);
   }
@@ -250,7 +284,7 @@ export async function querySourcesAsEntities<
   // should actually be a lookup to properly sort, but multiple LOOKUPs break
   const groupingsByEntityId = new Map(
     groupings.map((grouping) => {
-      const parts = [grouping.pivot.type, ENTITY_ID_SEPARATOR, grouping.key];
+      const parts = [grouping.pivot.type, ENTITY_ID_SEPARATOR, grouping.id];
       const id = parts.join('');
       return [id, grouping];
     })

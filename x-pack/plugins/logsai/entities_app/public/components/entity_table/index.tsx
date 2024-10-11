@@ -8,6 +8,7 @@ import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_ra
 import React, { useMemo, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { getIndexPatternsForFilters } from '@kbn/entities-api-plugin/public';
+import { DefinitionEntity } from '@kbn/entities-api-plugin/common/entities';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
 import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
@@ -39,13 +40,22 @@ export function EntityTable({ type }: { type: 'all' | string }) {
     order: 'desc',
   });
 
-  const definitionsMetadataFetch = useEntitiesAppFetch(
-    ({ signal }) => {
-      return entitiesAPIClient.fetch('POST /internal/entities_api/definitions/metadata', {
+  const typeDefinitionsFetch = useEntitiesAppFetch(
+    ({
+      signal,
+    }): Promise<{
+      definitionEntities: DefinitionEntity[];
+    }> => {
+      if (selectedType === 'all') {
+        return entitiesAPIClient.fetch('GET /internal/entities_api/types', {
+          signal,
+        });
+      }
+      return entitiesAPIClient.fetch('GET /internal/entities_api/types/{type}', {
         signal,
         params: {
-          body: {
-            types: [selectedType],
+          path: {
+            type: selectedType,
           },
         },
       });
@@ -82,11 +92,11 @@ export function EntityTable({ type }: { type: 'all' | string }) {
   }, [queryFetch.value]);
 
   const dataViewsFetch = useAbortableAsync(() => {
-    if (!definitionsMetadataFetch.value) {
+    if (!typeDefinitionsFetch.value) {
       return undefined;
     }
 
-    const allIndexPatterns = definitionsMetadataFetch.value.definitions.flatMap((definition) =>
+    const allIndexPatterns = typeDefinitionsFetch.value.definitionEntities.flatMap((definition) =>
       getIndexPatternsForFilters(definition.filters)
     );
 
@@ -102,7 +112,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
       .then((response) => {
         return [response];
       });
-  }, [dataViews, definitionsMetadataFetch.value]);
+  }, [dataViews, typeDefinitionsFetch.value]);
 
   return (
     <ControlledEntityTable

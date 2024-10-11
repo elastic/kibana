@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { z } from '@kbn/zod';
 import {
   Entity,
   entitySourceQuery,
   EntityWithSignalStatus,
   getIndexPatternsForFilters,
 } from '../../../common';
-import { createEntitiesAPIServerRoute } from '../create_entities_api_server_route';
-import { getEntities } from './get_entities';
+import { EntityTypeDefinition } from '../../../common/entities';
+import { entityTimeRangeQuery } from '../../../common/queries/entity_time_range_query';
+import { createAlertsClient } from '../../lib/clients/create_alerts_client';
 import { createEntitiesAPIEsClient } from '../../lib/clients/create_entities_api_es_client';
 import { createSloClient } from '../../lib/clients/create_slo_client';
-import { createAlertsClient } from '../../lib/clients/create_alerts_client';
-import { getDefinitionEntities } from '../../lib/get_definition_entities';
-import { entityTimeRangeQuery } from '../../../common/queries/entity_time_range_query';
-import { DefinitionEntity, EntityTypeDefinition } from '../../../common/entities';
-import { getEntityFromTypeAndKey } from './get_entity_from_type_and_key';
 import { getDataStreamsForFilter } from '../../lib/entities/get_data_streams_for_filter';
+import { getDefinitionEntities } from '../../lib/entities/get_definition_entities';
+import { getTypeDefinitions } from '../../lib/entities/get_type_definitions';
+import { createEntitiesAPIServerRoute } from '../create_entities_api_server_route';
+import { getEntities } from './get_entities';
+import { getEntityFromTypeAndKey } from './get_entity_from_type_and_key';
 
 export const findEntitiesRoute = createEntitiesAPIServerRoute({
   endpoint: 'POST /internal/entities_api/entities',
@@ -68,9 +69,14 @@ export const findEntitiesRoute = createEntitiesAPIServerRoute({
 
     const filters = [...kqlQuery(kuery)];
 
-    const definitionEntities = await getDefinitionEntities({
-      esClient: currentUserEsClient,
-    });
+    const [definitionEntities, typeDefinitions] = await Promise.all([
+      getDefinitionEntities({
+        esClient: currentUserEsClient,
+      }),
+      getTypeDefinitions({
+        esClient: currentUserEsClient,
+      }),
+    ]);
 
     const groupings = definitionEntities
       .filter((definitionEntity) => {
@@ -79,10 +85,11 @@ export const findEntitiesRoute = createEntitiesAPIServerRoute({
       .map((definitionEntity) => {
         return {
           id: definitionEntity.id,
+          type: definitionEntity.type,
           key: definitionEntity.key,
           pivot: {
-            identityFields: definitionEntity.pivot.identityFields,
             type: definitionEntity.type,
+            identityFields: definitionEntity.pivot.identityFields,
           },
           displayName: definitionEntity.displayName,
           filters: definitionEntity.filters,
@@ -94,13 +101,14 @@ export const findEntitiesRoute = createEntitiesAPIServerRoute({
       end,
       alertsClient,
       currentUserEsClient,
+      typeDefinitions,
       groupings,
       internalUserEsClient,
       logger,
       sloClient,
       sortField,
       sortOrder,
-      sources: [{ index: ['.entities.v1.instance.data_streams'] }],
+      sources: [{ index: ['.data_streams'] }],
       sourceRangeQuery: {
         bool: {
           should: [
@@ -147,36 +155,33 @@ export const getEntityRoute = createEntitiesAPIServerRoute({
       type: z.string(),
       key: z.string(),
     }),
-    query: z.object({
-      start: z.string(),
-      end: z.string(),
-    }),
   }),
   handler: async (
     resources
   ): Promise<{
     entity: Entity;
     typeDefinition: EntityTypeDefinition;
-    definitionEntities: DefinitionEntity[];
   }> => {
     const {
       path: { type, key },
-      query: { start: startAsString, end: endAsString },
     } = resources.params;
-
-    const start = Number(startAsString);
-    const end = Number(endAsString);
 
     const esClient = await createEntitiesAPIEsClient(resources);
 
-    const definitionEntities = await getDefinitionEntities({
-      esClient,
-    });
+    const [definitionEntities, typeDefinitions] = await Promise.all([
+      getDefinitionEntities({
+        esClient,
+      }),
+      getTypeDefinitions({
+        esClient,
+      }),
+    ]);
 
     return await getEntityFromTypeAndKey({
       esClient,
       type,
       key,
+      typeDefinitions,
       definitionEntities,
     });
   },
@@ -208,15 +213,21 @@ export const getDataStreamsForEntityRoute = createEntitiesAPIServerRoute({
 
     const esClient = await createEntitiesAPIEsClient(resources);
 
-    const definitionEntities = await getDefinitionEntities({
-      esClient,
-    });
+    const [definitionEntities, typeDefinitions] = await Promise.all([
+      getDefinitionEntities({
+        esClient,
+      }),
+      getTypeDefinitions({
+        esClient,
+      }),
+    ]);
 
     const { entity } = await getEntityFromTypeAndKey({
       esClient,
       type,
       key,
       definitionEntities,
+      typeDefinitions,
     });
 
     const foundDataStreams = await getDataStreamsForFilter({

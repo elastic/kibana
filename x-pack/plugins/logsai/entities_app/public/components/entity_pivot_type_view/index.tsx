@@ -12,6 +12,7 @@ import { EntitiesAppPageHeaderTitle } from '../entities_app_page_header/entities
 import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
+import { useEntitiesAppBreadcrumbs } from '../../hooks/use_entities_app_breadcrumbs';
 
 export function EntityPivotTypeView() {
   const {
@@ -26,13 +27,13 @@ export function EntityPivotTypeView() {
     },
   } = useKibana();
 
-  const typesFetch = useEntitiesAppFetch(
+  const typeDefinitionsFetch = useEntitiesAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('POST /internal/entities_api/definitions/metadata', {
+      return entitiesAPIClient.fetch('GET /internal/entities_api/types/{type}', {
         signal,
         params: {
-          body: {
-            types: [type],
+          path: {
+            type,
           },
         },
       });
@@ -40,7 +41,22 @@ export function EntityPivotTypeView() {
     [entitiesAPIClient, type]
   );
 
-  const title = typesFetch.value?.definitions[0]?.displayName ?? '';
+  const typeDefinition = typeDefinitionsFetch.value?.typeDefinition;
+
+  const title = typeDefinition?.displayName ?? '';
+
+  useEntitiesAppBreadcrumbs(() => {
+    if (!title) {
+      return [];
+    }
+    return [
+      {
+        title,
+        path: `/{type}`,
+        params: { path: { type } },
+      } as const,
+    ];
+  }, [title, type]);
 
   return (
     <EuiFlexGroup direction="column">

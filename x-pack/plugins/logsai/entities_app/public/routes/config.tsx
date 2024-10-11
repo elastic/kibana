@@ -101,7 +101,7 @@ const entitiesAppRoutes = {
         },
       },
       '/': {
-        element: <RedirectTo path="/all" />,
+        element: <RedirectTo path="/{type}" params={{ path: { type: 'data_stream' } }} />,
       },
     },
   },

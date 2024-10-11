@@ -6,13 +6,13 @@
  */
 
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { builtinEntityDefinitions } from '../built_in_definitions_stub';
-import { DefinitionEntity } from '../../common/entities';
+import { builtinTypeDefinitions } from '../../built_in_definitions_stub';
+import { EntityTypeDefinition } from '../../../common/entities';
 
-export async function getDefinitionEntities({
+export async function getTypeDefinitions({
   esClient,
 }: {
   esClient: ObservabilityElasticsearchClient;
-}): Promise<DefinitionEntity[]> {
-  return builtinEntityDefinitions;
+}): Promise<EntityTypeDefinition[]> {
+  return builtinTypeDefinitions;
 }

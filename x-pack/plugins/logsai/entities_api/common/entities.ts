@@ -28,7 +28,7 @@ export type StoredEntity = IEntity;
 
 export interface DefinitionEntity extends StoredEntity {
   filters: EntityFilter[];
-  pivot: Omit<Pivot, 'type'>;
+  pivot: Pivot;
 }
 
 export interface Pivot {
@@ -54,16 +54,18 @@ interface EntityDefinitionMatchAllFilter {
 
 export interface EntityGrouping {
   id: string;
-  key: string;
-  displayName: string;
   filters: EntityFilter[];
   pivot: Pivot;
+}
+
+export interface EntityDisplayNameTemplate {
+  concat: Array<{ field: string } | { literal: string }>;
 }
 
 export interface EntityTypeDefinition {
   pivot: Pivot;
   displayName: string;
-  displayNameTemplate?: string;
+  displayNameTemplate?: EntityDisplayNameTemplate;
 }
 
 export type EntityFilter =

@@ -78,14 +78,10 @@ export function EntityDetailViewWithoutParams({
             type,
             key: encodeURIComponent(key),
           },
-          query: {
-            start: String(start),
-            end: String(end),
-          },
         },
       });
     },
-    [type, key, entitiesAPIClient, start, end]
+    [type, key, entitiesAPIClient]
   );
 
   const typeDefinition = entityFetch.value?.typeDefinition;

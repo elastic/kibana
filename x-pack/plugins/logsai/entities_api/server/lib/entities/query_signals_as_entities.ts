@@ -20,7 +20,12 @@ import { pick } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { Logger } from '@kbn/logging';
 import { querySourcesAsEntities } from './query_sources_as_entities';
-import { ENTITY_HEALTH_STATUS_INT, EntityGrouping, IEntity } from '../../../common/entities';
+import {
+  ENTITY_HEALTH_STATUS_INT,
+  EntityGrouping,
+  EntityTypeDefinition,
+  IEntity,
+} from '../../../common/entities';
 
 export async function querySignalsAsEntities({
   logger,
@@ -28,6 +33,7 @@ export async function querySignalsAsEntities({
   end,
   esClient,
   groupings,
+  typeDefinitions,
   filters,
   sloClient,
   alertsClient,
@@ -37,6 +43,7 @@ export async function querySignalsAsEntities({
   start: number;
   end: number;
   groupings: EntityGrouping[];
+  typeDefinitions: EntityTypeDefinition[];
   filters?: QueryDslQueryContainer[];
   spaceId: string;
   sloClient: SloClient;
@@ -59,6 +66,7 @@ export async function querySignalsAsEntities({
       ? querySourcesAsEntities({
           logger,
           groupings,
+          typeDefinitions,
           esClient,
           sources: [{ index: authorizedAlertsIndices }],
           filters: [
@@ -92,6 +100,7 @@ export async function querySignalsAsEntities({
     querySourcesAsEntities({
       logger,
       groupings,
+      typeDefinitions,
       esClient,
       sources: [{ index: sloSummaryDataScope.index }],
       filters: [...(filters ?? []), sloSummaryDataScope.query],
@@ -129,7 +138,7 @@ export async function querySignalsAsEntities({
       existing.alertsCount = alertsCount;
     } else {
       entitiesById.set(entity.id, {
-        ...pick(entity, 'id', 'type', 'displayName'),
+        ...pick(entity, 'id', 'key', 'type', 'displayName'),
         alertsCount,
         healthStatus: null,
       });
@@ -145,7 +154,7 @@ export async function querySignalsAsEntities({
       existing.healthStatus = healthStatus;
     } else {
       entitiesById.set(entity.id, {
-        ...pick(entity, 'id', 'type', 'displayName'),
+        ...pick(entity, 'id', 'key', 'type', 'displayName'),
         alertsCount: 0,
         healthStatus,
       });

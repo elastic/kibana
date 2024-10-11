@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DefinitionEntity } from '../common/entities';
+import { DefinitionEntity, EntityTypeDefinition } from '../common/entities';
 
 export const allDataStreamsEntity: DefinitionEntity = {
   id: 'data_streams',
@@ -13,26 +13,54 @@ export const allDataStreamsEntity: DefinitionEntity = {
   displayName: 'Data streams',
   type: 'data_stream',
   pivot: {
+    type: 'data_stream',
     identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
   },
   filters: [
     {
-      index: ['logs-*', 'metrics-*', 'traces-*', '.entities.v1.instance.data_streams'],
+      index: ['logs-*', 'metrics-*', 'traces-*', '.data_streams'],
     },
   ],
 };
 
 export const allLogsEntity: DefinitionEntity = {
-  id: 'data_streams',
-  key: 'data_streams',
-  displayName: 'Data streams',
+  id: 'all_logs',
+  key: 'all_logs',
+  displayName: 'logs-*',
   type: 'data_stream',
   pivot: {
+    type: 'data_stream',
     identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
   },
   filters: [
     {
-      index: ['logs-*', '.entities.v1.instance.data_streams'],
+      index: ['logs-*', '.data_streams'],
+    },
+    {
+      term: {
+        'data_stream.type': 'logs',
+      },
+    },
+  ],
+};
+
+export const allMetricsEntity: DefinitionEntity = {
+  id: 'all_metrics',
+  key: 'all_metrics',
+  displayName: 'metrics-*',
+  type: 'data_stream',
+  pivot: {
+    type: 'data_stream',
+    identityFields: ['data_stream.dataset', 'data_stream.type', 'data_stream.namespace'],
+  },
+  filters: [
+    {
+      index: ['metrics-*', '.data_streams'],
+    },
+    {
+      term: {
+        'data_stream.type': 'metrics',
+      },
     },
   ],
 };
@@ -51,4 +79,23 @@ export const allLogsEntity: DefinitionEntity = {
 //   ],
 // };
 
-export const builtinEntityDefinitions = [allDataStreamsEntity, allLogsEntity];
+export const builtinEntityDefinitions = [allDataStreamsEntity, allLogsEntity, allMetricsEntity];
+
+const dataStreamTypeDefinition: EntityTypeDefinition = {
+  displayName: 'Data streams',
+  displayNameTemplate: {
+    concat: [
+      { field: 'data_stream.type' },
+      { literal: '-' },
+      { field: 'data_stream.dataset' },
+      { literal: '-' },
+      { field: 'data_stream.namespace' },
+    ],
+  },
+  pivot: {
+    type: 'data_stream',
+    identityFields: ['data_stream.type', 'data_stream.dataset', 'data_stream.namespace'],
+  },
+};
+
+export const builtinTypeDefinitions = [dataStreamTypeDefinition];

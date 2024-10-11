@@ -15,16 +15,23 @@ export async function getEntityFromTypeAndKey({
   type,
   key,
   definitionEntities,
+  typeDefinitions,
 }: {
   esClient: ObservabilityElasticsearchClient;
   type: string;
   key: string;
   definitionEntities: DefinitionEntity[];
+  typeDefinitions: EntityTypeDefinition[];
 }): Promise<{
   entity: Entity;
   typeDefinition: EntityTypeDefinition;
-  definitionEntities: DefinitionEntity[];
 }> {
+  const typeDefinition = typeDefinitions.find((typeDef) => typeDef.pivot.type === type);
+
+  if (!typeDefinition) {
+    throw notFound(`Could not find type definition for type ${type}`);
+  }
+
   const definitionsForType = definitionEntities.filter((definition) => definition.type === type);
 
   if (!definitionsForType.length) {
@@ -36,32 +43,17 @@ export async function getEntityFromTypeAndKey({
   if (entityAsDefinition) {
     return {
       entity: entityAsDefinition,
-      typeDefinition: {
-        displayName: entityAsDefinition.displayName,
-        pivot: {
-          type: entityAsDefinition.type,
-          identityFields: entityAsDefinition.pivot.identityFields,
-        },
-      },
-      definitionEntities: [entityAsDefinition],
+      typeDefinition,
     };
   }
-
-  const firstDefinition = definitionsForType[0];
 
   return {
     entity: pivotEntityFromTypeAndKey({
       type,
       key,
-      identityFields: firstDefinition.pivot.identityFields,
+      identityFields: typeDefinition.pivot.identityFields,
+      displayNameTemplate: typeDefinition.displayNameTemplate,
     }),
-    typeDefinition: {
-      displayName: firstDefinition.displayName,
-      pivot: {
-        type: firstDefinition.type,
-        identityFields: firstDefinition.pivot.identityFields,
-      },
-    },
-    definitionEntities: definitionsForType,
+    typeDefinition,
   };
 }

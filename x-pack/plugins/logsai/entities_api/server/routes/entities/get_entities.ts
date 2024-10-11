@@ -10,7 +10,12 @@ import type { Logger } from '@kbn/logging';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { SloClient } from '@kbn/slo-plugin/server';
-import type { EntityDataSource, EntityWithSignalStatus } from '../../../common/entities';
+import type {
+  DefinitionEntity,
+  EntityDataSource,
+  EntityTypeDefinition,
+  EntityWithSignalStatus,
+} from '../../../common/entities';
 import { EntityGrouping, healthStatusIntToKeyword } from '../../../common/entities';
 import { querySignalsAsEntities } from '../../lib/entities/query_signals_as_entities';
 import { querySourcesAsEntities } from '../../lib/entities/query_sources_as_entities';
@@ -23,6 +28,7 @@ export async function getEntities({
   end,
   sourceRangeQuery,
   groupings,
+  typeDefinitions,
   sources,
   logger,
   filters,
@@ -39,7 +45,8 @@ export async function getEntities({
   end: number;
   sourceRangeQuery?: QueryDslQueryContainer;
   sources: EntityDataSource[];
-  groupings: EntityGrouping[];
+  groupings: Array<EntityGrouping | DefinitionEntity>;
+  typeDefinitions: EntityTypeDefinition[];
   logger: Logger;
   filters?: QueryDslQueryContainer[];
   alertsClient: AlertsClient;
@@ -64,6 +71,7 @@ export async function getEntities({
         alertsClient,
         esClient: internalUserEsClient,
         groupings,
+        typeDefinitions,
         sloClient,
         filters,
       });
@@ -72,6 +80,7 @@ export async function getEntities({
         logger,
         esClient: currentUserEsClient,
         groupings,
+        typeDefinitions,
         sources,
         filters,
         sortField,
@@ -110,6 +119,7 @@ export async function getEntities({
 
       return entitiesFromSources.map((entity) => {
         const { columns, ...base } = entity;
+
         return {
           ...base,
           healthStatus:

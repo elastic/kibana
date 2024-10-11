@@ -22,7 +22,10 @@ export function entitySourceQuery({ entity }: { entity: IEntity }): QueryDslQuer
       .flatMap((filter): QueryDslQueryContainer => {
         if ('index' in filter) {
           return {
-            bool: { filter: filter.index.map((index) => ({ wildcard: { _index: index } })) },
+            bool: {
+              should: filter.index.map((index) => ({ wildcard: { _index: index } })),
+              minimum_should_match: 1,
+            },
           };
         }
         return filter;
