@@ -12,13 +12,13 @@ import {
   AppMenuItemPrimary,
   AppMenuItemSecondary,
   AppMenuItemCustom,
-  AppMenuActionSecondary,
   AppMenuActionId,
   AppMenuActionType,
   AppMenuActionSubmenuCustom,
   AppMenuActionSubmenuSecondary,
   AppMenuActionBase,
   AppMenuActionSubmenuBase,
+  AppMenuActionCustom,
 } from './types';
 
 export class AppMenuRegistry {
@@ -32,7 +32,7 @@ export class AppMenuRegistry {
     this.appMenuItems.push(appMenuItem);
   }
 
-  public registerCustomActionUnderAlerts(appMenuItem: AppMenuActionSecondary) {
+  public registerCustomActionUnderAlerts(appMenuItem: AppMenuActionCustom) {
     const alertsMenuItem = this.appMenuItems.find((item) => item.id === AppMenuActionId.alerts);
     if (alertsMenuItem && isAppMenuActionSubmenuSecondary(alertsMenuItem)) {
       alertsMenuItem.actions.push(appMenuItem);

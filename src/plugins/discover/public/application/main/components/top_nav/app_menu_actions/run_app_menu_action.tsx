@@ -24,6 +24,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
   AppMenuActionSecondary,
   AppMenuActionPrimary,
+  AppMenuActionCustom,
   AppMenuActionSubmenuSecondary,
   AppMenuActionSubmenuCustom,
 } from '@kbn/discover-utils';
@@ -147,7 +148,7 @@ export async function runAppMenuAction({
   anchorElement,
   services,
 }: {
-  appMenuItem: AppMenuActionSecondary | AppMenuActionPrimary;
+  appMenuItem: AppMenuActionPrimary | AppMenuActionSecondary | AppMenuActionCustom;
   anchorElement: HTMLElement;
   services: DiscoverServices;
 }) {

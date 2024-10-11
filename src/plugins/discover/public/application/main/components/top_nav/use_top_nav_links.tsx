@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { AppMenuItem, AppMenuRegistry } from '@kbn/discover-utils';
+import { AppMenuItemPrimary, AppMenuItemSecondary, AppMenuRegistry } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -68,45 +68,49 @@ export const useTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
 
-  const appMenuPrimaryAndSecondaryItems: AppMenuItem[] = useMemo(() => {
-    const items: AppMenuItem[] = [];
-    if (!defaultMenu?.inspectItem?.disabled) {
-      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-      items.push(inspectAppMenuItem);
-    }
+  const appMenuPrimaryAndSecondaryItems: Array<AppMenuItemPrimary | AppMenuItemSecondary> =
+    useMemo(() => {
+      const items: Array<AppMenuItemPrimary | AppMenuItemSecondary> = [];
+      if (!defaultMenu?.inspectItem?.disabled) {
+        const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+        items.push(inspectAppMenuItem);
+      }
 
-    if (
-      services.triggersActionsUi &&
-      services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-      !defaultMenu?.alertsItem?.disabled
-    ) {
-      const alertsAppMenuItem = getAlertsAppMenuItem({ getDiscoverParams, stateContainer: state });
-      items.push(alertsAppMenuItem);
-    }
+      if (
+        services.triggersActionsUi &&
+        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+        !defaultMenu?.alertsItem?.disabled
+      ) {
+        const alertsAppMenuItem = getAlertsAppMenuItem({
+          getDiscoverParams,
+          stateContainer: state,
+        });
+        items.push(alertsAppMenuItem);
+      }
 
-    if (!defaultMenu?.newItem?.disabled) {
-      const newSearchMenuItem = getNewSearchAppMenuItem({
-        onNewSearch: () => {
-          services.locator.navigate({});
-        },
-      });
-      items.push(newSearchMenuItem);
-    }
+      if (!defaultMenu?.newItem?.disabled) {
+        const newSearchMenuItem = getNewSearchAppMenuItem({
+          onNewSearch: () => {
+            services.locator.navigate({});
+          },
+        });
+        items.push(newSearchMenuItem);
+      }
 
-    if (!defaultMenu?.openItem?.disabled) {
-      const openSearchMenuItem = getOpenSearchAppMenuItem({
-        onOpenSavedSearch: state.actions.onOpenSavedSearch,
-      });
-      items.push(openSearchMenuItem);
-    }
+      if (!defaultMenu?.openItem?.disabled) {
+        const openSearchMenuItem = getOpenSearchAppMenuItem({
+          onOpenSavedSearch: state.actions.onOpenSavedSearch,
+        });
+        items.push(openSearchMenuItem);
+      }
 
-    if (!defaultMenu?.shareItem?.disabled) {
-      const shareAppMenuItem = getShareAppMenuItem({ getDiscoverParams, stateContainer: state });
-      items.push(shareAppMenuItem);
-    }
+      if (!defaultMenu?.shareItem?.disabled) {
+        const shareAppMenuItem = getShareAppMenuItem({ getDiscoverParams, stateContainer: state });
+        items.push(shareAppMenuItem);
+      }
 
-    return items;
-  }, [getDiscoverParams, state, services, defaultMenu, onOpenInspector]);
+      return items;
+    }, [getDiscoverParams, state, services, defaultMenu, onOpenInspector]);
 
   const appMenuRegistry = useMemo(
     () => new AppMenuRegistry(appMenuPrimaryAndSecondaryItems),
