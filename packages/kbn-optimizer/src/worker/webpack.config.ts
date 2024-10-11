@@ -248,7 +248,7 @@ export function getWebpackConfig(
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET],
+              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
             },
           },
         },
@@ -370,17 +370,18 @@ export function getWebpackConfig(
     ],
 
     optimization: {
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-          parallel: false,
-          terserOptions: {
-            compress: { passes: 2 },
-            keep_classnames: true,
-            mangle: true,
-          },
-        }),
-      ],
+      minimize: false,
+      // minimizer: [
+      //   new TerserPlugin({
+      //     extractComments: false,
+      //     parallel: false,
+      //     terserOptions: {
+      //       compress: { passes: 2 },
+      //       keep_classnames: true,
+      //       mangle: true,
+      //     },
+      //   }),
+      // ],
       // TODO: try to understand why usedExports is treeShaking code it shouldn't be
       usedExports: false,
       // sideEffects: false,

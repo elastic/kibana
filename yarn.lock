@@ -13321,6 +13321,11 @@ babel-plugin-transform-react-remove-prop-types@^0.4.24:
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.24.tgz#f2edaf9b4c6a5fbe5c1d678bfb531078c1555f3a"
   integrity sha512-eqj0hVcJUR57/Ug2zE1Yswsw4LhuqqHhD+8v120T1cl3kjg76QwtyBrdIk4WVwK+lAhBJVYCd/v+4nc4y+8JsA==
 
+babel-plugin-transform-require-default@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/babel-plugin-transform-require-default/-/babel-plugin-transform-require-default-0.1.7.tgz#fa97c97e52c30d70f8a505b7fffc5503dfa84a88"
+  integrity sha512-eoH8Tm/fVtkRluI6UDc8B/TdsbjuvQwd5BPaw4yShHV0USsKoFHgGJsVCcFPhsPVyoBKbTlisiEc4sBpbtUldA==
+
 babel-plugin-transform-typescript-metadata@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-typescript-metadata/-/babel-plugin-transform-typescript-metadata-0.3.2.tgz#7a327842d8c36ffe07ee1b5276434e56c297c9b7"
