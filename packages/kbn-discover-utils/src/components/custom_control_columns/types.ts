@@ -16,9 +16,8 @@ export interface RowControlRowProps {
   record: DataTableRecord;
 }
 
-export interface RowControlProps {
+export interface RowControlProps extends EuiButtonIconProps {
   'data-test-subj'?: string;
-  color?: EuiButtonIconProps['color'];
   disabled?: boolean;
   label: string;
   iconType: IconType;

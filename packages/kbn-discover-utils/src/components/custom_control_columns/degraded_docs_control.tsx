@@ -87,7 +87,10 @@ const DegradedDocs = ({
   if (!enabled) {
     if (addIgnoredMetadataToQuery) {
       return (
-        <EnableESQLDegradedDocsControl addIgnoredMetadataToQuery={addIgnoredMetadataToQuery} />
+        <EnableESQLDegradedDocsControl
+          control={Control}
+          addIgnoredMetadataToQuery={addIgnoredMetadataToQuery}
+        />
       );
     } else {
       return (
@@ -129,20 +132,23 @@ const DegradedDocs = ({
 
 const EnableESQLDegradedDocsControl = ({
   addIgnoredMetadataToQuery,
-}: Pick<DegradedDocsControlProps, 'addIgnoredMetadataToQuery'>) => {
+  control: Control,
+}: {
+  addIgnoredMetadataToQuery: DegradedDocsControlProps['addIgnoredMetadataToQuery'];
+  control: RowControlComponent;
+}) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
       anchorPosition="upCenter"
       button={
-        <EuiButtonIcon
-          aria-label={actionsHeaderAriaLabelDegradedAction}
-          data-test-subj="docTableDegradedDocDisabled"
-          iconSize="s"
-          iconType="indexClose"
-          onClick={togglePopover}
+        <Control
           css={{ color: euiThemeVars.euiColorDisabledText }}
+          data-test-subj="docTableDegradedDocDisabled"
+          iconType="indexClose"
+          label={actionsHeaderAriaLabelDegradedAction}
+          onClick={togglePopover}
         />
       }
       closePopover={closePopover}
