@@ -73,14 +73,12 @@ export function initializeSettingsManager({
     api: {
       ...titleManager.titlesApi,
       getSettings: () => ({
-        description: titleManager.titlesApi.panelDescription.value,
-        hidePanelTitles: titleManager.titlesApi.hidePanelTitle.value,
+        ...titleManager.serializeTitles(),
         syncColors: syncColors$.value,
         syncCursor: syncCursor$.value,
         syncTooltips: syncTooltips$.value,
         tags: tags$.value,
         timeRestore: timeRestore$.value,
-        title: titleManager.titlesApi.panelTitle.value,
         useMargins: useMargins$.value,
       }),
       settings: {

@@ -35,6 +35,7 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 
 export function getDashboardApi({
   creationOptions,
@@ -51,7 +52,7 @@ export function getDashboardApi({
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(false);
   const isManaged = savedObjectResult?.managed ?? false;
-  const references: Reference[] = savedObjectResult?.references ?? [];
+  let references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const viewMode$ = new BehaviorSubject<ViewMode>(initialState.viewMode);
 
@@ -91,10 +92,32 @@ export function getDashboardApi({
     settingsManager,
     unifiedSearchManager,
   });
+  async function getState() {
+    const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
+    const dashboardState: DashboardState = {
+      ...settingsManager.api.getSettings(),
+      ...unifiedSearchManager.internalApi.getState(),
+      panels,
+      viewMode: viewMode$.value,
+    };
 
-  // --------------------------------------------------------------------------------------
+    const controlGroupApi = controlGroupApi$.value;
+    let controlGroupReferences: Reference[] | undefined;
+    if (controlGroupApi) {
+      const { rawState: controlGroupSerializedState, references: extractedReferences } =
+        await controlGroupApi.serializeState();
+      controlGroupReferences = extractedReferences;
+      dashboardState.controlGroupInput = controlGroupSerializedState;
+    }
+
+    return {
+      dashboardState,
+      controlGroupReferences,
+      panelReferences,
+    };
+  }
+
   // Start animating panel transforms 500 ms after dashboard is created.
-  // --------------------------------------------------------------------------------------
   setTimeout(() => animatePanelTransforms$.next(true), 500);
 
   return {
@@ -107,7 +130,6 @@ export function getDashboardApi({
       ...unifiedSearchManager.api,
       ...unsavedChangesManager.api,
       ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
-
       controlGroupApi$,
       fullScreenMode$,
       getAppContext: () => {
@@ -125,7 +147,19 @@ export function getDashboardApi({
         throw new Error('runInteractiveSave not implemented');
       },
       runQuickSave: async () => {
-        throw new Error('runQuickSave not implemented');
+        const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+        const saveResult = await getDashboardContentManagementService().saveDashboardState({
+          controlGroupReferences,
+          currentState: dashboardState,
+          panelReferences,
+          saveOptions: {},
+          lastSavedId: savedObjectId$.value,
+        });
+
+        unsavedChangesManager.internalApi.onSave(dashboardState);
+        references = saveResult.references ?? [];
+
+        return;
       },
       savedObjectId: savedObjectId$,
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),

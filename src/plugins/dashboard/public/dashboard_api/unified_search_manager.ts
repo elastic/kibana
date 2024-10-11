@@ -90,7 +90,7 @@ export function initializeUnifiedSearchManager(
   function setTimeRestore(timeRestore: boolean) {
     if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
-  const timeslice$ = new BehaviorSubject<[number, number] | undefined>(initialState.timeslice);
+  const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
@@ -230,6 +230,13 @@ export function initializeUnifiedSearchManager(
           setTimeRange(lastSavedState.timeRange);
         }
       },
+      getState: () => ({
+        filters: unifiedSearchFilters$.value,
+        query: query$.value,
+        refreshInterval: refreshInterval$.value,
+        timeRange: timeRange$.value,
+        timeRestore: timeRestore$.value,
+      }),
       setTimeRestore,
       timeRestore$,
     },

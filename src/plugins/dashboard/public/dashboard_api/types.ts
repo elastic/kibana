@@ -91,7 +91,6 @@ export interface DashboardState {
   filters: Filter[];
   timeRestore: boolean;
   timeRange?: TimeRange;
-  timeslice?: [number, number];
   refreshInterval?: RefreshInterval;
 
   // dashboard meta info
@@ -101,6 +100,7 @@ export interface DashboardState {
   description?: string;
   executionContext: KibanaExecutionContext;
 
+  // settings
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
   syncTooltips: DashboardOptions['syncTooltips'];
   useMargins: DashboardOptions['useMargins'];
