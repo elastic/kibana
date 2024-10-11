@@ -19,7 +19,6 @@ import {
   TIMESTAMP,
   ALERT_LAST_DETECTED,
   ALERT_INTENDED_TIMESTAMP,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
