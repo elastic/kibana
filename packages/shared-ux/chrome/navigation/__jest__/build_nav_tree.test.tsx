@@ -139,32 +139,33 @@ describe('builds navigation tree', () => {
   });
 
   test('should render panel opener groups as accordion when the sideNav is collapsed', async () => {
-    const accordionNode: ChromeProjectNavigationNode = {
-      id: 'group1',
-      title: 'Group 1',
-      path: 'group1',
+    const panelOpenerNode: ChromeProjectNavigationNode = {
+      id: 'nestedGroup1',
+      title: 'Nested Group 1',
+      path: 'group1.nestedGroup1',
+      renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
       children: [
         {
-          id: 'nestedGroup1',
-          title: 'Nested Group 1',
-          path: 'group1.nestedGroup1',
-          renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              href: 'https://foo',
-              path: 'group1.item1',
-            },
-          ],
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
         },
       ],
     };
 
+    const nodes: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      children: [panelOpenerNode],
+    };
+
     {
+      // Side nav is collapsed
       const { queryAllByTestId, unmount } = renderNavigation({
         navTreeDef: of({
-          body: [accordionNode],
+          body: [nodes],
         }),
         services: { isSideNavCollapsed: true },
       });
@@ -176,16 +177,42 @@ describe('builds navigation tree', () => {
     }
 
     {
+      // Side nav is not collapsed
       const { queryAllByTestId, unmount } = renderNavigation({
         navTreeDef: of({
-          body: [accordionNode],
+          body: [nodes],
         }),
         services: { isSideNavCollapsed: false }, // No conversion to accordion
       });
 
       const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
 
-      expect(accordionButtonLabel).toEqual(['Group 1']); // 1 accordion button
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
+    }
+
+    {
+      // Panel opener with a link
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [
+            {
+              ...nodes,
+              children: [
+                {
+                  ...panelOpenerNode,
+                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
+                },
+              ],
+            },
+          ],
+        }),
+        services: { isSideNavCollapsed: true }, // SideNav is collapsed
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
       unmount();
     }
   });

@@ -274,10 +274,7 @@ const getEuiProps = (
     : navNode.children
         ?.map((child) =>
           // Recursively convert the children to EuiCollapsibleNavSubItemProps
-          nodeToEuiCollapsibleNavProps(child, {
-            ...deps,
-            treeDepth: treeDepth + 1,
-          })
+          nodeToEuiCollapsibleNavProps(child, { ...deps, treeDepth: treeDepth + 1 })
         )
         .filter(({ isVisible }) => isVisible)
         .map((res) => {
