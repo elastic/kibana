@@ -1077,6 +1077,7 @@
     "classnames": "2.2.6",
     "color": "^4.2.3",
     "commander": "^4.1.1",
+    "compare-versions": "3.5.1",
     "constate": "^3.3.2",
     "copy-to-clipboard": "^3.0.8",
     "core-js": "^3.37.1",
