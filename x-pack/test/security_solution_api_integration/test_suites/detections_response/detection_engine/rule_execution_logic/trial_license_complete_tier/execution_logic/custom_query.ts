@@ -2496,7 +2496,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(alerts.hits.hits).toHaveLength(1);
 
         expect(alerts.hits.hits[0]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
-          alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TIMESTAMP]
+          alerts.hits.hits[0]?._source?.[TIMESTAMP]
         );
 
         expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('scheduled');
@@ -2511,7 +2511,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_INTENDED_TIMESTAMP]).not.toEqual(
-          allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TIMESTAMP]
+          allNewAlerts.hits.hits[1]?._source?.[TIMESTAMP]
         );
 
         expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
