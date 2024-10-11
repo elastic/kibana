@@ -9,13 +9,13 @@ const basePath = '/app/apm/settings/apm-indices';
 
 const getAbleToModifyCase = () => {
   it('should be able to modify settings', () => {
-    const newErrorIndex = 'test';
+    const newErrorIndex = 'logs-*';
     cy.visitKibana(basePath);
     const input = cy.get('input[name="error"]');
     input.should('not.be.disabled');
     input.clear().type(newErrorIndex);
     cy.contains('Apply changes').should('not.be.disabled').click();
-    cy.intercept('GET', '/internal/apm/settings/apm-index-settings').as('internalApiRequest');
+    cy.intercept('GET', '/internal/apm/settings/apm-index-settings*').as('internalApiRequest');
     cy.wait('@internalApiRequest');
     cy.get('input[name="error"]').should('have.value', newErrorIndex);
   });
