@@ -71,7 +71,10 @@ export function GeneralSettings() {
   const isProfilingIntegrationEnabled = useApmFeatureFlag(
     ApmFeatureFlagName.ProfilingIntegrationAvailable
   );
-  const canSave = application.capabilities.apm['settings:save'] as boolean;
+
+  const canSave =
+    application.capabilities.advancedSettings.save &&
+    (application.capabilities.apm['settings:save'] as boolean);
   const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(apmSettingsKeys);

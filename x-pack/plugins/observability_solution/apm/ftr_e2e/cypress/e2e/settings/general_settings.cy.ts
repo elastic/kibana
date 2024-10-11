@@ -13,7 +13,9 @@ const getAbleToModifyCase = () => {
     const button = cy.get('button[name="Inspect ES queries"]');
     button.should('not.be.disabled');
     button.click();
-    cy.contains('Save changes');
+    cy.intercept('POST', '/internal/kibana/settings').as('saveSettings');
+    cy.contains('Save changes').click();
+    cy.wait('@saveSettings').its('response.statusCode').should('eq', 200);
   });
 };
 

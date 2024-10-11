@@ -118,7 +118,7 @@ export const customRoles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['minimal_read', 'settings_save'], ml: ['all'] },
+        feature: { apm: ['minimal_read', 'settings_save'], advancedSettings: ['all'], ml: ['all'] },
         spaces: ['*'],
       },
     ],

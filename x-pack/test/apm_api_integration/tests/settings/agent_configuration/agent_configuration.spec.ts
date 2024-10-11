@@ -93,9 +93,10 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
   }
 
+  // set config to trial as we need to test sub-feature role permissions
   registry.when(
     'agent configuration when no data is loaded',
-    { config: 'basic', archives: [] },
+    { config: 'trial', archives: [] },
     () => {
       it('handles the empty state for environments', async () => {
         const { body } = await getEnvironments('myservice');
@@ -388,7 +389,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177661
-  registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {
+  registry.when('Agent configurations through fleet', { config: 'trial', archives: [] }, () => {
     const name = 'myservice';
     const environment = 'development';
     const testConfig = {
@@ -448,7 +449,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   registry.when(
     'agent configuration when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    { config: 'trial', archives: [archiveName] },
     () => {
       it('returns the environments, all unconfigured', async () => {
         const { body } = await getEnvironments('opbeans-node');
