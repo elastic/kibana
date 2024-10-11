@@ -4,10 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting, EuiAccordion } from '@elastic/eui';
+import {
+  EuiDataGridSorting,
+  EuiAccordion,
+  EuiSpacer,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityType } from '../../../common/entities';
+import type { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -21,7 +30,8 @@ export function GroupedInventoryPage() {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
+  const { groupSortField, pageIndex, kuery, entityTypes, groupSortDirection } = query;
+  const { euiTheme } = useEuiTheme();
 
   const inventoryRoute = useInventoryRouter();
 
@@ -37,15 +47,18 @@ export function GroupedInventoryPage() {
             field: 'entity.type',
           },
           query: {
-            sortDirection,
+            groupSortField,
+            groupSortDirection,
             kuery,
           },
         },
         signal,
       });
     },
-    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
+    [entityTypes, inventoryAPIClient, kuery, groupSortDirection, groupSortField]
   );
+
+  const totalEntities = value.groups.reduce((acc, group) => acc + group.count, 0);
 
   useEffectOnce(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
@@ -94,14 +107,62 @@ export function GroupedInventoryPage() {
     });
   }
 
-  return value.groups.map((group) => {
-    return (
-      <EuiAccordion
-        id={group['entity.type']}
-        buttonContent={`Type: ${group['entity.type']} (${group.count})`}
-      >
-        <UngroupedInventoryPage entityType={group['entity.type']} />
-      </EuiAccordion>
-    );
-  });
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
+          <FormattedMessage
+            id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
+            defaultMessage="{total} Entities"
+            values={{ total: totalEntities }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
+          <FormattedMessage
+            id="xpack.inventory.groupedInventoryPage.groupsTotalLabel"
+            defaultMessage="{total} Groups"
+            values={{ total: value.groups.length }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow />
+        <EuiFlexItem grow={false} className="">
+          Placeholder
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {value.groups.map((group) => {
+        const field = group[value.groupBy];
+
+        return (
+          <>
+            <EuiAccordion
+              key={field}
+              id={field}
+              css={css`
+                border-radius: ${euiTheme.border.radius.medium};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+              buttonContent={`Type: ${field} (${group.count})`}
+              buttonProps={{ paddingSize: 'm' }}
+              paddingSize="l"
+              borders="all"
+            >
+              <UngroupedInventoryPage entityType={field} />
+            </EuiAccordion>
+            <EuiSpacer size="s" />
+          </>
+        );
+      })}
+    </>
+  );
 }
