@@ -128,6 +128,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Creating calendar.
 | `failure` | Failed to create calendar.
 
+.2+| `ml_post_calendar_events`
+| `success` | Adding events to calendar.
+| `failure` | Failed to add events to calendar.
+
 .2+| `ml_forecast`
 | `success` | Creating anomaly detection forecast.
 | `failure` | Failed to create anomaly detection forecast.
@@ -302,14 +306,6 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Removing job from calendar.
 | `failure` | Failed to remove job from calendar.
 
-.2+| `ml_post_calendar_events`
-| `success` | Adding events to calendar.
-| `failure` | Failed to add events to calendar.
-
-.2+| `ml_delete_calendar_event`
-| `success` | Deleting calendar event.
-| `failure` | Failed to delete calendar event.
-
 .2+| `ml_update_filter`
 | `success` | Updating filter.
 | `failure` | Failed to update filter.
@@ -408,6 +404,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `ml_delete_calendar`
 | `success` | Deleting calendar.
 | `failure` | Failed to delete calendar.
+
+.2+| `ml_delete_calendar_event`
+| `success` | Deleting calendar event.
+| `failure` | Failed to delete calendar event.
 
 .2+| `ml_delete_filter`
 | `success` | Deleting filter.

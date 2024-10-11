@@ -263,7 +263,7 @@ export class MlAuditLogger {
         const eventsCount = (params.body ?? params).events;
         return {
           message: `Adding ${eventsCount} event(s) to calendar ${calendarId}`,
-          type: [EVENT_TYPES.change],
+          type: [EVENT_TYPES.creation],
         };
       }
       case 'ml_delete_calendar_event': {
@@ -272,7 +272,7 @@ export class MlAuditLogger {
         const eventId = params.event_id;
         return {
           message: `Removing event(s) ${eventId} from calendar ${calendarId}`,
-          type: [EVENT_TYPES.change],
+          type: [EVENT_TYPES.deletion],
         };
       }
       case 'ml_put_filter': {
