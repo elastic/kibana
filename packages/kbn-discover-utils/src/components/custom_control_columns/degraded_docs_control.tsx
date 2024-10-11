@@ -138,11 +138,11 @@ const EnableESQLDegradedDocsControl = ({
       button={
         <EuiButtonIcon
           aria-label={actionsHeaderAriaLabelDegradedAction}
-          color="text"
           data-test-subj="docTableDegradedDocDisabled"
           iconSize="s"
           iconType="indexClose"
           onClick={togglePopover}
+          css={{ color: euiThemeVars.euiColorDisabledText }}
         />
       }
       closePopover={closePopover}
