@@ -45,6 +45,7 @@ import type {
   PackageInfo,
   PackageVerificationResult,
   InstallResultStatus,
+  AssetsMap,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
@@ -76,6 +77,7 @@ import {
   deleteVerificationResult,
   unpackBufferToAssetsMap,
 } from '../archive';
+import { createArchiveIterator, createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
@@ -106,6 +108,8 @@ import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+
+const PACKAGES_FOR_STREAM_INSTALL = ['security_detection_engine'];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -381,6 +385,7 @@ interface InstallRegistryPackageParams {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
+  useStreaming?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -409,6 +414,7 @@ interface InstallUploadedArchiveParams {
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
   skipRateLimitCheck?: boolean;
+  useStreaming?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -444,6 +450,7 @@ async function installPackageFromRegistry({
   ignoreMappingUpdateErrors = false,
   skipDataStreamRollover = false,
   retryFromLastState = false,
+  useStreaming = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -478,11 +485,12 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, assetsMap, verificationResult }] =
+    const [latestPackage, { paths, packageInfo, assetsMap, archiveIterator, verificationResult }] =
       await Promise.all([
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
+          useStreaming,
         }),
       ]);
 
@@ -490,6 +498,7 @@ async function installPackageFromRegistry({
       packageInfo,
       assetsMap,
       paths,
+      archiveIterator,
     };
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -542,6 +551,7 @@ async function installPackageFromRegistry({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      useStreaming,
     });
   } catch (e) {
     sendEvent({
@@ -580,6 +590,7 @@ async function installPackageWithStateMachine(options: {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
+  useStreaming?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -599,6 +610,7 @@ async function installPackageWithStateMachine(options: {
     skipDataStreamRollover,
     packageInstallContext,
     retryFromLastState,
+    useStreaming,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -696,6 +708,7 @@ async function installPackageWithStateMachine(options: {
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      useStreaming,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -757,6 +770,7 @@ async function installPackageByUpload({
   skipDataStreamRollover,
   isBundledPackage,
   skipRateLimitCheck,
+  useStreaming,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
 
@@ -807,17 +821,30 @@ async function installPackageByUpload({
       packageInfo,
     });
 
-    const { assetsMap, paths } = await unpackBufferToAssetsMap({
-      name: packageInfo.name,
-      version: pkgVersion,
-      archiveBuffer,
-      contentType,
-    });
+    // TODO move this to a separate function
+    const archiveIterator = createArchiveIterator(archiveBuffer, contentType);
+    let paths: string[];
+    let assetsMap: AssetsMap;
+    if (useStreaming) {
+      paths = await archiveIterator.getPaths();
+      // We keep the assetsMap empty as we don't want to load all the assets in memory
+      assetsMap = new Map();
+    } else {
+      const results = await unpackBufferToAssetsMap({
+        name: packageInfo.name,
+        version: pkgVersion,
+        archiveBuffer,
+        contentType,
+      });
+      paths = results.paths;
+      assetsMap = results.assetsMap;
+    }
 
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
       assetsMap,
       paths,
+      archiveIterator,
     };
     // update the timestamp of latest installation
     setLastUploadInstallCache();
@@ -837,6 +864,7 @@ async function installPackageByUpload({
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      useStreaming,
     });
   } catch (e) {
     return {
@@ -884,6 +912,9 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       retryFromLastState,
     } = args;
 
+    const { pkgName } = Registry.splitPkgKey(pkgkey);
+    const useStreaming = PACKAGES_FOR_STREAM_INSTALL.includes(pkgName);
+
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
 
     if (matchingBundledPackage) {
@@ -905,6 +936,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         skipDataStreamRollover,
         isBundledPackage: true,
         skipRateLimitCheck: true,
+        useStreaming,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -924,6 +956,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      useStreaming,
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -1004,12 +1037,14 @@ export async function installCustomPackage(
     acc.set(asset.path, asset.content);
     return acc;
   }, new Map<string, Buffer | undefined>());
-  const paths = [...assetsMap.keys()];
+  const paths = assets.map((asset) => asset.path);
+  const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
   const packageInstallContext: PackageInstallContext = {
     assetsMap,
     paths,
     packageInfo,
+    archiveIterator,
   };
   return await installPackageWithStateMachine({
     packageInstallContext,
@@ -1341,16 +1376,20 @@ export async function installAssetsForInputPackagePolicy(opts: {
       ignoreUnverified: force,
     });
 
+    const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
     packageInstallContext = {
       assetsMap: pkg.assetsMap,
       packageInfo: pkg.packageInfo,
       paths: pkg.paths,
+      archiveIterator,
     };
   } else {
+    const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
     packageInstallContext = {
       assetsMap: installedPkgWithAssets.assetsMap,
       packageInfo: installedPkgWithAssets.packageInfo,
       paths: installedPkgWithAssets.paths,
+      archiveIterator,
     };
   }
 

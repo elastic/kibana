@@ -14,17 +14,32 @@ import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
+import { MANIFEST_NAME } from '../../../archive/parse';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, installSource } = context;
+  const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
-  const { packageInfo } = packageInstallContext;
+  const { packageInfo, archiveIterator } = packageInstallContext;
+
+  let assetsMap = packageInstallContext?.assetsMap;
+  let paths = packageInstallContext?.paths;
+  // For stream based installations, we don't want to save any assets but
+  // manifest.yaml due to the large number of assets in the package.
+  if (useStreaming) {
+    assetsMap = new Map();
+    await archiveIterator.traverseEntries(async (entry) => {
+      if (entry.path.endsWith(MANIFEST_NAME)) {
+        assetsMap.set(entry.path, entry.buffer);
+      }
+    });
+    paths = Array.from(assetsMap.keys());
+  }
 
   const packageAssetResults = await withPackageSpan('Update archive entries', () =>
     saveArchiveEntriesFromAssetsMap({
       savedObjectsClient,
-      assetsMap: packageInstallContext?.assetsMap,
-      paths: packageInstallContext?.paths,
+      assetsMap,
+      paths,
       packageInfo,
       installSource,
     })
