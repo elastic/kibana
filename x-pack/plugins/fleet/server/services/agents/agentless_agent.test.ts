@@ -9,7 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateError } from '../../errors';
@@ -20,6 +20,7 @@ import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
+import { response } from 'express';
 
 jest.mock('axios');
 // Add a mock implementation for `isAxiosError` to simulate that the error is an Axios error
@@ -213,6 +214,426 @@ describe('Agentless Agent service', () => {
         supports_agentless: true,
       } as AgentPolicy)
     ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet enrollment token'));
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 500', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: 'Internal Server Error',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 429', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 429,
+        data: {
+          message: 'Limit exceeded',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 408', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 408,
+        data: {
+          message: 'Request timed out',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toBeCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 404', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 404,
+        data: {
+          message: 'Not Found',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toBeCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 403', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 403,
+        data: {
+          message: 'Forbidden',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toBeCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 401', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 401,
+        data: {
+          message: 'Unauthorized',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toBeCalledTimes(1);
+  });
+
+  it('should throw an error and log and error when the Agentless API returns status 400', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-policy-id',
+          api_key: 'mocked-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: 'Bad Request',
+        },
+      },
+    } as AxiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that the error is logged
+    expect(mockedLogger.error).toBeCalledTimes(1);
   });
 
   it('should create agentless agent for ESS', async () => {
