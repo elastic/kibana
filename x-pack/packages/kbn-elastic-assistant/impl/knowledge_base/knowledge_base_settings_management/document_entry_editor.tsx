@@ -127,7 +127,6 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntr
           id="requiredKnowledge"
           onChange={onRequiredKnowledgeChanged}
           checked={entry?.required ?? false}
-          disabled={true}
         />
       </EuiFormRow>
     </EuiForm>

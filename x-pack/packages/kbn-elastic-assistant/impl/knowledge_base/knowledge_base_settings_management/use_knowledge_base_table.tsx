@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
@@ -32,7 +32,7 @@ export const useKnowledgeBaseTable = () => {
       if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';
       }
-      return 'visText';
+      return 'document';
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }
@@ -61,9 +61,7 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: (entry: KnowledgeBaseEntryResponse) => (
-            <EuiLink onClick={() => onEntryNameClicked(entry)}>{entry.name}</EuiLink>
-          ),
+          render: ({ name }: KnowledgeBaseEntryResponse) => name,
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },
