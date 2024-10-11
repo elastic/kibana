@@ -66,3 +66,9 @@ export function apiHasLastReloadRequestTime(
 ): api is { lastReloadRequestTime: number } {
   return isObject(api) && Object.hasOwn(api, 'lastReloadRequestTime');
 }
+
+export function apiPublishesInlineEditingCapabilities(
+  api: unknown
+): api is { canEditInline: boolean } {
+  return isObject(api) && Object.hasOwn(api, 'canEditInline');
+}

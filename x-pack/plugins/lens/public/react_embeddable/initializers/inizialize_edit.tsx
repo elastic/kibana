@@ -28,6 +28,7 @@ import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
+import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -129,6 +130,11 @@ export function initializeEditApi(
     );
   };
 
+  // this will force the embeddable to toggle the inline editing feature
+  const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
+    ? parentApi.canEditInline
+    : true;
+
   return {
     comparators: {},
     serialize: emptySerializer,
@@ -146,6 +152,17 @@ export function initializeEditApi(
       onEdit: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
+        }
+        // just navigate directly to the editor
+        if (!canEditInline) {
+          const navigateFn = navigateToLensEditor(
+            new EmbeddableStateTransfer(
+              startDependencies.coreStart.application.navigateToApp,
+              startDependencies.coreStart.application.currentAppId$
+            ),
+            true
+          );
+          return navigateFn();
         }
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
