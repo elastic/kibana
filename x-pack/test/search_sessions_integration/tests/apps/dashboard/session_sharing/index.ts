@@ -10,14 +10,14 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common']);
   const searchSessions = getService('searchSessions');
+  const { common } = getPageObjects(['common']);
 
   describe('Search session sharing', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
     });
 
     after(async () => {

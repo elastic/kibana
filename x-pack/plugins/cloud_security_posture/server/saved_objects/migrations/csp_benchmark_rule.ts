@@ -10,7 +10,7 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { rulesV1, rulesV2, rulesV3 } from '../../../common/types';
+import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-common/schema/rules';
 
 function migrateCspBenchmarkRuleToV840(
   doc: SavedObjectUnsanitizedDoc<rulesV1.CspBenchmarkRule>,

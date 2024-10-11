@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
   RuleSource,
@@ -20,7 +21,6 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 
 export const RULE_DEFAULTS = {
   enabled: false,
@@ -125,7 +125,6 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         query: props.query ?? '',
         filters: props.filters,
         saved_id: props.saved_id,
-        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }
@@ -138,7 +137,6 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         filters: props.filters,
         saved_id: props.saved_id,
         data_view_id: props.data_view_id,
-        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }

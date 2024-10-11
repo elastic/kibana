@@ -14,6 +14,7 @@ import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution
 import type { Rule } from '../../../rule_management/logic/types';
 import { enrichNewExceptionItems } from '../flyout_components/utils';
 import type { AlertData } from '../../utils/types';
+import * as i18n from './translations';
 
 const RULE_DEFAULT_OPTIONS = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
 
@@ -183,3 +184,14 @@ export const prepareToCloseAlerts = ({
     ruleStaticIds,
   };
 };
+
+export const getSuccessToastTitle = (listType: ExceptionListTypeEnum) =>
+  listType === ExceptionListTypeEnum.ENDPOINT
+    ? i18n.ADD_ENDPOINT_EXCEPTION_SUCCESS
+    : i18n.ADD_EXCEPTION_SUCCESS;
+
+export const getSuccessToastText = (listType: ExceptionListTypeEnum, sharedListNames: string[]) =>
+  i18n.ADD_EXCEPTION_SUCCESS_DETAILS(
+    listType === ExceptionListTypeEnum.ENDPOINT ? 'Endpoint' : 'Rule',
+    sharedListNames.join(',')
+  );

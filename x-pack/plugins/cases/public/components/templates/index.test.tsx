@@ -71,7 +71,7 @@ describe('Templates', () => {
   it('calls onChange on add option click', async () => {
     appMockRender.render(<Templates {...props} />);
 
-    userEvent.click(await screen.findByTestId('add-template'));
+    await userEvent.click(await screen.findByTestId('add-template'));
 
     expect(props.onAddTemplate).toBeCalled();
   });
@@ -83,7 +83,7 @@ describe('Templates', () => {
 
     expect(list).toBeInTheDocument();
 
-    userEvent.click(
+    await userEvent.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
     );
 
@@ -97,13 +97,13 @@ describe('Templates', () => {
 
     const list = await screen.findByTestId('templates-list');
 
-    userEvent.click(
+    await userEvent.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
     );
 
     expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText('Delete'));
+    await userEvent.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(props.onDeleteTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
@@ -130,9 +130,7 @@ describe('Templates', () => {
 
     appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
 
-    userEvent.click(await screen.findByTestId('add-template'));
-
     expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
-    expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
+    expect(screen.queryByTestId('add-template')).not.toBeInTheDocument();
   });
 });

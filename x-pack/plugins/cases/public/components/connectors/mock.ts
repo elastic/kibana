@@ -35,6 +35,16 @@ export const swimlaneConnector = {
   isSystemAction: false,
 };
 
+export const theHiveConnector = {
+  id: '123',
+  name: 'My connector',
+  actionTypeId: '.thehive',
+  config: {},
+  isPreconfigured: false,
+  isDeprecated: false,
+  isSystemAction: false,
+};
+
 export const issues = [
   { id: 'personId', title: 'Person Task', key: 'personKey' },
   { id: 'womanId', title: 'Woman Task', key: 'womanKey' },

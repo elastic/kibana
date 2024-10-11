@@ -72,7 +72,12 @@ describe('useTableData', () => {
 
   beforeEach(() => {
     queryClient.setQueryData([TRAINED_MODEL_STATS_QUERY_KEY], {
-      trained_model_stats: [{ model_id: '.elser_model_2', deployment_stats: { state: 'started' } }],
+      trained_model_stats: [
+        {
+          model_id: '.elser_model_2',
+          deployment_stats: { deployment_id: 'my-elser-model-01', state: 'started' },
+        },
+      ],
     });
   });
   it('should return correct pagination', () => {
@@ -113,9 +118,7 @@ describe('useTableData', () => {
       b.inference_id.localeCompare(a.inference_id)
     );
 
-    const sortedEndpoints = result.current.sortedTableData.map(
-      (item) => item.endpoint.inference_id
-    );
+    const sortedEndpoints = result.current.sortedTableData.map((item) => item.endpoint);
     const expectedModelIds = expectedSortedData.map((item) => item.inference_id);
 
     expect(sortedEndpoints).toEqual(expectedModelIds);
@@ -148,18 +151,6 @@ describe('useTableData', () => {
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(
-      filteredData.every((item) => item.endpoint.inference_id.includes(searchKey))
-    ).toBeTruthy();
-  });
-
-  it('should update deployment status based on deploymentStatus object', () => {
-    const { result } = renderHook(
-      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey),
-      { wrapper }
-    );
-
-    const updatedData = result.current.sortedTableData;
-    expect(updatedData[0].deployment).toEqual('deployed');
+    expect(filteredData.every((item) => item.endpoint.includes(searchKey))).toBeTruthy();
   });
 });

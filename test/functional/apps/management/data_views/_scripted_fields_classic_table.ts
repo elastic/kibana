@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // Tests for 4 scripted fields;
@@ -17,10 +18,6 @@
 // 2. See the expected value of the scripted field in Discover doc view
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
-
-// NOTE: Scripted field input is managed by Ace editor, which automatically
-//   appends closing braces, for exmaple, if you type opening square brace [
-//   it will automatically insert a a closing square brace ], etc.
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';

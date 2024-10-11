@@ -26,7 +26,7 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.0';
+const REGISTRY_SPEC_MAX_VERSION = '3.2';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {

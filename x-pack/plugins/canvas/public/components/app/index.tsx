@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import { AppUpdater, ScopedHistory } from '@kbn/core/public';
 import PropTypes from 'prop-types';
-import { ScopedHistory } from '@kbn/core/public';
-import { useNavLinkService } from '../../services';
+import React, { FC, useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
 import { Flyouts } from '../flyouts';
+import { getSessionStorage } from '../../lib/storage';
+import { SESSIONSTORAGE_LASTPATH } from '../../../common/lib';
+import { coreServices } from '../../services/kibana_services';
 
-class ShortcutManagerContextWrapper extends React.Component {
+class ShortcutManagerContextWrapper extends React.Component<React.PropsWithChildren<{}>> {
   static childContextTypes = {
     shortcuts: PropTypes.object.isRequired,
   };
@@ -28,12 +31,21 @@ class ShortcutManagerContextWrapper extends React.Component {
   }
 }
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
-  const { updatePath } = useNavLinkService();
-
+export const App: FC<{ history: ScopedHistory; appUpdater: BehaviorSubject<AppUpdater> }> = ({
+  history,
+  appUpdater,
+}) => {
   useEffect(() => {
     return history.listen(({ pathname, search }) => {
-      updatePath(pathname + search);
+      const path = pathname + search;
+      appUpdater.next(() => ({
+        defaultPath: path,
+      }));
+
+      getSessionStorage().set(
+        `${SESSIONSTORAGE_LASTPATH}:${coreServices.http.basePath.get()}`,
+        path
+      );
     });
   });
 

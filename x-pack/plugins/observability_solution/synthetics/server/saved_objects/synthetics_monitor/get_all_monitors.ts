@@ -11,7 +11,6 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
-import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import {
@@ -19,7 +18,6 @@ import {
   EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
 export const getAllMonitors = async ({
   soClient,
@@ -57,9 +55,6 @@ export const getAllMonitors = async ({
 
 export const processMonitors = (
   allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
-  server: SyntheticsServerSetup,
-  soClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
   queryLocations?: string[] | string
 ) => {
   /**
@@ -76,7 +71,7 @@ export const processMonitors = (
   let projectMonitorsCount = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
-  const monitorLocationMap: Record<string, string[]> = {};
+  const monitorLocationsMap: Record<string, string[]> = {};
   const monitorQueryIdToConfigIdMap: Record<string, string> = {};
 
   for (const monitor of allMonitors) {
@@ -102,7 +97,7 @@ export const processMonitors = (
     } else {
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
-      monitorLocationMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
+      monitorLocationsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
         ? intersection(monitorLocations, queryLocations)
         : monitorLocations;
       listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocations]);
@@ -117,7 +112,7 @@ export const processMonitors = (
     enabledMonitorQueryIds,
     disabledMonitorQueryIds,
     disabledCount,
-    monitorLocationMap,
+    monitorLocationsMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorLocationIds: [...listOfLocationsSet],

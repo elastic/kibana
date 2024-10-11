@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
+
 /**
  * Defines the search types you can have from Elasticsearch within a
  * doc._source. It uses recursive types of "| SearchTypes[]" to designate
@@ -32,10 +34,7 @@ export interface BaseHit<T> {
   fields?: Record<string, SearchTypes[]>;
 }
 
-export interface EqlSequence<T> {
-  join_keys: SearchTypes[];
-  events: Array<BaseHit<T>>;
-}
+export type EqlSequence<T> = EqlHitsSequence<T>;
 
 export interface EqlSearchResponse<T> {
   is_partial: boolean;

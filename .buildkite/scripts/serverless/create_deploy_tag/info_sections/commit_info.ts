@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
@@ -35,7 +36,7 @@ export async function getCurrentQARelease() {
   // @ts-ignore
   const fileContent = Buffer.from(releasesFile.data.content, 'base64').toString('utf8');
 
-  const sha = fileContent.match(`qa: "([a-z0-9]+)"`)?.[1];
+  const sha = fileContent.match(`qa-ds-1: "([a-z0-9]+)"`)?.[1];
 
   if (!sha) {
     throw new Error('Could not find QA hash in current releases file');

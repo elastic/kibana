@@ -12,17 +12,29 @@ import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { casesFeatureId, observabilityFeatureId } from '../../../../common';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
+import {
+  casesFeatureId,
+  observabilityAlertFeatureIds,
+  observabilityFeatureId,
+} from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import type { ConfigSchema } from '../../../plugin';
 import { getRenderCellValue } from '../common/render_cell_value';
 import { getColumns } from '../common/get_columns';
+import { getPersistentControlsHook } from './get_persistent_controls';
 
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  config: ConfigSchema
+  config: ConfigSchema,
+  dataViews: DataViewsServicePublic,
+  http: HttpSetup,
+  notifications: NotificationsStart
 ): AlertsTableConfigurationRegistry => {
   const renderCustomActionsRow = (props: RenderCustomActionsRowArgs) => {
     return (
@@ -34,7 +46,7 @@ export const getAlertsPageTableConfiguration = (
     );
   };
   return {
-    id: observabilityFeatureId,
+    id: ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
     cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
     columns: getColumns({ showRuleName: true }),
     getRenderCellValue,
@@ -53,6 +65,15 @@ export const getAlertsPageTableConfiguration = (
       return { header, body, footer };
     },
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
+    usePersistentControls: getPersistentControlsHook({
+      groupingId: ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
+      featureIds: observabilityAlertFeatureIds,
+      services: {
+        dataViews,
+        http,
+        notifications,
+      },
+    }),
     showInspectButton: true,
   };
 };

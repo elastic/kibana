@@ -16,7 +16,6 @@ import {
   expectToRejectWithError,
   expectToRejectWithNotFound,
 } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 import { testUsers, setupTestUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -25,32 +24,25 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  let TEST_SPACE_1: string;
 
-  describe('change space agent policies', async function () {
+  describe('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
+
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await setupTestUsers(getService('security'), true);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-    });
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
-    let defaultSpacePolicy1: CreateAgentPolicyResponse;
-    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
-    before(async () => {
       await apiClient.postEnableSpaceAwareness();
       const _policyRes = await apiClient.createAgentPolicy();
       defaultSpacePolicy1 = _policyRes;
@@ -71,6 +63,15 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
       defaultPackagePolicy1 = packagePolicyRes;
+      await spaces.createTestSpace(TEST_SPACE_1);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
     });
 
     describe('PUT /agent_policies/{id}', () => {
@@ -191,6 +192,33 @@ export default function (providerContext: FtrProviderContext) {
             }),
           /400 Bad Request No enough permissions to remove policies from space test1/
         );
+      });
+    });
+
+    describe('DELETE /agent_policies/{id}', () => {
+      let policyRes: CreateAgentPolicyResponse;
+      before(async () => {
+        const _policyRes = await apiClient.createAgentPolicy();
+        policyRes = _policyRes;
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [policyRes.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+        await apiClient.putAgentPolicy(policyRes.item.id, {
+          name: `test-nginx-${Date.now()}`,
+          namespace: 'default',
+          description: 'tata',
+          space_ids: ['default', TEST_SPACE_1],
+        });
+      });
+      it('should allow to delete an agent policy through multiple spaces', async () => {
+        await apiClient.deleteAgentPolicy(policyRes.item.id);
       });
     });
   });

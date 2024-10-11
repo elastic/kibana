@@ -10,6 +10,7 @@ import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/e
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import type { OpenTimelineResult } from '../../open_timeline/types';
+import type { SelectableTimelineProps } from '../selectable_timeline';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
@@ -52,11 +53,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(false);
   }, []);
 
-  const handleOpenPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const handlePopover = useCallback(() => {
+    setIsPopoverOpen((isOpen) => !isOpen);
   }, []);
 
-  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+  const handleKeyboardOpen = useCallback<NonNullable<EuiFieldTextProps['onKeyDown']>>((event) => {
     if (event.key === keys.ENTER) {
       setIsPopoverOpen(true);
     }
@@ -68,7 +69,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     () => (
       <EuiFieldText
         disabled={isDisabled}
-        onClick={handleOpenPopover}
+        onClick={handlePopover}
         onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon={!isDisabled ? { type: 'arrowDown', side: 'right' } : undefined}
@@ -81,15 +82,15 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     [
       ariaLabel,
       handleKeyboardOpen,
-      handleOpenPopover,
       isDisabled,
       isPopoverOpen,
       popoverId,
       timelineTitle,
+      handlePopover,
     ]
   );
 
-  const handleGetSelectableOptions = useCallback(
+  const handleGetSelectableOptions = useCallback<SelectableTimelineProps['getSelectableOptions']>(
     ({ timelines, onlyFavorites, searchTimelineValue }) => [
       ...(!onlyFavorites && searchTimelineValue === ''
         ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)

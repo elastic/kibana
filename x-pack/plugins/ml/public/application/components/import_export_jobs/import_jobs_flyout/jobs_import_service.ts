@@ -7,6 +7,7 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
+import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import type { Filter } from '../../../../../common/types/filters';
@@ -105,7 +106,7 @@ export class JobImportService {
       const { jobId } = jobIds[i];
       j.job.job_id = jobId;
       j.datafeed.job_id = jobId;
-      j.datafeed.datafeed_id = `datafeed-${jobId}`;
+      j.datafeed.datafeed_id = createDatafeedId(jobId);
       return j;
     });
   }

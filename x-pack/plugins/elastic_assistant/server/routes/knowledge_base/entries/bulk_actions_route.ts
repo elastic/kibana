@@ -22,11 +22,18 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import {
+  EsKnowledgeBaseEntrySchema,
+  UpdateKnowledgeBaseEntrySchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { transformToCreateSchema } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
+import {
+  getUpdateScript,
+  transformToCreateSchema,
+  transformToUpdateSchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
 
 export interface BulkOperationError {
   message: string;
@@ -166,7 +173,9 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // subscribing to completed$, because it handles both cases when request was completed and aborted.
           // when route is finished by timeout, aborted$ is not getting fired
           request.events.completed$.subscribe(() => abortController.abort());
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
+            v2KnowledgeBaseEnabled: true,
+          });
           const spaceId = ctx.elasticAssistant.getSpaceId();
           // Authenticated user null check completed in `performChecks()` above
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
@@ -199,11 +208,26 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((c) =>
-              transformToCreateSchema(changedAt, spaceId, authenticatedUser, c)
+            documentsToCreate: body.create?.map((entry) =>
+              transformToCreateSchema({
+                createdAt: changedAt,
+                spaceId,
+                user: authenticatedUser,
+                entry,
+              })
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: [], // TODO: Support bulk update
+            documentsToUpdate: body.update?.map((entry) =>
+              // TODO: KB-RBAC check, required when users != null as entry will either be created globally if empty
+              transformToUpdateSchema({
+                user: authenticatedUser,
+                updatedAt: changedAt,
+                entry,
+                global: entry.users != null && entry.users.length === 0,
+              })
+            ),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
+              getUpdateScript({ entry, isPatch: true }),
             authenticatedUser,
           });
           const created =

@@ -30,7 +30,6 @@ import {
   AggregateName,
   AggregationsAggregate,
   AggregationsMultiBucketAggregateBase,
-  InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
@@ -826,18 +825,16 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
                 ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source.signal != null && ctx._source.signal.status != null) {
                 ctx._source.signal.status = '${status}'
               }`,
-              lang: 'painless',
-            } as InlineScript,
-            query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+            lang: 'painless',
           },
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
         return result;
@@ -965,14 +962,12 @@ export class AlertsClient {
       await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
-        body: {
-          script: {
-            source: painlessScript,
-            lang: 'painless',
-            params: { caseIds },
-          } as InlineScript,
-          query: esQuery,
+        script: {
+          source: painlessScript,
+          lang: 'painless',
+          params: { caseIds },
         },
+        query: esQuery,
         ignore_unavailable: true,
       });
     } catch (err) {
@@ -1133,7 +1128,7 @@ export class AlertsClient {
           script: {
             source:
               // When size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
-              "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+              "if (!doc.containsKey(params['selectedGroup']) || doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
               // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
               // the runtime field will only return the first value in an array.
               // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."

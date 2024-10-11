@@ -15,11 +15,12 @@ import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common/con
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
-import { isHorizontalChart } from '../state_helpers';
+import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, getXDomain, AxisGroupConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
+import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
@@ -502,159 +503,25 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   const legendSize = state.legend.legendSize;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <VisualOptionsPopover
+        <VisualOptionsPopover
+          state={state}
+          setState={setState}
+          datasourceLayers={frame.datasourceLayers}
+        />
+      </EuiFlexItem>
+      {hasBarSeries(state.layers) && (
+        <EuiFlexItem grow={false}>
+          <TextPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
-
-          <LegendSettingsPopover
-            legendOptions={legendOptions}
-            mode={legendMode}
-            location={state?.legend.isInside ? 'inside' : 'outside'}
-            onLocationChange={(location) => {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isInside: location === 'inside',
-                },
-              });
-            }}
-            titlePlaceholder={
-              frame.activeData?.[dataLayers[0].layerId]?.columns.find(
-                (col) => col.id === dataLayers[0].splitAccessor
-              )?.name ?? defaultLegendTitle
-            }
-            legendTitle={state?.legend.title}
-            onLegendTitleChange={({ title, visible }) => {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  title,
-                  isTitleVisible: visible,
-                },
-              });
-            }}
-            isTitleVisible={state?.legend.isTitleVisible}
-            onDisplayChange={(optionId) => {
-              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-              if (newMode === 'auto') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: false,
-                  },
-                });
-              } else if (newMode === 'show') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: true,
-                  },
-                });
-              } else if (newMode === 'hide') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: false,
-                    showSingleSeries: false,
-                  },
-                });
-              }
-            }}
-            position={state?.legend.position}
-            horizontalAlignment={state?.legend.horizontalAlignment}
-            verticalAlignment={state?.legend.verticalAlignment}
-            floatingColumns={state?.legend.floatingColumns}
-            onFloatingColumnsChange={(val) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, floatingColumns: val },
-              });
-            }}
-            maxLines={state?.legend.maxLines}
-            onMaxLinesChange={(val) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, maxLines: val },
-              });
-            }}
-            shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
-            onTruncateLegendChange={() => {
-              const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
-              setState({
-                ...state,
-                legend: { ...state.legend, shouldTruncate: !current },
-              });
-            }}
-            onPositionChange={(id) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, position: id as Position },
-              });
-            }}
-            onAlignmentChange={(value) => {
-              const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
-              const horizontalAlignment =
-                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
-
-              setState({
-                ...state,
-                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
-              });
-            }}
-            allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
-            legendStats={state?.legend.legendStats}
-            onLegendStatsChange={(legendStats, hasConvertedToTable) => {
-              if (hasConvertedToTable) {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    legendStats,
-                    legendSize: LegendSize.AUTO,
-                    isVisible: true,
-                    showSingleSeries: true,
-                  },
-                });
-                return;
-              }
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  legendStats,
-                  isVisible: true,
-                  showSingleSeries: true,
-                },
-              });
-            }}
-            legendSize={legendSize}
-            onLegendSizeChange={(newLegendSize) => {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  legendSize: newLegendSize,
-                },
-              });
-            }}
-            showAutoLegendSizeOption={true}
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
@@ -765,6 +632,118 @@ export const XyToolbar = memo(function XyToolbar(
             />
           </TooltipWrapper>
         </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <LegendSettingsPopover
+          legendOptions={legendOptions}
+          mode={legendMode}
+          location={state?.legend.isInside ? 'inside' : 'outside'}
+          onLocationChange={(location) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                isInside: location === 'inside',
+              },
+            });
+          }}
+          titlePlaceholder={
+            frame.activeData?.[dataLayers[0].layerId]?.columns.find(
+              (col) => col.id === dataLayers[0].splitAccessor
+            )?.name ?? defaultLegendTitle
+          }
+          legendTitle={state?.legend.title}
+          onLegendTitleChange={({ title, visible }) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                title,
+                isTitleVisible: visible,
+              },
+            });
+          }}
+          isTitleVisible={state?.legend.isTitleVisible}
+          onDisplayChange={(optionId) => {
+            const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                isVisible: newMode !== 'hide',
+                showSingleSeries: newMode === 'show',
+              },
+            });
+          }}
+          position={state?.legend.position}
+          horizontalAlignment={state?.legend.horizontalAlignment}
+          verticalAlignment={state?.legend.verticalAlignment}
+          floatingColumns={state?.legend.floatingColumns}
+          onFloatingColumnsChange={(val) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, floatingColumns: val },
+            });
+          }}
+          maxLines={state?.legend.maxLines}
+          onMaxLinesChange={(val) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, maxLines: val },
+            });
+          }}
+          shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
+          onTruncateLegendChange={() => {
+            const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
+            setState({
+              ...state,
+              legend: { ...state.legend, shouldTruncate: !current },
+            });
+          }}
+          onPositionChange={(id) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, position: id as Position },
+            });
+          }}
+          onAlignmentChange={(value) => {
+            const [vertical, horizontal] = value.split('_');
+            const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+            const horizontalAlignment =
+              horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
+            setState({
+              ...state,
+              legend: { ...state.legend, verticalAlignment, horizontalAlignment },
+            });
+          }}
+          allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
+          legendStats={state?.legend.legendStats}
+          onLegendStatsChange={(legendStats, hasConvertedToTable) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                legendStats,
+                isVisible: true,
+                showSingleSeries: true,
+                ...(hasConvertedToTable ? { legendSize: LegendSize.AUTO } : {}),
+              },
+            });
+          }}
+          legendSize={legendSize}
+          onLegendSizeChange={(newLegendSize) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                legendSize: newLegendSize,
+              },
+            });
+          }}
+          showAutoLegendSizeOption={true}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

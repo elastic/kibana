@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useCallback } from 'react';
@@ -96,6 +97,8 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
           grow={1}
           style={{
             paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
+            paddingRight: euiTheme.size.base,
+            overflowY: 'auto',
           }}
         >
           <EuiFacetGroup>
@@ -154,23 +157,19 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               hasBorder
               title={rule.name}
               onClick={() => onSelectRuleType(rule.id)}
-              description={
-                <>
-                  {rule.description}
-                  {rule.description && <EuiSpacer size="s" />}
-                  <EuiText
-                    color="subdued"
-                    size="xs"
-                    style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-                  >
-                    {producerToDisplayName(rule.producer)}
-                  </EuiText>
-                </>
-              }
+              description={rule.description}
               style={{ marginRight: '8px', flexGrow: 0 }}
               data-test-subj={`${rule.id}-SelectOption`}
               isDisabled={rule.enabledInLicense === false}
-            />
+            >
+              <EuiText
+                color="subdued"
+                size="xs"
+                style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
+              >
+                {producerToDisplayName(rule.producer)}
+              </EuiText>
+            </EuiCard>
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}

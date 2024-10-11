@@ -63,7 +63,8 @@ export const AlertsPopover = () => {
     ) {
       const { logsExplorerState } = pageState.context;
       const index = hydrateDataSourceSelection(
-        logsExplorerState.dataSourceSelection
+        logsExplorerState.dataSourceSelection,
+        pageState.context.allSelection
       ).toDataviewSpec();
 
       return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
@@ -92,7 +93,8 @@ export const AlertsPopover = () => {
     if (isCreateSLOFlyoutOpen && pageState.matches({ initialized: 'validLogsExplorerState' })) {
       const { logsExplorerState } = pageState.context;
       const dataView = hydrateDataSourceSelection(
-        logsExplorerState.dataSourceSelection
+        logsExplorerState.dataSourceSelection,
+        pageState.context.allSelection
       ).toDataviewSpec();
       const query =
         logsExplorerState?.query && 'query' in logsExplorerState.query

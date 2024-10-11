@@ -12,6 +12,10 @@ export {
   findInventoryFields,
   metrics,
   type InventoryModels,
+  isBasicMetricAgg,
+  isDerivativeAgg,
+  isSumBucketAgg,
+  isTermsWithAggregation,
 } from './inventory_models';
 
 export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
@@ -28,11 +32,6 @@ export {
   InventoryVisTypeRT,
   ItemTypeRT,
   SnapshotMetricTypeRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESDerivativeAggRT,
-  MetricsUIAggregationRT,
-  ESBasicMetricAggRT,
   SnapshotMetricTypeKeys,
 } from './inventory_models/types';
 
@@ -49,3 +48,26 @@ export type {
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';
+
+export {
+  MetricsAPIMetricRT,
+  MetricsAPIRequestRT,
+  MetricsAPIPageInfoRT,
+  MetricsAPIColumnTypeRT,
+  MetricsAPIColumnRT,
+  MetricsAPIRowRT,
+  MetricsAPISeriesRT,
+  MetricsAPIResponseSeriesRT,
+  MetricsAPIResponseRT,
+} from './http_api';
+export type {
+  MetricsAPIMetric,
+  MetricsAPIRequest,
+  MetricsAPITimerange,
+  MetricsAPIColumnType,
+  MetricsAPIPageInfo,
+  MetricsAPIColumn,
+  MetricsAPIRow,
+  MetricsAPISeries,
+  MetricsAPIResponse,
+} from './http_api';

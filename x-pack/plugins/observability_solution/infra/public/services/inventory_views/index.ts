@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './inventory_views_client';
 export * from './inventory_views_service';
 export * from './types';

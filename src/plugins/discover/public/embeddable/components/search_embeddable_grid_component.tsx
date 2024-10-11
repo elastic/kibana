@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -18,6 +19,7 @@ import {
 } from '@kbn/discover-utils';
 import { Filter } from '@kbn/es-query';
 import {
+  FetchContext,
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -27,6 +29,7 @@ import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
@@ -37,9 +40,15 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
+import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
+import { createDataSource } from '../../../common/data_sources';
 
 interface SavedSearchEmbeddableComponentProps {
-  api: SearchEmbeddableApi & { fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]> };
+  api: SearchEmbeddableApi & {
+    fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+    fetchContext$: BehaviorSubject<FetchContext | undefined>;
+  };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateManager: SearchEmbeddableStateManager;
@@ -60,6 +69,9 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
+    query,
+    filters,
+    fetchContext,
     rows,
     totalHitCount,
     columnsMeta,
@@ -69,6 +81,9 @@ export function SearchEmbeddableGridComponent({
     api.savedSearch$,
     api.savedObjectId,
     api.fetchWarnings$,
+    api.query$,
+    api.filters$,
+    api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
     stateManager.columnsMeta,
@@ -121,6 +136,25 @@ export function SearchEmbeddableGridComponent({
     sort,
     settings: grid,
   });
+
+  const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
+  const timeRange = useMemo(
+    () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
+    [fetchContext]
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
+
+  // Security Solution overrides our cell actions -- this is a temporary workaroud to keep
+  // things working as they do currently until we can migrate their actions to One Discover
+  const isInSecuritySolution =
+    useObservable(discoverServices.application.currentAppId$) === 'securitySolutionUI';
 
   const onStateEditedProps = useMemo(
     () => ({
@@ -209,7 +243,13 @@ export function SearchEmbeddableGridComponent({
       {...onStateEditedProps}
       settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
-      cellActionsTriggerId={SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID}
+      cellActionsTriggerId={
+        isInSecuritySolution
+          ? SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID
+          : DISCOVER_CELL_ACTIONS_TRIGGER.id
+      }
+      cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
+      cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
       columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}

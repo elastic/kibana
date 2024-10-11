@@ -1,0 +1,44 @@
+{
+  "name": "Kibana",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker",
+        "editorconfig.editorconfig",
+        "timonwong.shellcheck",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github"
+      ]
+    }
+  },
+  "forwardPorts": [
+    9200,
+    5601,
+    9229,
+    9230,
+    9231
+  ],
+  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "KBN_DIR": "${containerWorkspaceFolder}"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {
+      "version": "stable"
+    }
+  }
+}

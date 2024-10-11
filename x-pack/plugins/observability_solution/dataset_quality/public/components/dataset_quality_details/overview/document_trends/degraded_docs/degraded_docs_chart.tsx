@@ -14,7 +14,7 @@ import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { flyoutDegradedDocsTrendText } from '../../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 import { TimeRangeConfig } from '../../../../../../common/types';
-import { useDegradedDocs } from '../../../../../hooks/use_degraded_docs';
+import { useDegradedDocsChart } from '../../../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -26,7 +26,7 @@ const DISABLED_ACTIONS = [
 
 interface DegradedDocsChartProps
   extends Pick<
-    ReturnType<typeof useDegradedDocs>,
+    ReturnType<typeof useDegradedDocsChart>,
     'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
   > {
   timeRange: TimeRangeConfig;

@@ -9,6 +9,7 @@ import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rul
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleResponse,
   TypeSpecificCreateProps,
@@ -25,7 +26,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToCamelCase } from '../../../../../../utils/object_case_converters';
 import type { RuleParams, TypeSpecificRuleParams } from '../../../../rule_schema';
 import { transformToActionFrequency } from '../../../normalization/rule_actions';
-import { addEcsToRequiredFields, separateActionsAndSystemAction } from '../../../utils/utils';
+import { separateActionsAndSystemAction } from '../../../utils/utils';
 
 /**
  * These are the fields that are added to the rule response that are not part of the rule params
@@ -52,6 +53,9 @@ export const convertRuleResponseToAlertingRule = (
   const alertActions = ruleActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], rule.throttle);
 
+  const responseActions = rule.response_actions?.map((ruleResponseAction) =>
+    transformRuleToAlertResponseAction(ruleResponseAction)
+  );
   // Because of Omit<RuleResponse, RuntimeFields> Typescript doesn't recognize
   // that rule is assignable to TypeSpecificCreateProps despite omitted fields
   // are not part of type specific props. So we need to cast here.
@@ -93,6 +97,7 @@ export const convertRuleResponseToAlertingRule = (
       note: rule.note,
       version: rule.version,
       exceptionsList: rule.exceptions_list,
+      responseActions,
       ...typeSpecificParams,
     },
     schedule: { interval: rule.interval },
@@ -157,9 +162,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
@@ -172,9 +174,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }

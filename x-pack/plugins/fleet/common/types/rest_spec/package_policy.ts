@@ -61,7 +61,7 @@ export type PostDeletePackagePoliciesResponse = Array<{
   name?: string;
   success: boolean;
   package?: PackagePolicyPackage;
-  policy_id?: string;
+  policy_id?: string | null;
   policy_ids?: string[];
   output_id?: string;
   // Support generic errors

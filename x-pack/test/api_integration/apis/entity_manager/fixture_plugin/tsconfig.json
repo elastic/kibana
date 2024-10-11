@@ -15,6 +15,7 @@
     "@kbn/entityManager-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/entities-schema",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

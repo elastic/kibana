@@ -21,13 +21,13 @@ import {
   fetchRule,
   getRuleWithWebHookAction,
   getSimpleMlRule,
-  getSimpleRule,
   getSimpleThreatMatch,
   getStats,
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
   updateRule,
   deleteAllEventLogExecutionEvents,
+  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createRule,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('@ess Detection rule legacy actions telemetry', async () => {
+  describe('@ess Detection rule legacy actions telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -403,12 +403,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"pre-packaged"/"immutable" rules', async () => {
+    describe('"pre-packaged"/"immutable" rules', () => {
       it('should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, false);
+        const newRuleToUpdate = getCustomQueryRuleParams({ rule_id: immutableRule.rule_id });
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
 
@@ -429,7 +429,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
-            rule_name: 'Simple Rule Query',
+            rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: false,
             elastic_rule: true,
@@ -465,7 +465,10 @@ export default ({ getService }: FtrProviderContext) => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, true);
+        const newRuleToUpdate = getCustomQueryRuleParams({
+          rule_id: immutableRule.rule_id,
+          enabled: true,
+        });
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
 
@@ -486,7 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
-            rule_name: 'Simple Rule Query',
+            rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: true,
             elastic_rule: true,

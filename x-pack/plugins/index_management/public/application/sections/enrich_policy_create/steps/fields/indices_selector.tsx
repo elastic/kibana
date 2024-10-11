@@ -90,7 +90,7 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
     <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

@@ -232,9 +232,9 @@ describe('DiskUsageRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',
         context: {
-          internalFullMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify disk usage level of node.`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: 'Verify disk usage level of node.',
           clusterName,
           count,
@@ -381,9 +381,9 @@ describe('DiskUsageRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',
         context: {
-          internalFullMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+          internalFullMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:${ccs}))`,
           internalShortMessage: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify disk usage level of node.`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/myNodeId?_g=(cluster_uuid:abc123,ccs:testCluster))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/myNodeId?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           actionPlain: 'Verify disk usage level of node.',
           clusterName,
           count,

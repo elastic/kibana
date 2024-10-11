@@ -13,13 +13,20 @@ import type { CreateLayerDescriptorParams, MapsStartApi } from '@kbn/maps-plugin
 import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { ChartLoader } from '../chart_loader';
+import type { MlApi } from '../../../../services/ml_api_service';
+
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class MapLoader extends ChartLoader {
   private _getMapData;
 
-  constructor(indexPattern: DataView, query: object, mapsPlugin: MapsStartApi | undefined) {
-    super(indexPattern, query);
+  constructor(
+    mlApi: MlApi,
+    indexPattern: DataView,
+    query: object,
+    mapsPlugin: MapsStartApi | undefined
+  ) {
+    super(mlApi, indexPattern, query);
 
     this._getMapData = mapsPlugin
       ? memoizeOne(mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor, eq)

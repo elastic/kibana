@@ -9,6 +9,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AgentState, NodeParamsBase } from '../types';
+import { NodeType } from '../constants';
 
 export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: string) =>
   llmType === 'bedrock'
@@ -27,7 +28,7 @@ export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: s
     ? ChatPromptTemplate.fromMessages([
         [
           'system',
-          `You are a title generator for a helpful assistant for Elastic Security. Assume the following human message is the start of a conversation between you and a human; Do not respond to the human message, instead respond with conversation title relevant to the human's message. DO NOT UNDER ANY CIRCUMSTANCES use quotes or markdown in your response. This title is shown in a list of conversations to the human, so title it for the user, not for you. Please create the title in ${responseLanguage}. Respond with the title only with no other text explaining your response. As an example, for the given MESSAGE, this is the TITLE:
+          `You are a title generator for a helpful assistant for Elastic Security. Assume the following human message is the start of a conversation between you and a human. Generate a relevant conversation title for the human's message in plain text. Make sure the title is formatted for the user, without using quotes or markdown. The title should clearly reflect the content of the message and be appropriate for a list of conversations. Please create the title in ${responseLanguage}. Respond only with the title. As an example, for the given MESSAGE, this is the TITLE:
 
     MESSAGE: I am having trouble with the Elastic Security app.
     TITLE: Troubleshooting Elastic Security app issues
@@ -48,25 +49,21 @@ export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: s
       ]);
 
 export interface GenerateChatTitleParams extends NodeParamsBase {
-  llmType?: string;
-  responseLanguage: string;
   state: AgentState;
   model: BaseChatModel;
 }
 
-export const GENERATE_CHAT_TITLE_NODE = 'generateChatTitle';
-
-export const generateChatTitle = async ({
-  llmType,
-  responseLanguage,
+export async function generateChatTitle({
   logger,
-  model,
   state,
-}: GenerateChatTitleParams) => {
-  logger.debug(() => `Node state:\n ${JSON.stringify(state, null, 2)}`);
+  model,
+}: GenerateChatTitleParams): Promise<Partial<AgentState>> {
+  logger.debug(
+    () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
+  );
 
   const outputParser = new StringOutputParser();
-  const graph = GENERATE_CHAT_TITLE_PROMPT(responseLanguage, llmType)
+  const graph = GENERATE_CHAT_TITLE_PROMPT(state.responseLanguage, state.llmType)
     .pipe(model)
     .pipe(outputParser);
 
@@ -77,5 +74,6 @@ export const generateChatTitle = async ({
 
   return {
     chatTitle,
+    lastNode: NodeType.GENERATE_CHAT_TITLE,
   };
-};
+}

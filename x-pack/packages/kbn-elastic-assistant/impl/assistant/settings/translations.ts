@@ -84,13 +84,6 @@ export const EVALUATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const ADD_SYSTEM_PROMPT_MODAL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.modalTitle',
-  {
-    defaultMessage: 'System Prompts',
-  }
-);
-
 export const CANCEL = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slCancelButtonTitle',
   {

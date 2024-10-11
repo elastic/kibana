@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEmpty } from 'lodash';
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  initializeControlGroupTelemetry,
+  type ControlGroupTelemetry,
+} from '@kbn/controls-plugin/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID } from './dashboard_telemetry_collection_task';

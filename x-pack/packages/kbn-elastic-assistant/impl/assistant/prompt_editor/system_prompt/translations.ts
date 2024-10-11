@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_SYSTEM_PROMPT_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.firstPromptEditor.addSystemPromptTooltip',
-  {
-    defaultMessage: 'Add system prompt',
-  }
-);
-
 export const CLEAR_SYSTEM_PROMPT = i18n.translate(
   'xpack.elasticAssistant.assistant.firstPromptEditor.clearSystemPrompt',
   {

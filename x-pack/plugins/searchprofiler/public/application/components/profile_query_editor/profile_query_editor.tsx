@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback } from 'react';
+import React, { useRef, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -23,7 +23,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
-import { Editor, EditorInstance } from './editor';
+import { Editor, type EditorProps } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';
 
@@ -39,33 +39,36 @@ const INITIAL_EDITOR_VALUE = `{
  * Drives state changes for mine via profiler action context.
  */
 export const ProfileQueryEditor = memo(() => {
-  const editorRef = useRef<EditorInstance>(null as any);
+  const editorPropsRef = useRef<EditorProps>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location, ...startServices } = useAppContext();
+  const { getLicenseStatus, notifications, location } = useAppContext();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
   const searchProfilerQueryURI = queryParams.get('load_from');
+
   const searchProfilerQuery =
     searchProfilerQueryURI &&
     decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
+  const [editorValue, setEditorValue] = useState(
+    searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE
+  );
 
   const requestProfile = useRequestProfile();
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
     try {
-      const { current: editor } = editorRef;
       const { data: result, error } = await requestProfile({
-        query: editorRef.current.getValue(),
+        query: editorValue,
         index: indexInputRef.current.value,
       });
       if (error) {
         notifications.addDanger(error);
-        editor.focus();
+        editorPropsRef.current.focus();
         return;
       }
       if (result === null) {
@@ -77,16 +80,14 @@ export const ProfileQueryEditor = memo(() => {
     }
   };
 
-  const onEditorReady = useCallback((editorInstance) => (editorRef.current = editorInstance), []);
+  const onEditorReady = useCallback(
+    (editorPropsInstance: EditorProps) => (editorPropsRef.current = editorPropsInstance),
+    []
+  );
   const licenseEnabled = getLicenseStatus().valid;
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      className="prfDevTool__sense"
-      gutterSize="none"
-      direction="column"
-    >
+    <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
@@ -117,9 +118,9 @@ export const ProfileQueryEditor = memo(() => {
       <EuiFlexItem grow={10}>
         <Editor
           onEditorReady={onEditorReady}
+          setEditorValue={setEditorValue}
+          editorValue={editorValue}
           licenseEnabled={licenseEnabled}
-          initialValue={searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE}
-          {...startServices}
         />
       </EuiFlexItem>
 

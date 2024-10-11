@@ -23,7 +23,9 @@
       "licensing",
       "ml",
       "alerting",
-      "features"
+      "features",
+      "inference",
+      "logsDataAccess"
     ],
     "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],

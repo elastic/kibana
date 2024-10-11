@@ -17,9 +17,9 @@ import {
   createGridHideHandler,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import type { LensGridDirection, ColumnConfig } from '../../../../common/expressions';
+import type { LensGridDirection, DatatableColumnConfig } from '../../../../common/expressions';
 
-function getDefaultConfig(): ColumnConfig {
+function getDefaultConfig(): DatatableColumnConfig {
   return {
     columns: [
       { columnId: 'a', type: 'lens_datatable_column' },

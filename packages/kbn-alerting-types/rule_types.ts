@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -102,6 +103,7 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
   MAX_QUEUED_ACTIONS = 'maxQueuedActions',
+  EXECUTION = 'ruleExecution',
 }
 
 export type RuleExecutionStatuses = (typeof RuleExecutionStatusValues)[number];
@@ -203,6 +205,11 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
   alertsFilter?: SanitizedAlertsFilter;
 };
 
+export interface Flapping extends SavedObjectAttributes {
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -238,6 +245,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
+  flapping?: Flapping | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

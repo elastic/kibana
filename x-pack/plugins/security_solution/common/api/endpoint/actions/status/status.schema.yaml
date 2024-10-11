@@ -5,9 +5,9 @@ info:
 paths:
   /api/endpoint/action_status:
     get:
-      summary: Get Actions status schema
+      summary: Get response actions status 
       operationId: EndpointGetActionsStatus
-      description: Get action status
+      description: Get the status of response actions for the specified agent IDs.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:

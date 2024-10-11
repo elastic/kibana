@@ -311,7 +311,7 @@ function setUptimeAppStatus(
     } else {
       const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
       if (hasUptimePrivileges) {
-        const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
+        const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
         indexStatusPromise.then((indexStatus) => {
           if (indexStatus.indexExists) {
             registerUptimeRoutesWithNavigation(coreStart, pluginsStart);

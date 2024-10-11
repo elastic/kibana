@@ -8,16 +8,19 @@
 import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 
+import {
+  createFeature,
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
+import { KibanaPrivilegeTable as FeatureTable } from '@kbn/security-ui-components';
+import { getDisplayedFeaturePrivileges } from '@kbn/security-ui-components/src/kibana_privilege_table/__fixtures__';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { SpaceSelector } from './space_selector';
 import type { Role } from '../../../../../../../common';
-import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
-import { FeatureTable } from '../feature_table';
-import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

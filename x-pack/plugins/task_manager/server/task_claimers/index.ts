@@ -8,14 +8,15 @@
 import { Subject, Observable } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 
+import minimatch from 'minimatch';
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
-import { claimAvailableTasksDefault } from './strategy_default';
+import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
-import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
 import { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
@@ -38,6 +39,7 @@ export interface ClaimOwnershipResult {
     tasksConflicted: number;
     tasksClaimed: number;
     tasksLeftUnclaimed?: number;
+    tasksErrors?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -49,17 +51,17 @@ let WarnedOnInvalidClaimer = false;
 
 export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
   switch (strategy) {
-    case CLAIM_STRATEGY_DEFAULT:
-      return claimAvailableTasksDefault;
+    case CLAIM_STRATEGY_UPDATE_BY_QUERY:
+      return claimAvailableTasksUpdateByQuery;
     case CLAIM_STRATEGY_MGET:
       return claimAvailableTasksMget;
   }
 
   if (!WarnedOnInvalidClaimer) {
     WarnedOnInvalidClaimer = true;
-    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to default`);
+    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to update_by_query`);
   }
-  return claimAvailableTasksDefault;
+  return claimAvailableTasksUpdateByQuery;
 }
 
 export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
@@ -71,4 +73,23 @@ export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
     },
     docs: [],
   };
+}
+
+export function isTaskTypeExcluded(excludedTaskTypePatterns: string[], taskType: string) {
+  for (const excludedTypePattern of excludedTaskTypePatterns) {
+    if (minimatch(taskType, excludedTypePattern)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function getExcludedTaskTypes(
+  definitions: TaskTypeDictionary,
+  excludedTaskTypePatterns: string[]
+) {
+  return definitions
+    .getAllTypes()
+    .filter((taskType) => isTaskTypeExcluded(excludedTaskTypePatterns, taskType));
 }

@@ -31,18 +31,18 @@ ARM_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "arm64") 
 AMD_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest' manifests.json)
 
 echo docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
-docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
+docker_with_retry pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
 echo linux/arm64 image pulled, with digest: $ARM_64_DIGEST
 
 echo docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
-docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
+docker_with_retry pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
 echo linux/amd64 image pulled, with digest: $AMD_64_DIGEST
 
 docker tag "$SOURCE_IMAGE@$ARM_64_DIGEST" "$TARGET_IMAGE-arm64"
 docker tag "$SOURCE_IMAGE@$AMD_64_DIGEST" "$TARGET_IMAGE-amd64"
 
-docker push "$TARGET_IMAGE-arm64"
-docker push "$TARGET_IMAGE-amd64"
+docker_with_retry push "$TARGET_IMAGE-arm64"
+docker_with_retry push "$TARGET_IMAGE-amd64"
 
 docker manifest rm "$TARGET_IMAGE" || echo "Nothing to delete"
 

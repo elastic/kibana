@@ -47,8 +47,6 @@
     "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
     "@kbn/guided-onboarding-plugin",
@@ -71,7 +69,13 @@
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/monaco",
-    "@kbn/search-types",
     "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-analytics",
+    "@kbn/default-nav-management",
+    "@kbn/default-nav-devtools",
+    "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/management-settings-ids",
   ]
 }

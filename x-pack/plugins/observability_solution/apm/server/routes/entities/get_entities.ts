@@ -4,33 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  AGENT_NAME,
-  DATA_STEAM_TYPE,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
-import { FIRST_SEEN, LAST_SEEN, ENTITY, ENTITY_TYPE } from '../../../common/es_fields/entities';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { getServiceEntitiesHistoryMetrics } from './get_service_entities_history_metrics';
-import { EntitiesRaw, EntityType, ServiceEntities } from './types';
-import { isFiniteNumber } from '../../../common/utils/is_finite_number';
+  ENTITY_FIRST_SEEN,
+  ENTITY_LAST_SEEN,
+} from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
+import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
+import { getEntityLatestServices } from './get_entity_latest_services';
+import type { EntityLatestServiceRaw } from './types';
 
-export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
+  if (!start || !end) {
+    return [];
+  }
+
   return [
     {
       range: {
-        [LAST_SEEN]: {
+        [ENTITY_LAST_SEEN]: {
           gte: start,
         },
       },
     },
     {
       range: {
-        [FIRST_SEEN]: {
+        [ENTITY_FIRST_SEEN]: {
           lte: end,
         },
       },
@@ -54,59 +52,16 @@ export async function getEntities({
   kuery?: string;
   size: number;
   serviceName?: string;
-}): Promise<ServiceEntities[]> {
-  const entities = (
-    await entitiesESClient.searchLatest(`get_entities`, {
-      body: {
-        size,
-        track_total_hits: false,
-        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...environmentQuery(environment, SERVICE_ENVIRONMENT),
-              ...entitiesRangeQuery(start, end),
-              ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
-              ...termQuery(SERVICE_NAME, serviceName),
-            ],
-          },
-        },
-      },
-    })
-  ).hits.hits.map((hit) => hit._source as EntitiesRaw);
-
-  const serviceEntitiesHistoryMetricsMap = entities.length
-    ? await getServiceEntitiesHistoryMetrics({
-        start,
-        end,
-        entitiesESClient,
-        entityIds: entities.map((entity) => entity.entity.id),
-        size,
-      })
-    : undefined;
-
-  return entities.map((entity) => {
-    const historyLogRate = serviceEntitiesHistoryMetricsMap?.[entity.entity.id]?.logRate;
-    return {
-      serviceName: entity.service.name,
-      environment: Array.isArray(entity.service?.environment) // TODO fix this in the EEM
-        ? entity.service.environment[0]
-        : entity.service.environment,
-      agentName: entity.agent.name[0],
-      signalTypes: entity.data_stream.type,
-      entity: {
-        ...entity.entity,
-        hasLogMetrics: isFiniteNumber(historyLogRate) ? historyLogRate > 0 : false,
-        // History metrics undefined means that for the selected time range there was no ingestion happening.
-        metrics: serviceEntitiesHistoryMetricsMap?.[entity.entity.id] || {
-          latency: null,
-          logErrorRate: null,
-          failedTransactionRate: null,
-          logRate: null,
-          throughput: null,
-        },
-      },
-    };
+}): Promise<EntityLatestServiceRaw[]> {
+  const entityLatestServices = await getEntityLatestServices({
+    entitiesESClient,
+    start,
+    end,
+    environment,
+    kuery,
+    size,
+    serviceName,
   });
+
+  return entityLatestServices;
 }

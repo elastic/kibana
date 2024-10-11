@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       expect(body).not.to.be.empty();
     });
-    it('scopes the elasticsearch client provided via request context to user credentials', async () => {
+    it('scopes the elasticsearch client provided via request contract to user credentials', async () => {
       const { body } = await supertest
         .get('/api/elasticsearch_client_xpack/contract/user')
         .expect(200);

@@ -15,11 +15,11 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
-import { useMlKibana, useNotifications } from '../../../contexts/kibana';
+import { useNotifications } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
 import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
-import { mlJobService } from '../../../services/job_service';
+import { useMlJobService } from '../../../services/job_service';
 import { useForecastService } from '../../../services/forecast_service';
 import { useTimeSeriesExplorerService } from '../../../util/time_series_explorer_service';
 import { APP_STATE_ACTION } from '../../../timeseriesexplorer/timeseriesexplorer_constants';
@@ -28,7 +28,6 @@ import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesex
 import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useTableInterval } from '../../../components/controls/select_interval';
 import { useTableSeverity } from '../../../components/controls/select_severity';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { useTimeSeriesExplorerUrlState } from '../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
 import type { TimeSeriesExplorerAppState } from '../../../../../common/types/locator';
 import { useJobSelectionFlyout } from '../../../contexts/ml/use_job_selection_flyout';
@@ -46,14 +45,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
-  const {
-    services: {
-      data: { dataViews: dataViewsService },
-    },
-  } = useMlKibana();
+  const mlJobService = useMlJobService();
   const { toasts } = useNotifications();
   const mlForecastService = useForecastService();
-  const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
     useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -204,6 +198,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       jobsWithTimeRange,
       selectedJobIds,
       setGlobalState,
+      mlJobService,
       toasts,
       getJobSelection
     );
@@ -221,6 +216,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   );
 
   useEffect(() => {
+    if (selectedForecastIdProp !== selectedForecastId) {
+      setSelectedForecastIdProp(undefined);
+    }
+
     if (
       autoZoomDuration !== undefined &&
       boundsMinMs !== undefined &&
@@ -228,9 +227,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       selectedJob !== undefined &&
       selectedForecastId !== undefined
     ) {
-      if (selectedForecastIdProp !== selectedForecastId) {
-        setSelectedForecastIdProp(undefined);
-      }
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
         .then((resp) => {
@@ -270,7 +266,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-  if (timeSeriesJobs.length === 0) {
+  if (timeSeriesJobs.length === 0 || selectedJobId === undefined) {
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
         <TimeseriesexplorerNoJobsFound />
@@ -294,8 +290,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
-        dataViewsService,
-        toastNotificationService,
         appStateHandler,
         autoZoomDuration,
         bounds,

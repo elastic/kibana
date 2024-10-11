@@ -13,7 +13,13 @@ interface GetComponentTemplateNameOpts {
   context?: string;
   name?: string;
 }
-export const VALID_ALERT_INDEX_PREFIXES = ['.ds-.alerts-', '.internal.alerts-', '.alerts-'];
+export const VALID_ALERT_INDEX_PREFIXES = [
+  '.ds-.alerts-',
+  '.internal.alerts-',
+  '.alerts-',
+  '.internal.preview.alerts-',
+  '.preview.alerts-',
+];
 
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
   `.alerts-${context ? `${context}.alerts` : name ? name : 'framework'}-mappings`;

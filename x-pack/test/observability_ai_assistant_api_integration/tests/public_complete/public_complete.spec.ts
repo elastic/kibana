@@ -142,7 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       proxy.close();
     });
 
-    describe('after executing an action', async () => {
+    describe('after executing an action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after adding an instruction', async () => {
+    describe('after adding an instruction', () => {
       let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
@@ -225,7 +225,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('with openai format', async () => {
+    describe('with openai format', () => {
       let responseBody: string;
 
       before(async () => {

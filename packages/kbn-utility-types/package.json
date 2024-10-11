@@ -2,7 +2,7 @@
   "name": "@kbn/utility-types",
   "version": "1.0.0",
   "private": true,
-  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
     "test": "../../node_modules/.bin/tsd src/tsd_tests"
   }

@@ -78,6 +78,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/zod-helpers",
     "@kbn/openapi-bundler",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/zod"
   ]
 }

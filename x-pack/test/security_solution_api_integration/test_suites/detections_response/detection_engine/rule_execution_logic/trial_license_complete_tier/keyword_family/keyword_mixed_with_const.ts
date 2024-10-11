@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 import {
   EqlRuleCreateProps,
   ThresholdRuleCreateProps,
@@ -75,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 8, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
-        const hits = alertsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
+        const hits = alertsOpen.hits.hits.map((hit) => get(hit, '_source.event.dataset')).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
@@ -113,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 8, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
-        const hits = alertsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
+        const hits = alertsOpen.hits.hits.map((hit) => get(hit, '_source.event.dataset')).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"threshold" rule type', async () => {
+    describe('"threshold" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getRuleForAlertTesting(['keyword', 'const_keyword']),

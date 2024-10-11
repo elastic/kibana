@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('aiops basic license', function () {
-    this.tags(['aiops']);
+    this.tags(['aiops', 'skipFIPS']);
 
     // The aiops API should return forbidden when called without a trial/platinum license.
     loadTestFile(require.resolve('./permissions'));

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -16,13 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects([
+  const { common, discover, dashboard, header, timePicker } = getPageObjects([
     'common',
     'discover',
     'dashboard',
     'header',
     'timePicker',
-    'unifiedFieldList',
   ]);
 
   const defaultSettings = {
@@ -30,14 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'doc_table:legacy': true,
   };
 
-  describe('discover esql grid with legacy setting', async function () {
+  describe('discover esql grid with legacy setting', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -49,16 +49,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render esql view correctly', async function () {
       const savedSearchESQL = 'testESQLWithLegacySetting';
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.existOrFail('docTableHeader');
       await testSubjects.missingOrFail('euiDataGridBody');
 
-      await PageObjects.discover.selectTextBaseLang();
+      await discover.selectTextBaseLang();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('docTableHeader');
       await testSubjects.existOrFail('euiDataGridBody');
@@ -67,14 +67,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('docViewerFlyout');
 
-      await PageObjects.discover.saveSearch(savedSearchESQL);
+      await discover.saveSearch(savedSearchESQL);
 
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultAbsoluteRange();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch(savedSearchESQL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await testSubjects.missingOrFail('docTableHeader');
       await testSubjects.existOrFail('euiDataGridBody');
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardAddPanel.addSavedSearch('A Saved Search');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('docTableHeader');
       await testSubjects.missingOrFail('euiDataGridBody');
     });

@@ -6,10 +6,7 @@
     "id": "observability",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -39,6 +36,7 @@
       "dashboard",
       "expressions",
       "logsExplorer",
+      "logsShared",
       "licensing",
       "navigation"
     ],
@@ -59,10 +57,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces",
+      "spaces"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

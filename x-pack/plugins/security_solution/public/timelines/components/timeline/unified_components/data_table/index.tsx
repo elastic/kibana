@@ -208,7 +208,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [onColumnResize]
     );
 
-    const onChangeItemsPerPage = useCallback(
+    const onChangeItemsPerPage = useCallback<
+      NonNullable<UnifiedDataTableProps['onUpdateRowsPerPage']>
+    >(
       (itemsChangedPerPage) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })

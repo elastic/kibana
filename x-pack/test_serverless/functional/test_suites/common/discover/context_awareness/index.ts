@@ -42,5 +42,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));
     loadTestFile(require.resolve('./extensions/_get_cell_renderers'));
     loadTestFile(require.resolve('./extensions/_get_default_app_state'));
+    loadTestFile(require.resolve('./extensions/_get_additional_cell_actions'));
   });
 }

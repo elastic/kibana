@@ -23,7 +23,6 @@ import {
   initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
 import { initMetadataRoute } from './routes/metadata';
-import { initMetricsAPIRoute } from './routes/metrics_api';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
@@ -35,6 +34,7 @@ import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
 import { InfraBackendLibs } from './lib/infra_types';
+import { initEntitiesConfigurationRoutes } from './routes/entities';
 
 export const registerRoutes = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -54,7 +54,6 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
   initMetricsExplorerViewRoutes(libs);
-  initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
   initInventoryViewRoutes(libs);
@@ -65,4 +64,5 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);
+  initEntitiesConfigurationRoutes(libs);
 };

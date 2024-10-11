@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
-import {
-  CLOUD_SECURITY_POSTURE_BASE_PATH,
-  type CspSecuritySolutionContext,
-} from '@kbn/cloud-security-posture-plugin/public';
+import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';

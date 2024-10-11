@@ -99,6 +99,7 @@ interface ConstructorOptions {
   frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
   dataStreamAdapter: DataStreamAdapter;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -122,6 +123,7 @@ export class RuleDataService implements IRuleDataService {
       frameworkAlerts: options.frameworkAlerts,
       pluginStop$: options.pluginStop$,
       dataStreamAdapter: options.dataStreamAdapter,
+      elasticsearchAndSOAvailability$: this.options.elasticsearchAndSOAvailability$,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));

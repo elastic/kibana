@@ -44,19 +44,18 @@ export const getRotatingNumberVisualization = ({
 }): Visualization<RotatingNumberState> => ({
   id: 'rotatingNumber',
 
+  getVisualizationTypeId() {
+    return 'rotatingNumber';
+  },
   visualizationTypes: [
     {
       id: 'rotatingNumber',
       icon: 'refresh',
       label: 'Rotating number',
-      groupLabel: 'Goal and single value',
+      description: 'A number that rotates',
       sortPriority: 3,
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'rotatingNumber';
-  },
 
   clearLayer(state) {
     return {

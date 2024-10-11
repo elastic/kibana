@@ -6,7 +6,7 @@
  */
 
 import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
-import { splitIntoCommands } from './correct_common_esql_mistakes';
+import { splitIntoCommands } from '@kbn/inference-plugin/common';
 
 export function getErrorsWithCommands(query: string, errors: Array<ESQLMessage | EditorError>) {
   const asCommands = splitIntoCommands(query);

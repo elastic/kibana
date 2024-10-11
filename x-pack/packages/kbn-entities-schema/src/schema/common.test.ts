@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { durationSchema, metadataSchema, semVerSchema, historySettingsSchema } from './common';
+import { durationSchema, metadataSchema, semVerSchema } from './common';
 
 describe('schemas', () => {
   describe('metadataSchema', () => {
@@ -28,7 +28,7 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'host.name',
-        limit: 0,
+        aggregation: { type: 'terms', limit: 0 },
       });
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
@@ -52,10 +52,40 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'hostName',
-        size: 1,
       });
       expect(result.success).toBeTruthy();
       expect(result).toMatchSnapshot();
+    });
+
+    it('should default to terms aggregation when none provided', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+      });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'terms', limit: 10, lookbackPeriod: undefined },
+      });
+    });
+
+    it('should parse supported aggregations', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      });
+      expect(result.success).toBeTruthy();
+    });
+
+    it('should reject unsupported aggregation', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'unknown_agg', limit: 10 },
+      });
+      expect(result.success).toBeFalsy();
     });
   });
 
@@ -107,32 +137,6 @@ describe('schemas', () => {
       const result = semVerSchema.safeParse('0.9');
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
-    });
-  });
-
-  describe('historySettingsSchema', () => {
-    it('should return default values when not defined', () => {
-      let result = historySettingsSchema.safeParse(undefined);
-      expect(result.success).toBeTruthy();
-      expect(result.data).toEqual({ lookbackPeriod: '1h' });
-
-      result = historySettingsSchema.safeParse({ syncDelay: '1m' });
-      expect(result.success).toBeTruthy();
-      expect(result.data).toEqual({ syncDelay: '1m', lookbackPeriod: '1h' });
-    });
-
-    it('should return user defined values when defined', () => {
-      const result = historySettingsSchema.safeParse({
-        lookbackPeriod: '30m',
-        syncField: 'event.ingested',
-        syncDelay: '5m',
-      });
-      expect(result.success).toBeTruthy();
-      expect(result.data).toEqual({
-        lookbackPeriod: '30m',
-        syncField: 'event.ingested',
-        syncDelay: '5m',
-      });
     });
   });
 });

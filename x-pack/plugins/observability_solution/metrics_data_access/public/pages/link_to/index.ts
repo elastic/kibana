@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useNodeDetailsRedirect } from './use_node_details_redirect';
+export { useAssetDetailsRedirect } from './use_asset_details_redirect';

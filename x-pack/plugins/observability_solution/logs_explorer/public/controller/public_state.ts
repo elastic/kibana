@@ -6,6 +6,7 @@
  */
 
 import {
+  AllDatasetSelection,
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
@@ -37,7 +38,8 @@ export const getPublicStateFromContext = (
 };
 
 export const getContextFromPublicState = (
-  publicState: LogsExplorerPublicStateUpdate
+  publicState: LogsExplorerPublicStateUpdate,
+  allSelection: AllDatasetSelection
 ): LogsExplorerControllerContext => ({
   ...DEFAULT_CONTEXT,
   chart: {
@@ -47,7 +49,7 @@ export const getContextFromPublicState = (
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
   dataSourceSelection:
     publicState.dataSourceSelection != null
-      ? hydrateDataSourceSelection(publicState.dataSourceSelection)
+      ? hydrateDataSourceSelection(publicState.dataSourceSelection, allSelection)
       : DEFAULT_CONTEXT.dataSourceSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
@@ -81,12 +83,12 @@ const getPublicControlsStateFromControlPanels = (
 const getOptionsListPublicControlStateFromControlPanel = (
   optionsListControlPanel: ControlPanels[string]
 ): OptionsListControl => ({
-  mode: optionsListControlPanel.explicitInput.exclude ? 'exclude' : 'include',
-  selection: optionsListControlPanel.explicitInput.existsSelected
+  mode: optionsListControlPanel.exclude ? 'exclude' : 'include',
+  selection: optionsListControlPanel.existsSelected
     ? { type: 'exists' }
     : {
         type: 'options',
-        selectedOptions: optionsListControlPanel.explicitInput.selectedOptions ?? [],
+        selectedOptions: optionsListControlPanel.selectedOptions ?? [],
       },
 });
 
@@ -119,16 +121,13 @@ const getControlPanelFromOptionsListPublicControlState = (
 
   return {
     ...defaultControlPanelConfig,
-    explicitInput: {
-      ...defaultControlPanelConfig.explicitInput,
-      exclude: publicControlState.mode === 'exclude',
-      ...(publicControlState.selection.type === 'exists'
-        ? {
-            existsSelected: true,
-          }
-        : {
-            selectedOptions: publicControlState.selection.selectedOptions,
-          }),
-    },
+    exclude: publicControlState.mode === 'exclude',
+    ...(publicControlState.selection.type === 'exists'
+      ? {
+          existsSelected: true,
+        }
+      : {
+          selectedOptions: publicControlState.selection.selectedOptions,
+        }),
   };
 };

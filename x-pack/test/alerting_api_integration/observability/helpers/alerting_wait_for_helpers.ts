@@ -14,6 +14,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { retry } from '../../common/retry';
 
 const TIMEOUT = 70_000;
@@ -34,7 +35,7 @@ export async function waitForRuleStatus({
   logger: ToolingLog;
 }): Promise<Record<string, any>> {
   const ruleResponse = await retry<Record<string, any>>({
-    test: async () => {
+    testFn: async () => {
       const response = await supertest.get(`/api/alerting/rule/${id}`);
       const { execution_status: executionStatus } = response.body || {};
       const { status } = executionStatus || {};
@@ -63,6 +64,7 @@ export async function waitForDocumentInIndex<T>({
   timeout = TIMEOUT,
   retries = RETRIES,
   retryDelay = RETRY_DELAY,
+  filters,
 }: {
   esClient: Client;
   indexName: string;
@@ -72,13 +74,23 @@ export async function waitForDocumentInIndex<T>({
   timeout?: number;
   retries?: number;
   retryDelay?: number;
+  filters?: QueryDslQueryContainer[];
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
-    test: async () => {
+    testFn: async () => {
       const response = await esClient.search<T>({
         index: indexName,
         rest_total_hits_as_int: true,
         ignore_unavailable: true,
+        body: filters
+          ? {
+              query: {
+                bool: {
+                  filter: filters,
+                },
+              },
+            }
+          : undefined,
       });
       if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
         logger.debug(`Document count is ${response.hits.total}, should be ${docCountTarget}`);
@@ -104,27 +116,38 @@ export async function waitForAlertInIndex<T>({
   ruleId,
   retryService,
   logger,
+  filters = [],
+  retryDelay,
 }: {
   esClient: Client;
   indexName: string;
   ruleId: string;
   retryService: RetryService;
   logger: ToolingLog;
+  filters?: QueryDslQueryContainer[];
+  retryDelay?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
-    test: async () => {
+    testFn: async () => {
       const response = await esClient.search<T>({
         index: indexName,
         body: {
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                ...filters,
+              ],
             },
           },
         },
       });
       if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+        throw new Error(`No hits found for the ruleId: ${ruleId}`);
       }
       return response;
     },
@@ -133,6 +156,6 @@ export async function waitForAlertInIndex<T>({
     retryService,
     timeout: TIMEOUT,
     retries: RETRIES,
-    retryDelay: RETRY_DELAY,
+    retryDelay: retryDelay ?? RETRY_DELAY,
   });
 }

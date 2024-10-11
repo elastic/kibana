@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { arrayOfStringsSchema } from './common';
 
 export const entityBaseSchema = z.object({
@@ -35,7 +35,6 @@ export const entityLatestSchema = z
     entity: entityBaseSchema.merge(
       z.object({
         lastSeenTimestamp: z.string(),
-        firstSeenTimestamp: z.string(),
       })
     ),
   })

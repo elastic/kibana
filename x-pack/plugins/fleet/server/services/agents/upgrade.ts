@@ -46,8 +46,7 @@ export async function sendUpgradeAgentAction({
     );
   }
 
-  const currentNameSpace = getCurrentNamespace(soClient);
-  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+  const currentSpaceId = getCurrentNamespace(soClient);
 
   await createAgentAction(esClient, {
     agents: [agentId],
@@ -55,7 +54,7 @@ export async function sendUpgradeAgentAction({
     data,
     ack_data: data,
     type: 'UPGRADE',
-    ...namespaces,
+    namespaces: [currentSpaceId],
   });
   await updateAgent(esClient, agentId, {
     upgraded_at: null,
@@ -76,7 +75,7 @@ export async function sendUpgradeAgentsActions(
     batchSize?: number;
   }
 ): Promise<{ actionId: string }> {
-  const currentNameSpace = getCurrentNamespace(soClient);
+  const currentSpaceId = getCurrentNamespace(soClient);
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
@@ -96,7 +95,7 @@ export async function sendUpgradeAgentsActions(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
 
     const res = await getAgentsByKuery(esClient, soClient, {
@@ -116,12 +115,12 @@ export async function sendUpgradeAgentsActions(
           ...options,
           batchSize,
           total: res.total,
-          spaceId: currentNameSpace,
+          spaceId: currentSpaceId,
         },
         { pitId: await openPointInTime(esClient) }
       ).runActionAsyncWithRetry();
     }
   }
 
-  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentNameSpace);
+  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
 }

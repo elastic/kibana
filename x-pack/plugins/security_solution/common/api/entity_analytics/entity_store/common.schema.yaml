@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Entity Store Common Schema
+  description: Common schema for Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    EntityType:
+      type: string
+      enum:
+        - user
+        - host
+
+    EngineDescriptor:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/EntityType'
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+        filter:
+          type: string
+
+    EngineStatus:
+      type: string
+      enum:
+        - installing
+        - started
+        - stopped
+
+    IndexPattern:
+      type: string
+
+    InspectQuery:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            type: string
+        dsl:
+          type: array
+          items:
+            type: string
+      required:
+        - dsl
+        - response

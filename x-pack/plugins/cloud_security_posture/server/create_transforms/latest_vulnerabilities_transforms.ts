@@ -7,9 +7,11 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-common';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
 
@@ -28,7 +30,7 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
     index: VULNERABILITIES_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   },
   frequency: '5m',
   sync: {

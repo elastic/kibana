@@ -7,11 +7,9 @@
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
-import { getUiSettings } from './dependency_cache';
-
-export function getTimeBucketsFromCache() {
-  const uiSettings = getUiSettings();
+export function getTimeBucketsFromCache(uiSettings: IUiSettingsClient) {
   return new TimeBuckets({
     [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
     [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),

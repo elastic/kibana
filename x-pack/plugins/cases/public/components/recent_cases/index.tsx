@@ -48,7 +48,7 @@ const RecentCasesComponent = React.memo(({ maxCasesToShow }: RecentCasesProps) =
     useState<RecentCasesFilterMode>('recentlyCreated');
 
   const navigateToAllCasesClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateToAllCases();
     },

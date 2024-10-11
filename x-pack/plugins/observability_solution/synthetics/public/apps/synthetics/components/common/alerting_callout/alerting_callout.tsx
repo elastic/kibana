@@ -111,21 +111,22 @@ const MissingRulesCallout = ({
       color="warning"
       iconType="warning"
     >
-      <p>
-        {configCallout}
-        {rulesCallout}
-      </p>
+      {configCallout}
+      {rulesCallout}
       {missingConfig && (
-        <EuiButton
-          data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
-          href={url}
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.synthetics.alerting.noConnectorsCallout.button"
-            defaultMessage="Configure now"
-          />
-        </EuiButton>
+        <>
+          <EuiSpacer size="m" />
+          <EuiButton
+            data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
+            href={url}
+            color="warning"
+          >
+            <FormattedMessage
+              id="xpack.synthetics.alerting.noConnectorsCallout.button"
+              defaultMessage="Configure now"
+            />
+          </EuiButton>
+        </>
       )}
       <EuiButtonEmpty
         data-test-subj="syntheticsMissingRulesCalloutRemindMeLaterButton"

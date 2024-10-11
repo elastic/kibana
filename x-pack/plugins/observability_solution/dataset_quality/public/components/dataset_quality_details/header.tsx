@@ -18,19 +18,30 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
-import { useDatasetQualityDetailsRedirectLink, useDatasetQualityDetailsState } from '../../hooks';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetDetailsTelemetry,
+  useDatasetQualityDetailsState,
+  useRedirectLink,
+} from '../../hooks';
 import { IntegrationIcon } from '../common';
 
 export function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
+  const { navigationSources } = useDatasetDetailsTelemetry();
+
   const { rawName, name: title } = datasetDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const redirectLinkProps = useDatasetQualityDetailsRedirectLink({
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    navigationSource: navigationSources.Header,
+  });
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
+    sendTelemetry,
   });
 
   const pageTitle = integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? title;
@@ -38,15 +49,15 @@ export function Header() {
   return !loadingState.integrationDetailsLoaded ? (
     <EuiSkeletonTitle
       size="s"
-      data-test-subj="datasetQualityFlyoutIntegrationLoading"
-      className="datasetQualityFlyoutIntegrationLoading"
+      data-test-subj="datasetQualityDetailsIntegrationLoading"
+      className="datasetQualityDetailsIntegrationLoading"
     />
   ) : (
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow>
         <EuiFlexGroup gutterSize="m" alignItems="flexStart" direction="column">
           <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
-            <EuiTitle data-test-subj="datasetQualityFlyoutTitle" size="l">
+            <EuiTitle data-test-subj="datasetQualityDetailsTitle" size="l">
               <h2>{pageTitle}</h2>
             </EuiTitle>
             <div
@@ -74,7 +85,7 @@ export function Header() {
           alignItems="center"
         >
           <EuiButton
-            data-test-subj="datasetQualityHeaderButton"
+            data-test-subj="datasetQualityDetailsHeaderButton"
             size="s"
             {...redirectLinkProps.linkProps}
             iconType={

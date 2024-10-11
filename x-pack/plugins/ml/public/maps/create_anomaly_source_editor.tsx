@@ -13,11 +13,11 @@ import { AnomalyJobSelector } from './anomaly_job_selector';
 import { LayerSelector } from './layer_selector';
 import type { MlAnomalyLayersType } from './util';
 import { ML_ANOMALY_LAYERS } from './util';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
-  mlJobsService: MlApiServices['jobs'];
+  mlJobsService: MlApi['jobs'];
   jobsManagementPath?: string;
   canCreateJobs: boolean;
 }

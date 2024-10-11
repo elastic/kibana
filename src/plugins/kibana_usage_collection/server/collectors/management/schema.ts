@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
@@ -126,6 +127,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableCcsWarning': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableVisualizationsInFlyout': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -483,14 +488,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:aiAssistantLogsIndexPattern': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:aiAssistantResponseLanguage': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:aiAssistantSimulatedFunctionCalling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -512,6 +509,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
     },
+  },
+  'observability:enableLogsStream': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -696,5 +697,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:profilingFetchTopNFunctionsFromStacktraces': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:searchExcludedDataTiers': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'observability:newLogsOverview': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the new logs overview component.',
+    },
   },
 };

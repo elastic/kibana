@@ -45,6 +45,13 @@
     "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
     "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
 
+    "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
+    "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
+    "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",
+    "genai_kb_entries:qa:serverless:release": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaEnv",
+    "genai_kb_entries:server:ess": "npm run initialize-server:genai:trial_complete knowledge_base/entries ess",
+    "genai_kb_entries:runner:ess": "npm run run-tests:genai:trial_complete knowledge_base/entries ess essEnv",
+
     "nlp_cleanup_task:complete:server:serverless": "npm run initialize-server:genai:trial_complete nlp_cleanup_task serverless",
     "nlp_cleanup_task:complete:runner:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless serverlessEnv",
     "nlp_cleanup_task:complete:qa:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless qaPeriodicEnv",
@@ -56,7 +63,7 @@
     "nlp_cleanup_task:essentials:qa:serverless:release": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless qaEnv",
 
     "entity_analytics:server:serverless": "npm run initialize-server:ea:trial_complete risk_engine serverless",
-    "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv",
+    "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv --",
     "entity_analytics:qa:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless qaPeriodicEnv",
     "entity_analytics:qa:serverless:release": "npm run run-tests:ea:trial_complete risk_engine serverless qaEnv",
     "entity_analytics:server:ess": "npm run initialize-server:ea:trial_complete risk_engine ess",
@@ -68,6 +75,13 @@
     "entity_analytics:essentials:qa:serverless:release": "npm run run-tests:ea:basic_essentials risk_engine serverless qaEnv",
     "entity_analytics:essentials:server:ess": "npm run initialize-server:ea:basic_essentials risk_engine ess",
     "entity_analytics:essentials:runner:ess": "npm run run-tests:ea:basic_essentials risk_engine ess essEnv",
+
+    "entity_analytics:entity_store:server:serverless": "npm run initialize-server:ea:trial_complete entity_store serverless",
+    "entity_analytics:entity_store:runner:serverless": "npm run run-tests:ea:trial_complete entity_store serverless serverlessEnv",
+    "entity_analytics:entity_store:qa:serverless": "npm run run-tests:ea:trial_complete entity_store serverless qaPeriodicEnv",
+    "entity_analytics:entity_store:qa:serverless:release": "npm run run-tests:ea:trial_complete entity_store serverless qaEnv",
+    "entity_analytics:entity_store:server:ess": "npm run initialize-server:ea:trial_complete entity_store ess",
+    "entity_analytics:entity_store:runner:ess": "npm run run-tests:ea:trial_complete entity_store ess essEnv --",
 
     "edr_workflows:artifacts:server:serverless": "npm run initialize-server:edr-workflows artifacts serverless",
     "edr_workflows:artifacts:runner:serverless": "npm run run-tests:edr-workflows artifacts serverless serverlessEnv",

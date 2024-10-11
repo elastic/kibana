@@ -52,8 +52,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
         expect(body.sortDirection).to.equal('desc');
       });
 
-      // no sorting indicator is present on the screen
-      cy.get('.euiTableSortIcon').should('not.exist');
+      // no column shows sorting to be on
+      cy.get('.euiTableHeaderButton-isSorted').should('not.exist');
     });
 
     it('User can sort by any field', () => {
@@ -71,12 +71,12 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
         cy.getByTestSubj(`tableHeaderCell_${field}_${i}`).as('header').click();
         validateSortingInResponse(field, 'asc');
         cy.get('@header').should('have.attr', 'aria-sort', 'ascending');
-        cy.get('.euiTableSortIcon').should('exist');
+        cy.get('.euiTableHeaderButton-isSorted').should('exist');
 
         cy.get('@header').click();
         validateSortingInResponse(field, 'desc');
         cy.get('@header').should('have.attr', 'aria-sort', 'descending');
-        cy.get('.euiTableSortIcon').should('exist');
+        cy.get('.euiTableHeaderButton-isSorted').should('exist');
       }
     });
 
