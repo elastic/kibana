@@ -81,7 +81,7 @@ export function TrainedModelsTableProvider(
     /**
      * Maps the vCPU level to the corresponding value in the slider.
      */
-    private readonly vCPULevelValueMap = {
+    public readonly vCPULevelValueMap = {
       low: 0.5,
       medium: 1.5,
       high: 2.5,
