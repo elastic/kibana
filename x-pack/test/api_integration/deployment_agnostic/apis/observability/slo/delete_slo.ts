@@ -24,10 +24,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const dataViewApi = getService('dataViewApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const config = getService('config');
-
-  const isServerless = config.get('serverless');
-  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
   const DATA_VIEW_ID = 'data-view-id';

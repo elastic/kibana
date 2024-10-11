@@ -7,7 +7,7 @@
 
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
@@ -16,25 +16,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const sloApi = getService('sloApi');
   const logger = getService('log');
-  const retry = getService('retry');
   const samlAuth = getService('samlAuth');
   const dataViewApi = getService('dataViewApi');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const config = getService('config');
-
-  const isServerless = config.get('serverless');
-  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
 
   describe('Get SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
