@@ -69,7 +69,7 @@ const getAbleToModifyCase = () => {
     cy.get('div[data-test-subj="comboBoxInput"]').click();
     cy.get(`button[title="${TEST_ENV}"]`).click();
     cy.get('button[data-test-subj="apmAddEnvironmentsCreateJobsButton"]').click();
-    cy.intercept('GET', '/internal/apm/settings/anomaly-detection/jobs').as('internalApiRequest');
+    cy.intercept('GET', '/internal/apm/settings/anomaly-detection/jobs*').as('internalApiRequest');
     cy.wait('@internalApiRequest');
     cy.contains('Anomaly detection jobs created');
   });
