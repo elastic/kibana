@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { AppMenuActionId, AppMenuActionType, AppMenuActionIconOnly } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, AppMenuActionPrimary } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
 
@@ -16,7 +16,7 @@ export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
-}): AppMenuActionIconOnly => {
+}): AppMenuActionPrimary => {
   return {
     id: AppMenuActionId.open,
     type: AppMenuActionType.primary,

@@ -9,26 +9,32 @@
 
 import {
   AppMenuItem,
-  AppMenuAction,
-  AppMenuActionSubmenu,
+  AppMenuItemPrimary,
+  AppMenuItemSecondary,
+  AppMenuItemCustom,
+  AppMenuActionSecondary,
   AppMenuActionId,
   AppMenuActionType,
+  AppMenuActionSubmenuCustom,
+  AppMenuActionSubmenuSecondary,
+  AppMenuActionBase,
+  AppMenuActionSubmenuBase,
 } from './types';
 
 export class AppMenuRegistry {
   private readonly appMenuItems: AppMenuItem[];
 
-  constructor(primaryAndSecondaryActions: AppMenuItem[]) {
+  constructor(primaryAndSecondaryActions: Array<AppMenuItemPrimary | AppMenuItemSecondary>) {
     this.appMenuItems = assignOrderToActions(primaryAndSecondaryActions);
   }
 
-  public registerCustomAction(appMenuItem: AppMenuAction | AppMenuActionSubmenu) {
+  public registerCustomAction(appMenuItem: AppMenuItemCustom) {
     this.appMenuItems.push(appMenuItem);
   }
 
-  public registerCustomActionUnderAlerts(appMenuItem: AppMenuAction) {
+  public registerCustomActionUnderAlerts(appMenuItem: AppMenuActionSecondary) {
     const alertsMenuItem = this.appMenuItems.find((item) => item.id === AppMenuActionId.alerts);
-    if (alertsMenuItem && isAppMenuActionSubmenu(alertsMenuItem)) {
+    if (alertsMenuItem && isAppMenuActionSubmenuSecondary(alertsMenuItem)) {
       alertsMenuItem.actions.push(appMenuItem);
     }
   }
@@ -48,28 +54,59 @@ export class AppMenuRegistry {
   }
 }
 
-function isAppMenuActionSubmenu(appMenuItem: AppMenuItem): appMenuItem is AppMenuActionSubmenu {
-  return 'actions' in appMenuItem;
+function isAppMenuActionSubmenu(
+  appMenuItem: AppMenuItem
+): appMenuItem is AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom {
+  return 'actions' in appMenuItem && Array.isArray(appMenuItem.actions);
+}
+
+function isAppMenuActionSubmenuSecondary(
+  appMenuItem: AppMenuItem
+): appMenuItem is AppMenuActionSubmenuSecondary {
+  return isAppMenuActionSubmenu(appMenuItem) && appMenuItem.type === AppMenuActionType.secondary;
 }
 
 const FALLBACK_ORDER = Number.MAX_SAFE_INTEGER;
 
-function sortByOrder(a: AppMenuItem, b: AppMenuItem): number {
+function sortByOrder<T extends AppMenuActionBase>(a: T, b: T): number {
   return (a.order ?? FALLBACK_ORDER) - (b.order ?? FALLBACK_ORDER);
+}
+
+function getAppMenuSubmenuWithSortedItemsByOrder<
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+>(appMenuItem: T): T {
+  return {
+    ...appMenuItem,
+    actions: [...appMenuItem.actions].sort(sortByOrder),
+  };
 }
 
 function sortAppMenuItemsByOrder(appMenuItems: AppMenuItem[]): AppMenuItem[] {
   const sortedAppMenuItems = [...appMenuItems].sort(sortByOrder);
   return sortedAppMenuItems.map((appMenuItem) => {
     if (isAppMenuActionSubmenu(appMenuItem)) {
-      const popoverWithSortedActions: AppMenuActionSubmenu = {
-        ...appMenuItem,
-        actions: [...appMenuItem.actions].sort(sortByOrder),
-      };
-      return popoverWithSortedActions;
+      return getAppMenuSubmenuWithSortedItemsByOrder(appMenuItem);
     }
     return appMenuItem;
   });
+}
+
+function getAppMenuSubmenuWithAssignedOrder<
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+>(appMenuItem: T, order: number): T {
+  let orderInSubmenu = 0;
+  const actionsWithOrder = appMenuItem.actions.map((action) => {
+    orderInSubmenu = orderInSubmenu + 100;
+    return {
+      ...action,
+      order: action.order ?? orderInSubmenu,
+    };
+  });
+  return {
+    ...appMenuItem,
+    order: appMenuItem.order ?? order,
+    actions: actionsWithOrder,
+  };
 }
 
 /**
@@ -82,19 +119,7 @@ function assignOrderToActions(appMenuItems: AppMenuItem[]): AppMenuItem[] {
   return appMenuItems.map((appMenuItem) => {
     order = order + 100;
     if (isAppMenuActionSubmenu(appMenuItem)) {
-      let orderInPopover = 0;
-      const actionsWithOrder = appMenuItem.actions.map((action) => {
-        orderInPopover = orderInPopover + 100;
-        return {
-          ...action,
-          order: action.order ?? orderInPopover,
-        };
-      });
-      return {
-        ...appMenuItem,
-        order: appMenuItem.order ?? order,
-        actions: actionsWithOrder,
-      };
+      return getAppMenuSubmenuWithAssignedOrder(appMenuItem, order);
     }
     return {
       ...appMenuItem,

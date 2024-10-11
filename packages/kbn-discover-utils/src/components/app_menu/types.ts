@@ -41,23 +41,31 @@ export enum AppMenuActionType {
   custom = 'custom',
 }
 
-interface AppMenuActionBase {
+export interface AppMenuActionBase {
   readonly id: AppMenuActionId | string;
-  readonly order?: number;
+  readonly order?: number | undefined;
 }
 
 /**
- * A normal menu action
+ * A secondary menu action
  */
-export interface AppMenuAction extends AppMenuActionBase {
-  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
+export interface AppMenuActionSecondary extends AppMenuActionBase {
+  readonly type: AppMenuActionType.secondary;
   readonly controlProps: AppMenuControlProps;
 }
 
 /**
- * A menu action with icon only
+ * A custom menu action
  */
-export interface AppMenuActionIconOnly extends AppMenuActionBase {
+export interface AppMenuActionCustom extends AppMenuActionBase {
+  readonly type: AppMenuActionType.custom;
+  readonly controlProps: AppMenuControlProps;
+}
+
+/**
+ * A primary menu action (with icon only)
+ */
+export interface AppMenuActionPrimary extends AppMenuActionBase {
   readonly type: AppMenuActionType.primary;
   readonly controlProps: AppMenuControlIconOnlyProps;
 }
@@ -65,12 +73,39 @@ export interface AppMenuActionIconOnly extends AppMenuActionBase {
 /**
  * A menu action which opens a submenu with more actions
  */
-export interface AppMenuActionSubmenu extends AppMenuActionBase {
+export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuActionCustom>
+  extends AppMenuActionBase {
+  readonly type: T extends AppMenuActionSecondary
+    ? AppMenuActionType.secondary
+    : AppMenuActionType.custom;
   readonly label: TopNavMenuData['label'];
   readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
-  readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
-  readonly actions: AppMenuAction[];
+  readonly actions: T[];
 }
 
-export type AppMenuItem = AppMenuActionSubmenu | AppMenuAction | AppMenuActionIconOnly;
+/**
+ * A menu action which opens a submenu with more secondary actions
+ */
+export type AppMenuActionSubmenuSecondary = AppMenuActionSubmenuBase<AppMenuActionSecondary>;
+/**
+ * A menu action which opens a submenu with more custom actions
+ */
+export type AppMenuActionSubmenuCustom = AppMenuActionSubmenuBase<AppMenuActionCustom>;
+
+/**
+ * A primary menu item can only have an icon
+ */
+export type AppMenuItemPrimary = AppMenuActionPrimary;
+/**
+ * A secondary menu item can have only a label or a submenu
+ */
+export type AppMenuItemSecondary = AppMenuActionSecondary | AppMenuActionSubmenuSecondary;
+/**
+ * A custom menu item can have only a label or a submenu
+ */
+export type AppMenuItemCustom = AppMenuActionCustom | AppMenuActionSubmenuCustom;
+/**
+ * A menu item can be primary, secondary or custom
+ */
+export type AppMenuItem = AppMenuItemPrimary | AppMenuItemSecondary | AppMenuItemCustom;
