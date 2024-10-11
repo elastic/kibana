@@ -63,7 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response).property('id');
       const id = response.id;
 
-      await sloApi.delete({ id, roleAuthc: adminRoleAuthc });
+      await sloApi.delete(id, adminRoleAuthc);
 
       // Expect no definitions exists
       const definitions = await sloApi.findDefinitions(adminRoleAuthc);

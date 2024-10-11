@@ -8,7 +8,7 @@
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { getSLOPipelineId } from '@kbn/slo-plugin/common/constants';
+import { SLO_MODEL_VERSION, getSLOPipelineId } from '@kbn/slo-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
@@ -65,7 +65,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // reset
-      await sloApi.reset(sloId, adminRoleAuthc);
+      const resetResponse = await sloApi.reset(sloId, adminRoleAuthc);
+      expect(resetResponse).property('version', SLO_MODEL_VERSION);
+      expect(resetResponse).property('revision', 1);
 
       // assert the pipeline is re-created
       await retry.tryForTime(60 * 1000, async () => {

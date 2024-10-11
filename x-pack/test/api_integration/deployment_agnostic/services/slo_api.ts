@@ -35,7 +35,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .post(`/api/observability/slos`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(slo);
+        .send(slo)
+        .expect(200);
       return body;
     },
 
@@ -44,7 +45,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .post(`/api/observability/slos/${id}/_reset`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send();
+        .send()
+        .expect(200);
 
       return body;
     },
@@ -57,18 +59,30 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .put(`/api/observability/slos/${sloId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(slo);
+        .send(slo)
+        .expect(200);
 
       return body;
     },
 
-    async delete({ id, roleAuthc }: SloRequestParams) {
-      const response = await supertestWithoutAuth
+    async delete(id: string, roleAuthc: RoleCredentials) {
+      return await supertestWithoutAuth
         .delete(`/api/observability/slos/${id}`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
+    },
 
-      return response;
+    async get(id: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
     },
 
     async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {

@@ -61,10 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const sloId1 = createResponse1.id;
 
       // get the slo by ID
-      const getSloResponse = await sloApi.waitForSloCreated({
-        id: sloId1,
-        roleAuthc: adminRoleAuthc,
-      });
+      const getSloResponse = await sloApi.get(sloId1, adminRoleAuthc);
       // We cannot assert on the summary values itself - it would make the test too flaky
       // But we can assert on the existence of these fields at least.
       // On top of whatever the SLO definition contains.
