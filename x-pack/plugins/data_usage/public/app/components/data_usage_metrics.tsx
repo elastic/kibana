@@ -14,7 +14,6 @@ import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import { MetricsResponse } from '../types';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { UsageMetricsRequestSchemaQueryParams } from '../../../common/rest_types';
 import { ChartFilters } from './filters/charts_filters';
@@ -134,7 +133,7 @@ export const DataUsageMetrics = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem css={EuiItemCss}>
-        {isFetched && data ? <Charts data={data as MetricsResponse} /> : <EuiLoadingElastic />}
+        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
