@@ -262,7 +262,7 @@ export const SearchIndexDetailsPage = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
-                  <QuickStats index={index} mappings={mappings} />
+                  <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>

@@ -22,10 +22,12 @@ import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 import { useKibana } from '../../hooks/use_kibana';
+import { IndexDocuments } from '../../hooks/api/use_document_search';
 
 export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
+  indexDocuments: IndexDocuments;
 }
 
 export const SetupAISearchButton: React.FC = () => {
@@ -60,12 +62,13 @@ export const SetupAISearchButton: React.FC = () => {
   );
 };
 
-export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
+export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDocuments }) => {
   const [open, setOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
+  console.log(indexDocuments);
 
   return (
     <EuiPanel
