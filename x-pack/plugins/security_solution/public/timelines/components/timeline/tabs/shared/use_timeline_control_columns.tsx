@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
@@ -21,6 +21,7 @@ import { TimelineControlColumnCellRender } from '../../unified_components/data_t
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { useTimelineColumns } from './use_timeline_columns';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
+import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
 
 interface UseTimelineControlColumnArgs {
   columns: ColumnHeaderOptions[];
@@ -84,9 +85,20 @@ export const useTimelineControlColumn = ({
             />
           );
         },
-        rowCellRender: (
+        rowCellRender: React.memo(function TimelineControlColumnCellRenderer(
           props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
-        ) => {
+        ) {
+          const ctx = useTimelineUnifiedDataTableContext();
+
+          useEffect(() => {
+            props.setCellProps({
+              className:
+                ctx.expanded?.id === events[props.rowIndex]?._id
+                  ? 'unifiedDataTable__cell--expanded'
+                  : '',
+            });
+          });
+
           /*
            * In some cases, when number of events is updated
            * but new table is not yet rendered it can result
@@ -95,13 +107,6 @@ export const useTimelineControlColumn = ({
            *
            * */
           if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
-          props.setCellProps({
-            className:
-              props.expandedEventId === events[props.rowIndex]?._id
-                ? 'unifiedDataTable__cell--expanded'
-                : '',
-          });
-
           return (
             <TimelineControlColumnCellRender
               rowIndex={props.rowIndex}
@@ -126,7 +131,7 @@ export const useTimelineControlColumn = ({
               toggleShowNotes={onToggleShowNotes}
             />
           );
-        },
+        }),
       }));
     } else {
       return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({

@@ -49,8 +49,6 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
   }) {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
-    const eventDetailRowRef = useRef<HTMLDivElement | null>(null);
-
     /*
      * Ideally, unified data table could have handled the styling of trailing columns when a row is expanded.
      * But, a trailing column can have arbitrary design and that is why it is best for consumer to handle the styling
@@ -74,7 +72,7 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
         alignItems="center"
         data-test-subj={`timeline-row-renderer-${rowIndex}`}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EventsTrSupplement>
             <StatefulRowRenderer
               ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}

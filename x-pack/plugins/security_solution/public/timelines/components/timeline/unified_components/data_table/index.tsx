@@ -43,7 +43,6 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import type { UnifiedTimelineDataGridCellContext } from '../../types';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -303,9 +302,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
           footerCellProps: { style: { display: 'none' } },
 
-          // When rendering this custom cell, we'll want to override
-          // the automatic width/heights calculated by EuiDataGrid
-          rowCellRender: (props) => {
+          rowCellRender: React.memo(function TimelineEventDetailRowRenderer(props) {
             const { rowIndex, ...restProps } = props;
             return (
               <TimelineEventDetailRow
@@ -316,7 +313,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 {...restProps}
               />
             );
-          },
+          }),
         },
       ],
       [enabledRowRenderers, tableRows, timelineId]
@@ -351,12 +348,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       ),
       [tableRows, enabledRowRenderers, rowHeight, refetch]
     );
-
-    const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {
-      return {
-        expandedEventId: expandedDoc?.id,
-      };
-    }, [expandedDoc]);
 
     const finalRenderCustomBodyCallback = useMemo(() => {
       return enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined;
@@ -419,7 +410,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
-            cellContext={cellContext}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>
