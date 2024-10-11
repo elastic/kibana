@@ -19,13 +19,12 @@ const metricsSchema = z.object({
 
 const entitySchema = z.object({
   id: z.string(),
-  definitionId: z.string(),
-  definitionVersion: z.string(),
-  displayName: z.string(),
-  firstSeenTimestamp: z.string(),
-  lastSeenTimestamp: z.string(),
-  identityFields: z.array(z.string()),
-  schemaVersion: z.string(),
+  definition_id: z.string(),
+  definition_version: z.string(),
+  display_name: z.string(),
+  last_seen_timestamp: z.string(),
+  identity_fields: z.array(z.string()),
+  schema_version: z.string(),
   type: z.string(),
   metrics: metricsSchema,
 });

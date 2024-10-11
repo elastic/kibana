@@ -58,14 +58,14 @@ export async function getEntitiesWithSource({
         const sources = await fetchSources(indices);
 
         return {
-          identityFields: entity?.entity.identity_fields,
+          identity_fields: entity?.entity.identity_fields,
           id: entity?.entity.id,
-          definitionId: entity?.entity.definition_id,
-          lastSeenTimestamp: entity?.entity.last_seen_timestamp,
-          displayName: entity?.entity.display_name,
+          definition_id: entity?.entity.definition_id,
+          last_seen_timestamp: entity?.entity.last_seen_timestamp,
+          display_name: entity?.entity.display_name,
           metrics: entity?.entity.metrics,
-          schemaVersion: entity?.entity.schema_version,
-          definitionVersion: entity?.entity.definition_version,
+          schema_version: entity?.entity.schema_version,
+          definition_version: entity?.entity.definition_version,
           type: entity?.entity.type,
           sources,
         };
@@ -104,7 +104,7 @@ const getFetchEntitiesPromises = ({
   hostName?: string;
   containerId?: string;
   serviceEnvironment?: string;
-}): Array<Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>>> => {
+}): Array<Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>>> => {
   const shouldFilterForServiceEnvironment =
     serviceEnvironment &&
     serviceName &&
@@ -139,7 +139,7 @@ const getFetchEntitiesPromises = ({
 
   return [containersPromise, hostsPromise, servicesPromise].filter(
     (promise) => promise !== null
-  ) as Array<Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>>>;
+  ) as Array<Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>>>;
 };
 
 const getFetchEntityPromise = ({
@@ -152,10 +152,10 @@ const getFetchEntityPromise = ({
   shouldFetch: boolean;
   shouldMatch: QueryDslQueryContainer[];
   entitiesEsClient: EntitiesESClient;
-}): Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>> | null => {
+}): Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>> | null => {
   return shouldFetch
     ? entitiesEsClient
-        .search<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>(index, {
+        .search<{ source_index: string[]; entity: EntitiesLatest['entity'] }>(index, {
           body: {
             query: {
               bool: {
@@ -167,7 +167,7 @@ const getFetchEntityPromise = ({
         })
         .then((response) => {
           return response.hits.hits.map((hit) => {
-            return { sourceIndex: hit?._source.sourceIndex, entity: hit._source.entity };
+            return { source_index: hit?._source.source_index, entity: hit._source.entity };
           });
         })
     : null;
