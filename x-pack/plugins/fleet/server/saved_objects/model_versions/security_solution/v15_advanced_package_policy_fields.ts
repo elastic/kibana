@@ -30,24 +30,24 @@ export const packagePolicyV15AdvancedFieldsForEndpointV816: SavedObjectModelData
     policy.windows.advanced = {
       ...policy.windows.advanced,
       events: {
-        ...policy.windows.advanced?.events,
         aggregate_process: false,
+        ...policy.windows.advanced?.events,
       },
     };
 
     policy.mac.advanced = {
       ...policy.mac.advanced,
       events: {
-        ...policy.mac.advanced?.events,
         aggregate_process: false,
+        ...policy.mac.advanced?.events,
       },
     };
 
     policy.linux.advanced = {
       ...policy.linux.advanced,
       events: {
-        ...policy.linux.advanced?.events,
         aggregate_process: false,
+        ...policy.linux.advanced?.events,
       },
     };
   }

@@ -117,6 +117,23 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
         expect(migratedPolicyConfig.mac.advanced.events.cheese).toBe('maasdam');
         expect(migratedPolicyConfig.linux.advanced.events.cheese).toBe('camambert');
       });
+
+      it('should not backfill if field is already present', () => {
+        const policyConfig = getConfig(policyConfigSO);
+        policyConfig.windows.advanced = { events: { aggregate_process: true } };
+        policyConfig.mac.advanced = { events: { aggregate_process: true } };
+        policyConfig.linux.advanced = { events: { aggregate_process: true } };
+
+        const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+          document: policyConfigSO,
+          fromVersion: 14,
+          toVersion: 15,
+        });
+
+        const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
+
+        expectConfigToHave(migratedPolicyConfig, 'advanced.events.aggregate_process', true);
+      });
     });
   });
 
