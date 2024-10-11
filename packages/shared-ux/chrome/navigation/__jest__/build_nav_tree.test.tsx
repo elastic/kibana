@@ -114,7 +114,7 @@ describe('builds navigation tree', () => {
 
       const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
       accordionToggleButton.click();
-      expect(navigateToUrl).not.toHaveBeenCalled();
+      expect(navigateToUrl).not.toHaveBeenCalled(); // Should not navigate to the href
       unmount();
     }
 
@@ -135,6 +135,58 @@ describe('builds navigation tree', () => {
       accordionToggleButton.click();
 
       expect(navigateToUrl).toHaveBeenCalledWith('/app/foo'); // Should navigate to the href
+    }
+  });
+
+  test('should render panel opener groups as accordion when the sideNav is collapsed', async () => {
+    const accordionNode: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      children: [
+        {
+          id: 'nestedGroup1',
+          title: 'Nested Group 1',
+          path: 'group1.nestedGroup1',
+          renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              href: 'https://foo',
+              path: 'group1.item1',
+            },
+          ],
+        },
+      ],
+    };
+
+    {
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [accordionNode],
+        }),
+        services: { isSideNavCollapsed: true },
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']); // 2 accordion buttons
+
+      unmount();
+    }
+
+    {
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [accordionNode],
+        }),
+        services: { isSideNavCollapsed: false }, // No conversion to accordion
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // 1 accordion button
+      unmount();
     }
   });
 

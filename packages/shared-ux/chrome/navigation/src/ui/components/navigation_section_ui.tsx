@@ -116,7 +116,6 @@ const serializeNavNode = (
 ) => {
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
-    children: navNode.children?.filter(itemIsVisible),
   };
 
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
@@ -125,12 +124,15 @@ const serializeNavNode = (
     treeDepth,
     parentNode,
   });
+  serialized.children = navNode.children?.filter(itemIsVisible).map((child) =>
+    serializeNavNode(child, {
+      isSideNavCollapsed,
+      treeDepth: treeDepth + 1,
+      parentNode: serialized,
+    })
+  );
 
-  return {
-    navNode: serialized,
-    hasLink: nodeHasLink(serialized),
-    isItem: serialized.renderAs === 'item',
-  };
+  return serialized;
 };
 
 const isEuiCollapsibleNavItemProps = (
@@ -220,7 +222,7 @@ const renderPanelOpener = (
 };
 
 const getEuiProps = (
-  _navNode: ChromeProjectNavigationNode,
+  navNode: ChromeProjectNavigationNode,
   deps: {
     navigateToUrl: NavigateToUrlFn;
     closePanel: PanelContext['close'];
@@ -229,8 +231,6 @@ const getEuiProps = (
     activeNodes: ChromeProjectNavigationNode[][];
     eventTracker: EventTracker;
     basePath: BasePathService;
-    isSideNavCollapsed: boolean;
-    parentNode?: ChromeProjectNavigationNode;
   }
 ): {
   navNode: ChromeProjectNavigationNode;
@@ -247,14 +247,9 @@ const getEuiProps = (
     activeNodes,
     eventTracker,
     basePath,
-    isSideNavCollapsed,
-    parentNode,
   } = deps;
-  const { navNode, isItem, hasLink } = serializeNavNode(_navNode, {
-    isSideNavCollapsed,
-    treeDepth,
-    parentNode,
-  });
+  const hasLink = nodeHasLink(navNode);
+  const isItem = navNode.renderAs === 'item';
   const { path, href, onClick: customOnClick, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
 
   const isAccordion = isAccordionNode(navNode);
@@ -282,7 +277,6 @@ const getEuiProps = (
           nodeToEuiCollapsibleNavProps(child, {
             ...deps,
             treeDepth: treeDepth + 1,
-            parentNode: navNode,
           })
         )
         .filter(({ isVisible }) => isVisible)
@@ -368,8 +362,6 @@ function nodeToEuiCollapsibleNavProps(
     activeNodes: ChromeProjectNavigationNode[][];
     eventTracker: EventTracker;
     basePath: BasePathService;
-    isSideNavCollapsed: boolean;
-    parentNode?: ChromeProjectNavigationNode;
   }
 ): {
   items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
@@ -451,7 +443,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   const { navigateToUrl, eventTracker, basePath, isSideNavCollapsed } = useServices();
   const [items, setItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
 
-  const { navNode } = useMemo(
+  const navNode = useMemo(
     () =>
       serializeNavNode(
         {
@@ -478,18 +470,8 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       activeNodes,
       eventTracker,
       basePath,
-      isSideNavCollapsed,
     });
-  }, [
-    navNode,
-    navigateToUrl,
-    closePanel,
-    getIsCollapsed,
-    activeNodes,
-    eventTracker,
-    basePath,
-    isSideNavCollapsed,
-  ]);
+  }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes, eventTracker, basePath]);
 
   const { items: topLevelItems } = props;
 
