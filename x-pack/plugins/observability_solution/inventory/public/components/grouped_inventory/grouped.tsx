@@ -30,7 +30,7 @@ export function GroupedInventoryPage() {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { groupSortField, pageIndex, kuery, entityTypes, groupSortDirection } = query;
+  const { pageIndex, kuery, entityTypes } = query;
   const { euiTheme } = useEuiTheme();
 
   const inventoryRoute = useInventoryRouter();
@@ -47,15 +47,13 @@ export function GroupedInventoryPage() {
             field: 'entity.type',
           },
           query: {
-            groupSortField,
-            groupSortDirection,
             kuery,
           },
         },
         signal,
       });
     },
-    [entityTypes, inventoryAPIClient, kuery, groupSortDirection, groupSortField]
+    [entityTypes, inventoryAPIClient, kuery]
   );
 
   const totalEntities = value.groups.reduce((acc, group) => acc + group.count, 0);
