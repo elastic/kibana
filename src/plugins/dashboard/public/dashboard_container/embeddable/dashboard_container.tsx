@@ -887,7 +887,7 @@ export class DashboardContainer
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
-            panels: [],
+            controls: [],
             ignoreParentSettings: {
               ignoreFilters: false,
               ignoreQuery: false,

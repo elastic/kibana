@@ -20,11 +20,11 @@ import { parseReferenceName } from '../../controls/data_controls/reference_name_
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
-  const { panels } = state.rawState;
+  const { controls } = state.rawState;
 
-  const panelsMap: ControlPanelsState = {};
-  panels.forEach(({ id, ...rest }) => {
-    panelsMap![id] = rest;
+  const controlsMap: ControlPanelsState = {};
+  controls.forEach(({ id, ...rest }) => {
+    controlsMap![id] = rest;
   });
 
   /** Inject data view references into each individual control */
@@ -32,24 +32,24 @@ export const deserializeControlGroup = (
   references.forEach((reference) => {
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
-    if (panelsMap[controlId]) {
-      panelsMap[controlId].dataViewId = reference.id;
+    if (controlsMap[controlId]) {
+      controlsMap[controlId].dataViewId = reference.id;
     }
   });
 
-  /** Flatten the state of each panel by removing `embeddableConfig` */
-  const flattenedPanels = Object.keys(panelsMap).reduce((prev, panelId) => {
-    const currentPanel = panelsMap[panelId];
-    const currentPanelExplicitInput = panelsMap[panelId].embeddableConfig;
+  /** Flatten the state of each control by removing `controlConfig` */
+  const flattenedControls = Object.keys(controlsMap).reduce((prev, controlId) => {
+    const currentControl = controlsMap[controlId];
+    const currentControlExplicitInput = controlsMap[controlId].controlConfig;
     return {
       ...prev,
-      [panelId]: { ...omit(currentPanel, 'embeddableConfig'), ...currentPanelExplicitInput },
+      [controlId]: { ...omit(currentControl, 'controlConfig'), ...currentControlExplicitInput },
     };
   }, {});
 
   return {
     ...omit(state.rawState, ['controlStyle', 'showApplySelections']),
-    initialChildControlState: flattenedPanels,
+    initialChildControlState: flattenedControls,
     autoApplySelections:
       typeof state.rawState.showApplySelections === 'boolean'
         ? !state.rawState.showApplySelections

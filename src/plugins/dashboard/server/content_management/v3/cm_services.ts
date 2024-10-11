@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
@@ -41,11 +42,15 @@ const apiError = schema.object({
 });
 
 export const controlGroupInputSchema = schema.object({
-  panels: schema.arrayOf(
+  controls: schema.arrayOf(
     schema.object(
       {
         type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-        embeddableConfig: schema.recordOf(schema.string(), schema.any()),
+        controlConfig: schema.recordOf(schema.string(), schema.any()),
+        id: schema.string({
+          defaultValue: uuidv4(),
+          meta: { description: 'The unique ID of the control.' },
+        }),
         order: schema.number({
           meta: {
             description: 'The order of the control panel in the control group.',
@@ -246,7 +251,7 @@ export const gridDataSchema = schema.object({
 });
 
 export const panelSchema = schema.object({
-  embeddableConfig: schema.object(
+  panelConfig: schema.object(
     {
       version: schema.maybe(
         schema.string({
@@ -257,10 +262,6 @@ export const panelSchema = schema.object({
       description: schema.maybe(
         schema.string({ meta: { description: 'The description of the panel' } })
       ),
-      // id: schema.string({
-      //   defaultValue: uuidv4(),
-      //   meta: { description: 'The id of the panel' },
-      // }),
       savedObjectId: schema.maybe(
         schema.string({
           meta: { description: 'The unique id of the library item to construct the embeddable.' },
@@ -294,7 +295,7 @@ export const panelSchema = schema.object({
     schema.string({
       meta: {
         description:
-          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (embeddableConfig in this type).",
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
         deprecated: true,
       },
     })

@@ -187,14 +187,14 @@ export const getControlGroupEmbeddableFactory = () => {
           });
         },
         serializeState: () => {
-          const { panels, references } = controlsManager.serializeControls();
+          const { controls, references } = controlsManager.serializeControls();
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
               controlStyle: labelPosition$.getValue(),
               showApplySelections: !autoApplySelections$.getValue(),
               ignoreParentSettings: ignoreParentSettings$.getValue(),
-              panels,
+              controls,
             },
             references,
           };

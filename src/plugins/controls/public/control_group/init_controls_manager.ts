@@ -148,7 +148,7 @@ export function initControlsManager(
     serializeControls: () => {
       const references: Reference[] = [];
 
-      const panels: Array<ControlPanelState & { embeddableConfig: object }> = [];
+      const controls: Array<ControlPanelState & { controlConfig: object }> = [];
 
       controlsInOrder$.getValue().forEach(({ id }, index) => {
         const controlApi = getControlApi(id);
@@ -165,19 +165,18 @@ export function initControlsManager(
           references.push(...controlReferences);
         }
 
-        panels.push({
-          id,
+        controls.push({
           grow,
           order: index,
           type: controlApi.type,
           width,
-          /** Re-add the `embeddableConfig` layer on serialize so control group saved object retains shape */
-          embeddableConfig: { id, ...rest },
+          /** Re-add the `controlConfig` layer on serialize so control group saved object retains shape */
+          controlConfig: { id, ...rest },
         });
       });
 
       return {
-        panels,
+        controls,
         references,
       };
     },
