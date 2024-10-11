@@ -8,7 +8,6 @@
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { castArray } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import {
@@ -142,11 +141,10 @@ export async function getMobileCrashGroupMainStatistics({
         ...event,
         error: {
           ...(event.error ?? {}),
-          exception: castArray(
-            errorSource?.error.exception && errorSource?.error.exception?.length > 1
+          exception:
+            (errorSource?.error.exception?.length ?? 0) > 1
               ? errorSource?.error.exception
-              : event?.error.exception
-          ),
+              : event?.error.exception && [event.error.exception],
         },
       };
 
@@ -156,8 +154,8 @@ export async function getMobileCrashGroupMainStatistics({
         lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
         occurrences: bucket.doc_count,
         culprit: mergedEvent.error.culprit,
-        handled: mergedEvent.error.exception[0].handled,
-        type: mergedEvent.error.exception[0].type,
+        handled: mergedEvent.error.exception?.[0].handled,
+        type: mergedEvent.error.exception?.[0].type,
       };
     }) ?? []
   );

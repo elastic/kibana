@@ -8,7 +8,6 @@
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { castArray } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -180,11 +179,10 @@ export async function getErrorGroupMainStatistics({
         ...event,
         error: {
           ...(event.error ?? {}),
-          exception: castArray(
-            errorSource?.error.exception && errorSource?.error.exception?.length > 1
+          exception:
+            (errorSource?.error.exception?.length ?? 0) > 1
               ? errorSource?.error.exception
-              : event?.error.exception
-          ),
+              : event?.error.exception && [event.error.exception],
         },
       };
 
@@ -194,8 +192,8 @@ export async function getErrorGroupMainStatistics({
         lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
         occurrences: bucket.doc_count,
         culprit: mergedEvent.error.culprit,
-        handled: mergedEvent.error.exception[0].handled,
-        type: mergedEvent.error.exception[0].type,
+        handled: mergedEvent.error.exception?.[0].handled,
+        type: mergedEvent.error.exception?.[0].type,
         traceId: mergedEvent.trace?.id,
       };
     }) ?? [];

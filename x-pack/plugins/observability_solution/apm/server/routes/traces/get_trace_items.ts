@@ -10,7 +10,7 @@ import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { castArray, last, omit } from 'lodash';
+import { last, omit } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMConfig } from '../..';
@@ -161,11 +161,10 @@ export async function getTraceItems({
       ...event,
       error: {
         ...(event.error ?? {}),
-        exception: castArray(
-          errorSource?.error.exception && errorSource?.error.exception?.length > 1
+        exception:
+          (errorSource?.error.exception?.length ?? 0) > 1
             ? errorSource?.error.exception
-            : event?.error.exception
-        ),
+            : event?.error.exception && [event.error.exception],
         log: errorSource?.error.log,
       },
     };
