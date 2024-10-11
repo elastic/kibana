@@ -114,6 +114,7 @@ export function GroupedInventoryPage() {
           grow={false}
           css={css`
             font-weight: ${euiTheme.font.weight.bold};
+            color: ${euiTheme.colors.subduedText};
           `}
         >
           <FormattedMessage
@@ -126,6 +127,7 @@ export function GroupedInventoryPage() {
           grow={false}
           css={css`
             font-weight: ${euiTheme.font.weight.bold};
+            color: ${euiTheme.colors.subduedText};
           `}
         >
           <FormattedMessage
