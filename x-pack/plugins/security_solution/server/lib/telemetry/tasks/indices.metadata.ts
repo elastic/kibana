@@ -12,6 +12,7 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { getPreviousDailyTaskTimestamp, newTelemetryLogger } from '../helpers';
 import {
+  TELEMETRY_CLUSTER_STATS_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
@@ -50,54 +51,53 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       };
 
       try {
-        // 1. Get all data streams
-        const dataStreams = (await receiver.getDataStreams()).slice(
-          0,
-          taskConfig.datastreams_threshold
-        );
-
-        // and calculate index and ilm names
-        const dsNames = dataStreams.map((stream) => stream.datastream_name);
-        const ilmsNames = dataStreams
-          .map((ds) =>
-            ds.indices?.filter((i) => i.ilm_policy !== undefined)?.map((i) => i.ilm_policy)
-          )
-          .flat()
-          .slice(0, taskConfig.indices_threshold) as string[];
-        const indexNames = dataStreams
-          .map((ds) => ds.indices?.map((i) => i.index_name) ?? [])
-          .flat();
-
-        log.info(`Got data streams`, {
-          datastreams: dsNames.length,
-          ilms: ilmsNames.length,
-          indices: indexNames.length,
-        } as LogMeta);
-
         let policyCount = 0;
         let indicesCount = 0;
         let ilmsCount = 0;
         let dsCount = 0;
 
-        for await (const stat of receiver.getIndicesStats(dsNames, queryConfig)) {
-          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
-          indicesCount++;
-        }
-        log.info(`Sent ${indicesCount} indices stats`, { indicesCount } as LogMeta);
+        // 1. Get cluster stats and list of indices and datastreams
+        const [clusterStats, indices, dataStreams] = await Promise.all([
+          receiver.getClusterStats(),
+          receiver.getIndices(),
+          receiver.getDataStreams(),
+        ]);
 
-        for await (const stat of receiver.getIlmsStats(indexNames, queryConfig)) {
-          sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
-          ilmsCount++;
-        }
-        log.info(`Sent ${ilmsCount} ILM stats`, { ilmsCount } as LogMeta);
+        sender.reportEBT(TELEMETRY_CLUSTER_STATS_EVENT.eventType, clusterStats);
 
-        for (const ds of dataStreams) {
+        // 2. Publish datastreams stats
+        for (const ds of dataStreams.slice(0, taskConfig.datastreams_threshold)) {
           sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
           dsCount++;
         }
         log.info(`Sent ${dsCount} data streams`, { dsCount } as LogMeta);
 
-        for await (const policy of receiver.getIlmsPolicies(ilmsNames, queryConfig)) {
+        // 3. Get and publish indices stats
+        for await (const stat of receiver.getIndicesStats(
+          indices.slice(0, taskConfig.indices_threshold),
+          queryConfig
+        )) {
+          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
+          indicesCount++;
+        }
+        log.info(`Sent ${indicesCount} indices stats`, { indicesCount } as LogMeta);
+
+        // 4. Get ILM stats and publish them
+        const ilmNames = new Set<string>();
+        for await (const stat of receiver.getIlmsStats(indices, queryConfig)) {
+          if (stat.policy_name !== undefined) {
+            ilmNames.add(stat.policy_name);
+            sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
+            ilmsCount++;
+          }
+        }
+        log.info(`Sent ${ilmsCount} ILM stats`, { ilmsCount } as LogMeta);
+
+        // 5. Publish ILM policies
+        for await (const policy of receiver.getIlmsPolicies(
+          Array.from(ilmNames.values()),
+          queryConfig
+        )) {
           sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, policy);
           policyCount++;
         }
@@ -110,7 +110,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           policies: policyCount,
         } as LogMeta);
 
-        return policyCount + indicesCount + ilmsCount + dsCount;
+        return indicesCount;
       } catch (err) {
         log.warn(`Error running indices metadata task`, {
           error: err.message,

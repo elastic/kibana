@@ -11,7 +11,13 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
-import type { DataStream, IlmPolicy, IlmStats, IndexStats } from '../indices.metadata.types';
+import type {
+  ClusterStats,
+  DataStream,
+  IlmPolicy,
+  IlmStats,
+  IndexStats,
+} from '../indices.metadata.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -205,6 +211,35 @@ export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
       _meta: {
         description: 'ruleId',
       },
+    },
+  },
+};
+
+export const TELEMETRY_CLUSTER_STATS_EVENT: EventTypeOpts<ClusterStats> = {
+  eventType: 'telemetry_cluster_stats_event',
+  schema: {
+    num_nodes: {
+      type: 'long',
+      _meta: { description: 'How many nodes have the cluster' },
+    },
+    num_indices: {
+      type: 'long',
+      _meta: { description: 'How many indices have the cluster' },
+    },
+    num_docs: {
+      type: 'long',
+      _meta: { description: 'How many nodes have the cluster' },
+    },
+    num_deleted_docs: {
+      type: 'long',
+      _meta: {
+        description: 'How many nodes have the cluster',
+        optional: true,
+      },
+    },
+    total_size_in_bytes: {
+      type: 'long',
+      _meta: { description: 'The total size, in bytes, of all documents stored in the cluster.' },
     },
   },
 };
@@ -584,6 +619,7 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  TELEMETRY_CLUSTER_STATS_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
