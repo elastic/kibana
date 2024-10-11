@@ -93,7 +93,11 @@ export function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
 }
 
 // Wait until elasticsearch status goes green
-export function waitForEsStatusGreen(esUrl: string, auth: string, projectId: string): Promise<void> {
+export function waitForEsStatusGreen(
+  esUrl: string,
+  auth: string,
+  projectId: string
+): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
