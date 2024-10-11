@@ -6,8 +6,6 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- yarn install and bootstrap"
 
-BOOTSTRAP_ALWAYS_FORCE_INSTALL=true
-
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
