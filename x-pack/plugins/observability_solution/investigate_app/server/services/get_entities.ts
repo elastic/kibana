@@ -22,7 +22,7 @@ import {
 } from '../clients/create_entities_es_client';
 
 // the official types do not explicitly define sourceIndex in the schema, but it is present in the data at the time of writing this
-type EntitiesLatest = z.infer<typeof entityLatestSchema> & { sourceIndex: string[] };
+type EntitiesLatest = z.infer<typeof entityLatestSchema> & { source_index: string[] };
 
 export async function getEntitiesWithSource({
   serviceEnvironment,
@@ -51,21 +51,21 @@ export async function getEntitiesWithSource({
   for (const response of entityResponses) {
     const processedEntities = await Promise.all(
       response.map(async (entity: EntitiesLatest) => {
-        const sourceIndex = entity?.sourceIndex;
+        const sourceIndex = entity?.source_index;
         if (!sourceIndex || !sourceIndex.length) return null;
 
         const indices = await esClient.indices.get({ index: sourceIndex });
         const sources = await fetchSources(indices);
 
         return {
-          identityFields: entity?.entity.identityFields,
+          identityFields: entity?.entity.identity_fields,
           id: entity?.entity.id,
-          definitionId: entity?.entity.definitionId,
-          lastSeenTimestamp: entity?.entity.lastSeenTimestamp,
-          displayName: entity?.entity.displayName,
+          definitionId: entity?.entity.definition_id,
+          lastSeenTimestamp: entity?.entity.last_seen_timestamp,
+          displayName: entity?.entity.display_name,
           metrics: entity?.entity.metrics,
-          schemaVersion: entity?.entity.schemaVersion,
-          definitionVersion: entity?.entity.definitionVersion,
+          schemaVersion: entity?.entity.schema_version,
+          definitionVersion: entity?.entity.definition_version,
           type: entity?.entity.type,
           sources,
         };

@@ -45,8 +45,8 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
 
       render: (record: Entity) => {
-        const field = record.entity?.identityFields[0];
-        const value = record.entity?.displayName;
+        const field = record.entity?.identity_fields[0];
+        const value = record.entity?.display_name;
         const onClick = () => {
           const id = isUserEntity(record) ? UserPanelKey : HostPanelKey;
           const params = {

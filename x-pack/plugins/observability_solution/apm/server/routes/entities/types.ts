@@ -26,7 +26,6 @@ export interface EntityLatestServiceRaw {
 
 interface Entity {
   id: string;
-  lastSeenTimestamp: string;
-  firstSeenTimestamp: string;
-  identityFields: string[];
+  last_seen_timestamp: string;
+  identity_fields: string[];
 }

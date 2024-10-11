@@ -29,7 +29,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     identityFields: ['service.name'],
     displayNameTemplate: '{{service.name}}',
     metadata: [
-      { source: '_index', destination: 'sourceIndex' },
+      { source: '_index', destination: 'source_index' },
       {
         source: 'data_stream.type',
         destination: 'source_data_stream.type',

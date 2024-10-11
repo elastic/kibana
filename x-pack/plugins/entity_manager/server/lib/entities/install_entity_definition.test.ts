@@ -74,7 +74,7 @@ const assertHasCreatedDefinition = (
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
     _meta: {
-      definitionVersion: definition.version,
+      definition_version: definition.version,
       managed: definition.managed,
     },
   });
@@ -112,7 +112,7 @@ const assertHasUpgradedDefinition = (
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
     _meta: {
-      definitionVersion: definition.version,
+      definition_version: definition.version,
       managed: definition.managed,
     },
   });

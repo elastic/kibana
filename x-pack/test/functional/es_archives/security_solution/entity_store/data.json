@@ -17,17 +17,16 @@
         "hash": []
       },
       "entity": {
-        "lastSeenTimestamp": "2024-09-11T11:24:15.588Z",
-        "schemaVersion": "v1",
-        "definitionVersion": "1.0.0",
-        "displayName": "hinamatsumoto",
-        "identityFields": [
+        "last_seen_timestamp": "2024-09-11T11:24:15.588Z",
+        "schema_version": "v1",
+        "definition_version": "1.0.0",
+        "display_name": "hinamatsumoto",
+        "identity_fields": [
           "user.name"
         ],
         "id": "LBQAgKHGmpup0Kg9nlKmeQ==",
         "type": "node",
-        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
-        "definitionId": "ea_default_user_entity_store"
+        "definition_id": "ea_default_user_entity_store"
       }
     }
   }
@@ -68,17 +67,16 @@
         ]
       },
       "entity": {
-        "lastSeenTimestamp": "2024-09-11T11:24:15.591Z",
-        "schemaVersion": "v1",
-        "definitionVersion": "1.0.0",
-        "displayName": "ali-ubuntu-server",
-        "identityFields": [
+        "last_seen_timestamp": "2024-09-11T11:24:15.591Z",
+        "schema_version": "v1",
+        "definition_version": "1.0.0",
+        "display_name": "ali-ubuntu-server",
+        "identity_fields": [
           "host.name"
         ],
         "id": "ZXKm6GEcUJY6NHkMgPPmGQ==",
         "type": "node",
-        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
-        "definitionId": "ea_default_host_entity_store"
+        "definition_id": "ea_default_host_entity_store"
       }
     }
   }

@@ -3,7 +3,7 @@
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "1.0.0",
+    "definition_version": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
@@ -42,7 +42,7 @@ Object {
           },
         },
       },
-      "entity.lastSeenTimestamp": Object {
+      "entity.last_seen_timestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },
