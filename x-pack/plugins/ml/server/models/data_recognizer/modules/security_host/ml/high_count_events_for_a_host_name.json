@@ -5,7 +5,7 @@
     "bucket_span": "3h",
     "detectors": [
       {
-        "detector_description": "Detects high count of host based events.",
+        "detector_description": "high count of host based events",
         "function": "high_count",
         "partition_field_name": "host.name",
         "detector_index": 0
