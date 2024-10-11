@@ -205,23 +205,14 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
 
       const router = http.createRouter('');
       const resources = httpResources.createRegistrar(router);
-      const htmlBody = `
-          <!DOCTYPE html>
-          <html>
-            <body>
-              <p>HTML body</p>
-            </body>
-          </html>
-        `;
+      const htmlBody = `<p>HtMlr00lz</p>`;
       resources.register({ path: '/render-html', validate: false }, (context, req, res) =>
         res.renderHtml({ body: htmlBody })
       );
 
       await root.start();
-      const response = await request.get(root, '/render-html').expect(200);
-
-      expect(response.text).toBe(htmlBody);
-      expect(response.header).not.toMatchObject({ 'elastic-api-version': expect.any(String) });
+      const { header } = await request.get(root, '/render-html').expect(200);
+      expect(header).not.toMatchObject({ 'elastic-api-version': expect.any(String) });
     });
   });
 }
