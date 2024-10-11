@@ -19,6 +19,7 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlSearch'] },
   // add feature flags
   kbnServerArgs: [
+    `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
     `--xpack.searchIndices.enabled=true`, // global empty state FF
   ],
   // load tests in the index file
