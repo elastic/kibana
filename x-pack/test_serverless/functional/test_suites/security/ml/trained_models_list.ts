@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
 import { ServerlessRoleName } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -30,10 +31,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.trainedModels.assertStats(1);
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
+    });
 
-      // TODO enabled when https://github.com/elastic/kibana/issues/195593 is resolved
-      it.skip('sets correct VCU ranges for start model deployment', async () => {
-        await ml.trainedModelsTable.openStartDeploymentModal('.elser_model_2');
+    describe('trained models table', () => {
+      const tinyElser = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
+
+      before(async () => {
+        await ml.api.importTrainedModel(tinyElser.name, tinyElser.name);
+      });
+
+      it('sets correct VCU ranges for start model deployment', async () => {
+        await ml.trainedModelsTable.openStartDeploymentModal(tinyElser.name);
         await ml.trainedModelsTable.toggleAdvancedConfiguration(true);
 
         await ml.testExecution.logTestStep('should have correct default VCU level');
