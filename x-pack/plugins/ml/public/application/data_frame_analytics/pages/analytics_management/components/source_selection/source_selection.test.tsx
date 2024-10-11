@@ -9,6 +9,7 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 
 import {
   type DataViewAndSavedSearch,
@@ -107,7 +108,9 @@ jest.mock('../../../../../util/index_utils', () => {
           savedSearch: null,
         };
       }),
-    isCcsIndexPattern: (a: string) => a.includes(':'),
+    isCcsIndexPattern: (a: string) => {
+      return isCCSRemoteIndexName(a);
+    },
   };
 });
 
