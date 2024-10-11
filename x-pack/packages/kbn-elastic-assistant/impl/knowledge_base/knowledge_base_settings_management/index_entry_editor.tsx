@@ -143,7 +143,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
 
   // Description
   const setDescription = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
       setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
     [setEntry]
   );
@@ -223,27 +223,28 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
       </EuiFormRow>
       <EuiFormRow
         label={i18n.ENTRY_DESCRIPTION_INPUT_LABEL}
-        helpText={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
-        fullWidth
-      >
-        <EuiFieldText
-          name="description"
-          fullWidth
-          value={entry?.description}
-          onChange={setDescription}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL}
-        helpText={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
         fullWidth
       >
         <EuiTextArea
           name="description"
+          fullWidth
+          placeholder={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
+          value={entry?.description}
+          onChange={setDescription}
+          rows={2}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL}
+        fullWidth
+      >
+        <EuiTextArea
+          name="query_description"
+          placeholder={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
           value={entry?.queryDescription}
           onChange={setQueryDescription}
           fullWidth
-          rows={2}
+          rows={3}
         />
       </EuiFormRow>
       <EuiFormRow
