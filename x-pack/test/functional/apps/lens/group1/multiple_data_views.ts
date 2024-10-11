@@ -38,11 +38,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ) {
     if (chartType === 'lines') {
       expect(
-        state?.lines?.map(({ points }) =>
-          points
-            .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
-            .sort(({ x }, { x: x2 }) => x - x2)
-        )
+        state?.lines
+          ?.map(({ points }) =>
+            points
+              .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+              .sort(({ x }, { x: x2 }) => x - x2)
+          )
+          .filter((a) => a.length > 0)
       ).to.eql(expectedData);
     } else {
       expect(
@@ -107,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('ignores global filters on layers using a data view without the filter field', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData], 'lines');
       await lens.save(visTitle);
     });
 
@@ -118,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.openSavedVisualization(visTitle);
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedFlightsData], 'lines');
     });
   });
 }
