@@ -198,28 +198,25 @@ export const GroupPreview = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={0}>
-              <div
+              <LensEmbeddableComponent
                 css={css`
                   & > div {
                     height: 400px;
                     width: 100%;
                   }
                 `}
-              >
-                <LensEmbeddableComponent
-                  data-test-subj="chart"
-                  id="annotation-library-preview"
-                  timeRange={chartTimeRange}
-                  attributes={lensAttributes}
-                  onBrushEnd={({ range }) =>
-                    setChartTimeRange({
-                      from: new Date(range[0]).toISOString(),
-                      to: new Date(range[1]).toISOString(),
-                    })
-                  }
-                  searchSessionId={searchSessionId}
-                />
-              </div>
+                data-test-subj="chart"
+                id="annotation-library-preview"
+                timeRange={chartTimeRange}
+                attributes={lensAttributes}
+                onBrushEnd={({ range }) =>
+                  setChartTimeRange({
+                    from: new Date(range[0]).toISOString(),
+                    to: new Date(range[1]).toISOString(),
+                  })
+                }
+                searchSessionId={searchSessionId}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
