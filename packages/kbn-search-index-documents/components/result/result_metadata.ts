@@ -47,6 +47,15 @@ export const resultMetaData = (result: SearchHit): MetaDataProps => ({
 const MAPPING_TYPE_ORDER = ['semantic_text', 'dense_vector', 'sparse_vector'];
 const SPECIAL_NAME_FIELDS = ['headings'];
 
+/**
+ * Reorders an array of fields based on their importance.
+ *
+ * The function sorts the fields by checking if their names are in the `SPECIAL_NAME_FIELDS` array first and then by
+ * their mapping type (semantic_text, dense_vector, sparse_vector) if they are not in the `SPECIAL_NAME_FIELDS` array.
+ *
+ * @param fields - An array of field properties to be reordered.
+ * @returns The reordered array of field properties.
+ */
 export const reorderFieldsInImportance = (fields: FieldProps[]) => {
   return fields.sort((a, b) => {
     const specialA = SPECIAL_NAME_FIELDS.indexOf(a.fieldName);
