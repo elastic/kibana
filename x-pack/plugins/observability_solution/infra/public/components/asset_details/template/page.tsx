@@ -8,7 +8,6 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -25,6 +24,7 @@ import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 import { useEntitySummary } from '../hooks/use_entity_summary';
+import { isMetricsSignal } from '../utils/get_data_stream_types';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -84,8 +84,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     }
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
-  const showPageTitleWithPopover =
-    asset.type === 'host' && !dataStreams.includes(EntityDataStreamType.METRICS);
+  const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
 
   return (
     <InfraPageTemplate
