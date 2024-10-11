@@ -58,8 +58,8 @@ export const reorderFieldsInImportance = (fields: FieldProps[]) => {
       return specialA - specialB;
     }
 
-    const typeA = MAPPING_TYPE_ORDER.indexOf(a.fieldType!);
-    const typeB = MAPPING_TYPE_ORDER.indexOf(b.fieldType!);
+    const typeA = MAPPING_TYPE_ORDER.indexOf(a.fieldType);
+    const typeB = MAPPING_TYPE_ORDER.indexOf(b.fieldType);
     const orderA = typeA === -1 ? MAPPING_TYPE_ORDER.length : typeA;
     const orderB = typeB === -1 ? MAPPING_TYPE_ORDER.length : typeB;
 
