@@ -76,11 +76,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await es.indices.create({ index: 'test-my-index-002' });
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
       });
+      it('should start with side nav collapsed', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSearchSideNavIsCollapsed();
+        await pageObjects.svlSearchElasticsearchStartPage.clickSideNavCollapseButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSearchSideNavIsOpen();
+      });
       it('should redirect to indices list if single index exist on page load', async () => {
         await svlSearchNavigation.navigateToGettingStartedPage();
         await es.indices.create({ index: 'test-my-index-001' });
         await svlSearchNavigation.navigateToElasticsearchStartPage(true);
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSearchSideNavIsOpen();
       });
 
       it('should support switching between UI and Code Views', async () => {

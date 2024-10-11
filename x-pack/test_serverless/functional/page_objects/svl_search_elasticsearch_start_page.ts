@@ -109,5 +109,16 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
     },
+
+    async expectSearchSideNavIsOpen() {
+      await testSubjects.existOrFail('*nav-item-search_project_nav.home');
+    },
+    async expectSearchSideNavIsCollapsed() {
+      await testSubjects.missingOrFail('*nav-item-search_project_nav.home');
+    },
+    async clickSideNavCollapseButton() {
+      await testSubjects.existOrFail('euiCollapsibleNavButton');
+      await testSubjects.click('euiCollapsibleNavButton');
+    },
   };
 }
