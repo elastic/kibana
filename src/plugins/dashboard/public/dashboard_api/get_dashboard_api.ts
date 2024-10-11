@@ -147,6 +147,7 @@ export function getDashboardApi({
         throw new Error('runInteractiveSave not implemented');
       },
       runQuickSave: async () => {
+        if (isManaged) return;
         const { controlGroupReferences, dashboardState, panelReferences } = await getState();
         const saveResult = await getDashboardContentManagementService().saveDashboardState({
           controlGroupReferences,
