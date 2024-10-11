@@ -40,6 +40,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         ],
       });
+      // login with custom role
+      await pageObjects.svlCommonPage.loginWithCustomRole();
+      await pageObjects.svlCommonPage.assertUserAvatarExists();
     });
 
     after(async () => {
@@ -50,11 +53,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       if (roleAuthc) {
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       }
-    });
-
-    it('should login successfully', async () => {
-      await pageObjects.svlCommonPage.loginWithCustomRole();
-      await pageObjects.svlCommonPage.assertUserAvatarExists();
     });
 
     it('should have limited navigation menu', async () => {
