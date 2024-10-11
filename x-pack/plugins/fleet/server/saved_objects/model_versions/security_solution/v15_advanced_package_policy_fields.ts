@@ -28,7 +28,9 @@ export const packagePolicyV15AdvancedFieldsForEndpointV816: SavedObjectModelData
     const policy = input.config.policy.value;
 
     policy.windows.advanced = {
+      set_extended_host_information: true,
       ...policy.windows.advanced,
+
       events: {
         aggregate_process: false,
         ...policy.windows.advanced?.events,
@@ -36,7 +38,9 @@ export const packagePolicyV15AdvancedFieldsForEndpointV816: SavedObjectModelData
     };
 
     policy.mac.advanced = {
+      set_extended_host_information: true,
       ...policy.mac.advanced,
+
       events: {
         aggregate_process: false,
         ...policy.mac.advanced?.events,
@@ -44,7 +48,9 @@ export const packagePolicyV15AdvancedFieldsForEndpointV816: SavedObjectModelData
     };
 
     policy.linux.advanced = {
+      set_extended_host_information: true,
       ...policy.linux.advanced,
+
       events: {
         aggregate_process: false,
         ...policy.linux.advanced?.events,

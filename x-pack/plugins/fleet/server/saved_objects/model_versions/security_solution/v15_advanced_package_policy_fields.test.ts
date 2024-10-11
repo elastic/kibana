@@ -8,6 +8,7 @@
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { ModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
+import { set } from '@kbn/safer-lodash-set';
 
 import { getSavedObjectTypes } from '../..';
 
@@ -64,77 +65,79 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
     };
   });
 
+  /** Builds object key paths for all parent objects
+   *
+   * @param path e.g. `advanced.events.optionName`
+   * @returns e.g. ['advanced', 'advanced.events']
+   */
+  const getParentObjectKeyPaths = (path: string): string[] =>
+    path
+      .split('.') // ['advanced', 'events', 'optionName']
+      .slice(0, -1) // ['advanced', 'events']
+      .map((parentObject) => path.match(`^.*${parentObject}`)![0]); // ['advanced', 'advanced.events']
+
   describe('when updating to model version 15', () => {
-    describe('backfilling `aggregate_process` with `false`', () => {
-      it('should backfill when there are no advanced options yet', () => {
-        const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
-          document: policyConfigSO,
-          fromVersion: 14,
-          toVersion: 15,
+    describe.each`
+      name                               | path                                        | backfill
+      ${'aggregate_process'}             | ${'advanced.events.aggregate_process'}      | ${false}
+      ${'set_extended_host_information'} | ${'advanced.set_extended_host_information'} | ${true}
+    `(
+      'backfilling `$name` with `$backfill`',
+      ({ path, backfill }: { path: string; backfill: boolean }) => {
+        it('should backfill when there are no advanced options yet', () => {
+          const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+            document: policyConfigSO,
+            fromVersion: 14,
+            toVersion: 15,
+          });
+
+          const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
+
+          expectConfigToHave(migratedPolicyConfig, path, backfill);
         });
 
-        const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
+        it.each(getParentObjectKeyPaths(path))(
+          'should backfill without modifying other options in parent object `%s`',
+          (parentObjectKeyPath) => {
+            const policyConfig = getConfig(policyConfigSO);
+            const dummyField = `${parentObjectKeyPath}.cheese`;
+            set(policyConfig.windows, dummyField, 'brie');
+            set(policyConfig.mac, dummyField, 'maasdam');
+            set(policyConfig.linux, dummyField, 'camambert');
 
-        expectConfigToHave(migratedPolicyConfig, 'advanced.events.aggregate_process', false);
-      });
+            const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+              document: policyConfigSO,
+              fromVersion: 14,
+              toVersion: 15,
+            });
 
-      it('should backfill without modifying other advanced options', () => {
-        const policyConfig = getConfig(policyConfigSO);
-        policyConfig.windows.advanced = { cheese: 'brie' };
-        policyConfig.mac.advanced = { cheese: 'maasdam' };
-        policyConfig.linux.advanced = { cheese: 'camambert' };
+            const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
 
-        const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
-          document: policyConfigSO,
-          fromVersion: 14,
-          toVersion: 15,
+            expectConfigToHave(migratedPolicyConfig, path, backfill);
+            expect(migratedPolicyConfig.windows).toHaveProperty(dummyField, 'brie');
+            expect(migratedPolicyConfig.mac).toHaveProperty(dummyField, 'maasdam');
+            expect(migratedPolicyConfig.linux).toHaveProperty(dummyField, 'camambert');
+          }
+        );
+
+        it('should not backfill if field is already present', () => {
+          const policyConfig = getConfig(policyConfigSO);
+          set(policyConfig.windows, path, !backfill);
+          set(policyConfig.mac, path, !backfill);
+          set(policyConfig.linux, path, !backfill);
+
+          const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+            document: policyConfigSO,
+            fromVersion: 14,
+            toVersion: 15,
+          });
+
+          const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
+
+          expectConfigToHave(migratedPolicyConfig, path, !backfill);
         });
-
-        const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
-
-        expectConfigToHave(migratedPolicyConfig, 'advanced.events.aggregate_process', false);
-        expect(migratedPolicyConfig.windows.advanced.cheese).toBe('brie');
-        expect(migratedPolicyConfig.mac.advanced.cheese).toBe('maasdam');
-        expect(migratedPolicyConfig.linux.advanced.cheese).toBe('camambert');
-      });
-
-      it('should backfill without modifying other event options', () => {
-        const policyConfig = getConfig(policyConfigSO);
-        policyConfig.windows.advanced = { events: { cheese: 'brie' } };
-        policyConfig.mac.advanced = { events: { cheese: 'maasdam' } };
-        policyConfig.linux.advanced = { events: { cheese: 'camambert' } };
-
-        const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
-          document: policyConfigSO,
-          fromVersion: 14,
-          toVersion: 15,
-        });
-
-        const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
-
-        expectConfigToHave(migratedPolicyConfig, 'advanced.events.aggregate_process', false);
-        expect(migratedPolicyConfig.windows.advanced.events.cheese).toBe('brie');
-        expect(migratedPolicyConfig.mac.advanced.events.cheese).toBe('maasdam');
-        expect(migratedPolicyConfig.linux.advanced.events.cheese).toBe('camambert');
-      });
-
-      it('should not backfill if field is already present', () => {
-        const policyConfig = getConfig(policyConfigSO);
-        policyConfig.windows.advanced = { events: { aggregate_process: true } };
-        policyConfig.mac.advanced = { events: { aggregate_process: true } };
-        policyConfig.linux.advanced = { events: { aggregate_process: true } };
-
-        const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
-          document: policyConfigSO,
-          fromVersion: 14,
-          toVersion: 15,
-        });
-
-        const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
-
-        expectConfigToHave(migratedPolicyConfig, 'advanced.events.aggregate_process', true);
-      });
-    });
+      }
+    );
   });
 
   const getConfig = (so: SavedObject<PackagePolicy>) =>
