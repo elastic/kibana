@@ -15,6 +15,7 @@ import {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
@@ -32,11 +33,23 @@ import {
 import { CONTENT_ID } from '../../../common/content_management';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
-export type DashboardPanel = TypeOf<typeof panelSchema>;
+
+// Panel config has some defined types but also allows for custom keys added by embeddables
+// The schema uses "unknowns: 'allow'" to permit any other keys, but the TypeOf helper does not
+// recognize this, so we need to manually extend the type here.
+export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
+  panelConfig: TypeOf<typeof panelSchema>['panelConfig'] & { [key: string]: any };
+};
+export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
+  panels: DashboardPanel[];
+};
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
+export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
+  attributes: Partial<DashboardAttributes>;
+  references: SavedObjectReference[] | undefined;
+};
 
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
 

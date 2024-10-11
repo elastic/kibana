@@ -32,7 +32,7 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
         id: panelIndex,
         ...(panel.id !== undefined && { savedObjectId: panel.id }),
         ...(panel.title !== undefined && { title: panel.title }),
-        ...panel.embeddableConfig,
+        ...panel.panelConfig,
       },
       version: panel.version,
     };
@@ -58,7 +58,7 @@ export const convertPanelMapToPanelsArray = (
       type: panelState.type,
       gridData: panelState.gridData,
       panelIndex,
-      embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
+      panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
       ...(panelState.explicitInput.title !== undefined && {
         title: panelState.explicitInput.title,
       }),

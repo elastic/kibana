@@ -36,7 +36,7 @@ export const isPanelVersionTooOld = (panels: DashboardPanel[]) => {
   for (const panel of panels) {
     if (
       !panel.gridData ||
-      !panel.embeddableConfig ||
+      !panel.panelConfig ||
       (panel.version && semverSatisfies(panel.version, '<7.3'))
     )
       return true;
