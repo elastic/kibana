@@ -51,7 +51,7 @@
     {
       "repoOwner": "elastic",
       "repoName": "kibana",
-      "pipelineSlug": "kibana-deploy-project",
+      "pipelineSlug": "kibana-deploy-project-from-pr",
 
       "enabled": true,
       "allow_org_users": true,
@@ -64,7 +64,7 @@
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:project))$",
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project"],
+      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/test/",
