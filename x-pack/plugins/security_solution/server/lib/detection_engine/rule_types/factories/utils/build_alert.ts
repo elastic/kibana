@@ -154,6 +154,11 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   return [...existingAncestors, newAncestor];
 };
 
+enum RULE_EXECUTION_TYPE {
+  MANUAL = 'manual',
+  SCHEDULED = 'scheduled',
+}
+
 /**
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
@@ -288,7 +293,9 @@ export const buildAlertFields = ({
     [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp ? intendedTimestamp.toISOString() : timestamp,
-    [ALERT_RULE_EXECUTION_TYPE]: intendedTimestamp ? 'manual' : 'scheduled',
+    [ALERT_RULE_EXECUTION_TYPE]: intendedTimestamp
+      ? RULE_EXECUTION_TYPE.MANUAL
+      : RULE_EXECUTION_TYPE.SCHEDULED,
   };
 };
 
