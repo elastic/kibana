@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, defer, from, of, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, defer, from, map, of, shareReplay, switchMap } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 
@@ -37,12 +37,19 @@ export function initTour(core: CoreStart, spacesManager: SpacesManager) {
     }
   };
 
-  const showTourObservable$ = allSpaces$.pipe(
-    switchMap((spaces) => {
-      // Don't show the tour if there are multiple spaces or the default space is the classic solution
-      if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) return of(false);
+  const showTourObservable$ = showTour$.pipe(
+    switchMap((showTour) => {
+      if (!showTour) return of(false);
 
-      return showTour$.asObservable();
+      return allSpaces$.pipe(
+        map((spaces) => {
+          if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) {
+            return false;
+          }
+
+          return true;
+        })
+      );
     })
   );
 
@@ -52,16 +59,18 @@ export function initTour(core: CoreStart, spacesManager: SpacesManager) {
     });
   };
 
-  allSpaces$.subscribe((spaces) => {
-    if (!hasValueInUiSettings && (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces))) {
-      // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
-      // we don't want to show the tour later on. This can happen in the following scenarios:
-      // - the user deletes all the spaces but one (and that last space has a solution set)
-      // - the user edits the default space and sets a solution
-      // So we can immediately hide the tour in the global settings from now on.
-      hideTourInGlobalSettings();
-    }
-  });
+  if (!hasValueInUiSettings) {
+    allSpaces$.subscribe((spaces) => {
+      if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) {
+        // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
+        // we don't want to show the tour later on. This can happen in the following scenarios:
+        // - the user deletes all the spaces but one (and that last space has a solution set)
+        // - the user edits the default space and sets a solution
+        // So we can immediately hide the tour in the global settings from now on.
+        hideTourInGlobalSettings();
+      }
+    });
+  }
 
   const onFinishTour = () => {
     hideTourInGlobalSettings();
