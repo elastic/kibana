@@ -15,14 +15,10 @@ All Kibana HTTP API developers and maintainers must ensure that past versions of
   The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
 </DocCallOut>
 
-<DocAccordion buttonContent="FAQ: What is the difference between an internal and a public HTTP API?" color="warning">
+<DocAccordion buttonContent="FAQ: What is the difference between an internal and a public HTTP API?">
 <DocCallOut >
 
 We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically garanteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
-
-**How do we prevent external consumers from using internal APIs?**
-Access to [internal APIs is restricted](https://github.com/elastic/kibana/pull/193792) behind a configuration setting, `server.restrictInternalApis`. When set to true (the default), external requests without a special internal header or query parameter are blocked.
-Of course there are ways of [getting around the restriction](https://github.com/elastic/kibana/pull/195696) but it has to be by choice and not incidental as it has been up to now.
  
 </DocCallOut></DocAccordion>
 
