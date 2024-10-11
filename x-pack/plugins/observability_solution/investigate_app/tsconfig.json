@@ -68,5 +68,7 @@
     "@kbn/ml-random-sampler-utils",
     "@kbn/charts-plugin",
     "@kbn/observability-utils",
+    "@kbn/apm-plugin",
+    "@kbn/apm-data-access-plugin",
   ],
 }
