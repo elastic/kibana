@@ -166,7 +166,10 @@ export class ActionsClient {
   /**
    * Create an action
    */
-  public async create({ action, options }: ConnectorCreateParams): Promise<ActionResult> {
+  public async create({
+    action,
+    options,
+  }: Omit<ConnectorCreateParams, 'context'>): Promise<ActionResult> {
     return create({ context: this.context, action, options });
   }
 
