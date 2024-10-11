@@ -10,8 +10,8 @@
 import {
   AppMenuItem,
   AppMenuAction,
+  AppMenuActionSubmenu,
   AppMenuActionId,
-  AppMenuPopoverActions,
   AppMenuActionType,
 } from './types';
 
@@ -22,26 +22,25 @@ export class AppMenuRegistry {
     this.appMenuItems = assignOrderToActions(primaryAndSecondaryActions);
   }
 
-  public registerCustomAction(appMenuItem: AppMenuAction | AppMenuPopoverActions) {
+  public registerCustomAction(appMenuItem: AppMenuAction | AppMenuActionSubmenu) {
     this.appMenuItems.push(appMenuItem);
   }
 
   public registerCustomActionUnderAlerts(appMenuItem: AppMenuAction) {
     const alertsMenuItem = this.appMenuItems.find((item) => item.id === AppMenuActionId.alerts);
-    if (alertsMenuItem && isAppMenuActionsPopover(alertsMenuItem)) {
-      // insert the custom action before the last item in the alerts menu
+    if (alertsMenuItem && isAppMenuActionSubmenu(alertsMenuItem)) {
       alertsMenuItem.actions.push(appMenuItem);
     }
   }
 
   public getSortedItems() {
-    const primaryActions = sortAppMenuItems(
+    const primaryActions = sortAppMenuItemsByOrder(
       this.appMenuItems.filter((item) => item.type === AppMenuActionType.primary)
     );
-    const secondaryActions = sortAppMenuItems(
+    const secondaryActions = sortAppMenuItemsByOrder(
       this.appMenuItems.filter((item) => item.type === AppMenuActionType.secondary)
     );
-    const customActions = sortAppMenuItems(
+    const customActions = sortAppMenuItemsByOrder(
       this.appMenuItems.filter((item) => item.type === AppMenuActionType.custom)
     );
 
@@ -49,7 +48,7 @@ export class AppMenuRegistry {
   }
 }
 
-function isAppMenuActionsPopover(appMenuItem: AppMenuItem): appMenuItem is AppMenuPopoverActions {
+function isAppMenuActionSubmenu(appMenuItem: AppMenuItem): appMenuItem is AppMenuActionSubmenu {
   return 'actions' in appMenuItem;
 }
 
@@ -59,11 +58,11 @@ function sortByOrder(a: AppMenuItem, b: AppMenuItem): number {
   return (a.order ?? FALLBACK_ORDER) - (b.order ?? FALLBACK_ORDER);
 }
 
-function sortAppMenuItems(appMenuItems: AppMenuItem[]): AppMenuItem[] {
+function sortAppMenuItemsByOrder(appMenuItems: AppMenuItem[]): AppMenuItem[] {
   const sortedAppMenuItems = [...appMenuItems].sort(sortByOrder);
   return sortedAppMenuItems.map((appMenuItem) => {
-    if (isAppMenuActionsPopover(appMenuItem)) {
-      const popoverWithSortedActions: AppMenuPopoverActions = {
+    if (isAppMenuActionSubmenu(appMenuItem)) {
+      const popoverWithSortedActions: AppMenuActionSubmenu = {
         ...appMenuItem,
         actions: [...appMenuItem.actions].sort(sortByOrder),
       };
@@ -73,11 +72,16 @@ function sortAppMenuItems(appMenuItems: AppMenuItem[]): AppMenuItem[] {
   });
 }
 
+/**
+ * All primary and secondary actions by default get order 100, 200, 300,... assigned to them.
+ * Same for actions under a submenu.
+ * @param appMenuItems
+ */
 function assignOrderToActions(appMenuItems: AppMenuItem[]): AppMenuItem[] {
   let order = 0;
   return appMenuItems.map((appMenuItem) => {
     order = order + 100;
-    if (isAppMenuActionsPopover(appMenuItem)) {
+    if (isAppMenuActionSubmenu(appMenuItem)) {
       let orderInPopover = 0;
       const actionsWithOrder = appMenuItem.actions.map((action) => {
         orderInPopover = orderInPopover + 100;

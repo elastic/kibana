@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionId, AppMenuActionType, AppMenuIconAction } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, AppMenuActionIconOnly } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getNewSearchAppMenuItem = ({
   onNewSearch,
 }: {
   onNewSearch: () => void;
-}): AppMenuIconAction => {
+}): AppMenuActionIconOnly => {
   return {
     id: AppMenuActionId.new,
     type: AppMenuActionType.primary,

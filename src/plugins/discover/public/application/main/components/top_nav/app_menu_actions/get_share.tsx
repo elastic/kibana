@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuIconAction, AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuActionIconOnly, AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ export const getShareAppMenuItem = ({
 }: {
   stateContainer: DiscoverStateContainer;
   getDiscoverParams: () => AppMenuDiscoverParams;
-}): AppMenuIconAction => {
+}): AppMenuActionIconOnly => {
   return {
     id: AppMenuActionId.share,
     type: AppMenuActionType.primary,

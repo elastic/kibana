@@ -20,13 +20,12 @@ export type AppMenuControlProps = Pick<
   'testId' | 'isLoading' | 'label' | 'description' | 'disableButton' | 'href' | 'tooltip'
 > & {
   onClick:
-    | ((
-        params: AppMenuControlOnClickParams
-      ) => Promise<React.ReactNode | void> | React.ReactNode | void)
+    | ((params: AppMenuControlOnClickParams) => Promise<React.ReactNode | void>)
+    | ((params: AppMenuControlOnClickParams) => React.ReactNode | void)
     | undefined;
 };
 
-export type AppMenuIconControlProps = AppMenuControlProps & Pick<TopNavMenuData, 'iconType'>;
+export type AppMenuControlIconOnlyProps = AppMenuControlProps & Pick<TopNavMenuData, 'iconType'>;
 
 export enum AppMenuActionId {
   new = 'new',
@@ -47,17 +46,26 @@ interface AppMenuActionBase {
   readonly order?: number;
 }
 
+/**
+ * A normal menu action
+ */
 export interface AppMenuAction extends AppMenuActionBase {
   readonly type: AppMenuActionType.secondary | AppMenuActionType.custom;
   readonly controlProps: AppMenuControlProps;
 }
 
-export interface AppMenuIconAction extends AppMenuActionBase {
+/**
+ * A menu action with icon only
+ */
+export interface AppMenuActionIconOnly extends AppMenuActionBase {
   readonly type: AppMenuActionType.primary;
-  readonly controlProps: AppMenuIconControlProps;
+  readonly controlProps: AppMenuControlIconOnlyProps;
 }
 
-export interface AppMenuPopoverActions extends AppMenuActionBase {
+/**
+ * A menu action which opens a submenu with more actions
+ */
+export interface AppMenuActionSubmenu extends AppMenuActionBase {
   readonly label: TopNavMenuData['label'];
   readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
@@ -65,4 +73,4 @@ export interface AppMenuPopoverActions extends AppMenuActionBase {
   readonly actions: AppMenuAction[];
 }
 
-export type AppMenuItem = AppMenuPopoverActions | AppMenuAction | AppMenuIconAction;
+export type AppMenuItem = AppMenuActionSubmenu | AppMenuAction | AppMenuActionIconOnly;

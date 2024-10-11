@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AppMenuActionId, AppMenuActionType, AppMenuPopoverActions } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, AppMenuActionSubmenu } from '@kbn/discover-utils';
 import {
   AlertConsumers,
   ES_QUERY_ID,
@@ -100,7 +100,7 @@ export const getAlertsAppMenuItem = ({
 }: {
   getDiscoverParams: () => AppMenuDiscoverParams;
   stateContainer: DiscoverStateContainer;
-}): AppMenuPopoverActions => {
+}): AppMenuActionSubmenu => {
   const { dataView, services, isEsqlMode } = getDiscoverParams();
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);

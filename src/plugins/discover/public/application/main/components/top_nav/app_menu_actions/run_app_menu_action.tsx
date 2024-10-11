@@ -21,14 +21,18 @@ import ReactDOM from 'react-dom';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { AppMenuAction, AppMenuIconAction, AppMenuPopoverActions } from '@kbn/discover-utils';
+import type {
+  AppMenuAction,
+  AppMenuActionIconOnly,
+  AppMenuActionSubmenu,
+} from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
 
 interface AppMenuActionsMenuPopoverProps {
-  appMenuItem: AppMenuPopoverActions;
+  appMenuItem: AppMenuActionSubmenu;
   anchorElement: HTMLElement;
   services: DiscoverServices;
   onClose: () => void;
@@ -110,7 +114,7 @@ export function runAppMenuPopoverAction({
   anchorElement,
   services,
 }: {
-  appMenuItem: AppMenuPopoverActions;
+  appMenuItem: AppMenuActionSubmenu;
   anchorElement: HTMLElement;
   services: DiscoverServices;
 }) {
@@ -142,7 +146,7 @@ export async function runAppMenuAction({
   anchorElement,
   services,
 }: {
-  appMenuItem: AppMenuAction | AppMenuIconAction;
+  appMenuItem: AppMenuAction | AppMenuActionIconOnly;
   anchorElement: HTMLElement;
   services: DiscoverServices;
 }) {
