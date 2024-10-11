@@ -84,9 +84,7 @@ module.exports = (request, options) => {
       return FILE_MOCK;
     }
 
-    if (
-      pReqExt === '.worker' && reqBasename.endsWith('.editor')
-    ) {
+    if (pReqExt === '.worker' && reqBasename.endsWith('.editor')) {
       return WORKER_MOCK;
     }
   }
