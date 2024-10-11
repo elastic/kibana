@@ -6,15 +6,16 @@
  */
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import {
-  CONTAINER_ID,
-  HOST_NAME,
   AGENT_NAME,
   CLOUD_PROVIDER,
+  CONTAINER_ID,
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
+  ENTITY_IDENTITY_FIELDS,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
+  HOST_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
@@ -77,25 +78,27 @@ interface BaseEntity {
   [ENTITY_TYPE]: EntityType;
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
+  [ENTITY_IDENTITY_FIELDS]: string | string[];
+  [key: string]: any;
 }
 
 /**
  * These types are based on service, host and container from the built in definition.
  */
-interface ServiceEntity extends BaseEntity {
+export interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
-  [SERVICE_ENVIRONMENT]?: string | null;
+  [SERVICE_ENVIRONMENT]?: string | string[] | null;
   [AGENT_NAME]: string | string[] | null;
 }
 
-interface HostEntity extends BaseEntity {
+export interface HostEntity extends BaseEntity {
   [ENTITY_TYPE]: 'host';
   [HOST_NAME]: string;
   [CLOUD_PROVIDER]: string | string[] | null;
 }
 
-interface ContainerEntity extends BaseEntity {
+export interface ContainerEntity extends BaseEntity {
   [ENTITY_TYPE]: 'container';
   [CONTAINER_ID]: string;
   [CLOUD_PROVIDER]: string | string[] | null;

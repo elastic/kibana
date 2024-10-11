@@ -39,9 +39,9 @@ import {
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
-  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -230,7 +230,7 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientSimpleChatModel;
+  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
@@ -242,8 +242,8 @@ export interface AssistantToolParams {
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
+  isOssModel?: boolean;
   logger: Logger;
-  modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
   request: KibanaRequest<

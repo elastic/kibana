@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -77,8 +76,6 @@ const RuleActionsOverflowComponent = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -152,39 +149,32 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.EXPORT_RULE}
             </EuiContextMenuItem>,
-            ...(isManualRuleRunEnabled
-              ? [
-                  <EuiContextMenuItem
-                    key={i18nActions.MANUAL_RULE_RUN}
-                    icon="play"
-                    disabled={!userHasPermissions || !rule.enabled}
-                    toolTipContent={
-                      !userHasPermissions || !rule.enabled
-                        ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
-                        : ''
-                    }
-                    data-test-subj="rules-details-manual-rule-run"
-                    onClick={async () => {
-                      startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
-                      closePopover();
-                      const modalManualRuleRunConfirmationResult =
-                        await showManualRuleRunConfirmation();
-                      telemetry.reportManualRuleRunOpenModal({
-                        type: 'single',
-                      });
-                      if (modalManualRuleRunConfirmationResult === null) {
-                        return;
-                      }
-                      await scheduleRuleRun({
-                        ruleIds: [rule.id],
-                        timeRange: modalManualRuleRunConfirmationResult,
-                      });
-                    }}
-                  >
-                    {i18nActions.MANUAL_RULE_RUN}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
+            <EuiContextMenuItem
+              key={i18nActions.MANUAL_RULE_RUN}
+              icon="play"
+              disabled={!userHasPermissions || !rule.enabled}
+              toolTipContent={
+                !userHasPermissions || !rule.enabled ? i18nActions.MANUAL_RULE_RUN_TOOLTIP : ''
+              }
+              data-test-subj="rules-details-manual-rule-run"
+              onClick={async () => {
+                startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
+                closePopover();
+                const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+                telemetry.reportManualRuleRunOpenModal({
+                  type: 'single',
+                });
+                if (modalManualRuleRunConfirmationResult === null) {
+                  return;
+                }
+                await scheduleRuleRun({
+                  ruleIds: [rule.id],
+                  timeRange: modalManualRuleRunConfirmationResult,
+                });
+              }}
+            >
+              {i18nActions.MANUAL_RULE_RUN}
+            </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
@@ -226,7 +216,6 @@ const RuleActionsOverflowComponent = ({
       downloadExportedRules,
       confirmDeletion,
       scheduleRuleRun,
-      isManualRuleRunEnabled,
       telemetry,
     ]
   );
