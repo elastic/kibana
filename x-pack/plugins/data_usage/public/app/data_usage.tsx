@@ -26,7 +26,6 @@ import { PLUGIN_NAME } from '../../common';
 import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from './hooks/use_date_picker';
 import { useDataUsageMetricsUrlParams } from './hooks/use_charts_url_params';
-import { MetricsResponse } from './types';
 
 export const DataUsage = () => {
   const {
@@ -42,37 +41,37 @@ export const DataUsage = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
+  const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
-    dataStreams: [],
+    // TODO: Replace with data streams from /data_streams api
+    dataStreams: [
+      '.alerts-ml.anomaly-detection-health.alerts-default',
+      '.alerts-stack.alerts-default',
+    ],
     from: DEFAULT_DATE_RANGE_OPTIONS.startDate,
     to: DEFAULT_DATE_RANGE_OPTIONS.endDate,
   });
 
   useEffect(() => {
     if (!metricTypesFromUrl) {
-      setUrlMetricTypesFilter(
-        typeof queryParams.metricTypes !== 'string'
-          ? queryParams.metricTypes.join(',')
-          : queryParams.metricTypes
-      );
+      setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
     }
     if (!startDateFromUrl || !endDateFromUrl) {
-      setUrlDateRangeFilter({ startDate: queryParams.from, endDate: queryParams.to });
+      setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
     }
   }, [
     endDateFromUrl,
     metricTypesFromUrl,
-    queryParams.from,
-    queryParams.metricTypes,
-    queryParams.to,
+    metricsFilters.from,
+    metricsFilters.metricTypes,
+    metricsFilters.to,
     setUrlDateRangeFilter,
     setUrlMetricTypesFilter,
     startDateFromUrl,
   ]);
 
   useEffect(() => {
-    setQueryParams((prevState) => ({
+    setMetricsFilters((prevState) => ({
       ...prevState,
       metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
       dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
@@ -89,7 +88,7 @@ export const DataUsage = () => {
     refetch: refetchDataUsageMetrics,
   } = useGetDataUsageMetrics(
     {
-      ...queryParams,
+      ...metricsFilters,
       from: dateRangePickerState.startDate,
       to: dateRangePickerState.endDate,
     },
@@ -140,7 +139,7 @@ export const DataUsage = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        {isFetched && data ? <Charts data={data as MetricsResponse} /> : <EuiLoadingElastic />}
+        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
       </EuiPageSection>
     </>
   );

@@ -298,7 +298,7 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
 
       cy.log('should reload the data when refresh button is pressed');
 
-      cy.intercept(/bsearch/).as('search');
+      cy.intercept('POST', '/internal/search/threatIntelligenceSearchStrategy').as('search');
       cy.get(REFRESH_BUTTON).should('exist').click();
       cy.wait('@search');
     });

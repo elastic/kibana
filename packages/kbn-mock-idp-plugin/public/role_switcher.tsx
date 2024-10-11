@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 

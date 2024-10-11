@@ -9,7 +9,11 @@
 
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
-import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import {
+  removeDropCommandsFromESQLQuery,
+  appendToESQLQuery,
+  isESQLColumnSortable,
+} from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -553,12 +557,17 @@ export class LensVisService {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
-    const breakdown = breakdownColumn
-      ? `, \`${breakdownColumn.name}\` | sort \`${breakdownColumn.name}\` asc`
-      : '';
+    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+
+    // sort by breakdown column if it's sortable
+    const sortBy =
+      breakdownColumn && isESQLColumnSortable(breakdownColumn)
+        ? ` | sort \`${breakdownColumn.name}\` asc`
+        : '';
+
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 

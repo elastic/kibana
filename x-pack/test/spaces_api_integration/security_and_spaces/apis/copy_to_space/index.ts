@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createUsersAndRoles } from '../../../common/lib/create_users_and_roles';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
