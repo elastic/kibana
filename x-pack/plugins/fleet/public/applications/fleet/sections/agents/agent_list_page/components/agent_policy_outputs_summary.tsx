@@ -23,20 +23,21 @@ import React, { memo, useMemo, useState } from 'react';
 import type { AgentPolicy, Output } from '../../../../types';
 import { useLink } from '../../../../hooks';
 
-const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
 
 export const AgentPolicyOutputsSummary = memo<{
   outputs: Output[];
   agentPolicy: AgentPolicy | undefined;
   monitoring?: boolean;
-  direction?: 'column' | 'row';
-}>(({ outputs, agentPolicy, monitoring, direction = 'row' }) => {
+}>(({ outputs, agentPolicy, monitoring }) => {
   const { getHref } = useLink();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const defaultOutput = outputs.find((item) => item.is_default);
+  const defaultOutput = useMemo(() => {
+    return outputs.find((item) => item.is_default);
+  }, [outputs]);
+
   const policyId = agentPolicy?.id;
 
   const outputToDisplay = useMemo(() => {
@@ -57,9 +58,9 @@ export const AgentPolicyOutputsSummary = memo<{
     if (!outputToDisplay) return [];
 
     const { hosts } = outputToDisplay;
-    return (hosts || []).map((host) => {
+    return (hosts || []).map((host, index) => {
       return {
-        'data-test-subj': `host-${host}`,
+        'data-test-subj': `output-host-${index}`,
         label: host,
         href: getHref('settings_edit_outputs', { outputId: outputToDisplay.id }),
         iconType: 'dot',
@@ -74,12 +75,10 @@ export const AgentPolicyOutputsSummary = memo<{
 
   return (
     <EuiFlexGroup
-      direction={direction}
-      gutterSize={direction === 'column' ? 'none' : 's'}
+      gutterSize="s"
       alignItems="baseline"
-      style={MIN_WIDTH}
       responsive={false}
-      justifyContent={'flexStart'}
+      justifyContent="flexStart"
     >
       <EuiFlexItem grow={false}>
         <EuiLink
@@ -110,7 +109,7 @@ export const AgentPolicyOutputsSummary = memo<{
             anchorPosition="downCenter"
           >
             <EuiPopoverTitle>
-              {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.title', {
+              {i18n.translate('xpack.fleet.AgentPolicyOutputsSummary.popover.title', {
                 defaultMessage: 'Output for Integrations',
               })}
             </EuiPopoverTitle>
