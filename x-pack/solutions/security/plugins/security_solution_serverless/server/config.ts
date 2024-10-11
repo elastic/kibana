@@ -13,6 +13,20 @@ import { productTypes } from '../common/config';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
+const tlsConfig = schema.object({
+  certificate: schema.string(),
+  key: schema.string(),
+  ca: schema.string(),
+});
+export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
+
+const usageApiConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  url: schema.maybe(schema.string()),
+  tls: schema.maybe(tlsConfig),
+});
+export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   productTypes,
