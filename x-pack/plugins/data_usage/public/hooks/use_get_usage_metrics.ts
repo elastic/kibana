@@ -21,24 +21,24 @@ interface ErrorType {
 }
 
 export const useGetDataUsageMetrics = (
-  query: UsageMetricsRequestSchemaQueryParams,
+  body: UsageMetricsRequestSchemaQueryParams,
   options: UseQueryOptions<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> => {
   const http = useKibanaContextForPlugin().services.http;
 
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
-    queryKey: ['get-data-usage-metrics', query],
+    queryKey: ['get-data-usage-metrics', body],
     ...options,
     keepPreviousData: true,
     queryFn: async () => {
-      return http.get<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
+      return http.post<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
         version: '1',
-        query: {
-          from: query.from,
-          to: query.to,
-          metricTypes: query.metricTypes,
-          dataStreams: query.dataStreams,
-        },
+        body: JSON.stringify({
+          from: body.from,
+          to: body.to,
+          metricTypes: body.metricTypes,
+          dataStreams: body.dataStreams,
+        }),
       });
     },
   });
