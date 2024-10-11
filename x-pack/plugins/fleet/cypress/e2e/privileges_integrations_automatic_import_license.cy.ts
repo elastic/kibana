@@ -19,7 +19,7 @@ describe('User with basic license should hit License Paywall', () => {
         uid: 'someId',
         type: 'basic',
         mode: 'basic',
-        expiryDateInMillis: 1731226793474,
+        expiryDateInMillis: 4884310543000,
         status: 'active',
       },
       signature: 'someIdAgain',
