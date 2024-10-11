@@ -8,9 +8,10 @@
 import https from 'https';
 
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
-import type { AxiosError, AxiosRequestConfig } from 'axios';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import apm from 'elastic-apm-node';
@@ -25,7 +26,11 @@ import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
-import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
+import {
+  prependAgentlessApiBasePathToEndpoint,
+  isAgentlessApiEnabled,
+  getDeletionEndpointPath,
+} from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -34,8 +39,6 @@ class AgentlessAgentService {
     agentlessAgentPolicy: AgentPolicy
   ) {
     const traceId = apm.currentTransaction?.traceparent;
-    const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
-
     const errorMetadata: LogMeta = {
       trace: {
         id: traceId,
@@ -111,67 +114,18 @@ class AgentlessAgentService {
     logger.debug(
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
-    const errorMetadataWithRequestConfig: LogMeta = {
-      ...errorMetadata,
-      http: {
-        request: {
-          id: traceId,
-          body: requestConfig.data,
-        },
-      },
-    };
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
-        if (!axios.isAxiosError(error)) {
-          logger.error(
-            `[Agentless API] Creating agentless failed with an error ${error} ${requestConfigDebugStatus}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AgentlessAgentCreateError(withRequestIdMessage(error.message));
-        }
-
-        const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
-
-        if (error.response) {
-          // The request was made and the server responded with a status code and error data
-          logger.error(
-            `[Agentless API] Creating agentless failed because the Agentless API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
-              error.response.status
-            )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
-            {
-              ...errorMetadataWithRequestConfig,
-              http: {
-                ...errorMetadataWithRequestConfig.http,
-                response: {
-                  status_code: error.response.status,
-                  body: error.response.data,
-                },
-              },
-            }
-          );
-          throw new AgentlessAgentCreateError(
-            withRequestIdMessage(`the Agentless API could not create the agentless agent`)
-          );
-        } else if (error.request) {
-          // The request was made but no response was received
-          logger.error(
-            `[Agentless API] Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AgentlessAgentCreateError(
-            withRequestIdMessage(`no response received from the Agentless API`)
-          );
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          logger.error(
-            `[Agentless API] Creating agentless agent failed to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AgentlessAgentCreateError(
-            withRequestIdMessage('the Agentless API could not create the agentless agent')
-          );
-        }
+        this.catchAgentlessApiError(
+          'create',
+          error,
+          logger,
+          requestConfig,
+          requestConfigDebugStatus,
+          errorMetadata,
+          traceId
+        );
       }
     );
 
@@ -184,10 +138,7 @@ class AgentlessAgentService {
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
-      url: prependAgentlessApiBasePathToEndpoint(
-        agentlessConfig,
-        `/deployments/${agentlessPolicyId}`
-      ),
+      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
       method: 'DELETE',
       headers: {
         'Content-type': 'application/json',
@@ -198,6 +149,12 @@ class AgentlessAgentService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
+    };
+    const traceId = apm.currentTransaction?.traceparent;
+    const errorMetadata: LogMeta = {
+      trace: {
+        id: traceId,
+      },
     };
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -223,33 +180,199 @@ class AgentlessAgentService {
     );
 
     const response = await axios(requestConfig).catch((error: AxiosError) => {
-      const errorLogCodeCause = `${error.code} ${this.convertCauseErrorsToString(error)}`;
-
-      if (!axios.isAxiosError(error)) {
-        logger.error(
-          `[Agentless API] Deleting agentless deployment failed with an error ${JSON.stringify(
-            error
-          )} ${requestConfigDebugStatus}`
-        );
-      }
-      if (error.response) {
-        logger.error(
-          `[Agentless API] Deleting Agentless deployment Failed Response Error: ${JSON.stringify(
-            error.response.status
-          )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus} `
-        );
-      } else if (error.request) {
-        logger.error(
-          `[Agentless API] Deleting agentless deployment failed to receive a response from the Agentless API ${errorLogCodeCause} ${requestConfigDebugStatus}`
-        );
-      } else {
-        logger.error(
-          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${requestConfigDebugStatus}`
-        );
-      }
+      this.catchAgentlessApiError(
+        'delete',
+        error,
+        logger,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
     });
 
     return response;
+  }
+
+  private catchAgentlessApiError(
+    action: 'create' | 'delete',
+    error: Error | AxiosError,
+    logger: Logger,
+    requestConfig: AxiosRequestConfig,
+    requestConfigDebugStatus: string,
+    errorMetadata: LogMeta,
+    traceId?: string
+  ) {
+    const errorMetadataWithRequestConfig: LogMeta = {
+      ...errorMetadata,
+      http: {
+        request: {
+          id: traceId,
+          body: requestConfig.data,
+        },
+      },
+    };
+
+    const errorLogCodeCause = (axiosError: AxiosError) =>
+      `${axiosError.code}  ${this.convertCauseErrorsToString(axiosError)}`;
+
+    if (!axios.isAxiosError(error)) {
+      logger.error(
+        `${
+          action === 'create'
+            ? '[Agentless API] Creating agentless failed with an error '
+            : '[Agentless API] Deleting agentless deployment failed with an error'
+        } ${error} ${requestConfigDebugStatus}`,
+        errorMetadataWithRequestConfig
+      );
+      throw new AgentlessAgentCreateError(this.withRequestIdMessage(error.message, traceId));
+    }
+
+    if (error.response) {
+      if (error.response.status === 400) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          action === 'create'
+            ? '[Agentless API] Creating the agentless agent failed with a status 400, bad request.'
+            : '[Agentless API] Deleting the agentless deployment failed with a status 400, bad request.',
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent, please delete the agentless policy try again or contact your administrator.'
+            : 'the Agentless API could not delete the agentless deployment, please try again or contact your administrator.',
+          traceId
+        );
+      }
+      if (error.response.status === 401) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          action === 'create'
+            ? '[Agentless API] Creating the agentless agent failed with a status 401 unauthorized.  Check the Kibana Agentless API tls configuration'
+            : '[Agentless API] Deleting the agentless deployment failed with a status 401 unauthorized.  Check the Kibana Agentless API tls configuration',
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent because an unauthorized request was sent. Please delete the agentless policy and try again or contact your administrator.'
+            : 'the Agentless API could not delete the agentless deployment because an unauthorized request was sent. Please try again or contact your administrator.',
+          traceId
+        );
+      }
+      if (error.response.status >= 408) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          action === 'create'
+            ? '[Agentless API] Creating the agentless agent failed with a status 408, the request timed out.'
+            : '[Agentless API] Deleting the agentless deployment failed with a status 408, the request timed out.',
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent because the request timed out, please delete the agentless policy try again or contact your administrator.'
+            : 'the Agentless API could not delete the agentless deployment because the request timed out, please try again or contact your administrator.',
+          traceId
+        );
+      }
+      if (error.response.status === 429) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          // this error will only happen when creating agentless agents
+          '[Agentless API] Creating the agentless agent failed with a status 429, agentless agent limit has been reached for this deployment or project.',
+          `the Agentless API could not create the agentless agent, you have reached the limit of agentless agents provisioned for this deployment or project.  Consider removing some agentless agents and try again or use agent-based agents for this integration.`,
+          traceId
+        );
+      }
+      if (error.response.status === 500) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          action === 'create'
+            ? '[Agentless API] Creating the agentless agent failed with a status 500 internal service error.'
+            : '[Agentless API] Deleting the agentless deployment failed with a status 500 internal service error.',
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent, please delete the agentless policy and try again later  or contact your administrator.'
+            : 'the Agentless API could not delete the agentless deployment, please try again later or contact your administrator.',
+          traceId
+        );
+      }
+      // The request was made and the server responded with a status code and error data
+      this.handleResponseError(
+        error.response,
+        logger,
+        errorMetadataWithRequestConfig,
+        requestConfigDebugStatus,
+        '[Agentless API] Creating agentless agent failed because the Agentless API responding with a status code that falls out of the range of 2xx:',
+        'the Agentless API could not create the agentless agent, please delete the agentless policy and try again later or contact your administrator.',
+        traceId
+      );
+    } else if (error.request) {
+      // The request was made but no response was received
+
+      const logMessage =
+        action === 'create'
+          ? '[Agentless API] Creating agentless agent failed while sending the request to the Agentless API:'
+          : '[Agentless API] Deleting agentless deployment failed while sending the request to the Agentless API:';
+
+      const thrownMessage =
+        action === 'create'
+          ? 'no response received from the Agentless API when attempting to create the agentless agent, please delete the agentless policy and try again later or contact your administrator.'
+          : 'no response received from the Agentless API when attempting to delete the agentless deployment, please try again later or contact your administrator.';
+
+      logger.error(
+        `${logMessage} ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
+        errorMetadataWithRequestConfig
+      );
+      throw new AgentlessAgentCreateError(this.withRequestIdMessage(thrownMessage, traceId));
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      logger.error(
+        `[Agentless API] Creating agentless agent failed to be created ${errorLogCodeCause(
+          error
+        )} ${requestConfigDebugStatus}`,
+        errorMetadataWithRequestConfig
+      );
+      throw new AgentlessAgentCreateError(
+        this.withRequestIdMessage('the Agentless API could not create the agentless agent', traceId)
+      );
+    }
+  }
+
+  private handleResponseError(
+    response: AxiosResponse,
+    logger: Logger,
+    errorMetadataWithRequestConfig: LogMeta,
+    requestConfigDebugStatus: string,
+    logMessage: string,
+    userMessage: string,
+    traceId?: string
+  ) {
+    logger.error(
+      `${logMessage} ${JSON.stringify(response.status)}} ${JSON.stringify(
+        response.data
+      )}} ${requestConfigDebugStatus}`,
+      {
+        ...errorMetadataWithRequestConfig,
+        http: {
+          ...errorMetadataWithRequestConfig.http,
+          response: {
+            status_code: response?.status,
+            body: response?.data,
+          },
+        },
+      }
+    );
+
+    throw new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
+  }
+
+  private withRequestIdMessage(message: string, traceId?: string) {
+    return `${message} [Request Id: ${traceId}]`;
   }
 
   private createTlsConfig(agentlessConfig: AgentlessConfig | undefined) {
