@@ -43,10 +43,6 @@ export interface ToastOptions {
    * How long should the toast remain on screen.
    */
   toastLifeTimeMs?: number;
-  /**
-   * Perform an action after the toast has been closed.
-   */
-  onClose?: ToastInputFields['onClose'];
 }
 
 /**
