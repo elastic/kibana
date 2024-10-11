@@ -108,9 +108,9 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       log.debug(`deleted space id: ${spaceId}`);
     }
 
-    public async getSpace(id: string) {
+    public async get(id: string) {
       log.debug(`retrieving space ${id}`);
-      const { data, status, statusText } = await axios.get<Space[]>(`/api/spaces/space/${id}`);
+      const { data, status, statusText } = await axios.get<Space>(`/api/spaces/space/${id}`);
 
       if (status !== 200) {
         throw new Error(

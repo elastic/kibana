@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView, Space } from '@kbn/spaces-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -47,7 +47,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('solution tour', () => {
-      let _defaultSpace: any = {};
+      let _defaultSpace: Space | undefined = {
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+      };
 
       const updateSolutionDefaultSpace = async (solution: SolutionView) => {
         log.debug(`Updating default space solution: [${solution}].`);
@@ -59,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        _defaultSpace = await spacesService.getSpace('default');
+        _defaultSpace = await spacesService.get('default');
 
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
           shouldUseHashForSubUrl: false,
