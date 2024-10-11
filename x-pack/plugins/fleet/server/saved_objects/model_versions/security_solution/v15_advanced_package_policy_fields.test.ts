@@ -16,6 +16,8 @@ import type { PackagePolicy } from '../../../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 
 describe('Defend integration advanced policy fields v8.16.0', () => {
+  const TARGET_MODEL_VERSION = 15;
+
   let migrator: ModelVersionTestMigrator;
   let policyConfigSO: SavedObject<PackagePolicy>;
 
@@ -76,7 +78,7 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
       .slice(0, -1) // ['advanced', 'events']
       .map((parentObject) => path.match(`^.*${parentObject}`)![0]); // ['advanced', 'advanced.events']
 
-  describe('when updating to model version 15', () => {
+  describe(`when updating to model version ${TARGET_MODEL_VERSION}`, () => {
     describe.each`
       name                               | path                                        | backfill
       ${'aggregate_process'}             | ${'advanced.events.aggregate_process'}      | ${false}
@@ -91,8 +93,8 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
         it('should backfill when there are no advanced options yet', () => {
           const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
             document: policyConfigSO,
-            fromVersion: 14,
-            toVersion: 15,
+            fromVersion: TARGET_MODEL_VERSION - 1,
+            toVersion: TARGET_MODEL_VERSION,
           });
 
           const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
@@ -111,8 +113,8 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
 
             const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
               document: policyConfigSO,
-              fromVersion: 14,
-              toVersion: 15,
+              fromVersion: TARGET_MODEL_VERSION - 1,
+              toVersion: TARGET_MODEL_VERSION,
             });
 
             const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
@@ -132,8 +134,8 @@ describe('Defend integration advanced policy fields v8.16.0', () => {
 
           const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
             document: policyConfigSO,
-            fromVersion: 14,
-            toVersion: 15,
+            fromVersion: TARGET_MODEL_VERSION - 1,
+            toVersion: TARGET_MODEL_VERSION,
           });
 
           const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
