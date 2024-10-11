@@ -22,6 +22,7 @@ export interface LogCategory {
   documentCount: number;
   histogram: LogCategoryHistogramBucket[];
   terms: string;
+  sampleDocument?: string;
 }
 
 export type LogCategoryChange =
@@ -153,7 +154,7 @@ export const categorizeDocuments = async ({
     maxCategoriesCount: 1000,
   });
 
-  const rawResponse = await esClient.search(requestParams);
+  const rawResponse = await esClient.search(requestParams, {});
 
   if (rawResponse.aggregations == null) {
     throw new Error('No aggregations found in large categories response');
@@ -176,12 +177,17 @@ export const categorizeDocuments = async ({
 
 const mapCategoryBucket = (bucket: any): LogCategory =>
   esCategoryBucketSchema
-    .transform((parsedBucket) => ({
-      change: mapChangePoint(parsedBucket),
-      documentCount: parsedBucket.doc_count,
-      histogram: parsedBucket.histogram,
-      terms: parsedBucket.key,
-    }))
+    .transform((parsedBucket) => {
+      return {
+        change: mapChangePoint(parsedBucket),
+        documentCount: parsedBucket.doc_count,
+        histogram: parsedBucket.histogram,
+        terms: parsedBucket.key,
+        sampleDocument: parsedBucket.sampleDocument.hits.hits[0]?._source
+          ? JSON.stringify(parsedBucket.sampleDocument.hits.hits[0]._source)
+          : undefined,
+      };
+    })
     .parse(bucket);
 
 const mapChangePoint = ({ change, histogram }: EsCategoryBucket): LogCategoryChange => {
@@ -355,6 +361,16 @@ const esHistogramSchema = z
   })
   .transform(({ buckets }) => buckets);
 
+const esTopHitsSchema = z.object({
+  hits: z.object({
+    hits: z.array(
+      z.object({
+        _source: z.object({}).passthrough(),
+      })
+    ),
+  }),
+});
+
 type EsHistogram = z.output<typeof esHistogramSchema>;
 
 const esCategoryBucketSchema = z.object({
@@ -362,6 +378,7 @@ const esCategoryBucketSchema = z.object({
   doc_count: z.number(),
   change: esChangePointSchema,
   histogram: esHistogramSchema,
+  sampleDocument: esTopHitsSchema,
 });
 
 type EsCategoryBucket = z.output<typeof esCategoryBucketSchema>;
@@ -407,6 +424,9 @@ export const createCategorizationRequestParams = ({
   return {
     index,
     size: 0,
+    /* We occassionally end up with a  search_phase_execution_exception Caused by: illegal_argument_exception: 0 > -1
+     * error and need to enable error traces to debug it while this feature is hidden behind a feature flag. */
+    error_trace: true,
     track_total_hits: false,
     query: createCategorizationQuery({
       messageField,
@@ -432,11 +452,25 @@ export const createCategorizationRequestParams = ({
           field: messageField,
           size: maxCategoriesCount,
           categorization_analyzer: {
-            tokenizer: 'ml_standard',
+            tokenizer: 'standard',
           },
+          similarity_threshold: 60,
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
         },
         aggs: {
+          // grab the first sample document for this pattern
+          sampleDocument: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+          },
           histogram: {
             date_histogram: {
               field: timeField,

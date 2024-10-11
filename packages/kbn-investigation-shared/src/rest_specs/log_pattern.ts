@@ -41,6 +41,7 @@ const logPatternSchema = z.object({
   histogram: changeHistogramSchema,
   terms: z.string(),
   source: z.string().optional(),
+  sampleDocument: z.string().optional(),
 });
 
 const entityLogPatternsSchema = z.object({

@@ -101,6 +101,7 @@ ${getEntityContext(entities)}
 
 ## Additional requests:
 I do not have the alert details or entity details in front of me. Always include the alert reason and the entity metrics in your response. 
+The user already has the investigation details in front of them. Do not repeat the name of the investigation or why it was initiated.
 
 ## Formatting
 The entity metrics should be listed in a table format.
@@ -135,40 +136,43 @@ When referencing the log patterns or services, please include the name of the lo
 }
 
 const formatEntityMetrics = (entity: EntityWithSource): string => {
-  const entityMetrics = Object.entries(entity.metrics)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(', ');
+  const entityMetrics = entity.metrics
+    ? Object.entries(entity.metrics)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
+    : null;
   const entitySources = entity.sources.map((source) => source.dataStream).join(', ');
   return dedent(`
-    Entity name: ${entity.displayName}; 
-    Entity type: ${entity.type}; 
-    Entity metrics: ${entityMetrics}; 
+    Entity name: ${entity.displayName}
+    Entity type: ${entity.type}
     Entity data streams: ${entitySources}
+    ${entityMetrics ? `Entity metrics: ${entityMetrics}` : ''} 
   `);
 };
 
+// ${logPattern?.change?.pValue ? `Change p-value: ${logPattern?.change?.pValue};` : ''}
 const formatLogPatterns = (logPattern: LogPattern): string => {
   return dedent(`
     ### Log pattern: ${logPattern.terms}
     Change type: ${logPattern?.change?.type}; 
     Change time: ${logPattern?.change?.timestamp}; 
-    ${logPattern?.change?.pValue ? `Change p-value: ${logPattern?.change?.pValue};` : ''}
+    Document count: ${logPattern?.documentCount};
+    ${logPattern?.source ? `Entity: ${logPattern?.source}` : ''}
+    ${logPattern?.sampleDocument ? `Sample log document: ${logPattern?.sampleDocument}` : ''}
     ${
       logPattern?.change?.correlationCoefficient
         ? `Change correlation coefficient: ${logPattern?.change?.correlationCoefficient};`
         : ''
     }
-    Document count: ${logPattern?.documentCount};
-    ${logPattern?.source ? `Entity: ${logPattern?.source}` : ''}
   `);
 };
 
 const getLogPatternContext = (logPatterns: EntityLogPatterns[]): string => {
   return logPatterns?.length
     ? dedent(`
-  I found the following new patterns in the logs. Can you correlate these patterns across the stack, explain the relationships and narrow down the root cause based on the evidence? Please include an evidence-based hypothesis for what's causing the outage and list the most critical patterns first.
+  Below is a list of new long patterns I detected across the stack. Group related relevant patterns together. Exclude irrelevant patterns that do not indicate a problem, even if these patterns are rare. Pay special attention to patterns that indicate an error and surface these patterns to the top of the list. Include the full "message" field from the sample log document when useful.
 
-  Below is the list of the log patterns I detected across the stack. Group related patterns together and exclude irrelevant patterns that do not indicate a problem, even if these patterns are rare. 
+  Can you correlate these patterns across the stack, explain the relationships and narrow down the root cause based on the evidence? Please include an evidence-based hypothesis for what's causing the outage and list the most critical patterns first.
         
   ${logPatterns
     .map((logPattern) => {
@@ -194,7 +198,7 @@ const getEntityContext = (entities: EntityWithSource[]): string => {
     .map((entity, index) => {
       return dedent(`
         ## Entity ${index + 1}:
-        ${formatEntityMetrics(entity)};
+        ${formatEntityMetrics(entity)}
       `);
     })
     .join('/n/n')}`
