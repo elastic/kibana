@@ -54,7 +54,6 @@ export const CreateIndexForm = ({
 }: CreateIndexFormProps) => {
   const { application } = useKibana().services;
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
-  const [defaultIndexName] = useState<string>(formState.indexName);
   const usageTracker = useUsageTracker();
   const { createIndex, isLoading } = useCreateIndex();
   const onCreateIndex = useCallback(
@@ -65,13 +64,13 @@ export const CreateIndexForm = ({
       }
       usageTracker.click(AnalyticsEvents.startCreateIndexClick);
 
-      if (defaultIndexName !== formState.indexName) {
+      if (formState.defaultIndexName !== formState.indexName) {
         usageTracker.click(AnalyticsEvents.startCreateIndexPageModifyIndexName);
       }
 
       createIndex({ indexName: formState.indexName });
     },
-    [usageTracker, createIndex, formState.indexName, defaultIndexName]
+    [usageTracker, createIndex, formState.indexName, formState.defaultIndexName]
   );
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIndexName = e.target.value;
