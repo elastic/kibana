@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
@@ -349,6 +349,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
+        'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**
