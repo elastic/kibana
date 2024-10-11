@@ -22,7 +22,7 @@ export type CasesSupportedOperations = (typeof allOperations)[number];
  */
 
 const pushOperations = ['pushCase'] as const;
-const createOperations = ['createCase', 'createComment'] as const;
+const createOperations = ['createCase'] as const;
 const readOperations = [
   'getCase',
   'getComment',
@@ -31,11 +31,12 @@ const readOperations = [
   'getUserActions',
   'findConfigurations',
 ] as const;
+// Update operations do not currently include the ability to re-open a case
 const updateOperations = ['updateCase', 'updateComment'] as const;
 const deleteOperations = ['deleteCase', 'deleteComment'] as const;
 const settingsOperations = ['createConfiguration', 'updateConfiguration'] as const;
 const createCommentOperations = ['createComment'] as const;
-const reopenOperations = ['reopenCases'] as const;
+const reopenOperations = ['reopenCase'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
@@ -69,7 +70,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.delete),
       ...getCasesPrivilege(settingsOperations, privilegeDefinition.cases?.settings),
       ...getCasesPrivilege(createCommentOperations, privilegeDefinition.cases?.createComment),
-      ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCases),
+      ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
     ]);
   }
 }

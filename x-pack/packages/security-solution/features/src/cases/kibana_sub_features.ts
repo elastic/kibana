@@ -18,8 +18,8 @@ import type { CasesFeatureParams } from './types';
 export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
   CasesSubFeatureId.casesSettings,
-  CasesSubFeatureId.addComment,
-  CasesSubFeatureId.reopenCases,
+  CasesSubFeatureId.createComment,
+  CasesSubFeatureId.reopenCase,
 ];
 
 /**
@@ -131,11 +131,11 @@ export const getCasesSubFeaturesMap = ({
       },
     ],
   };
-  const casesReopenCasesSubFeature: SubFeatureConfig = {
+  const casesreopenCaseubFeature: SubFeatureConfig = {
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.reopenCasesSubFeatureName',
+      'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureName',
       {
-        defaultMessage: 'Reopen Closed Cases',
+        defaultMessage: 'Re-open',
       }
     ),
     privilegeGroups: [
@@ -144,11 +144,11 @@ export const getCasesSubFeaturesMap = ({
         privileges: [
           {
             api: apiTags.all,
-            id: 'reopen_cases',
+            id: 'case_reopen',
             name: i18n.translate(
-              'securitySolutionPackages.features.featureRegistry.reopenCasesSubFeatureDetails',
+              'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureDetails',
               {
-                defaultMessage: 'Reopen closed cases',
+                defaultMessage: 'Re-open closed cases',
               }
             ),
             includeIn: 'all',
@@ -157,9 +157,9 @@ export const getCasesSubFeaturesMap = ({
               read: [],
             },
             cases: {
-              reopenCases: [APP_ID],
+              reopenCase: [APP_ID],
             },
-            ui: uiCapabilities.reopenCases,
+            ui: uiCapabilities.reopenCase,
           },
         ],
       },
@@ -169,7 +169,7 @@ export const getCasesSubFeaturesMap = ({
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
     [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
-    [CasesSubFeatureId.addComment, casesAddCommentsCasesSubFeature],
-    [CasesSubFeatureId.reopenCases, casesReopenCasesSubFeature],
+    [CasesSubFeatureId.createComment, casesAddCommentsCasesSubFeature],
+    [CasesSubFeatureId.reopenCase, casesreopenCaseubFeature],
   ]);
 };

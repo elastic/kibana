@@ -28,8 +28,8 @@ describe('createUICapabilities', () => {
           "read_cases",
           "cases_connectors",
         ],
-        "reopenCases": Array [
-          "reopen_cases",
+        "reopenCase": Array [
+          "case_reopen",
         ],
         "settings": Array [
           "cases_settings",

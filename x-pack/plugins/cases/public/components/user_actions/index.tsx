@@ -108,10 +108,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
-  const { checkShowCommentEditor } = useUserPermissions({ status: caseData.status });
+  const { getCanAddUserComments } = useUserPermissions();
 
   // add-comment markdown is not visible in History filter
-  const showCommentEditor = checkShowCommentEditor(userActivityQueryParams);
+  const shouldShowCommentEditor = getCanAddUserComments(userActivityQueryParams);
 
   const {
     commentRefs,
@@ -136,7 +136,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
   );
 
-  const bottomActions = showCommentEditor
+  const bottomActions = shouldShowCommentEditor
     ? [
         {
           username: (

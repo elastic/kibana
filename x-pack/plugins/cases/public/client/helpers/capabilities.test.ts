@@ -18,7 +18,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": false,
       }
@@ -35,7 +35,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": false,
       }
@@ -52,7 +52,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": false,
       }
@@ -78,7 +78,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": false,
       }
@@ -95,7 +95,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": false,
       }
@@ -121,7 +121,7 @@ describe('getUICapabilities', () => {
         "delete": true,
         "push": true,
         "read": true,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": true,
       }
@@ -148,7 +148,7 @@ describe('getUICapabilities', () => {
         "delete": true,
         "push": true,
         "read": true,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": true,
         "update": true,
       }
@@ -175,7 +175,7 @@ describe('getUICapabilities', () => {
         "delete": true,
         "push": true,
         "read": true,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": false,
         "update": true,
       }
@@ -192,7 +192,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
-        "reopenCases": false,
+        "reopenCase": false,
         "settings": true,
         "update": false,
       }

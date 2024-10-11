@@ -155,9 +155,9 @@ function mergeWithSubFeatures(
         mergedConfig.cases?.createComment ?? [],
         subFeaturePrivilege.cases?.createComment ?? []
       ),
-      reopenCases: mergeArrays(
-        mergedConfig.cases?.reopenCases ?? [],
-        subFeaturePrivilege.cases?.reopenCases ?? []
+      reopenCase: mergeArrays(
+        mergedConfig.cases?.reopenCase ?? [],
+        subFeaturePrivilege.cases?.reopenCase ?? []
       ),
     };
   }

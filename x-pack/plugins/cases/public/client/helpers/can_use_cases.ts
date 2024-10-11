@@ -42,7 +42,7 @@ export const canUseCases =
         acc.push = acc.push || userCapabilitiesForOwner.push;
         acc.connectors = acc.connectors || userCapabilitiesForOwner.connectors;
         acc.settings = acc.settings || userCapabilitiesForOwner.settings;
-        acc.reopenCases = acc.reopenCases || userCapabilitiesForOwner.reopenCases;
+        acc.reopenCase = acc.reopenCase || userCapabilitiesForOwner.reopenCase;
         acc.createComment = acc.createComment || userCapabilitiesForOwner.createComment;
 
         const allFromAcc =
@@ -53,7 +53,7 @@ export const canUseCases =
           acc.push &&
           acc.connectors &&
           acc.settings &&
-          acc.reopenCases &&
+          acc.reopenCase &&
           acc.createComment;
 
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
@@ -69,7 +69,7 @@ export const canUseCases =
         push: false,
         connectors: false,
         settings: false,
-        reopenCases: false,
+        reopenCase: false,
         createComment: false,
       }
     );

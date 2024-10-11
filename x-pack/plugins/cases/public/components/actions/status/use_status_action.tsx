@@ -15,6 +15,7 @@ import * as i18n from './translations';
 import type { UseActionProps } from '../types';
 import { statuses } from '../../status';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
+import { useShouldDisableStatus } from './use_should_disable_status';
 
 const getStatusToasterMessage = (status: CaseStatuses, cases: CasesUI): string => {
   const totalCases = cases.length;
@@ -35,9 +36,6 @@ interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
 
-const shouldDisableStatus = (cases: CasesUI, status: CaseStatuses) =>
-  cases.every((theCase) => theCase.status === status);
-
 export const useStatusAction = ({
   onAction,
   onActionSuccess,
@@ -45,8 +43,7 @@ export const useStatusAction = ({
   selectedStatus,
 }: UseStatusActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
-  const { canChangeStatus } = useUserPermissions({ status: selectedStatus });
-  const isActionDisabled = isDisabled || !canChangeStatus;
+  const { canUpdate, canReopenCase } = useUserPermissions();
   const handleUpdateCaseStatus = useCallback(
     (selectedCases: CasesUI, status: CaseStatuses) => {
       onAction();
@@ -67,6 +64,8 @@ export const useStatusAction = ({
     [onAction, updateCases, onActionSuccess]
   );
 
+  const shouldDisableStatusFn = useShouldDisableStatus();
+
   const getStatusIcon = (status: CaseStatuses): string =>
     selectedStatus && selectedStatus === status ? 'check' : 'empty';
 
@@ -76,7 +75,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.open].label,
         icon: getStatusIcon(CaseStatuses.open),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
-        disabled: isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses.open),
+        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses.open),
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
@@ -84,8 +83,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses['in-progress']].label,
         icon: getStatusIcon(CaseStatuses['in-progress']),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
-        disabled:
-          isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses['in-progress']),
+        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses['in-progress']),
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
@@ -93,14 +91,14 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.closed].label,
         icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
-        disabled: isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses.closed),
+        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses.closed),
         'data-test-subj': 'cases-bulk-action-status-closed',
         key: 'cases-bulk-status-action',
       },
     ];
   };
 
-  return { getActions, canUpdateStatus: canChangeStatus };
+  return { getActions, canUpdateStatus: canUpdate || canReopenCase };
 };
 
 export type UseStatusAction = ReturnType<typeof useStatusAction>;

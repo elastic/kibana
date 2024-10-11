@@ -68,8 +68,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [caseData.settings, onUpdateField]
   );
 
-  const { canChangeStatus: disableStatusMenu } = useUserPermissions({ status: caseData.status });
-
+  const { canReopenCase, canUpdate } = useUserPermissions();
+  const isStatusMenuDisabled = !canUpdate && !canReopenCase;
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       <EuiFlexItem
@@ -86,7 +86,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
-            disabled={disableStatusMenu}
+            disabled={isStatusMenuDisabled}
             isLoading={isLoading}
             onStatusChanged={onStatusChanged}
           />

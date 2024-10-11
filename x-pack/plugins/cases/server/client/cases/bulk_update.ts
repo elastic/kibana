@@ -272,9 +272,11 @@ function partitionPatchRequest(
   conflictedCases: CasePatchRequest[];
   // This will be a deduped array of case IDs with their corresponding owner
   casesToAuthorize: OwnerEntity[];
+  reopenedCases: CasePatchRequest[];
 } {
   const nonExistingCases: CasePatchRequest[] = [];
   const conflictedCases: CasePatchRequest[] = [];
+  const reopenedCases: CasePatchRequest[] = [];
   const casesToAuthorize: Map<string, OwnerEntity> = new Map<string, OwnerEntity>();
 
   for (const reqCase of patchReqCases) {
@@ -286,6 +288,12 @@ function partitionPatchRequest(
       conflictedCases.push(reqCase);
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+    } else if (
+      foundCase.attributes.status !== reqCase.status &&
+      foundCase.attributes.status === CaseStatuses.closed
+    ) {
+      // Track cases that are closed and a user is attempting to reopen
+      reopenedCases.push(reqCase);
     } else {
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
@@ -294,6 +302,7 @@ function partitionPatchRequest(
   return {
     nonExistingCases,
     conflictedCases,
+    reopenedCases,
     casesToAuthorize: Array.from(casesToAuthorize.values()),
   };
 }
@@ -344,25 +353,22 @@ export const bulkUpdate = async (
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
-    const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
-      casesMap,
-      query.cases
-    );
-    const requestToChangeStatusFromClosed = Array.from(casesMap.values()).some((c) => {
-      return c.attributes.status === CaseStatuses.closed;
-    });
+    const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases } =
+      partitionPatchRequest(casesMap, query.cases);
 
-    if (requestToChangeStatusFromClosed) {
-      await authorization.ensureAuthorized({
-        entities: casesToAuthorize,
-        operation: Operations.reopenCases,
-      });
-    } else {
-      await authorization.ensureAuthorized({
-        entities: casesToAuthorize,
-        operation: Operations.updateCase,
-      });
-    }
+    const operationsToAuthorize =
+      reopenedCases.length > 0
+        ? [Operations.reopenCase, Operations.updateCase]
+        : [Operations.updateCase];
+
+    await Promise.all(
+      operationsToAuthorize.map(async (operationToAuthorize) =>
+        authorization.ensureAuthorized({
+          entities: casesToAuthorize,
+          operation: operationToAuthorize,
+        })
+      )
+    );
 
     if (nonExistingCases.length > 0) {
       throw Boom.notFound(
