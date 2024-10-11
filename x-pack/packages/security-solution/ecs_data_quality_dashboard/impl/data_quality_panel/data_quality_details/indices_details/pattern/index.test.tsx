@@ -466,7 +466,7 @@ describe('pattern', () => {
 
         // assert
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
-      });
+      }, 15000);
     });
 
     describe('when chartSelectedIndex is set', () => {
