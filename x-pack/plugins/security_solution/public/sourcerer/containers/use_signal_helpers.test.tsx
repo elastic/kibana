@@ -70,7 +70,9 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
     await waitFor(() => null);
     expect(result.current.signalIndexNeedsInit).toEqual(true);
@@ -97,7 +99,9 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
     await waitFor(() => null);
     expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -126,7 +130,9 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
     await waitFor(() => null);
     expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -158,7 +164,9 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
     await waitFor(() => null);
     expect(result.current.signalIndexNeedsInit).toEqual(false);

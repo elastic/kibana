@@ -138,7 +138,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
-    waitFor,
   };
 
   return testRendererMocks;

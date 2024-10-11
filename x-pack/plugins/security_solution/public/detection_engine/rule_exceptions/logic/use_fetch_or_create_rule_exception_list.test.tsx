@@ -95,7 +95,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       .mockResolvedValue(detectionExceptionList);
 
     render = (listType = detectionListType) =>
-      renderHook<ReturnUseFetchOrCreateRuleExceptionList, UseFetchOrCreateRuleExceptionListProps>(
+      renderHook<UseFetchOrCreateRuleExceptionListProps, ReturnUseFetchOrCreateRuleExceptionList>(
         () =>
           useFetchOrCreateRuleExceptionList({
             http: mockKibanaHttpService,

@@ -164,7 +164,9 @@ describe('Sourcerer Hooks', () => {
   });
   it('initializes loading default and timeline index patterns', async () => {
     const { rerender } = renderHook(() => useInitSourcerer(), {
-      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <Provider store={store}>{children}</Provider>
+      ),
     });
     await waitFor(() => null);
     rerender();

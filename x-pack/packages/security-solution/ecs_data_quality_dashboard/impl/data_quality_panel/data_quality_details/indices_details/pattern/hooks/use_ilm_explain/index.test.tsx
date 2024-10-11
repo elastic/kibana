@@ -115,7 +115,7 @@ describe('useIlmExplain', () => {
 
     beforeEach(async () => {
       const { result } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <DataQualityProvider
             httpFetch={mockHttpFetch}
             telemetryEvents={mockTelemetryEvents}
