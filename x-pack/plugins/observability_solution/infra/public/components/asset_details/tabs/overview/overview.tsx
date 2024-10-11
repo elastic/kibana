@@ -66,24 +66,18 @@ export const Overview = () => {
   );
 
   const shouldShowCallout = () => {
-    const isHost = asset.type === 'host';
-    const isContainer = asset.type === 'container';
+    if (dataStreamsStatus !== 'success') {
+      return false;
+    }
+
+    const { type } = asset;
     const baseCondition =
-      dataStreamsStatus === 'success' &&
-      dataStreams &&
-      !isMetricsSignal(dataStreams) &&
-      !dismissedAddMetricsCallout &&
-      renderMode.mode === 'page';
+      !isMetricsSignal(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
 
-    if (isHost) {
-      return baseCondition;
-    }
+    const isRelevantContainer =
+      type === 'container' && (isDockerContainer || isKubernetesContainer);
 
-    if (isContainer) {
-      return baseCondition && (isDockerContainer || isKubernetesContainer);
-    }
-
-    return false;
+    return baseCondition && (type === 'host' || isRelevantContainer);
   };
 
   const showAddMetricsCallout = shouldShowCallout();
