@@ -9,7 +9,6 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
-  MetricTypes,
 } from '../../../common/rest_types';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { FILTER_NAMES } from '../translations';
@@ -24,9 +23,6 @@ export type FilterItems = Array<{
   checked?: 'on' | undefined;
   'data-test-subj'?: string;
 }>;
-
-const isDefaultMetricType = (metricType: MetricTypes): boolean =>
-  metricType === 'ingest_rate' || metricType === 'storage_retained';
 
 export const useChartsFilter = ({
   filterName,
@@ -78,11 +74,13 @@ export const useChartsFilter = ({
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isMetricTypesFilter
-      ? METRIC_TYPE_VALUES.map((metricType) => ({
+      ? METRIC_TYPE_VALUES.filter((metricType) => {
+          // just these two metric types are supported for now
+          return metricType === 'ingest_rate' || metricType === 'storage_retained' ? true : false;
+        }).map((metricType) => ({
           key: metricType,
           label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
-          checked: isDefaultMetricType(metricType) ? 'on' : undefined, // metrics are selected by default
-          disabled: isDefaultMetricType(metricType),
+          checked: 'on', // metrics are selected by default
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : []

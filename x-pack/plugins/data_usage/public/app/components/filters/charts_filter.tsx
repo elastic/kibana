@@ -7,7 +7,7 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
@@ -15,6 +15,7 @@ import {
   type MetricTypes,
 } from '../../../../common/rest_types';
 
+import { ClearAllButton } from './clear_all_button';
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks/use_charts_filter';
@@ -141,6 +142,35 @@ export const ChartsFilter = memo(
       ]
     );
 
+    // clear all selected options
+    const onClearAll = useCallback(() => {
+      // update filter UI options state
+      setItems(
+        items.map((option) => {
+          option.checked = undefined;
+          return option;
+        })
+      );
+
+      // update URL params based on filter on page
+      if (filterName === 'metricTypes') {
+        setUrlMetricTypesFilter('');
+      } else if (filterName === 'dataStreams') {
+        setUrlDataStreamsFilter('');
+      }
+
+      if (typeof onChangeFilterOptions !== 'undefined') {
+        onChangeFilterOptions([]);
+      }
+    }, [
+      setItems,
+      items,
+      filterName,
+      onChangeFilterOptions,
+      setUrlMetricTypesFilter,
+      setUrlDataStreamsFilter,
+    ]);
+
     return (
       <ChartsFilterPopover
         closePopover={onClosePopover}
@@ -180,6 +210,15 @@ export const ChartsFilter = memo(
                   </EuiPopoverTitle>
                 )}
                 {list}
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <ClearAllButton
+                      data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
+                      isDisabled={!hasActiveFilters}
+                      onClick={onClearAll}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </div>
             );
           }}
