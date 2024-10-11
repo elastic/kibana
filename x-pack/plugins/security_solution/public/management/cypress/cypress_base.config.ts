@@ -71,7 +71,6 @@ export const getCypressBaseConfig = (
         grepFilterSpecs: true,
         grepOmitFiltered: true,
         IS_CI: process.env.CI,
-        runnerUi: true,
       },
 
       e2e: {

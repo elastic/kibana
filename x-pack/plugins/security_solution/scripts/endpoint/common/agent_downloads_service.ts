@@ -85,7 +85,6 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   ): Promise<DownloadedAgentInfo> {
     this.log.debug(`Downloading and storing: ${agentDownloadUrl}`);
 
-    // TODO: should we add "retry" attempts to file downloads?
     this.log.info(`Downloading agent from [${agentDownloadUrl}]`);
 
     await this.ensureExists();
@@ -99,29 +98,51 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       return newDownloadInfo;
     }
 
-    try {
-      this.log.info(
-        `Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
-      );
-      const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
-      this.log.info(`outputStream: ${outputStream}`);
+    let attempt = 0;
+    const maxAttempts = 2;
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      const interruptions = await handleProcessInterruptions(
-        async () => {
-          const { body } = await nodeFetch(agentDownloadUrl);
-          await finished(body.pipe(outputStream));
-        },
-        () => {
-          fs.unlinkSync(newDownloadInfo.fullFilePath);
+    while (attempt < maxAttempts) {
+      try {
+        this.log.info(
+          `Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+        );
+        const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
+
+        await handleProcessInterruptions(
+          async () => {
+            try {
+              const { body } = await nodeFetch(agentDownloadUrl);
+              await finished(body.pipe(outputStream));
+            } catch (error) {
+              this.log.error(`Error during fetch: ${error.message}`);
+              throw error;
+            }
+          },
+          () => {
+            fs.promises.unlink(newDownloadInfo.fullFilePath);
+          }
+        );
+
+        this.log.info(
+          `Downloaded agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+        );
+        await this.cleanupDownloads();
+        this.log.info(`finished cleanupDownloads`);
+        return newDownloadInfo;
+      } catch (e) {
+        this.log.error(
+          `Failed to download agent from [${agentDownloadUrl}] on attempt ${attempt + 1}`
+        );
+        await unlink(newDownloadInfo.fullFilePath);
+        attempt += 1;
+
+        if (attempt >= maxAttempts) {
+          throw e;
         }
-      );
-      this.log.info(`interruptions: ${interruptions}`);
-    } catch (e) {
-      this.log.error(`Failed to download agent from [${agentDownloadUrl}]`);
-      // Try to clean up download case it failed halfway through
-      await unlink(newDownloadInfo.fullFilePath);
-
-      throw e;
+        await delay(attempt * 1000); // Add exponential backoff
+        this.log.info(`Retrying download...`);
+      }
     }
 
     this.log.info(
@@ -134,41 +155,53 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   }
 
   public async cleanupDownloads(): Promise<{ deleted: string[] }> {
-    this.log.debug(`Performing cleanup of cached Agent downlaods`);
+    this.log.debug(`Performing cleanup of cached Agent downloads`);
 
     const settings = await this.get();
     const maxAgeDate = new Date();
     const response: { deleted: string[] } = { deleted: [] };
 
-    maxAgeDate.setMilliseconds(settings.maxFileAge * -1); // `* -1` to set time back
+    maxAgeDate.setMilliseconds(settings.maxFileAge * -1); // Go back in time by `maxFileAge`
 
-    // If cleanup already happen within the file age, then nothing to do. Exit.
+    // If cleanup already happened recently, exit early.
     if (settings.lastCleanup > maxAgeDate.toISOString()) {
+      this.log.debug(`Skipping cleanup as lastCleanup is more recent than maxFileAge.`);
       return response;
     }
 
+    // Update lastCleanup time
     await this.save({
       ...settings,
       lastCleanup: new Date().toISOString(),
     });
 
-    const deleteFilePromises: Array<Promise<unknown>> = [];
-    const allFiles = await readdir(this.downloadsDirFullPath);
+    try {
+      const allFiles = await readdir(this.downloadsDirFullPath);
 
-    for (const fileName of allFiles) {
-      const filePath = join(this.downloadsDirFullPath, fileName);
-      const fileStats = await stat(filePath);
+      // Create an array of promises for file deletion
+      const deleteFilePromises = allFiles.map(async (fileName) => {
+        const filePath = join(this.downloadsDirFullPath, fileName);
+        const fileStats = await stat(filePath);
 
-      if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
-        deleteFilePromises.push(unlink(filePath));
-        response.deleted.push(filePath);
-      }
+        // Only delete files older than the maxAgeDate
+        if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
+          try {
+            await unlink(filePath); // Async version of deleting the file
+            response.deleted.push(filePath); // Track successfully deleted files
+          } catch (err) {
+            this.log.error(`Failed to delete file: ${filePath}. Error: ${err.message}`);
+          }
+        }
+      });
+
+      // Wait for all delete operations to finish
+      await Promise.allSettled(deleteFilePromises);
+
+      this.log.debug(`Deleted [${response.deleted.length}] file(s)`);
+      this.log.verbose(`Files deleted:\n${response.deleted.join('\n')}`);
+    } catch (err) {
+      this.log.error(`Error during cleanup: ${err.message}`);
     }
-
-    await Promise.allSettled(deleteFilePromises);
-
-    this.log.debug(`Deleted [${response.deleted.length}] file(s)`);
-    this.log.verbose(`files deleted:\n`, response.deleted.join('\n'));
 
     return response;
   }

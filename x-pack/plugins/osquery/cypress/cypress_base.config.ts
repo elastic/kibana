@@ -50,7 +50,6 @@ export const getCypressBaseConfig = (
       env: {
         grepFilterSpecs: true,
         grepOmitFiltered: true,
-        runnerUi: true,
       },
 
       e2e: {
