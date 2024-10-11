@@ -52,7 +52,7 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ApmApiClientKey =
+export type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'

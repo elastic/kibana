@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmApiError } from '../../common/apm_api_supertest';
+import { ApmApiClientKey } from '../../../common/config';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -56,6 +57,22 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
         await createCustomLink(customLink);
       });
 
+      it('should fail if the user does not have write access', async () => {
+        const customLink = {
+          url: 'https://elastic.co',
+          label: 'with filters',
+          filters: [
+            { key: 'service.name', value: 'baz' },
+            { key: 'transaction.type', value: 'qux' },
+          ],
+        } as CustomLink;
+
+        const err = await expectToReject<ApmApiError>(() =>
+          createCustomLink(customLink, 'apmAllPrivilegesWithoutWriteSettingsUser')
+        );
+        expect(err.res.status).to.be(403);
+      });
+
       it('fetches a custom link', async () => {
         const { status, body } = await searchCustomLinks({
           'service.name': 'baz',
@@ -73,59 +90,80 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
           ],
         });
       });
+      for (const user of [
+        'writeUser',
+        'apmReadPrivilegesWithWriteSettingsUser',
+      ] as ApmApiClientKey[]) {
+        it(`creates a custom link as ${user}`, async () => {
+          const customLink = {
+            url: 'https://elastic.co',
+            label: 'with filters',
+            filters: [
+              { key: 'service.name', value: 'baz' },
+              { key: 'transaction.type', value: 'qux' },
+            ],
+          } as CustomLink;
 
-      it('updates a custom link', async () => {
-        const { status, body } = await searchCustomLinks({
-          'service.name': 'baz',
-          'transaction.type': 'qux',
-        });
-        expect(status).to.equal(200);
-
-        const id = body.customLinks[0].id!;
-        await updateCustomLink(id, {
-          label: 'foo',
-          url: 'https://elastic.co?service.name={{service.name}}',
-          filters: [
-            { key: 'service.name', value: 'quz' },
-            { key: 'transaction.name', value: 'bar' },
-          ],
-        });
-
-        const { status: newStatus, body: newBody } = await searchCustomLinks({
-          'service.name': 'quz',
-          'transaction.name': 'bar',
+          await createCustomLink(customLink, user);
         });
 
-        const { label, url, filters } = newBody.customLinks[0];
-        expect(newStatus).to.equal(200);
-        expect({ label, url, filters }).to.eql({
-          label: 'foo',
-          url: 'https://elastic.co?service.name={{service.name}}',
-          filters: [
-            { key: 'service.name', value: 'quz' },
-            { key: 'transaction.name', value: 'bar' },
-          ],
-        });
-      });
+        it(`updates a custom link as ${user}`, async () => {
+          const { status, body } = await searchCustomLinks({
+            'service.name': 'baz',
+            'transaction.type': 'qux',
+          });
+          expect(status).to.equal(200);
 
-      it('deletes a custom link', async () => {
-        const { status, body } = await searchCustomLinks({
-          'service.name': 'quz',
-          'transaction.name': 'bar',
-        });
-        expect(status).to.equal(200);
-        expect(body.customLinks.length).to.be(1);
+          const id = body.customLinks[0].id!;
+          await updateCustomLink(
+            id,
+            {
+              label: 'foo',
+              url: 'https://elastic.co?service.name={{service.name}}',
+              filters: [
+                { key: 'service.name', value: 'quz' },
+                { key: 'transaction.name', value: 'bar' },
+              ],
+            },
+            user
+          );
 
-        const id = body.customLinks[0].id!;
-        await deleteCustomLink(id);
+          const { status: newStatus, body: newBody } = await searchCustomLinks({
+            'service.name': 'quz',
+            'transaction.name': 'bar',
+          });
 
-        const { status: newStatus, body: newBody } = await searchCustomLinks({
-          'service.name': 'quz',
-          'transaction.name': 'bar',
+          const { label, url, filters } = newBody.customLinks[0];
+          expect(newStatus).to.equal(200);
+          expect({ label, url, filters }).to.eql({
+            label: 'foo',
+            url: 'https://elastic.co?service.name={{service.name}}',
+            filters: [
+              { key: 'service.name', value: 'quz' },
+              { key: 'transaction.name', value: 'bar' },
+            ],
+          });
         });
-        expect(newStatus).to.equal(200);
-        expect(newBody.customLinks.length).to.be(0);
-      });
+
+        it(`deletes a custom link as ${user}`, async () => {
+          const { status, body } = await searchCustomLinks({
+            'service.name': 'quz',
+            'transaction.name': 'bar',
+          });
+          expect(status).to.equal(200);
+          expect(body.customLinks.length).to.be(1);
+
+          const id = body.customLinks[0].id!;
+          await deleteCustomLink(id, user);
+
+          const { status: newStatus, body: newBody } = await searchCustomLinks({
+            'service.name': 'quz',
+            'transaction.name': 'bar',
+          });
+          expect(newStatus).to.equal(200);
+          expect(newBody.customLinks.length).to.be(0);
+        });
+      }
 
       it('fetches a transaction sample', async () => {
         const response = await apmApiClient.readUser({
@@ -151,10 +189,10 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     });
   }
 
-  async function createCustomLink(customLink: CustomLink) {
+  async function createCustomLink(customLink: CustomLink, user: ApmApiClientKey = 'writeUser') {
     log.debug('creating configuration', customLink);
 
-    return apmApiClient.writeUser({
+    return apmApiClient[user]({
       endpoint: 'POST /internal/apm/settings/custom_links',
       params: {
         body: customLink,
@@ -162,10 +200,14 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     });
   }
 
-  async function updateCustomLink(id: string, customLink: CustomLink) {
+  async function updateCustomLink(
+    id: string,
+    customLink: CustomLink,
+    user: ApmApiClientKey = 'writeUser'
+  ) {
     log.debug('updating configuration', id, customLink);
 
-    return apmApiClient.writeUser({
+    return apmApiClient[user]({
       endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
       params: {
         path: { id },
@@ -174,10 +216,10 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     });
   }
 
-  async function deleteCustomLink(id: string) {
+  async function deleteCustomLink(id: string, user: ApmApiClientKey = 'writeUser') {
     log.debug('deleting configuration', id);
 
-    return apmApiClient.writeUser({
+    return apmApiClient[user]({
       endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
       params: { path: { id } },
     });

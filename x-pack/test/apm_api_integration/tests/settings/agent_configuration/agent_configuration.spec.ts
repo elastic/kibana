@@ -12,6 +12,7 @@ import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmApiClientKey } from '../../../common/config';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { addAgentConfigEtagMetric } from './add_agent_config_metrics';
 
@@ -51,9 +52,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
   }
 
-  function createConfiguration(configuration: AgentConfigurationIntake, { user = 'write' } = {}) {
+  function createConfiguration(
+    configuration: AgentConfigurationIntake,
+    { user = 'writeUser' as ApmApiClientKey } = {}
+  ) {
     log.debug('creating configuration', configuration.service);
-    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
+    const supertestClient = apmApiClient[user];
 
     return supertestClient({
       endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
@@ -61,9 +65,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
   }
 
-  function updateConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
+  function updateConfiguration(
+    config: AgentConfigurationIntake,
+    { user = 'writeUser' as ApmApiClientKey } = {}
+  ) {
     log.debug('updating configuration', config.service);
-    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
+    const supertestClient = apmApiClient[user];
 
     return supertestClient({
       endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
@@ -71,9 +78,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
   }
 
-  function deleteConfiguration({ service }: AgentConfigurationIntake, { user = 'write' } = {}) {
+  function deleteConfiguration(
+    { service }: AgentConfigurationIntake,
+    { user = 'writeUser' as ApmApiClientKey } = {}
+  ) {
     log.debug('deleting configuration', service);
-    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
+    const supertestClient = apmApiClient[user];
 
     return supertestClient({
       endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
@@ -111,7 +121,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       describe('as a read-only user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
         it('does not allow creating config', async () => {
-          await expectStatusCode(() => createConfiguration(newConfig, { user: 'read' }), 403);
+          await expectStatusCode(() => createConfiguration(newConfig, { user: 'readUser' }), 403);
         });
 
         describe('when a configuration already exists', () => {
@@ -119,11 +129,47 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           after(async () => deleteConfiguration(newConfig));
 
           it('does not allow updating the config', async () => {
-            await expectStatusCode(() => updateConfiguration(newConfig, { user: 'read' }), 403);
+            await expectStatusCode(() => updateConfiguration(newConfig, { user: 'readUser' }), 403);
           });
 
           it('does not allow deleting the config', async () => {
-            await expectStatusCode(() => deleteConfiguration(newConfig, { user: 'read' }), 403);
+            await expectStatusCode(() => deleteConfiguration(newConfig, { user: 'readUser' }), 403);
+          });
+        });
+      });
+
+      describe('as a all privileges without modify settings user', () => {
+        const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
+        it('does not allow creating config', async () => {
+          await expectStatusCode(
+            () =>
+              createConfiguration(newConfig, { user: 'apmAllPrivilegesWithoutWriteSettingsUser' }),
+            403
+          );
+        });
+
+        describe('when a configuration already exists', () => {
+          before(async () => createConfiguration(newConfig));
+          after(async () => deleteConfiguration(newConfig));
+
+          it('does not allow updating the config', async () => {
+            await expectStatusCode(
+              () =>
+                updateConfiguration(newConfig, {
+                  user: 'apmAllPrivilegesWithoutWriteSettingsUser',
+                }),
+              403
+            );
+          });
+
+          it('does not allow deleting the config', async () => {
+            await expectStatusCode(
+              () =>
+                deleteConfiguration(newConfig, {
+                  user: 'apmAllPrivilegesWithoutWriteSettingsUser',
+                }),
+              403
+            );
           });
         });
       });
@@ -151,6 +197,23 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
           // delete config
           await deleteConfiguration(newConfig);
+
+          // assert that config was deleted
+          await expectMissing(() => searchConfigurations(searchParams));
+        });
+
+        it('can create and delete config as read privileges and modify settings user', async () => {
+          // assert that config does not exist
+          await expectMissing(() => searchConfigurations(searchParams));
+
+          // create config
+          await createConfiguration(newConfig, { user: 'apmReadPrivilegesWithWriteSettingsUser' });
+
+          // assert that config now exists
+          await expectExists(() => searchConfigurations(searchParams));
+
+          // delete config
+          await deleteConfiguration(newConfig, { user: 'apmReadPrivilegesWithWriteSettingsUser' });
 
           // assert that config was deleted
           await expectMissing(() => searchConfigurations(searchParams));

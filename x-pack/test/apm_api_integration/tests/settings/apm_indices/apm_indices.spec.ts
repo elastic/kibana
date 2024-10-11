@@ -11,6 +11,7 @@ import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import expect from '@kbn/expect';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apmIndicesTests({ getService }: FtrProviderContext) {
@@ -31,7 +32,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
     }
   }
 
-  registry.when('APM Indices', { config: 'basic', archives: [] }, () => {
+  registry.when('APM Indices', { config: 'trial', archives: [] }, () => {
     beforeEach(async () => {
       await deleteSavedObject();
     });
@@ -71,6 +72,42 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
 
       expect(readResponse.status).to.be(200);
       expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
+    });
+
+    it('updates apm indices as read privileges with modify settings user', async () => {
+      const INDEX_VALUE = 'foo-*';
+
+      const writeResponse = await apmApiClient.apmReadPrivilegesWithWriteSettingsUser({
+        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        params: {
+          body: { transaction: INDEX_VALUE },
+        },
+      });
+      expect(writeResponse.status).to.be(200);
+
+      const readResponse = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/settings/apm-indices',
+      });
+
+      expect(readResponse.status).to.be(200);
+      expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
+    });
+
+    it('fails to update apm indices as all privilege without modify settings', async () => {
+      const INDEX_VALUE = 'foo-*';
+
+      try {
+        await apmApiClient.apmAllPrivilegesWithoutWriteSettingsUser({
+          endpoint: 'POST /internal/apm/settings/apm-indices/save',
+          params: {
+            body: { transaction: INDEX_VALUE },
+          },
+        });
+        expect(true).to.be(false);
+      } catch (e) {
+        const err = e as ApmApiError;
+        expect(err.res.status).to.be(403);
+      }
     });
 
     it('updates apm indices removing legacy sourcemap', async () => {
