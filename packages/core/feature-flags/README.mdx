@@ -18,6 +18,10 @@ For a code example, refer to the [Feature Flags Example plugin](../../../example
 
 ## Registering a feature flag
 
+> [!IMPORTANT]
+> At the moment, we follow a manual process to manage our feature flags. Refer to [this repo](https://github.com/elastic/kibana-feature-flags) to learn more about our current internal process.
+> Our goal is to achieve the _gitops_ approach detailed below. But, at the moment, it's not available, and you can skip it if you want.
+
 Kibana follows a _gitops_ approach when managing feature flags. To declare a feature flag, add your flags definitions in
 your plugin's `server/index.ts` file:
 
