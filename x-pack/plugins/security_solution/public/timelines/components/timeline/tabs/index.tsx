@@ -9,9 +9,11 @@ import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -38,7 +40,8 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -248,6 +251,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
   const shouldShowESQLTab = useMemo(() => {
@@ -273,6 +280,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
+  // old notes system (through timeline)
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -281,11 +289,41 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     return [...globalTimelineNoteIds, ...eventNoteIds];
   }, [globalTimelineNoteIds, eventIdToNoteIds]);
 
-  const numberOfNotes = useMemo(
+  const numberOfNotesOldSystem = useMemo(
     () =>
       appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
       (isEmpty(timelineDescription) ? 0 : 1),
     [appNotes, allTimelineNoteIds, timelineDescription]
+  );
+
+  const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
+  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+  const isTimelineSaved: boolean = useMemo(
+    () => timelineSavedObjectId.length > 0,
+    [timelineSavedObjectId]
+  );
+
+  // new note system
+  const fetchNotes = useCallback(
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
+    [dispatch, timelineSavedObjectId]
+  );
+  useEffect(() => {
+    if (isTimelineSaved) {
+      fetchNotes();
+    }
+  }, [fetchNotes, isTimelineSaved]);
+
+  const numberOfNotesNewSystem = useSelector((state: State) =>
+    selectSortedNotesBySavedObjectId(state, {
+      savedObjectId: timelineSavedObjectId,
+      sort: { field: 'created', direction: 'asc' },
+    })
+  );
+
+  const numberOfNotes = useMemo(
+    () => (securitySolutionNotesEnabled ? numberOfNotesNewSystem.length : numberOfNotesOldSystem),
+    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesEnabled]
   );
 
   const setActiveTab = useCallback(

@@ -67,6 +67,8 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { PermissionsError } from '../../../../../fleet/layouts';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -87,6 +89,7 @@ import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
 import './index.scss';
+import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -135,6 +138,11 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
+  /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+   ** to redirect back to the onboarding page after adding an integration
+   */
+  const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
+  const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
 
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
@@ -388,7 +396,7 @@ export function Detail() {
         hash,
       });
 
-      const navigateOptions = getInstallPkgRouteOptions({
+      const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
@@ -398,6 +406,25 @@ export function Detail() {
         isGuidedOnboardingActive,
         pkgkey,
       });
+
+      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+       ** to redirect back to the onboarding page after adding an integration
+       */
+      const navigateOptions: InstallPkgRouteOptions =
+        onboardingAppId && onboardingLink
+          ? [
+              defaultNavigateOptions[0],
+              {
+                ...defaultNavigateOptions[1],
+                state: {
+                  ...(defaultNavigateOptions[1]?.state ?? {}),
+                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelUrl: onboardingLink,
+                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                },
+              },
+            ]
+          : defaultNavigateOptions;
 
       services.application.navigateToApp(...navigateOptions);
     },
@@ -410,6 +437,8 @@ export function Detail() {
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
+      onboardingAppId,
+      onboardingLink,
       pathname,
       pkgkey,
       search,
@@ -799,7 +828,14 @@ export function Detail() {
             <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
-            <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+            {canReadIntegrationPolicies ? (
+              <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+            ) : (
+              <PermissionsError
+                error="MISSING_PRIVILEGES"
+                requiredFleetRole="Agent Policies Read and Integrations Read"
+              />
+            )}
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />

@@ -7,6 +7,34 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const AI_ASSISTANT_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.aiAssistantSettings',
+  {
+    defaultMessage: 'AI Assistant settings',
+  }
+);
+
+export const ANONYMIZATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymization',
+  {
+    defaultMessage: 'Anonymization',
+  }
+);
+
+export const KNOWLEDGE_BASE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBase',
+  {
+    defaultMessage: 'Knowledge Base',
+  }
+);
+
+export const ALERTS_TO_ANALYZE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.alertsToAnalyze',
+  {
+    defaultMessage: 'Alerts to analyze',
+  }
+);
+
 export const RESET_CONVERSATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.resetConversation',
   {

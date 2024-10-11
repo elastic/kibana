@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
@@ -15,11 +17,21 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function deleteActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
+  const retry = getService('retry');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('delete', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    before(async () => {
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
+    });
+    after(async () => {
+      await esTestIndexTool.destroy();
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -209,6 +221,77 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               });
               break;
             default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle delete hooks appropriately', async () => {
+          const source = uuidv4();
+          const encryptedValue = 'This value should be encrypted';
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'Hooked action',
+              connector_type_id: 'test.connector-with-hooks',
+              config: {
+                index: ES_TEST_INDEX_NAME,
+                source,
+              },
+              secrets: {
+                encrypted: encryptedValue,
+              },
+            })
+            .expect(200);
+
+          // clear out docs from create
+          await esTestIndexTool.destroy();
+          await esTestIndexTool.setup();
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          const searchResult = await esTestIndexTool.search(source);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(searchResult.body.hits.hits.length).to.eql(0);
+              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+
+              const refs: string[] = [];
+              for (const hit of searchResult.body.hits.hits) {
+                const doc = hit._source as any;
+
+                const reference = doc.reference;
+                delete doc.reference;
+                refs.push(reference);
+
+                const expected = {
+                  state: {
+                    connectorId: createdAction.id,
+                    config: { index: ES_TEST_INDEX_NAME, source },
+                  },
+                  source,
+                };
+                expect(doc).to.eql(expected);
+              }
+
+              refs.sort();
+              expect(refs).to.eql(['post-delete']);
+              break;
+            default:
+              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });

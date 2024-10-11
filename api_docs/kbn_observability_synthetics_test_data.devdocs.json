@@ -1,0 +1,98 @@
+{
+  "id": "@kbn/observability-synthetics-test-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.makeDownSummary",
+        "type": "Function",
+        "tags": [],
+        "label": "makeDownSummary",
+        "description": [],
+        "signature": [
+          "({ name, timestamp, monitorId, location, configId, }?: ",
+          "DocOverrides",
+          ") => { summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; error: { message: string; type: string; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; id: string; up: number; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; certificate_not_valid_before: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; certificate_not_valid_after: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
+        ],
+        "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.makeDownSummary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  timestamp,\n  monitorId,\n  location,\n  configId,\n}",
+            "description": [],
+            "signature": [
+              "DocOverrides"
+            ],
+            "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.makeUpSummary",
+        "type": "Function",
+        "tags": [],
+        "label": "makeUpSummary",
+        "description": [],
+        "signature": [
+          "({ name, timestamp, monitorId, configId, testRunId, location, }?: ",
+          "DocOverrides",
+          ") => { test_run_id?: string | undefined; summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; up: number; id: string; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; certificate_not_valid_before: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; certificate_not_valid_after: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
+        ],
+        "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.makeUpSummary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  timestamp,\n  monitorId,\n  configId,\n  testRunId,\n  location,\n}",
+            "description": [],
+            "signature": [
+              "DocOverrides"
+            ],
+            "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -9,7 +9,7 @@ import type {
   PluginInitializerContext,
   PluginConfigDescriptor,
 } from '@kbn/core/server';
-import { DataUsageConfig } from './config';
+import { DataUsageConfigType } from './config';
 
 import { DataUsagePlugin } from './plugin';
 import type {
@@ -19,11 +19,11 @@ import type {
   DataUsageStartDependencies,
 } from './types';
 
-import { config as configSchema } from './config';
+import { configSchema } from './config';
 
 export type { DataUsageServerSetup, DataUsageServerStart };
 
-export const config: PluginConfigDescriptor<DataUsageConfig> = {
+export const config: PluginConfigDescriptor<DataUsageConfigType> = {
   schema: configSchema,
 };
 
@@ -32,5 +32,5 @@ export const plugin: PluginInitializer<
   DataUsageServerStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<DataUsageConfig>) =>
+> = async (pluginInitializerContext: PluginInitializerContext<DataUsageConfigType>) =>
   await new DataUsagePlugin(pluginInitializerContext);

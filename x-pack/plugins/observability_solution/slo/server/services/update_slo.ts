@@ -70,8 +70,8 @@ export class UpdateSLO {
 
     const rollbackOperations = [];
 
-    await this.repository.save(updatedSlo);
-    rollbackOperations.push(() => this.repository.save(originalSlo));
+    await this.repository.update(updatedSlo);
+    rollbackOperations.push(() => this.repository.update(originalSlo));
 
     if (!requireRevisionBump) {
       // At this point, we still need to update the sli and summary pipeline to include the changes (id and revision in the rollup index) and (name, desc, tags, ...) in the summary index

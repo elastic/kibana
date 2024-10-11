@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import GeminiParamsFields from './params';
-import { DEFAULT_GEMINI_URL, SUB_ACTION } from '../../../common/gemini/constants';
+import { SUB_ACTION } from '../../../common/gemini/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 
 const messageVariables = [
@@ -48,37 +48,9 @@ describe('Gemini Params Fields renders', () => {
     };
     const editAction = jest.fn();
     const errors = {};
-    const actionConnector = {
-      secrets: {
-        credentialsJSON: JSON.stringify({
-          type: 'service_account',
-          project_id: '',
-          private_key_id: '',
-          private_key: '-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n',
-          client_email: '',
-          client_id: '',
-          auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-          token_uri: 'https://oauth2.googleapis.com/token',
-          auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-          client_x509_cert_url: '',
-        }),
-      },
-      id: 'test',
-      actionTypeId: '.gemini',
-      isPreconfigured: false,
-      isSystemAction: false as const,
-      isDeprecated: false,
-      name: 'My Gemini Connector',
-      config: {
-        apiUrl: DEFAULT_GEMINI_URL,
-        gcpRegion: 'us-central-1',
-        gcpProjectID: 'test-project',
-      },
-    };
     render(
       <GeminiParamsFields
         actionParams={actionParams}
-        actionConnector={actionConnector}
         editAction={editAction}
         index={0}
         messageVariables={messageVariables}

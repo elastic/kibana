@@ -19,7 +19,7 @@ import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
@@ -270,7 +270,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
         runCategorizeRequest(

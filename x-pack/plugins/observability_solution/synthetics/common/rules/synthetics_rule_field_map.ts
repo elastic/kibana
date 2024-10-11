@@ -17,8 +17,14 @@ export const syntheticsRuleFieldMap: FieldMap = {
     type: 'keyword',
     required: false,
   },
+  'observer.name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'observer.geo.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // monitor status alert fields
@@ -43,6 +49,10 @@ export const syntheticsRuleFieldMap: FieldMap = {
     array: true,
     required: false,
   },
+  'monitor.state.id': {
+    type: 'keyword',
+    required: false,
+  },
   configId: {
     type: 'keyword',
     required: false,
@@ -53,10 +63,12 @@ export const syntheticsRuleFieldMap: FieldMap = {
   },
   'location.id': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   'location.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // tls alert fields

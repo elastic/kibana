@@ -70,6 +70,14 @@ export const DistributionBar = () => {
       <DistributionBarComponent stats={mockStatsAlerts} />
       <EuiSpacer size={'m'} />
     </React.Fragment>,
+    <React.Fragment key={'hideLastTooltip'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Hide last tooltip'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsAlerts} hideLastTooltip />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
     <React.Fragment key={'empty'}>
       <EuiTitle size={'xs'}>
         <h4>{'Empty state'}</h4>

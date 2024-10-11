@@ -378,19 +378,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [
-      visType,
-      visParams,
-      chartBaseTheme,
-      containerDimensions,
-      rescaleFactor,
-      hasOpenedOnAggBasedEditor,
-    ]
+    [visType, visParams, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');

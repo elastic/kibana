@@ -14,7 +14,7 @@ import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
-import { createCategorizeQuery } from '@kbn/aiops-log-pattern-analysis/create_categorize_query';
+import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -32,7 +32,7 @@ export function useValidateFieldRequest() {
       runtimeMappings: MappingRuntimeFields | undefined,
       headers?: HttpFetchOptions['headers']
     ) => {
-      const query = createCategorizeQuery(queryIn, timeField, timeRange);
+      const query = createDefaultQuery(queryIn, timeField, timeRange);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
         {

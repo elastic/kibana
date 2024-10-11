@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -48,14 +49,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'observabilityOnboarding',
         });
 
-        // check the AI & ML subsection
-        await solutionNavigation.sidenav.openSection('observability_project_nav.aiMl'); // open AI & ML subsection
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Anomaly Detection' });
+        // open apm (Application) panel using the link button (not the button icon)
+        await solutionNavigation.sidenav.openPanel('apm', { button: 'link' });
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
+          expect(isOpen).to.be(true);
+        }
+
+        await solutionNavigation.sidenav.closePanel('apm', { button: 'link' });
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
+          expect(isOpen).to.be(false);
+        }
+
+        // open Infrastructure panel using the icon button and navigate to some link inside the panel
+        await solutionNavigation.sidenav.openPanel('metrics', { button: 'icon' });
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
+          expect(isOpen).to.be(true);
+        }
+        await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'ml:anomalyDetection',
+          text: 'Infrastructure inventory',
         });
+
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
+          expect(isOpen).to.be(false);
+        }
 
         // navigate to a different section
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');

@@ -157,6 +157,7 @@ describe('UsageCountersService', () => {
             },
           ],
           Object {
+            "refresh": false,
             "upsertAttributes": Object {
               "counterName": "counterA",
               "counterType": "count",
@@ -175,6 +176,7 @@ describe('UsageCountersService', () => {
             },
           ],
           Object {
+            "refresh": false,
             "upsertAttributes": Object {
               "counterName": "counterB",
               "counterType": "count",

@@ -10,11 +10,14 @@ import {
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
+  GEMINI_USER_PROMPT,
+  STRUCTURED_SYSTEM_PROMPT,
 } from './nodes/translations';
 
 export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
     ['placeholder', '{agent_scratchpad}'],
@@ -23,62 +26,9 @@ export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
 export const systemPrompts = {
   openai: DEFAULT_SYSTEM_PROMPT,
   bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
-  gemini: `${DEFAULT_SYSTEM_PROMPT} ${GEMINI_SYSTEM_PROMPT}`,
-  structuredChat: `Respond to the human as helpfully and accurately as possible. You have access to the following tools:
-
-{tools}
-
-The tool action_input should ALWAYS follow the tool JSON schema args.
-
-Valid "action" values: "Final Answer" or {tool_names}
-
-Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).
-
-Provide only ONE action per $JSON_BLOB, as shown:
-
-\`\`\`
-
-{{
-
-  "action": $TOOL_NAME,
-
-  "action_input": $TOOL_INPUT
-
-}}
-
-\`\`\`
-
-Follow this format:
-
-Question: input question to answer
-
-Thought: consider previous and subsequent steps
-
-Action:
-
-\`\`\`
-
-$JSON_BLOB
-
-\`\`\`
-
-Observation: action result
-
-... (repeat Thought/Action/Observation N times)
-
-Thought: I know what to respond
-
-Action:
-
-\`\`\`
-
-{{
-
-  "action": "Final Answer",
-
-  "action_input": "Final response to human"}}
-
-Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:\`\`\`$JSON_BLOB\`\`\`then Observation`,
+  // The default prompt overwhelms gemini, do not prepend
+  gemini: GEMINI_SYSTEM_PROMPT,
+  structuredChat: STRUCTURED_SYSTEM_PROMPT,
 };
 
 export const openAIFunctionAgentPrompt = formatPrompt(systemPrompts.openai);
@@ -90,6 +40,7 @@ export const geminiToolCallingAgentPrompt = formatPrompt(systemPrompts.gemini);
 export const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     [
       'human',
@@ -98,3 +49,16 @@ export const formatPromptStructured = (prompt: string, additionalPrompt?: string
   ]);
 
 export const structuredChatAgentPrompt = formatPromptStructured(systemPrompts.structuredChat);
+
+/**
+ * If Gemini is the llmType,
+ * Adds a user prompt for the latest message in a conversation
+ * @param prompt
+ * @param llmType
+ */
+export const formatLatestUserMessage = (prompt: string, llmType?: string): string => {
+  if (llmType === 'gemini') {
+    return `${GEMINI_USER_PROMPT}${prompt}`;
+  }
+  return prompt;
+};

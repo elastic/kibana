@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { generateOpenApiDocument } from './src/generate_oas';
+export {
+  generateOpenApiDocument,
+  type GenerateOpenApiDocumentOptionsFilters,
+} from './src/generate_oas';

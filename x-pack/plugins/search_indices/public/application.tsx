@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { SearchApiKeyProvider } from '@kbn/search-api-keys-components';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 import { SearchIndicesServicesContextDeps } from './types';
 
@@ -29,7 +30,9 @@ export const renderApp = async (
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
-              <App />
+              <SearchApiKeyProvider>
+                <App />
+              </SearchApiKeyProvider>
             </QueryClientProvider>
           </I18nProvider>
         </UsageTrackerContextProvider>

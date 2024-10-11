@@ -21,7 +21,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
-import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
+import { AiopsAppContext, type AiopsAppContextValue } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
@@ -39,7 +39,7 @@ export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  appContextValue: AiopsAppContextValue;
   /** Timestamp for start of initial analysis */
   initialAnalysisStart?: number | WindowParameters;
   /** Optional time range */
@@ -57,13 +57,11 @@ export interface LogRateAnalysisContentWrapperProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
-  appDependencies,
+  appContextValue,
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
@@ -71,7 +69,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barHighlightColorOverride,
   onAnalysisCompleted,
   showFrozenDataTierChoice = true,
-  embeddingOrigin,
 }) => {
   if (!dataView) return null;
 
@@ -82,13 +79,13 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   }
 
   const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
 
   return (
-    <AiopsAppContext.Provider value={appDependencies}>
+    <AiopsAppContext.Provider value={appContextValue}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch: null }}>
           <LogRateAnalysisReduxProvider initialAnalysisStart={initialAnalysisStart}>
@@ -103,7 +100,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
-                  embeddingOrigin={embeddingOrigin}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

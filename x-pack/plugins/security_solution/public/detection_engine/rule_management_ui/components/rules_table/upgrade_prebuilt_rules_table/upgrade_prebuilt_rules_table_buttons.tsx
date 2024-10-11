@@ -7,10 +7,10 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import type { RuleUpgradeState } from './use_prebuilt_rules_upgrade_state';
 
 interface UpgradePrebuiltRulesTableButtonsProps {
   selectedRules: RuleUpgradeState[];

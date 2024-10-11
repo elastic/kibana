@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import type { Criteria } from '@elastic/eui';
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  ApiKeyToInvalidate,
+  CategorizedApiKey,
+  QueryApiKeyResult,
+} from '@kbn/security-plugin-types-common';
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from '@kbn/security-plugin-types-server';
-
-import type {
-  ApiKeyToInvalidate,
-  CategorizedApiKey,
-  QueryApiKeyResult,
-} from '@kbn/security-plugin-types-common';
-import type { Criteria } from '@elastic/eui';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 

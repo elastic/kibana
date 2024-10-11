@@ -11,17 +11,18 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../../state/defaults';
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 import type { CanvasWorkpad } from '../../../../types';
 
 export const useCreateWorkpad = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
   const history = useHistory();
 
   return useCallback(
     async (_workpad?: CanvasWorkpad | null) => {
+      const workpadService = getCanvasWorkpadService();
       const workpad = _workpad || (getDefaultWorkpad() as CanvasWorkpad);
 
       try {
@@ -34,7 +35,7 @@ export const useCreateWorkpad = () => {
       }
       return;
     },
-    [notifyService, history, workpadService]
+    [notifyService, history]
   );
 };
 

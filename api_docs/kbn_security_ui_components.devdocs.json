@@ -125,7 +125,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
             "deprecated": false,
@@ -857,7 +857,7 @@
         "label": "FeatureTableCell",
         "description": [],
         "signature": [
-          "({ feature, className }: Props) => JSX.Element"
+          "({ feature, className }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/components/feature_table_cell.tsx",
         "deprecated": false,

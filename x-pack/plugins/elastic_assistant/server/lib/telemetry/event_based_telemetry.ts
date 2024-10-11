@@ -9,7 +9,7 @@ import type { EventTypeOpts } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   resultCount: number;
   responseTime: number;
 }> = {
@@ -25,6 +25,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     resultCount: {
@@ -44,7 +45,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
 
 export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   errorMessage: string;
 }> = {
   eventType: 'knowledge_base_execution_error',
@@ -59,6 +60,7 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     errorMessage: {

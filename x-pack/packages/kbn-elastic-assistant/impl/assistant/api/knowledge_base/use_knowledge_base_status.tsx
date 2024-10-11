@@ -89,7 +89,7 @@ export const useInvalidateKnowledgeBaseStatus = () => {
 export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean => {
   return (
     (kbStatus?.elser_exists &&
-      kbStatus?.esql_exists &&
+      kbStatus?.security_labs_exists &&
       kbStatus?.index_exists &&
       kbStatus?.pipeline_exists) ??
     false

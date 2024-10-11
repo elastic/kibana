@@ -20,8 +20,9 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  */
 export const AnalyticsNoDataPage = ({
   onDataViewCreated,
-  onESQLNavigationComplete,
   allowAdHocDataView,
+  onTryESQL,
+  onESQLNavigationComplete,
 }: AnalyticsNoDataPageProps) => {
   const { customBranding, ...services } = useServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$) ?? false;
@@ -33,6 +34,7 @@ export const AnalyticsNoDataPage = ({
       allowAdHocDataView={allowAdHocDataView}
       onDataViewCreated={onDataViewCreated}
       onESQLNavigationComplete={onESQLNavigationComplete}
+      onTryESQL={onTryESQL}
     />
   );
 };

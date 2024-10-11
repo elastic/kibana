@@ -69,3 +69,5 @@ spec:
           env:
             TRIGGER_PIPELINE_SET: artifacts-trigger
             MESSAGE: Daily build
+      tags:
+        - kibana

@@ -11,6 +11,7 @@ export const MONITOR_NAME = 'monitor.name';
 export const MONITOR_TYPE = 'monitor.type';
 export const URL_FULL = 'url.full';
 export const URL_PORT = 'url.port';
+export const OBSERVER_NAME = 'observer.name';
 export const OBSERVER_GEO_NAME = 'observer.geo.name';
 export const ERROR_MESSAGE = 'error.message';
 export const STATE_ID = 'monitor.state.id';

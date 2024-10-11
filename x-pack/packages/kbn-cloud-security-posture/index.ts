@@ -12,3 +12,7 @@ export type { NavFilter } from './src/hooks/use_navigate_findings';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
+export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_vulnerability_colors';
+export { getSeverityText } from './src/utils/get_vulnerability_text';
+export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
+export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';

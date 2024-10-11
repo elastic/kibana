@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(status2.body.risk_engine_status).to.be('ENABLED');
       expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
-      const response = await riskEngineRoutes.delete();
+      const response = await riskEngineRoutes.cleanUp();
       expect(response.body).to.eql({
         cleanup_successful: true,
       });

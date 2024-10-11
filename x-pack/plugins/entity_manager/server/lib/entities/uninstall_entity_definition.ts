@@ -11,14 +11,10 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIndices } from './delete_index';
-import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { deleteIngestPipelines } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
 
-import {
-  generateHistoryIndexTemplateId,
-  generateLatestIndexTemplateId,
-} from './helpers/generate_component_id';
-import { deleteTemplate } from '../manage_index_templates';
+import { deleteTemplates } from '../manage_index_templates';
 
 import { stopTransforms } from './stop_transforms';
 
@@ -40,19 +36,13 @@ export async function uninstallEntityDefinition({
   await stopTransforms(esClient, definition, logger);
   await deleteTransforms(esClient, definition, logger);
 
-  await Promise.all([
-    deleteHistoryIngestPipeline(esClient, definition, logger),
-    deleteLatestIngestPipeline(esClient, definition, logger),
-  ]);
+  await deleteIngestPipelines(esClient, definition, logger);
 
   if (deleteData) {
     await deleteIndices(esClient, definition, logger);
   }
 
-  await Promise.all([
-    deleteTemplate({ esClient, logger, name: generateHistoryIndexTemplateId(definition) }),
-    deleteTemplate({ esClient, logger, name: generateLatestIndexTemplateId(definition) }),
-  ]);
+  await deleteTemplates(esClient, definition, logger);
 
   await deleteEntityDefinition(soClient, definition);
 }

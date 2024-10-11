@@ -246,6 +246,7 @@ describe('KibanaDiscoveryService', () => {
     savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
 
     it('returns the active kibana nodes', async () => {
+      const onNodesCounted = jest.fn();
       const kibanaDiscoveryService = new KibanaDiscoveryService({
         savedObjectsRepository,
         logger,
@@ -254,6 +255,7 @@ describe('KibanaDiscoveryService', () => {
           active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
           interval: DEFAULT_DISCOVERY_INTERVAL_MS,
         },
+        onNodesCounted,
       });
 
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
@@ -265,6 +267,7 @@ describe('KibanaDiscoveryService', () => {
         type: BACKGROUND_TASK_NODE_SO_NAME,
       });
       expect(activeNodes).toEqual(mockActiveNodes);
+      expect(onNodesCounted).toHaveBeenCalledWith(mockActiveNodes.length);
     });
   });
 

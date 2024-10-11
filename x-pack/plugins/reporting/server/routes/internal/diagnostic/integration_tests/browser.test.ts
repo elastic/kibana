@@ -120,6 +120,30 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
       });
   });
 
+  it('returns a response including log received from the browser + helpful link on font config error', async () => {
+    const fontErrorLog = `Fontconfig error: Cannot load default config file: No such file: (null)`;
+
+    registerDiagnoseBrowser(core, mockLogger);
+
+    await server.start();
+    screenshotting.diagnose.mockReturnValue(Rx.of(fontErrorLog));
+
+    return supertest(httpSetup.server.listener)
+      .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchInlineSnapshot(`
+          Object {
+            "help": Array [
+              "The browser couldn't start properly due to missing system font dependencies. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages",
+            ],
+            "logs": "${fontErrorLog}",
+            "success": false,
+          }
+        `);
+      });
+  });
+
   it('logs a message when the browser starts, but then has problems later', async () => {
     registerDiagnoseBrowser(core, mockLogger);
 

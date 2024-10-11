@@ -21,12 +21,14 @@ import { Settings } from './settings';
 
 jest.mock('../../../supported_renderers');
 
-jest.mock('@elastic/eui/lib/components/portal/portal', () => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const React = jest.requireActual('react');
-  return {
-    EuiPortal: (props: any) => <div>{props.children}</div>,
-  };
+// @ts-ignore Importing this to mock
+import * as Portal from '@elastic/eui/lib/components/portal/portal';
+
+// Mock the EuiPortal - `insertAdjacentElement is not supported in
+// `jsdom` 12.  We're just going to render a `div` with the children
+// so the `enzyme` tests will be accurate.
+jest.spyOn(Portal, 'EuiPortal').mockImplementation((props: any) => {
+  return <div className="mockedEuiPortal">{props.children}</div>;
 });
 
 describe('<Settings />', () => {

@@ -27,7 +27,7 @@
         "label": "ElandPythonClient",
         "description": [],
         "signature": [
-          "({ supportedNlpModels, nlpImportModel }: React.PropsWithChildren<{ supportedNlpModels: string; nlpImportModel: string; }>) => JSX.Element"
+          "({ supportedNlpModels, nlpImportModel }: { supportedNlpModels: string; nlpImportModel: string; }) => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
         "deprecated": false,
@@ -36,12 +36,12 @@
           {
             "parentPluginId": "@kbn/inference_integration_flyout",
             "id": "def-common.ElandPythonClient.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ supportedNlpModels, nlpImportModel }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ supportedNlpModels: string; nlpImportModel: string; }>"
+              "{ supportedNlpModels: string; nlpImportModel: string; }"
             ],
             "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
             "deprecated": false,
@@ -60,9 +60,9 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onSaveInferenceEndpoint, onFlyoutClose, isInferenceFlyoutVisible, e5documentationUrl, elserv2documentationUrl, supportedNlpModels, nlpImportModel, errorCallout, trainedModels, isCreateInferenceApiLoading, onInferenceEndpointChange, inferenceEndpointError, setInferenceEndpointError, }: React.PropsWithChildren<",
+          "({ onSaveInferenceEndpoint, onFlyoutClose, isInferenceFlyoutVisible, e5documentationUrl, elserv2documentationUrl, supportedNlpModels, nlpImportModel, errorCallout, trainedModels, isCreateInferenceApiLoading, onInferenceEndpointChange, inferenceEndpointError, setInferenceEndpointError, }: ",
           "InferenceFlyoutProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
         "deprecated": false,
@@ -71,14 +71,12 @@
           {
             "parentPluginId": "@kbn/inference_integration_flyout",
             "id": "def-common.InferenceFlyoutWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  onSaveInferenceEndpoint,\n  onFlyoutClose,\n  isInferenceFlyoutVisible,\n  e5documentationUrl = '',\n  elserv2documentationUrl = '',\n  supportedNlpModels = '',\n  nlpImportModel = '',\n  errorCallout,\n  trainedModels = [],\n  isCreateInferenceApiLoading,\n  onInferenceEndpointChange,\n  inferenceEndpointError = undefined,\n  setInferenceEndpointError,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "InferenceFlyoutProps",
-              ">"
+              "InferenceFlyoutProps"
             ],
             "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
             "deprecated": false,

@@ -44,5 +44,9 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server",
+    "@kbn/management-settings-ids",
+    "@kbn/observability-logs-overview",
+    "@kbn/charts-plugin",
+    "@kbn/core-ui-settings-common",
   ]
 }

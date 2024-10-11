@@ -117,7 +117,6 @@ export const renderApp = (
     guidedOnboarding,
     history,
     indexMappingComponent,
-    isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
     isSidebarEnabled,
     lens,
     ml,
@@ -128,7 +127,6 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
-    searchHomepage: plugins.searchHomepage,
     searchPlayground: plugins.searchPlayground,
     searchInferenceEndpoints: plugins.searchInferenceEndpoints,
     security,

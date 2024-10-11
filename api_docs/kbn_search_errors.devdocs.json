@@ -136,7 +136,7 @@
             "label": "getErrorMessage",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
@@ -152,7 +152,7 @@
             "label": "getActions",
             "description": [],
             "signature": [
-              "() => JSX.Element[]"
+              "() => React.JSX.Element[]"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,

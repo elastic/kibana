@@ -16,6 +16,7 @@ import {
   KubernetesPage,
   LandingPage,
   OtelLogsPage,
+  OtelKubernetesPage,
   SystemLogsPage,
   FirehosePage,
 } from './pages';
@@ -49,6 +50,9 @@ export function ObservabilityOnboardingFlow() {
         </Route>
         <Route path="/kubernetes">
           <KubernetesPage />
+        </Route>
+        <Route path="/otel-kubernetes">
+          <OtelKubernetesPage />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />

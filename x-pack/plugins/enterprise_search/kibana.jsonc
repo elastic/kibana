@@ -7,9 +7,7 @@
     "id": "enterpriseSearch",
     "server": true,
     "browser": true,
-    "configPath": [
-      "enterpriseSearch"
-    ],
+    "configPath": ["enterpriseSearch"],
     "requiredPlugins": [
       "data",
       "features",
@@ -17,7 +15,7 @@
       "logsShared",
       "logsDataAccess",
       "esUiShared",
-      "navigation",
+      "navigation"
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -31,7 +29,6 @@
       "guidedOnboarding",
       "console",
       "searchConnectors",
-      "searchHomepage",
       "searchPlayground",
       "searchInferenceEndpoints",
       "embeddable",
@@ -39,10 +36,8 @@
       "charts",
       "cloud",
       "lens",
-      "share",
+      "share"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaReact"]
   }
 }

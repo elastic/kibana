@@ -23,11 +23,13 @@ import type {
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   entityClient: EntityClient;
+  assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
 }
@@ -43,6 +45,7 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
+
   constructor(private readonly options: EntityStoreClientOpts) {
     this.engineClient = new EngineDescriptorClient({
       soClient: options.soClient,
@@ -54,12 +57,23 @@ export class EntityStoreDataClient {
     entityType: EntityType,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
+    const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
+    const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
+
+    if (requiresMigration) {
+      throw new Error(
+        'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
+      );
+    }
+
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
-    this.options.logger.info(`Initializing entity store for ${entityType}`);
+    logger.info(
+      `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
+    );
 
     const descriptor = await this.engineClient.init(entityType, definition, filter);
-    await this.options.entityClient.createEntityDefinition({
+    await entityClient.createEntityDefinition({
       definition: {
         ...definition,
         filter,
@@ -80,11 +94,13 @@ export class EntityStoreDataClient {
 
     if (descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
-        `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(`Starting entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Starting entity store for ${entityType}`
+    );
     await this.options.entityClient.startEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
@@ -97,11 +113,13 @@ export class EntityStoreDataClient {
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
       throw new Error(
-        `Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${this.options.namespace}: Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(`Stopping entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Stopping entity store for ${entityType}`
+    );
     await this.options.entityClient.stopEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
@@ -118,7 +136,9 @@ export class EntityStoreDataClient {
   public async delete(entityType: EntityType, deleteData: boolean) {
     const { id } = getEntityDefinition(entityType, this.options.namespace);
 
-    this.options.logger.info(`Deleting entity store for ${entityType}`);
+    this.options.logger.info(
+      `In namespace ${this.options.namespace}: Deleting entity store for ${entityType}`
+    );
 
     await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
     await this.engineClient.delete(id);

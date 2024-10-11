@@ -7,6 +7,8 @@
 
 import type { EuiSuperSelectOption, EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiBetaBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -24,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
 
@@ -40,9 +43,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoElasticsearch" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            {
-              defaultMessage: 'Search',
-            }
+            { defaultMessage: 'Search' }
           )}
         </>
       ),
@@ -55,9 +56,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoObservability" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
-            {
-              defaultMessage: 'Observability',
-            }
+            { defaultMessage: 'Observability' }
           )}
         </>
       ),
@@ -70,9 +69,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoSecurity" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
-            {
-              defaultMessage: 'Security',
-            }
+            { defaultMessage: 'Security' }
           )}
         </>
       ),
@@ -85,9 +82,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoKibana" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
-            {
-              defaultMessage: 'Classic',
-            }
+            { defaultMessage: 'Classic' }
           )}
         </>
       ),
@@ -112,25 +107,40 @@ export const SolutionView: FunctionComponent<Props> = ({
   sectionTitle,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const showClassicDefaultViewCallout = isEditing && space.solution == null;
 
   return (
     <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.spaces.management.manageSpacePage.setSolutionViewMessage"
-                defaultMessage="Set solution view"
-              />
-            </h3>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.spaces.management.manageSpacePage.setSolutionViewMessage"
+                    defaultMessage="Select solution view"
+                  />
+                </h3>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.setSolutionViewNewBadge',
+                    { defaultMessage: 'New' }
+                  )}
+                  color="accent"
+                  size="s"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.manageSpacePage.setSolutionViewDescription"
-                defaultMessage="Determines the navigation all users will see for this space. Each solution view contains features from Analytics tools and Management."
+                defaultMessage="Focus the navigation and menus of this space on a specific solution. Features that are not relevant to the selected solution are no longer visible to users of this space."
               />
             </p>
           </EuiText>
@@ -145,20 +155,43 @@ export const SolutionView: FunctionComponent<Props> = ({
           >
             <EuiSuperSelect
               options={getOptions(euiTheme)}
-              valueOfSelected={space.solution}
+              valueOfSelected={
+                space.solution ??
+                (showClassicDefaultViewCallout ? SOLUTION_VIEW_CLASSIC : undefined)
+              }
               data-test-subj="solutionViewSelect"
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
-                {
-                  defaultMessage: 'Select view',
-                }
+                { defaultMessage: 'Select solution view' }
               )}
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
+
+          {showClassicDefaultViewCallout && (
+            <>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
+                  defaultMessage="Affects all users of the space"
+                />
+              </EuiText>
+
+              <EuiSpacer />
+              <EuiCallOut
+                color="primary"
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout',
+                  { defaultMessage: 'By default your current view is Classic' }
+                )}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

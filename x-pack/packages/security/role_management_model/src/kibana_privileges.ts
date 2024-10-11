@@ -6,9 +6,9 @@
  */
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-
-import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
+import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';
 import { SecuredFeature } from './secured_feature';

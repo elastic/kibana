@@ -6,9 +6,13 @@
  */
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { cloneDeep, remove } from 'lodash';
+import { cloneDeep, remove, find } from 'lodash';
 import type { AppLinkItems, LinkItem } from '../../../common/links/types';
-import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
+import {
+  createInvestigationsLinkFromNotes,
+  createInvestigationsLinkFromTimeline,
+  updateInvestigationsLinkFromNotes,
+} from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createSettingsLinksFromManage } from './sections/settings_links';
@@ -24,6 +28,19 @@ export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems =
   const [timelineLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.timelines });
   if (timelineLinkItem) {
     solutionAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
+  }
+
+  // Remove note link
+  const investigationsLinkItem = find(solutionAppLinks, { id: SecurityPageName.investigations });
+  const [noteLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.notes });
+  if (noteLinkItem) {
+    if (!investigationsLinkItem) {
+      solutionAppLinks.push(createInvestigationsLinkFromNotes(noteLinkItem));
+    } else {
+      solutionAppLinks.push(
+        updateInvestigationsLinkFromNotes(investigationsLinkItem, noteLinkItem)
+      );
+    }
   }
 
   // Remove manage link

@@ -978,6 +978,7 @@ module.exports = {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1814,9 +1815,23 @@ module.exports = {
       files: [
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
+        'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
+
+        'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,

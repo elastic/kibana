@@ -13,8 +13,10 @@
   }
 
   &__header {
-    @include euiToolTipTitle;
+    font-weight: $euiFontWeightBold;
     padding: $euiSizeXS ($euiSizeXS * 2);
+    margin-bottom: $euiSizeXS;
+    border-bottom: $euiBorderThin solid transparentize($euiBorderColor, .8);
   }
 
   &__item {

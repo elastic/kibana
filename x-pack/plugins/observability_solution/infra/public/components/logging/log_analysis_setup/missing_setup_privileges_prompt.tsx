@@ -16,6 +16,7 @@ import { UserManagementLink } from './user_management_link';
 
 export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
   <EmptyPrompt
+    data-test-subj="logsMissingMLAllPrivileges"
     title={<h2>{missingMlPrivilegesTitle}</h2>}
     body={<p>{missingMlSetupPrivilegesDescription}</p>}
     actions={<UserManagementLink />}

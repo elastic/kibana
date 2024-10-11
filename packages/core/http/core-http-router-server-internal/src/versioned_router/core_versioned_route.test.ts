@@ -548,7 +548,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
 
@@ -569,7 +569,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
     expect(router.get).toHaveBeenCalledTimes(1);

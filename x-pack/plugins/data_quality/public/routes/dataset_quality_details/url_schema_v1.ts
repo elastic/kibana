@@ -19,6 +19,7 @@ export const getStateFromUrlValue = (
     degradedFields: urlValue.degradedFields,
     breakdownField: urlValue.breakdownField,
     expandedDegradedField: urlValue.expandedDegradedField,
+    showCurrentQualityIssues: urlValue.showCurrentQualityIssues,
   });
 
 export const getUrlValueFromState = (
@@ -30,6 +31,7 @@ export const getUrlValueFromState = (
     degradedFields: state.degradedFields,
     breakdownField: state.breakdownField,
     expandedDegradedField: state.expandedDegradedField,
+    showCurrentQualityIssues: state.showCurrentQualityIssues,
     v: 1,
   });
 

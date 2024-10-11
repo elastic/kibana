@@ -9919,6 +9919,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableVisualizationsInFlyout":{
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "search:includeFrozen": {
           "type": "boolean",
           "_meta": {
@@ -10480,6 +10486,12 @@
             }
           }
         },
+        "observability:enableLogsStream": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -10754,6 +10766,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "observability:newLogsOverview": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable the new logs overview component."
           }
         },
         "observability:searchExcludedDataTiers": {

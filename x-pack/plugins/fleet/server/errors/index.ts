@@ -57,6 +57,12 @@ export class AgentlessAgentCreateError extends FleetError {
   }
 }
 
+export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
+  constructor(message: string) {
+    super(`Unable to create integration. ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}

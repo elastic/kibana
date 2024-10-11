@@ -29,7 +29,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/ace",
     "@kbn/es-ui-shared-plugin",
     "@kbn/discover-plugin",
     "@kbn/kibana-utils-plugin",

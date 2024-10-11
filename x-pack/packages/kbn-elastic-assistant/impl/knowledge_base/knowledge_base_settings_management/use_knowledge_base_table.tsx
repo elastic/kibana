@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
@@ -18,7 +18,7 @@ import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
-import { isEsqlSystemEntry } from './helpers';
+import { isSystemEntry } from './helpers';
 
 export const useKnowledgeBaseTable = () => {
   const { currentUserAvatar } = useAssistantContext();
@@ -29,10 +29,10 @@ export const useKnowledgeBaseTable = () => {
       if (entry.kbResource === 'user') {
         return 'userAvatar';
       }
-      if (entry.kbResource === 'esql') {
+      if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';
       }
-      return 'visText';
+      return 'document';
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }
@@ -61,9 +61,7 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: (entry: KnowledgeBaseEntryResponse) => (
-            <EuiLink onClick={() => onEntryNameClicked(entry)}>{entry.name}</EuiLink>
-          ),
+          render: ({ name }: KnowledgeBaseEntryResponse) => name,
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },
@@ -83,8 +81,8 @@ export const useKnowledgeBaseTable = () => {
           render: (entry: KnowledgeBaseEntryResponse) => {
             // TODO: Look up user from `createdBy` id if privileges allow
             const userName = entry.users?.[0]?.name ?? 'Unknown';
-            const badgeItem = isEsqlSystemEntry(entry) ? 'Elastic' : userName;
-            const userImage = isEsqlSystemEntry(entry) ? (
+            const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
+            const userImage = isSystemEntry(entry) ? (
               <EuiIcon
                 type={'logoElastic'}
                 css={css`
@@ -124,7 +122,7 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isEsqlSystemEntry(entry)
+            return isSystemEntry(entry)
               ? entry.text
               : entry.type === DocumentEntryType.value
               ? '1'

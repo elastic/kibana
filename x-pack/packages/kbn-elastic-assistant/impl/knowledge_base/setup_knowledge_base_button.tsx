@@ -13,8 +13,6 @@ import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
-export const ESQL_RESOURCE = 'esql';
-
 interface Props {
   display?: 'mini';
 }
@@ -26,7 +24,7 @@ interface Props {
 export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
   const { http, toasts } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
@@ -34,10 +32,10 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
     kbStatus?.pipeline_exists &&
-    kbStatus?.esql_exists;
+    kbStatus?.security_labs_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
-    setupKB(ESQL_RESOURCE);
+    setupKB();
   }, [setupKB]);
 
   if (isSetupComplete) {

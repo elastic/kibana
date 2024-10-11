@@ -60,6 +60,7 @@ featuresStart.getFeatures.mockResolvedValue([
 const spacesGridCommonProps = {
   serverBasePath: '',
   maxSpaces: 1000,
+  isServerless: false,
 };
 
 describe('SpacesGridPage', () => {
@@ -95,7 +96,7 @@ describe('SpacesGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spaces);
     expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual({
       field: 'solution',
-      name: 'Solution View',
+      name: 'Solution view',
       sortable: true,
       render: expect.any(Function),
     });
@@ -155,7 +156,7 @@ describe('SpacesGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
     expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
       field: 'solution',
-      name: 'Solution View',
+      name: 'Solution view',
       sortable: true,
       render: expect.any(Function),
     });
@@ -326,6 +327,7 @@ describe('SpacesGridPage', () => {
         maxSpaces={1}
         allowSolutionVisibility
         serverBasePath={spacesGridCommonProps.serverBasePath}
+        isServerless={false}
       />
     );
 
@@ -409,5 +411,82 @@ describe('SpacesGridPage', () => {
     expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Error loading spaces',
     });
+  });
+
+  it(`renders the 'Features visible' column when not serverless`, async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const error = new Error('something awful happened');
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager}
+        getFeatures={() => Promise.reject(error)}
+        notifications={notifications}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual(
+      expect.objectContaining({
+        field: 'disabledFeatures',
+        name: 'Features visible',
+      })
+    );
+  });
+
+  it(`does not render the 'Features visible' column when serverless`, async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const error = new Error('something awful happened');
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager}
+        getFeatures={() => Promise.reject(error)}
+        notifications={notifications}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+        isServerless={true}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual(
+      expect.objectContaining({
+        field: 'disabledFeatures',
+        name: 'Features visible',
+      })
+    );
   });
 });

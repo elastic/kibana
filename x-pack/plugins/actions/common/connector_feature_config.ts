@@ -56,6 +56,12 @@ const compatibilityAlertingRules = i18n.translate(
     defaultMessage: 'Alerting Rules',
   }
 );
+const compatibilitySecuritySolution = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.securitySolution',
+  {
+    defaultMessage: 'Security Solution',
+  }
+);
 
 const compatibilityCases = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.cases',
@@ -93,7 +99,7 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
     defaultMessage: 'Security Solution',
   }),
-  compatibility: compatibilityAlertingRules,
+  compatibility: compatibilitySecuritySolution,
 };
 
 export const GenerativeAIForSecurityFeature: ConnectorFeatureConfig = {

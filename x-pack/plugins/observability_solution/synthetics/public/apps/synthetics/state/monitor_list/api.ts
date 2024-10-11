@@ -35,6 +35,7 @@ function toMonitorManagementListQueryArgs(
     schedules: pageState.schedules,
     monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
+    internal: true,
   };
 }
 
