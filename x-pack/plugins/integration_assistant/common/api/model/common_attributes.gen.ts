@@ -98,11 +98,11 @@ export const SamplesFormat = z.object({
    */
   multiline: z.boolean().optional(),
   /**
-   * For CSV format, specifies whether the samples have a header row.
+   * For CSV format, specifies whether the samples have a header row. For other formats, specifies the presence of header in each row.
    */
   header: z.boolean().optional(),
   /**
-   * For CSV format, specifies the columns guessed at by the LLM.
+   * For CSV format, specifies the column names proposed by the LLM.
    */
   columns: z.array(z.string()).optional(),
   /**
