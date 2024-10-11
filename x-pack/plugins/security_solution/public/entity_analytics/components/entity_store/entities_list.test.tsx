@@ -29,6 +29,7 @@ const responseData: ListEntitiesResponse = {
   total: 1,
   records: [
     {
+      '@timestamp': '2021-08-02T14:00:00.000Z',
       user: { name: entityName },
       entity: {
         type: 'node',
@@ -39,7 +40,8 @@ const responseData: ListEntitiesResponse = {
         display_name: entityName,
         identity_fields: ['field1', 'field2'],
         definition_id: 'definition-id',
-        source: 'source',
+        name: entityName,
+        source: ['source'],
       },
     },
   ],
