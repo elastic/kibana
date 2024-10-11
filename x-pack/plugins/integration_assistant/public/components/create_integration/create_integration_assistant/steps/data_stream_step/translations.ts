@@ -199,13 +199,6 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
-const ERROR_NO_UNDERLYING_MESSAGE_AVAILABLE = i18n.translate(
-  'xpack.integrationAssistant.errors.noUnderlyingMessage',
-  {
-    defaultMessage: 'No reason available',
-  }
-);
-
 export const GENERATION_ERROR_TRANSLATION: Record<
   GenerationErrorCode,
   string | ((attributes: GenerationErrorAttributes) => string)
