@@ -7,9 +7,9 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
+export const DEFAULT_METRIC_TYPES = ['ingest_rate', 'storage_retained'] as const;
 export const METRIC_TYPE_VALUES = [
-  'storage_retained',
-  'ingest_rate',
+  ...DEFAULT_METRIC_TYPES,
   'search_vcu',
   'ingest_vcu',
   'ml_vcu',
@@ -20,6 +20,10 @@ export const METRIC_TYPE_VALUES = [
 ] as const;
 
 export type MetricTypes = (typeof METRIC_TYPE_VALUES)[number];
+
+export const isDefaultMetricType = (metricType: string) =>
+  // @ts-ignore
+  DEFAULT_METRIC_TYPES.includes(metricType);
 
 export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<MetricTypes, string>>({
   storage_retained: 'Data Retained in Storage',
@@ -64,7 +68,6 @@ export const UsageMetricsRequestSchema = schema.object({
     },
   }),
   dataStreams: schema.arrayOf(schema.string(), {
-    minSize: 1,
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {
         return '[dataStreams] list cannot contain empty values';
@@ -73,26 +76,28 @@ export const UsageMetricsRequestSchema = schema.object({
   }),
 });
 
-export type UsageMetricsRequestSchemaQueryParams = TypeOf<typeof UsageMetricsRequestSchema>;
+export type UsageMetricsRequestBody = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
-    schema.object({
-      metrics: schema.recordOf(
-        metricTypesSchema,
-        schema.arrayOf(
-          schema.object({
-            name: schema.string(),
-            data: schema.arrayOf(
-              schema.object({
-                x: schema.number(),
-                y: schema.number(),
-              })
-            ),
-          })
-        )
-      ),
-    }),
+    schema.oneOf([
+      schema.object({
+        metrics: schema.recordOf(
+          metricTypesSchema,
+          schema.arrayOf(
+            schema.object({
+              name: schema.string(),
+              data: schema.arrayOf(
+                schema.object({
+                  x: schema.number(),
+                  y: schema.number(),
+                })
+              ),
+            })
+          )
+        ),
+      }),
+    ]),
 };
 export type UsageMetricsResponseSchemaBody = Omit<
   TypeOf<typeof UsageMetricsResponseSchema.body>,

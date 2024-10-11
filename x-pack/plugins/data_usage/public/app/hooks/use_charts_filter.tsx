@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import {
+  isDefaultMetricType,
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
 } from '../../../common/rest_types';
@@ -74,13 +75,11 @@ export const useChartsFilter = ({
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isMetricTypesFilter
-      ? METRIC_TYPE_VALUES.filter((metricType) => {
-          // just these two metric types are supported for now
-          return metricType === 'ingest_rate' || metricType === 'storage_retained' ? true : false;
-        }).map((metricType) => ({
+      ? METRIC_TYPE_VALUES.map((metricType) => ({
           key: metricType,
           label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
-          checked: 'on', // metrics are selected by default
+          checked: isDefaultMetricType(metricType) ? 'on' : undefined, // default metrics are selected by default
+          disabled: isDefaultMetricType(metricType),
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : []

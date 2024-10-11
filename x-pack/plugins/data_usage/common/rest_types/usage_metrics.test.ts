@@ -41,7 +41,7 @@ describe('usage_metrics schemas', () => {
     ).not.toThrow();
   });
 
-  it('should error if `dataStream` list is empty', () => {
+  it('should not error if `dataStream` list is empty', () => {
     expect(() =>
       UsageMetricsRequestSchema.validate({
         from: new Date().toISOString(),
@@ -49,7 +49,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: [],
       })
-    ).toThrowError('[dataStreams]: array size is [0], but cannot be smaller than [1]');
+    ).not.toThrow();
   });
 
   it('should error if `dataStream` is given type not array', () => {

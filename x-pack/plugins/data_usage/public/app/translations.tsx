@@ -48,4 +48,7 @@ export const UX_LABELS = Object.freeze({
       defaultMessage: 'No {filterName} available',
       values: { filterName },
     }),
+  noDataStreamsSelected: i18n.translate('xpack.dataUsage.metrics.noDataStreamsSelected', {
+    defaultMessage: 'Select one or more data streams to view data usage metrics.',
+  }),
 });

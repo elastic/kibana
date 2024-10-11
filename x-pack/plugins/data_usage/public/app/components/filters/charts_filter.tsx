@@ -38,6 +38,9 @@ export const ChartsFilter = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const isMetricsFilter = filterName === 'metricTypes';
+    const isDataStreamsFilter = filterName === 'dataStreams';
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const onPopoverButtonClick = useCallback(() => {
@@ -97,7 +100,7 @@ export const ChartsFilter = memo(
       return items;
     }, [areDataStreamsSelectedOnMount, shouldPinSelectedDataStreams, items]);
 
-    const isSearchable = useMemo(() => filterName !== 'metricTypes', [filterName]);
+    const isSearchable = useMemo(() => !isMetricsFilter, [isMetricsFilter]);
 
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
@@ -113,13 +116,13 @@ export const ChartsFilter = memo(
         }, []);
 
         // update URL params
-        if (filterName === 'metricTypes') {
+        if (isMetricsFilter) {
           setUrlMetricTypesFilter(
             selectedItems
               .map((item) => METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[item as MetricTypes])
               .join()
           );
-        } else if (filterName === 'dataStreams') {
+        } else if (isDataStreamsFilter) {
           setUrlDataStreamsFilter(selectedItems.join());
         }
         // reset shouldPinSelectedDataStreams, setAreDataStreamsSelectedOnMount
@@ -133,7 +136,8 @@ export const ChartsFilter = memo(
       },
       [
         setItems,
-        filterName,
+        isMetricsFilter,
+        isDataStreamsFilter,
         shouldPinSelectedDataStreams,
         setAreDataStreamsSelectedOnMount,
         onChangeFilterOptions,
@@ -153,9 +157,9 @@ export const ChartsFilter = memo(
       );
 
       // update URL params based on filter on page
-      if (filterName === 'metricTypes') {
+      if (isMetricsFilter) {
         setUrlMetricTypesFilter('');
-      } else if (filterName === 'dataStreams') {
+      } else if (isDataStreamsFilter) {
         setUrlDataStreamsFilter('');
       }
 
@@ -165,7 +169,8 @@ export const ChartsFilter = memo(
     }, [
       setItems,
       items,
-      filterName,
+      isMetricsFilter,
+      isDataStreamsFilter,
       onChangeFilterOptions,
       setUrlMetricTypesFilter,
       setUrlDataStreamsFilter,
@@ -210,15 +215,17 @@ export const ChartsFilter = memo(
                   </EuiPopoverTitle>
                 )}
                 {list}
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <ClearAllButton
-                      data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
-                      isDisabled={!hasActiveFilters}
-                      onClick={onClearAll}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                {!isMetricsFilter && (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <ClearAllButton
+                        data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
+                        isDisabled={!hasActiveFilters}
+                        onClick={onClearAll}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </div>
             );
           }}

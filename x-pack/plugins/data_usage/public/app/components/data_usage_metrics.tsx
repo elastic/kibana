@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, memo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiCallOut } from '@elastic/eui';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -15,12 +15,17 @@ import { PLUGIN_NAME } from '../../../common';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
-import { UsageMetricsRequestSchemaQueryParams } from '../../../common/rest_types';
+import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
 import { ChartFilters } from './filters/charts_filters';
+import { UX_LABELS } from '../translations';
 
 const EuiItemCss = css`
   width: 100%;
 `;
+
+const FlexItemWithCss = memo(({ children }: { children: React.ReactNode }) => (
+  <EuiFlexItem css={EuiItemCss}>{children}</EuiFlexItem>
+));
 
 export const DataUsageMetrics = () => {
   const {
@@ -36,13 +41,9 @@ export const DataUsageMetrics = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestSchemaQueryParams>({
-    metricTypes: ['storage_retained', 'ingest_rate'],
-    // TODO: Replace with data streams from /data_streams api
-    dataStreams: [
-      '.alerts-ml.anomaly-detection-health.alerts-default',
-      '.alerts-stack.alerts-default',
-    ],
+  const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestBody>({
+    metricTypes: [...DEFAULT_METRIC_TYPES],
+    dataStreams: [],
     from: DEFAULT_DATE_RANGE_OPTIONS.startDate,
     to: DEFAULT_DATE_RANGE_OPTIONS.endDate,
   });
@@ -112,14 +113,9 @@ export const DataUsageMetrics = () => {
 
   useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
-  // TODO: show a toast?
-  if (!isFetching && error?.body) {
-    return <div>{error.body.message}</div>;
-  }
-
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
-      <EuiFlexItem css={EuiItemCss}>
+      <FlexItemWithCss>
         <ChartFilters
           dateRangePickerState={dateRangePickerState}
           isDataLoading={isFetching}
@@ -129,12 +125,26 @@ export const DataUsageMetrics = () => {
           onTimeChange={onTimeChange}
           onChangeDataStreamsFilter={onChangeDataStreamsFilter}
           onChangeMetricTypesFilter={onChangeMetricTypesFilter}
-          showMetricsTypesFilter={false}
+          showMetricsTypesFilter={true}
         />
-      </EuiFlexItem>
-      <EuiFlexItem css={EuiItemCss}>
-        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
-      </EuiFlexItem>
+      </FlexItemWithCss>
+      {!isFetching && error?.message && (
+        <FlexItemWithCss>
+          <EuiCallOut
+            size="s"
+            title={UX_LABELS.noDataStreamsSelected}
+            iconType="iInCircle"
+            color="warning"
+          />
+        </FlexItemWithCss>
+      )}
+      <FlexItemWithCss>
+        {isFetched && data?.metrics ? (
+          <Charts data={data} />
+        ) : isFetching ? (
+          <EuiLoadingElastic />
+        ) : null}
+      </FlexItemWithCss>
     </EuiFlexGroup>
   );
 };
