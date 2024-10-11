@@ -18,7 +18,7 @@ import {
 import { ClearAllButton } from './clear_all_button';
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
-import { FilterItems, FilterName, useChartsFilter } from '../../hooks/use_charts_filter';
+import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
 
 const getSearchPlaceholder = (filterName: FilterName) => {
   if (filterName === 'dataStreams') {

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { useDataUsageMetricsFilter } from './use_charts_filter';
+export { useChartsFilter, type FilterName, type FilterItems } from './use_charts_filter';
 export { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 export { useDateRangePicker } from './use_date_picker';
