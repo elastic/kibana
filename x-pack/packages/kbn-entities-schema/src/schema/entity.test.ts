@@ -16,6 +16,7 @@ const entity = {
     identity_fields: ['log.logger', 'event.category'],
     id: '6UHVPiduEC2qk6rMjs1Jzg==',
     type: 'service',
+    metrics: {},
     definition_id: 'admin-console-services',
   },
 };

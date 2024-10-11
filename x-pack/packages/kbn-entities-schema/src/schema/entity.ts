@@ -39,10 +39,3 @@ export const entityLatestSchema = z
     ),
   })
   .and(entityMetadataSchema);
-
-export const entityHistorySchema = z
-  .object({
-    '@timestamp': z.string(),
-    entity: entityBaseSchema,
-  })
-  .and(entityMetadataSchema);
