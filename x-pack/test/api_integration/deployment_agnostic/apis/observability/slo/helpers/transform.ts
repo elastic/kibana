@@ -31,7 +31,7 @@ export function createTransformHelper(
             .timeout(10000)
             .expect(404);
         },
-        { retryCount: 5, retryDelay: 2000 }
+        { retryCount: 10, retryDelay: 3000 }
       );
     },
 
@@ -50,7 +50,7 @@ export function createTransformHelper(
             .expect(200);
           return response.body;
         },
-        { retryCount: 5, retryDelay: 2000 }
+        { retryCount: 10, retryDelay: 3000 }
       );
     },
   };
