@@ -25,19 +25,15 @@ export function useScreenContext() {
   const { data: alertDetails, isLoading: isAlertDetailsLoading } = useFetchAlert({ investigation });
 
   useEffect(() => {
-    if (!investigation || isAlertDetailsLoading) {
+    if (!investigation || (isAlertDetailsLoading && !alertDetails)) {
       return;
     }
 
     observabilityAIAssistant.service.setScreenContext({
-      screenDescription: dedent(`
-        ${
-          getScreenContext({
-            alertDetails: alertDetails as EcsFieldsResponse,
-            investigation: investigation as GetInvestigationResponse,
-          }).screenDescription
-        }
-      `),
+      screenDescription: getScreenContext({
+        alertDetails: alertDetails as EcsFieldsResponse,
+        investigation: investigation as GetInvestigationResponse,
+      }).screenDescription,
       data: [
         {
           name: 'investigation',

@@ -24,11 +24,11 @@ export const getPaddedAlertTimeRange = (
   const now = moment().toISOString();
 
   // If alert duration is less than 160 min, we use 20 minute buffer
-  // Otherwise, we use 8 times alert duration
+  // Otherwise, we use 1/5 of the alert duration as buffer
   const defaultDurationMs =
     alertDuration.asMinutes() < 160
-      ? moment.duration(20, 'minutes').asMilliseconds()
-      : alertDuration.asMilliseconds() / 8;
+      ? moment.duration(30, 'minutes').asMilliseconds()
+      : alertDuration.asMilliseconds() / 5;
   // To ensure the alert time range at least covers 20 times lookback window,
   // we compare lookBackDurationMs and defaultDurationMs to use any of those that is longer
   const lookBackDurationMs =
