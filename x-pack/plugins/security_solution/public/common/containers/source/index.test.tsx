@@ -84,12 +84,12 @@ describe('source/index.tsx', () => {
       });
     });
     it('sets field data for data view', async () => {
-      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
-        () => useDataView(),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<{}>,
+        { indexFieldsSearch: IndexFieldSearch }
+      >(() => useDataView(), {
+        wrapper: TestProviders,
+      });
 
       await waitFor(() => null);
 
@@ -108,12 +108,12 @@ describe('source/index.tsx', () => {
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
 
-      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
-        () => useDataView(),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<{}>,
+        { indexFieldsSearch: IndexFieldSearch }
+      >(() => useDataView(), {
+        wrapper: TestProviders,
+      });
 
       await waitFor(() => null);
 
@@ -139,12 +139,12 @@ describe('source/index.tsx', () => {
 
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
-      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
-        () => useDataView(),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<{}>,
+        { indexFieldsSearch: IndexFieldSearch }
+      >(() => useDataView(), {
+        wrapper: TestProviders,
+      });
       await waitFor(() => null);
       await act(async () => {
         indexFieldsSearch = result.current.indexFieldsSearch;

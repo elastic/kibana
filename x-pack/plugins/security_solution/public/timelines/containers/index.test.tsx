@@ -148,10 +148,13 @@ describe('useTimelineEvents', () => {
       {
         events: [],
         id: TimelineId.active,
-        inspect: result.current[1].inspect,
-        loadPage: result.current[1].loadPage,
-        pageInfo: result.current[1].pageInfo,
-        refetch: result.current[1].refetch,
+        inspect: expect.objectContaining({ dsl: [], response: [] }),
+        loadPage: expect.any(Function),
+        pageInfo: expect.objectContaining({
+          activePage: 0,
+          querySize: 0,
+        }),
+        refetch: expect.any(Function),
         totalCount: -1,
         refreshedAt: 0,
       },
@@ -231,8 +234,8 @@ describe('useTimelineEvents', () => {
 
   test('Correlation pagination is calling search strategy when switching page', async () => {
     const { result, rerender } = renderHook<
-      [DataLoadingState, TimelineArgs],
-      UseTimelineEventsProps
+      UseTimelineEventsProps,
+      [DataLoadingState, TimelineArgs]
     >((args) => useTimelineEvents(args), {
       initialProps: {
         ...props,
@@ -320,7 +323,7 @@ describe('useTimelineEvents', () => {
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
   });
   test('should not query again when a removed field is added back', async () => {
-    const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
       (args) => useTimelineEvents(args),
       {
         initialProps: { ...props },

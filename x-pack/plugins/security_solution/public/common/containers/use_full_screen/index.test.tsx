@@ -18,7 +18,7 @@ describe('useFullScreen', () => {
     let result: RenderResult<GlobalFullScreen>;
 
     test('Default values with no data grid in the dom', async () => {
-      const WrapperContainer: RenderOptions['wrapper'] = ({ children }) => (
+      const WrapperContainer = ({ children }: React.PropsWithChildren<{}>) => (
         <div className="euiDataGrid--fullScreen">
           <TestProviders>{children}</TestProviders>
         </div>

@@ -8,6 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { act, waitFor } from '@testing-library/react';
 
+import type { ActionStatus } from '../../../../../../../common/types';
+
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 
 import { useActionStatus } from './use_action_status';
@@ -42,7 +44,7 @@ describe('useActionStatus', () => {
       nbAgentsFailed: 0,
       nbAgentsActioned: 2,
       creationTime: '2022-09-19T12:07:27.102Z',
-    },
+    } as ActionStatus,
   ];
   beforeEach(() => {
     mockSendGetActionStatus.mockReset();

@@ -64,7 +64,7 @@ describe('useQueryAlerts', () => {
     );
     await waitFor(() => expect(result.current.refetch).toBeDefined());
 
-    result.current.refetch();
+    result.current.refetch!();
 
     await waitFor(() => expect(spyOnfetchQueryAlerts).toHaveBeenCalledTimes(2));
   });
