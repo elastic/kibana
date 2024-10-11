@@ -90,6 +90,8 @@ export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({
   risk_score: 55,
   rule_id: 'rule-1',
   version: 1,
+  author: [],
+  license: 'Elastic License v2',
   ...getPrebuiltThreatMatchRuleSpecificFieldsMock(),
 });
 
