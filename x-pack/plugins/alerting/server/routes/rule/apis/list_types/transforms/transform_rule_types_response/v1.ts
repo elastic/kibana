@@ -20,12 +20,14 @@ export const transformRuleTypesResponse = (
       authorized_consumers: ruleType.authorizedConsumers,
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
-      default_schedule_interval: ruleType.defaultScheduleInterval,
+      ...(ruleType.defaultScheduleInterval
+        ? { defaultScheduleInterval: ruleType.defaultScheduleInterval }
+        : {}),
       ...(isBoolean(ruleType.doesSetRecoveryContext)
         ? { does_set_recovery_context: ruleType.doesSetRecoveryContext }
         : {}),
       enabled_in_license: ruleType.enabledInLicense,
-      ...(ruleType.fieldsForAAD ? { fields_for_a_a_d: ruleType.fieldsForAAD } : {}),
+      ...(ruleType.fieldsForAAD ? { fieldsForAAD: ruleType.fieldsForAAD } : {}),
       has_alerts_mappings: ruleType.hasAlertsMappings,
       has_fields_for_a_a_d: ruleType.hasFieldsForAAD,
       id: ruleType.id,
@@ -34,7 +36,7 @@ export const transformRuleTypesResponse = (
       name: ruleType.name,
       producer: ruleType.producer,
       recovery_action_group: ruleType.recoveryActionGroup,
-      rule_task_timeout: ruleType.ruleTaskTimeout,
+      ...(ruleType.ruleTaskTimeout ? { rule_task_timeout: ruleType.ruleTaskTimeout } : {}),
     };
   });
 };

@@ -47,9 +47,11 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
     ),
     category: schema.string(),
     default_action_group_id: schema.string(),
+    default_schedule_interval: schema.maybe(schema.string()),
     does_set_recovery_context: schema.maybe(schema.boolean()),
     enabled_in_license: schema.boolean(),
-    fields_for_a_a_d: schema.maybe(schema.arrayOf(schema.string())),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    fields_for_AAD: schema.maybe(schema.arrayOf(schema.string())), // we cannot introduce breaking changes yet
     has_alerts_mappings: schema.boolean(),
     has_fields_for_a_a_d: schema.boolean(),
     id: schema.string(),
@@ -65,6 +67,7 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
     name: schema.string(),
     producer: schema.string(),
     recovery_action_group: actionGroupSchema,
+    rule_task_timeout: schema.maybe(schema.string()),
   })
 );
 
