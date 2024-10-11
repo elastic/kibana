@@ -28,7 +28,6 @@ export const getUsageMetricsHandler = (
   const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
 
   return async (context, request, response) => {
-    console.log('request: ', request.body);
     try {
       const core = await context.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
