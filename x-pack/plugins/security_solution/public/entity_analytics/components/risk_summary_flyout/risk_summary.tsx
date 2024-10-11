@@ -83,10 +83,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const isAssetCriticalityEnabled = true;
 
-  const columns = useMemo(
-    () => buildColumns(isAssetCriticalityEnabled),
-    [isAssetCriticalityEnabled]
-  );
+  const columns = useMemo(() => buildColumns(true), []);
 
   const rows = useMemo(
     () => getItems(entityData, isAssetCriticalityEnabled),

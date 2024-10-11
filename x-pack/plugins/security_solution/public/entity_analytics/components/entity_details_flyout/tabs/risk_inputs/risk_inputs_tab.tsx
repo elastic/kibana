@@ -175,8 +175,6 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     [isPreviewEnabled, scopeId]
   );
 
-  const isAssetCriticalityEnabled = true;
-
   if (riskScoreError) {
     return (
       <EuiCallOut
@@ -227,9 +225,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
 
   return (
     <>
-      {isAssetCriticalityEnabled && (
-        <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
-      )}
+      <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
     </>

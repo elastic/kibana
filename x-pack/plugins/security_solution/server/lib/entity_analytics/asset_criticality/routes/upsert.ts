@@ -21,7 +21,6 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const assetCriticalityPublicUpsertRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,7 +50,6 @@ export const assetCriticalityPublicUpsertRoute = (
       ): Promise<IKibanaResponse<CreateAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;

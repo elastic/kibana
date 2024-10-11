@@ -21,7 +21,6 @@ import {
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -81,7 +80,6 @@ export const assetCriticalityPublicCSVUploadRoute = (
         const telemetry = coreStart.analytics;
 
         try {
-          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;

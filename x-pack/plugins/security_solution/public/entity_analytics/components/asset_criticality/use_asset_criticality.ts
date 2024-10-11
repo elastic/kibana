@@ -32,12 +32,10 @@ export const useAssetCriticalityPrivileges = (
 ): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
   const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const isAssetCriticalityEnabled = true;
-  const isEnabled = isAssetCriticalityEnabled && hasEntityAnalyticsCapability;
 
   return useQuery({
-    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, isEnabled],
-    queryFn: isEnabled ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
+    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
+    queryFn: hasEntityAnalyticsCapability ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
   });
 };
 
