@@ -31,7 +31,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     language: 'kuery',
     rule_id: 'rule-1',
     version: 1,
-    author: ['Elastic'],
+    author: [],
     license: 'Elastic License v2',
     ...rewrites,
   });
@@ -155,7 +155,7 @@ export const getPrebuiltRuleMockOfType = <T extends TypeSpecificCreateProps>(
     name: `${type} rule`,
     severity: 'high',
     risk_score: 55,
-    author: ['Elastic'],
+    author: [],
     license: 'Elastic License v2',
     ...typeSpecificFields,
     rule_id: `rule-${type}`,
