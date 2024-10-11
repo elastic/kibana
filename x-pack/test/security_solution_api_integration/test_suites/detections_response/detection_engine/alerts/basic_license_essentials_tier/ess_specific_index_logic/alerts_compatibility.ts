@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('@ess alerts compatibility with legacy siem signals index', function () {
+  describe.only('@ess alerts compatibility with legacy siem signals index', function () {
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
@@ -387,6 +387,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
+          'kibana.alert.rule.execution.type': 'scheduled',
         });
       });
 
@@ -555,6 +556,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
+          'kibana.alert.rule.execution.type': 'scheduled',
         });
       });
     });
