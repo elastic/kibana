@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Adapters,
-  CellValueContext,
-  EmbeddableInput,
-  FilterableEmbeddable,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { createCopyToClipboardLensAction } from './copy_to_clipboard';
@@ -20,8 +13,8 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PhaseEvent } from '@kbn/presentation-publishing';
+import type { TimeRange } from '@kbn/es-query';
+import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
@@ -34,70 +27,18 @@ jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 const getMockLensApi = (
   { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
-): LensApi & FilterableEmbeddable => ({
-  // Static props
-  type: 'lens',
-  uuid: '1234',
-  // Shared Embeddable Observables
-  panelTitle: new BehaviorSubject<string | undefined>('myPanel'),
-  hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
-  filters$: new BehaviorSubject<Filter[] | undefined>([]),
-  query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-    query: 'test',
-    language: 'kuery',
-  }),
-  timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
-  dataLoading: new BehaviorSubject<boolean | undefined>(false),
-  // Methods
-  getSavedVis: jest.fn(),
-  getFullAttributes: jest.fn(),
-  canViewUnderlyingData: jest.fn(async () => true),
-  getViewUnderlyingDataArgs: jest.fn(() => ({
-    dataViewSpec: { id: 'index-pattern-id' },
-    timeRange: { from: 'now-7d', to: 'now' },
-    filters: [],
-    query: undefined,
-    columns: [],
-  })),
-  isTextBasedLanguage: jest.fn(() => true),
-  getTextBasedLanguage: jest.fn(),
-  getInspectorAdapters: jest.fn(() => ({})),
-  inspect: jest.fn(),
-  closeInspector: jest.fn(async () => {}),
-  supportedTriggers: jest.fn(() => []),
-  canLinkToLibrary: jest.fn(async () => false),
-  canUnlinkFromLibrary: jest.fn(async () => false),
-  unlinkFromLibrary: jest.fn(),
-  checkForDuplicateTitle: jest.fn(),
-  /** New embeddable api inherited methods */
-  resetUnsavedChanges: jest.fn(),
-  serializeState: jest.fn(),
-  snapshotRuntimeState: jest.fn(),
-  saveToLibrary: jest.fn(async () => 'saved-id'),
-  getByValueRuntimeSnapshot: jest.fn(),
-  onEdit: jest.fn(),
-  isEditingEnabled: jest.fn(() => true),
-  getTypeDisplayName: jest.fn(() => 'Lens'),
-  setPanelTitle: jest.fn(),
-  setHidePanelTitle: jest.fn(),
-  phase$: new BehaviorSubject<PhaseEvent | undefined>({
-    id: '1111',
-    status: 'rendered',
-    timeToEvent: 1000,
-  }),
-  unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
-  libraryId$: new BehaviorSubject<string | undefined>(undefined),
-  savedObjectId: new BehaviorSubject<string | undefined>(undefined),
-  adapters$: new BehaviorSubject<Adapters>({}),
-  updateAttributes: jest.fn(),
-  updateSavedObjectId: jest.fn(),
-  updateOverrides: jest.fn(),
-
-  // make it pass the isFilterable check for now
-  getFilters: jest.fn(),
-  getQuery: jest.fn(),
-});
+): LensApi =>
+  getLensApiMock({
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
+    getViewUnderlyingDataArgs: jest.fn(() => ({
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: [],
+      query: undefined,
+      columns: [],
+    })),
+    saveToLibrary: jest.fn(async () => 'saved-id'),
+  });
 
 const getMockEmbeddable = (type: string): IEmbeddable =>
   ({
