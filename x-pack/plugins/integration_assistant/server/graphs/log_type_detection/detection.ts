@@ -35,6 +35,9 @@ export async function handleLogFormatDetection({
 
   try {
     samplesFormat = SamplesFormat.parse(logFormatDetectionResult);
+    if (samplesFormat.header === undefined) {
+      samplesFormat.header = false;
+    }
   } catch (error) {
     // If the LLM fails to produce the output of specified format, we will default to unsupported.
   }

@@ -32,7 +32,7 @@ describe('Testing log type detection handler', () => {
     } as unknown as IScopedClusterClient;
 
     const response = await handleLogFormatDetection({ state, model, client });
-    expect(response.samplesFormat).toStrictEqual({ name: 'structured' });
+    expect(response.samplesFormat).toStrictEqual({ name: 'structured', header: false });
     expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
 });
