@@ -6,17 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { OutputAPI } from '@kbn/inference-plugin/common/output';
-import type { ChatCompleteAPI } from '@kbn/inference-plugin/common/chat_complete';
 import type { FunctionCallingMode } from '@kbn/inference-plugin/common/chat_complete';
-import type {
-  ProductDocBaseStartContract,
-  ProductDocSearchAPI,
-} from '@kbn/product-doc-base-plugin/server';
+import type { ProductName } from '@kbn/product-doc-common';
 
 export interface RetrieveDocumentationParams {
   request: KibanaRequest;
+  max?: number;
+  products?: ProductName[];
   connectorId: string;
   searchTerm: string;
   functionCalling?: FunctionCallingMode;

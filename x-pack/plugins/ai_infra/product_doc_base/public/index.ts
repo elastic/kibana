@@ -8,19 +8,19 @@
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { KnowledgeBaseRegistryPlugin } from './plugin';
 import type {
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies,
+  ProductDocBasePluginSetup,
+  ProductDocBasePluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
   PublicPluginConfig,
 } from './types';
 
-export type { KnowledgeBaseRegistrySetupContract, KnowledgeBaseRegistryStartContract };
+export type { ProductDocBasePluginSetup, ProductDocBasePluginStart };
 
 export const plugin: PluginInitializer<
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies
+  ProductDocBasePluginSetup,
+  ProductDocBasePluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<PublicPluginConfig>) =>
   new KnowledgeBaseRegistryPlugin(pluginInitializerContext);

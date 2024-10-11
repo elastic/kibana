@@ -27,11 +27,11 @@ export const performSearch = async ({
     query: {
       bool: {
         filter: [
-          {
-            bool: {
-              must: [{ term: { version: '8.15' } }],
-            },
-          },
+          // {
+          //   bool: {
+          //     must: [{ term: { version: '8.15' } }],
+          //   },
+          // },
         ],
         should: [
           {

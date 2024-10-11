@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { InstallationAPI } from './services/installation';
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface PublicPluginConfig {}
 
-export interface KnowledgeBaseRegistrySetupDependencies {}
+export interface PluginSetupDependencies {}
 
-export interface KnowledgeBaseRegistryStartDependencies {}
+export interface PluginStartDependencies {}
 
-export interface KnowledgeBaseRegistrySetupContract {}
+export interface ProductDocBasePluginSetup {}
 
-export interface KnowledgeBaseRegistryStartContract {}
+export interface ProductDocBasePluginStart {
+  installation: InstallationAPI;
+}

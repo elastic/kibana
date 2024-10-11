@@ -9,19 +9,20 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type {
   PublicPluginConfig,
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies,
+  ProductDocBasePluginSetup,
+  ProductDocBasePluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
 } from './types';
+import { InstallationService } from './services/installation';
 
 export class KnowledgeBaseRegistryPlugin
   implements
     Plugin<
-      KnowledgeBaseRegistrySetupContract,
-      KnowledgeBaseRegistryStartContract,
-      KnowledgeBaseRegistrySetupDependencies,
-      KnowledgeBaseRegistryStartDependencies
+      ProductDocBasePluginSetup,
+      ProductDocBasePluginStart,
+      PluginSetupDependencies,
+      PluginStartDependencies
     >
 {
   logger: Logger;
@@ -30,19 +31,21 @@ export class KnowledgeBaseRegistryPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<
-      KnowledgeBaseRegistryStartDependencies,
-      KnowledgeBaseRegistryStartContract
-    >,
-    pluginsSetup: KnowledgeBaseRegistrySetupDependencies
-  ): KnowledgeBaseRegistrySetupContract {
+    coreSetup: CoreSetup<PluginStartDependencies, ProductDocBasePluginStart>,
+    pluginsSetup: PluginSetupDependencies
+  ): ProductDocBasePluginSetup {
     return {};
   }
 
-  start(
-    coreStart: CoreStart,
-    pluginsStart: KnowledgeBaseRegistryStartDependencies
-  ): KnowledgeBaseRegistryStartContract {
-    return {};
+  start(coreStart: CoreStart, pluginsStart: PluginStartDependencies): ProductDocBasePluginStart {
+    const installationService = new InstallationService({ http: coreStart.http });
+
+    return {
+      installation: {
+        getStatus: () => installationService.getInstallationStatus(),
+        install: () => installationService.install(),
+        uninstall: () => installationService.uninstall(),
+      },
+    };
   }
 }

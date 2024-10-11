@@ -208,6 +208,13 @@ export class PackageInstaller {
 
     await this.productDocClient.setUninstalled(productName);
   }
+
+  async uninstallAll() {
+    const allProducts = Object.values(DocumentationProduct);
+    for (const productName of allProducts) {
+      await this.uninstallPackage({ productName });
+    }
+  }
 }
 
 const selectVersion = (currentVersion: string, availableVersions: string[]): string => {

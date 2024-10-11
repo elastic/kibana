@@ -8,15 +8,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
-import { InstallationStatus } from '../../../common/install_status';
+import type { ProductInstallState } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { KnowledgeBaseProductDocInstallAttributes as TypeAttributes } from '../../saved_objects';
 // import { soToModel } from './model_conversion';
-
-interface ProductInstallState {
-  status: InstallationStatus;
-  version?: string;
-}
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
@@ -37,7 +32,7 @@ export class ProductDocInstallClient {
   }
   */
 
-  async getInstallationStatus() {
+  async getInstallationStatus(): Promise<Record<ProductName, ProductInstallState>> {
     const response = await this.soClient.find<TypeAttributes>({
       type: typeName,
       perPage: 100,

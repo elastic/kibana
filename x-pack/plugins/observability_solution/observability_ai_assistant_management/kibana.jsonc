@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "observabilityAiAssistantManagement"],
     "requiredPlugins": ["management", "observabilityAIAssistant", "observabilityShared"],
-    "optionalPlugins": ["actions", "home", "serverless", "enterpriseSearch"],
+    "optionalPlugins": ["actions", "home", "serverless", "enterpriseSearch", "productDocBase"],
     "requiredBundles": ["kibanaReact", "logsDataAccess"]
   }
 }

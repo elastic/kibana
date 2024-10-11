@@ -23,6 +23,7 @@ import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
 import { SearchService } from './services/search';
+import { registerRoutes } from './routes';
 
 export class KnowledgeBaseRegistryPlugin
   implements
@@ -34,6 +35,8 @@ export class KnowledgeBaseRegistryPlugin
     >
 {
   logger: Logger;
+  private installClient?: ProductDocInstallClient;
+  private packageInstaller?: PackageInstaller;
 
   constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
@@ -43,6 +46,23 @@ export class KnowledgeBaseRegistryPlugin
     pluginsSetup: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
     coreSetup.savedObjects.registerType(knowledgeBaseProductDocInstallSavedObjectType);
+
+    const router = coreSetup.http.createRouter();
+    registerRoutes({
+      router,
+      getInstallClient: () => {
+        if (!this.installClient) {
+          throw new Error('getInstallClient called before #start');
+        }
+        return this.installClient;
+      },
+      getInstaller: () => {
+        if (!this.packageInstaller) {
+          throw new Error('getInstaller called before #start');
+        }
+        return this.packageInstaller;
+      },
+    });
 
     return {};
   }
@@ -55,13 +75,14 @@ export class KnowledgeBaseRegistryPlugin
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
+    this.installClient = productDocClient;
 
     const endpointManager = new InferenceEndpointManager({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger.get('endpoint-manager'),
     });
 
-    const packageInstaller = new PackageInstaller({
+    this.packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       endpointManager,
@@ -77,7 +98,7 @@ export class KnowledgeBaseRegistryPlugin
     });
 
     // TODO: see if we should be using taskManager for that.
-    packageInstaller.ensureUpToDate({}).catch((err) => {
+    this.packageInstaller.ensureUpToDate({}).catch((err) => {
       this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
     });
 
@@ -85,8 +106,7 @@ export class KnowledgeBaseRegistryPlugin
     delay(10)
       .then(async () => {
         // this.logger.info('*** test installing packages');
-        // await packageInstaller.installAll({});
-
+        // await this.packageInstaller.installAll({});
         // const results = await searchService.search({
         //  query: 'How to create a space in Kibana?',
         //  products: ['kibana'],

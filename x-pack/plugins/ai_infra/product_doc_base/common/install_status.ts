@@ -18,3 +18,8 @@ export interface ProductDocInstallStatus {
   lastInstallationFailureReason: string | undefined;
   indexName?: string;
 }
+
+export interface ProductInstallState {
+  status: InstallationStatus;
+  version?: string;
+}

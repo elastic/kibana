@@ -11,5 +11,5 @@ export const productDocIndexPrefix = '.kibana-ai-product-doc';
 export const productDocIndexPattern = `${productDocIndexPrefix}-*`;
 
 export const getProductDocIndexName = (productName: ProductName): string => {
-  return `${productDocIndexPrefix}-${productName}`;
+  return `${productDocIndexPrefix}-${productName.toLowerCase()}`;
 };
