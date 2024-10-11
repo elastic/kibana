@@ -41683,11 +41683,7 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          }
-        },
+        "responses": {},
         "summary": "Copy saved objects to spaces",
         "tags": [
           "spaces"
@@ -41762,11 +41758,7 @@
             }
           }
         },
-        "responses": {
-          "204": {
-            "description": "Indicates a successful call."
-          }
-        },
+        "responses": {},
         "summary": "Disable legacy URL aliases",
         "tags": [
           "spaces"
@@ -41835,11 +41827,7 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          }
-        },
+        "responses": {},
         "summary": "Get shareable references",
         "tags": [
           "spaces"
@@ -42050,11 +42038,7 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          }
-        },
+        "responses": {},
         "summary": "Update saved objects in spaces",
         "tags": [
           "spaces"
