@@ -264,7 +264,7 @@ export function DiscoverMainRoute({
     async (nextDataView: unknown) => {
       if (nextDataView) {
         setLoading(true);
-        setNoDataState({ showNoDataPage: false, hasESData: true, hasUserDataView: true });
+        setNoDataState(state => ({ ...state, showNoDataPage: false }));
         setError(undefined);
         await loadSavedSearch({ nextDataView: nextDataView as DataView });
       }
