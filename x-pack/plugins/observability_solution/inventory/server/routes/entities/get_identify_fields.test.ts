@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityType } from '../../../common/entities'; // Adjust the import path accordingly
+import { EntityType } from '../../../common/entities';
 import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
