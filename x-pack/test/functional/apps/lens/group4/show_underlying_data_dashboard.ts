@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await lens.openInEditor();
       await header.waitUntilLoadingHasFinished();
       await lens.createLayer('annotations');
       await lens.waitForVisualization('xyVisChart');
