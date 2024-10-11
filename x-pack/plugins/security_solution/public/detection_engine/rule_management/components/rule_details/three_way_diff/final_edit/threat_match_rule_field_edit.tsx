@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { DiffableThreatMatchFields } from '../../../../../../../common/api/detection_engine';
 import { FieldFormWrapper } from './field_form_wrapper';
 import {
   KqlQueryEdit,
@@ -14,9 +13,10 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
+import type { UpgradeableThreatMatchFields } from '../../../../model/prebuilt_rule_upgrade/types';
 
 interface ThreatMatchRuleFieldEditProps {
-  fieldName: keyof DiffableThreatMatchFields;
+  fieldName: UpgradeableThreatMatchFields;
 }
 
 export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEditProps) {

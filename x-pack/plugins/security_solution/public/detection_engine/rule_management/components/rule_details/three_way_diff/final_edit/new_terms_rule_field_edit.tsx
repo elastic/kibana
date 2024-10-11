@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { DiffableNewTermsFields } from '../../../../../../../common/api/detection_engine';
 import { FieldFormWrapper } from './field_form_wrapper';
 import {
   KqlQueryEdit,
@@ -14,9 +13,10 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
+import type { UpgradeableNewTermsFields } from '../../../../model/prebuilt_rule_upgrade/types';
 
 interface NewTermsRuleFieldEditProps {
-  fieldName: keyof DiffableNewTermsFields;
+  fieldName: UpgradeableNewTermsFields;
 }
 
 export function NewTermsRuleFieldEdit({ fieldName }: NewTermsRuleFieldEditProps) {

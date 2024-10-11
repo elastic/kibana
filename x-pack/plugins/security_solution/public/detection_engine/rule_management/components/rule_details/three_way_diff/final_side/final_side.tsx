@@ -13,9 +13,10 @@ import * as i18n from './translations';
 import { FinalReadOnly } from '../final_readonly/final_readonly';
 import { FinalEdit } from '../final_edit/final_edit';
 import { FinalSideMode } from './constants';
+import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/types';
 
 interface FinalSideProps {
-  fieldName: string;
+  fieldName: UpgradeableDiffableFields;
 }
 
 export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {

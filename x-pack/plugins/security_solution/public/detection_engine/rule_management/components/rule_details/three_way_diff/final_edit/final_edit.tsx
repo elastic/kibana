@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
-import type {
-  DiffableThreatMatchFields,
-  DiffableCustomQueryFields,
-  DiffableRuleTypes,
-  DiffableThresholdFields,
-  DiffableNewTermsFields,
-} from '../../../../../../../common/api/detection_engine';
+import React from 'react';
+import type { DiffableRuleTypes } from '../../../../../../../common/api/detection_engine';
 import { FinalEditContextProvider } from './final_edit_context';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { useDiffableRuleContext } from '../diffable_rule_context';
@@ -23,9 +16,18 @@ import { SavedQueryRuleFieldEdit } from './saved_query_rule_field_edit';
 import { ThreatMatchRuleFieldEdit } from './threat_match_rule_field_edit';
 import { ThresholdRuleFieldEdit } from './threshold_rule_field_edit';
 import { NewTermsRuleFieldEdit } from './new_terms_rule_field_edit';
+import type {
+  UpgradeableDiffableFields,
+  UpgradeableCustomQueryFields,
+  UpgradeableSavedQueryFields,
+  UpgradeableThreatMatchFields,
+  UpgradeableThresholdFields,
+  UpgradeableNewTermsFields,
+} from '../../../../model/prebuilt_rule_upgrade/types';
+import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/constants';
 
 interface FinalEditProps {
-  fieldName: string;
+  fieldName: UpgradeableDiffableFields;
   setReadOnlyMode: () => void;
 }
 
@@ -40,37 +42,32 @@ export function FinalEdit({ fieldName, setReadOnlyMode }: FinalEditProps) {
 }
 
 interface FinalEditFieldProps {
-  fieldName: string;
+  fieldName: UpgradeableDiffableFields;
   ruleType: DiffableRuleTypes;
 }
 
 function FieldEdit({ fieldName, ruleType }: FinalEditFieldProps) {
-  const { data: commonField } = useMemo(
-    () => DiffableCommonFields.keyof().safeParse(fieldName),
-    [fieldName]
-  );
-
-  if (commonField) {
-    return <CommonRuleFieldEdit fieldName={commonField} />;
+  if (isCommonFieldName(fieldName)) {
+    return <CommonRuleFieldEdit fieldName={fieldName} />;
   }
 
   switch (ruleType) {
     case 'query':
-      return <CustomQueryRuleFieldEdit fieldName={fieldName as keyof DiffableCustomQueryFields} />;
+      return <CustomQueryRuleFieldEdit fieldName={fieldName as UpgradeableCustomQueryFields} />;
     case 'saved_query':
-      return <SavedQueryRuleFieldEdit fieldName={fieldName as keyof DiffableCustomQueryFields} />;
+      return <SavedQueryRuleFieldEdit fieldName={fieldName as UpgradeableSavedQueryFields} />;
     case 'eql':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'esql':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'threat_match':
-      return <ThreatMatchRuleFieldEdit fieldName={fieldName as keyof DiffableThreatMatchFields} />;
+      return <ThreatMatchRuleFieldEdit fieldName={fieldName as UpgradeableThreatMatchFields} />;
     case 'threshold':
-      return <ThresholdRuleFieldEdit fieldName={fieldName as keyof DiffableThresholdFields} />;
+      return <ThresholdRuleFieldEdit fieldName={fieldName as UpgradeableThresholdFields} />;
     case 'machine_learning':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'new_terms':
-      return <NewTermsRuleFieldEdit fieldName={fieldName as keyof DiffableNewTermsFields} />;
+      return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
     default:
       return assertUnreachable(ruleType);
   }

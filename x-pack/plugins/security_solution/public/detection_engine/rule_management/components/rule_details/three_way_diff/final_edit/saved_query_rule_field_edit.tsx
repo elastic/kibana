@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { DiffableSavedQueryFields } from '../../../../../../../common/api/detection_engine';
 import { FieldFormWrapper } from './field_form_wrapper';
 import {
   KqlQueryEdit,
@@ -14,9 +13,10 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
+import type { UpgradeableSavedQueryFields } from '../../../../model/prebuilt_rule_upgrade/types';
 
 interface SavedQueryRuleFieldEditProps {
-  fieldName: keyof DiffableSavedQueryFields;
+  fieldName: UpgradeableSavedQueryFields;
 }
 
 export function SavedQueryRuleFieldEdit({ fieldName }: SavedQueryRuleFieldEditProps) {
