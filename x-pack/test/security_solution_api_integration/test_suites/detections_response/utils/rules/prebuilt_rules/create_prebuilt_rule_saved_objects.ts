@@ -12,9 +12,9 @@ import {
   getPrebuiltRuleMockOfType,
   getPrebuiltRuleWithExceptionsMock,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import type { TypeSpecificCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { TypeSpecificFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
 
 const ruleAssetSavedObjectESFields = {
   type: 'security-rule',
@@ -41,7 +41,7 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
  * @param overrideParams Params to override the default mock
  * @returns Created rule asset saved object
  */
-export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificFields>(
+export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificCreateProps>(
   type: T['type']
 ) => ({
   'security-rule': getPrebuiltRuleMockOfType<T>(type),

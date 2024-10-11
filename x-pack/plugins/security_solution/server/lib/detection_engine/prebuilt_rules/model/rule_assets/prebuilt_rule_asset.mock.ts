@@ -68,8 +68,6 @@ export const getPrebuiltThreatMatchRuleSpecificFieldsMock = (): ThreatMatchRuleC
   type: 'threat_match',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  version: 1,
-  author: [],
   threat_query: '*:*',
   threat_index: ['list-index'],
   threat_mapping: [
