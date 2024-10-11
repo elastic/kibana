@@ -75,7 +75,7 @@ export const IPINFO_NAME_OPTIONS = [
   {
     value: 'asn',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeAsnDatabaseName', {
-      defaultMessage: 'Free IP to ASN ',
+      defaultMessage: 'Free IP to ASN',
     }),
   },
   {
@@ -95,7 +95,7 @@ export const IPINFO_NAME_OPTIONS = [
     text: i18n.translate(
       'xpack.ingestPipelines.manageProcessors.ipinfo.ipGeolocationDatabaseName',
       {
-        defaultMessage: 'IP geolocation',
+        defaultMessage: 'IP Geolocation',
       }
     ),
   },
@@ -104,7 +104,7 @@ export const IPINFO_NAME_OPTIONS = [
     text: i18n.translate(
       'xpack.ingestPipelines.manageProcessors.ipinfo.privacyDetectionDatabaseName',
       {
-        defaultMessage: 'Privacy detection',
+        defaultMessage: 'Privacy Detection',
       }
     ),
   },
