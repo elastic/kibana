@@ -370,18 +370,17 @@ export function getWebpackConfig(
     ],
 
     optimization: {
-      minimize: false,
-      // minimizer: [
-      //   new TerserPlugin({
-      //     extractComments: false,
-      //     parallel: false,
-      //     terserOptions: {
-      //       compress: { passes: 2 },
-      //       keep_classnames: true,
-      //       mangle: true,
-      //     },
-      //   }),
-      // ],
+      minimizer: [
+        new TerserPlugin({
+          extractComments: false,
+          parallel: false,
+          terserOptions: {
+            compress: { passes: 2 },
+            keep_classnames: true,
+            mangle: true,
+          },
+        }),
+      ],
       // TODO: try to understand why usedExports is treeShaking code it shouldn't be
       usedExports: false,
       // sideEffects: false,
