@@ -11,6 +11,7 @@ import type { RuleResponse } from '../../../../../../../common/api/detection_eng
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizableUpdateFields } from '../../../utils/validate';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -49,6 +50,8 @@ export const updateRule = async ({
     const error = getIdError({ id, ruleId });
     throw new ClientError(error.message, error.statusCode);
   }
+
+  validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
 
   const ruleWithUpdates = await applyRuleUpdate({
     prebuiltRuleAssetClient,
