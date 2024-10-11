@@ -42,19 +42,24 @@ import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
+import { SelfManagePreference } from '../create_connector';
 
 export interface ManualConfigurationProps {
   isDisabled: boolean;
+  selfManagePreference: SelfManagePreference;
 }
 
-export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({ isDisabled }) => {
+export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
+  isDisabled,
+  selfManagePreference,
+}) => {
   const { services } = useKibana<KibanaDeps>();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
-  const { selectedConnector } = useValues(NewConnectorLogic);
-  const { setRawName } = useActions(NewConnectorLogic);
+  const { connectorName } = useValues(NewConnectorLogic);
+  const { setRawName, createConnector } = useActions(NewConnectorLogic);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -67,239 +72,15 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({ isDisa
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
-  const [flyoutContent, setFlyoutContent] = useState<React.FC>();
+  const [flyoutContent, setFlyoutContent] = useState<'manual_config' | 'client'>();
   const cliCode = CREATE_CONNECTOR_PLUGIN.CLI_SNIPPET;
-
-  const flyoutCliContent: React.FC = () => (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={simpleFlyoutTitleId}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
-              {
-                defaultMessage: 'CLI',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiText size="s">
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.manualConfiguration.p.youCanAlsoUseLabel',
-              {
-                defaultMessage: 'You can also use the',
-              }
-            )}{' '}
-            <EuiLink
-              data-test-subj="enterpriseSearchManualConfigurationConnectorsCliLink"
-              href="https://github.com/elastic/connectors/blob/main/docs/CLI.md"
-              target="_blank"
-              external
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorsCLILinkLabel',
-                {
-                  defaultMessage: 'connectors CLI',
-                }
-              )}
-            </EuiLink>{' '}
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.manualConfiguration.p.commandlineInterfaceTheFollowingLabel',
-              {
-                defaultMessage:
-                  'command-line interface. The following command creates a new connector attached to the',
-              }
-            )}{' '}
-            <EuiCode>my index</EuiCode>{' '}
-            {i18n.translate(
-              'xpack.enterpriseSearch.manualConfiguration.p.UsingConfigurationFromLabel',
-              { defaultMessage: ', using configuration from your file.' }
-            )}
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiCodeBlock language="bash" isCopyable>
-          {cliCode}
-        </EuiCodeBlock>
-      </EuiFlyoutBody>
-    </>
-  );
-  const flyoutManualConfigContent: React.FC = () => (
-    <>
-      {' '}
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={simpleFlyoutTitleId}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
-              {
-                defaultMessage: 'Manual configuration',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
-              { defaultMessage: 'This manual option is an alternative to the' }
-            )}
-            <b>
-              {' '}
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
-                { defaultMessage: 'Generate configuration' }
-              )}
-            </b>{' '}
-            {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.optionWhichCreatesALabel',
-              {
-                defaultMessage:
-                  'option, here you can bring your already existing index or API key.',
-              }
-            )}
-          </p>
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexItem>
-          <EuiPanel hasBorder>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
-                  {
-                    defaultMessage: 'Connector',
-                  }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
-                { defaultMessage: 'Connector name' }
-              )}
-              helpText="Names should be lowercase and cannot contain spaces or special characters."
-            >
-              <EuiFieldText
-                data-test-subj="enterpriseSearchStartStepFieldText"
-                fullWidth
-                name="first"
-                value={selectedConnector?.name ?? ''}
-                onChange={(e) => {
-                  if (e.target.value !== selectedConnector?.name ?? '') {
-                    setRawName(e.target.value);
-                  }
-                }}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem>{/* <AttachIndexBox connector={connector} /> */}</EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem>
-          <EuiPanel hasBorder>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
-                  {
-                    defaultMessage: 'Bring your API key',
-                  }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              helpText={i18n.translate(
-                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
-                { defaultMessage: 'If no API key is provided, one will be generated for you.' }
-              )}
-              label={i18n.translate(
-                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
-                { defaultMessage: 'API key name' }
-              )}
-            >
-              <EuiFieldText
-                data-test-subj="enterpriseSearchStartStepFieldText"
-                fullWidth
-                name="first"
-                placeholder="Your encoded API key"
-                value={''}
-                onChange={() => {}}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiLink
-              data-test-subj="enterpriseSearchFlyoutManualConfigContentCreateAnApiKeyLink"
-              href="https://www.elastic.co/guide/en/cloud/current/ec-api-keys.html"
-              target="_blank"
-              external
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.manualConfiguration.createAPIKey',
-                {
-                  defaultMessage: 'Manage API key',
-                }
-              )}
-            </EuiLink>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="enterpriseSearchFlyoutManualConfigContentCloseButton"
-              iconType="cross"
-              onClick={() => setIsFlyoutVisible(false)}
-              flush="left"
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.closeButtonEmptyLabel',
-                { defaultMessage: 'Close' }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="enterpriseSearchFlyoutManualConfigContentSaveButton"
-              onClick={() => {
-                setIsFlyoutVisible(false);
-                setTimeout(() => {
-                  window.scrollTo({
-                    behavior: 'smooth',
-                    top: window.innerHeight,
-                  });
-                }, 100);
-              }}
-              fill
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel',
-                { defaultMessage: 'Save configuration' }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </>
-  );
 
   const items = [
     <EuiContextMenuItem
       key="copy"
       icon="wrench"
       onClick={() => {
-        setFlyoutContent(flyoutManualConfigContent);
+        setFlyoutContent('manual_config');
         setIsFlyoutVisible(true);
         closePopover();
       }}
@@ -332,7 +113,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({ isDisa
       key="share"
       icon="console"
       onClick={() => {
-        setFlyoutContent(flyoutCliContent);
+        setFlyoutContent('client');
         setIsFlyoutVisible(true);
         closePopover();
       }}
@@ -378,7 +159,183 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({ isDisa
           aria-labelledby={simpleFlyoutTitleId}
           size="s"
         >
-          {flyoutContent}
+          {flyoutContent === 'manual_config' && (
+            <>
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="m">
+                  <h2 id={simpleFlyoutTitleId}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
+                      {
+                        defaultMessage: 'Manual configuration',
+                      }
+                    )}
+                  </h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText color="subdued" size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
+                      { defaultMessage: 'This manual option is an alternative to the' }
+                    )}
+                    <b>
+                      {' '}
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
+                        { defaultMessage: 'Generate configuration' }
+                      )}
+                    </b>{' '}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.optionWhichCreatesALabel',
+                      {
+                        defaultMessage:
+                          'option, here you can bring your already existing index or API key.',
+                      }
+                    )}
+                  </p>
+                </EuiText>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                <EuiFlexItem>
+                  <EuiPanel hasBorder>
+                    <EuiTitle size="s">
+                      <h3>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
+                          {
+                            defaultMessage: 'Connector',
+                          }
+                        )}
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="m" />
+                    <EuiFormRow
+                      fullWidth
+                      label={i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
+                        { defaultMessage: 'Connector name' }
+                      )}
+                    >
+                      <EuiFieldText
+                        data-test-subj="enterpriseSearchStartStepFieldText"
+                        fullWidth
+                        name="first"
+                        value={connectorName}
+                        onChange={(e) => {
+                          setRawName(e.target.value);
+                        }}
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="m" />
+                    <EuiText size="xs">
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.createConnector.manualConfiguration.p.connectorNameDescription',
+                          {
+                            defaultMessage:
+                              'You will be redirected to connector page to configure the rest of your connector',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchFlyoutManualConfigContentCloseButton"
+                      iconType="cross"
+                      onClick={() => setIsFlyoutVisible(false)}
+                      flush="left"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.closeButtonEmptyLabel',
+                        { defaultMessage: 'Close' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="enterpriseSearchFlyoutManualConfigContentSaveButton"
+                      onClick={() => {
+                        createConnector({
+                          isSelfManaged: selfManagePreference === 'selfManaged',
+                          shouldGenerateAfterCreate: false,
+                          shouldNavigateToConnectorAfterCreate: true,
+                        });
+                      }}
+                      fill
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel',
+                        { defaultMessage: 'Save configuration' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
+            </>
+          )}
+          {flyoutContent === 'client' && (
+            <>
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="m">
+                  <h2 id={simpleFlyoutTitleId}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
+                      {
+                        defaultMessage: 'CLI',
+                      }
+                    )}
+                  </h2>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                <EuiText size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.manualConfiguration.p.youCanAlsoUseLabel',
+                      {
+                        defaultMessage: 'You can also use the',
+                      }
+                    )}{' '}
+                    <EuiLink
+                      data-test-subj="enterpriseSearchManualConfigurationConnectorsCliLink"
+                      href="https://github.com/elastic/connectors/blob/main/docs/CLI.md"
+                      target="_blank"
+                      external
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorsCLILinkLabel',
+                        {
+                          defaultMessage: 'connectors CLI',
+                        }
+                      )}
+                    </EuiLink>{' '}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.manualConfiguration.p.commandlineInterfaceTheFollowingLabel',
+                      {
+                        defaultMessage:
+                          'command-line interface. The following command creates a new connector attached to the',
+                      }
+                    )}{' '}
+                    <EuiCode>my index</EuiCode>{' '}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.manualConfiguration.p.UsingConfigurationFromLabel',
+                      { defaultMessage: ', using configuration from your file.' }
+                    )}
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiCodeBlock language="bash" isCopyable>
+                  {cliCode}
+                </EuiCodeBlock>
+              </EuiFlyoutBody>
+            </>
+          )}
         </EuiFlyout>
       )}
     </>

@@ -30,19 +30,12 @@ import * as Constants from '../../../../shared/constants';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
-import { ConnectorCreationSteps } from './create_connector';
-
 interface ConfigurationStepProps {
-  currentStep: ConnectorCreationSteps;
   setCurrentStep: Function;
   title: string;
 }
 
-export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
-  title,
-  currentStep,
-  setCurrentStep,
-}) => {
+export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, setCurrentStep }) => {
   const { connector } = useValues(ConnectorViewLogic);
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
@@ -124,7 +117,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
             <EuiSpacer size="m" />
             <EuiButton
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => setCurrentStep(currentStep + 1)}
+              onClick={() => setCurrentStep('finish')}
               fill
             >
               {Constants.NEXT_BUTTON_LABEL}

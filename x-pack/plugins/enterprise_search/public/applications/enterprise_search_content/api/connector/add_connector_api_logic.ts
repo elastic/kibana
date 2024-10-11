@@ -20,11 +20,17 @@ export interface AddConnectorApiLogicArgs {
   language: string | null;
   name: string;
   serviceType?: string;
+  // Without a proper refactoring there is no good way to chain actions.
+  // This prop is simply passed back with the result to let listeners
+  // know what was the intent of the request. And call the next action
+  // accordingly.
+  uiFlags?: Record<string, boolean>;
 }
 
 export interface AddConnectorApiLogicResponse {
   id: string;
   indexName: string;
+  uiFlags?: Record<string, boolean>;
 }
 
 export const addConnector = async ({
@@ -34,6 +40,7 @@ export const addConnector = async ({
   isNative,
   language,
   serviceType,
+  uiFlags,
 }: AddConnectorApiLogicArgs): Promise<AddConnectorApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
 
@@ -54,6 +61,7 @@ export const addConnector = async ({
   return {
     id: result.id,
     indexName: result.index_name,
+    uiFlags,
   };
 };
 

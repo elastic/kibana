@@ -104,14 +104,13 @@ export const CreateConnector: React.FC = () => {
     ];
   };
 
-  const stepContent: Record<'start' | 'deployment' | 'configure' | 'finish', React.Node> = {
+  const stepContent: Record<'start' | 'deployment' | 'configure' | 'finish', React.ReactNode> = {
     configure: (
       <ConfigurationStep
         title={i18n.translate(
           'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
           { defaultMessage: 'Configuration' }
         )}
-        currentStep={currentStep}
         setCurrentStep={setCurrentStep}
       />
     ),
@@ -131,7 +130,6 @@ export const CreateConnector: React.FC = () => {
     ),
     start: (
       <StartStep
-        currentStep={currentStep}
         title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
           defaultMessage: 'Start',
         })}

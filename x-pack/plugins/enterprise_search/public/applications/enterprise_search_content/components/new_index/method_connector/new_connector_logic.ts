@@ -12,6 +12,8 @@ import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import { Status } from '../../../../../../common/types/api';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
 import {
   AddConnectorApiLogic,
   AddConnectorApiLogicActions,
@@ -29,19 +31,14 @@ import {
   GenerateConnectorNamesApiResponse,
 } from '../../../api/connector/generate_connector_names_api_logic';
 import { APIKeyResponse } from '../../../api/generate_api_key/generate_api_key_logic';
-import {
-  IndexExistsApiLogic,
-  IndexExistsApiParams,
-  IndexExistsApiResponse,
-} from '../../../api/index/index_exists_api_logic';
 
-import { isValidIndexName } from '../../../utils/validate_index_name';
-
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import {
   ConnectorViewActions,
   ConnectorViewLogic,
 } from '../../connector_detail/connector_view_logic';
 import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
+import { SearchIndexTabId } from '../../search_index/search_index';
 import { UNIVERSAL_LANGUAGE_VALUE } from '../constants';
 import { LanguageForOptimization } from '../types';
 import { getLanguageForOptimization } from '../utils';
@@ -49,12 +46,9 @@ import { getLanguageForOptimization } from '../utils';
 export interface NewConnectorValues {
   canConfigureConnector: boolean;
   connectorId: string;
+  connectorName: string;
   createConnectorApiStatus: Status;
   currentStep: ConnectorCreationSteps;
-  data: IndexExistsApiResponse;
-  fullIndexName: string;
-  fullIndexNameExists: boolean;
-  fullIndexNameIsValid: boolean;
   generateConfigurationStatus: Status;
   generatedConfigData:
     | {
@@ -70,12 +64,10 @@ export interface NewConnectorValues {
   languageSelectValue: string;
   rawName: string;
   selectedConnector: ConnectorDefinition | null;
+  shouldGenerateConfigAfterCreate: boolean;
 }
 
-type NewConnectorActions = Pick<
-  Actions<IndexExistsApiParams, IndexExistsApiResponse>,
-  'makeRequest'
-> & {
+type NewConnectorActions = {
   conncetorNameGenerated: GenerateConnectorNamesApiLogicActions['apiSuccess'];
   generateConnectorName: GenerateConnectorNamesApiLogicActions['makeRequest'];
 } & {
@@ -83,7 +75,15 @@ type NewConnectorActions = Pick<
   generateConfiguration: GenerateConfigApiActions['makeRequest'];
 } & {
   connectorCreated: Actions<AddConnectorApiLogicArgs, AddConnectorApiLogicResponse>['apiSuccess'];
-  createConnector: ({ isSelfManaged }: { isSelfManaged: boolean }) => { isSelfManaged: boolean };
+  createConnector: ({
+    isSelfManaged,
+    shouldGenerateAfterCreate,
+    shouldNavigateToConnectorAfterCreate,
+  }: {
+    isSelfManaged: boolean;
+    shouldGenerateAfterCreate?: boolean;
+    shouldNavigateToConnectorAfterCreate?: boolean;
+  }) => { isSelfManaged: boolean; shouldGenerateAfterCreate?: boolean };
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
   setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
@@ -96,7 +96,15 @@ type NewConnectorActions = Pick<
 
 export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnectorActions>>({
   actions: {
-    createConnector: ({ isSelfManaged }) => ({ isSelfManaged }),
+    createConnector: ({
+      isSelfManaged,
+      shouldGenerateAfterCreate,
+      shouldNavigateToConnectorAfterCreate,
+    }) => ({
+      isSelfManaged,
+      shouldGenerateAfterCreate,
+      shouldNavigateToConnectorAfterCreate,
+    }),
     setCurrentStep: (step) => ({ step }),
     setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
@@ -108,16 +116,12 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       ['makeRequest as generateConnectorName', 'apiSuccess as connectorNameGenerated'],
       AddConnectorApiLogic,
       ['makeRequest as createConnectorApi', 'apiSuccess as connectorCreated'],
-      IndexExistsApiLogic,
-      ['makeRequest'],
       GenerateConfigApiLogic,
       ['makeRequest as generateConfiguration', 'apiSuccess as configurationGenerated'],
       ConnectorViewLogic,
       ['fetchConnector'],
     ],
     values: [
-      IndexExistsApiLogic,
-      ['data'],
       GenerateConnectorNamesApiLogic,
       ['data as generatedNameData'],
       GenerateConfigApiLogic,
@@ -127,25 +131,41 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     ],
   },
   listeners: ({ actions, values }) => ({
-    connectorCreated: ({ id }) => {
-      actions.fetchConnector({ connectorId: id });
-      actions.generateConfiguration({ connectorId: id });
+    connectorCreated: ({ id, uiFlags }) => {
+      if (uiFlags?.shouldNavigateToConnectorAfterCreate) {
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId: id,
+            tabId: SearchIndexTabId.CONFIGURATION,
+          })
+        );
+      } else {
+        actions.fetchConnector({ connectorId: id });
+        if (!uiFlags || uiFlags.shouldGenerateAfterCreate) {
+          actions.generateConfiguration({ connectorId: id });
+        }
+      }
     },
-    createConnector: ({ isSelfManaged }) => {
+    createConnector: ({
+      isSelfManaged,
+      shouldGenerateAfterCreate = true,
+      shouldNavigateToConnectorAfterCreate = false,
+    }) => {
       if (
         !values.rawName &&
         values.selectedConnector &&
-        values.fullIndexName &&
+        values.connectorName &&
         values.generatedNameData
       ) {
         // name is generated, use everything generated
         actions.createConnectorApi({
           deleteExistingConnector: false,
-          indexName: values.fullIndexName,
+          indexName: values.connectorName,
           isNative: !values.selectedConnector.isNative ? false : !isSelfManaged,
           language: null,
           name: values.generatedNameData.connectorName,
           serviceType: values.selectedConnector.serviceType,
+          uiFlags: { shouldNavigateToConnectorAfterCreate, shouldGenerateAfterCreate },
         });
       } else {
         // TODO: this is the user input case. Generate index and api key names from the user input first and then create the connector.
@@ -158,7 +178,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'new_search_index'],
+  path: ['enterprise_search', 'content', 'new_search_connector'],
   reducers: {
     connectorId: [
       '',
@@ -204,25 +224,15 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
   },
   selectors: ({ selectors }) => ({
     canConfigureConnector: [
-      () => [selectors.fullIndexName, selectors.selectedConnector],
-      (fullIndexName: string, selectedConnector: NewConnectorValues['selectedConnector']) =>
-        fullIndexName && selectedConnector?.name,
+      () => [selectors.connectorName, selectors.selectedConnector],
+      (connectorName: string, selectedConnector: NewConnectorValues['selectedConnector']) =>
+        (connectorName && selectedConnector?.name) ?? false,
     ],
-    fullIndexName: [
+    connectorName: [
       // TODO: this is the connector name. Rename this.
       () => [selectors.rawName, selectors.generatedNameData],
       (name: string, generatedName: NewConnectorValues['generatedNameData']) =>
         name ? name : generatedName?.connectorName ?? '',
-    ],
-    fullIndexNameExists: [
-      () => [selectors.data, selectors.fullIndexName],
-      (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>
-        data?.exists === true && data.indexName === fullIndexName,
-    ],
-    fullIndexNameIsValid: [
-      // TODO: remove this if not used
-      () => [selectors.fullIndexName],
-      (fullIndexName) => isValidIndexName(fullIndexName),
     ],
     isCreateLoading: [
       () => [selectors.createConnectorApiStatus],

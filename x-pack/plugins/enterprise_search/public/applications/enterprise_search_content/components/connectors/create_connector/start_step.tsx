@@ -34,10 +34,9 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
-import { ConnectorCreationSteps, SelfManagePreference } from './create_connector';
+import { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
-  currentStep: ConnectorCreationSteps;
   error?: string | React.ReactNode;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
@@ -48,7 +47,6 @@ interface StartStepProps {
 export const StartStep: React.FC<StartStepProps> = ({
   title,
   selfManagePreference,
-  currentStep,
   setCurrentStep,
   onSelfManagePreferenceChange,
   error,
@@ -57,9 +55,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
   const {
-    fullIndexName,
-    fullIndexNameExists,
-    fullIndexNameIsValid,
+    connectorName,
     canConfigureConnector,
     selectedConnector,
     generatedConfigData,
@@ -70,36 +66,6 @@ export const StartStep: React.FC<StartStepProps> = ({
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
-  };
-
-  const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
-
-  const formError = () => {
-    if (fullIndexNameExists) {
-      // TODO: connector with same name is allowed.
-      return i18n.translate(
-        'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.alreadyExists.error',
-        {
-          defaultMessage: 'A connector with the name {connectorName} already exists',
-          values: {
-            connectorName: fullIndexName,
-          },
-        }
-      );
-    }
-    if (!fullIndexNameIsValid) {
-      // TODO: make sure to use name stripping logic
-      return i18n.translate(
-        'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.isInvalid.error',
-        {
-          defaultMessage: '{connectorName} is an invalid connector name',
-          values: {
-            connectorName: fullIndexName,
-          },
-        }
-      );
-    }
-    return error;
   };
 
   return (
@@ -126,8 +92,7 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
-                  isInvalid={formInvalid}
-                  error={formError()}
+                  isInvalid={!!error}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                     { defaultMessage: 'Connector name' }
@@ -137,7 +102,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
                     name="first"
-                    value={fullIndexName}
+                    value={connectorName}
                     onChange={handleNameChange}
                   />
                 </EuiFormRow>
@@ -259,8 +224,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                 onClick={() => {
                   if (selectedConnector && selectedConnector.name) {
                     createConnector({
-                      isSelfManaged: false,
+                      isSelfManaged: true,
                     });
+                    setCurrentStep('deployment');
                   }
                 }}
                 fill
@@ -318,7 +284,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiButton
                     data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
                     fill
-                    onClick={() => setCurrentStep(currentStep + 1)}
+                    onClick={() => setCurrentStep('configure')}
                   >
                     {Constants.NEXT_BUTTON_LABEL}
                   </EuiButton>
@@ -350,6 +316,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration
                       isDisabled={isGenerateLoading || isCreateLoading || !canConfigureConnector}
+                      selfManagePreference={selfManagePreference}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
