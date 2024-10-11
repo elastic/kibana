@@ -12,8 +12,6 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { createBrowserHistory } from 'history';
 
-import datemath from '@elastic/datemath';
-
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Router } from '@kbn/shared-ux-router';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
@@ -27,10 +25,10 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';
+import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import type { AiopsPluginStartDeps } from '../types';
 
-import { LogRateAnalysisDocumentCountChartData } from '../components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_document_count_chart_data';
-import { LogRateAnalysisContent } from '../components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content';
+import { LogRateAnalysisForEmbeddable } from '../components/log_rate_analysis/log_rate_analysis_for_embeddable';
 
 /**
  * Only used to initialize internally
@@ -124,16 +122,6 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
 
   const history = createBrowserHistory();
 
-  const timeRangeParsed = useMemo(() => {
-    if (timeRange) {
-      const min = datemath.parse(timeRange.from);
-      const max = datemath.parse(timeRange.to);
-      if (min && max) {
-        return { min, max };
-      }
-    }
-  }, [timeRange]);
-
   // We use the following pattern to track changes of dataViewId, and if there's
   // a change, we unmount and remount the complete inner component. This makes
   // sure the component is reinitialized correctly when the options of the
@@ -165,19 +153,20 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
         <Router history={history}>
           <ReloadContextProvider reload$={resultObservable$}>
             <AiopsAppContext.Provider value={aiopsAppContextValue}>
-              <UrlStateProvider>
-                <DataSourceContextProvider
-                  dataViews={pluginStart.data.dataViews}
-                  dataViewId={dataViewId}
-                >
-                  <LogRateAnalysisReduxProvider>
-                    <DatePickerContextProvider {...datePickerDeps}>
-                      <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
-                      <LogRateAnalysisContent />
-                    </DatePickerContextProvider>
-                  </LogRateAnalysisReduxProvider>
-                </DataSourceContextProvider>
-              </UrlStateProvider>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <UrlStateProvider>
+                  <DataSourceContextProvider
+                    dataViews={pluginStart.data.dataViews}
+                    dataViewId={dataViewId}
+                  >
+                    <FilterQueryContextProvider timeRange={timeRange}>
+                      <LogRateAnalysisReduxProvider>
+                        <LogRateAnalysisForEmbeddable timeRange={timeRange} />
+                      </LogRateAnalysisReduxProvider>
+                    </FilterQueryContextProvider>
+                  </DataSourceContextProvider>
+                </UrlStateProvider>
+              </DatePickerContextProvider>
             </AiopsAppContext.Provider>
           </ReloadContextProvider>
         </Router>
