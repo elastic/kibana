@@ -50,10 +50,3 @@ export const prependAgentlessApiBasePathToEndpoint = (
     : AGENTLESS_ESS_API_BASE_PATH;
   return `${agentlessConfig.api.url}${endpointPrefix}${endpoint}`;
 };
-
-export const getDeletionEndpointPath = (
-  agentlessConfig: FleetConfigType['agentless'],
-  endpoint: AgentlessApiEndpoints
-) => {
-  return `${agentlessConfig.api.url}${AGENTLESS_ESS_API_BASE_PATH}${endpoint}`;
-};
