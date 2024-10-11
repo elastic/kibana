@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   let roleAuthc: RoleCredentials;
 
-  describe('With custom role', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/195976
+  describe.skip('With custom role', function () {
     // skipping on MKI while we are working on a solution
     this.tags(['skipMKI']);
     before(async () => {

@@ -67,7 +67,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const metaDataIcon = (
     <EuiButtonIcon
       display="empty"
-      size="xs"
+      size="s"
       iconType="iInCircle"
       color="primary"
       data-test-subj="documentMetadataButton"
@@ -186,7 +186,7 @@ export const RichResultHeader: React.FC<Props> = ({
     <EuiFlexItem
       grow
       css={css`
-        min-height: ${euiTheme.base * 3}px;
+        min-height: ${euiTheme.base * 1}px;
         max-height: ${euiTheme.base * 8}px;
       `}
     >
@@ -204,12 +204,12 @@ export const RichResultHeader: React.FC<Props> = ({
                   <EuiFlexItem>
                     {onTitleClick ? (
                       <EuiLink onClick={onTitleClick} color="text">
-                        <EuiTitle size="xs">
+                        <EuiTitle size="s">
                           <h4>{title}</h4>
                         </EuiTitle>
                       </EuiLink>
                     ) : (
-                      <EuiTitle size="xs">
+                      <EuiTitle size="s">
                         <h4>{title}</h4>
                       </EuiTitle>
                     )}
