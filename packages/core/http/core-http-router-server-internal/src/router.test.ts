@@ -181,14 +181,14 @@ describe('Router', () => {
           },
           validate: false,
         },
-        (context, req, res) => res.ok({ headers: { AAAA: 'test' } }), // with some fake headers
+        (context, req, res) => res.ok(),
         { isVersioned: false, isHTTPResource: false }
       );
       router.post(
         {
           path: '/public-resource',
           options: {
-            access: 'internal',
+            access: 'public',
           },
           validate: false,
         },
@@ -198,15 +198,12 @@ describe('Router', () => {
       const [{ handler: publicHandler }, { handler: resourceHandler }] = router.getRoutes();
 
       await publicHandler(createRequestMock(), mockResponseToolkit);
-      expect(mockResponse.header).toHaveBeenCalledTimes(2);
-      const [first, second] = mockResponse.header.mock.calls
-        .concat()
-        .sort(([k1], [k2]) => k1.localeCompare(k2));
-      expect(first).toEqual(['AAAA', 'test']);
-      expect(second).toEqual(['elastic-api-version', '2023-10-31']);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1);
+      const [headersTuple] = mockResponse.header.mock.calls;
+      expect(headersTuple).toEqual(['elastic-api-version', '2023-10-31']);
 
       await resourceHandler(createRequestMock(), mockResponseToolkit);
-      expect(mockResponse.header).toHaveBeenCalledTimes(2); // no additional calls
+      expect(mockResponse.header).toHaveBeenCalledTimes(1); // no additional calls
     });
   });
 
