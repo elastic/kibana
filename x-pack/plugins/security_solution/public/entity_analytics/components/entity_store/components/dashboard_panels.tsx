@@ -12,58 +12,82 @@ import {
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingLogo,
+  EuiPanel,
 } from '@elastic/eui';
 
+import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EntityAnalyticsLearnMoreLink } from '../../risk_score_onboarding/entity_analytics_doc_link';
 import { EntitiesList } from '../entities_list';
 
-import { useEntityStore } from '../hooks/use_entity_store';
+import { useEntityStoreEnablement } from '../hooks/use_entity_store';
 import { EntityStoreEnablementModal, type Enablements } from './enablement_modal';
-import { EnableRiskScore } from '../../enable_risk_score';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
+import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';
+import { useEntityEngineStatus } from '../hooks/use_entity_engine_status';
 
 const EntityStoreDashboardPanelsComponent = () => {
-  const [modal, setModalState] = useState({ visible: false, enablements: {} });
+  const [modal, setModalState] = useState({ visible: false });
+  const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
 
-  const entityStore = useEntityStore();
-
-  // NOTE: Props needed only for current implementation of the EnableRiskScore component
-  const refreshPage = useRefetchQueries();
-  const { deleteQuery, setQuery, from, to } = useGlobalTime();
+  const entityStore = useEntityEngineStatus();
+  const { enable: enableStore } = useEntityStoreEnablement();
+  const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
   const enableEntityStore = (enable: Enablements) => () => {
-    setModalState({ visible: false, enablements: enable });
+    setModalState({ visible: false });
     if (enable.riskScore) {
-      // return enableRiskScore().then(() => {
-      //   if (enablements.entityStore) {
-      //     entityStore.enablement.enableEntityStore();
-      //   }
-      // });
+      const options = {
+        onSuccess: () => {
+          setRiskEngineInitializing(false);
+          if (enable.entityStore) {
+            enableStore();
+          }
+        },
+      };
+      setRiskEngineInitializing(true);
+      initRiskEngine(undefined, options);
     }
 
     if (enable.entityStore) {
-      entityStore.enablement.enableEntityStore();
+      enableStore();
     }
   };
 
-  if (entityStore.enablement.loading) {
-    return <EuiLoadingSpinner size="xl" />;
+  if (entityStore.status === 'loading') {
+    return (
+      <EuiPanel hasBorder>
+        <EuiEmptyPrompt
+          icon={<EuiLoadingSpinner size="xl" />}
+          title={<h2>{'Initializing store'}</h2>}
+        />
+      </EuiPanel>
+    );
   }
 
-  const isRiskScoreEnabled =
-    entityStore.status.newRiskScore.installed ||
-    entityStore.status.legacyHostRiskScore.isEnabled ||
-    entityStore.status.legacyUserRiskScore.isEnabled;
+  if (entityStore.status === 'installing') {
+    return (
+      <EuiPanel hasBorder>
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
+          title={<h2>{'Initializing store'}</h2>}
+        />
+      </EuiPanel>
+    );
+  }
+
+  const isRiskScoreAvailable =
+    entityStore.riskEngineStatus.data &&
+    entityStore.riskEngineStatus.data.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
-      {entityStore.status.entityStore.status === 'enabled' && isRiskScoreEnabled && (
+      {entityStore.status === 'enabled' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
             <EntitiesList />
@@ -77,50 +101,33 @@ const EntityStoreDashboardPanelsComponent = () => {
           </EuiFlexItem>
         </>
       )}
-      {entityStore.status.entityStore.status === 'enabled' && !isRiskScoreEnabled && (
+      {entityStore.status === 'enabled' && !isRiskScoreAvailable && (
         <>
-          {/* QUESTION: Should we have a separate component for enabling risk score? Current one seems too overloaded */}
           <EuiFlexItem>
             <EnableRiskScore
-              entityType={RiskScoreEntity.user}
-              timerange={{ from, to }}
-              refetch={refreshPage}
-              isDisabled={false}
-              isDeprecated={entityStore.status.legacyUserRiskScore.isDeprecated}
+              onEnable={() => setModalState({ visible: true })}
+              loading={riskEngineInitializing}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EnableRiskScore
-              entityType={RiskScoreEntity.host}
-              timerange={{ from, to }}
-              refetch={refreshPage}
-              isDisabled={false}
-              isDeprecated={entityStore.status.legacyHostRiskScore.isDeprecated}
-            />
-          </EuiFlexItem>
+
           <EuiFlexItem>
             <EntitiesList />
           </EuiFlexItem>
         </>
       )}
 
-      {entityStore.status.entityStore.status === 'not_installed' && !isRiskScoreEnabled && (
+      {entityStore.status === 'not_installed' && !isRiskScoreAvailable && (
         // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
-        <EnableEntityStore
-          onEnable={() =>
-            setModalState({ visible: true, enablements: { riskScore: true, entityStore: true } })
-          }
-        />
+        <EnableEntityStore onEnable={() => setModalState({ visible: true })} />
       )}
 
-      {entityStore.status.entityStore.status === 'not_installed' && isRiskScoreEnabled && (
+      {entityStore.status === 'not_installed' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
             <EnableEntityStore
               onEnable={() =>
                 setModalState({
                   visible: true,
-                  enablements: { riskScore: false, entityStore: true },
                 })
               }
             />
@@ -136,9 +143,13 @@ const EntityStoreDashboardPanelsComponent = () => {
 
       <EntityStoreEnablementModal
         visible={modal.visible}
-        toggle={(visible) => setModalState((prev) => ({ ...prev, visible }))}
+        toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
-        riskScore={modal.enablements}
+        riskScore={{ disabled: isRiskScoreAvailable, checked: !isRiskScoreAvailable }}
+        entityStore={{
+          disabled: entityStore.status === 'enabled',
+          checked: entityStore.status !== 'enabled',
+        }}
       />
     </EuiFlexGroup>
   );
@@ -167,6 +178,50 @@ export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({ onEnable }
               fill
               onClick={onEnable}
               data-test-subj={`enable_entity_store_btn`}
+            >
+              {'Enable'}
+            </EuiButton>
+          </EuiToolTip>
+        }
+      />
+    </Panel>
+  );
+};
+
+interface EnableRiskEngineProps {
+  onEnable: () => void;
+  loading: boolean;
+}
+
+export const EnableRiskScore: React.FC<EnableRiskEngineProps> = ({ onEnable, loading }) => {
+  if (loading) {
+    return (
+      <EuiPanel hasBorder>
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
+          title={<h2>{'Initializing risk engine'}</h2>}
+        />
+      </EuiPanel>
+    );
+  }
+  return (
+    <Panel hasBorder data-test-subj={`entity_analytics_enable_risk_score`}>
+      <HeaderSection title={'Risk Store'} titleSize="s" />
+      <EuiEmptyPrompt
+        title={<h2>{'Placeholder title'}</h2>}
+        body={
+          <>
+            {'Placeholder text'}
+            <EntityAnalyticsLearnMoreLink />
+          </>
+        }
+        actions={
+          <EuiToolTip content={'Enable Risk Score'}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onEnable}
+              data-test-subj={`enable_risk_score_btn`}
             >
               {'Enable'}
             </EuiButton>

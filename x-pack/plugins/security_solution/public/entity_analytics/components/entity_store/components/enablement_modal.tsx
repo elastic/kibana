@@ -31,6 +31,10 @@ interface EntityStoreEnablementModalProps {
     disabled?: boolean;
     checked?: boolean;
   };
+  entityStore: {
+    disabled?: boolean;
+    checked?: boolean;
+  };
 }
 
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
@@ -38,10 +42,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   toggle,
   enableStore,
   riskScore,
+  entityStore,
 }) => {
   const [enablements, setEnablements] = useState({
     riskScore: !!riskScore.checked,
-    entityStore: true,
+    entityStore: !!entityStore.checked,
   });
 
   if (!visible) {
@@ -58,7 +63,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
           <EuiFlexItem>
             <EuiSwitch
               label="Risk Score"
-              checked={!!riskScore.checked}
+              checked={enablements.riskScore}
               disabled={riskScore.disabled || false}
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
             />
@@ -66,7 +71,8 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
           <EuiFlexItem>
             <EuiSwitch
               label="Entity Store"
-              checked
+              checked={enablements.entityStore}
+              disabled={entityStore.disabled || false}
               onChange={() =>
                 setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
               }

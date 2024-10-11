@@ -5,40 +5,57 @@
  * 2.0.
  */
 
+import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { EngineDescriptor } from '../../../../../common/api/entity_analytics';
+import type { ListEntityEnginesResponse } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
 
-export const useEntityEngineStatus = () => {
+interface Options {
+  disabled?: boolean;
+  polling?: UseQueryOptions<ListEntityEnginesResponse>['refetchInterval'];
+}
+
+export const useEntityEngineStatus = (opts: Options = {}) => {
+  const riskEngineStatus = useRiskEngineStatus();
   // QUESTION: Maybe we should have an `EnablementStatus` API route for this?
   const { listEntityEngines } = useEntityStoreRoutes();
 
-  const { isLoading, data } = useQuery<EngineDescriptor[]>({
+  const { isLoading, data } = useQuery<ListEntityEnginesResponse>({
     queryKey: [ENTITY_STORE_ENGINE_STATUS],
-    queryFn: listEntityEngines,
+    queryFn: () => listEntityEngines(),
+    refetchInterval: opts.polling,
+    enabled: !opts.disabled,
   });
 
-  if (isLoading) {
-    return { status: 'loading' };
-  }
+  const status = (() => {
+    if (data?.count === 0) {
+      return 'not_installed';
+    }
 
-  if (!data) {
-    return { status: 'error' };
-  }
+    if (data?.engines?.every((engine) => engine.status === 'stopped')) {
+      return 'stopped';
+    }
 
-  if (data.length === 0) {
-    return { status: 'not_installed' };
-  }
+    if (data?.engines?.some((engine) => engine.status === 'installing')) {
+      return 'installing';
+    }
 
-  if (data.every((engine) => engine.status === 'stopped')) {
-    return { status: 'stopped' };
-  }
+    if (isLoading) {
+      return 'loading';
+    }
 
-  if (data.some((engine) => engine.status === 'installing')) {
-    return { status: 'installing' };
-  }
+    if (!data) {
+      return 'error';
+    }
 
-  return { status: 'enabled' };
+    return 'enabled';
+  })();
+
+  return {
+    status,
+    riskEngineStatus,
+  };
 };

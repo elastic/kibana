@@ -5,11 +5,13 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import type {
-  EngineDescriptor,
-  EntityType,
-} from '../../../common/api/entity_analytics/entity_store/common.gen';
+  GetEntityEngineResponse,
+  InitEntityEngineResponse,
+  ListEntityEnginesResponse,
+} from '../../../common/api/entity_analytics';
+import { API_VERSIONS } from '../../../common/entity_analytics/constants';
+import type { EntityType } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityStoreRoutes = () => {
@@ -17,7 +19,7 @@ export const useEntityStoreRoutes = () => {
 
   return useMemo(() => {
     const initEntityStore = async (entityType: EntityType) => {
-      return http.fetch<EngineDescriptor>(`/api/entity_store/engines/${entityType}/init`, {
+      return http.fetch<InitEntityEngineResponse>(`/api/entity_store/engines/${entityType}/init`, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
@@ -25,14 +27,14 @@ export const useEntityStoreRoutes = () => {
     };
 
     const getEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<EngineDescriptor>(`/api/entity_store/engines/${entityType}`, {
+      return http.fetch<GetEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
       });
     };
 
     const listEntityEngines = async () => {
-      return http.fetch<EngineDescriptor[]>(`/api/entity_store/engines`, {
+      return http.fetch<ListEntityEnginesResponse>(`/api/entity_store/engines`, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
       });
