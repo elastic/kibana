@@ -75,6 +75,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     },
     getAppMenu: (prev) => (params) => {
       const prevValue = prev(params);
+
+      // what is available via params:
+      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+
       return {
         appMenuRegistry: (registry) => {
           registry.registerCustomAction({
@@ -111,6 +115,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             controlProps: {
               label: 'Custom 2',
               onClick: ({ onFinishAction }) => {
+                // This is an example of a custom action that opens a flyout or any other custom modal
+                // To do so, simply return a React element and call onFinishAction when you're done
                 return (
                   <EuiFlyout onClose={onFinishAction}>
                     <div>Example custom action 2 clicked</div>
