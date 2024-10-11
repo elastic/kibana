@@ -50,6 +50,7 @@ export const GET_DEFAULT_FORM_DATA = ({
     ruleTypeId,
     name,
     actions,
+    alertDelay: { active: 1 },
   };
 };
 

@@ -28,16 +28,8 @@ export const RuleAlertDelay = () => {
 
   const onAlertDelayChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.validity.valid) {
-        return;
-      }
-      const value = e.target.value;
-      if (value === '') {
-        dispatch({
-          type: 'setAlertDelay',
-          payload: null,
-        });
-      } else if (INTEGER_REGEX.test(value)) {
+      const value = e.target.value.trim();
+      if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);
         dispatch({
           type: 'setAlertDelay',

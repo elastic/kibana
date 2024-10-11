@@ -47,7 +47,7 @@ import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
 import { RuleSettingsFlappingTitleTooltip } from '../../rule_settings/rule_settings_flapping_title_tooltip';
 import { RuleSettingsFlappingForm } from '../../rule_settings/rule_settings_flapping_form';
@@ -62,6 +62,7 @@ export const RuleDefinition = () => {
     metadata,
     selectedRuleType,
     selectedRuleTypeModel,
+    availableRuleTypes,
     validConsumers,
     canShowConsumerSelection = false,
     flappingSettings,
@@ -78,21 +79,29 @@ export const RuleDefinition = () => {
 
   const { writeFlappingSettingsUI } = rulesSettings || {};
 
-  const { params, schedule, notifyWhen, flapping } = formData;
+  const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const [isFlappingPopoverOpen, setIsFlappingPopoverOpen] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
-    if (!validConsumers?.length) {
+    if (consumer !== ALERTING_FEATURE_ID) {
+      return [];
+    }
+
+    const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
+      return ruleType.id === selectedRuleType.id;
+    });
+
+    if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
     return getAuthorizedConsumers({
-      ruleType: selectedRuleType,
+      ruleType: selectedAvailableRuleType,
       validConsumers,
     });
-  }, [selectedRuleType, validConsumers]);
+  }, [consumer, selectedRuleType, availableRuleTypes, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
@@ -107,10 +116,8 @@ export const RuleDefinition = () => {
     ) {
       return false;
     }
-    return (
-      selectedRuleTypeModel.id && MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleTypeModel.id)
-    );
-  }, [authorizedConsumers, selectedRuleTypeModel, canShowConsumerSelection]);
+    return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
+  }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
 
   const RuleParamsExpressionComponent = selectedRuleTypeModel.ruleParamsExpression ?? null;
 

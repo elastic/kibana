@@ -194,7 +194,7 @@ export const RULE_TYPE_REQUIRED_TEXT = i18n.translate(
 export const RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.error.belowMinimumAlertDelayText',
   {
-    defaultMessage: 'Alert delay must be greater than 1.',
+    defaultMessage: 'Alert delay must be 1 or greater.',
   }
 );
 

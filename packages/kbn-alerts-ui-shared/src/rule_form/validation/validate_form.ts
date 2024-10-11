@@ -35,7 +35,10 @@ export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormAc
 
   if ('alertsFilter' in action) {
     const query = action?.alertsFilter?.query;
-    if (query && !query.kql) {
+    if (!query) {
+      return errors;
+    }
+    if (!query.filters.length && !query.kql) {
       errors.filterQuery.push(
         i18n.translate('alertsUIShared.ruleForm.actionsForm.requiredFilterQuery', {
           defaultMessage: 'A custom query is required.',
@@ -43,7 +46,6 @@ export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormAc
       );
     }
   }
-
   return errors;
 };
 
@@ -88,11 +90,7 @@ export function validateRuleBase({
     errors.ruleTypeId.push(RULE_TYPE_REQUIRED_TEXT);
   }
 
-  if (
-    formData.alertDelay &&
-    !isNaN(formData.alertDelay?.active) &&
-    formData.alertDelay?.active < 1
-  ) {
+  if (!formData.alertDelay || isNaN(formData.alertDelay.active) || formData.alertDelay.active < 1) {
     errors.alertDelay.push(RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT);
   }
 
@@ -121,20 +119,25 @@ const hasActionsError = (actionsErrors: Record<string, RuleFormActionsErrors>) =
   });
 };
 
-const hasParamsErrors = (errors: RuleFormParamsErrors): boolean => {
-  const values = Object.values(errors);
+const hasParamsErrors = (errors: RuleFormParamsErrors | string | string[]): boolean => {
   let hasError = false;
-  for (const value of values) {
-    if (Array.isArray(value) && value.length > 0) {
-      return true;
-    }
-    if (typeof value === 'string' && value.trim() !== '') {
-      return true;
-    }
-    if (isObject(value)) {
-      hasError = hasParamsErrors(value as RuleFormParamsErrors);
-    }
+
+  if (typeof errors === 'string' && errors.trim() !== '') {
+    hasError = true;
   }
+
+  if (Array.isArray(errors)) {
+    errors.forEach((error) => {
+      hasError = hasError || hasParamsErrors(error);
+    });
+  }
+
+  if (isObject(errors)) {
+    Object.entries(errors).forEach(([_, value]) => {
+      hasError = hasError || hasParamsErrors(value);
+    });
+  }
+
   return hasError;
 };
 

@@ -24,6 +24,7 @@ import {
 } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
+  getAvailableRuleTypes,
   getInitialConsumer,
   getInitialMultiConsumer,
   getInitialSchedule,
@@ -89,6 +90,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     isInitialLoading,
     ruleType,
+    ruleTypes,
     ruleTypeModel,
     uiConfig,
     healthCheckError,
@@ -177,6 +179,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
+          availableRuleTypes: getAvailableRuleTypes({
+            consumer,
+            ruleTypes,
+            ruleTypeRegistry,
+          }).map(({ ruleType: rt }) => rt),
           validConsumers,
           flappingSettings,
           canShowConsumerSelection,

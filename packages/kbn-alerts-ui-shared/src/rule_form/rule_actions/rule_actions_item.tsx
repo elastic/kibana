@@ -40,17 +40,12 @@ import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
 import { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import {
-  ActionConnector,
-  ActionTypeModel,
-  RuleFormParamsErrors,
-  RuleTypeWithDescription,
-} from '../../common/types';
+import { ActionConnector, RuleFormParamsErrors } from '../../common/types';
 import { getAvailableActionVariables } from '../../action_variables';
 import { validateAction, validateParamsForWarnings } from '../validation';
 
 import { RuleActionsSettings } from './rule_actions_settings';
-import { getSelectedActionGroup } from '../utils';
+import { getDefaultParams, getSelectedActionGroup } from '../utils';
 import { RuleActionsMessage } from './rule_actions_message';
 import {
   ACTION_ERROR_TOOLTIP,
@@ -82,22 +77,6 @@ const ACTION_TITLE = (connector: ActionConnector) =>
       }`,
     },
   });
-
-const getDefaultParams = ({
-  group,
-  ruleType,
-  actionTypeModel,
-}: {
-  group: string;
-  actionTypeModel: ActionTypeModel;
-  ruleType: RuleTypeWithDescription;
-}) => {
-  if (group === ruleType.recoveryActionGroup.id) {
-    return actionTypeModel.defaultRecoveredActionParams;
-  } else {
-    return actionTypeModel.defaultActionParams;
-  }
-};
 
 export interface RuleActionsItemProps {
   action: RuleAction;
@@ -381,16 +360,24 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         ...action.alertsFilter,
         query,
       };
+
+      if (!newAlertsFilter.query) {
+        delete newAlertsFilter.query;
+      }
+
+      const alertsFilter = isEmpty(newAlertsFilter) ? undefined : newAlertsFilter;
+
       const newAction = {
         ...action,
-        alertsFilter: newAlertsFilter,
+        alertsFilter,
       };
+
       dispatch({
         type: 'setActionProperty',
         payload: {
           uuid: action.uuid!,
           key: 'alertsFilter',
-          value: newAlertsFilter,
+          value: alertsFilter,
         },
       });
       validateActionBase(newAction);
@@ -400,19 +387,33 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onTimeframeChange = useCallback(
     (timeframe?: AlertsFilterTimeframe) => {
+      const newAlertsFilter = {
+        ...action.alertsFilter,
+        timeframe,
+      };
+
+      if (!newAlertsFilter.timeframe) {
+        delete newAlertsFilter.timeframe;
+      }
+
+      const alertsFilter = isEmpty(newAlertsFilter) ? undefined : newAlertsFilter;
+
+      const newAction = {
+        ...action,
+        alertsFilter,
+      };
+
       dispatch({
         type: 'setActionProperty',
         payload: {
           uuid: action.uuid!,
           key: 'alertsFilter',
-          value: {
-            ...action.alertsFilter,
-            timeframe,
-          },
+          value: alertsFilter,
         },
       });
+      validateActionBase(newAction);
     },
-    [action, dispatch]
+    [action, dispatch, validateActionBase]
   );
 
   const onUseAadTemplateFieldsChange = useCallback(() => {

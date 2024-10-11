@@ -72,6 +72,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   connectors: ActionConnector[];
   connectorTypes: ActionType[];
   aadTemplateFields: ActionVariable[];
+  availableRuleTypes: RuleTypeWithDescription[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
   actionsErrors?: Record<string, RuleFormActionsErrors>;
@@ -83,7 +84,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
+  validConsumers: RuleCreationValidConsumer[];
   flappingSettings?: RulesSettingsFlapping;
 }
 

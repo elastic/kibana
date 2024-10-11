@@ -24,7 +24,8 @@ import {
   RuleFormRuleTypeError,
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
-import { parseRuleCircuitBreakerErrorMessage } from './utils';
+import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
+import { DEFAULT_VALID_CONSUMERS } from './constants';
 
 export interface EditRuleFormProps {
   id: string;
@@ -64,6 +65,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const {
     isInitialLoading,
     ruleType,
+    ruleTypes,
     ruleTypeModel,
     uiConfig,
     healthCheckError,
@@ -164,7 +166,13 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
+          availableRuleTypes: getAvailableRuleTypes({
+            consumer: fetchedFormData.consumer,
+            ruleTypes,
+            ruleTypeRegistry,
+          }).map(({ ruleType: rt }) => rt),
           flappingSettings,
+          validConsumers: DEFAULT_VALID_CONSUMERS,
           showMustacheAutocompleteSwitch,
         }}
       >
