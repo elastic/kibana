@@ -83,6 +83,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // Support for including http-client.env.json configurations
   '**/http-client.env.json',
+
+  // updatecli configuration for driving the UBI/Ironbank image updates
+  'updatecli-compose.yaml',
 ];
 
 /**
