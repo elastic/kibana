@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -83,6 +84,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     }
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
+  const showPageTitleWithPopover =
+    asset.type === 'host' && !dataStreams.includes(EntityDataStreamType.METRICS);
+
   return (
     <InfraPageTemplate
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
@@ -90,7 +94,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
-        ) : asset.type === 'host' && dataStreams.length > 0 ? (
+        ) : showPageTitleWithPopover ? (
           <PageTitleWithPopover name={asset.name} />
         ) : (
           asset.name
