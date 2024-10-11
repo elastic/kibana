@@ -10,20 +10,27 @@ import {
   CREATE_INTEGRATION_LANDING_PAGE,
   LICENSE_PAYWALL_CARD,
 } from '../screens/integrations_automatic_import';
-import { startBasicLicense, startTrialLicense } from '../tasks/api_calls/licensing';
 
-describe('No enterprise License should show License Paywall', () => {
+describe('User with basic license should hit License Paywall', () => {
   beforeEach(() => {
     login();
-    startBasicLicense();
+    cy.intercept('/api/licensing/info', {
+      license: {
+        uid: 'someId',
+        type: 'basic',
+        mode: 'basic',
+        expiryDateInMillis: 1731226793474,
+        status: 'active',
+      },
+      signature: 'someIdAgain',
+    });
   });
-
   afterEach(() => {
-    startTrialLicense();
     logout();
   });
 
   it('Create Assistant is not accessible but upload is accessible', () => {
+    cy.request('/api/licensing/info');
     loginAndWaitForPage(CREATE_INTEGRATION_LANDING_PAGE);
     cy.getBySel(LICENSE_PAYWALL_CARD).should('exist');
   });
