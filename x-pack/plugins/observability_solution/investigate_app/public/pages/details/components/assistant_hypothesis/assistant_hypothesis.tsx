@@ -83,21 +83,29 @@ export function AssistantHypothesis({
     end,
   });
 
+  const entityContent = getEntityContext(entitiesData?.entities || []);
+  const logPatternContent = getLogPatternContext(logPatternsData?.logPatterns || []);
+  const dependenciesContent = getDependenciesContext(
+    apmDependenciesData?.content
+      ?.map((dependency) => dependency['service.name'])
+      .filter((service): service is string => !!service) ?? [],
+    serviceName ?? ''
+  );
+
   const getInvestigationContextMessages = useCallback(async () => {
     if (!getContextualInsightMessages || !alert || !investigation) {
       return [];
     }
 
-    const entities = entitiesData?.entities ?? [];
-    const logPatterns = logPatternsData?.logPatterns ?? [];
     const instructions = dedent(`
       ${getScreenContext({ alertDetails: alert, investigation }).screenDescription}
       
 ## Current task:
-${getLogPatternContext(logPatterns)}
+${logPatternContent}
       
 ## Additional information:
-${getEntityContext(entities)}
+${entityContent}
+${dependenciesContent}
 
 ## Additional requests:
 I do not have the alert details or entity details in front of me. Always include the alert reason and the entity metrics in your response. 
@@ -115,9 +123,10 @@ When referencing the log patterns or services, please include the name of the lo
   }, [
     alert,
     getContextualInsightMessages,
-    entitiesData?.entities,
-    logPatternsData?.logPatterns,
+    entityContent,
+    logPatternContent,
     investigation,
+    dependenciesContent,
   ]);
 
   if (!ObservabilityAIAssistantContextualInsight) {
@@ -150,7 +159,6 @@ const formatEntityMetrics = (entity: EntityWithSource): string => {
   `);
 };
 
-// ${logPattern?.change?.pValue ? `Change p-value: ${logPattern?.change?.pValue};` : ''}
 const formatLogPatterns = (logPattern: LogPattern): string => {
   return dedent(`
     ### Log pattern: ${logPattern.terms}
@@ -205,4 +213,12 @@ const getEntityContext = (entities: EntityWithSource[]): string => {
     : '';
 
   return entityContext;
+};
+
+const getDependenciesContext = (dependencies: string[], serviceName: string): string => {
+  return dependencies?.length && serviceName
+    ? dedent(`
+  The ${serviceName} service has the following dependencies: ${dependencies.join(', ')}.
+  `)
+    : '';
 };
