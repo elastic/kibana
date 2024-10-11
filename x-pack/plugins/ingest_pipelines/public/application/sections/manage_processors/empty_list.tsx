@@ -18,7 +18,7 @@ export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Elemen
         <h2 data-test-subj="geoipEmptyListPrompt">
           <FormattedMessage
             id="xpack.ingestPipelines.manageProcessors.geoip.emptyPromptTitle"
-            defaultMessage="Add your first database for GeoIP processor"
+            defaultMessage="Add your first database for IP Location processor"
           />
         </h2>
       }
@@ -26,7 +26,7 @@ export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Elemen
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.manageProcessors.geoip.emptyPromptDescription"
-            defaultMessage="Use a custom database when setting up GeoIP processor."
+            defaultMessage="Use a custom database when setting up IP Location processor."
           />
         </p>
       }
