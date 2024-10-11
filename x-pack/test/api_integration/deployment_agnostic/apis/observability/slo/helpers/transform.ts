@@ -6,17 +6,17 @@
  */
 
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../services';
+import { RoleCredentials } from '../../../../services';
 
 export type TransformHelper = ReturnType<typeof createTransformHelper>;
 
 export function createTransformHelper(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
-  roleAuthc: RoleCredentials,
-  internalHeaders: InternalRequestHeader
+  roleAuthc: RoleCredentials
 ) {
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlAuth = getService('samlAuth');
 
   return {
     assertNotFound: async (transformId: string) => {
@@ -26,7 +26,7 @@ export function createTransformHelper(
           const response = await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
             .set(roleAuthc.apiKeyHeader)
-            .set(internalHeaders)
+            .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)
@@ -45,7 +45,7 @@ export function createTransformHelper(
           const response = await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
             .set(roleAuthc.apiKeyHeader)
-            .set(internalHeaders)
+            .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)

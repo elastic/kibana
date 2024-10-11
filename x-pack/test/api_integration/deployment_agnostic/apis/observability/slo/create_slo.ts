@@ -7,7 +7,7 @@
 
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
@@ -26,14 +26,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
   let transformHelper: TransformHelper;
 
   describe('Create SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
-      transformHelper = createTransformHelper(getService, adminRoleAuthc, internalHeaders);
+      transformHelper = createTransformHelper(getService, adminRoleAuthc);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -123,89 +121,91 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    it('creates instanceId for SLOs with multi groupBy', async () => {
-      const apiResponse = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { groupBy: ['system.network.name', 'event.dataset'] }),
-        adminRoleAuthc
-      );
-
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
-
-      await retry.tryForTime(300 * 1000, async () => {
-        const response = await esClient.search(getRollupDataEsQuery(id));
-
-        // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql(
-          'eth1,system.network'
+    describe('groupBy smoke tests', () => {
+      it('creates instanceId for SLOs with multi groupBy', async () => {
+        const apiResponse = await sloApi.create(
+          Object.assign({}, DEFAULT_SLO, { groupBy: ['system.network.name', 'event.dataset'] }),
+          adminRoleAuthc
         );
+
+        expect(apiResponse).property('id');
+        const { id } = apiResponse;
+
+        await retry.tryForTime(300 * 1000, async () => {
+          const response = await esClient.search(getRollupDataEsQuery(id));
+
+          // @ts-ignore
+          expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql(
+            'eth1,system.network'
+          );
+        });
       });
-    });
 
-    it('creates instanceId for SLOs with single groupBy', async () => {
-      const apiResponse = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { groupBy: 'system.network.name' }),
-        adminRoleAuthc
-      );
+      it('creates instanceId for SLOs with single groupBy', async () => {
+        const apiResponse = await sloApi.create(
+          Object.assign({}, DEFAULT_SLO, { groupBy: 'system.network.name' }),
+          adminRoleAuthc
+        );
 
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
+        expect(apiResponse).property('id');
+        const { id } = apiResponse;
 
-      await retry.tryForTime(300 * 1000, async () => {
-        const response = await esClient.search(getRollupDataEsQuery(id));
+        await retry.tryForTime(300 * 1000, async () => {
+          const response = await esClient.search(getRollupDataEsQuery(id));
 
-        // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('eth1');
+          // @ts-ignore
+          expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('eth1');
+        });
       });
-    });
 
-    it('creates instanceId for SLOs without groupBy ([])', async () => {
-      const apiResponse = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { groupBy: [] }),
-        adminRoleAuthc
-      );
+      it('creates instanceId for SLOs without groupBy ([])', async () => {
+        const apiResponse = await sloApi.create(
+          Object.assign({}, DEFAULT_SLO, { groupBy: [] }),
+          adminRoleAuthc
+        );
 
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
+        expect(apiResponse).property('id');
+        const { id } = apiResponse;
 
-      await retry.tryForTime(300 * 1000, async () => {
-        const response = await esClient.search(getRollupDataEsQuery(id));
+        await retry.tryForTime(300 * 1000, async () => {
+          const response = await esClient.search(getRollupDataEsQuery(id));
 
-        // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+          // @ts-ignore
+          expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+        });
       });
-    });
 
-    it('creates instanceId for SLOs without groupBy (["*"])', async () => {
-      const apiResponse = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { groupBy: ['*'] }),
-        adminRoleAuthc
-      );
+      it('creates instanceId for SLOs without groupBy (["*"])', async () => {
+        const apiResponse = await sloApi.create(
+          Object.assign({}, DEFAULT_SLO, { groupBy: ['*'] }),
+          adminRoleAuthc
+        );
 
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
+        expect(apiResponse).property('id');
+        const { id } = apiResponse;
 
-      await retry.tryForTime(300 * 1000, async () => {
-        const response = await esClient.search(getRollupDataEsQuery(id));
+        await retry.tryForTime(300 * 1000, async () => {
+          const response = await esClient.search(getRollupDataEsQuery(id));
 
-        // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+          // @ts-ignore
+          expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+        });
       });
-    });
 
-    it('creates instanceId for SLOs without groupBy ("")', async () => {
-      const apiResponse = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { groupBy: '' }),
-        adminRoleAuthc
-      );
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
+      it('creates instanceId for SLOs without groupBy ("")', async () => {
+        const apiResponse = await sloApi.create(
+          Object.assign({}, DEFAULT_SLO, { groupBy: '' }),
+          adminRoleAuthc
+        );
+        expect(apiResponse).property('id');
+        const { id } = apiResponse;
 
-      await retry.tryForTime(300 * 1000, async () => {
-        const response = await esClient.search(getRollupDataEsQuery(id));
+        await retry.tryForTime(300 * 1000, async () => {
+          const response = await esClient.search(getRollupDataEsQuery(id));
 
-        // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+          // @ts-ignore
+          expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('*');
+        });
       });
     });
   });

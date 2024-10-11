@@ -7,7 +7,7 @@
 
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
@@ -25,14 +25,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
   let transformHelper: TransformHelper;
 
   describe('Update SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
-      transformHelper = createTransformHelper(getService, adminRoleAuthc, internalHeaders);
+      transformHelper = createTransformHelper(getService, adminRoleAuthc);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
