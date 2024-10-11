@@ -103,6 +103,32 @@ describe('runSaveLensVisualization', () => {
           expect(saveToLibraryFn).not.toHaveBeenCalled();
           expect(props.notifications.toasts.addSuccess).not.toHaveBeenCalled();
         });
+
+        it('should get back to dashboard preserving the original panel settings', async () => {
+          const { props, saveProps, options } = getDefaultArgs(
+            {
+              lastKnownDoc: defaultByValueDoc,
+              initialInput: {
+                attributes: defaultByValueDoc,
+                title: 'blah',
+                timeRange: { from: 'now-7d', to: 'now' },
+              },
+            },
+            { returnToOrigin: true }
+          );
+          await runSaveLensVisualization(props, saveProps, options);
+
+          // callback called
+          expect(props.onAppLeave).toHaveBeenCalled();
+          expect(props.redirectToOrigin).toHaveBeenCalledWith(
+            expect.objectContaining({
+              state: expect.objectContaining({
+                title: 'blah',
+                timeRange: { from: 'now-7d', to: 'now' },
+              }),
+            })
+          );
+        });
       });
 
       describe('Save to library', () => {
