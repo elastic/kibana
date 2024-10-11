@@ -6,14 +6,7 @@
  */
 
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import {
-  ENTITIES_LATEST_ALIAS,
-  MAX_NUMBER_OF_ENTITIES,
-  type EntityType,
-  Entity,
-} from '../../../common/entities';
+import { type EntityType } from '../../../common/entities';
 
 export async function getInventoryEntitiesList({
   inventoryEsClient,
