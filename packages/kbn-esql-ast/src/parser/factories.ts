@@ -41,6 +41,7 @@ import type {
   FunctionSubtype,
   ESQLNumericLiteral,
   ESQLOrderExpression,
+  InlineCastingType,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -72,7 +73,7 @@ export const createCommand = (name: string, ctx: ParserRuleContext) =>
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
   Builder.expression.inlineCast(
-    { castType: ctx.dataType().getText(), value },
+    { castType: ctx.dataType().getText() as InlineCastingType, value },
     createParserFields(ctx)
   );
 

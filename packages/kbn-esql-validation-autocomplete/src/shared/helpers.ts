@@ -740,4 +740,19 @@ export function getExpressionType(
   if (isTimeIntervalItem(root)) {
     return 'time_literal';
   }
+
+  if (isInlineCastItem(root)) {
+    switch (root.castType) {
+      case 'int':
+        return 'integer';
+      case 'bool':
+        return 'boolean';
+      case 'string':
+        return 'keyword';
+      case 'datetime':
+        return 'date';
+      default:
+        return root.castType;
+    }
+  }
 }

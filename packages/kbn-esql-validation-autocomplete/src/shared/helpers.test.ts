@@ -95,4 +95,36 @@ describe('getExpressionType', () => {
       expect(getExpressionType(ast)).toBe(expectedType);
     });
   });
+
+  describe('inline casting', () => {
+    const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
+      { expectedType: 'boolean', expression: '"true"::bool' },
+      { expectedType: 'boolean', expression: '"false"::boolean' },
+      { expectedType: 'cartesian_point', expression: '""::cartesian_point' },
+      { expectedType: 'cartesian_shape', expression: '""::cartesian_shape' },
+      { expectedType: 'date_nanos', expression: '1::date_nanos' },
+      { expectedType: 'date_period', expression: '1::date_period' },
+      { expectedType: 'date', expression: '1::datetime' },
+      { expectedType: 'double', expression: '1::double' },
+      { expectedType: 'geo_point', expression: '""::geo_point' },
+      { expectedType: 'geo_shape', expression: '""::geo_shape' },
+      { expectedType: 'integer', expression: '1.2::int' },
+      { expectedType: 'integer', expression: '1.2::integer' },
+      { expectedType: 'ip', expression: '"123.12.12.2"::ip' },
+      { expectedType: 'keyword', expression: '1::keyword' },
+      { expectedType: 'long', expression: '1::long' },
+      { expectedType: 'keyword', expression: '1::string' },
+      { expectedType: 'text', expression: '1::text' },
+      { expectedType: 'time_duration', expression: '1::time_duration' },
+      { expectedType: 'unsigned_long', expression: '1::unsigned_long' },
+      { expectedType: 'version', expression: '"1.2.3"::version' },
+    ];
+    test.each(cases)(
+      'detects a casted literal of type $expectedType ($expression)',
+      ({ expression, expectedType }) => {
+        const ast = getASTForExpression(expression);
+        expect(getExpressionType(ast)).toBe(expectedType);
+      }
+    );
+  });
 });
