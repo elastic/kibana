@@ -13,8 +13,4 @@ export const config = schema.object({
   scope: schema.maybe(schema.oneOf([schema.literal('observability'), schema.literal('search')])),
 });
 
-export type ObservabilityAIAssistantConfig = TypeOf<typeof config> & {
-  exposeToBrowser: {
-    scope: true;
-  };
-};
+export type ObservabilityAIAssistantConfig = TypeOf<typeof config>;
