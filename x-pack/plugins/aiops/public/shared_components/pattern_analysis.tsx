@@ -10,7 +10,6 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
@@ -139,34 +138,32 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
         padding: '10px',
       }}
     >
-      <KibanaRenderContextProvider {...coreStart}>
-        <AiopsAppContext.Provider value={aiopsAppContextValue}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            <ReloadContextProvider reload$={resultObservable$}>
-              <DataSourceContextProvider
-                dataViews={pluginStart.data.dataViews}
-                dataViewId={dataViewId}
-              >
-                <FilterQueryContextProvider timeRange={timeRange}>
-                  <PatternAnalysisEmbeddableWrapper
-                    dataViewId={dataViewId}
-                    timeRange={timeRange}
-                    fieldName={fieldName}
-                    minimumTimeRangeOption={minimumTimeRangeOption}
-                    randomSamplerMode={randomSamplerMode}
-                    randomSamplerProbability={randomSamplerProbability}
-                    lastReloadRequestTime={lastReloadRequestTime}
-                    onLoading={onLoading}
-                    onRenderComplete={onRenderComplete}
-                    onError={onError}
-                    onChange={onChange}
-                  />
-                </FilterQueryContextProvider>
-              </DataSourceContextProvider>
-            </ReloadContextProvider>
-          </DatePickerContextProvider>
-        </AiopsAppContext.Provider>
-      </KibanaRenderContextProvider>
+      <AiopsAppContext.Provider value={aiopsAppContextValue}>
+        <DatePickerContextProvider {...datePickerDeps}>
+          <ReloadContextProvider reload$={resultObservable$}>
+            <DataSourceContextProvider
+              dataViews={pluginStart.data.dataViews}
+              dataViewId={dataViewId}
+            >
+              <FilterQueryContextProvider timeRange={timeRange}>
+                <PatternAnalysisEmbeddableWrapper
+                  dataViewId={dataViewId}
+                  timeRange={timeRange}
+                  fieldName={fieldName}
+                  minimumTimeRangeOption={minimumTimeRangeOption}
+                  randomSamplerMode={randomSamplerMode}
+                  randomSamplerProbability={randomSamplerProbability}
+                  lastReloadRequestTime={lastReloadRequestTime}
+                  onLoading={onLoading}
+                  onRenderComplete={onRenderComplete}
+                  onError={onError}
+                  onChange={onChange}
+                />
+              </FilterQueryContextProvider>
+            </DataSourceContextProvider>
+          </ReloadContextProvider>
+        </DatePickerContextProvider>
+      </AiopsAppContext.Provider>
     </div>
   );
 };
