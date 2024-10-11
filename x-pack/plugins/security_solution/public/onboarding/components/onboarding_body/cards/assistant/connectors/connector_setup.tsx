@@ -24,7 +24,7 @@ import {
   type ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
 
 const usePanelCss = () => {
@@ -72,6 +72,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
             flush
             data-test-subj="connectorSetupCompressed"
             listItems={actionTypes.map((actionType) => ({
+              key: actionType.id,
               id: actionType.id,
               label: actionType.name,
               size: 's',
@@ -88,7 +89,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
           />
         ) : (
           <EuiFlexGroup gutterSize="l">
-            {actionTypes?.map((actionType: ActionType) => (
+            {actionTypes.map((actionType: ActionType) => (
               <EuiFlexItem key={actionType.id}>
                 <EuiLink
                   color="text"

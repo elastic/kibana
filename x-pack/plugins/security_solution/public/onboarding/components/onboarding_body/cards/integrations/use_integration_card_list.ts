@@ -17,7 +17,7 @@ import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
   INTEGRATION_APP_ID,
-  MAX_CARD_HEIGHT,
+  MAX_CARD_HEIGHT_IN_PX,
   ONBOARDING_APP_ID,
   ONBOARDING_LINK,
 } from './constants';
@@ -93,7 +93,7 @@ const addSecuritySpecificProps = ({
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
     descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
-    maxCardHeight: MAX_CARD_HEIGHT,
+    maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
     showInstallationStatus: true,
     url,
     onCardClick: () => {

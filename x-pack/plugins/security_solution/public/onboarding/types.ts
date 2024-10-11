@@ -13,7 +13,7 @@ import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 import type { StartServices } from '../types';
 
-export interface CheckCompleteResult {
+export interface CheckCompleteResult<TMetadata extends {} = {}> {
   /**
    * Optional custom badge text replacement for the card complete badge in the card header.
    */
@@ -25,7 +25,7 @@ export interface CheckCompleteResult {
   /**
    * Optional metadata to be passed to the card component.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: TMetadata;
 }
 /**
  * The result of a card completion auto check.
@@ -35,7 +35,9 @@ export interface CheckCompleteResult {
  * - `{ isComplete: false, additionalBadges: ReactNode[] }` if the card is complete and has to show additional badges on the header.
  * - `{ isComplete: false, metadata: {showWarningCallOut: true} }` if the card is not complete and passes some metadata to the card component.
  */
-export type CheckCompleteResponse = boolean | ({ isComplete: boolean } & CheckCompleteResult);
+export type CheckCompleteResponse<TMetadata extends {} = {}> =
+  | boolean
+  | ({ isComplete: boolean } & CheckCompleteResult<TMetadata>);
 
 export type SetComplete = (isComplete: boolean) => void;
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
@@ -44,7 +46,7 @@ export type SetExpandedCardId = (
   options?: { scroll?: boolean }
 ) => void;
 
-export type OnboardingCardComponent = React.ComponentType<{
+export type OnboardingCardComponent<TMetadata extends {} = {}> = React.ComponentType<{
   /**
    * Function to set the current card completion status.
    */
@@ -65,14 +67,14 @@ export type OnboardingCardComponent = React.ComponentType<{
    * Metadata passed from the card checkComplete function.
    * It will be `undefined` until the first checkComplete call finishes.
    */
-  checkCompleteMetadata?: Record<string, unknown>;
+  checkCompleteMetadata?: TMetadata;
 }>;
 
-export type OnboardingCardCheckComplete = (
+export type OnboardingCardCheckComplete<TMetadata extends {} = {}> = (
   services: StartServices
-) => Promise<CheckCompleteResponse>;
+) => Promise<CheckCompleteResponse<TMetadata>>;
 
-export interface OnboardingCardConfig {
+export interface OnboardingCardConfig<TMetadata extends {} = {}> {
   id: OnboardingCardId;
   title: string;
   icon: IconType;
@@ -81,12 +83,12 @@ export interface OnboardingCardConfig {
    * It receives a `setComplete` function to allow the card to mark itself as complete if needed.
    * Please use React.lazy() to load the component.
    */
-  Component: OnboardingCardComponent;
+  Component: React.LazyExoticComponent<OnboardingCardComponent<TMetadata>>;
   /**
    * Function for auto-checking completion for the card
    * @returns Promise for the complete status
    */
-  checkComplete?: OnboardingCardCheckComplete;
+  checkComplete?: OnboardingCardCheckComplete<TMetadata>;
   /**
    * The RBAC capability strings required to enable the card. It uses object dot notation. e.g. `'siem.crud'`.
    *
@@ -114,5 +116,7 @@ export interface OnboardingCardConfig {
 
 export interface OnboardingGroupConfig {
   title: string;
-  cards: OnboardingCardConfig[];
+  // It's not possible to type the cards array with the generic type for all the cards metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cards: Array<OnboardingCardConfig<any>>;
 }

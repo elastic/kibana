@@ -20,6 +20,7 @@ jest.mock('../../../onboarding_context');
 jest.mock('../../../../hooks/use_stored_state');
 
 jest.mock('../../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../../common/lib/kibana'),
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
     getAppUrl: jest.fn(),

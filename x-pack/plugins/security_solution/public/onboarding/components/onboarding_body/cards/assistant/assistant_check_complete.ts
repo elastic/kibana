@@ -10,8 +10,11 @@ import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/conn
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import { AllowedActionTypeIds } from './constants';
+import type { AssistantCardMetadata } from './types';
 
-export const checkAssistantCardComplete: OnboardingCardCheckComplete = async ({ http }) => {
+export const checkAssistantCardComplete: OnboardingCardCheckComplete<
+  AssistantCardMetadata
+> = async ({ http }) => {
   const allConnectors = await loadConnectors({ http });
 
   const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {

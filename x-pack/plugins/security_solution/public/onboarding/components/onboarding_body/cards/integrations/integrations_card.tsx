@@ -12,27 +12,24 @@ import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import type { IntegrationCardMetadata } from './types';
 
-const isCheckCompleteMetadata = (metadata?: unknown): metadata is IntegrationCardMetadata => {
-  return metadata !== undefined;
-};
+export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> = React.memo(
+  ({ checkCompleteMetadata }) => {
+    if (!checkCompleteMetadata) {
+      return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
+    }
+    const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
 
-export const IntegrationsCard: OnboardingCardComponent = ({
-  checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
-}) => {
-  if (!isCheckCompleteMetadata(checkCompleteMetadata)) {
-    return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
+    return (
+      <OnboardingCardContentPanel>
+        <IntegrationsCardGridTabs
+          isAgentRequired={isAgentRequired}
+          installedIntegrationsCount={installedIntegrationsCount}
+        />
+      </OnboardingCardContentPanel>
+    );
   }
-  const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
-
-  return (
-    <OnboardingCardContentPanel>
-      <IntegrationsCardGridTabs
-        isAgentRequired={isAgentRequired}
-        installedIntegrationsCount={installedIntegrationsCount}
-      />
-    </OnboardingCardContentPanel>
-  );
-};
+);
+IntegrationsCard.displayName = 'IntegrationsCard';
 
 // eslint-disable-next-line import/no-default-export
 export default IntegrationsCard;

@@ -18,7 +18,7 @@ import {
 import { useOnboardingContext } from '../../../onboarding_context';
 import {
   DEFAULT_TAB,
-  LOADING_SKELETON_HEIGHT,
+  LOADING_SKELETON_TEXT_LINES,
   SCROLL_ELEMENT_ID,
   SEARCH_FILTER_CATEGORIES,
   WITHOUT_SEARCH_BOX_HEIGHT,
@@ -123,7 +123,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
         <EuiSkeletonText
           data-test-subj="loadingPackages"
           isLoading={true}
-          lines={LOADING_SKELETON_HEIGHT}
+          lines={LOADING_SKELETON_TEXT_LINES}
         />
       );
     }
@@ -158,7 +158,9 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
           id={SCROLL_ELEMENT_ID}
           ref={scrollElement}
         >
-          <Suspense fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />}>
+          <Suspense
+            fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
+          >
             <PackageListGrid
               callout={
                 <IntegrationCardTopCallout
@@ -199,7 +201,7 @@ export const IntegrationsCardGridTabs = withLazyHook(
   <EuiSkeletonText
     data-test-subj="loadingPackages"
     isLoading={true}
-    lines={LOADING_SKELETON_HEIGHT}
+    lines={LOADING_SKELETON_TEXT_LINES}
   />
 );
 IntegrationsCardGridTabs.displayName = 'IntegrationsCardGridTabs';

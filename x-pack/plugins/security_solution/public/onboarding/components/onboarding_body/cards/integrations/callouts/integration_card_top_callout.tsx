@@ -45,7 +45,6 @@ export const IntegrationCardTopCallout = React.memo(
             installedIntegrationsCount={installedIntegrationsCount}
           />
         )}
-        {}
       </>
     );
   }

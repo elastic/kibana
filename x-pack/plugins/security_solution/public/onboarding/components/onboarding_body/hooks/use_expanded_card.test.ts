@@ -17,10 +17,12 @@ const scrollTimeout = HEIGHT_ANIMATION_DURATION + 50;
 const mockSetStorageExpandedCardId = jest.fn();
 const mockUseStoredExpandedCardId = jest.fn(() => [null, mockSetStorageExpandedCardId]);
 jest.mock('../../../hooks/use_stored_state', () => ({
+  ...jest.requireActual('../../../hooks/use_stored_state'),
   useStoredExpandedCardId: () => mockUseStoredExpandedCardId(),
 }));
 
 jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useLocation: () => ({ hash: '#card-1', pathname: '/test' }),
 }));
 

@@ -19,6 +19,7 @@ const mockUseStoredCompletedCardIds = jest.fn(() => [
   mockSetStoredCompletedCardIds,
 ]);
 jest.mock('../../../hooks/use_stored_state', () => ({
+  ...jest.requireActual('../../../hooks/use_stored_state'),
   useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
 }));
 

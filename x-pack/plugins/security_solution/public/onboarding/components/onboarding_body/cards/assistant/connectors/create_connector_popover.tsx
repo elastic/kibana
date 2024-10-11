@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPopover, EuiLink, EuiText } from '@elastic/eui';
 import { ConnectorSetup } from './connector_setup';
-import * as i18n from '../../translations';
+import * as i18n from '../translations';
 
 interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
@@ -19,7 +19,10 @@ export const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(
     const [isOpen, setIsPopoverOpen] = useState(false);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+    const onButtonClick = useCallback(
+      () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen),
+      []
+    );
 
     return (
       <EuiPopover

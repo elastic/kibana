@@ -8,15 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { ConnectorCards } from './components/connectors/connector_cards';
+import { ConnectorCards } from './connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
+import type { AssistantCardMetadata } from './types';
 
-export const AssistantCard: OnboardingCardComponent = ({
+export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
   setExpandedCardId,
   checkCompleteMetadata,
@@ -31,7 +31,7 @@ export const AssistantCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
-  const aiConnectors = checkCompleteMetadata?.connectors as AIConnector[];
+  const connectors = checkCompleteMetadata?.connectors;
 
   return (
     <OnboardingCardContentPanel style={{ paddingTop: 0 }}>
@@ -43,7 +43,7 @@ export const AssistantCard: OnboardingCardComponent = ({
         </EuiFlexItem>
         <EuiFlexItem>
           {isIntegrationsCardComplete ? (
-            <ConnectorCards connectors={aiConnectors} onConnectorSaved={checkComplete} />
+            <ConnectorCards connectors={connectors} onConnectorSaved={checkComplete} />
           ) : (
             <EuiFlexItem
               className={css`

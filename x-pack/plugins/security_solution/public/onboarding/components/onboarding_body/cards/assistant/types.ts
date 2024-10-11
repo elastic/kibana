@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const PAGE_CONTENT_WIDTH = '1150px';
 
-export enum OnboardingCardId {
-  integrations = 'integrations',
-  dashboards = 'dashboards',
-  rules = 'rules',
-  alerts = 'alerts',
-  assistant = 'assistant',
-  attackDiscovery = 'attack_discovery',
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
+
+export interface AssistantCardMetadata {
+  connectors: ActionConnector[];
 }

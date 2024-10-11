@@ -12,10 +12,11 @@ import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import { AGENT_INDEX } from './constants';
 import type { StartServices } from '../../../../../types';
+import type { IntegrationCardMetadata } from './types';
 
-export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async (
-  services: StartServices
-) => {
+export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
+  IntegrationCardMetadata
+> = async (services: StartServices) => {
   const packageData = await services.http.get<GetPackagesResponse>(
     EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
     {

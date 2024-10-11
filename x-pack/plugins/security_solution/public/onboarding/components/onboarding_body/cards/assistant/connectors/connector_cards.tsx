@@ -17,18 +17,17 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { CreateConnectorPopover } from './create_connector_popover';
 import { ConnectorSetup } from './connector_setup';
 
 interface ConnectorCardsProps {
   connectors?: AIConnector[];
   onConnectorSaved: () => void;
-  onClose?: () => void;
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
-  ({ connectors, onConnectorSaved, onClose }) => {
+  ({ connectors, onConnectorSaved }) => {
     const {
       triggersActionsUi: { actionTypeRegistry },
     } = useKibana().services;
@@ -45,8 +44,9 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
               overflow-y: auto;
             `}
           >
-            {connectors?.map((connector) => (
+            {connectors.map((connector) => (
               <EuiFlexItem
+                key={connector.id}
                 grow={false}
                 className={css`
                   width: 30%;
