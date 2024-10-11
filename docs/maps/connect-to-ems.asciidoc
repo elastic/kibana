@@ -1,6 +1,6 @@
 :ems: Elastic Maps Service
 :ems-docker-repo: docker.elastic.co/elastic-maps-service/elastic-maps-server
-:ems-docker-image: {ems-docker-repo}:{version}-amd64
+:ems-docker-image: {ems-docker-repo}:{version}
 :ems-headers-url: https://deployment-host
 
 [[maps-connect-to-ems]]
@@ -81,33 +81,52 @@ If you cannot connect to {ems} from the {kib} server or browser clients, and you
 
 {hosted-ems} is a self-managed version of {ems} offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
 
-You can use +docker pull+ to download the {hosted-ems} image from the Elastic Docker registry.
-
+. Pull the {hosted-ems} Docker image.
++
 ifeval::["{release-state}"=="unreleased"]
-Version {version} of {hosted-ems} has not yet been released, so no Docker image is currently available for this version.
+WARNING: Version {version} of {hosted-ems} has not yet been released. 
+No Docker image is currently available for this version.
 endif::[]
-
-ifeval::["{release-state}"!="unreleased"]
-
++
 ["source","bash",subs="attributes"]
 ----------------------------------
 docker pull {ems-docker-image}
 ----------------------------------
 
-Start {hosted-ems} and expose the default port `8080`:
+. Optional: Install
+https://docs.sigstore.dev/system_config/installation/[Cosign] for your
+environment. Then use Cosign to verify the {es} image's signature.
++
+[source,sh,subs="attributes"]
+----
+wget https://artifacts.elastic.co/cosign.pub
+cosign verify --key cosign.pub {ems-docker-image}
+----
++
+The `cosign` command prints the check results and the signature payload in JSON format:
++
+[source,sh,subs="attributes"]
+--------------------------------------------
+Verification for {ems-docker-image} --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+--------------------------------------------
 
+
+. Start {hosted-ems} and expose the default port `8080`:
++
 ["source","bash",subs="attributes"]
 ----------------------------------
 docker run --rm --init --publish 8080:8080 \
   {ems-docker-image}
 ----------------------------------
-
++
 Once {hosted-ems} is running, follow instructions from the webpage at `localhost:8080` to define a configuration file and optionally download a more detailed basemaps database.
-
++
 [role="screenshot"]
 image::images/elastic-maps-server-instructions.png[Set-up instructions]
-
-endif::[]
 
 [float]
 [[elastic-maps-server-configuration]]
@@ -193,7 +212,6 @@ One way to configure {hosted-ems} is to provide `elastic-maps-server.yml` via bi
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
-version: '2'
 services:
   ems-server:
     image: {ems-docker-image}
@@ -212,7 +230,6 @@ These variables can be set with +docker-compose+ like this:
 
 ["source","yaml",subs="attributes"]
 ----------------------------------------------------------
-version: '2'
 services:
   ems-server:
     image: {ems-docker-image}
