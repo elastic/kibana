@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-deploy-project-form-pr
+  name: bk-kibana-deploy-project-from-pr
   description: 'Builds and deploys a Kibana serverless project from a PR'
   links:
     - url: 'https://buildkite.com/elastic/kibana-deploy-project-from-pr'
