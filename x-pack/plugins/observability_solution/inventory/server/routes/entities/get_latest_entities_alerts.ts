@@ -10,6 +10,14 @@ import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { AlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
 import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import { EntityType } from '../../../common/entities';
+
+interface Bucket {
+  key: Record<string, any>;
+  doc_count: number;
+}
+
+type EntityTypeBucketsAggregation = Record<EntityType, { buckets: Bucket[] }>;
 
 export async function getLatestEntitiesAlerts({
   alertsClient,
@@ -19,7 +27,7 @@ export async function getLatestEntitiesAlerts({
   alertsClient: AlertsClient;
   kuery?: string;
   identityFieldsPerEntityType: IdentityFieldsPerEntityType;
-}) {
+}): Promise<Array<{ [key: string]: any; alertsCount: number; type: EntityType }>> {
   if (identityFieldsPerEntityType.size === 0) {
     return [];
   }
@@ -39,9 +47,14 @@ export async function getLatestEntitiesAlerts({
     aggs: getGroupByTermsAgg(identityFieldsPerEntityType),
   });
 
+  const aggregations = response.aggregations as EntityTypeBucketsAggregation;
+
   const alerts = Array.from(identityFieldsPerEntityType).flatMap(([entityType]) => {
-    const buckets = response.aggregations?.[entityType]?.buckets ?? [];
-    return buckets.map((bucket: { key: Record<string, string>; doc_count: number }) => ({
+    const entityAggregation = aggregations?.[entityType];
+
+    const buckets = entityAggregation.buckets ?? [];
+
+    return buckets.map((bucket: Bucket) => ({
       alertsCount: bucket.doc_count,
       type: entityType,
       ...bucket.key,

@@ -65,7 +65,7 @@ export function EntitiesGrid({
   );
 
   const showAlertsColumn = useMemo(
-    () => entities?.some((entity: Entity) => entity?.alertsCount && entity?.alertsCount > 0),
+    () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
     [entities]
   );
 

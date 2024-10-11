@@ -9,7 +9,7 @@ import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
-import { entityTypeRt, entityColumnIdsRt } from '../../../common/entities';
+import { entityTypeRt, entityColumnIdsRt, Entity } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';
 import { getLatestEntities } from './get_latest_entities';
@@ -92,7 +92,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         sortField === 'alertsCount'
           ? orderBy(
               joined,
-              [(item) => item?.alertsCount === undefined, sortField],
+              [(item: Entity) => item?.alertsCount === undefined, sortField],
               ['asc', sortDirection] // push entities without alertsCount to the end
             )
           : joined,
