@@ -147,7 +147,7 @@ export async function getExpressionRendererParams(
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
-  abortController: AbortController;
+  abortController?: AbortController;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
   activeVisualizationState?: unknown;
@@ -159,8 +159,6 @@ export async function getExpressionRendererParams(
     data,
     injectFilterReferences,
   });
-
-  const newAbortController = abortController || new AbortController();
 
   const {
     expression,
@@ -178,7 +176,7 @@ export async function getExpressionRendererParams(
     addUserMessages([getSearchContextIncompatibleMessage()]);
   }
 
-  if (!newAbortController.signal.aborted && expression) {
+  if (expression) {
     const params: ExpressionWrapperProps = {
       expression,
       syncColors,
@@ -202,7 +200,7 @@ export async function getExpressionRendererParams(
         // throw new Error('Function not implemented.');
         logError('runtime');
       },
-      abortController: newAbortController,
+      abortController,
       hasCompatibleActions: buildHasCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
       variables: getVariables(api, state),
@@ -216,13 +214,13 @@ export async function getExpressionRendererParams(
       activeVisualizationState,
       activeDatasourceState,
       params,
-      abortController: newAbortController,
+      abortController,
     };
   }
 
   return {
     params: null,
-    abortController: newAbortController,
+    abortController,
     indexPatterns,
     indexPatternRefs,
     activeVisualizationState,
