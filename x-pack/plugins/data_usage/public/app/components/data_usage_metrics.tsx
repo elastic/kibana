@@ -125,7 +125,7 @@ export const DataUsageMetrics = () => {
           onTimeChange={onTimeChange}
           onChangeDataStreamsFilter={onChangeDataStreamsFilter}
           onChangeMetricTypesFilter={onChangeMetricTypesFilter}
-          showMetricsTypesFilter={true}
+          showMetricsTypesFilter={false}
         />
       </FlexItemWithCss>
       {!isFetching && error?.message && (
