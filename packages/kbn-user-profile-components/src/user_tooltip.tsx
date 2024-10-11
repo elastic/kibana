@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiToolTipProps } from '@elastic/eui';
-import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfileUserInfo } from './user_profile';
+import type { UserProfileAvatarData } from './types';
 import { UserAvatar } from './user_avatar';
+import type { UserProfileUserInfo } from './user_profile';
 import { getUserDisplayName } from './user_profile';
-import { UserProfileAvatarData } from './types';
 
 /**
  * Props of {@link UserToolTip} component

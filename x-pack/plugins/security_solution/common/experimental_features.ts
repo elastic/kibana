@@ -139,11 +139,6 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * enables logging requests during rule preview
-   */
-  loggingRequestsEnabled: false,
-
-  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
@@ -229,11 +224,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
