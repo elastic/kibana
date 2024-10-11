@@ -167,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
+        'kibana.alert.rule.execution.type': 'scheduled',
       });
     });
 
@@ -1200,7 +1201,7 @@ export default ({ getService }: FtrProviderContext) => {
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits).toHaveLength(2);
 
-        expect(allNewAlerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
