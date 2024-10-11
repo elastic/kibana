@@ -92,6 +92,22 @@ export const defaultConfig: StorybookConfig = {
       })
     );
 
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      use: [
+        {
+          loader: require.resolve('babel-loader'),
+          options: {
+            presets: [
+              require.resolve('@babel/preset-env'),
+              require.resolve('@babel/preset-react'),
+              require.resolve('@babel/preset-typescript'),
+            ],
+          },
+        },
+      ],
+    });
+
     // Same, but for imports statements which import modules outside of the directory (../)
     config.plugins?.push(
       new webpack.NormalModuleReplacementPlugin(/^\.\.\//, async (resource: any) => {
