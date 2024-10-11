@@ -55,8 +55,6 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     [editAction, index, subActionParams]
   );
 
-  // ChatCompleteParams | RerankParams | SparseEmbeddingParams | TextEmbeddingParams
-
   if (subAction === SUB_ACTION.COMPLETION) {
     return (
       <CompletionParamsFields
@@ -100,6 +98,27 @@ const InferenceServiceParamsFields: React.FunctionComponent<
   return <></>;
 };
 
+const InferenceInput: React.FunctionComponent<{
+  input?: string;
+  inputError?: string;
+  editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
+}> = ({ input, inputError, editSubActionParams }) => {
+  return (
+    <EuiFormRow fullWidth error={inputError} isInvalid={false} label={i18n.INPUT}>
+      <EuiTextArea
+        data-test-subj="inferenceInput"
+        name="input"
+        value={input}
+        onChange={(e) => {
+          editSubActionParams({ input: e.target.value });
+        }}
+        isInvalid={false}
+        fullWidth={true}
+      />
+    </EuiFormRow>
+  );
+};
+
 const CompletionParamsFields: React.FunctionComponent<{
   subActionParams: ChatCompleteParams;
   errors: RuleFormParamsErrors;
@@ -108,20 +127,11 @@ const CompletionParamsFields: React.FunctionComponent<{
   const { input } = subActionParams;
 
   return (
-    <>
-      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
-        <EuiTextArea
-          data-test-subj="inferenceInput"
-          name="input"
-          value={input}
-          onChange={(e) => {
-            editSubActionParams({ input: e.target.value });
-          }}
-          isInvalid={false}
-          fullWidth={true}
-        />
-      </EuiFormRow>
-    </>
+    <InferenceInput
+      input={input}
+      editSubActionParams={editSubActionParams}
+      inputError={errors.input as string}
+    />
   );
 };
 
@@ -133,20 +143,11 @@ const SparseEmbeddingParamsFields: React.FunctionComponent<{
   const { input } = subActionParams;
 
   return (
-    <>
-      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
-        <EuiTextArea
-          data-test-subj="inferenceInput"
-          name="input"
-          value={input}
-          onChange={(e) => {
-            editSubActionParams({ input: e.target.value });
-          }}
-          isInvalid={false}
-          fullWidth={true}
-        />
-      </EuiFormRow>
-    </>
+    <InferenceInput
+      input={input}
+      editSubActionParams={editSubActionParams}
+      inputError={errors.input as string}
+    />
   );
 };
 
@@ -183,18 +184,11 @@ const TextEmbeddingParamsFields: React.FunctionComponent<{
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow fullWidth error={errors.input as string} isInvalid={false} label={i18n.INPUT}>
-        <EuiTextArea
-          data-test-subj="inferenceInput"
-          name="input"
-          value={input}
-          onChange={(e) => {
-            editSubActionParams({ input: e.target.value });
-          }}
-          isInvalid={false}
-          fullWidth={true}
-        />
-      </EuiFormRow>
+      <InferenceInput
+        input={input}
+        editSubActionParams={editSubActionParams}
+        inputError={errors.input as string}
+      />
     </>
   );
 };

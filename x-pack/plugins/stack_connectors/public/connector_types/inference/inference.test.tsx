@@ -36,16 +36,35 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('OpenAI action params validation', () => {
-  test('action params validation succeeds when action params is valid', async () => {
-    const actionParams = {
+  test.each([
+    {
+      subAction: SUB_ACTION.RERANK,
+      subActionParams: { input: ['message test'], query: 'foobar' },
+    },
+    {
       subAction: SUB_ACTION.COMPLETION,
       subActionParams: { input: 'message test' },
-    };
-
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { input: [], subAction: [], inputType: [], query: [] },
-    });
-  });
+    },
+    {
+      subAction: SUB_ACTION.TEXT_EMBEDDING,
+      subActionParams: { input: 'message test', inputType: 'foobar' },
+    },
+    {
+      subAction: SUB_ACTION.SPARSE_EMBEDDING,
+      subActionParams: { input: 'message test' },
+    },
+  ])(
+    'validation succeeds when params are valid for subAction $subAction',
+    async ({ subAction, subActionParams }) => {
+      const actionParams = {
+        subAction,
+        subActionParams,
+      };
+      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+        errors: { input: [], subAction: [], inputType: [], query: [] },
+      });
+    }
+  );
 
   test('params validation fails when params is a wrong object', async () => {
     const actionParams = {
@@ -73,6 +92,22 @@ describe('OpenAI action params validation', () => {
     });
   });
 
+  test('params validation fails when subAction is not in the list of the supported', async () => {
+    const actionParams = {
+      subAction: 'wrong',
+      subActionParams: { input: 'message test' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        input: [],
+        inputType: [],
+        query: [],
+        subAction: ['Invalid action name.'],
+      },
+    });
+  });
+
   test('params validation fails when subActionParams is missing', async () => {
     const actionParams = {
       subAction: SUB_ACTION.RERANK,
@@ -84,6 +119,22 @@ describe('OpenAI action params validation', () => {
         input: ['Input is required.', 'Input does not have a valid Array format.'],
         inputType: [],
         query: ['Query is required.'],
+        subAction: [],
+      },
+    });
+  });
+
+  test('params validation fails when text_embedding inputType is missing', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.TEXT_EMBEDDING,
+      subActionParams: { input: 'message test' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        input: [],
+        inputType: ['Input type is required.'],
+        query: [],
         subAction: [],
       },
     });

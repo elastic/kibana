@@ -66,7 +66,7 @@ export function getConnectorType(): InferenceConnector {
       }
       if (subAction === SUB_ACTION.TEXT_EMBEDDING) {
         if (!(subActionParams as TextEmbeddingParams).inputType?.length) {
-          errors.query.push(translations.getRequiredMessage('Input type'));
+          errors.inputType.push(translations.getRequiredMessage('Input type'));
         }
       }
       if (errors.input.length) return { errors };

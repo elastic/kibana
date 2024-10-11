@@ -39,16 +39,6 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
   } as ActionType,
-  {
-    id: '.inference',
-    name: 'Inference API',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'enterprise',
-    isSystemActionType: true,
-    supportedFeatureIds: ['generativeAI'],
-  } as ActionType,
 ];
 
 export const mockConnectors: AIConnector[] = [
