@@ -8,7 +8,7 @@
 import { ENTITY_IDENTITY_FIELDS } from '@kbn/observability-shared-plugin/common';
 import { Entity } from '../entities';
 
-export function getIdentityFieldValuePairsToKql({ entity }: { entity: Entity }) {
+export function parseIdentityFieldValuesToKql({ entity }: { entity: Entity }) {
   const mapping: string[] = [];
 
   const identityFields = entity[ENTITY_IDENTITY_FIELDS];

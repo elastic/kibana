@@ -12,7 +12,7 @@ import {
   ENTITY_LAST_SEEN,
 } from '@kbn/observability-shared-plugin/common';
 import { HostEntity, ServiceEntity } from '../entities';
-import { getIdentityFieldValuePairsToKql } from './get_identity_field_value_pairs_to_kql';
+import { parseIdentityFieldValuesToKql } from './parse_identity_field_values_to_kql';
 
 const commonEntityFields = {
   [ENTITY_LAST_SEEN]: '2023-10-09T00:00:00Z',
@@ -22,7 +22,7 @@ const commonEntityFields = {
   alertCount: 3,
 };
 
-describe('getIdentityFieldValuePairsToKql', () => {
+describe('parseIdentityFieldValuesToKql', () => {
   it('should return the value when identityFields is a single string', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
@@ -32,7 +32,7 @@ describe('getIdentityFieldValuePairsToKql', () => {
       ...commonEntityFields,
     };
 
-    const result = getIdentityFieldValuePairsToKql({ entity });
+    const result = parseIdentityFieldValuesToKql({ entity });
     expect(result).toEqual(['service.name: "my-service"']);
   });
 
@@ -46,7 +46,7 @@ describe('getIdentityFieldValuePairsToKql', () => {
       ...commonEntityFields,
     };
 
-    const result = getIdentityFieldValuePairsToKql({ entity });
+    const result = parseIdentityFieldValuesToKql({ entity });
     expect(result).toEqual(['service.name: "my-service"', 'service.environment: "staging"']);
   });
 
@@ -59,7 +59,7 @@ describe('getIdentityFieldValuePairsToKql', () => {
       ...commonEntityFields,
     };
 
-    const result = getIdentityFieldValuePairsToKql({ entity });
+    const result = parseIdentityFieldValuesToKql({ entity });
     expect(result).toEqual([]);
   });
   it('should return an empty array if identityFields is empty array', () => {
@@ -71,7 +71,7 @@ describe('getIdentityFieldValuePairsToKql', () => {
       ...commonEntityFields,
     };
 
-    const result = getIdentityFieldValuePairsToKql({ entity });
+    const result = parseIdentityFieldValuesToKql({ entity });
     expect(result).toEqual([]);
   });
 
@@ -84,7 +84,7 @@ describe('getIdentityFieldValuePairsToKql', () => {
       ...commonEntityFields,
     };
 
-    const result = getIdentityFieldValuePairsToKql({ entity });
+    const result = parseIdentityFieldValuesToKql({ entity });
     expect(result).toEqual(['host.name: "my-host"']);
   });
 });

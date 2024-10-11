@@ -10,10 +10,10 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Entity } from '../../../common/entities';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIdentityFieldValuePairsToKql } from '../../../common/utils/get_identity_field_value_pairs_to_kql';
+import { parseIdentityFieldValuesToKql } from '../../../common/utils/parse_identity_field_values_to_kql';
 
 export function AlertsBadge({ entity }: { entity: Entity }) {
-  const identityFieldValues = getIdentityFieldValuePairsToKql({ entity });
+  const identityFieldValues = parseIdentityFieldValuesToKql({ entity });
   const {
     services: {
       http: { basePath },

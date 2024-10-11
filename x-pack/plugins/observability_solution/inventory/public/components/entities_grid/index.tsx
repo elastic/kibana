@@ -35,7 +35,7 @@ interface Props {
   loading: boolean;
   entities: LatestEntities;
   sortDirection: 'asc' | 'desc';
-  sortField: EntityColumnIds;
+  sortField: string;
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
