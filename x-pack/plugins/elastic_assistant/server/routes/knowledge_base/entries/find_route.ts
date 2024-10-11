@@ -74,7 +74,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
-          const systemFilter = ` AND kb_resource:"user"`;
+          const systemFilter = ` AND (kb_resource:"user" OR type:"index")`;
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
 
           const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
@@ -160,7 +160,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
               body: {
                 perPage: result.perPage,
                 page: result.page,
-                total: result.total,
+                total: result.total + systemEntries.length,
                 data: [...transformESSearchToKnowledgeBaseEntry(result.data), ...systemEntries],
               },
             });

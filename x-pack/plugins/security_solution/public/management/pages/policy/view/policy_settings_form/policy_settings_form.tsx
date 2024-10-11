@@ -6,11 +6,13 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
+import { EventMergingBanner } from './components/event_merging_banner';
 import { AntivirusRegistrationCard } from './components/cards/antivirus_registration_card';
 import { LinuxEventCollectionCard } from './components/cards/linux_event_collection_card';
 import { MacEventCollectionCard } from './components/cards/mac_event_collection_card';
@@ -41,6 +43,15 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const getTestId = useTestIdGenerator(props['data-test-subj']);
   const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
 
+  const { storage } = useKibana().services;
+  const [showEventMergingBanner, setShowEventMergingBanner] = useState(
+    storage.get('securitySolution.showEventMergingBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowEventMergingBanner(false);
+    storage.set('securitySolution.showEventMergingBanner', false);
+  }, [storage]);
+
   const onChangeProxy: PolicySettingsFormProps['onChange'] = ({ isValid, updatedPolicy }) => {
     // perform tasks that synchronises changes between settings
     updateAntivirusRegistrationEnabled(updatedPolicy);
@@ -50,8 +61,13 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   return (
     <div data-test-subj={getTestId()}>
+      {showEventMergingBanner && (
+        <>
+          <EventMergingBanner onDismiss={onBannerDismiss} />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
-      <EuiSpacer size="s" />
 
       {ProtectionsUpSellingComponent && (
         <>
