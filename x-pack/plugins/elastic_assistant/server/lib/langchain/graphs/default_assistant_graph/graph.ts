@@ -137,7 +137,7 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.AGENT, (state: AgentState) =>
-        runAgent({ ...nodeParams, state, agentRunnable })
+        runAgent({ ...nodeParams, state, agentRunnable, kbDataClient: dataClients?.kbDataClient })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) => executeTools({ ...nodeParams, state, tools }))
       .addNode(NodeType.RESPOND, (state: AgentState) =>
