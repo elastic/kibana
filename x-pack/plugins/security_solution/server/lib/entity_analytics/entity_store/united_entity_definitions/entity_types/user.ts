@@ -7,11 +7,12 @@
 import { collectValuesWithLength } from '../definition_utils';
 import type { UnitedDefinitionBuilder } from '../types';
 
+export const USER_DEFINITION_VERSION = '1.0.0';
 export const getUserUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
   const collect = collectValuesWithLength(fieldHistoryLength);
   return {
     entityType: 'user',
-    version: '1.0.0',
+    version: USER_DEFINITION_VERSION,
     fields: [
       collect({ field: 'user.domain' }),
       collect({ field: 'user.email' }),

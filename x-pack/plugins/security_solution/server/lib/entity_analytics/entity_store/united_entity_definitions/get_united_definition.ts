@@ -10,6 +10,8 @@ import {
   getHostUnitedDefinition,
   getUserUnitedDefinition,
   getCommonUnitedFieldDefinitions,
+  USER_DEFINITION_VERSION,
+  HOST_DEFINITION_VERSION,
 } from './entity_types';
 import type { UnitedDefinitionBuilder } from './types';
 import { UnitedEntityDefinition } from './united_entity_definition';
@@ -43,6 +45,9 @@ export const getUnitedEntityDefinition = memoize(
   ({ entityType, namespace, fieldHistoryLength }: Options) =>
     `${entityType}-${namespace}-${fieldHistoryLength}`
 );
+
+export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
+  entityType === 'host' ? HOST_DEFINITION_VERSION : USER_DEFINITION_VERSION;
 
 export const getAvailableEntityTypes = (): EntityType[] =>
   Object.keys(unitedDefinitionBuilders) as EntityType[];
