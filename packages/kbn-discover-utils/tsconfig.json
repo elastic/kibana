@@ -28,6 +28,7 @@
     "@kbn/ui-theme",
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/i18n-react"
   ]
 }
