@@ -19,7 +19,20 @@ export default createTestConfig({
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: [],
   kbnServerArgs: [
-    `--xpack.cloud.id='ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg=='`,
-    `--xpack.cloud.serverless.project_id='fakeprojectid'`,
+    `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
+    `--xpack.cloud.serverless.project_id=fakeprojectid`,
+    `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
+    `--xpack.cloud.projects_url=/projects/`,
   ],
+  apps: {
+    serverlessElasticsearch: {
+      pathname: '/app/elasticsearch',
+    },
+    serverlessConnectors: {
+      pathname: '/app/connectors',
+    },
+    searchPlayground: {
+      pathname: '/app/search_playground',
+    },
+  },
 });
