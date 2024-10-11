@@ -45,5 +45,5 @@ export function useEntitySummary({
     [entityType, entityId]
   );
 
-  return { dataStreams: data ? data.sourceDataStreams : undefined, status };
+  return { dataStreams: data?.sourceDataStreams ?? [], status };
 }
