@@ -42,12 +42,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
-
-    // remove duplicated steps
-    console.log([...new Set(pipeline)].join('\n'));
-    return;
-
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
