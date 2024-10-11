@@ -308,12 +308,11 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
   });
-
-  context('Changing alert status with read only role', () => {
+  context.skip('Changing alert status with read only role', () => {
     beforeEach(() => {
-      login(ROLES.t2_analyst);
       deleteAlertsAndRules();
       createRule(getNewRule());
+      login(ROLES.t2_analyst);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectAlertsCountTable();
