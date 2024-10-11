@@ -60,7 +60,7 @@ export const getTriggerIndicesMetadataTaskRoute = (
 
       return response.ok({
         body: {
-          message: `Task processed ${result} datastreams. It took ${elapsedTime} ms to run and required ${memoryUsed} bytes ${msgSuffix}`,
+          message: `Task finished, it processed ${result} indices, took ${elapsedTime} ms to run and required ${memoryUsed} bytes ${msgSuffix} [ v1.1 ]`,
         },
       });
     }

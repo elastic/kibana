@@ -42,6 +42,7 @@ import type {
   IndicesGetDataStreamRequest,
   IndicesStatsRequest,
   IlmGetLifecycleRequest,
+  CatIndicesRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
@@ -92,6 +93,7 @@ import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/co
 import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 import type { TelemetryLogger } from './telemetry_logger';
 import type {
+  ClusterStats,
   DataStream,
   IlmPhase,
   IlmPhases,
@@ -254,6 +256,8 @@ export interface ITelemetryReceiver {
   setNumDocsToSample(n: number): void;
 
   // ---------- TODO: POC ----------  //
+  getClusterStats(): Promise<ClusterStats>;
+  getIndices(): Promise<string[]>;
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(
     indices: string[],
@@ -1345,6 +1349,43 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   // ---------- TODO: POC ----------  //
+  public async getClusterStats(): Promise<ClusterStats> {
+    const es = this.esClient();
+
+    this.logger.debug('Fetching cluster stats');
+
+    return es.cluster.stats({}).then(
+      (response) =>
+        ({
+          num_nodes: response.nodes.count.total,
+          num_indices: response.indices.count,
+          num_docs: response.indices.docs.count,
+          num_deleted_docs: response.indices.docs.deleted,
+          total_size_in_bytes: response.indices.store.size_in_bytes,
+        } as ClusterStats)
+    );
+  }
+
+  public async getIndices(): Promise<string[]> {
+    const es = this.esClient();
+
+    this.logger.debug('Fetching indices');
+
+    const request: CatIndicesRequest = {
+      expand_wildcards: ['open', 'hidden'],
+      filter_path: ['index'],
+      format: 'json',
+    };
+
+    return es.cat
+      .indices(request)
+      .then((indices) => indices.map(({ index }) => index as string))
+      .catch((error) => {
+        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        throw error;
+      });
+  }
+
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 

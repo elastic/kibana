@@ -42,6 +42,14 @@ export interface IndexStats {
   docs_total_size_in_bytes?: number;
 }
 
+export interface ClusterStats {
+  num_nodes: number;
+  num_indices: number;
+  num_docs: number;
+  num_deleted_docs?: number;
+  total_size_in_bytes: number;
+}
+
 export interface Index {
   index_name: string;
   ilm_policy?: string;
