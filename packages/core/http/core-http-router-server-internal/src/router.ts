@@ -146,9 +146,15 @@ export interface RouterOptions {
 }
 
 /** @internal */
-export interface InternalRegistrarOptions {
+interface InternalRegistrarOptions {
   isVersioned: boolean;
+  /**
+   * @default false
+   * @remark cannot be set to `true` if `isVersioned` is true
+   */
+  isHTTPResource?: boolean;
 }
+
 /** @internal */
 export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
   RouteConfig<P, Q, B, M>,
@@ -201,11 +207,16 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        { isVersioned }: { isVersioned: boolean } = { isVersioned: false }
+        { isVersioned, isHTTPResource }: InternalRegistrarOptions = { isVersioned: false }
       ) => {
+        if (isVersioned === true && isHTTPResource === true) {
+          throw new Error('A versioned route as an HTTP resource is not supported');
+        }
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
-        const isPublicUnversionedRoute = route.options?.access === 'public' && !isVersioned;
+        // We do not consider HTTP resource routes as APIs
+        const isPublicUnversionedApi =
+          !isHTTPResource && route.options?.access === 'public' && !isVersioned;
 
         this.routes.push({
           handler: async (req, responseToolkit) =>
@@ -213,7 +224,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
               routeSchemas,
               request: req,
               responseToolkit,
-              isPublicUnversionedRoute,
+              isPublicUnversionedApi,
               handler: this.enhanceWithContext(handler),
             }),
           method,
@@ -223,7 +234,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           security: isVersioned
             ? route.security
             : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
-          /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned,
         });
@@ -269,12 +279,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     routeSchemas,
     request,
     responseToolkit,
-    isPublicUnversionedRoute,
+    isPublicUnversionedApi,
     handler,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    isPublicUnversionedRoute: boolean;
+    isPublicUnversionedApi: boolean;
     handler: RequestHandlerEnhanced<
       P,
       Q,
@@ -296,7 +306,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
       const response = hapiResponseAdapter.toBadRequest(error.message);
-      if (isPublicUnversionedRoute) {
+      if (isPublicUnversionedApi) {
         response.output.headers = {
           ...response.output.headers,
           ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
@@ -307,7 +317,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
-      if (isPublicUnversionedRoute) {
+      if (isPublicUnversionedApi) {
         injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
       }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
