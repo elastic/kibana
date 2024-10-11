@@ -47,6 +47,7 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
+  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -811,6 +812,11 @@ function validateSource(
 ) {
   const messages: ESQLMessage[] = [];
   if (source.incomplete) {
+    return messages;
+  }
+
+  const hasCCS = hasCCSSource(source.name);
+  if (hasCCS) {
     return messages;
   }
 
