@@ -18,7 +18,6 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -51,7 +50,6 @@ export const assetCriticalityPublicGetRoute = (
       ): Promise<IKibanaResponse<GetAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;

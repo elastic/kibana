@@ -90,8 +90,7 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
 
 export const getItems: (
   entityData: EntityData | undefined,
-  isAssetCriticalityEnabled: boolean
-) => TableItem[] = (entityData, isAssetCriticalityEnabled) => {
+) => TableItem[] = (entityData) => {
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -100,8 +99,7 @@ export const getItems: (
       score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
-    ...(isAssetCriticalityEnabled
-      ? [
+  
           {
             category: i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
@@ -112,8 +110,6 @@ export const getItems: (
             score: entityData?.risk.category_2_score ?? 0,
             count: undefined,
           },
-        ]
-      : []),
   ];
 };
 

@@ -15,7 +15,6 @@ import {
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -45,8 +44,6 @@ export const assetCriticalityInternalPrivilegesRoute = (
       ): Promise<IKibanaResponse<AssetCriticalityGetPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core);
-
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const [_, { security }] = await getStartServices();
