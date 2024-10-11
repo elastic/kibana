@@ -48,7 +48,7 @@ export const DeleteDatabaseModal = ({
     }
     setIsLoading(true);
     try {
-      const { error } = await services.api.deleteGeoipDatabase(database.id);
+      const { error } = await services.api.deleteDatabase(database.id);
       setIsLoading(false);
       if (error) {
         services.notifications.toasts.addError(error, {

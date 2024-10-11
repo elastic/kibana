@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
+import { IPINFO_NAME_OPTIONS } from './constants';
 import type { GeoipDatabase } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 import { getTypeLabel } from './constants';
@@ -33,7 +34,7 @@ import { getErrorMessage } from './get_error_message';
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
-  const { data, isLoading, error, resendRequest } = services.api.useLoadGeoipDatabases();
+  const { data, isLoading, error, resendRequest } = services.api.useLoadDatabases();
   const [showModal, setShowModal] = useState<'add' | 'delete' | null>(null);
   const [databaseToDelete, setDatabaseToDelete] = useState<GeoipDatabase | null>(null);
   const onDatabaseDelete = (item: GeoipDatabase) => {
@@ -68,6 +69,15 @@ export const GeoipList: React.FunctionComponent = () => {
           defaultMessage: 'Database name',
         }),
         sortable: true,
+        render: (name: string, row) => {
+          if (row.type === 'ipinfo') {
+            // find the name in the options to get the translated value
+            const option = IPINFO_NAME_OPTIONS.find((opt) => opt.value === name);
+            return option?.text ?? name;
+          }
+
+          return name;
+        },
       },
       {
         field: 'type',

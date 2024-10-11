@@ -141,28 +141,28 @@ export class ApiService {
     return result;
   }
 
-  public useLoadGeoipDatabases() {
+  public useLoadDatabases() {
     return this.useRequest<GeoipDatabase[], ResponseErrorBody>({
-      path: `${API_BASE_PATH}/geoip_database`,
+      path: `${API_BASE_PATH}/databases`,
       method: 'get',
     });
   }
 
-  public async createGeoipDatabase(database: {
+  public async createDatabase(database: {
     databaseType: string;
     maxmind?: string;
     databaseName: string;
   }) {
     return this.sendRequest({
-      path: `${API_BASE_PATH}/geoip_database`,
+      path: `${API_BASE_PATH}/databases`,
       method: 'post',
       body: JSON.stringify(database),
     });
   }
 
-  public async deleteGeoipDatabase(id: string) {
+  public async deleteDatabase(id: string) {
     return this.sendRequest({
-      path: `${API_BASE_PATH}/geoip_database/${id}`,
+      path: `${API_BASE_PATH}/databases/${id}`,
       method: 'delete',
     });
   }

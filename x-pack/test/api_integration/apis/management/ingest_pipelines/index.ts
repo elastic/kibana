@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { registerListGeoipRoute } from './list';
-export { registerCreateGeoipRoute } from './create';
-export { registerDeleteGeoipRoute } from './delete';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Ingest pipelines', () => {
+    loadTestFile(require.resolve('./databases'));
+  });
+}

@@ -73,17 +73,17 @@ const registerHttpRequestMockHelpers = (
   const setParseCsvResponse = (response?: object, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/parse_csv`, response, error);
 
-  const setLoadGeoipDatabasesResponse = (response?: object[], error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/geoip_database`, response, error);
+  const setLoadDatabasesResponse = (response?: object[], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/databases`, response, error);
 
-  const setDeleteGeoipDatabaseResponse = (
+  const setDeleteDatabasesResponse = (
     databaseName: string,
     response?: object,
     error?: ResponseError
-  ) => mockResponse('DELETE', `${API_BASE_PATH}/geoip_database/${databaseName}`, response, error);
+  ) => mockResponse('DELETE', `${API_BASE_PATH}/databases/${databaseName}`, response, error);
 
-  const setCreateGeoipDatabaseResponse = (response?: object, error?: ResponseError) =>
-    mockResponse('POST', `${API_BASE_PATH}/geoip_database`, response, error);
+  const setCreateDatabasesResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/databases`, response, error);
 
   return {
     setLoadPipelinesResponse,
@@ -91,9 +91,9 @@ const registerHttpRequestMockHelpers = (
     setDeletePipelineResponse,
     setCreatePipelineResponse,
     setParseCsvResponse,
-    setLoadGeoipDatabasesResponse,
-    setDeleteGeoipDatabaseResponse,
-    setCreateGeoipDatabaseResponse,
+    setLoadDatabasesResponse,
+    setDeleteDatabasesResponse,
+    setCreateDatabasesResponse,
   };
 };
 

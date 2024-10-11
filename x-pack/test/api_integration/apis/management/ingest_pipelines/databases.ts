@@ -12,11 +12,11 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const ingestPipelines = getService('ingestPipelines');
-  const url = `/api/ingest_pipelines/geoip_database`;
+  const url = `/api/ingest_pipelines/databases`;
   const databaseName = 'GeoIP2-Anonymous-IP';
   const normalizedDatabaseName = 'geoip2-anonymous-ip';
 
-  describe('GeoIP databases', function () {
+  describe('Manage databases', function () {
     after(async () => {
       await ingestPipelines.api.deleteGeoipDatabases();
     });

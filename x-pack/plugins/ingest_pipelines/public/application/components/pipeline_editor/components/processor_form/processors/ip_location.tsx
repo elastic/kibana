@@ -70,7 +70,7 @@ const fieldsConfig: FieldsConfig = {
 
 export const IpLocation: FunctionComponent = () => {
   const { services } = useKibana();
-  const { data, isLoading } = services.api.useLoadGeoipDatabases();
+  const { data, isLoading } = services.api.useLoadDatabases();
 
   const dataAsOptions = (data || []).map((item) => ({
     id: item.id,

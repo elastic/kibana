@@ -34,13 +34,13 @@ const bodySchema = schema.object({
   ]),
 });
 
-export const registerCreateGeoipRoute = ({
+export const registerCreateDatabaseRoute = ({
   router,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.post(
     {
-      path: `${API_BASE_PATH}/geoip_database`,
+      path: `${API_BASE_PATH}/databases`,
       validate: {
         body: bodySchema,
       },
@@ -52,10 +52,11 @@ export const registerCreateGeoipRoute = ({
       const normalizedDatabaseName = normalizeDatabaseName(databaseName);
 
       try {
-        // the js client doesn't work for this API yet https://github.com/elastic/elasticsearch-specification/issues/2810
+        // TODO: the js client doesn't work for this API yet, so we resort to
+        // using the transport layer instead
         await clusterClient.asCurrentUser.transport.request({
           method: 'PUT',
-          path: `/_ingest/geoip/database/${normalizedDatabaseName}`,
+          path: `/_ingest/ip_location/database/${normalizedDatabaseName}`,
           body: serializedDatabase,
         });
 

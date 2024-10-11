@@ -48,7 +48,7 @@ describe('<ManageProcessors />', () => {
 
     const databases = [database1, database2, database3];
 
-    httpRequestsMockHelpers.setLoadGeoipDatabasesResponse(databases);
+    httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
 
     test('renders the list of databases', async () => {
       const { exists, find, table } = testBed;
@@ -72,7 +72,7 @@ describe('<ManageProcessors />', () => {
     test('deletes a database', async () => {
       const { actions } = testBed;
       const { name: databaseName } = database1;
-      httpRequestsMockHelpers.setDeleteGeoipDatabaseResponse(databaseName, {});
+      httpRequestsMockHelpers.setDeleteDatabasesResponse(databaseName, {});
 
       await actions.clickDeleteDatabaseButton(0);
 
@@ -90,7 +90,7 @@ describe('<ManageProcessors />', () => {
       const { actions } = testBed;
       const databaseName = 'GeoIP2-ISP';
       const maxmind = '123456';
-      httpRequestsMockHelpers.setCreateGeoipDatabaseResponse({
+      httpRequestsMockHelpers.setCreateDatabasesResponse({
         name: databaseName,
         id: databaseName.toLowerCase(),
       });
@@ -112,7 +112,7 @@ describe('<ManageProcessors />', () => {
 
   describe('No databases', () => {
     test('displays an empty prompt', async () => {
-      httpRequestsMockHelpers.setLoadGeoipDatabasesResponse([]);
+      httpRequestsMockHelpers.setLoadDatabasesResponse([]);
 
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -132,7 +132,7 @@ describe('<ManageProcessors />', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadGeoipDatabasesResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadDatabasesResponse(undefined, error);
 
       await act(async () => {
         testBed = await setup(httpSetup);

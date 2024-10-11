@@ -13,13 +13,13 @@ const paramsSchema = schema.object({
   database_id: schema.string(),
 });
 
-export const registerDeleteGeoipRoute = ({
+export const registerDeleteDatabaseRoute = ({
   router,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.delete(
     {
-      path: `${API_BASE_PATH}/geoip_database/{database_id}`,
+      path: `${API_BASE_PATH}/databases/{database_id}`,
       validate: {
         params: paramsSchema,
       },
@@ -29,8 +29,11 @@ export const registerDeleteGeoipRoute = ({
       const { database_id: databaseID } = req.params;
 
       try {
-        await clusterClient.asCurrentUser.ingest.deleteGeoipDatabase({
-          id: databaseID,
+        // TODO: the js client doesn't work for this API yet, so we resort to
+        // using the transport layer instead
+        await clusterClient.asCurrentUser.transport.request({
+          method: 'DELETE',
+          path: `/_ingest/ip_location/database/${databaseID}`,
         });
 
         return res.ok();

@@ -16,9 +16,9 @@ import {
   registerSimulateRoute,
   registerDocumentsRoute,
   registerParseCsvRoute,
-  registerListGeoipRoute,
-  registerCreateGeoipRoute,
-  registerDeleteGeoipRoute,
+  registerListDatabaseRoute,
+  registerCreateDatabaseRoute,
+  registerDeleteDatabaseRoute,
 } from './api';
 
 export class ApiRoutes {
@@ -32,9 +32,9 @@ export class ApiRoutes {
     registerDocumentsRoute(dependencies);
     registerParseCsvRoute(dependencies);
     if (dependencies.config.enableManageProcessors) {
-      registerListGeoipRoute(dependencies);
-      registerCreateGeoipRoute(dependencies);
-      registerDeleteGeoipRoute(dependencies);
+      registerListDatabaseRoute(dependencies);
+      registerCreateDatabaseRoute(dependencies);
+      registerDeleteDatabaseRoute(dependencies);
     }
   }
 }

@@ -40,7 +40,7 @@ const getGeoipType = ({ database }: GeoipDatabaseFromES) => {
   }
 
   if (database.ipinfo) {
-    return 'maxmind';
+    return 'ipinfo';
   }
 
   if (database.local) {

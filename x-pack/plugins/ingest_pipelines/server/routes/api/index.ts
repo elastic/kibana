@@ -22,7 +22,7 @@ export { registerDocumentsRoute } from './documents';
 export { registerParseCsvRoute } from './parse_csv';
 
 export {
-  registerListGeoipRoute,
-  registerCreateGeoipRoute,
-  registerDeleteGeoipRoute,
-} from './geoip_database';
+  registerListDatabaseRoute,
+  registerCreateDatabaseRoute,
+  registerDeleteDatabaseRoute,
+} from './database';

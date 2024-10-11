@@ -79,7 +79,7 @@ export const AddDatabaseModal = ({
     }
     setIsLoading(true);
     try {
-      const { error } = await services.api.createGeoipDatabase({
+      const { error } = await services.api.createDatabase({
         databaseType,
         databaseName,
         maxmind,
