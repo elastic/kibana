@@ -33,7 +33,6 @@ export interface OtelTransactionDocument extends OtelDocument {
   duration?: number;
   kind?: string;
   name?: string;
-  transaction: { id: string };
 }
 
 export class OtelTransaction extends Serializable<OtelTransactionDocument> {

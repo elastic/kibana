@@ -18,13 +18,11 @@ interface OtelSharedResourceAttributes {
   'agent.name'?: string;
   'agent.version'?: string;
   'metricset.interval'?: string;
-  'metricset.name'?: string;
   'service.instance.id'?: string;
   'telemetry.sdk.language'?: string;
   'telemetry.sdk.name'?: string;
   'telemetry.sdk.version'?: string;
   'some.resource.attribute'?: string;
-  'timestamp.us'?: number;
 }
 
 export interface OtelDocument extends Fields {
@@ -34,6 +32,7 @@ export interface OtelDocument extends Fields {
     type: string;
   };
   attributes?: {
+    'timestamp.us'?: number;
     [key: string]: any;
   };
   resource?: {
@@ -77,6 +76,7 @@ class Otel extends Serializable<OtelDocument> {
         'processor.event': 'error',
         'timestamp.us': 1726580752010657,
         'event.name': 'exception',
+        'error.id': `error-${spanId}`,
       },
       data_stream: {
         dataset: 'generic.otel',
@@ -91,7 +91,6 @@ class Otel extends Serializable<OtelDocument> {
           'agent.version': '1.28.0',
           'service.name': 'sendotlp-synth',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
-          'some.resource.attribute': 'resource.attr',
         },
         dropped_attributes_count: 0,
         schema_url: 'https://opentelemetry.io/schemas/1.26.0',
@@ -118,6 +117,7 @@ class Otel extends Serializable<OtelDocument> {
         'service.target.name': 'foo_service',
         'service.target.type': 'http',
         'span.name': 'child1',
+        'span.destination.service.resource': 'foo_service:8080',
       },
       data_stream: {
         dataset: 'service_destination.10m.otel',
@@ -144,6 +144,8 @@ class Otel extends Serializable<OtelDocument> {
     });
   }
 
+  // In Otel we have only spans (https://opentelemetry.io/docs/concepts/signals/traces/#spans)
+  // we call the root span a transaction to match our data model
   transaction(id: string) {
     return new OtelTransaction({
       ...this.fields,
@@ -156,7 +158,7 @@ class Otel extends Serializable<OtelDocument> {
         'transaction.id': id,
         'transaction.name': 'parent-synth',
         'transaction.representative_count': 1,
-        'transaction.result': 'Success',
+        'transaction.result': 'HTTP 2xx',
         'transaction.root': true,
         'transaction.sampled': true,
         'transaction.type': 'unknown',
@@ -187,7 +189,6 @@ class Otel extends Serializable<OtelDocument> {
         dropped_attributes_count: 0,
         name: 'sendotlp-synth',
       },
-      transaction: { id },
       span_id: id,
       status: {
         code: 'Unset',

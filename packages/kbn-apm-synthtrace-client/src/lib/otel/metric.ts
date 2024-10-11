@@ -14,11 +14,11 @@ export interface OtelMetricDocument extends OtelDocument {
   attributes?: {
     'metricset.name'?: string;
     'processor.event'?: string;
-    // service_destination
     'event.outcome'?: string;
     'service.target.name'?: string;
     'service.target.type'?: string;
     'span.name'?: string;
+    'span.destination.service.resource'?: string;
   };
   metrics?: {
     service_summary?: number;

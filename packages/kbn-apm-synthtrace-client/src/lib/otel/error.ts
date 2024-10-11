@@ -19,6 +19,7 @@ export interface OtelErrorDocument extends OtelDocument {
     'processor.event'?: string;
     'timestamp.us'?: number;
     'event.name'?: string;
+    'error.id'?: string;
   };
 }
 

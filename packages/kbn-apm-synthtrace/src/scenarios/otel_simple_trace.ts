@@ -38,7 +38,7 @@ const scenario: Scenario<OtelDocument> = async (runOptions) => {
       return [
         withClient(
           otelEsClient,
-          logger.perf('generating_otel_otelTrace', () => otelWithMetricsAndErrors)
+          logger.perf('generating_otel_trace', () => otelWithMetricsAndErrors)
         ),
       ];
     },
