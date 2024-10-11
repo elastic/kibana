@@ -175,12 +175,10 @@ const processScores = async ({
     return [];
   }
 
-  const isAssetCriticalityEnabled: boolean = true;
-  if (!isAssetCriticalityEnabled) {
+
     return buckets.map((bucket) =>
       formatForResponse({ bucket, now, identifierField, includeNewFields: false })
     );
-  }
 
   const identifiers = buckets.map((bucket) => ({
     id_field: identifierField,
