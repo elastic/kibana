@@ -318,7 +318,7 @@ describe('Per-Alert Action Scheduler', () => {
 
     test('should skip creating actions to schedule when alert has no scheduled actions', async () => {
       // 2 per-alert actions * 2 alerts = 4 actions to schedule
-      // but alert 1 has invalid action group, so only actions for alert 2 should be scheduled
+      // but alert 1 has has no scheduled actions, so only actions for alert 2 should be scheduled
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const newAlertInvalidActionGroup = generateAlert({
         id: 1,
