@@ -8,6 +8,7 @@
  */
 
 import type { QueryState } from '@kbn/data-plugin/public';
+import rison from '@kbn/rison';
 import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -20,12 +21,15 @@ import { coreServices } from '../../services/kibana_services';
 export const getDashboardListItemLink = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
   id: string,
-  timeRestore: boolean
+  timeRestore: boolean,
+  unsavedFilters?: Record<string, { filters: string }>
 ) => {
   const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
+  const unsavedFiltersForUrl =
+    unsavedFilters && unsavedFilters[id] ? rison.encode(unsavedFilters[id].filters) : undefined;
 
   let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
-    path: `#${createDashboardEditUrl(id)}`,
+    path: `#${createDashboardEditUrl(id, true, unsavedFiltersForUrl)}`,
   });
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
 

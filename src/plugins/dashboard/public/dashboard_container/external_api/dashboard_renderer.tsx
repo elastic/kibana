@@ -20,6 +20,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
+import type { Filter } from '@kbn/es-query';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardApi } from '../../dashboard_api/types';
 import { embeddableService, screenshotModeService } from '../../services/kibana_services';
@@ -36,6 +37,7 @@ export interface DashboardRendererProps {
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  unsavedFilters?: Filter[];
 }
 
 export function DashboardRenderer({
@@ -45,6 +47,7 @@ export function DashboardRenderer({
   showPlainSpinner,
   locator,
   onApiAvailable,
+  unsavedFilters,
 }: DashboardRendererProps) {
   const dashboardRoot = useRef(null);
   const dashboardViewport = useRef(null);
@@ -57,8 +60,10 @@ export function DashboardRenderer({
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
-    if (dashboardContainer) dashboardContainer.locator = locator;
-  }, [dashboardContainer, locator]);
+    if (dashboardContainer) {
+      dashboardContainer.locator = locator;
+    }
+  }, [dashboardContainer, locator, unsavedFilters]);
 
   useEffect(() => {
     /**
@@ -86,10 +91,9 @@ export function DashboardRenderer({
     let canceled = false;
     (async () => {
       const creationOptions = await getCreationOptions?.();
-
       const dashboardFactory = new DashboardContainerFactoryDefinition(embeddableService);
       const container = await dashboardFactory.create(
-        { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
+        { id, filters: unsavedFilters } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
         creationOptions,
         savedObjectId

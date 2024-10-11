@@ -19,6 +19,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import type { Filter } from '@kbn/es-query';
 import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
 import {
@@ -59,6 +60,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  unsavedFilters?: Filter[];
 }
 
 export function DashboardApp({
@@ -67,6 +69,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  unsavedFilters,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -163,7 +166,7 @@ export function DashboardApp({
         getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
     });
-  }, [history, embedSettings, validateOutcome, getScopedHistory, kbnUrlStateStorage]);
+  }, [history, kbnUrlStateStorage, validateOutcome, embedSettings, getScopedHistory]);
 
   useEffect(() => {
     if (!dashboardApi) return;
@@ -221,6 +224,7 @@ export function DashboardApp({
         savedObjectId={savedDashboardId}
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
+        unsavedFilters={unsavedFilters}
       />
     </>
   );

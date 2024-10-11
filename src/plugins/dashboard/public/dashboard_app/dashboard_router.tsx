@@ -16,9 +16,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { parse, ParsedQuery } from 'query-string';
 import React from 'react';
+import rison from '@kbn/rison';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
+import type { Filter } from '@kbn/es-query';
 import {
   CREATE_NEW_DASHBOARD_URL,
   createDashboardEditUrl,
@@ -28,7 +30,12 @@ import {
   VIEW_DASHBOARD_URL,
 } from '../dashboard_constants';
 import { RedirectToProps } from '../dashboard_container/types';
-import { coreServices, dataService, embeddableService } from '../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  spacesService,
+} from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
 import { DashboardApp } from './dashboard_app';
@@ -58,6 +65,7 @@ export async function mountApp({
   mountContext,
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
+  const spaceId = (await spacesService?.getActiveSpace())?.id;
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
@@ -95,13 +103,24 @@ export async function mountApp({
     };
   };
 
+  const getDashboardUnsavedFilters = (routeParams: string) => {
+    return rison.decode(routeParams);
+  };
+
   const renderDashboard = (
-    routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
+    routeProps: RouteComponentProps<{
+      id?: string;
+      expandedPanelId?: string;
+      unsavedFilters?: string;
+    }>
   ) => {
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
+    const formatUnsavedFilters = routeProps.match.params.unsavedFilters
+      ? (getDashboardUnsavedFilters(routeProps.match.params.unsavedFilters) as Filter[])
+      : undefined;
     return (
       <DashboardApp
         history={routeProps.history}
@@ -109,6 +128,7 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
+        unsavedFilters={formatUnsavedFilters}
       />
     );
   };
@@ -124,6 +144,7 @@ export async function mountApp({
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         redirectTo={redirect}
+        spaceId={spaceId}
       />
     );
   };
@@ -153,6 +174,7 @@ export async function mountApp({
             <Route
               path={[
                 CREATE_NEW_DASHBOARD_URL,
+                `${VIEW_DASHBOARD_URL}/:id/unsavedFilters=:unsavedFilters`,
                 `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
                 `${VIEW_DASHBOARD_URL}/:id`,
               ]}
