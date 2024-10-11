@@ -34,7 +34,6 @@ export const getServicesMock = (): NavigationServices => {
   return {
     basePath,
     recentlyAccessed$,
-    navIsOpen: true,
     navigateToUrl,
     activeNodes$: of(activeNodes),
     isSideNavCollapsed: false,
