@@ -32,24 +32,43 @@ export class ApmSynthtraceKibanaClient {
 
   async fetchLatestApmPackageVersion() {
     this.logger.debug(`Fetching latest APM package version`);
-    const url = `${this.getFleetApmPackagePath()}?prerelease=true`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: kibanaHeaders(),
-      agent: getFetchAgent(url),
-    });
 
-    const responseJson = await response.json();
+    const fetchPackageVersion = async (prerelease: boolean) => {
+      const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
+      this.logger.debug(`Fetching from URL: ${url}`);
 
-    if (response.status !== 200) {
-      throw new Error(
-        `Failed to fetch latest APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: kibanaHeaders(),
+        agent: getFetchAgent(url),
+      });
+
+      const responseJson = await response.json();
+
+      if (response.status !== 200) {
+        throw new Error(
+          `Failed to fetch APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
+        );
+      }
+
+      return responseJson.item.latestVersion as string;
+    };
+
+    try {
+      // First attempt fetch latest Prerelease version (prerelease=true)
+      return await fetchPackageVersion(true);
+    } catch (error) {
+      this.logger.debug(
+        'Fetching latestes prerelease version failed, retrying with latest GA version'
       );
+      // Retry with fetch latest GA version (prerelease=false)
+      const retryResult = await fetchPackageVersion(false).catch((retryError) => {
+        this.logger.debug('Fetching with prerelease=false failed');
+        throw retryError;
+      });
+
+      return retryResult;
     }
-
-    const { latestVersion } = responseJson.item;
-
-    return latestVersion as string;
   }
 
   async installApmPackage(packageVersion?: string) {
