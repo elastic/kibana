@@ -374,7 +374,6 @@ export const PresentationPanelHoverActions = ({
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];
     return notifications?.map((notification) => {
-      console.log('notificationElements', { api });
       let notificationComponent = notification.MenuItem ? (
         React.createElement(notification.MenuItem, {
           key: notification.id,
