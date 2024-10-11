@@ -143,7 +143,7 @@ export const AddDatabaseModal = ({
               data-test-subj="datanaseTypeSelect"
             />
           </EuiFormRow>
-          {databaseType && (
+          {databaseType === 'maxmind' && (
             <>
               <EuiSpacer />
               <EuiCallOut
@@ -159,6 +159,38 @@ export const AddDatabaseModal = ({
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
                     defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore. {link}"
+                    values={{
+                      link: (
+                        <EuiLink href="#">
+                          <FormattedMessage
+                            id="xpack.ingestPipelines.manageProcessors.geoip.licenseLearnMoreLink"
+                            defaultMessage="Learn more."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {databaseType === 'ipinfo' && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
+                    defaultMessage="Add IP-Info license key to keystore"
+                  />
+                }
+                iconType="iInCircle"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
+                    defaultMessage="In order to grant access to your IP-Info account, you must add the license key to the keystore. {link}"
                     values={{
                       link: (
                         <EuiLink href="#">
