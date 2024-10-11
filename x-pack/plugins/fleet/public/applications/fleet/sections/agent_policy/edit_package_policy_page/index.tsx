@@ -27,7 +27,6 @@ import {
   useUIExtension,
   sendGetAgentStatus,
   useAuthz,
-  useAgentless,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -60,6 +59,8 @@ import { useMultipleAgentPolicies } from '../../../hooks';
 import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
+
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';

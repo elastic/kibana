@@ -51,7 +51,6 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
-  useAgentless,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -83,6 +82,7 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
+import { useAgentless } from './hooks/setup_technology';
 import { SetupTechnologySelector } from './components/setup_technology_selector';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -356,6 +356,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
+    packageInfo,
     packagePolicy,
   });
 
