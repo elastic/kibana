@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { EntityType } from '@kbn/observability-shared-plugin/common';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { parseSearchString } from './parse_search_string';
@@ -60,6 +61,11 @@ export const Processes = () => {
     entityType: EntityType.HOST,
     entityId: asset.name,
   });
+  const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
+  );
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
@@ -143,14 +149,21 @@ export const Processes = () => {
   const isLoading = isPending(status);
 
   const showAddMetricsCallout =
-    dataStreamsStatus === 'success' && !isMetricsSignal(dataStreams) && renderMode.mode === 'page';
-  const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
+    dataStreamsStatus === 'success' &&
+    !isMetricsSignal(dataStreams) &&
+    !dismissedAddMetricsCallout &&
+    renderMode.mode === 'page';
 
   return (
     <>
       {showAddMetricsCallout && (
         <>
-          <AddMetricsCallout id={addMetricsCalloutId} />
+          <AddMetricsCallout
+            id={addMetricsCalloutId}
+            onDismiss={() => {
+              setDismissedAddMetricsCallout(true);
+            }}
+          />
           <EuiSpacer />
         </>
       )}
