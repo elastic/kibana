@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const utils = EntityStoreUtils(getService);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess Entity Store Engine APIs', () => {
     before(async () => {
       await utils.cleanEngines();
     });
