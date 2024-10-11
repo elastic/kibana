@@ -40,10 +40,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await sloApi.deleteAllSLOs(adminRoleAuthc);
     });
 
-    afterEach(async () => {
-      await sloApi.deleteAllSLOs(adminRoleAuthc);
-    });
-
     after(async () => {
       await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
       await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });

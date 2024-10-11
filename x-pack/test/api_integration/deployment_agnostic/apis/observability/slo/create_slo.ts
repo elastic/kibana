@@ -31,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Create SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      transformHelper = createTransformHelper(getService, adminRoleAuthc);
+      transformHelper = createTransformHelper(getService);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -42,10 +42,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: DATA_VIEW,
       });
 
-      await sloApi.deleteAllSLOs(adminRoleAuthc);
-    });
-
-    afterEach(async () => {
       await sloApi.deleteAllSLOs(adminRoleAuthc);
     });
 

@@ -6,13 +6,11 @@
  */
 
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../services';
 
 export type TransformHelper = ReturnType<typeof createTransformHelper>;
 
 export function createTransformHelper(
-  getService: DeploymentAgnosticFtrProviderContext['getService'],
-  roleAuthc: RoleCredentials
+  getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -20,19 +18,18 @@ export function createTransformHelper(
 
   return {
     assertNotFound: async (transformId: string) => {
+      const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+
       return await retry.tryWithRetries(
         `Wait for transform ${transformId} to be deleted`,
         async () => {
-          const response = await supertestWithoutAuth
+          await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
-            .set(roleAuthc.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
+            .set(cookieHeader)
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)
             .expect(404);
-
-          return response.body;
         },
         { retryCount: 5, retryDelay: 2000 }
       );
@@ -42,10 +39,11 @@ export function createTransformHelper(
       return await retry.tryWithRetries(
         `Wait for transform ${transformId} to exist`,
         async () => {
+          const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+
           const response = await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
-            .set(roleAuthc.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
+            .set(cookieHeader)
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)
