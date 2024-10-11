@@ -308,18 +308,7 @@ describe('ElasticsearchStore', () => {
           {
             query: {
               bool: {
-                must_not: [
-                  {
-                    term: {
-                      'metadata.kbResource': 'esql',
-                    },
-                  },
-                  {
-                    term: {
-                      'metadata.required': true,
-                    },
-                  },
-                ],
+                must_not: [{ term: { 'metadata.required': true } }],
                 must: [
                   {
                     text_expansion: {
@@ -340,18 +329,7 @@ describe('ElasticsearchStore', () => {
           {
             query: {
               bool: {
-                must: [
-                  {
-                    term: {
-                      'metadata.kbResource': 'esql',
-                    },
-                  },
-                  {
-                    term: {
-                      'metadata.required': true,
-                    },
-                  },
-                ],
+                must: [{ term: { 'metadata.required': true } }],
               },
             },
             size: TERMS_QUERY_SIZE,
@@ -374,18 +352,7 @@ describe('ElasticsearchStore', () => {
           {
             query: {
               bool: {
-                must_not: [
-                  {
-                    term: {
-                      'metadata.kbResource': 'esql',
-                    },
-                  },
-                  {
-                    term: {
-                      'metadata.required': true,
-                    },
-                  },
-                ],
+                must_not: [{ term: { 'metadata.required': true } }],
                 must: [
                   {
                     text_expansion: {
@@ -406,18 +373,7 @@ describe('ElasticsearchStore', () => {
           {
             query: {
               bool: {
-                must: [
-                  {
-                    term: {
-                      'metadata.kbResource': 'esql',
-                    },
-                  },
-                  {
-                    term: {
-                      'metadata.required': true,
-                    },
-                  },
-                ],
+                must: [{ term: { 'metadata.required': true } }],
               },
             },
             size: TERMS_QUERY_SIZE,
@@ -433,7 +389,6 @@ describe('ElasticsearchStore', () => {
 
       expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
         model: '.elser_model_2',
-        resourceAccessed: 'esql',
         responseTime: 142,
         resultCount: 2,
       });
@@ -446,7 +401,6 @@ describe('ElasticsearchStore', () => {
 
       expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
         model: '.elser_model_2',
-        resourceAccessed: 'esql',
         errorMessage: 'Oh no!',
       });
     });

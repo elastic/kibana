@@ -47,3 +47,5 @@ spec:
           message: Single user daily test
           env: {}
           branch: main
+      tags:
+        - kibana
