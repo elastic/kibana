@@ -41066,9 +41066,7 @@ paths:
               required:
                 - spaces
                 - objects
-      responses:
-        '200':
-          description: Indicates a successful call.
+      responses: {}
       summary: Copy saved objects to spaces
       tags:
         - spaces
@@ -41121,9 +41119,7 @@ paths:
                   type: array
               required:
                 - aliases
-      responses:
-        '204':
-          description: Indicates a successful call.
+      responses: {}
       summary: Disable legacy URL aliases
       tags:
         - spaces
@@ -41169,9 +41165,7 @@ paths:
                   type: array
               required:
                 - objects
-      responses:
-        '200':
-          description: Indicates a successful call.
+      responses: {}
       summary: Get shareable references
       tags:
         - spaces
@@ -41331,9 +41325,7 @@ paths:
                 - objects
                 - spacesToAdd
                 - spacesToRemove
-      responses:
-        '200':
-          description: Indicates a successful call.
+      responses: {}
       summary: Update saved objects in spaces
       tags:
         - spaces
