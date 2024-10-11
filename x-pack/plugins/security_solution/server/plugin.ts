@@ -76,10 +76,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import type {
-  CreateRuleAdditionalOptions,
-  CreateRuleOptions,
-} from './lib/detection_engine/rule_types/types';
+import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
   isLegacyNotificationRuleExecutor,
@@ -115,6 +112,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -223,6 +221,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
+    if (experimentalFeatures.entityStoreEnabled) {
+      registerEntityStoreFieldRetentionEnrichTask({
+        getStartServices: core.getStartServices,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
+    }
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -280,6 +286,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
       licensing: plugins.licensing,
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateActionService: plugins.osquery.createActionService,
+      }),
     };
 
     const ruleDataServiceOptions = {
@@ -321,28 +331,18 @@ export class Plugin implements ISecuritySolutionPlugin {
       analytics: core.analytics,
     };
 
-    const ruleAdditionalOptions: CreateRuleAdditionalOptions = {
-      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
-        endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateActionService: plugins.osquery.createActionService,
-      }),
-    };
-
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
-    plugins.alerting.registerType(
-      securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
-    );
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions })));
     if (!experimentalFeatures.esqlRulesDisabled) {
       plugins.alerting.registerType(
-        securityRuleTypeWrapper(createEsqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+        securityRuleTypeWrapper(createEsqlAlertType({ ...ruleOptions }))
       );
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...ruleAdditionalOptions,
           id: SAVED_QUERY_RULE_TYPE_ID,
           name: 'Saved Query Rule',
         })
@@ -356,7 +356,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...ruleAdditionalOptions,
           id: QUERY_RULE_TYPE_ID,
           name: 'Custom Query Rule',
         })
@@ -364,7 +363,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(
-      securityRuleTypeWrapper(createNewTermsAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+      securityRuleTypeWrapper(createNewTermsAlertType({ ...ruleOptions }))
     );
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -546,14 +545,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(
       APP_UI_ID,
       getAssistantTools({
-        naturalLanguageESQLToolEnabled:
-          config.experimentalFeatures.assistantNaturalLanguageESQLTool,
         assistantKnowledgeBaseByDefault:
           config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       })
     );
     const features = {
-      assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     };

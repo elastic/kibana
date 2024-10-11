@@ -45,6 +45,7 @@
     "@kbn/config-schema",
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/spaces-plugin"
   ]
 }
