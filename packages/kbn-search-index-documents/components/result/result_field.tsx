@@ -9,22 +9,12 @@
 
 import React from 'react';
 
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiText,
-  EuiToken,
-} from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiText, EuiToken } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
 import { ResultFieldProps } from './result_types';
+import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
+import { ResultFieldValue } from './result_field_value';
 
 const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
@@ -65,75 +55,6 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'questionInCircle';
 
-const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector', 'sparse_vector'];
-
-interface ResultValueProps {
-  fieldValue: string;
-  fieldType: string;
-  isExpanded?: boolean;
-}
-
-const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpanded = false }) => {
-  if (
-    isExpanded &&
-    fieldType &&
-    (['object', 'array', 'nested'].includes(fieldType) || Array.isArray(fieldValue))
-  ) {
-    return (
-      <EuiCodeBlock language="json" transparentBackground fontSize="s">
-        {fieldValue}
-      </EuiCodeBlock>
-    );
-  } else if (PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType)) {
-    return (
-      <>
-        <EuiText size="s" color="default">
-          {fieldValue}
-        </EuiText>
-        {fieldType === 'dense_vector' && (
-          <div className={'denseVectorFieldValue'}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiBadge color="hollow">
-                  {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
-                    defaultMessage: '{value} dims',
-                    values: {
-                      value: JSON.parse(fieldValue).length,
-                    },
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCopy textToCopy={fieldValue}>
-                  {(copy) => (
-                    <EuiIcon
-                      type="copyClipboard"
-                      onClick={copy}
-                      data-test-subj="copyDenseVector"
-                      aria-label={i18n.translate(
-                        'searchIndexDocuments.result.value.denseVector.copy',
-                        {
-                          defaultMessage: 'Copy vector',
-                        }
-                      )}
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        )}
-      </>
-    );
-  } else {
-    return (
-      <EuiText size="s" color="default">
-        {fieldValue}
-      </EuiText>
-    );
-  }
-};
-
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
   fieldName,
@@ -164,7 +85,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         </EuiText>
       </EuiTableRowCell>
       <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
-        <ResultValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
+        <ResultFieldValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
       </EuiTableRowCell>
     </EuiTableRow>
   );
