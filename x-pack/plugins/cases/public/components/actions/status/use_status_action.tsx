@@ -45,7 +45,7 @@ export const useStatusAction = ({
   selectedStatus,
 }: UseStatusActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
-  const { canChangeStatus } = useUserPermissions({ status: selectedStatus });
+  const { canChangeStatus } = useUserPermissions({ newStatusToAuthorize: selectedStatus });
   const isActionDisabled = isDisabled || !canChangeStatus;
   const handleUpdateCaseStatus = useCallback(
     (selectedCases: CasesUI, status: CaseStatuses) => {

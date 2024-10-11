@@ -234,7 +234,7 @@ interface UseBulkActionsProps {
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCases;
+  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCase;
 
   return {
     actions: shouldShowActions

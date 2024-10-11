@@ -84,7 +84,7 @@ const casesSchemaObject = schema.maybe(
     push: schema.maybe(casesSchema),
     settings: schema.maybe(casesSchema),
     createComment: schema.maybe(casesSchema),
-    reopenCases: schema.maybe(casesSchema),
+    reopenCase: schema.maybe(casesSchema),
   })
 );
 

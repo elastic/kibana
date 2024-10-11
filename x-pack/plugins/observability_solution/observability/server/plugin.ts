@@ -241,7 +241,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ],
         },
         {
-          name: i18n.translate('xpack.observability.featureRegistry.reopenCasesSubFeatureName', {
+          name: i18n.translate('xpack.observability.featureRegistry.reopenCaseubFeatureName', {
             defaultMessage: 'Reopen Closed Cases',
           }),
           privilegeGroups: [
@@ -249,9 +249,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'reopen_cases',
+                  id: 'case_reopen',
                   name: i18n.translate(
-                    'xpack.observability.featureRegistry.reopenCasesSubFeatureDetails',
+                    'xpack.observability.featureRegistry.reopenCaseubFeatureDetails',
                     {
                       defaultMessage: 'Reopen closed cases',
                     }
@@ -262,9 +262,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                     read: [],
                   },
                   cases: {
-                    reopenCases: [observabilityFeatureId],
+                    reopenCase: [observabilityFeatureId],
                   },
-                  ui: casesCapabilities.reopenCases,
+                  ui: casesCapabilities.reopenCase,
                 },
               ],
             },

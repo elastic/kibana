@@ -182,10 +182,10 @@ const CaseOperations = {
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
-  [WriteOperations.ReopenCases]: {
+  [WriteOperations.ReopenCase]: {
     ecsType: EVENT_TYPES.change,
-    name: WriteOperations.ReopenCases as const,
-    action: 'reopen_cases',
+    name: WriteOperations.ReopenCase as const,
+    action: 'case_reopen',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,

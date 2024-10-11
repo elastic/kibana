@@ -69,17 +69,10 @@ export const bulkCreate = async (
       [[], []]
     );
 
-    if (attachments.every((attachment) => attachment.type === AttachmentType.user)) {
-      await authorization.ensureAuthorized({
-        operation: Operations.createComment,
-        entities,
-      });
-    } else {
-      await authorization.ensureAuthorized({
-        operation: Operations.bulkCreateAttachments,
-        entities,
-      });
-    }
+    await authorization.ensureAuthorized({
+      operation: Operations.bulkCreateAttachments,
+      entities,
+    });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({

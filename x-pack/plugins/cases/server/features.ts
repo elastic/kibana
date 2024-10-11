@@ -15,7 +15,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   APP_ID,
   FEATURE_ID,
-  REOPEN_CASES_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
 } from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
@@ -163,7 +163,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ],
       },
       {
-        name: i18n.translate('xpack.cases.features.reopenCasesSubFeatureName', {
+        name: i18n.translate('xpack.cases.features.reopenCaseubFeatureName', {
           defaultMessage: 'Reopen Closed Cases',
         }),
         privilegeGroups: [
@@ -172,8 +172,8 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             privileges: [
               {
                 api: apiTags.all,
-                id: REOPEN_CASES_CAPABILITY,
-                name: i18n.translate('xpack.cases.features.reopenCasesSubFeatureDetails', {
+                id: CASES_REOPEN_CAPABILITY,
+                name: i18n.translate('xpack.cases.features.reopenCaseubFeatureDetails', {
                   defaultMessage: 'Reopen closed cases',
                 }),
                 includeIn: 'all',
@@ -182,9 +182,9 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                   read: [],
                 },
                 cases: {
-                  reopenCases: [APP_ID],
+                  reopenCase: [APP_ID],
                 },
-                ui: capabilities.reopenCases,
+                ui: capabilities.reopenCase,
               },
             ],
           },

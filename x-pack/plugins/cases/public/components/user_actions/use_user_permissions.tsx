@@ -7,36 +7,27 @@
 import { useMemo, useCallback } from 'react';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseStatuses } from '../../../common/types/domain';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
-export const useUserPermissions = ({ status }: { status?: CaseStatuses }) => {
+export const useUserPermissions = ({
+  newStatusToAuthorize,
+}: {
+  newStatusToAuthorize?: CaseStatuses;
+}) => {
   const { permissions } = useCasesContext();
   const canChangeStatus = useMemo(() => {
-    // User has full permissions
-    if (permissions.update && permissions.reopenCases) {
-      return false;
-    } else {
-      // When true, we only want to block if the case is closed
-      if (status === CaseStatuses.closed) {
-        return !permissions.reopenCases;
-      } else {
-        // Allow the update permission to disable as before
-        return !permissions.update;
-      }
-    }
-  }, [status, permissions.update, permissions.reopenCases]);
+    if (!permissions.update) return false;
+    if (!permissions.reopenCase && newStatusToAuthorize === CaseStatuses.closed) return false;
+    return true;
+  }, [newStatusToAuthorize, permissions.update, permissions.reopenCase]);
 
-  const checkShowCommentEditor = useCallback(
-    (userActivityQueryParams) => {
-      if (permissions.create && userActivityQueryParams.type !== 'action') {
-        return permissions.createComment;
-      } else if (permissions.createComment && userActivityQueryParams.type !== 'action') {
-        return true;
-      } else {
-        return false;
-      }
+  const canAddUserComments = useCallback(
+    (userActivityQueryParams: UserActivityParams) => {
+      if (userActivityQueryParams.type === 'action') return false;
+      return permissions.createComment;
     },
-    [permissions.create, permissions.createComment]
+    [permissions.createComment]
   );
 
-  return { canChangeStatus, checkShowCommentEditor };
+  return { canChangeStatus, canAddUserComments };
 };

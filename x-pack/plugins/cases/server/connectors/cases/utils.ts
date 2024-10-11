@@ -120,6 +120,6 @@ export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
     `cases:${owner}/updateComment`,
     `cases:${owner}/deleteComment`,
     `cases:${owner}/findConfigurations`,
-    `cases:${owner}/reopenCases`,
+    `cases:${owner}/reopenCase`,
   ];
 };

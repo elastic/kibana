@@ -2520,14 +2520,14 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCases" with an error and entity 1`] = `
+exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error and entity 1`] = `
 Object {
   "error": Object {
     "code": "Error",
     "message": "an error",
   },
   "event": Object {
-    "action": "reopen_cases",
+    "action": "case_reopen",
     "category": Array [
       "database",
     ],
@@ -2546,14 +2546,14 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCases" with an error but no entity 1`] = `
+exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error but no entity 1`] = `
 Object {
   "error": Object {
     "code": "Error",
     "message": "an error",
   },
   "event": Object {
-    "action": "reopen_cases",
+    "action": "case_reopen",
     "category": Array [
       "database",
     ],
@@ -2566,10 +2566,10 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCases" without an error but with an entity 1`] = `
+exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "reopen_cases",
+    "action": "case_reopen",
     "category": Array [
       "database",
     ],
@@ -2588,10 +2588,10 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCases" without an error or entity 1`] = `
+exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "reopen_cases",
+    "action": "case_reopen",
     "category": Array [
       "database",
     ],

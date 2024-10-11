@@ -145,7 +145,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'reopen_cases',
+                  id: 'case_reopen',
                   name: 'Reopen closed cases',
                   includeIn: 'all',
                   savedObject: {
@@ -153,7 +153,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                     read: [],
                   },
                   cases: {
-                    reopenCases: ['securitySolutionFixture'],
+                    reopenCase: ['securitySolutionFixture'],
                   },
                   ui: [],
                 },

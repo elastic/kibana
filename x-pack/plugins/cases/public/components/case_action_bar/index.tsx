@@ -68,7 +68,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [caseData.settings, onUpdateField]
   );
 
-  const { canChangeStatus: disableStatusMenu } = useUserPermissions({ status: caseData.status });
+  const { canChangeStatus: disableStatusMenu } = useUserPermissions({
+    newStatusToAuthorize: caseData.status,
+  });
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
