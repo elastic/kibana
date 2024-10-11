@@ -71,6 +71,7 @@ class Otel extends Serializable<OtelDocument> {
       ...this.fields,
       attributes: {
         'exception.message': 'boom',
+        'exception.handled': false,
         'exception.type': '*errors.errorString',
         'error.stack_trace': 'Error: INTERNAL: Boom',
         'processor.event': 'error',
