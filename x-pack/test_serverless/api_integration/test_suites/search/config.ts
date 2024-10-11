@@ -17,7 +17,7 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
-  esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
+  esServerArgs: [],
   kbnServerArgs: [
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
