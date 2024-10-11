@@ -180,7 +180,7 @@ export const postEvaluateRoute = (
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
-              const llmClass = getLlmClass(llmType, true);
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = () =>
                 new llmClass({
                   actionsClient,
@@ -236,7 +236,6 @@ export const postEvaluateRoute = (
                 llm,
                 isOssModel,
                 logger,
-                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
@@ -302,7 +301,6 @@ export const postEvaluateRoute = (
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  bedrockChatEnabled: true,
                   isStreaming: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
