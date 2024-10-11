@@ -12,13 +12,19 @@
       "searchAssistant"
     ],
     "requiredPlugins": [
+      "actions",
+      "licensing",
       "observabilityAIAssistant",
-      "observabilityAIAssistantApp"
+      "observabilityAIAssistantApp",
+      "triggersActionsUi",
+      "share"
     ],
     "optionalPlugins": [
       "cloud",
       "usageCollection",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
