@@ -16,7 +16,6 @@ import type { HapiReadableStream } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
@@ -82,7 +81,7 @@ export const assetCriticalityPublicCSVUploadRoute = (
         const telemetry = coreStart.analytics;
 
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;

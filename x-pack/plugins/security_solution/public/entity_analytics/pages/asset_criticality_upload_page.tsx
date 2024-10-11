@@ -24,7 +24,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../common/constants';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
 import { useHasSecurityCapability } from '../../helper_hooks';
@@ -33,7 +32,6 @@ export const AssetCriticalityUploadPage = () => {
   const { docLinks } = useKibana().services;
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const isAssetCriticalityEnabled = true;
   const {
     data: privileges,
     error: privilegesError,
@@ -48,16 +46,11 @@ export const AssetCriticalityUploadPage = () => {
 
   if (
     !hasEntityAnalyticsCapability ||
-    !isAssetCriticalityEnabled ||
     privilegesError?.body.status_code === 403
   ) {
     const errorMessage = privilegesError?.body.message ?? (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-        defaultMessage='Please enable "{ENABLE_ASSET_CRITICALITY_SETTING}" on advanced settings to access the page.'
-        values={{
-          ENABLE_ASSET_CRITICALITY_SETTING,
-        }}
       />
     );
 

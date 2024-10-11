@@ -11,7 +11,6 @@ import type { GetAssetCriticalityStatusResponse } from '../../../../../common/ap
 import {
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -41,7 +40,7 @@ export const assetCriticalityInternalStatusRoute = (
       ): Promise<IKibanaResponse<GetAssetCriticalityStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;
