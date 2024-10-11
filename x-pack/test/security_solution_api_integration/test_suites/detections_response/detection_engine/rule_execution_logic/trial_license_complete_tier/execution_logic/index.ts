@@ -23,6 +23,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./indicator_match_alert_suppression'));
     loadTestFile(require.resolve('./threshold'));
     loadTestFile(require.resolve('./threshold_alert_suppression'));
+    loadTestFile(require.resolve('./synthetic_source'));
     loadTestFile(require.resolve('./non_ecs_fields'));
     loadTestFile(require.resolve('./custom_query'));
   });

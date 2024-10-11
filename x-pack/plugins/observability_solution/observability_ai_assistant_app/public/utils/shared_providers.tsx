@@ -11,8 +11,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { ObservabilityAIAssistantAppServiceProvider } from '../context/observability_ai_assistant_app_service_provider';
-import type { ObservabilityAIAssistantAppService } from '../service/create_app_service';
+import { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export function SharedProviders({
@@ -25,7 +24,7 @@ export function SharedProviders({
   children: React.ReactElement;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
-  service: ObservabilityAIAssistantAppService;
+  service: AIAssistantAppService;
   theme$: Observable<CoreTheme>;
 }) {
   const theme = useMemo(() => {
@@ -45,11 +44,7 @@ export function SharedProviders({
           }}
         >
           <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <ObservabilityAIAssistantAppServiceProvider value={service}>
-                {children}
-              </ObservabilityAIAssistantAppServiceProvider>
-            </coreStart.i18n.Context>
+            <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
           </RedirectAppLinks>
         </KibanaContextProvider>
       </KibanaThemeProvider>
