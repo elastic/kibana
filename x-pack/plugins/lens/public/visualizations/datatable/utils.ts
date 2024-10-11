@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { usageReportingService } from './usage_reporting_service';
+export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
+  { alignment }: C,
+  isNumeric = false
+): 'left' | 'right' | 'center' {
+  if (alignment) return alignment;
+  return isNumeric ? 'right' : 'left';
+}

@@ -37,37 +37,37 @@ export const DataUsageMetrics = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
+  const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
-    dataStreams: [],
+    // TODO: Replace with data streams from /data_streams api
+    dataStreams: [
+      '.alerts-ml.anomaly-detection-health.alerts-default',
+      '.alerts-stack.alerts-default',
+    ],
     from: DEFAULT_DATE_RANGE_OPTIONS.startDate,
     to: DEFAULT_DATE_RANGE_OPTIONS.endDate,
   });
 
   useEffect(() => {
     if (!metricTypesFromUrl) {
-      setUrlMetricTypesFilter(
-        typeof queryParams.metricTypes !== 'string'
-          ? queryParams.metricTypes.join(',')
-          : queryParams.metricTypes
-      );
+      setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
     }
     if (!startDateFromUrl || !endDateFromUrl) {
-      setUrlDateRangeFilter({ startDate: queryParams.from, endDate: queryParams.to });
+      setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
     }
   }, [
     endDateFromUrl,
     metricTypesFromUrl,
-    queryParams.from,
-    queryParams.metricTypes,
-    queryParams.to,
+    metricsFilters.from,
+    metricsFilters.metricTypes,
+    metricsFilters.to,
     setUrlDateRangeFilter,
     setUrlMetricTypesFilter,
     startDateFromUrl,
   ]);
 
   useEffect(() => {
-    setQueryParams((prevState) => ({
+    setMetricsFilters((prevState) => ({
       ...prevState,
       metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
       dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
@@ -84,7 +84,7 @@ export const DataUsageMetrics = () => {
     refetch: refetchDataUsageMetrics,
   } = useGetDataUsageMetrics(
     {
-      ...queryParams,
+      ...metricsFilters,
       from: dateRangePickerState.startDate,
       to: dateRangePickerState.endDate,
     },
@@ -99,16 +99,16 @@ export const DataUsageMetrics = () => {
 
   const onChangeDataStreamsFilter = useCallback(
     (selectedDataStreams: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, dataStreams: selectedDataStreams }));
+      setMetricsFilters((prevState) => ({ ...prevState, dataStreams: selectedDataStreams }));
     },
-    [setQueryParams]
+    [setMetricsFilters]
   );
 
   const onChangeMetricTypesFilter = useCallback(
     (selectedMetricTypes: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, metricTypes: selectedMetricTypes }));
+      setMetricsFilters((prevState) => ({ ...prevState, metricTypes: selectedMetricTypes }));
     },
-    [setQueryParams]
+    [setMetricsFilters]
   );
 
   useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
