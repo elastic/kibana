@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe.only('@ess alerts compatibility with legacy siem signals index', function () {
+  describe('@ess alerts compatibility with legacy siem signals index', function () {
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
