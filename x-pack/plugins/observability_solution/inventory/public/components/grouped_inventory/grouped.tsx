@@ -23,8 +23,17 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { UngroupedInventoryPage } from './ungrouped';
+import { GroupSelector } from './group_selector';
 
-export function GroupedInventoryPage() {
+export interface GroupedInventoryPageProps {
+  groupSelected: string;
+  setGroupSelected: (selected: string) => void;
+}
+
+export function GroupedInventoryPage({
+  groupSelected = 'none',
+  setGroupSelected,
+}: GroupedInventoryPageProps) {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
@@ -105,6 +114,17 @@ export function GroupedInventoryPage() {
     });
   }
 
+  const onChange = (groupSelection: string) => {
+    let newSelectedGroup: string = '';
+    if (groupSelection === groupSelected) {
+      newSelectedGroup = 'none';
+    } else {
+      newSelectedGroup = groupSelection;
+    }
+
+    setGroupSelected(newSelectedGroup);
+  };
+
   return (
     <>
       <EuiFlexGroup>
@@ -136,7 +156,7 @@ export function GroupedInventoryPage() {
         </EuiFlexItem>
         <EuiFlexItem grow />
         <EuiFlexItem grow={false} className="">
-          Placeholder
+          <GroupSelector onGroupChange={onChange} groupSelected={groupSelected} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -157,7 +177,11 @@ export function GroupedInventoryPage() {
               paddingSize="l"
               borders="all"
             >
-              <UngroupedInventoryPage entityType={field} />
+              <UngroupedInventoryPage
+                entityType={field}
+                groupSelected={groupSelected}
+                setGroupSelected={setGroupSelected}
+              />
             </EuiAccordion>
             <EuiSpacer size="s" />
           </>

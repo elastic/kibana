@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
@@ -14,21 +16,23 @@ import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
+import { GroupSelector } from './group_selector';
 
 interface Props {
   entityType?: EntityType;
+  groupSelected: string;
+  setGroupSelected: (selected: string) => void;
 }
 
-export function UngroupedInventoryPage({ entityType }: Props) {
+export function UngroupedInventoryPage({ entityType, groupSelected, setGroupSelected }: Props) {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, pageIndex, kuery } = query;
-
+  const { euiTheme } = useEuiTheme();
   const inventoryRoute = useInventoryRouter();
-  const isGrouped = true;
 
   const {
     value = { entities: [] },
@@ -98,16 +102,49 @@ export function UngroupedInventoryPage({ entityType }: Props) {
     });
   }
 
+  const totalEntities = value.entities.length;
+
+  const onChange = (groupSelection: string) => {
+    let newSelectedGroup: string = '';
+    if (groupSelection === groupSelected) {
+      newSelectedGroup = 'none';
+    } else {
+      newSelectedGroup = groupSelection;
+    }
+    setGroupSelected(newSelectedGroup);
+  };
+
   return (
-    <EntitiesGrid
-      entities={value.entities}
-      loading={loading}
-      sortDirection={sortDirection}
-      sortField={sortField}
-      onChangePage={handlePageChange}
-      onChangeSort={handleSortChange}
-      pageIndex={pageIndex}
-      onFilterByType={handleTypeFilter}
-    />
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+            color: ${euiTheme.colors.subduedText};
+          `}
+        >
+          <FormattedMessage
+            id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
+            defaultMessage="{total} Entities"
+            values={{ total: totalEntities }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow />
+        <EuiFlexItem grow={false} className="">
+          <GroupSelector onGroupChange={onChange} groupSelected={groupSelected} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EntitiesGrid
+        entities={value.entities}
+        loading={loading}
+        sortDirection={sortDirection}
+        sortField={sortField}
+        onChangePage={handlePageChange}
+        onChangeSort={handleSortChange}
+        pageIndex={pageIndex}
+        onFilterByType={handleTypeFilter}
+      />
+    </>
   );
 }
