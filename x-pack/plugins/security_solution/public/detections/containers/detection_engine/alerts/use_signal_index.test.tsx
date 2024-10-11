@@ -6,7 +6,7 @@
  */
 import type { PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import type { ReturnSignalIndex } from './use_signal_index';
 import { useSignalIndex } from './use_signal_index';
@@ -75,7 +75,7 @@ describe('useSignalIndex', () => {
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
-      await result.current.createDeSignalIndex();
+      await result.current.createDeSignalIndex!();
     });
 
     await waitFor(() =>
@@ -101,7 +101,7 @@ describe('useSignalIndex', () => {
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
-      await result.current.createDeSignalIndex();
+      await result.current.createDeSignalIndex!();
     });
 
     await waitFor(() => expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1));
@@ -122,7 +122,7 @@ describe('useSignalIndex', () => {
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
-      await result.current.createDeSignalIndex();
+      await result.current.createDeSignalIndex!();
     });
 
     await waitFor(() =>
@@ -151,7 +151,7 @@ describe('useSignalIndex', () => {
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
-      await result.current.createDeSignalIndex();
+      await result.current.createDeSignalIndex!();
     });
 
     await waitFor(() =>

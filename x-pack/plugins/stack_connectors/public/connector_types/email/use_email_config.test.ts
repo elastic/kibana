@@ -17,6 +17,12 @@ const renderUseEmailConfigHook = (currentService?: string) =>
   renderHook(() => useEmailConfig({ http, toasts }));
 
 describe('useEmailConfig', () => {
+  let res: ReturnType<ReturnType<typeof useEmailConfig>['getEmailServiceConfig']> extends Promise<
+    infer R
+  >
+    ? R
+    : never;
+
   beforeEach(() => jest.clearAllMocks());
 
   it('should return the correct result when requesting the config of a service', async () => {
@@ -27,7 +33,7 @@ describe('useEmailConfig', () => {
     });
 
     const { result } = renderUseEmailConfigHook();
-    let res: ReturnType<typeof result.current.getEmailServiceConfig>;
+
     await act(async () => {
       res = await result.current.getEmailServiceConfig('gmail');
     });
@@ -48,7 +54,6 @@ describe('useEmailConfig', () => {
 
     const { result } = renderUseEmailConfigHook();
 
-    let res: ReturnType<typeof result.current.getEmailServiceConfig>;
     await act(async () => {
       res = await result.current.getEmailServiceConfig('gmail');
     });
@@ -65,7 +70,6 @@ describe('useEmailConfig', () => {
     http.get.mockResolvedValueOnce({});
     const { result } = renderUseEmailConfigHook();
 
-    let res: ReturnType<typeof result.current.getEmailServiceConfig>;
     await act(async () => {
       res = await result.current.getEmailServiceConfig('foo');
     });
