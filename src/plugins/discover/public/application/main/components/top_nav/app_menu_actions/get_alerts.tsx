@@ -12,8 +12,8 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   AppMenuActionId,
-  AppMenuActionType,
   AppMenuActionSubmenuSecondary,
+  AppMenuActionType,
 } from '@kbn/discover-utils';
 import {
   AlertConsumers,
@@ -144,6 +144,10 @@ export const getAlertsAppMenuItem = ({
             );
           },
         },
+      },
+      {
+        id: 'alertsDivider',
+        type: AppMenuActionType.submenuHorizontalRule,
       },
       {
         id: 'manageRulesAndConnectors',

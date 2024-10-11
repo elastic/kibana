@@ -18,15 +18,21 @@
 
 import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiHorizontalRule,
+  EuiWrappingPopover,
+} from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type {
-  AppMenuActionSecondary,
-  AppMenuActionPrimary,
+import {
   AppMenuActionCustom,
-  AppMenuActionSubmenuSecondary,
+  AppMenuActionPrimary,
+  AppMenuActionSecondary,
   AppMenuActionSubmenuCustom,
+  AppMenuActionSubmenuSecondary,
+  AppMenuActionType,
 } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
@@ -52,39 +58,41 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
     anchorElement?.focus();
   }, [anchorElement, originalOnClose]);
 
-  const panels = [
-    {
-      id: appMenuItem.id,
-      name: appMenuItem.label,
-      items: appMenuItem.actions.map((action) => {
-        const controlProps = action.controlProps;
+  const items = appMenuItem.actions.map((action) => {
+    if (action.type === AppMenuActionType.submenuHorizontalRule) {
+      return <EuiHorizontalRule key={action.id} margin="none" />;
+    }
 
-        return {
-          name: controlProps.label,
-          disabled:
-            typeof controlProps.disableButton === 'function'
-              ? controlProps.disableButton()
-              : Boolean(controlProps.disableButton),
-          onClick: async () => {
-            const result = await controlProps.onClick?.({
-              anchorElement,
-              onFinishAction: onClose,
-            });
+    const controlProps = action.controlProps;
 
-            if (result) {
-              setNestedContent(result);
-            }
-          },
-          href: controlProps.href,
-          ['data-test-subj']: controlProps.testId,
-          toolTipContent:
-            typeof controlProps.tooltip === 'function'
-              ? controlProps.tooltip()
-              : controlProps.tooltip,
-        };
-      }),
-    },
-  ];
+    return (
+      <EuiContextMenuItem
+        key={action.id}
+        data-test-subj={controlProps.testId}
+        disabled={
+          typeof controlProps.disableButton === 'function'
+            ? controlProps.disableButton()
+            : Boolean(controlProps.disableButton)
+        }
+        toolTipContent={
+          typeof controlProps.tooltip === 'function' ? controlProps.tooltip() : controlProps.tooltip
+        }
+        href={controlProps.href}
+        onClick={async () => {
+          const result = await controlProps.onClick?.({
+            anchorElement,
+            onFinishAction: onClose,
+          });
+
+          if (result) {
+            setNestedContent(result);
+          }
+        }}
+      >
+        {controlProps.label}
+      </EuiContextMenuItem>
+    );
+  });
 
   return (
     <>
@@ -94,9 +102,9 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         button={anchorElement}
         closePopover={onClose}
         isOpen={!nestedContent}
-        panelPaddingSize="s"
+        panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={appMenuItem.id} size="s" panels={panels} />
+        <EuiContextMenuPanel items={items} />
       </EuiWrappingPopover>
     </>
   );

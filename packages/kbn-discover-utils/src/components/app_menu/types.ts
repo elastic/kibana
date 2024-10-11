@@ -39,6 +39,7 @@ export enum AppMenuActionType {
   primary = 'primary',
   secondary = 'secondary',
   custom = 'custom',
+  submenuHorizontalRule = 'submenuHorizontalRule',
 }
 
 export interface AppMenuActionBase {
@@ -71,6 +72,13 @@ export interface AppMenuActionPrimary extends AppMenuActionBase {
 }
 
 /**
+ * A horizontal rule between menu items
+ */
+export interface AppMenuActionSubmenuHorizontalRule extends AppMenuActionBase {
+  type: AppMenuActionType.submenuHorizontalRule;
+}
+
+/**
  * A menu action which opens a submenu with more actions
  */
 export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuActionCustom>
@@ -82,8 +90,8 @@ export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuAc
   readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
   readonly actions: T extends AppMenuActionSecondary
-    ? Array<AppMenuActionSecondary | AppMenuActionCustom>
-    : AppMenuActionCustom[];
+    ? Array<AppMenuActionSecondary | AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
+    : Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>;
 }
 
 /**
