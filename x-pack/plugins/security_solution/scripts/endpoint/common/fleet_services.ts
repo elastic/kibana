@@ -495,9 +495,11 @@ export const getAgentDownloadUrl = async (
   closestMatch: boolean = false,
   log?: ToolingLog
 ): Promise<GetAgentDownloadUrlResponse> => {
+  log?.info(`11111111: Retrieving Elastic Agent download URL for version [${version}]`);
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
-
+  log?.info(`22222222: Using Elastic Agent version [${agentVersion}]`);
   const fileNameWithoutExtension = getAgentFileName(agentVersion);
+  log?.info(`33333333: Using Elastic Agent file name [${fileNameWithoutExtension}]`);
   const agentFile = `${fileNameWithoutExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
@@ -542,12 +544,18 @@ export const getLatestAgentDownloadVersion = async (
   const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await pRetry(
     async () => {
-      return axios
-        .get<{ versions: string[] }>(artifactsUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      try {
+        log?.info(`33333: Fetching artifact versions from [${artifactsUrl}]`);
+        return axios
+          .get<{ versions: string[] }>(artifactsUrl)
+          .catch(catchAxiosErrorFormatAndThrow)
+          .then((response) => {
+            return response.data;
+          });
+      } catch (error) {
+        log?.error(`333333 : Error fetching artifact versions: ${error.message}`);
+        throw error;
+      }
     },
     { maxTimeout: 10000 }
   );

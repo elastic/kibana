@@ -556,6 +556,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 });
               } else {
                 try {
+                  console.log({ runnerUI: cypressConfigFile.env?.runnerUI });
                   result = await cypress.run({
                     browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
@@ -570,7 +571,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
-                    runnerUi: !process.env.CI,
+                    runnerUi: !process.env.CI || cypressConfigFile.env?.runnerUI,
                   });
                   if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     failedSpecFilePaths.push(filePath);

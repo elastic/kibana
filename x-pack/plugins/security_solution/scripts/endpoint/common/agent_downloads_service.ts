@@ -86,21 +86,27 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     this.log.debug(`Downloading and storing: ${agentDownloadUrl}`);
 
     // TODO: should we add "retry" attempts to file downloads?
+    this.log.info(`Downloading agent from [${agentDownloadUrl}]`);
 
     await this.ensureExists();
 
     const newDownloadInfo = this.getPathsForUrl(agentDownloadUrl, agentFileName);
-
+    this.log.info(`path: ${newDownloadInfo.fullFilePath}`);
     // If download is already present on disk, then just return that info. No need to re-download it
     if (fs.existsSync(newDownloadInfo.fullFilePath)) {
       this.log.debug(`Download already cached at [${newDownloadInfo.fullFilePath}]`);
+      this.log.info(`Download already cached at [${newDownloadInfo.fullFilePath}]`);
       return newDownloadInfo;
     }
 
     try {
+      this.log.info(
+        `Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+      );
       const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
+      this.log.info(`outputStream: ${outputStream}`);
 
-      await handleProcessInterruptions(
+      const interruptions = await handleProcessInterruptions(
         async () => {
           const { body } = await nodeFetch(agentDownloadUrl);
           await finished(body.pipe(outputStream));
@@ -109,15 +115,21 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           fs.unlinkSync(newDownloadInfo.fullFilePath);
         }
       );
+      this.log.info(`interruptions: ${interruptions}`);
     } catch (e) {
+      this.log.error(`Failed to download agent from [${agentDownloadUrl}]`);
       // Try to clean up download case it failed halfway through
       await unlink(newDownloadInfo.fullFilePath);
 
       throw e;
     }
 
+    this.log.info(
+      `Downloaded agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+    );
     await this.cleanupDownloads();
 
+    this.log.info(`finished cleanupDownloads`);
     return newDownloadInfo;
   }
 

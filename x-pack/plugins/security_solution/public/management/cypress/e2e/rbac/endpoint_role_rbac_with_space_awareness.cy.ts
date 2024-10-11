@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { login, ROLE } from '../../tasks/login';
@@ -23,8 +25,7 @@ import {
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
 
-// FLAKY: https://github.com/elastic/kibana/issues/195477
-describe.skip(
+describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
     // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`
