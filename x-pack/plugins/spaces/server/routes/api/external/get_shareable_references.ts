@@ -24,16 +24,9 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
         description: 'Collect references and space contexts for saved objects.',
       },
       validate: {
-        request: {
-          body: schema.object({
-            objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
-          }),
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
-          },
-        },
+        body: schema.object({
+          objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
+        }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

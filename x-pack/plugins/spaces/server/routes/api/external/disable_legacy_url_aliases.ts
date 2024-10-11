@@ -24,31 +24,24 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
         tags: ['oas-tag:spaces'],
       },
       validate: {
-        request: {
-          body: schema.object({
-            aliases: schema.arrayOf(
-              schema.object({
-                targetSpace: schema.string({
-                  meta: { description: 'The space where the alias target object exists.' },
-                }),
-                targetType: schema.string({
-                  meta: { description: 'The type of alias target object. ' },
-                }),
-                sourceId: schema.string({
-                  meta: {
-                    description:
-                      'The alias source object identifier. This is the legacy object identifier.',
-                  },
-                }),
-              })
-            ),
-          }),
-        },
-        response: {
-          204: {
-            description: 'Indicates a successful call.',
-          },
-        },
+        body: schema.object({
+          aliases: schema.arrayOf(
+            schema.object({
+              targetSpace: schema.string({
+                meta: { description: 'The space where the alias target object exists.' },
+              }),
+              targetType: schema.string({
+                meta: { description: 'The type of alias target object. ' },
+              }),
+              sourceId: schema.string({
+                meta: {
+                  description:
+                    'The alias source object identifier. This is the legacy object identifier.',
+                },
+              }),
+            })
+          ),
+        }),
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {

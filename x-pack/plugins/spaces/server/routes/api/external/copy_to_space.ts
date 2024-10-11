@@ -45,92 +45,85 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.',
       },
       validate: {
-        request: {
-          body: schema.object(
-            {
-              spaces: schema.arrayOf(
-                schema.string({
-                  validate: (value) => {
-                    if (!SPACE_ID_REGEX.test(value)) {
-                      return `lower case, a-z, 0-9, "_", and "-" are allowed`;
-                    }
-                  },
-                  meta: {
-                    description:
-                      'The identifiers of the spaces where you want to copy the specified objects.',
-                  },
+        body: schema.object(
+          {
+            spaces: schema.arrayOf(
+              schema.string({
+                validate: (value) => {
+                  if (!SPACE_ID_REGEX.test(value)) {
+                    return `lower case, a-z, 0-9, "_", and "-" are allowed`;
+                  }
+                },
+                meta: {
+                  description:
+                    'The identifiers of the spaces where you want to copy the specified objects.',
+                },
+              }),
+              {
+                validate: (spaceIds) => {
+                  if (_.uniq(spaceIds).length !== spaceIds.length) {
+                    return 'duplicate space ids are not allowed';
+                  }
+                },
+              }
+            ),
+            objects: schema.arrayOf(
+              schema.object({
+                type: schema.string({
+                  meta: { description: 'The type of the saved object to copy.' },
                 }),
-                {
-                  validate: (spaceIds) => {
-                    if (_.uniq(spaceIds).length !== spaceIds.length) {
-                      return 'duplicate space ids are not allowed';
-                    }
-                  },
-                }
-              ),
-              objects: schema.arrayOf(
-                schema.object({
-                  type: schema.string({
-                    meta: { description: 'The type of the saved object to copy.' },
-                  }),
-                  id: schema.string({
-                    meta: { description: 'The identifier of the saved object to copy.' },
-                  }),
+                id: schema.string({
+                  meta: { description: 'The identifier of the saved object to copy.' },
                 }),
-                {
-                  validate: (objects) => {
-                    if (!areObjectsUnique(objects)) {
-                      return 'duplicate objects are not allowed';
-                    }
-                  },
-                }
-              ),
-              includeReferences: schema.boolean({
-                defaultValue: false,
-                meta: {
-                  description:
-                    'When set to true, all saved objects related to the specified saved objects will also be copied into the target spaces.',
-                },
               }),
-              overwrite: schema.boolean({
-                defaultValue: false,
-                meta: {
-                  description:
-                    'When set to true, all conflicts are automatically overridden. When a saved object with a matching type and identifier exists in the target space, that version is replaced with the version from the source space. This option cannot be used with the `createNewCopies` option.',
+              {
+                validate: (objects) => {
+                  if (!areObjectsUnique(objects)) {
+                    return 'duplicate objects are not allowed';
+                  }
                 },
-              }),
-              createNewCopies: schema.boolean({
-                defaultValue: true,
-                meta: {
-                  description:
-                    'Create new copies of saved objects, regenerate each object identifier, and reset the origin. When used, potential conflict errors are avoided.  This option cannot be used with the `overwrite` and `compatibilityMode` options.',
-                },
-              }),
-              compatibilityMode: schema.boolean({
-                defaultValue: false,
-                meta: {
-                  description:
-                    'Apply various adjustments to the saved objects that are being copied to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with copied saved objects. This option cannot be used with the `createNewCopies` option.',
-                },
-              }),
-            },
-            {
-              validate: (object) => {
-                if (object.overwrite && object.createNewCopies) {
-                  return 'cannot use [overwrite] with [createNewCopies]';
-                }
-                if (object.compatibilityMode && object.createNewCopies) {
-                  return 'cannot use [compatibilityMode] with [createNewCopies]';
-                }
+              }
+            ),
+            includeReferences: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'When set to true, all saved objects related to the specified saved objects will also be copied into the target spaces.',
               },
-            }
-          ),
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
+            }),
+            overwrite: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'When set to true, all conflicts are automatically overridden. When a saved object with a matching type and identifier exists in the target space, that version is replaced with the version from the source space. This option cannot be used with the `createNewCopies` option.',
+              },
+            }),
+            createNewCopies: schema.boolean({
+              defaultValue: true,
+              meta: {
+                description:
+                  'Create new copies of saved objects, regenerate each object identifier, and reset the origin. When used, potential conflict errors are avoided.  This option cannot be used with the `overwrite` and `compatibilityMode` options.',
+              },
+            }),
+            compatibilityMode: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Apply various adjustments to the saved objects that are being copied to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with copied saved objects. This option cannot be used with the `createNewCopies` option.',
+              },
+            }),
           },
-        },
+          {
+            validate: (object) => {
+              if (object.overwrite && object.createNewCopies) {
+                return 'cannot use [overwrite] with [createNewCopies]';
+              }
+              if (object.compatibilityMode && object.createNewCopies) {
+                return 'cannot use [compatibilityMode] with [createNewCopies]';
+              }
+            },
+          }
+        ),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

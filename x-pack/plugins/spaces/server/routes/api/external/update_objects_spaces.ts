@@ -47,27 +47,20 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
         description: 'Update one or more saved objects to add or remove them from some spaces.',
       },
       validate: {
-        request: {
-          body: schema.object({
-            objects: schema.arrayOf(
-              schema.object({
-                type: schema.string({
-                  meta: { description: 'The type of the saved object to update.' },
-                }),
-                id: schema.string({
-                  meta: { description: 'The identifier of the saved object to update.' },
-                }),
-              })
-            ),
-            spacesToAdd: spacesSchema,
-            spacesToRemove: spacesSchema,
-          }),
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
-          },
-        },
+        body: schema.object({
+          objects: schema.arrayOf(
+            schema.object({
+              type: schema.string({
+                meta: { description: 'The type of the saved object to update.' },
+              }),
+              id: schema.string({
+                meta: { description: 'The identifier of the saved object to update.' },
+              }),
+            })
+          ),
+          spacesToAdd: spacesSchema,
+          spacesToRemove: spacesSchema,
+        }),
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
