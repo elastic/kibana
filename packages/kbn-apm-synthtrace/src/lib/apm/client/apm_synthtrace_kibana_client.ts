@@ -33,7 +33,7 @@ export class ApmSynthtraceKibanaClient {
   async fetchLatestApmPackageVersion() {
     this.logger.debug(`Fetching latest APM package version`);
 
-    const fetchPackageVersion = async (prerelease: boolean) => {
+    const fetchPackageVersion = async ({ prerelease }: { prerelease: boolean }) => {
       const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
       this.logger.debug(`Fetching from URL: ${url}`);
 
@@ -56,14 +56,13 @@ export class ApmSynthtraceKibanaClient {
 
     try {
       // First attempt fetch latest Prerelease version (prerelease=true)
-      return await fetchPackageVersion(true);
+      return await fetchPackageVersion({ prerelease: true });
     } catch (error) {
       this.logger.debug(
         'Fetching latestes prerelease version failed, retrying with latest GA version'
       );
       // Retry with fetch latest GA version (prerelease=false)
-      const retryResult = await fetchPackageVersion(false).catch((retryError) => {
-        this.logger.debug('Fetching with prerelease=false failed');
+      const retryResult = await fetchPackageVersion({ prerelease: false }).catch((retryError) => {
         throw retryError;
       });
 
