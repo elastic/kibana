@@ -466,4 +466,16 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
   },
+  {
+    name: 'hidden_command',
+    description: 'A test fixture to test hidden-ness',
+    hidden: true,
+    examples: [],
+    modes: [],
+    options: [],
+    signature: {
+      params: [],
+      multipleParams: false,
+    },
+  },
 ];
