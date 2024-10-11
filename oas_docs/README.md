@@ -56,9 +56,11 @@ Besides the scripts in the `oas_docs/scripts` folder, there is an `oas_docs/make
 
 ## Bundling automation
 
-To keep the final resulting bundles always up-to-date and in sync with the source OpenAPI specs, the bundling runs as part of the `Checks` step in CI on every PR build and on merge builds. If there are any changes to the source OpenAPI files, these changes get propagated to the final bundles and CI commits the changes. In that case the build is marked as failed and needs to be restarted.
+Bundling Kibana OpenAPI bundles is **Step 2** of the workflow. To keep the final resulting bundles always up-to-date and in sync with the source OpenAPI specs, the bundling runs as part of the `Checks` step in CI on every PR build and on merge builds. If there are any changes to the source OpenAPI files, these changes get propagated to the final bundles and CI commits the changes. In that case the build is marked as failed and needs to be restarted.
 
 ## Bundling solution domains
+
+API domains bundling is **Step 1** of the workflow.
 
 ### Security Solution
 
@@ -107,3 +109,9 @@ Security Solution uses **specification first approach**. There are multiple Open
 - Security Timeline
   - Bundling script: `x-pack/plugins/security_solution/scripts/openapi/bundle_timeline.js`
   - Bundles location: `x-pack/plugins/security_solution/docs/openapi/{ess|serverless}`
+
+#### CI integration
+
+In general the idea is similar to [Bundling automation](#bundling-automation).
+
+To keep Security Solution domain OpenAPI bundles up-to-date and in sync with the OpenAPI files describing individual API endpoints, the bundling runs as part of the `Checks` step in CI on every PR build and on merge builds. After committing changes to source OpenAPI files CI will re-bundle Security Solution OpenAPI bundles and commit the changes if there are any. Committing changes will mark the build as failing and requires build restart.
