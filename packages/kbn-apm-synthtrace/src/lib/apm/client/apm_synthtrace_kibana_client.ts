@@ -55,13 +55,11 @@ export class ApmSynthtraceKibanaClient {
     };
 
     try {
-      // First attempt fetch latest Prerelease version (prerelease=true)
       return await fetchPackageVersion({ prerelease: true });
     } catch (error) {
       this.logger.debug(
         'Fetching latestes prerelease version failed, retrying with latest GA version'
       );
-      // Retry with fetch latest GA version (prerelease=false)
       const retryResult = await fetchPackageVersion({ prerelease: false }).catch((retryError) => {
         throw retryError;
       });
