@@ -34,7 +34,6 @@ export function joinByKey<
   X extends (a: T, b: T) => ValuesType<W>
 >(items: T[], key: V, mergeFn: X): W;
 
-// TODO util already exists in apm and other plugins. Move it to oblt shared
 export function joinByKey(
   items: Array<Record<string, any>>,
   key: string | string[],

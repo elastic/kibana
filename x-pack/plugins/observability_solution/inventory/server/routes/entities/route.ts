@@ -9,6 +9,7 @@ import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
+import { joinByKey } from '@kbn/observability-utils/array/join_by_key';
 import { entityTypeRt, entityColumnIdsRt, Entity } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';
@@ -16,7 +17,6 @@ import { getLatestEntities } from './get_latest_entities';
 import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
-import { joinByKey } from '../../../common/utils/join_by_key';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
