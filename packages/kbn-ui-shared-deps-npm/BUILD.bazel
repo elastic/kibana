@@ -54,7 +54,6 @@ RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
   "@npm//node-libs-browser",
-  "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-router-dom",
   "@npm//react-router-dom-v5-compat",

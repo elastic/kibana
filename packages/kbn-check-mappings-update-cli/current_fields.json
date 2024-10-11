@@ -313,6 +313,7 @@
     "apiKey"
   ],
   "entity-engine-status": [
+    "fieldHistoryLength",
     "filter",
     "indexPattern",
     "status",

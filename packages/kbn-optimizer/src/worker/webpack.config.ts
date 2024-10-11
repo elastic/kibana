@@ -253,6 +253,18 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+            },
+          },
+        },
+        {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },

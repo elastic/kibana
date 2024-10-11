@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import { SearchAssistantPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { PublicConfigType, SearchAssistantPlugin } from './plugin';
+import {
+  SearchAssistantPluginSetup,
+  SearchAssistantPluginStart,
+  SearchAssistantPluginStartDependencies,
+} from './types';
 
-export function plugin() {
-  return new SearchAssistantPlugin();
-}
+export const plugin: PluginInitializer<
+  SearchAssistantPluginSetup,
+  SearchAssistantPluginStart,
+  {},
+  SearchAssistantPluginStartDependencies
+> = (context: PluginInitializerContext<PublicConfigType>) => new SearchAssistantPlugin(context);
+
 export type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';
