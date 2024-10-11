@@ -121,6 +121,7 @@ class AgentlessAgentService {
           'create',
           error,
           logger,
+          agentlessAgentPolicy.id,
           requestConfig,
           requestConfigDebugStatus,
           errorMetadata,
@@ -138,7 +139,10 @@ class AgentlessAgentService {
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
-      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
+      url: prependAgentlessApiBasePathToEndpoint(
+        agentlessConfig,
+        `/deployments/${agentlessPolicyId}`
+      ),
       method: 'DELETE',
       headers: {
         'Content-type': 'application/json',
@@ -184,6 +188,7 @@ class AgentlessAgentService {
         'delete',
         error,
         logger,
+        agentlessPolicyId,
         requestConfig,
         requestConfigDebugStatus,
         errorMetadata,
@@ -198,6 +203,7 @@ class AgentlessAgentService {
     action: 'create' | 'delete',
     error: Error | AxiosError,
     logger: Logger,
+    agentlessPolicyId: string,
     requestConfig: AxiosRequestConfig,
     requestConfigDebugStatus: string,
     errorMetadata: LogMeta,
@@ -256,6 +262,37 @@ class AgentlessAgentService {
           action === 'create'
             ? 'the Agentless API could not create the agentless agent because an unauthorized request was sent. Please delete the agentless policy and try again or contact your administrator.'
             : 'the Agentless API could not delete the agentless deployment because an unauthorized request was sent. Please try again or contact your administrator.',
+          traceId
+        );
+      }
+      if (error.response.status === 403) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          action === 'create'
+            ? '[Agentless API] Creating the agentless agent failed with a status 403 forbidden. Check the Kibana Agentless API configuration.'
+            : '[Agentless API] Deleting the agentless deployment failed with a status 403 forbidden. Check the Kibana Agentless API configuration.',
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent because a forbidden request was sent. Please delete the agentless policy and try again or contact your administrator.'
+            : 'the Agentless API could not delete the agentless deployment because a forbidden request was sent. Please try again or contact your administrator.',
+          traceId
+        );
+      }
+      if (error.response.status === 404) {
+        this.handleResponseError(
+          error.response,
+          logger,
+          errorMetadataWithRequestConfig,
+          requestConfigDebugStatus,
+          // this error will only happen when deleting agentless agents, but covering the case for creating agentless agents
+          action === 'create'
+            ? `[Agentless API] Creating the agentless agent failed with a status 404 not found for agentless policy ${agentlessPolicyId}.`
+            : `[Agentless API] Deleting the agentless deployment failed with a status 404 not found for agentless policy ${agentlessPolicyId}.`,
+          action === 'create'
+            ? 'the Agentless API could not create the agentless agent because it returned a 404 error not found.'
+            : `the Agentless API could not delete the agentless deployment ${agentlessPolicyId} because an unauthorized request was sent. Please try again or contact your administrator.`,
           traceId
         );
       }
