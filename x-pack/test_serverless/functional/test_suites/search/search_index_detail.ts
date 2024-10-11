@@ -23,6 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search index detail page', () => {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
+    });
+    beforeEach(async () => {
       await pageObjects.svlApiKeys.deleteAPIKeys();
     });
     after(async () => {
