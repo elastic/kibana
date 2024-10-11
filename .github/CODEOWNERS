@@ -1188,7 +1188,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 # Observability UX management team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 /x-pack/test/observability_functional @elastic/obs-ux-management-team
-/x-pack/test/functional/es_archives/cases/default @elastic/obs-ux-management-team
 /x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-management-team
 /x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
@@ -1437,6 +1436,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
+/x-pack/test/functional/es_archives/cases/default @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
