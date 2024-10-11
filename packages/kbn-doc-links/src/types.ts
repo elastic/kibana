@@ -107,6 +107,7 @@ export interface DocLinks {
     readonly precisionTuning: string;
     readonly relevanceTuning: string;
     readonly resultSettings: string;
+    readonly searchLabsEvolutionBlog: string;
     readonly searchUI: string;
     readonly security: string;
     readonly synonyms: string;
@@ -222,6 +223,7 @@ export interface DocLinks {
     readonly permissions: string;
     readonly privateSourcePermissions: string;
     readonly salesforce: string;
+    readonly searchLabsEvolutionBlog: string;
     readonly security: string;
     readonly serviceNow: string;
     readonly sharePoint: string;
