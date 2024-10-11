@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
 
-      it('sets correct VCU ranges for start model deployment', async () => {
+      // TODO enabled when https://github.com/elastic/kibana/issues/195593 is resolved
+      it.skip('sets correct VCU ranges for start model deployment', async () => {
         await ml.trainedModelsTable.openStartDeploymentModal('.elser_model_2');
         await ml.trainedModelsTable.toggleAdvancedConfiguration(true);
 
