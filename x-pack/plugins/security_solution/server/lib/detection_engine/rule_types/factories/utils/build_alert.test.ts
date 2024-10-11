@@ -46,6 +46,24 @@ describe('buildAlertFields', () => {
       alertUuid: 'test-uuid',
       publicBaseUrl: 'test/url',
       alertTimestampOverride: new Date('2020-01-01T00:00:00.000Z'),
+      intendedTimestamp: undefined,
+    });
+    expect(alertFields).toMatchSnapshot();
+  });
+
+  test('it creates the expected alert fields for manual run', () => {
+    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const completeRule = getCompleteRuleMock(getQueryRuleParams());
+    const alertFields = buildAlertFields({
+      docs: [sampleDoc],
+      completeRule,
+      spaceId: 'default',
+      reason: 'test reason',
+      indicesToQuery: [],
+      alertUuid: 'test-uuid',
+      publicBaseUrl: 'test/url',
+      alertTimestampOverride: new Date('2020-01-01T00:00:00.000Z'),
+      intendedTimestamp: new Date('2019-01-01T00:00:00.000Z'),
     });
     expect(alertFields).toMatchSnapshot();
   });
