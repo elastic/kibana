@@ -8,6 +8,7 @@
  */
 
 import { EuiButtonIconProps, EuiDataGridControlColumn, IconType } from '@elastic/eui';
+import type { Interpolation, Theme } from '@emotion/react';
 import React, { FC, ReactElement } from 'react';
 import { DataTableRecord } from '../../types';
 
@@ -16,11 +17,13 @@ export interface RowControlRowProps {
   record: DataTableRecord;
 }
 
-export interface RowControlProps extends EuiButtonIconProps {
+export interface RowControlProps {
+  color?: EuiButtonIconProps['color'];
+  css?: Interpolation<Theme>;
   'data-test-subj'?: string;
   disabled?: boolean;
-  label: string;
   iconType: IconType;
+  label: string;
   onClick: ((props: RowControlRowProps) => void) | undefined;
   tooltipContent?: React.ReactNode;
 }

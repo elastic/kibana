@@ -88,7 +88,7 @@ const DegradedDocs = ({
     if (addIgnoredMetadataToQuery) {
       return (
         <EnableESQLDegradedDocsControl
-          control={Control}
+          Control={Control}
           addIgnoredMetadataToQuery={addIgnoredMetadataToQuery}
         />
       );
@@ -132,10 +132,10 @@ const DegradedDocs = ({
 
 const EnableESQLDegradedDocsControl = ({
   addIgnoredMetadataToQuery,
-  control: Control,
+  Control,
 }: {
   addIgnoredMetadataToQuery: DegradedDocsControlProps['addIgnoredMetadataToQuery'];
-  control: RowControlComponent;
+  Control: RowControlComponent;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
