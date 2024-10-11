@@ -11,15 +11,12 @@ import {
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import { buildHostEntityDefinition, buildUserEntityDefinition } from '../definition';
-
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
-export const getEntityDefinition = (entityType: EntityType, space: string) => {
-  if (entityType === 'host') return buildHostEntityDefinition(space);
-  if (entityType === 'user') return buildUserEntityDefinition(space);
+export const getIdentityFieldForEntityType = (entityType: EntityType) => {
+  if (entityType === 'host') return 'host.name';
 
-  throw new Error(`Unsupported entity type: ${entityType}`);
+  return 'user.name';
 };
 
 export const getByEntityTypeQuery = (entityType: EntityType) => {
@@ -34,5 +31,5 @@ export const getEntitiesIndexName = (entityType: EntityType, namespace: string) 
   });
 
 export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
-  return `ea_${space}_${entityType}_entity_store`;
+  return `security_${entityType}_${space}`;
 };
