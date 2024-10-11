@@ -35,14 +35,15 @@ export const UserEntity = z.object({
     .optional(),
   entity: z
     .object({
-      last_seen_timestamp: z.string().datetime(),
-      schema_version: z.string(),
-      definition_version: z.string(),
-      display_name: z.string(),
-      identity_fields: z.array(z.string()),
+      lastSeenTimestamp: z.string().datetime(),
+      schemaVersion: z.string(),
+      definitionVersion: z.string(),
+      displayName: z.string(),
+      identityFields: z.array(z.string()),
       id: z.string(),
       type: z.literal('node'),
-      definition_id: z.string(),
+      firstSeenTimestamp: z.string().datetime(),
+      definitionId: z.string(),
       source: z.string(),
     })
     .optional(),
@@ -70,14 +71,15 @@ export const HostEntity = z.object({
     .optional(),
   entity: z
     .object({
-      last_seen_timestamp: z.string().datetime(),
-      schema_version: z.string(),
-      definition_version: z.string(),
-      display_name: z.string(),
-      identity_fields: z.array(z.string()),
+      lastSeenTimestamp: z.string().datetime(),
+      schemaVersion: z.string(),
+      definitionVersion: z.string(),
+      displayName: z.string(),
+      identityFields: z.array(z.string()),
       id: z.string(),
       type: z.literal('node'),
-      definition_id: z.string(),
+      firstSeenTimestamp: z.string().datetime(),
+      definitionId: z.string(),
       source: z.string().optional(),
     })
     .optional(),
