@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -179,13 +179,18 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const { renderCount$, hasRenderCompleted$, expressionParams$ } = internalApi;
-          // Pick up updated params from the observable
-          const expressionParams = useStateFromPublishingSubject(expressionParams$);
-          // used for functional tests
-          const renderCount = useStateFromPublishingSubject(renderCount$);
-          // used for reporting/functional tests
-          const hasRendered = useStateFromPublishingSubject(hasRenderCompleted$);
+          const [
+            // Pick up updated params from the observable
+            expressionParams,
+            // used for functional tests
+            renderCount,
+            // has the render completed?
+            hasRendered,
+          ] = useBatchedPublishingSubjects(
+            internalApi.expressionParams$,
+            internalApi.renderCount$,
+            internalApi.hasRenderCompleted$
+          );
           const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(parentApi) === 'edit');
 
           const [blockingErrors, warningOrErrors, infoMessages] = useMessages(internalApi);
