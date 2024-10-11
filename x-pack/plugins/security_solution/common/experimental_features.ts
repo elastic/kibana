@@ -188,10 +188,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
-  /*
-   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
-   */
-  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.

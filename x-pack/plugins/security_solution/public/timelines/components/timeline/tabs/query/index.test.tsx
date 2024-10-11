@@ -103,9 +103,6 @@ describe('Timeline', () => {
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
-        if (feature === 'unifiedComponentsInTimelineDisabled') {
-          return true;
-        }
         return allowedExperimentalValues[feature];
       }
     );

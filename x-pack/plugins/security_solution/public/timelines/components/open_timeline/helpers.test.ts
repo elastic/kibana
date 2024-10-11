@@ -37,8 +37,6 @@ import {
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../common';
-import { allowedExperimentalValues } from '../../../../common';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -146,14 +144,6 @@ describe('helpers', () => {
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
-
-    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
-      (featureFlag: keyof ExperimentalFeatures) => {
-        return featureFlag === 'unifiedComponentsInTimelineDisabled'
-          ? false
-          : allowedExperimentalValues[featureFlag];
-      }
-    );
   });
 
   describe('#getPinnedEventCount', () => {
@@ -538,7 +528,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineDisabled is false', () => {
+    test('should produce correct model', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
@@ -564,7 +554,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of columns is passed', () => {
+    test('should produce correct model if custom set of columns is passed', () => {
       const customColumns = defaultUdtHeaders.slice(0, 2);
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -592,7 +582,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of excludedRowRendererIds is passed', () => {
+    test('should produce correct model if custom set of excludedRowRendererIds is passed', () => {
       const excludedRowRendererIds: RowRendererId[] = ['zeek'];
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -649,7 +639,7 @@ describe('helpers', () => {
       });
     });
 
-    describe('open a timeline', () => {
+    describe('open a timeline 1', () => {
       const selectedTimeline = {
         ...mockSelectedTimeline,
       };
@@ -843,7 +833,8 @@ describe('helpers', () => {
         });
       });
     });
-    describe('open a timeline when unifiedComponentsInTimelineDisabled is false', () => {
+
+    describe('open a timeline', () => {
       const untitledTimeline = { ...mockSelectedTimeline, title: '' };
       const onOpenTimeline = jest.fn();
       afterEach(() => {
@@ -858,7 +849,6 @@ describe('helpers', () => {
           timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
-          unifiedComponentsInTimelineDisabled: false,
         };
         (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
         renderHook(async () => {
@@ -894,7 +884,6 @@ describe('helpers', () => {
           timelineType: TimelineTypeEnum.default,
           onOpenTimeline: undefined,
           openTimeline: true,
-          unifiedComponentsInTimelineDisabled: false,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
@@ -933,7 +922,6 @@ describe('helpers', () => {
           timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
-          unifiedComponentsInTimelineDisabled: false,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
@@ -959,13 +947,13 @@ describe('helpers', () => {
   });
 
   describe('omitTypenameInTimeline', () => {
-    test('it does not modify the passed in timeline if no __typename exists', () => {
+    test('should not modify the passed in timeline if no __typename exists', () => {
       const result = omitTypenameInTimeline(mockGetOneTimelineResult);
 
       expect(result).toEqual(mockGetOneTimelineResult);
     });
 
-    test('it returns timeline with __typename removed when it exists', () => {
+    test('should return timeline with __typename removed when it exists', () => {
       const mockTimeline = {
         ...mockGetOneTimelineResult,
         __typename: 'something, something',

@@ -78,9 +78,6 @@ jest.mock('react-router-dom', () => ({
 const SPECIAL_TEST_TIMEOUT = 50000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineDisabled') {
-    return false;
-  }
   return allowedExperimentalValues[feature];
 });
 
@@ -890,9 +887,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineDisabled') {
-              return false;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return true;
             }
@@ -948,9 +942,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineDisabled') {
-              return false;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return false;
             }
