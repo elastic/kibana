@@ -30,7 +30,6 @@ describe('User with basic license should hit License Paywall', () => {
   });
 
   it('Create Integration is not accessible when user is basic', () => {
-    cy.request('/api/licensing/info');
     loginAndWaitForPage(CREATE_INTEGRATION_LANDING_PAGE);
     cy.getBySel(LICENSE_PAYWALL_CARD).should('exist');
   });
