@@ -2513,7 +2513,7 @@ export default ({ getService }: FtrProviderContext) => {
           allNewAlerts.hits.hits[1]?._source?.[TIMESTAMP]
         );
 
-        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
       });
 
       it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
