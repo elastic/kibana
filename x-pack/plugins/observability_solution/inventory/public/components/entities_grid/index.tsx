@@ -20,7 +20,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
@@ -35,7 +35,7 @@ interface Props {
   loading: boolean;
   entities: LatestEntities;
   sortDirection: 'asc' | 'desc';
-  sortField: string;
+  sortField: EntityColumnIds;
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
@@ -69,22 +69,17 @@ export function EntitiesGrid({
     [entities]
   );
 
-  const visibleColumns = useMemo(
-    () => getColumns({ showAlertsColumn }).map(({ id }) => id),
-    [showAlertsColumn]
-  );
-
   const columnVisibility = useMemo(
     () => ({
-      visibleColumns,
+      visibleColumns: getColumns({ showAlertsColumn }).map(({ id }) => id),
       setVisibleColumns: () => {},
     }),
-    [visibleColumns]
+    [showAlertsColumn]
   );
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const entity = entities[rowIndex] as Entity;
+      const entity = entities[rowIndex];
       if (entity === undefined) {
         return null;
       }

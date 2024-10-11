@@ -9,11 +9,11 @@ import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Entity } from '../../../common/entities';
-import { getIdentityFieldValues } from '../../../common/utils/get_identity_fields_values';
 import { useKibana } from '../../hooks/use_kibana';
+import { getIdentityFieldValuePairsToKql } from '../../../common/utils/get_identity_field_value_pairs_to_kql';
 
 export function AlertsBadge({ entity }: { entity: Entity }) {
-  const identityFieldValues = getIdentityFieldValues({ entity });
+  const identityFieldValues = getIdentityFieldValuePairsToKql({ entity });
   const {
     services: {
       http: { basePath },

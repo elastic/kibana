@@ -8,13 +8,13 @@
 import { ENTITY_IDENTITY_FIELDS } from '@kbn/observability-shared-plugin/common';
 import { Entity } from '../entities';
 
-export function getIdentityFieldValues({ entity }: { entity: Entity }) {
+export function getIdentityFieldValuePairsToKql({ entity }: { entity: Entity }) {
   const mapping: string[] = [];
 
   const identityFields = entity[ENTITY_IDENTITY_FIELDS];
 
   if (identityFields) {
-    const fields = Array.isArray(identityFields) ? identityFields : [identityFields];
+    const fields = [identityFields].flat();
 
     fields.forEach((field) => {
       if (field in entity) {

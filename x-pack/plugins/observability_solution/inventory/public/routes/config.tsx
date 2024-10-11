@@ -10,11 +10,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import {
-  DEFAULT_ENTITIES_SORT_FIELD,
-  entityTypesRt,
-  entityColumnIdsRt,
-} from '../../common/entities';
+import { defaultEntitySortField, entityTypesRt, entityColumnIdsRt } from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -42,7 +38,7 @@ const inventoryRoutes = {
     }),
     defaults: {
       query: {
-        sortField: DEFAULT_ENTITIES_SORT_FIELD,
+        sortField: defaultEntitySortField,
         sortDirection: 'desc',
         pageIndex: '0',
       },
