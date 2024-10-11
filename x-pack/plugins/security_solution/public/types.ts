@@ -66,6 +66,7 @@ import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Kubernetes } from './kubernetes';
+import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
@@ -89,7 +90,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
-import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 
 export interface SetupPlugins {
@@ -163,7 +164,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export interface ContractStartServices {
   getComponents$: GetComponents$;
   upselling: UpsellingService;
-  onboarding: OnboardingPageService;
+  onboarding: OnboardingService;
 }
 
 export type StartServices = CoreStart &
@@ -211,7 +212,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-  setOnboardingPageSettings: OnboardingPageService;
+  setOnboardingSettings: OnboardingService['setSettings'];
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
   getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
@@ -231,6 +232,7 @@ export interface SubPlugins {
   explore: Explore;
   kubernetes: Kubernetes;
   management: Management;
+  onboarding: Onboarding;
   overview: Overview;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
@@ -253,6 +255,7 @@ export interface StartedSubPlugins {
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
+  onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
