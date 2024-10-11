@@ -53,7 +53,7 @@ export const wrapSuppressedEsqlAlerts = ({
   };
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  intendedTimestamp?: Date;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {

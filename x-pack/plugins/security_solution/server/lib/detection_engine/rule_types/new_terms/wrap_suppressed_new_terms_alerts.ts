@@ -51,7 +51,7 @@ export const wrapSuppressedNewTermsAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  intendedTimestamp?: Date;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;

@@ -105,7 +105,7 @@ export interface RunOpts<TParams extends RuleParams> {
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
   experimentalFeatures?: ExperimentalFeatures;
-  intendedTimestamp?: Date;
+  intendedTimestamp: Date | undefined;
 }
 
 export type SecurityAlertType<
