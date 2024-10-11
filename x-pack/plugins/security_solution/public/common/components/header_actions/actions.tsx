@@ -130,7 +130,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopeId: timelineId,
   });
 
-  const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
