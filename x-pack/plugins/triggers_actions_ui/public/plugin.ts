@@ -168,7 +168,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
   actions: ActionsPublicPluginSetup;
 }
 
