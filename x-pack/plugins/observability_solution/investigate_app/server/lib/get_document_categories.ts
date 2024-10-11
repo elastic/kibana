@@ -454,7 +454,7 @@ export const createCategorizationRequestParams = ({
           categorization_analyzer: {
             tokenizer: 'standard',
           },
-          similarity_threshold: 60,
+          similarity_threshold: 65,
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
         },
         aggs: {
