@@ -17,7 +17,7 @@ export const registerUsageMetricsRoute = (
 ) => {
   if (dataUsageContext.serverConfig.enabled) {
     router.versioned
-      .get({
+      .post({
         access: 'internal',
         path: DATA_USAGE_METRICS_API_ROUTE,
       })
@@ -25,7 +25,9 @@ export const registerUsageMetricsRoute = (
         {
           version: '1',
           validate: {
-            request: UsageMetricsRequestSchema,
+            request: {
+              body: UsageMetricsRequestSchema,
+            },
             response: {
               200: UsageMetricsResponseSchema,
             },
