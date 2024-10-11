@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { useAgentless } from '../../../../../../../hooks';
+import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
   useGetPackagesQuery,
   useGetCategoriesQuery,
@@ -33,7 +33,7 @@ import {
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
-} from '../../../../../../../../common/services/agentless_helper';
+} from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
 

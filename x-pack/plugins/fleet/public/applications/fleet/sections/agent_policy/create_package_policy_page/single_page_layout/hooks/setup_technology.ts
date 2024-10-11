@@ -20,7 +20,10 @@ import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
-import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../../../../../common/services/agentless_policy_helper';
+import {
+  isAgentlessIntegration as isAgentlessIntegrationFn,
+  getAgentlessAgentPolicyNameFromPackagePolicyName,
+} from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
   const config = useConfig();
@@ -45,14 +48,7 @@ export const useAgentless = () => {
 
   // When an integration has at least a policy template enabled for agentless
   const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
-    if (
-      isAgentlessEnabled &&
-      packageInfo?.policy_templates &&
-      packageInfo?.policy_templates.length > 0 &&
-      !!packageInfo?.policy_templates.find(
-        (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
-      )
-    ) {
+    if (isAgentlessEnabled && isAgentlessIntegrationFn(packageInfo)) {
       return true;
     }
     return false;

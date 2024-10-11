@@ -7,7 +7,7 @@
 
 import { appContextService } from '..';
 import type { FleetConfigType } from '../../config';
-export { isAgentlessIntegration } from '../../../common/services/agentless_helper';
+export { isAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
 export const isAgentlessApiEnabled = () => {
   const cloudSetup = appContextService.getCloud && appContextService.getCloud();

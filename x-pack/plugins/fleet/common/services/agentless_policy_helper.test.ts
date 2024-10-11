@@ -12,9 +12,9 @@ import {
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
   isOnlyAgentlessPolicyTemplate,
-} from './agentless_helper';
+} from './agentless_policy_helper';
 
-describe('agentless_helper', () => {
+describe('agentless_policy_helper', () => {
   describe('isAgentlessIntegration', () => {
     it('should return true if packageInfo is defined and has at least one agentless integration', () => {
       const packageInfo = {
