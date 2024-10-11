@@ -119,10 +119,11 @@ const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnab
         .filter((pkg) => {
           return !isOnlyAgentlessIntegration(pkg);
         })
-        .forEach((pkg) => {
+        .map((pkg) => {
           pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
             return !isOnlyAgentlessPolicyTemplate(policyTemplate);
           });
+          return pkg;
         });
 };
 

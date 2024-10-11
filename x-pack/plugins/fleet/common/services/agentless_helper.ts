@@ -41,12 +41,11 @@ export const isOnlyAgentlessIntegration = (
   return false;
 };
 
-export const isOnlyAgentlessPolicyTemplate = (policyTemplate: {
-  deployment_modes?: RegistryPolicyTemplate['deployment_modes'];
-}) => {
+export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemplate) => {
   return (
-    policyTemplate.deployment_modes?.agentless.enabled === true &&
-    (!policyTemplate.deployment_modes?.default ||
-      policyTemplate.deployment_modes?.default.enabled === false)
+    policyTemplate.deployment_modes &&
+    policyTemplate.deployment_modes.agentless.enabled === true &&
+    (!policyTemplate.deployment_modes.default ||
+      policyTemplate.deployment_modes.default.enabled === false)
   );
 };

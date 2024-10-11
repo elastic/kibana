@@ -271,5 +271,17 @@ describe('agentless_helper', () => {
       expect(result).toBe(false);
       expect(result2).toBe(false);
     });
+
+    it('should return false if the policy template has no deployment modes', () => {
+      const policyTemplate = {
+        name: 'template1',
+        title: 'Template 1',
+        description: '',
+      };
+
+      const result = isOnlyAgentlessPolicyTemplate(policyTemplate);
+
+      expect(result).toBe(false);
+    });
   });
 });
