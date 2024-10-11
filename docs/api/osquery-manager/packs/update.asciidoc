@@ -4,6 +4,12 @@
 <titleabbrev>Update pack</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Update packs.
 
 WARNING: You are unable to update a prebuilt pack (`read_only = true`).

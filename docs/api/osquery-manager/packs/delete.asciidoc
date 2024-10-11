@@ -4,6 +4,12 @@
 <titleabbrev>Delete pack</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Delete packs.
 
 WARNING: Once you delete a pack, _it cannot be recovered_.
