@@ -9,13 +9,13 @@ import { EuiAccordion, EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
+import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { Role } from '@kbn/security-plugin-types-common';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
