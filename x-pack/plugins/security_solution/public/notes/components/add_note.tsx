@@ -111,8 +111,8 @@ export const AddNote = memo(
       if (createStatus === ReqStatus.Failed && createError) {
         addErrorToast(createError, {
           title: CREATE_NOTE_ERROR,
-          onClose: resetError,
         });
+        resetError();
       }
     }, [addErrorToast, createError, createStatus, resetError]);
 
