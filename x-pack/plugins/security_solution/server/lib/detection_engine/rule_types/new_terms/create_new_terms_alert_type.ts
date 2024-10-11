@@ -111,6 +111,7 @@ export const createNewTermsAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         params,
@@ -212,6 +213,7 @@ export const createNewTermsAlertType = (
               alertTimestampOverride,
               ruleExecutionLogger,
               publicBaseUrl,
+              intendedTimestamp,
             });
 
           const wrapSuppressedHits = (eventsAndTerms: EventsAndTerms[]) =>
@@ -226,6 +228,7 @@ export const createNewTermsAlertType = (
               publicBaseUrl,
               primaryTimestamp,
               secondaryTimestamp,
+              intendedTimestamp,
             });
 
           const eventsAndTerms: EventsAndTerms[] = (

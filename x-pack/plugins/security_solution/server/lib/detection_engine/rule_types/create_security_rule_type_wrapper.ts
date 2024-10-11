@@ -431,6 +431,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
+                    intendedTimestamp,
                   },
                 });
 
