@@ -9,8 +9,7 @@
 
 import { run } from '../../lib/spawn.mjs';
 import External from '../../lib/external_packages.js';
-
-import { buildWebpackBundles } from './webpack.mjs';
+import { buildWebpackBundles } from '../../lib/webpack.mjs';
 
 import {
   haveNodeModulesBeenManuallyDeleted,
@@ -96,7 +95,8 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      await buildWebpackBundles(log, { quiet });
+      const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+      await buildWebpackBundles(packageNames, log, { quiet });
     });
 
     await Promise.all([

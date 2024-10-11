@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run } from '../../lib/spawn.mjs';
-import { REPO_ROOT } from '../../lib/paths.mjs';
+import { run } from './spawn.mjs';
+import { REPO_ROOT } from './paths.mjs';
 import path from 'path';
 
 /**
  * Builds the 3 required kibana packages needed for the shared-ui DLL
+ * @param {string[]} packageNames
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  * @param {{ quiet: boolean }} options
  * @returns {Promise<void>}
  */
-export async function buildWebpackBundles(log, { quiet }) {
-  const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+export async function buildWebpackBundles(packageNames, log, { quiet }) {
   for (const packageName of packageNames) {
     log.info(`building ${packageName}`);
     await buildPackage(packageName, { quiet });
@@ -33,6 +33,13 @@ export async function buildWebpackBundles(log, { quiet }) {
  */
 async function buildPackage(packageName, { quiet }) {
   await run('yarn', ['build'], {
+    cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+    pipe: !quiet,
+  });
+}
+
+export async function watchPackage(packageName, { quiet }) {
+  await run('yarn', ['build', '--watch'], {
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
     pipe: !quiet,
   });

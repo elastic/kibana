@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { watchPackage } from '../lib/webpack.mjs';
+
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'watch',
-  description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
+  description: 'Runs a build in the webpack-built packages and keeps watching them for changes',
   flagsHelp: `
     --offline            Run the installation process without consulting online resources. This is useful and
                           sometimes necessary for using bootstrap on an airplane for instance. The local caches
@@ -22,9 +24,12 @@ export const command = {
     id: 'total',
   },
 
-  // async run({ args, log }) {
-  //   await Bazel.watch(log, {
-  //     offline: args.getBooleanValue('offline') ?? true,
-  //   });
-  // },
+  async run() {
+    const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+    const watchesFinished = [];
+    for (const packageName of packageNames) {
+      watchesFinished.push(watchPackage(packageName, { quiet: false }));
+    }
+    await Promise.all(watchesFinished);
+  },
 };

@@ -17,25 +17,40 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 
 let toolingLog: ToolingLog;
-run(async ({ log, flagsReader }) => {
-  toolingLog = log;
-  const packagePath = flagsReader.getPositionals()[0];
+run(
+  async ({ log, flagsReader, flags }) => {
+    toolingLog = log;
+    const packagePath = flagsReader.getPositionals()[0];
+    const watch = flagsReader.boolean('watch');
 
-  const packageRoot = path.resolve(REPO_ROOT, packagePath);
+    const packageRoot = path.resolve(REPO_ROOT, packagePath);
 
-  if (!fs.existsSync(packageRoot)) {
-    throw new Error(`Package not found at ${packageRoot}`);
+    if (!fs.existsSync(packageRoot)) {
+      throw new Error(`Package not found at ${packageRoot}`);
+    }
+
+    await buildPackage({ packageRoot, watch }, log);
+  },
+  {
+    description: 'Build a package',
+    flags: {
+      boolean: ['watch'],
+      help: `
+      --watch  Watch for changes and rebuild
+    `,
+    },
   }
-
-  await buildPackage(packageRoot, log);
-})
+)
   .then(() => {})
   .catch((e) => {
     toolingLog.error(e.message);
     throw e;
   });
 
-async function buildPackage(packageRoot: string, log: ToolingLog) {
+async function buildPackage(
+  { packageRoot, watch }: { packageRoot: string; watch?: boolean },
+  log: ToolingLog
+) {
   const packageConfig = JSON.parse(
     fs.readFileSync(path.resolve(packageRoot, 'package.json')).toString()
   );
@@ -69,6 +84,10 @@ async function buildPackage(packageRoot: string, log: ToolingLog) {
     }
   });
 
+  if (watch) {
+    argsProcessed.push('--watch');
+  }
+
   await copySources({
     log,
     root: packageRoot,
@@ -76,7 +95,11 @@ async function buildPackage(packageRoot: string, log: ToolingLog) {
     files: buildFile.SRCS,
   });
 
-  log.info(`building packages/${packageName}`);
+  if (watch) {
+    log.info(`watching ${packageName}`);
+  } else {
+    log.info(`building ${packageName}`);
+  }
 
   try {
     await execa('node_modules/.bin/webpack-cli', argsProcessed, {
