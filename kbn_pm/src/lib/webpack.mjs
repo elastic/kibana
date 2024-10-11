@@ -38,6 +38,12 @@ async function buildPackage(packageName, { quiet }) {
   });
 }
 
+/**
+ * Runs the build script in watch mode for a single package
+ * @param {string} packageName
+ * @param {{quiet: boolean}} options
+ * @returns {Promise<void>}
+ */
 export async function watchPackage(packageName, { quiet }) {
   await run('yarn', ['build', '--watch'], {
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
