@@ -133,7 +133,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     indexNames: selectedPatterns,
     language: 'eql',
     limit: !unifiedComponentsInTimelineDisabled ? sampleSize : itemsPerPage,
-    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,

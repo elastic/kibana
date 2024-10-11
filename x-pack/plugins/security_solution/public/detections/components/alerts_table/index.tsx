@@ -125,11 +125,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    sourcererDataView,
-  } = useSourcererDataView(sourcererScope);
+  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -162,11 +158,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && indexPatterns != null) {
+    if (browserFields != null && sourcererDataView) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        indexPattern: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -174,7 +170,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableId,
@@ -285,7 +281,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onUpdate: onAlertTableUpdate,
       cellContext,
       onLoaded: onLoad,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
@@ -304,7 +300,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       cellContext,
       onLoad,
-      sourcererDataView?.runtimeFieldMap,
+      sourcererDataView.runtimeFieldMap,
       isEventRenderedView,
     ]
   );
