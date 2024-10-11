@@ -16,6 +16,7 @@ export const ABOUT_UPGRADE_FIELD_ORDER: Array<keyof DiffableAllFields> = [
   'description',
   'author',
   'building_block',
+  'investigation_fields',
   'severity',
   'severity_mapping',
   'risk_score',
@@ -52,6 +53,7 @@ export const DEFINITION_UPGRADE_FIELD_ORDER: Array<keyof DiffableAllFields> = [
   'new_terms_fields',
   'history_window_start',
   'max_signals',
+  'alert_suppression',
 ];
 
 export const SCHEDULE_UPGRADE_FIELD_ORDER: Array<keyof DiffableAllFields> = ['rule_schedule'];
