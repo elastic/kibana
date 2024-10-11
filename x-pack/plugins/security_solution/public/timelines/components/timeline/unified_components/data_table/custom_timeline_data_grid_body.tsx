@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
+import type { EuiDataGridCustomBodyProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
@@ -19,7 +19,7 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { getEventTypeRowClassName } from './get_event_type_row_classname';
 
-const defaultAutoHeight = {
+const defaultAutoHeight: EuiDataGridRowHeightsOptions = {
   defaultHeight: 'auto',
 };
 
@@ -350,8 +350,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   );
   const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
 
-  const [rowHeight, _] = useState<number>(0);
-
   return (
     <CustomGridRow
       className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
@@ -377,9 +375,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
-          rowHeightsOptions={{
-            defaultHeight: 'auto',
-          }}
+          rowHeightsOptions={defaultAutoHeight}
           /* @ts-expect-error because currently CellProps do not allow string width but it is important to be passed for height calculations   */
           width={'100%'}
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
