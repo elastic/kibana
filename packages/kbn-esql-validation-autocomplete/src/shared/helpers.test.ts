@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shouldBeQuotedSource } from './helpers';
+import { parse } from '@kbn/esql-ast';
+import { getExpressionType, shouldBeQuotedSource } from './helpers';
+import { SupportedDataType } from '../definitions/types';
 
 describe('shouldBeQuotedSource', () => {
   it('does not have to be quoted for sources with acceptable characters @-+$', () => {
@@ -45,5 +47,52 @@ describe('shouldBeQuotedSource', () => {
     expect(shouldBeQuotedSource('*:*')).toBe(true);
     expect(shouldBeQuotedSource('*:*,cluster*:index|pattern,i|p')).toBe(true);
     expect(shouldBeQuotedSource('index-[dd-mm]')).toBe(true);
+  });
+});
+
+describe('getExpressionType', () => {
+  const getASTForExpression = (expression: string) => {
+    const { root } = parse(`FROM index | EVAL ${expression}`);
+    return root.commands[1].args[0];
+  };
+
+  describe('literal expressions', () => {
+    const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
+      {
+        expression: '1.0',
+        expectedType: 'double',
+      },
+      {
+        expression: '1',
+        expectedType: 'integer',
+      },
+      {
+        expression: 'true',
+        expectedType: 'boolean',
+      },
+      {
+        expression: '"foobar"',
+        expectedType: 'keyword',
+      },
+      {
+        expression: 'NULL',
+        expectedType: 'null',
+      },
+      // TODO — consider whether we need to be worried about
+      // differentiating between time_duration, and date_period
+      // instead of just using time_literal
+      {
+        expression: '1 second',
+        expectedType: 'time_literal',
+      },
+      {
+        expression: '1 day',
+        expectedType: 'time_literal',
+      },
+    ];
+    test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
+      const ast = getASTForExpression(expression);
+      expect(getExpressionType(ast)).toBe(expectedType);
+    });
   });
 });

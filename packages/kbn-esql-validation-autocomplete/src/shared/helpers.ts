@@ -43,10 +43,10 @@ import {
   FunctionParameterType,
   FunctionReturnType,
   ArrayType,
+  SupportedDataType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import type { EditorContext } from '../autocomplete/types';
@@ -226,26 +226,21 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === 'null') {
+    // all parameters accept null, but this is not yet reflected
+    // in our function definitions so we let it through here
     return true;
   }
 
-  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
-    return true;
-  }
-
-  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
-    return true;
-  }
-
-  if (item.literalType !== 'string') {
-    if (argType === item.literalType) {
-      return true;
-    }
-    return false;
+  if (item.literalType !== 'keyword') {
+    return argType === item.literalType;
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date', 'date_period'].includes(argType);
+  if (argType === 'date' || argType === 'date_period') {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -417,7 +412,7 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
  */
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
-    arg.literalType === 'string' &&
+    arg.literalType === 'keyword' &&
     argDef.acceptedValues &&
     !argDef.acceptedValues
       .map((option) => option.toLowerCase())
@@ -724,4 +719,25 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
   }
 
   return query;
+}
+
+/**
+ * Determines the type of the expression
+ */
+export function getExpressionType(
+  root: ESQLAstItem
+  // fields: Map<string, ESQLRealField>,
+  // variables: Map<string, ESQLVariable[]>
+): SupportedDataType {
+  if (!isSingleItem(root)) {
+    throw new Error('Lists not implemented');
+  }
+
+  if (isLiteralItem(root) && root.literalType !== 'param') {
+    return root.literalType;
+  }
+
+  if (isTimeIntervalItem(root)) {
+    return 'time_literal';
+  }
 }

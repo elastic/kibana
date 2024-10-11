@@ -88,7 +88,7 @@ function validateFunctionLiteralArg(
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      actualArg.literalType === 'string' &&
+      actualArg.literalType === 'keyword' &&
       argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {

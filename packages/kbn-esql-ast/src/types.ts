@@ -270,7 +270,7 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export type ESQLNumericLiteralType = 'decimal' | 'integer';
+export type ESQLNumericLiteralType = 'double' | 'integer';
 
 export type ESQLLiteral =
   | ESQLDecimalLiteral
@@ -290,7 +290,7 @@ export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ES
 }
 // We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
 // @internal
-export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'double'>;
 
 // @internal
 export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
@@ -312,7 +312,7 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 // @internal
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string';
+  literalType: 'keyword';
   value: string;
 }
 

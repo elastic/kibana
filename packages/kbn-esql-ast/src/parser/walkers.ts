@@ -346,7 +346,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
 
   // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue(), 'decimal');
+    return createNumericLiteral(ctx.decimalValue(), 'double');
   }
 
   // Integer type encompasses integer
@@ -358,7 +358,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
   }
   if (ctx instanceof StringLiteralContext) {
     // String literal covers multiple ES|QL types: text and keyword types
-    return createLiteral('string', ctx.string_().QUOTED_STRING());
+    return createLiteral('keyword', ctx.string_().QUOTED_STRING());
   }
   if (
     ctx instanceof NumericArrayLiteralContext ||
@@ -371,14 +371,14 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
       const isDecimal =
         numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
+      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
       // String literal covers multiple ES|QL types: text and keyword types
-      const literal = createLiteral('string', string.QUOTED_STRING());
+      const literal = createLiteral('keyword', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);
       }
@@ -534,7 +534,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);
-        const literal = createLiteral('string', regex._pattern.QUOTED_STRING());
+        const literal = createLiteral('keyword', regex._pattern.QUOTED_STRING());
         if (literal) {
           fn.args.push(literal);
         }
@@ -672,7 +672,7 @@ export function visitDissect(ctx: DissectCommandContext) {
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      ? [createLiteral('keyword', pattern), ...visitDissectOptions(ctx.commandOptions())]
       : []),
   ].filter(nonNullable);
 }
@@ -682,7 +682,7 @@ export function visitGrok(ctx: GrokCommandContext) {
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('string', pattern)]
+      ? [createLiteral('keyword', pattern)]
       : []),
   ].filter(nonNullable);
 }

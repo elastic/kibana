@@ -375,7 +375,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'string',
+              literalType: 'keyword',
               name: '"2"',
             },
             {
@@ -390,7 +390,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'decimal',
+              literalType: 'double',
               name: '3.14',
             },
           ]);
@@ -473,7 +473,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'decimal',
+                    literalType: 'double',
                     name: '3.3',
                   },
                 ],
@@ -492,7 +492,7 @@ describe('structurally can walk all nodes', () => {
               },
               {
                 type: 'literal',
-                literalType: 'decimal',
+                literalType: 'double',
                 name: '3.3',
               },
             ]);
