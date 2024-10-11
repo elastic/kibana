@@ -139,6 +139,10 @@ export function initializeEditApi(
           defaultMessage: 'Lens',
         }),
       supportedTriggers,
+      /**
+       * This is the key method to enable the new Editing capabilities API
+       * Lens will leverage the netural nature of this function to build the inline editing experience
+       */
       onEdit: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
