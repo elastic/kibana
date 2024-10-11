@@ -39,6 +39,16 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async reset(id: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/${id}/_reset`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send();
+
+      return body;
+    },
+
     async update(
       { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
       roleAuthc: RoleCredentials

@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./delete_slo'));
     loadTestFile(require.resolve('./get_slo'));
     loadTestFile(require.resolve('./find_slo'));
+    loadTestFile(require.resolve('./reset_slo'));
   });
 }
