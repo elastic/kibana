@@ -25,7 +25,6 @@ export const registerCoreHandlers = (
   env: Env,
   log: Logger
 ) => {
-  log.info(`Registering Core HTTP lifecycle handlers with config: ${JSON.stringify(config)}`);
   // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
   // add extra request checks stuff
