@@ -16,8 +16,7 @@
     {
       "version": "8.15.3",
       "branch": "8.15",
-      "previousMajor": true,
-      "previousMinor": true
+      "previousMajor": true
     },
     {
       "version": "7.17.25",
