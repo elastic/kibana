@@ -163,7 +163,13 @@ export const PackageInfoSchema = schema
     release: schema.maybe(
       schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
     ),
-    type: schema.maybe(schema.oneOf([schema.literal('integration'), schema.literal('input')])),
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('integration'),
+        schema.literal('input'),
+        schema.literal('content'),
+      ])
+    ),
     path: schema.maybe(schema.string()),
     download: schema.maybe(schema.string()),
     internal: schema.maybe(schema.boolean()),
@@ -192,6 +198,11 @@ export const PackageInfoSchema = schema
     format_version: schema.maybe(schema.string()),
     vars: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
     latestVersion: schema.maybe(schema.string()),
+    discovery: schema.maybe(
+      schema.object({
+        fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+      })
+    ),
   })
   // sometimes package list response contains extra properties, e.g. installed_kibana
   .extendsDeep({

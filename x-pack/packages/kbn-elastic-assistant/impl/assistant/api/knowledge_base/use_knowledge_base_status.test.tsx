@@ -32,7 +32,6 @@ jest.mock('@tanstack/react-query', () => ({
 
 const statusResponse = {
   elser_exists: true,
-  esql_exists: true,
   index_exists: true,
   pipeline_exists: true,
 };

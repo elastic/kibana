@@ -85,8 +85,6 @@ import {
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
 const UtilitySwitch = styled(EuiSwitch)`
@@ -128,7 +126,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     timelines,
     telemetry,
   } = useKibana().services;
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const {
     [RuleDetailTabs.executionResults]: {
@@ -473,15 +470,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   );
 
   const executionLogColumns = useMemo(() => {
-    const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
-      if ('field' in item) {
-        return item.field === 'type' ? isManualRuleRunEnabled : true;
-      }
-      return true;
-    });
+    const columns = [...EXECUTION_LOG_COLUMNS];
     let messageColumnWidth = 50;
 
-    if (showSourceEventTimeRange && isManualRuleRunEnabled) {
+    if (showSourceEventTimeRange) {
       columns.push(...getSourceEventTimeRangeColumns());
       messageColumnWidth = 30;
     }
@@ -506,7 +498,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
     return columns;
   }, [
-    isManualRuleRunEnabled,
     actions,
     docLinks,
     showMetricColumns,
@@ -583,14 +574,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 updatedAt: dataUpdatedAt,
               })}
             </UtilityBarText>
-            {isManualRuleRunEnabled && (
-              <UtilitySwitch
-                label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
-                checked={showSourceEventTimeRange}
-                compressed={true}
-                onChange={handleShowSourceEventTimeRange}
-              />
-            )}
+            <UtilitySwitch
+              label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+              checked={showSourceEventTimeRange}
+              compressed={true}
+              onChange={handleShowSourceEventTimeRange}
+            />
             <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}

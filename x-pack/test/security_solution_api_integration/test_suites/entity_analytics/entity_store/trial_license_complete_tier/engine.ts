@@ -27,10 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityType('user');
 
-        const expectedTransforms = [
-          'entities-v1-history-ea_default_user_entity_store',
-          'entities-v1-latest-ea_default_user_entity_store',
-        ];
+        const expectedTransforms = ['entities-v1-latest-ea_default_user_entity_store'];
 
         await utils.expectTransformsExist(expectedTransforms);
       });
@@ -38,10 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityType('host');
 
-        const expectedTransforms = [
-          'entities-v1-history-ea_default_host_entity_store',
-          'entities-v1-latest-ea_default_host_entity_store',
-        ];
+        const expectedTransforms = ['entities-v1-latest-ea_default_host_entity_store'];
 
         await utils.expectTransformsExist(expectedTransforms);
       });
@@ -173,7 +167,6 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_host_entity_store');
         await utils.expectTransformNotFound('entities-v1-latest-ea_host_entity_store');
       });
 
@@ -187,7 +180,6 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_user_entity_store');
         await utils.expectTransformNotFound('entities-v1-latest-ea_user_entity_store');
       });
     });

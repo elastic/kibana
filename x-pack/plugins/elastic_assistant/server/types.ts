@@ -244,7 +244,6 @@ export interface AssistantToolParams {
   llm?: ActionsClientLlm | AssistantToolLlm;
   isOssModel?: boolean;
   logger: Logger;
-  modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
   request: KibanaRequest<

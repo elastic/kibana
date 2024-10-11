@@ -154,6 +154,27 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const navigateToAddIntegrationWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      options
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const navigateToAddIntegrationCspmWithVersionPage = async (
     packageVersion: string,
     space?: string
@@ -505,6 +526,7 @@ export function AddCisIntegrationFormPageProvider({
     cisAzure,
     cisAws,
     cisGcp,
+    navigateToAddIntegrationWithVersionPage,
     navigateToAddIntegrationCspmPage,
     navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,

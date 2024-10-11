@@ -3443,7 +3443,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "{ elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }"
+          "{ elser_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -5737,7 +5737,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; esql_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_available: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; security_labs_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }>"
+          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_available: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; security_labs_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; security_labs_exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,

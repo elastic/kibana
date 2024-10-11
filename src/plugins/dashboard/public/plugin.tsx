@@ -72,13 +72,13 @@ import {
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { buildAllDashboardActions } from './dashboard_actions';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -227,14 +227,6 @@ export class DashboardPlugin
       },
     });
 
-    core.getStartServices().then(([, deps]) => {
-      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
-      embeddable.registerEmbeddableFactory(
-        dashboardContainerFactory.type,
-        dashboardContainerFactory
-      );
-    });
-
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -331,14 +323,12 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    Promise.all([import('./dashboard_actions'), untilPluginStartServicesReady()]).then(
-      ([{ buildAllDashboardActions }]) => {
-        buildAllDashboardActions({
-          plugins,
-          allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-        });
-      }
-    );
+    untilPluginStartServicesReady().then(() => {
+      buildAllDashboardActions({
+        plugins,
+        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+      });
+    });
 
     return {
       locator: this.locator,

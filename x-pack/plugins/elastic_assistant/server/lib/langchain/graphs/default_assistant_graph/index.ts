@@ -103,7 +103,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     logger,
-    modelExists: isEnabledKnowledgeBase,
     onNewReplacements,
     replacements,
     request,

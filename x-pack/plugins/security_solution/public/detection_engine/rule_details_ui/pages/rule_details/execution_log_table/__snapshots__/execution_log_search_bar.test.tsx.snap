@@ -16,6 +16,20 @@ exports[`ExecutionLogSearchBar snapshots renders correctly against snapshot 1`] 
       <EuiFlexItem
         grow={true}
       >
+        <ExecutionRunTypeFilter
+          items={
+            Array [
+              "standard",
+              "backfill",
+            ]
+          }
+          onChange={[Function]}
+          selectedItems={Array []}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+      >
         <ExecutionStatusFilter
           items={
             Array [

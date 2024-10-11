@@ -27,7 +27,8 @@ export const useSetupTechnology = ({
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const defaultSetupTechnology =
-    isEditPage && isAgentlessEnabled ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;
+    isEditPage && isAgentlessAvailable ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;
+
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(defaultSetupTechnology);
 
   const updateSetupTechnology = (value: SetupTechnology) => {

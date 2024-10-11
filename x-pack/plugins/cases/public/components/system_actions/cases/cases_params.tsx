@@ -43,7 +43,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     notifications: { toasts },
     data: { dataViews: dataViewsService },
   } = useKibana().services;
-  const owner = getOwnerFromRuleConsumerProducer(featureId, producerId);
+  const owner = getOwnerFromRuleConsumerProducer({ consumer: featureId, producer: producerId });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
     http,

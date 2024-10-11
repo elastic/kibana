@@ -82,6 +82,7 @@ export const RulesSettingsFlappingFormSection = memo(
             <RuleSettingsFlappingMessage
               lookBackWindow={lookBackWindow}
               statusChangeThreshold={statusChangeThreshold}
+              isUsingRuleSpecificFlapping={false}
             />
           </EuiPanel>
         </EuiFlexItem>

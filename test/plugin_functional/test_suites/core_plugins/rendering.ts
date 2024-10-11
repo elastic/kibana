@@ -315,6 +315,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean?)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
+
+        'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',

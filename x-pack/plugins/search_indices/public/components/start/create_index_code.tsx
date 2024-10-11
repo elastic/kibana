@@ -86,6 +86,13 @@ export const CreateIndexCodeView = ({
               application={application}
               sharePlugin={share}
               consolePlugin={consolePlugin}
+              telemetryId={`${selectedLanguage}_create_index`}
+              onClick={() => {
+                usageTracker.click([
+                  AnalyticsEvents.startCreateIndexRunInConsole,
+                  `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+                ]);
+              }}
             />
           </EuiFlexItem>
         )}
