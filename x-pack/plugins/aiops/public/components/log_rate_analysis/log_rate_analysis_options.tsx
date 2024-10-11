@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
@@ -23,6 +23,7 @@ import {
   setSkippedColumns,
   type LogRateAnalysisResultsTableColumnName,
 } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
+import { setCurrentFieldFilterSkippedItems } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_field_candidates_slice';
 
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
 import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
@@ -82,13 +83,11 @@ const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 export interface LogRateAnalysisOptionsProps {
   foundGroups: boolean;
   growFirstItem?: boolean;
-  onFieldsFilterChange: (skippedFieldsUpdate: string[]) => void;
 }
 
 export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   foundGroups,
   growFirstItem = false,
-  onFieldsFilterChange,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -96,19 +95,10 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const { isRunning } = useAppSelector((s) => s.logRateAnalysisStream);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
   const { skippedColumns } = useAppSelector((s) => s.logRateAnalysisTable);
-  const { fieldFilterUniqueItems, fieldFilterSkippedItems } = fieldCandidates;
+  const { fieldFilterUniqueItems, initialFieldFilterSkippedItems } = fieldCandidates;
   const fieldFilterButtonDisabled =
     isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
   const toggleIdSelected = groupResults ? resultsGroupedOnId : resultsGroupedOffId;
-
-  // null is used as the uninitialized state to identify the first load.
-  const [skippedFields, setSkippedFields] = useState<string[] | null>(null);
-
-  // Set skipped fields only on first load, otherwise we'd overwrite the user's selection.
-  useEffect(() => {
-    if (skippedFields === null && fieldFilterSkippedItems.length > 0)
-      setSkippedFields(fieldFilterSkippedItems);
-  }, [fieldFilterSkippedItems, skippedFields]);
 
   const onGroupResultsToggle = (optionId: string) => {
     dispatch(setGroupResults(optionId === resultsGroupedOnId));
@@ -120,9 +110,8 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
     dispatch(setSkippedColumns(columns));
   };
 
-  const onFieldsFilterChangeHandler = (skippedFieldsUpdate: string[]) => {
-    setSkippedFields(skippedFieldsUpdate);
-    onFieldsFilterChange(skippedFieldsUpdate);
+  const onFieldsFilterChange = (skippedFieldsUpdate: string[]) => {
+    dispatch(setCurrentFieldFilterSkippedItems(skippedFieldsUpdate));
   };
 
   // Disable the grouping switch toggle only if no groups were found,
@@ -173,8 +162,8 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
           popoverButtonTitle={fieldsButton}
           selectedItemLimit={1}
           uniqueItemNames={fieldFilterUniqueItems}
-          initialSkippedItems={fieldFilterSkippedItems}
-          onChange={onFieldsFilterChangeHandler}
+          initialSkippedItems={initialFieldFilterSkippedItems}
+          onChange={onFieldsFilterChange}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

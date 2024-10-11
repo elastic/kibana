@@ -135,21 +135,27 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setEmbeddableOptionsVisible((s) => !s);
   };
 
-  const onFieldsFilterChange = (skippedFieldsUpdate: string[]) => {
+  const { currentFieldFilterSkippedItems, keywordFieldCandidates, textFieldCandidates } =
+    fieldCandidates;
+
+  useEffect(() => {
+    if (currentFieldFilterSkippedItems === null) return;
+
     dispatch(resetResults());
     setOverrides({
       loaded: 0,
       remainingKeywordFieldCandidates: keywordFieldCandidates.filter(
-        (d) => !skippedFieldsUpdate.includes(d)
+        (d) => !currentFieldFilterSkippedItems.includes(d)
       ),
       remainingTextFieldCandidates: textFieldCandidates.filter(
-        (d) => !skippedFieldsUpdate.includes(d)
+        (d) => !currentFieldFilterSkippedItems.includes(d)
       ),
       regroupOnly: false,
     });
     startHandler(true, false);
-  };
-  const { fieldFilterSkippedItems, keywordFieldCandidates, textFieldCandidates } = fieldCandidates;
+    // custom check to trigger on currentFieldFilterSkippedItems change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentFieldFilterSkippedItems]);
 
   function cancelHandler() {
     abortCtrl.current.abort();
@@ -209,10 +215,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       dispatch(resetResults());
       setOverrides({
         remainingKeywordFieldCandidates: keywordFieldCandidates.filter(
-          (d) => fieldFilterSkippedItems !== null && fieldFilterSkippedItems.includes(d)
+          (d) =>
+            currentFieldFilterSkippedItems === null || !currentFieldFilterSkippedItems.includes(d)
         ),
         remainingTextFieldCandidates: textFieldCandidates.filter(
-          (d) => fieldFilterSkippedItems !== null && fieldFilterSkippedItems.includes(d)
+          (d) =>
+            currentFieldFilterSkippedItems === null || !currentFieldFilterSkippedItems.includes(d)
         ),
       });
     }
@@ -325,10 +333,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
-            <LogRateAnalysisOptions
-              foundGroups={foundGroups}
-              onFieldsFilterChange={onFieldsFilterChange}
-            />
+            <LogRateAnalysisOptions foundGroups={foundGroups} />
           )}
           {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
@@ -354,11 +359,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <LogRateAnalysisOptions
-              foundGroups={foundGroups}
-              growFirstItem={true}
-              onFieldsFilterChange={onFieldsFilterChange}
-            />
+            <LogRateAnalysisOptions foundGroups={foundGroups} growFirstItem={true} />
           </EuiFlexGroup>
         </>
       )}
