@@ -223,7 +223,7 @@ export async function mountApp(
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input: { attributes: state.attributes, savedObject: state.savedObjectId },
+          input: { ...state, attributes: state.attributes, savedObject: state.savedObjectId },
           searchSessionId: data.search.session.getSessionId(),
         },
       });

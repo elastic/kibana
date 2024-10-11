@@ -188,9 +188,11 @@ export function SaveModalContainer({
 
 function fromDocumentToSerializedState(
   doc: LensDocument,
-  panelSettings: Partial<LensSerializedState>
+  panelSettings: Partial<LensSerializedState>,
+  originalInput?: LensAppProps['initialInput']
 ): LensSerializedState {
   return {
+    ...originalInput,
     attributes: omit(doc, 'savedObjectId'),
     savedObjectId: doc.savedObjectId,
     ...panelSettings,
@@ -315,9 +317,13 @@ export const runSaveLensVisualization = async (
 
   try {
     // wrap the doc into a serializable state
-    const newDoc = fromDocumentToSerializedState(docToSave, {
-      timeRange: saveProps.panelTimeRange,
-    });
+    const newDoc = fromDocumentToSerializedState(
+      docToSave,
+      {
+        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
+      },
+      originalInput
+    );
 
     let savedObjectId: string | undefined;
     try {
