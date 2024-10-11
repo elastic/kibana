@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Result } from './result';
-export {
-  resultMetaData,
-  resultToFieldFromMappingResponse,
-  resultToFieldFromMappings as resultToField,
-  reorderFieldsInImportance,
-} from './result_metadata';
+export const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector', 'sparse_vector'];
