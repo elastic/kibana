@@ -10,8 +10,6 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import type { SplunkRuleMigration } from '../../../../../../../common/api/siem_migrations/splunk/rules/splunk_rule.gen';
 import type { SplunkRuleMigrationTranslateRuleResponse } from '../../../../../../../common/api/siem_migrations/splunk/rules/translate_rule.gen';
 import { SplunkRuleMigrationTranslateRuleRequestBody } from '../../../../../../../common/api/siem_migrations/splunk/rules/translate_rule.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -75,7 +73,7 @@ export const registerSplunkTranslateRuleRoute = (
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
-          const graph = await getTranslateRuleGraph({ model, esqlKnowledgeBaseTool });
+          const graph = getTranslateRuleGraph({ model, esqlKnowledgeBaseTool });
           const translateRuleState = await graph.invoke(parameters, options);
 
           // const { response, messages } = translateRuleState as TranslateRuleState;

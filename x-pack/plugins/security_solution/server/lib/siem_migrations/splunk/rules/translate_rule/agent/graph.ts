@@ -22,20 +22,16 @@ const callModel = async ({
   state,
   model,
 }: TranslateRuleNodeParams): Promise<Partial<TranslateRuleState>> => {
-  // const initialMessages = await TRANSLATE_RULE_MAIN_PROMPT.format({
+  const response = await model.invoke(state.messages);
+  // const translateCall = TRANSLATE_RULE_MAIN_PROMPT.pipe((initialMessages) =>
+  //   model.invoke([...initialMessages.toChatMessages(), ...state.messages])
+  // );
+
+  // const response = await translateCall.invoke({
   //   splunkRuleTitle: state.splunkRuleTitle,
   //   splunkRuleDescription: state.splunkRuleDescription,
   //   splunkRuleQuery: state.splunkRuleQuery,
   // });
-  const translateCall = TRANSLATE_RULE_MAIN_PROMPT.pipe((initialMessages) =>
-    model.invoke([...initialMessages.toChatMessages(), ...state.messages])
-  );
-
-  const response = await translateCall.invoke({
-    splunkRuleTitle: state.splunkRuleTitle,
-    splunkRuleDescription: state.splunkRuleDescription,
-    splunkRuleQuery: state.splunkRuleQuery,
-  });
   return { messages: [response] };
 };
 
@@ -51,10 +47,27 @@ function toolConditionalEdge(state: TranslateRuleState) {
   return END;
 }
 
-export async function getTranslateRuleGraph({
-  model,
-  esqlKnowledgeBaseTool,
-}: TranslateRuleGraphParams) {
+// export async function getTranslateRuleGraph({
+//   model,
+//   esqlKnowledgeBaseTool,
+// }: TranslateRuleGraphParams) {
+//   if (model.bindTools === undefined) {
+//     throw new Error(`The ${model.name} model does not support tools`);
+//   }
+//   const tools: StructuredTool[] = [esqlKnowledgeBaseTool];
+//   model.bindTools(tools);
+
+//   const translateRuleGraph = new StateGraph(translateRuleState)
+//     .addNode('callModel', (state: TranslateRuleState) => callModel({ state, model }))
+//     .addNode('tools', new ToolNode<TranslateRuleState>(tools))
+//     .addEdge(START, 'callModel')
+//     .addConditionalEdges('callModel', toolConditionalEdge)
+//     .addEdge('tools', 'callModel');
+
+//   return translateRuleGraph.compile();
+// }
+
+export function getTranslateRuleGraph({ model, esqlKnowledgeBaseTool }: TranslateRuleGraphParams) {
   if (model.bindTools === undefined) {
     throw new Error(`The ${model.name} model does not support tools`);
   }
@@ -68,5 +81,17 @@ export async function getTranslateRuleGraph({
     .addConditionalEdges('callModel', toolConditionalEdge)
     .addEdge('tools', 'callModel');
 
-  return translateRuleGraph.compile();
+  const graph = translateRuleGraph.compile();
+
+  const invoke: typeof graph.invoke = async (state, options) => {
+    const mainPrompts = await TRANSLATE_RULE_MAIN_PROMPT.formatMessages({
+      splunkRuleTitle: state.splunkRuleTitle,
+      splunkRuleDescription: state.splunkRuleDescription,
+      splunkRuleQuery: state.splunkRuleQuery,
+    });
+
+    return graph.invoke({ ...state, messages: mainPrompts }, options);
+  };
+
+  return { invoke };
 }
