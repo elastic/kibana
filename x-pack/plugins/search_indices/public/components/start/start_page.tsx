@@ -17,6 +17,7 @@ import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
 import { StartPageError } from './status_error';
+import { useInitSideNav } from './hooks/use_init_side_nav';
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin } = useKibana().services;
@@ -32,6 +33,7 @@ export const ElasticsearchStartPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  useInitSideNav(indicesData);
   useIndicesRedirect(indicesData);
 
   return (
