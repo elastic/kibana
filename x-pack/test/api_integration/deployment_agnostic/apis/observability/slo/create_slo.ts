@@ -8,9 +8,11 @@
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import { TransformHelper, createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -19,18 +21,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
   const samlAuth = getService('samlAuth');
   const dataViewApi = getService('dataViewApi');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
   let internalHeaders: InternalRequestHeader;
+  let transformHelper: TransformHelper;
 
   describe('Create SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalHeaders = samlAuth.getInternalRequestHeader();
+      transformHelper = createTransformHelper(getService, adminRoleAuthc, internalHeaders);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -97,36 +100,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         version: 2,
       });
 
-      const rollUpTransformResponse = await supertestWithoutAuth
-        .get(`/internal/transform/transforms/slo-${id}-1`)
-        .set(adminRoleAuthc.apiKeyHeader)
-        .set(internalHeaders)
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(200);
-
-      expect(rollUpTransformResponse.body.transforms[0].source.index).eql(['kbn-data-forge*']);
-      expect(rollUpTransformResponse.body.transforms[0].dest).eql({
+      const rollUpTransformResponse = await transformHelper.assertExist(getSLOTransformId(id, 1));
+      expect(rollUpTransformResponse.transforms[0].source.index).eql(['kbn-data-forge*']);
+      expect(rollUpTransformResponse.transforms[0].dest).eql({
         index: '.slo-observability.sli-v3.3',
         pipeline: `.slo-observability.sli.pipeline-${id}-1`,
       });
-      expect(rollUpTransformResponse.body.transforms[0].pivot.group_by).eql({
+      expect(rollUpTransformResponse.transforms[0].pivot.group_by).eql({
         'slo.groupings.tags': { terms: { field: 'tags' } },
         '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
       });
 
-      const summaryTransform = await supertestWithoutAuth
-        .get(`/internal/transform/transforms/slo-summary-${id}-1`)
-        .set(adminRoleAuthc.apiKeyHeader)
-        .set(internalHeaders)
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(200);
-
-      expect(summaryTransform.body.transforms[0].source.index).eql([
+      const summaryTransformResponse = await transformHelper.assertExist(
+        getSLOSummaryTransformId(id, 1)
+      );
+      expect(summaryTransformResponse.transforms[0].source.index).eql([
         '.slo-observability.sli-v3.3*',
       ]);
-      expect(summaryTransform.body.transforms[0].dest).eql({
+      expect(summaryTransformResponse.transforms[0].dest).eql({
         index: '.slo-observability.summary-v3.3',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });

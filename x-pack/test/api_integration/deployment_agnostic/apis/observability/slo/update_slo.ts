@@ -12,26 +12,27 @@ import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/com
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import { TransformHelper, createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const sloApi = getService('sloApi');
   const logger = getService('log');
   const samlAuth = getService('samlAuth');
-  const retry = getService('retry');
   const dataViewApi = getService('dataViewApi');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
   let internalHeaders: InternalRequestHeader;
+  let transformHelper: TransformHelper;
 
   describe('Update SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalHeaders = samlAuth.getInternalRequestHeader();
+      transformHelper = createTransformHelper(getService, adminRoleAuthc, internalHeaders);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -69,8 +70,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(updateResponse).property('revision', 1);
       expect(updateResponse).property('name', 'updated name');
 
-      await assertTransformExist(getSLOTransformId(sloId, 1));
-      await assertTransformExist(getSLOSummaryTransformId(sloId, 1));
+      await transformHelper.assertExist(getSLOTransformId(sloId, 1));
+      await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 1));
     });
 
     it('updates the definition with a revision bump', async () => {
@@ -87,45 +88,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(updateResponse).property('revision', 2);
       expect(updateResponse.objective).eql({ target: 0.63 });
 
-      await assertTransformDeleted(getSLOTransformId(sloId, 1));
-      await assertTransformDeleted(getSLOSummaryTransformId(sloId, 1));
+      await transformHelper.assertNotFound(getSLOTransformId(sloId, 1));
+      await transformHelper.assertNotFound(getSLOSummaryTransformId(sloId, 1));
 
-      await assertTransformExist(getSLOTransformId(sloId, 2));
-      await assertTransformExist(getSLOSummaryTransformId(sloId, 2));
+      await transformHelper.assertExist(getSLOTransformId(sloId, 2));
+      await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 2));
     });
   });
-
-  async function assertTransformDeleted(transformId: string) {
-    return await retry.tryWithRetries(
-      `Wait for transform ${transformId} to be deleted`,
-      async () => {
-        await supertestWithoutAuth
-          .get(`/internal/transform/transforms/${transformId}`)
-          .set(adminRoleAuthc.apiKeyHeader)
-          .set(internalHeaders)
-          .set('elastic-api-version', '1')
-          .send()
-          .timeout(10000)
-          .expect(404);
-      },
-      { retryCount: 5, retryDelay: 2000 }
-    );
-  }
-
-  async function assertTransformExist(transformId: string) {
-    return await retry.tryWithRetries(
-      `Wait for transform ${transformId} to exist`,
-      async () => {
-        await supertestWithoutAuth
-          .get(`/internal/transform/transforms/${transformId}`)
-          .set(adminRoleAuthc.apiKeyHeader)
-          .set(internalHeaders)
-          .set('elastic-api-version', '1')
-          .send()
-          .timeout(10000)
-          .expect(200);
-      },
-      { retryCount: 5, retryDelay: 2000 }
-    );
-  }
 }
