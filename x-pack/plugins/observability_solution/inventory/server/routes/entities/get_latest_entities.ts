@@ -31,7 +31,7 @@ export async function getLatestEntities({
   entityTypes?: EntityType[];
   kuery?: string;
 }) {
-  // alertCount doesn't exist in entties. Ignore it and sort by entity.lastSeenTimestamp by default
+  // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
   const entitiesSortField = sortField === 'alertsCount' ? ENTITY_LAST_SEEN : sortField;
 
   const request = {
