@@ -37,7 +37,8 @@ import { SearchIndexDetailsMappings } from './details_page_mappings';
 import { SearchIndexDetailsSettings } from './details_page_settings';
 import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item';
 import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
-import { DEFAULT_PAGE_SIZE } from '../index_documents/constants';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
@@ -58,10 +59,7 @@ export const SearchIndexDetailsPage = () => {
     error: mappingsError,
   } = useIndexMapping(indexName);
   const { data: indexDocuments, isInitialLoading: indexDocumentsIsInitialLoading } =
-    useIndexDocumentSearch(indexName, {
-      pageSize: DEFAULT_PAGE_SIZE,
-      pageIndex: 0,
-    });
+    useIndexDocumentSearch(indexName);
 
   const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
@@ -76,6 +74,7 @@ export const SearchIndexDetailsPage = () => {
     setDocumentsLoading(isInitialLoading);
     setDocumentsExists(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setDocumentsExists, setDocumentsLoading]);
+  const usageTracker = useUsageTracker();
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
@@ -121,9 +120,19 @@ export const SearchIndexDetailsPage = () => {
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {
       history.push(`index_details/${indexName}/${tab.id}`);
+
+      const tabEvent = {
+        [SearchIndexDetailsTabs.DATA]: AnalyticsEvents.indexDetailsNavDataTab,
+        [SearchIndexDetailsTabs.MAPPINGS]: AnalyticsEvents.indexDetailsNavMappingsTab,
+        [SearchIndexDetailsTabs.SETTINGS]: AnalyticsEvents.indexDetailsNavSettingsTab,
+      }[tab.id];
+
+      if (tabEvent) {
+        usageTracker.click(tabEvent);
+      }
     },
 
-    [history, indexName]
+    [history, indexName, usageTracker]
   );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
