@@ -162,7 +162,6 @@ const TextEmbeddingParamsFields: React.FunctionComponent<{
     { value: 'search', text: 'search' },
   ];
 
-  console.log(errors)
   return (
     <>
       <EuiFormRow

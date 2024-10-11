@@ -510,7 +510,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           validations: [],
           value: null,
           ui_restrictions: [],
-          default_value: null,
+          default_value: 1,
           depends_on: [],
         },
         num_threads: {
@@ -524,7 +524,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           validations: [],
           value: null,
           ui_restrictions: [],
-          default_value: null,
+          default_value: 2,
           depends_on: [],
         },
       },
