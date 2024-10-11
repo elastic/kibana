@@ -291,6 +291,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: AGENTS_TABLE_FIELDS.OUTPUT_INTEGRATION,
       sortable: true,
+      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.integrationsOutputTitle', {
         defaultMessage: 'Output for integrations',
       }),
@@ -299,16 +300,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         const agentPolicy = agent?.policy_id
           ? agentPoliciesIndexedById[agent.policy_id]
           : undefined;
-        return (
-          <>
-            <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />
-          </>
-        );
+        return <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />;
       },
     },
     {
       field: AGENTS_TABLE_FIELDS.OUTPUT_MONITORING,
       sortable: true,
+      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.monitoringOutputTitle', {
         defaultMessage: 'Output for Monitoring',
       }),

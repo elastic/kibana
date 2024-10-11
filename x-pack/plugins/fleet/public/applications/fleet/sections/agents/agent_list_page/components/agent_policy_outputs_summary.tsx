@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiListGroup,
+  EuiPopover,
+  EuiPopoverTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import type { CSSProperties } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import type { AgentPolicy, Output } from '../../../../types';
 import { useLink } from '../../../../hooks';
+
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
 
@@ -21,63 +33,93 @@ export const AgentPolicyOutputsSummary = memo<{
   direction?: 'column' | 'row';
 }>(({ outputs, agentPolicy, monitoring, direction = 'row' }) => {
   const { getHref } = useLink();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
 
   const defaultOutput = outputs.find((item) => item.is_default);
   const policyId = agentPolicy?.id;
 
   const outputToDisplay = useMemo(() => {
-    if (!policyId)
-      return {
-        name: defaultOutput?.name ?? '',
-        id: defaultOutput?.id ?? '',
-      };
+    if (!agentPolicy || !policyId) return defaultOutput;
 
     if (monitoring) {
-      const monitoringOutput = !!agentPolicy?.monitoring_output_id
+      return !!agentPolicy?.monitoring_output_id
         ? outputs.find((item) => item.id === agentPolicy.monitoring_output_id)
         : defaultOutput;
-      return {
-        name: monitoringOutput?.name ?? '',
-        id: monitoringOutput?.id ?? '',
-      };
     } else {
-      const dataOutput = !!agentPolicy?.data_output_id
+      return !!agentPolicy?.data_output_id
         ? outputs.find((item) => item.id === agentPolicy.data_output_id)
         : defaultOutput;
-      return {
-        name: dataOutput?.name ?? '',
-        id: dataOutput?.id ?? '',
-      };
     }
   }, [agentPolicy, defaultOutput, monitoring, outputs, policyId]);
-  const { name, id } = outputToDisplay;
+
+  const listItems: EuiListGroupItemProps[] = useMemo(() => {
+    if (!outputToDisplay) return [];
+
+    const { hosts } = outputToDisplay;
+    return (hosts || []).map((host) => {
+      return {
+        'data-test-subj': `host-${host}`,
+        label: host,
+        href: getHref('settings_edit_outputs', { outputId: outputToDisplay.id }),
+        iconType: 'dot',
+      };
+    });
+  }, [getHref, outputToDisplay]);
+
+  if (!outputToDisplay) return null;
+
+  const { name, id, hosts } = outputToDisplay;
+  const outputHost = hosts?.[0];
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          direction={direction}
-          gutterSize={direction === 'column' ? 'none' : 's'}
-          alignItems="baseline"
-          style={MIN_WIDTH}
-          responsive={false}
-          justifyContent={'flexStart'}
+    <EuiFlexGroup
+      direction={direction}
+      gutterSize={direction === 'column' ? 'none' : 's'}
+      alignItems="baseline"
+      style={MIN_WIDTH}
+      responsive={false}
+      justifyContent={'flexStart'}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          className={`eui-textTruncate`}
+          style={WRAP_WHITE_SPACE}
+          href={getHref('settings_edit_outputs', { outputId: id })}
+          title={outputHost || name}
+          data-test-subj="outputNameLink"
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup style={MIN_WIDTH} gutterSize="s" alignItems="baseline" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  style={WRAP_WHITE_SPACE}
-                  href={getHref('settings_edit_outputs', { outputId: id })}
-                  title={name || id}
-                  data-test-subj="outputNameLink"
-                >
-                  {name}
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          {outputHost || name}
+        </EuiLink>
       </EuiFlexItem>
+
+      {hosts && hosts.length > 1 && !monitoring && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            data-test-subj="outputHostsNumberBadge"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onClickAriaLabel="Open output hosts popover"
+          >
+            +{hosts.length - 1}
+          </EuiBadge>
+          <EuiPopover
+            data-test-subj="outputHostsPopover"
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            anchorPosition="downCenter"
+          >
+            <EuiPopoverTitle>
+              {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.title', {
+                defaultMessage: 'Output for Integrations',
+              })}
+            </EuiPopoverTitle>
+            <div style={{ width: '280px' }}>
+              <EuiListGroup listItems={listItems} color="primary" size="s" gutterSize="none" />
+            </div>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });
