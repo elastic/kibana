@@ -25,7 +25,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
 const testDomain = 'myTest';
 
-describe('Hover actions', { tags: ['@testhere', '@ess', '@serverless'] }, () => {
+describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
@@ -46,6 +46,14 @@ describe('Hover actions', { tags: ['@testhere', '@ess', '@serverless'] }, () => 
     });
     openHoverActions();
     mouseoverOnToOverflowItem();
+  });
+
+  it('Copy value', () => {
+    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
+
+    clickOnCopyValue();
+
+    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
 
   it('Adds global filter - filter in', () => {
@@ -74,14 +82,5 @@ describe('Hover actions', { tags: ['@testhere', '@ess', '@serverless'] }, () => 
   it('Show topN', () => {
     clickOnShowTopN();
     cy.get(TOP_N_CONTAINER).should('exist').should('contain.text', 'Top destination.domain');
-  });
-
-  // it('Copy value', { tags: ['@testhere'] }, () => {
-  it('Copy value', () => {
-    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
-
-    clickOnCopyValue();
-
-    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
 });
