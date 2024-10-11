@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await lens.openInEditor();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
