@@ -66,13 +66,16 @@ export const Overview = () => {
   );
 
   const shouldShowCallout = () => {
-    if (dataStreamsStatus !== 'success') {
+    if (
+      dataStreamsStatus !== 'success' ||
+      renderMode.mode !== 'page' ||
+      dismissedAddMetricsCallout
+    ) {
       return false;
     }
 
     const { type } = asset;
-    const baseCondition =
-      !isMetricsSignal(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
+    const baseCondition = !isMetricsSignal(dataStreams);
 
     const isRelevantContainer =
       type === 'container' && (isDockerContainer || isKubernetesContainer);
