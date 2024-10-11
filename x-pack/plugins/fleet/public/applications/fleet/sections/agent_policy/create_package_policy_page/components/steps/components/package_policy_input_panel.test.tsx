@@ -21,7 +21,7 @@ import type {
 
 import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_policy_input_panel';
 
-jest.mock('../../../../../../../../hooks', () => {
+jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
     useAgentless: jest.fn(),
   };

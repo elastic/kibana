@@ -83,7 +83,7 @@ import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
 
-import { isAgentlessEnabled, isAgentlessIntegration } from '../../utils/agentless';
+import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
@@ -512,7 +512,7 @@ async function installPackageFromRegistry({
     }
 
     // only allow install of agentless packages if agentless is enabled, or if using force flag
-    if (!isAgentlessEnabled() && isAgentlessIntegration(packageInfo)) {
+    if (!isAgentlessEnabled() && isOnlyAgentlessIntegration(packageInfo)) {
       if (!force) {
         throw new PackageInvalidDeploymentMode(
           `${pkgkey} contains agentless policy templates, agentless is not available on this deployment`
