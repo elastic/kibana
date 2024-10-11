@@ -153,12 +153,10 @@ const formatAssistantToolParams = ({
   alertsIndexPattern,
   anonymizationFields: [...(anonymizationFields ?? []), ...REQUIRED_FOR_ATTACK_DISCOVERY],
   isEnabledKnowledgeBase: false, // not required for attack discovery
-  chain: undefined, // not required for attack discovery
   esClient,
   langChainTimeout,
   llm,
   logger,
-  modelExists: false, // not required for attack discovery
   onNewReplacements,
   replacements: latestReplacements,
   request,

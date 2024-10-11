@@ -606,7 +606,6 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       eventLogger: this.eventLogger!,
       executionContext: core.executionContext,
-      getRulesClientWithRequest,
       kibanaBaseUrl: this.kibanaBaseUrl,
       logger,
       maintenanceWindowsService: new MaintenanceWindowsService({
@@ -677,7 +676,10 @@ export class AlertingPlugin {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
-        getRulesSettingsClient: () => {
+        getRulesSettingsClient: (withoutAuth?: boolean) => {
+          if (withoutAuth) {
+            return rulesSettingsClientFactory.create(request);
+          }
           return rulesSettingsClientFactory.createWithAuthorization(request);
         },
         getMaintenanceWindowClient: () => {
