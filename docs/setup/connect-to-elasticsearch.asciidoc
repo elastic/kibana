@@ -80,25 +80,18 @@ You can upload different file formats for analysis with the Data Visualizer:
 
 File formats supported up to 500 MB:
 
-- CSV
-
-- TSV
-
-- NDJSON
-
-- Log files
+* CSV
+* TSV
+* NDJSON
+* Log files
 
 File formats supported up to 60 MB:
 
-- PDF
-
-- Microsoft Office files (Word, Excel, PowerPoint)
-
-- Plain Text (TXT)
-
-- Rich Text (RTF)
-
-- Open Document Format (ODF)
+* PDF
+* Microsoft Office files (Word, Excel, PowerPoint)
+* Plain Text (TXT)
+* Rich Text (RTF)
+* Open Document Format (ODF)
 
 NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.
