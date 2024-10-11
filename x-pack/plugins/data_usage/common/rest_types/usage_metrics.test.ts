@@ -71,7 +71,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: ['ds_1', '  '],
       })
-    ).toThrow('[dataStreams]: [dataStreams] list cannot contain empty values');
+    ).toThrow('[dataStreams]: list cannot contain empty values');
   });
 
   it('should error if `metricTypes` is empty string', () => {
@@ -82,7 +82,7 @@ describe('usage_metrics schemas', () => {
         dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ' ',
       })
-    ).toThrow();
+    ).toThrow('[metricTypes]: could not parse array value from json input');
   });
 
   it('should error if `metricTypes` contains an empty item', () => {
@@ -93,7 +93,7 @@ describe('usage_metrics schemas', () => {
         dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: [' ', 'storage_retained'], // First item is invalid
       })
-    ).toThrowError(/list cannot contain empty values/);
+    ).toThrow('list cannot contain empty values');
   });
 
   it('should error if `metricTypes` is not a valid type', () => {
@@ -116,7 +116,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow(
-      '[metricTypes] must be one of storage_retained, ingest_rate, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
+      '[metricTypes]: must be one of ingest_rate, storage_retained, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
     );
   });
 

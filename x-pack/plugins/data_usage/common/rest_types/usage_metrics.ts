@@ -65,14 +65,14 @@ export const UsageMetricsRequestSchema = schema.object({
       if (trimmedValues.some((v) => !v.length)) {
         return '[metricTypes] list cannot contain empty values';
       } else if (trimmedValues.some((v) => !isValidMetricType(v))) {
-        return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
+        return `must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
       }
     },
   }),
   dataStreams: schema.arrayOf(schema.string(), {
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {
-        return '[dataStreams] list cannot contain empty values';
+        return 'list cannot contain empty values';
       }
     },
   }),
