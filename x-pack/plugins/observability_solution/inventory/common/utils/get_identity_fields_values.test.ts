@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Entity } from '../entities';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
-} from '../es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { HostEntity, ServiceEntity } from '../entities';
 import { getIdentityFieldValues } from './get_identity_fields_values';
 
 const commonEntityFields = {
@@ -24,7 +24,8 @@ const commonEntityFields = {
 
 describe('getIdentityFieldValues', () => {
   it('should return the value when identityFields is a single string', () => {
-    const entity: Entity = {
+    const entity: ServiceEntity = {
+      'agent.name': 'node',
       'entity.identityFields': 'service.name',
       'service.name': 'my-service',
       'entity.type': 'service',
@@ -36,7 +37,8 @@ describe('getIdentityFieldValues', () => {
   });
 
   it('should return values when identityFields is an array of strings', () => {
-    const entity: Entity = {
+    const entity: ServiceEntity = {
+      'agent.name': 'node',
       'entity.identityFields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
       'entity.type': 'service',
@@ -49,7 +51,8 @@ describe('getIdentityFieldValues', () => {
   });
 
   it('should return an empty array if identityFields is empty string', () => {
-    const entity: Entity = {
+    const entity: ServiceEntity = {
+      'agent.name': 'node',
       'entity.identityFields': '',
       'service.name': 'my-service',
       'entity.type': 'service',
@@ -60,7 +63,8 @@ describe('getIdentityFieldValues', () => {
     expect(result).toEqual([]);
   });
   it('should return an empty array if identityFields is empty array', () => {
-    const entity: Entity = {
+    const entity: ServiceEntity = {
+      'agent.name': 'node',
       'entity.identityFields': [],
       'service.name': 'my-service',
       'entity.type': 'service',
@@ -72,10 +76,11 @@ describe('getIdentityFieldValues', () => {
   });
 
   it('should ignore fields that are not present in the entity', () => {
-    const entity: Entity = {
+    const entity: HostEntity = {
       'entity.identityFields': ['host.name', 'foo.bar'],
       'host.name': 'my-host',
       'entity.type': 'host',
+      'cloud.provider': null,
       ...commonEntityFields,
     };
 
