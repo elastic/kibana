@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
-import { EuiButton, EuiButtonIcon, EuiCode, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCode, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
