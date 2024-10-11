@@ -11,7 +11,6 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
@@ -50,7 +49,7 @@ export const assetCriticalityPublicListRoute = (
       ): Promise<IKibanaResponse<FindAssetCriticalityRecordsResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();

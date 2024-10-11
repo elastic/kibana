@@ -15,7 +15,6 @@ import {
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
@@ -52,7 +51,7 @@ export const assetCriticalityPublicUpsertRoute = (
       ): Promise<IKibanaResponse<CreateAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+          await assertAdvancedSettingsEnabled(await context.core);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;
