@@ -304,6 +304,35 @@ export const AutomaticImportConnectorAllUser: User = {
   roles: [AutomaticImportConnectorAllRole.name],
 };
 
+export const AutomaticImportBasicRole: Role = {
+  name: 'automatic_import_basic_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+      cluster: ['manage_service_account'],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['read'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const AutomaticImportBasicUser: User = {
+  username: 'automatic_import_basic_user',
+  password: 'password',
+  roles: [AutomaticImportBasicRole.name],
+};
+
 export const BuiltInEditorUser: User = {
   username: 'editor_user',
   password: 'password',
