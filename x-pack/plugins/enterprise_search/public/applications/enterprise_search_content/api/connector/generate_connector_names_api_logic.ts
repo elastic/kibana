@@ -8,6 +8,7 @@ import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_lo
 import { HttpLogic } from '../../../shared/http';
 
 export interface GenerateConnectorNamesApiArgs {
+  connectorName?: string;
   connectorType?: string;
 }
 
@@ -18,14 +19,14 @@ export interface GenerateConnectorNamesApiResponse {
 }
 
 export const generateConnectorNames = async (
-  { connectorType }: GenerateConnectorNamesApiArgs = { connectorType: 'custom' }
+  { connectorType, connectorName }: GenerateConnectorNamesApiArgs = { connectorType: 'custom' }
 ) => {
   if (connectorType === '') {
     connectorType = 'custom';
   }
   const route = `/internal/enterprise_search/connectors/generate_connector_name`;
   return await HttpLogic.values.http.post(route, {
-    body: JSON.stringify({ connectorType }),
+    body: JSON.stringify({ connectorName, connectorType }),
   });
 };
 

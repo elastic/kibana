@@ -39,9 +39,6 @@ import {
 } from '../../connector_detail/connector_view_logic';
 import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
 import { SearchIndexTabId } from '../../search_index/search_index';
-import { UNIVERSAL_LANGUAGE_VALUE } from '../constants';
-import { LanguageForOptimization } from '../types';
-import { getLanguageForOptimization } from '../utils';
 
 export interface NewConnectorValues {
   canConfigureConnector: boolean;
@@ -60,8 +57,6 @@ export interface NewConnectorValues {
   generatedNameData: GenerateConnectorNamesApiResponse | undefined;
   isCreateLoading: boolean;
   isGenerateLoading: boolean;
-  language: LanguageForOptimization;
-  languageSelectValue: string;
   rawName: string;
   selectedConnector: ConnectorDefinition | null;
   shouldGenerateConfigAfterCreate: boolean;
@@ -87,7 +82,6 @@ type NewConnectorActions = {
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
   setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
-  setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   setSelectedConnector(connector: ConnectorDefinition | null): {
     connector: ConnectorDefinition | null;
@@ -106,7 +100,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       shouldNavigateToConnectorAfterCreate,
     }),
     setCurrentStep: (step) => ({ step }),
-    setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedConnector: (connector) => ({ connector }),
   },
@@ -146,6 +139,11 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         }
       }
     },
+    connectorNameGenerated: ({ connectorName }) => {
+      if (!values.rawName) {
+        actions.setRawName(connectorName);
+      }
+    },
     createConnector: ({
       isSelfManaged,
       shouldGenerateAfterCreate = true,
@@ -168,13 +166,25 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
           uiFlags: { shouldNavigateToConnectorAfterCreate, shouldGenerateAfterCreate },
         });
       } else {
-        // TODO: this is the user input case. Generate index and api key names from the user input first and then create the connector.
-        // Other option is to change the endpoint to do this in API level
+        if (values.generatedNameData && values.selectedConnector) {
+          actions.createConnectorApi({
+            deleteExistingConnector: false,
+            indexName: values.generatedNameData.indexName,
+            isNative: !values.selectedConnector.isNative ? false : !isSelfManaged,
+            language: null,
+            name: values.connectorName,
+            serviceType: values.selectedConnector?.serviceType,
+            uiFlags: { shouldNavigateToConnectorAfterCreate, shouldGenerateAfterCreate },
+          });
+        }
       }
     },
     setSelectedConnector: ({ connector }) => {
-      if (values.rawName === '' && connector) {
-        actions.generateConnectorName({ connectorType: connector.serviceType });
+      if (connector) {
+        actions.generateConnectorName({
+          connectorName: values.rawName,
+          connectorType: connector.serviceType,
+        });
       }
     },
   }),
@@ -196,13 +206,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
           _: NewConnectorValues['currentStep'],
           { step }: { step: NewConnectorValues['currentStep'] }
         ) => step,
-      },
-    ],
-    languageSelectValue: [
-      UNIVERSAL_LANGUAGE_VALUE,
-      {
-        // @ts-expect-error upgrade typescript v5.1.6
-        setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
@@ -229,7 +232,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         (connectorName && selectedConnector?.name) ?? false,
     ],
     connectorName: [
-      // TODO: this is the connector name. Rename this.
       () => [selectors.rawName, selectors.generatedNameData],
       (name: string, generatedName: NewConnectorValues['generatedNameData']) =>
         name ? name : generatedName?.connectorName ?? '',
@@ -241,11 +243,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     isGenerateLoading: [
       () => [selectors.generateConfigurationStatus],
       (status) => status === Status.LOADING,
-    ],
-    language: [
-      // TODO: remove this if not used
-      () => [selectors.languageSelectValue],
-      (languageSelectValue) => getLanguageForOptimization(languageSelectValue),
     ],
   }),
 });

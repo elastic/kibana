@@ -20,7 +20,7 @@ export const generateStepState = (currentStep: Steps): { [key in Steps]: EuiStep
     deployment:
       currentStep === 'deployment'
         ? 'current'
-        : currentStep === 'finish'
+        : currentStep === 'finish' || currentStep === 'configure'
         ? 'complete'
         : 'incomplete',
     finish: currentStep === 'finish' ? 'current' : 'incomplete',

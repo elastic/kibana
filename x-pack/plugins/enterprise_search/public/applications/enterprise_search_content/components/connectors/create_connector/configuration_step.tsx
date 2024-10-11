@@ -75,14 +75,6 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                   connectorId: connector.id,
                 });
               }}
-              saveAndSync={(config) => {
-                updateConnectorConfiguration({
-                  configuration: config,
-                  connectorId: connector.id,
-                });
-
-                // and sync
-              }}
             />
             <EuiSpacer size="m" />
             {isSyncing && (

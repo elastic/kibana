@@ -34,12 +34,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
-import { KibanaDeps } from '../../../../../../../common/types';
 
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 import { SelfManagePreference } from '../create_connector';
@@ -53,7 +49,6 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   isDisabled,
   selfManagePreference,
 }) => {
-  const { services } = useKibana<KibanaDeps>();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
@@ -89,25 +84,6 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
         'xpack.enterpriseSearch.createConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
         { defaultMessage: 'Manual configuration' }
       )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="edit"
-      onClick={() => {
-        closePopover();
-      }}
-    >
-      <TryInConsoleButton
-        application={services.application}
-        sharePlugin={services.share}
-        consolePlugin={services.console}
-        content={i18n.translate(
-          'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel',
-          {
-            defaultMessage: `Try in Console`,
-          }
-        )}
-        request={CREATE_CONNECTOR_PLUGIN.CONSOLE_SNIPPET}
-      />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="share"

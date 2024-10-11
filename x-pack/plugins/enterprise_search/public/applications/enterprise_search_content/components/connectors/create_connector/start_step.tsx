@@ -55,14 +55,14 @@ export const StartStep: React.FC<StartStepProps> = ({
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
   const {
-    connectorName,
+    rawName,
     canConfigureConnector,
     selectedConnector,
     generatedConfigData,
     isGenerateLoading,
     isCreateLoading,
   } = useValues(NewConnectorLogic);
-  const { setRawName, createConnector } = useActions(NewConnectorLogic);
+  const { setRawName, createConnector, generateConnectorName } = useActions(NewConnectorLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -102,8 +102,16 @@ export const StartStep: React.FC<StartStepProps> = ({
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
                     name="first"
-                    value={connectorName}
+                    value={rawName}
                     onChange={handleNameChange}
+                    onBlur={() => {
+                      if (selectedConnector) {
+                        generateConnectorName({
+                          connectorName: rawName,
+                          connectorType: selectedConnector.serviceType,
+                        });
+                      }
+                    }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

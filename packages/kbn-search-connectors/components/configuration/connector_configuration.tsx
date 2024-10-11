@@ -168,10 +168,12 @@ export const ConnectorConfigurationComponent: FC<
                 saveConfig(config);
                 setIsEditing(false);
               }}
-              saveAndSync={(config) => {
-                saveAndSync(config);
-                setIsEditing(false);
-              }}
+              {...(saveAndSync && {
+                saveAndSync: (config) => {
+                  saveAndSync(config);
+                  setIsEditing(false);
+                },
+              })}
             />
           ) : (
             uncategorizedDisplayList.length > 0 && (

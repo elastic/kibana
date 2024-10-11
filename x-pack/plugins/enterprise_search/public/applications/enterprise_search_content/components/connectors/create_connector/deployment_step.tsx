@@ -7,26 +7,27 @@
 
 import React, { useEffect } from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiButton, EuiFlexGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorStatus } from '@kbn/search-connectors';
+
 import * as Constants from '../../../../shared/constants';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { ConnectorDeployment } from '../../connector_detail/deployment';
 
-import { ConnectorCreationSteps } from './create_connector';
-
 interface DeploymentStepProps {
-  currentStep: ConnectorCreationSteps;
-  isNextStepEnabled: boolean;
   setCurrentStep: Function;
 }
 
-export const DeploymentStep: React.FC<DeploymentStepProps> = ({
-  currentStep,
-  setCurrentStep,
-  isNextStepEnabled,
-}) => {
+export const DeploymentStep: React.FC<DeploymentStepProps> = ({ setCurrentStep }) => {
+  const { connector } = useValues(ConnectorViewLogic);
+  const isNextStepEnabled =
+    connector && !(!connector.status || connector.status === ConnectorStatus.CREATED);
+
   useEffect(() => {
     setTimeout(() => {
       window.scrollTo({
@@ -69,7 +70,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
           <EuiSpacer size="m" />
           <EuiButton
             data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-            onClick={() => setCurrentStep(currentStep + 1)}
+            onClick={() => setCurrentStep('configure')}
             fill
             disabled={!isNextStepEnabled}
           >

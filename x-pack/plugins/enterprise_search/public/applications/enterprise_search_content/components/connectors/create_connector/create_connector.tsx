@@ -114,13 +114,7 @@ export const CreateConnector: React.FC = () => {
         setCurrentStep={setCurrentStep}
       />
     ),
-    deployment: (
-      <DeploymentStep
-        currentStep={currentStep}
-        setCurrentStep={setCurrentStep}
-        isNextStepEnabled={stepStates.configure === 'complete'}
-      />
-    ),
+    deployment: <DeploymentStep setCurrentStep={setCurrentStep} />,
     finish: (
       <FinishUpStep
         title={i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {

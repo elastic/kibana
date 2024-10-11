@@ -13,26 +13,33 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCard,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
-  EuiPopover,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
   EuiProgress,
   EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+import { APPLICATIONS_PLUGIN } from '../../../../../../common/constants';
+
+import { KibanaDeps } from '../../../../../../common/types';
+
+import { PLAYGROUND_PATH } from '../../../../applications/routes';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
+
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
+import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { IndexViewLogic } from '../../search_index/index_view_logic';
 import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
@@ -45,49 +52,16 @@ interface FinishUpStepProps {
 
 export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   const { euiTheme } = useEuiTheme();
-  const [isPopoverOpen, setPopover] = useState(false);
-  const splitButtonPopoverId = useGeneratedHtmlId({
-    prefix: 'splitButtonPopover',
-  });
-  // TODO: Update this to use index data.
-  const [hasData, setHasData] = useState(false);
+  const {
+    services: { discover },
+  } = useKibana<KibanaDeps>();
+  const [showNext, setShowNext] = useState(false);
 
   const { isWaitingForSync, isSyncing: isSyncingProp } = useValues(IndexViewLogic);
   const { connector } = useValues(ConnectorViewLogic);
   const { startSync } = useActions(SyncsLogic);
 
   const isSyncing = isWaitingForSync || isSyncingProp;
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
-  const items = [
-    <EuiContextMenuItem key="copy" icon="indexEdit" onClick={closePopover}>
-      {i18n.translate(
-        'xpack.enterpriseSearch.createConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
-        { defaultMessage: 'Manage attached index' }
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="edit" icon="refresh" onClick={closePopover}>
-      {i18n.translate(
-        'xpack.enterpriseSearch.createConnector.finishUpStep.incrementalContentSyncContextMenuItemLabel',
-        { defaultMessage: 'Incremental content sync' }
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="share" icon="clockCounter" onClick={closePopover}>
-      {i18n.translate(
-        'xpack.enterpriseSearch.createConnector.finishUpStep.scheduleASyncContextMenuItemLabel',
-        {
-          defaultMessage: 'Schedule a sync',
-        }
-      )}
-    </EuiContextMenuItem>,
-  ];
-
   useEffect(() => {
     setTimeout(() => {
       window.scrollTo({
@@ -124,7 +98,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   size="s"
                   color="success"
                   onClick={() => {
-                    setHasData(true);
+                    setShowNext(true);
                   }}
                 />
                 <EuiSpacer size="xl" />
@@ -148,13 +122,21 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       }
                     )}
                     footer={
-                      hasData ? (
+                      showNext ? (
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepStartSearchPlaygroundButton"
                           aria-label={i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
                             { defaultMessage: 'Start Search Playground' }
                           )}
+                          onClick={() => {
+                            if (connector) {
+                              KibanaLogic.values.navigateToUrl(
+                                `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${connector.index_name}`,
+                                { shouldNotCreateHref: true }
+                              );
+                            }
+                          }}
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.startSearchPlaygroundButtonLabel',
@@ -174,6 +156,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           )}
                           onClick={() => {
                             startSync(connector);
+                            setShowNext(true);
                           }}
                         >
                           {isSyncing ? 'Syncing data' : 'First sync data'}
@@ -198,13 +181,22 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       }
                     )}
                     footer={
-                      hasData ? (
+                      showNext ? (
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepViewInDiscoverButton"
                           aria-label={i18n.translate(
                             'xpack.enterpriseSearch.finishUpStep.euiButton.viewInDiscoverLabel',
                             { defaultMessage: 'View in Discover' }
                           )}
+                          onClick={() => {
+                            discover.locator?.navigate({
+                              dataViewSpec: {
+                                title: connector?.name,
+                              },
+                              indexPattern: connector?.index_name,
+                              title: connector?.name,
+                            });
+                          }}
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.viewInDiscoverButtonLabel',
@@ -224,6 +216,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           )}
                           onClick={() => {
                             startSync(connector);
+                            setShowNext(true);
                           }}
                         >
                           {isSyncing ? 'Syncing data' : 'First sync data'}
@@ -255,7 +248,14 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             size="m"
                             fill
                             onClick={() => {
-                              // TODO: Navigate to connector detail page
+                              if (connector) {
+                                KibanaLogic.values.navigateToUrl(
+                                  generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                                    connectorId: connector.id,
+                                    tabId: ConnectorDetailTabId.CONFIGURATION,
+                                  })
+                                );
+                              }
                             }}
                           >
                             {i18n.translate(
@@ -263,37 +263,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                               { defaultMessage: 'Manage connector' }
                             )}
                           </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiPopover
-                            id={splitButtonPopoverId}
-                            button={
-                              <EuiButtonIcon
-                                data-test-subj="enterpriseSearchFinishUpStepButton"
-                                display="fill"
-                                size="m"
-                                iconType="boxesVertical"
-                                aria-label={i18n.translate(
-                                  'xpack.enterpriseSearch.createConnector.finishUpStep.euiButtonIcon.moreLabel',
-                                  { defaultMessage: 'More' }
-                                )}
-                                onClick={onButtonClick}
-                              />
-                            }
-                            isOpen={isPopoverOpen}
-                            closePopover={closePopover}
-                            panelPaddingSize="none"
-                            anchorPosition="downLeft"
-                          >
-                            <EuiContextMenuPanel
-                              title={i18n.translate(
-                                'xpack.enterpriseSearch.createConnector.finishUpStep.euiContextMenuPanel.manageConnectorLabel',
-                                { defaultMessage: 'Manage connector' }
-                              )}
-                              size="s"
-                              items={items}
-                            />
-                          </EuiPopover>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     }
