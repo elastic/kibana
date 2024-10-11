@@ -49,6 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await lens.openInEditor();
       await lens.switchToVisualization('pie');
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
@@ -62,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await lens.openInEditor();
       await lens.switchToVisualization('treemap');
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
@@ -75,6 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await lens.openInEditor();
       await lens.save(newTitle, false, true);
       await dashboard.waitForRenderComplete();
       const newPanelCount = await dashboard.getPanelCount();
