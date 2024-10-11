@@ -6,6 +6,7 @@
  */
 
 import Fs from 'fs';
+
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 export class FileWrapper {
