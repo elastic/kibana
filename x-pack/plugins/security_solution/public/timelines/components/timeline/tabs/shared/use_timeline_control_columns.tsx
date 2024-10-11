@@ -109,7 +109,15 @@ export const useTimelineControlColumn = ({
   );
 
   // We need one less when the unified components are enabled because the document expand is provided by the unified data table
+<<<<<<< HEAD
   const UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT = ACTION_BUTTON_COUNT - 1;
+=======
+  const UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT = useMemo(
+    () => ACTION_BUTTON_COUNT - 1,
+    [ACTION_BUTTON_COUNT]
+  );
+
+>>>>>>> 7749ba523cb (start: remove unifiedComponentsInTimelineDisabled flag)
   return useMemo(() => {
     return getDefaultControlColumn(UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT).map((x) => ({
       ...x,
@@ -132,7 +140,53 @@ export const useTimelineControlColumn = ({
           />
         );
       },
+<<<<<<< HEAD
       rowCellRender: JEST_ENVIRONMENT ? RowCellRender : React.memo(RowCellRender),
+=======
+      rowCellRender: (
+        props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
+      ) => {
+        /*
+         * In some cases, when number of events is updated
+         * but new table is not yet rendered it can result
+         * in the mismatch between the number of events v/s
+         * the number of rows in the table currently rendered.
+         *
+         * */
+        if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
+        props.setCellProps({
+          className:
+            props.expandedEventId === events[props.rowIndex]?._id
+              ? 'unifiedDataTable__cell--expanded'
+              : '',
+        });
+
+        return (
+          <TimelineControlColumnCellRender
+            rowIndex={props.rowIndex}
+            columnId={props.columnId}
+            timelineId={timelineId}
+            ariaRowindex={props.rowIndex}
+            checked={false}
+            columnValues=""
+            data={events[props.rowIndex].data}
+            ecsData={events[props.rowIndex].ecs}
+            loadingEventIds={EMPTY_STRING_ARRAY}
+            eventId={events[props.rowIndex]?._id}
+            index={props.rowIndex}
+            onEventDetailsPanelOpened={noOp}
+            onRowSelected={noOp}
+            refetch={refetch}
+            showCheckboxes={false}
+            setEventsLoading={noOp}
+            setEventsDeleted={noOp}
+            pinnedEventIds={pinnedEventIds}
+            eventIdToNoteIds={eventIdToNoteIds}
+            toggleShowNotes={onToggleShowNotes}
+          />
+        );
+      },
+>>>>>>> 7749ba523cb (start: remove unifiedComponentsInTimelineDisabled flag)
     }));
   }, [
     UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT,
@@ -141,6 +195,14 @@ export const useTimelineControlColumn = ({
     sort,
     activeTab,
     timelineId,
+<<<<<<< HEAD
     RowCellRender,
+=======
+    refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
+    onToggleShowNotes,
+>>>>>>> 7749ba523cb (start: remove unifiedComponentsInTimelineDisabled flag)
   ]);
 };
