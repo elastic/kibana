@@ -51,6 +51,7 @@ export const IntegrationAssistantCard = React.memo(() => {
                     tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
                     size="s"
                     color="hollow"
+                    data-test-subj="techPreviewBadge"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -64,7 +65,9 @@ export const IntegrationAssistantCard = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {canExecuteConnectors ? (
-            <EuiButton onClick={() => navigate(Page.assistant)}>{i18n.ASSISTANT_BUTTON}</EuiButton>
+            <EuiButton onClick={() => navigate(Page.assistant)} data-test-subj="assistantButton">
+              {i18n.ASSISTANT_BUTTON}
+            </EuiButton>
           ) : (
             <MissingPrivilegesTooltip canExecuteConnectors>
               <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>

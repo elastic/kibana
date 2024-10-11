@@ -8,7 +8,7 @@
 import { compose, withProps } from 'react-recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter';
-import { pluginServices } from '../../services';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 import { getArgTypeDef } from '../../lib/args';
 import { FunctionFormList as Component } from './function_form_list';
 
@@ -78,7 +78,7 @@ const componentFactory = ({
   parentPath,
   removable,
 }) => {
-  const { expressions } = pluginServices.getServices();
+  const expressions = getCanvasExpressionService();
   return {
     args,
     nestedFunctionsArgs: argsWithExprFunctions,
