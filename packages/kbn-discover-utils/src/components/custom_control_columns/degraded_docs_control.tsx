@@ -147,6 +147,7 @@ const EnableESQLDegradedDocsControl = ({
       }
       closePopover={closePopover}
       isOpen={isPopoverOpen}
+      className="unifiedDataTable__rowControl"
     >
       <EuiText
         component="p"
