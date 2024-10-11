@@ -106,7 +106,8 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickAggBasedVisualizations() {
-    await this.testSubjects.click('visGroupAggBasedExploreLink');
+    await this.clickLegacyTab();
+    await this.testSubjects.click('visType-aggbased');
   }
 
   public async goBackToGroups() {
@@ -125,7 +126,7 @@ export class VisualizePageObject extends FtrService {
       .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
   }
 
-  public async getPromotedVisTypes() {
+  public async getVisibleVisTypes() {
     const chartTypeField = await this.testSubjects.find('visNewDialogGroups');
     const $ = await chartTypeField.parseDomContent();
     const promotedVisTypes: string[] = [];
@@ -137,7 +138,7 @@ export class VisualizePageObject extends FtrService {
           promotedVisTypes.push(title);
         }
       });
-    return promotedVisTypes;
+    return promotedVisTypes.sort();
   }
 
   public async waitForVisualizationSelectPage() {
@@ -221,7 +222,12 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
+  public async clickLegacyTab() {
+    await this.testSubjects.click('groupModalLegacyTab');
+  }
+
   public async clickMarkdownWidget() {
+    await this.clickLegacyTab();
     await this.clickVisType('markdown');
   }
 
@@ -254,6 +260,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisualBuilder() {
+    await this.clickLegacyTab();
     await this.clickVisType('metrics');
   }
 

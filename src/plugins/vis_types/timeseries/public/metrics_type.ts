@@ -102,7 +102,7 @@ export const metricsVisDefinition: VisTypeDefinition<
   name: VIS_TYPE,
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Perform advanced analysis of your time series data.',
+    defaultMessage: 'Legacy editor used to visualize and analyze time series data.',
   }),
   icon: 'visVisualBuilder',
   group: VisGroups.LEGACY,

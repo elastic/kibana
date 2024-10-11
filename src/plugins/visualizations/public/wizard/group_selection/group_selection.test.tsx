@@ -8,11 +8,13 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
-import { GroupSelection } from './group_selection';
+import { GroupSelection, GroupSelectionProps } from './group_selection';
 import { DocLinksStart } from '@kbn/core/public';
 import { VisParams } from '../../../common';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
@@ -99,35 +101,33 @@ describe('GroupSelection', () => {
     jest.clearAllMocks();
   });
 
+  const renderGroupSelectionComponent = (overrideProps?: Partial<GroupSelectionProps>) => {
+    return render(
+      <I18nProvider>
+        <GroupSelection
+          visTypesRegistry={visTypesRegistry(_visTypes)}
+          docLinks={docLinks as DocLinksStart}
+          toggleGroups={jest.fn()}
+          onVisTypeSelected={jest.fn()}
+          showExperimental={true}
+          {...overrideProps}
+        />
+      </I18nProvider>
+    );
+  };
+
   it('should render the header title', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="groupModalHeader"]').at(0).text()).toBe(
-      'New visualization'
-    );
+    renderGroupSelectionComponent();
+    expect(screen.getByTestId('groupModalHeader')).toHaveTextContent('Create visualization');
   });
 
-  it('should not render the aggBased group card if no aggBased visualization is registered', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(false);
+  it('should not render tabs if no legacy, tools or tsvb visualizations are registered', async () => {
+    renderGroupSelectionComponent();
+    expect(screen.queryByRole('tab', { name: /legacy/i })).toBeNull();
+    expect(screen.queryByRole('tab', { name: /recommended/i })).toBeNull();
   });
 
-  it('should render the aggBased group card if an aggBased group vis is registered', () => {
+  it('should render the aggBased group card if an aggBased group vis is registered', async () => {
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
@@ -135,32 +135,15 @@ describe('GroupSelection', () => {
       stage: 'production',
       ...defaultVisTypeParams,
     };
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
+    renderGroupSelectionComponent({
+      visTypesRegistry: visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[]),
+    });
+
+    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
+    expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
   });
 
-  it('should not render the tools group card if no tools visualization is registered', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(false);
-  });
-
-  it('should render the tools group card if a tools group vis is registered', () => {
+  it('should render the tools group card if a tools group vis is registered', async () => {
     const toolsVisType = {
       name: 'vis3',
       title: 'Vis3',
@@ -168,19 +151,16 @@ describe('GroupSelection', () => {
       group: VisGroups.TOOLS,
       ...defaultVisTypeParams,
     };
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
+    renderGroupSelectionComponent({
+      visTypesRegistry: visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[]),
+    });
+
+    expect(screen.queryByTestId('visType-vis3')).toBeNull();
+    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
+    expect(screen.getByTestId('visType-vis3')).toHaveTextContent('Vis3');
   });
 
-  it('should call the toggleGroups if the aggBased group card is clicked', () => {
+  it('should call the toggleGroups if the aggBased group card is clicked', async () => {
     const toggleGroups = jest.fn();
     const aggBasedVisType = {
       name: 'visWithSearch',
@@ -189,82 +169,26 @@ describe('GroupSelection', () => {
       stage: 'production',
       ...defaultVisTypeParams,
     };
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={toggleGroups}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').last();
-    aggBasedGroupCard.simulate('click');
+    renderGroupSelectionComponent({
+      toggleGroups,
+      visTypesRegistry: visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[]),
+    });
+
+    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Aggregation-based/i }));
     expect(toggleGroups).toHaveBeenCalled();
   });
 
-  it('should sort promoted visualizations first', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
+  it('should only show promoted visualizations in recommended tab', () => {
+    renderGroupSelectionComponent();
 
-    const cards = [
-      ...new Set(
-        wrapper.find('[data-test-subj^="visType-"]').map((card) => card.prop('data-test-subj'))
-      ),
-    ];
+    const cards = screen.getAllByRole('button').map((el) => el.textContent);
 
     expect(cards).toEqual([
-      'visType-visAliasWithPromotion',
-      'visType-vis1',
-      'visType-vis2',
-      'visType-visWithAliasUrl',
+      'Vis alias with promotion',
+      'Vis Type 1',
+      'Vis Type 2',
+      'Vis with alias Url',
     ]);
-  });
-
-  it('should not show tools experimental visualizations if showExperimentalis false', () => {
-    const expVis = {
-      name: 'visExp',
-      title: 'Experimental Vis',
-      group: VisGroups.TOOLS,
-      stage: 'experimental',
-      ...defaultVisTypeParams,
-    };
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
-  });
-
-  it('should show tools experimental visualizations if showExperimental is true', () => {
-    const expVis = {
-      name: 'visExp',
-      title: 'Experimental Vis',
-      group: VisGroups.TOOLS,
-      stage: 'experimental',
-      ...defaultVisTypeParams,
-    };
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
   });
 });

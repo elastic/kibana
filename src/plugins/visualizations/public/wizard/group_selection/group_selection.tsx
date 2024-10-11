@@ -8,7 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -20,14 +20,13 @@ import {
   EuiModalBody,
   EuiModalHeaderTitle,
   EuiLink,
-  EuiText,
   EuiSpacer,
-  EuiBetaBadge,
-  EuiTitle,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiDescriptionList,
-  EuiBadge,
+  EuiTabs,
+  EuiTab,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -36,7 +35,7 @@ import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';
 
-interface GroupSelectionProps {
+export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   docLinks: DocLinksStart;
@@ -48,7 +47,42 @@ interface VisCardProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visType: BaseVisType | VisTypeAlias;
   showExperimental?: boolean | undefined;
+  shouldStretch?: boolean;
 }
+
+const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; ['data-test-subj']: string }> =
+  [
+    {
+      id: 'recommended',
+      label: i18n.translate('visualizations.newVisWizard.recommendedTab', {
+        defaultMessage: 'Recommended',
+      }),
+      ['data-test-subj']: 'groupModalRecommendedTab',
+    },
+    {
+      id: 'legacy',
+      ['data-test-subj']: 'groupModalLegacyTab',
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('visualizations.newVisWizard.legacyTab', {
+              defaultMessage: 'Legacy',
+            })}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate('visualizations.newVisWizard.legacyTabDescription', {
+                defaultMessage:
+                  'Legacy visualizations are scheduled for deprecation in Kibana 9.0.',
+              })}
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+  ];
 
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
@@ -59,7 +93,7 @@ function GroupSelection(props: GroupSelectionProps) {
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
           // Include so TSVB still gets displayed
-          ...props.visTypesRegistry.getByGroup(VisGroups.LEGACY),
+          // ...props.visTypesRegistry.getByGroup(VisGroups.LEGACY),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
@@ -69,129 +103,147 @@ function GroupSelection(props: GroupSelectionProps) {
     [props.visTypesRegistry]
   );
 
+  const tsvbType = props.visTypesRegistry.getByGroup(VisGroups.LEGACY);
+  const aggBasedTypes = props.visTypesRegistry
+    .getByGroup(VisGroups.AGGBASED)
+    .filter((visDefinition) => !visDefinition.disableCreate);
+  const toolsTypes = props.visTypesRegistry
+    .getByGroup(VisGroups.TOOLS)
+    .filter(({ disableCreate }) => !disableCreate);
+
+  const shouldDisplayLegacyTab =
+    tsvbType.length > 0 || aggBasedTypes.length > 0 || toolsTypes.length > 0;
+
+  const tsvbProps = {
+    visType: { ...tsvbType[0], icon: 'visualizeApp' },
+    onVisTypeSelected: props.onVisTypeSelected,
+  };
+
+  const [tab, setTab] = React.useState(tabs[0].id);
+
   return (
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="groupModalHeader">
           <FormattedMessage
             id="visualizations.newVisWizard.title"
-            defaultMessage="New visualization"
+            defaultMessage="Create visualization"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="visNewVisDialogGroupSelection__body">
+        {shouldDisplayLegacyTab && (
+          <div className="visNewVisDialogGroupSelection__visGroups">
+            <EuiTabs>
+              {tabs.map((t) => (
+                <EuiTab
+                  data-test-subj={t['data-test-subj']}
+                  isSelected={tab === t.id}
+                  onClick={() => setTab(t.id)}
+                  key={t.id}
+                >
+                  {t.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </div>
+        )}
+
         <div className="visNewVisDialogGroupSelection__visGroups">
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
-            {promotedVisGroups.map((visType) => (
-              <VisGroup
-                visType={visType}
-                key={visType.name}
-                onVisTypeSelected={props.onVisTypeSelected}
-              />
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer size="l" />
-        </div>
-        <div className="visNewVisDialogGroupSelection__footer">
-          <EuiSpacer size="l" />
-          <EuiFlexGrid columns={2}>
-            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).filter((visDefinition) => {
-              return !visDefinition.disableCreate;
-            }).length > 0 && (
-              <EuiFlexItem>
-                <EuiCard
-                  titleSize="xs"
-                  layout="horizontal"
-                  display="transparent"
-                  onClick={() => props.toggleGroups(false)}
-                  title={
-                    <span data-test-subj="visGroupAggBasedTitle">
-                      {i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
-                        defaultMessage: 'Aggregation based',
-                      })}
-                    </span>
-                  }
-                  data-test-subj="visGroup-aggbased"
-                  description={i18n.translate(
-                    'visualizations.newVisWizard.aggBasedGroupDescription',
-                    {
-                      defaultMessage:
-                        'Use our classic visualize library to create charts based on aggregations.',
-                    }
-                  )}
-                  icon={<EuiIcon type="heatmap" size="xl" color="success" />}
-                >
-                  <EuiLink
-                    data-test-subj="visGroupAggBasedExploreLink"
-                    onClick={() => props.toggleGroups(false)}
-                  >
-                    <EuiText size="s">
-                      {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
-                        defaultMessage: 'Explore options',
-                      })}{' '}
-                      <EuiIcon type="sortRight" />
-                    </EuiText>
-                  </EuiLink>
-                </EuiCard>
-              </EuiFlexItem>
-            )}
-            {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
-              <EuiFlexItem className="visNewVisDialog__toolsCard">
-                <EuiSpacer size="m" />
-                <EuiTitle size="xs">
-                  <span data-test-subj="visGroup-tools">
-                    {i18n.translate('visualizations.newVisWizard.toolsGroupTitle', {
-                      defaultMessage: 'Tools',
-                    })}
-                  </span>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <div className="visNewVisDialog__toolsCardGroupContainer">
-                  {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
-                    <ToolsGroup
-                      visType={visType}
-                      key={visType.name}
-                      onVisTypeSelected={props.onVisTypeSelected}
-                      showExperimental={props.showExperimental}
-                    />
-                  ))}
-                </div>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGrid>
-          <EuiSpacer size="m" />
-          <EuiDescriptionList
-            className="visNewVisDialogGroupSelection__footerDescriptionList"
-            type="responsiveColumn"
-          >
-            <EuiDescriptionListTitle className="visNewVisDialogGroupSelection__footerDescriptionListTitle">
-              <FormattedMessage
-                id="visualizations.newVisWizard.learnMoreText"
-                defaultMessage="Want to learn more?"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiLink href={visualizeGuideLink} target="_blank" external>
-                <FormattedMessage
-                  id="visualizations.newVisWizard.readDocumentationLink"
-                  defaultMessage="Read documentation"
+          {tab === 'recommended' ? (
+            <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
+              {promotedVisGroups.map((visType) => (
+                <VisGroup
+                  visType={visType}
+                  key={visType.name}
+                  onVisTypeSelected={props.onVisTypeSelected}
+                  shouldStretch={visType.name === 'lens'}
                 />
-              </EuiLink>
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
+              ))}
+            </EuiFlexGrid>
+          ) : (
+            <EuiFlexGrid columns={3} data-test-subj="visNewDialogGroups">
+              <VisGroup {...tsvbProps} />
+              {
+                <VisGroup
+                  visType={{
+                    stage: 'production',
+                    name: 'aggbased',
+                    description: i18n.translate(
+                      'visualizations.newVisWizard.aggBasedGroupDescription',
+                      {
+                        defaultMessage: 'Legacy library for creating charts based on aggregations.',
+                      }
+                    ),
+                    icon: 'indexPatternApp',
+                    title: i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
+                      defaultMessage: 'Aggregation-based',
+                    }),
+                  }}
+                  onVisTypeSelected={() => {
+                    props.toggleGroups(false);
+                  }}
+                />
+              }
+              {props.visTypesRegistry
+                .getByGroup(VisGroups.TOOLS)
+                .filter(({ disableCreate }) => !disableCreate)
+                .map((visType) => (
+                  <VisGroup
+                    visType={visType}
+                    key={visType.name}
+                    onVisTypeSelected={props.onVisTypeSelected}
+                  />
+                ))}
+            </EuiFlexGrid>
+          )}
+
+          <EuiSpacer size="l" />
         </div>
+
+        <ModalFooter visualizeGuideLink={visualizeGuideLink} />
       </EuiModalBody>
     </>
   );
 }
 
-const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
+const ModalFooter = ({ visualizeGuideLink }: { visualizeGuideLink: string }) => {
+  return (
+    <div className="visNewVisDialogGroupSelection__footer">
+      <EuiSpacer size="l" />
+      <EuiDescriptionList
+        className="visNewVisDialogGroupSelection__footerDescriptionList"
+        type="responsiveColumn"
+      >
+        <EuiDescriptionListTitle className="visNewVisDialogGroupSelection__footerDescriptionListTitle">
+          <FormattedMessage
+            id="visualizations.newVisWizard.learnMoreText"
+            defaultMessage="Want to learn more?"
+          />
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiLink href={visualizeGuideLink} target="_blank" external>
+            <FormattedMessage
+              id="visualizations.newVisWizard.viewDocumentationLink"
+              defaultMessage="View documentation"
+            />
+          </EuiLink>
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </div>
+  );
+};
+
+const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCardProps) => {
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
   return (
-    <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
+    <EuiFlexItem
+      className="visNewVisDialog__groupsCardWrapper"
+      css={shouldStretch ? { gridColumn: '1 / -1' } : null}
+    >
       <EuiCard
         titleSize="xs"
         hasBorder={true}
@@ -213,67 +265,9 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" />}
       />
     </EuiFlexItem>
-  );
-};
-
-const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardProps) => {
-  const onClick = useCallback(() => {
-    onVisTypeSelected(visType);
-  }, [onVisTypeSelected, visType]);
-  // hide both the hidden visualizations and, if lab mode is not enabled, the experimental visualizations
-  // TODO: Remove the showExperimental logic as part of https://github.com/elastic/kibana/issues/152833
-  if (visType.disableCreate || (!showExperimental && visType.stage === 'experimental')) {
-    return null;
-  }
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={visType.icon || 'empty'} size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj={`visType-${visType.name}`}
-              data-vis-stage={visType.stage}
-              onClick={onClick}
-            >
-              {'titleInWizard' in visType && visType.titleInWizard
-                ? visType.titleInWizard
-                : visType.title}
-            </EuiLink>
-          </EuiFlexItem>
-          {visType.stage === 'experimental' && !visType.isDeprecated ? (
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                iconType="beaker"
-                tooltipContent={i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                })}
-                label={i18n.translate('visualizations.newVisWizard.experimentalTitle', {
-                  defaultMessage: 'Technical preview',
-                })}
-              />
-            </EuiFlexItem>
-          ) : (
-            visType.isDeprecated && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">
-                  <FormattedMessage id="visualizations.deprecatedTag" defaultMessage="Deprecated" />
-                </EuiBadge>
-              </EuiFlexItem>
-            )
-          )}
-        </EuiFlexGroup>
-        <EuiText color="subdued" size="s">
-          {visType.description}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
 

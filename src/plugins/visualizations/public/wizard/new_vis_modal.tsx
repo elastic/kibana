@@ -22,7 +22,7 @@ import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import './dialog.scss';
 
-interface TypeSelectionProps {
+export interface TypeSelectionProps {
   contentClient: ContentClient;
   isOpen: boolean;
   onClose: () => void;
