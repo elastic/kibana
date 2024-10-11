@@ -171,7 +171,7 @@ export const limitedJSNumberSchema = ({ fieldName }: LimitedJSNumberSchemaType) 
           );
         }
 
-        if (Math.abs(s) < Number.MIN_VALUE) {
+        if (Math.abs(s) < Number.MIN_VALUE && s !== 0) {
           return rt.failure(
             input,
             context,
