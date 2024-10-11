@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiModal,
   EuiModalBody,
@@ -53,22 +53,70 @@ interface Props {
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
+const convertToMinutes = (value: string) => {
+  const { size, unit } = splitSizeAndUnits(value);
+  const sizeNum = parseInt(size, 10);
+
+  switch (unit) {
+    case 'd':
+      // days to minutes
+      return sizeNum * 24 * 60;
+    case 'h':
+      // hours to minutes
+      return sizeNum * 60;
+    case 'm':
+      // minutes to minutes
+      return sizeNum;
+    case 's':
+      // seconds to minutes
+      return sizeNum / 60;
+    default:
+      throw new Error(`Unknown unit: ${unit}`);
+  }
+};
+
+const isRetentionBiggerThan = (valueA: string, valueB: string) => {
+  const minutesA = convertToMinutes(valueA);
+  const minutesB = convertToMinutes(valueB);
+
+  return minutesA > minutesB;
+};
+
 const configurationFormSchema: FormSchema = {
   dataRetention: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionField',
       {
-        defaultMessage: 'Data retention',
+        defaultMessage: 'Data retention period',
       }
     ),
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: ({ value, formData }) => {
+        validator: ({ value, formData, customData }) => {
           // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
           if (formData.infiniteRetentionPeriod) {
             return undefined;
+          }
+
+          // If project level data retention is enabled, we need to enforce the global max retention
+          const { globalMaxRetention, enableProjectLevelRetentionChecks } = customData.value as any;
+          if (enableProjectLevelRetentionChecks) {
+            const currentValue = `${value}${formData.timeUnit}`;
+            if (globalMaxRetention && isRetentionBiggerThan(currentValue, globalMaxRetention)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
+                  {
+                    defaultMessage:
+                      'Maximum data retention period on this project is {maxRetention} days.',
+                    // Remove the unit from the globalMaxRetention value
+                    values: { maxRetention: globalMaxRetention.slice(0, -1) },
+                  }
+                ),
+              };
+            }
           }
 
           if (!value) {
@@ -107,12 +155,6 @@ const configurationFormSchema: FormSchema = {
   infiniteRetentionPeriod: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    label: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
-      {
-        defaultMessage: 'Keep data indefinitely',
-      }
-    ),
   },
   dataRetentionEnabled: {
     type: FIELD_TYPES.TOGGLE,
@@ -194,7 +236,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
-    config: { enableTogglingDataRetention },
+    config: { enableTogglingDataRetention, enableProjectLevelRetentionChecks },
   } = useAppContext();
 
   const { form } = useForm({
@@ -212,6 +254,15 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   });
   const [formData] = useFormData({ form });
   const isDirty = useFormIsModified({ form });
+
+  const formHasErrors = form.getErrors().length > 0;
+  const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
+
+  // Whenever the formData changes, we need to re-validate the dataRetention field
+  // as it depends on the timeUnit field.
+  useEffect(() => {
+    form.validateFields(['dataRetention']);
+  }, [formData, form]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -268,7 +319,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiModal onClose={() => onClose()} data-test-subj="editDataRetentionModal">
+    <EuiModal
+      onClose={() => onClose()}
+      data-test-subj="editDataRetentionModal"
+      css={{ minWidth: 450 }}
+    >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
@@ -292,6 +347,17 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
+          {enableProjectLevelRetentionChecks && lifecycle?.globalMaxRetention && (
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
+                defaultMessage="Maximum data retention period is {maxRetention} days"
+                values={{ maxRetention: lifecycle?.globalMaxRetention.slice(0, -1) }}
+              />
+              <EuiSpacer />
+            </>
+          )}
+
           {enableTogglingDataRetention && (
             <UseField
               path="dataRetentionEnabled"
@@ -303,13 +369,17 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <UseField
             path="dataRetention"
             component={NumericField}
+            validationData={{
+              globalMaxRetention: lifecycle?.globalMaxRetention,
+              enableProjectLevelRetentionChecks,
+            }}
             labelAppend={
               <EuiText size="xs">
                 <EuiLink href={documentationService.getUpdateExistingDS()} target="_blank" external>
                   {i18n.translate(
                     'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
                     {
-                      defaultMessage: 'How does it work?',
+                      defaultMessage: 'How does this work?',
                     }
                   )}
                 </EuiLink>
@@ -350,6 +420,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="infiniteRetentionPeriod"
             component={ToggleField}
             data-test-subj="infiniteRetentionPeriod"
+            label={i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
+              {
+                defaultMessage:
+                  'Keep data {withProjectLevelRetention, plural, one {up to maximum retention period} other {indefinitely}}',
+                values: { withProjectLevelRetention: enableProjectLevelRetentionChecks ? 1 : 0 },
+              }
+            )}
             componentProps={{
               euiFieldProps: {
                 disabled: !formData.dataRetentionEnabled && enableTogglingDataRetention,
@@ -372,7 +450,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             fill
             type="submit"
             isLoading={false}
-            disabled={(form.isSubmitted && form.isValid === false) || !isDirty}
+            disabled={disableSubmit}
             data-test-subj="saveButton"
             onClick={onSubmitForm}
           >
