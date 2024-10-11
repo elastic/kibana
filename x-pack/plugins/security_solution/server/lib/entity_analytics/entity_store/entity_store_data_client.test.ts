@@ -19,7 +19,8 @@ import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_c
 describe('EntityStoreDataClient', () => {
   const logger = loggingSystemMock.createLogger();
   const mockSavedObjectClient = savedObjectsClientMock.create();
-  const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esClientMock = clusterClientMock.asInternalUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClient = new EntityStoreDataClient({
     esClient: esClientMock,
@@ -27,7 +28,7 @@ describe('EntityStoreDataClient', () => {
     namespace: 'default',
     soClient: mockSavedObjectClient,
     entityClient: new EntityClient({
-      esClient: esClientMock,
+      clusterClient: clusterClientMock,
       soClient: mockSavedObjectClient,
       logger,
     }),

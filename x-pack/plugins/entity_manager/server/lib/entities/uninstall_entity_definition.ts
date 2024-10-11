@@ -10,37 +10,30 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteIndices } from './delete_index';
 import { deleteIngestPipelines } from './delete_ingest_pipeline';
-import { findEntityDefinitions } from './find_entity_definition';
 
 import { deleteTemplates } from '../manage_index_templates';
 
 import { stopTransforms } from './stop_transforms';
 
 import { deleteTransforms } from './delete_transforms';
+import { EntityClient } from '../entity_client';
 
 export async function uninstallEntityDefinition({
   definition,
   esClient,
   soClient,
   logger,
-  deleteData = false,
 }: {
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-  deleteData?: boolean;
 }) {
   await stopTransforms(esClient, definition, logger);
   await deleteTransforms(esClient, definition, logger);
 
   await deleteIngestPipelines(esClient, definition, logger);
-
-  if (deleteData) {
-    await deleteIndices(esClient, definition, logger);
-  }
 
   await deleteTemplates(esClient, definition, logger);
 
@@ -48,25 +41,17 @@ export async function uninstallEntityDefinition({
 }
 
 export async function uninstallBuiltInEntityDefinitions({
-  esClient,
-  soClient,
-  logger,
+  entityClient,
   deleteData = false,
 }: {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-  logger: Logger;
+  entityClient: EntityClient;
   deleteData?: boolean;
 }): Promise<EntityDefinition[]> {
-  const definitions = await findEntityDefinitions({
-    soClient,
-    esClient,
-    builtIn: true,
-  });
+  const { definitions } = await entityClient.getEntityDefinitions({ builtIn: true });
 
   await Promise.all(
-    definitions.map(async (definition) => {
-      await uninstallEntityDefinition({ definition, esClient, soClient, logger, deleteData });
+    definitions.map(async ({ id }) => {
+      await entityClient.deleteEntityDefinition({ id, deleteData });
     })
   );
 

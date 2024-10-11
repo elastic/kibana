@@ -194,7 +194,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getEntityStoreDataClient: memoize(() => {
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const clusterClient = coreContext.elasticsearch.client;
+        const esClient = clusterClient.asCurrentUser;
         const logger = options.logger;
         const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
@@ -203,7 +204,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger,
           soClient,
           entityClient: new EntityClient({
-            esClient,
+            clusterClient,
             soClient,
             logger,
           }),
