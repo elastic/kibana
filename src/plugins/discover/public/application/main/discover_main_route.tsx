@@ -341,7 +341,7 @@ export function DiscoverMainRoute({
     noDataDependencies,
     onDataViewCreated,
     onESQLNavigationComplete,
-    noDataState,
+    noDataState.showNoDataPage,
     stateContainer,
   ]);
 
