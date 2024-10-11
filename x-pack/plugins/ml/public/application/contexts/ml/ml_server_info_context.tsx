@@ -15,7 +15,7 @@ export interface MlServerInfoContextValue {
 
 export const MlServerInfoContext = createContext<MlServerInfoContextValue | undefined>(undefined);
 
-export const MlServerContextProvider: FC<PropsWithChildren<MlServerInfoContextValue>> = ({
+export const MlServerInfoContextProvider: FC<PropsWithChildren<MlServerInfoContextValue>> = ({
   children,
   nlpSettings,
 }) => {
@@ -33,7 +33,7 @@ export const MlServerContextProvider: FC<PropsWithChildren<MlServerInfoContextVa
 export function useMlServerInfo() {
   const context = useContext(MlServerInfoContext);
   if (context === undefined) {
-    throw new Error('useMlServerInfo must be used within a MlServerContextProvider');
+    throw new Error('useMlServerInfo must be used within a MlServerInfoContextProvider');
   }
   return context;
 }
