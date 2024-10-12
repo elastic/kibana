@@ -212,6 +212,7 @@ const AlertsTableStateWithQueryProvider = memo(
     dynamicRowHeight,
     lastReloadRequestTime,
     emptyStateHeight,
+    height,
   }: AlertsTableStateProps) => {
     const {
       data,
@@ -343,6 +344,7 @@ const AlertsTableStateWithQueryProvider = memo(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
@@ -517,6 +519,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onSortChange,
         onPageChange,
         fieldFormats,
+        height,
       }),
       [
         alertsTableConfiguration,
@@ -556,6 +559,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onSortChange,
         onPageChange,
         fieldFormats,
+        height,
       ]
     );
 

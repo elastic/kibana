@@ -8307,6 +8307,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -47869,6 +47873,8 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -47877,6 +47883,11 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -47985,6 +47996,9 @@ components:
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -47996,42 +48010,15 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -48070,6 +48057,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -48159,6 +48150,9 @@ components:
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -48170,42 +48164,14 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
             - source
         user:
           type: object
@@ -48241,6 +48207,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
