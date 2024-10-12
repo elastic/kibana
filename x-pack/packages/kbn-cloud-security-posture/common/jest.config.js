@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture-common'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture/common'],
 };

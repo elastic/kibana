@@ -14,7 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { findingsNavigation } from '../../constants/navigation';
+import { findingsNavigation } from '../constants/navigation';
 import { useDataView } from './use_data_view';
 import { CspClientPluginStartDeps } from '../..';
 import { encodeQuery } from '../utils/query_utils';

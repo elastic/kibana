@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { statusColors } from '../../constants/component_constants';
+import { statusColors } from '../constants/component_constants';
 
 interface Props {
   type?: 'passed' | 'failed';

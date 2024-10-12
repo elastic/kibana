@@ -13,7 +13,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-import type { UseCspOptions } from '../../type';
+import type { UseCspOptions } from '../types';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
