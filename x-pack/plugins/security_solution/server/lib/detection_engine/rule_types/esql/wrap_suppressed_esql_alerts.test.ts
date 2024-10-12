@@ -128,6 +128,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
         from: moment('2010-10-20 04:43:12'),
         maxSignals: 100,
       },
+      intendedTimestamp: undefined,
     });
 
     expect(alerts[0]._id).toEqual('mocked-alert-id');
