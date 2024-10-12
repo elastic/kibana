@@ -483,6 +483,7 @@ export type FieldSpec = DataViewFieldBase & {
   parentName?: string;
 
   defaultFormatter?: string;
+  ecsDescription?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

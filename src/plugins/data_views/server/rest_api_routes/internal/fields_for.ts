@@ -105,6 +105,7 @@ const FieldDescriptorSchema = schema.object({
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
   defaultFormatter: schema.maybe(schema.string()),
+  ecsDescription: schema.maybe(schema.string()),
 });
 
 export const validate: VersionedRouteValidation<any, any, any> = {
