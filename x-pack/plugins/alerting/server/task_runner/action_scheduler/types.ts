@@ -21,7 +21,6 @@ import {
   RuleAlertData,
   RuleSystemAction,
   ThrottledActions,
-  RuleAction,
 } from '../../../common';
 import { NormalizedRuleType } from '../../rule_type_registry';
 import { CombinedSummarizedAlerts, RawRule } from '../../types';
