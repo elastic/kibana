@@ -19096,6 +19096,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19484,7 +19505,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -19561,6 +19583,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19949,7 +19992,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -21537,6 +21581,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -21965,7 +22030,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -22097,6 +22163,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22525,7 +22612,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23047,6 +23135,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -23475,7 +23584,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23595,6 +23705,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -24023,7 +24154,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },

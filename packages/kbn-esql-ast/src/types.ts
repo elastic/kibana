@@ -40,6 +40,7 @@ export type ESQLAstField = ESQLFunction | ESQLColumn;
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
 
 /**
  * *Proper* are nodes which are objects with `type` property, once we get rid

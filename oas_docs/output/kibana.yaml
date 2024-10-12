@@ -11544,6 +11544,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -22219,6 +22223,20 @@ paths:
                           type: array
                         description:
                           type: string
+                        discovery:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            fields:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                         download:
                           type: string
                         format_version:
@@ -22499,6 +22517,7 @@ paths:
                           enum:
                             - integration
                             - input
+                            - content
                           type: string
                         vars:
                           items:
@@ -22551,6 +22570,20 @@ paths:
                           type: array
                         description:
                           type: string
+                        discovery:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            fields:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                         download:
                           type: string
                         format_version:
@@ -22831,6 +22864,7 @@ paths:
                           enum:
                             - integration
                             - input
+                            - content
                           type: string
                         vars:
                           items:
@@ -23803,6 +23837,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -24110,6 +24158,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -24199,6 +24248,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -24506,6 +24569,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -24858,6 +24922,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -25165,6 +25243,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -25246,6 +25325,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -25553,6 +25646,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -49162,6 +49256,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
       type: string
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
@@ -49807,10 +49902,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/Security_Detections_API_TiebreakerField'
         timestamp_field:
@@ -49899,6 +49990,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -50024,6 +50119,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -50145,6 +50244,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -50248,6 +50351,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -50383,6 +50490,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -50507,6 +50618,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -50552,10 +50667,6 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_EsqlRulePatchProps:
       allOf:
         - type: object
@@ -50625,6 +50736,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -50751,6 +50866,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -51014,6 +51133,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -51140,6 +51263,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -51268,6 +51395,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -51390,6 +51521,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -51602,6 +51737,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -51731,6 +51870,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -51788,10 +51931,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_NewTermsRulePatchFields:
       allOf:
         - type: object
@@ -51875,6 +52014,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -52006,6 +52149,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -52241,6 +52388,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -52367,6 +52518,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -52425,10 +52580,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/Security_Detections_API_SavedQueryId'
     Security_Detections_API_QueryRulePatchFields:
@@ -52507,6 +52658,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -52630,6 +52785,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -53340,6 +53499,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -53469,6 +53632,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -53528,10 +53695,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
         query:
           $ref: '#/components/schemas/Security_Detections_API_RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_SavedQueryRulePatchFields:
       allOf:
         - type: object
@@ -53611,6 +53774,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -53737,6 +53904,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -53995,6 +54166,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -54123,6 +54298,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -54279,6 +54458,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -54413,6 +54596,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -54614,6 +54801,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -54742,6 +54933,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -54885,6 +55080,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -55013,6 +55212,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -56226,6 +56429,8 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -56234,6 +56439,11 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -56342,6 +56552,9 @@ components:
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -56353,42 +56566,15 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -56427,6 +56613,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -56516,6 +56706,9 @@ components:
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -56527,42 +56720,14 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
             - source
         user:
           type: object
@@ -56598,6 +56763,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
