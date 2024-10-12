@@ -29,6 +29,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
+import { omit } from 'lodash/fp';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -113,6 +114,7 @@ export const postEvaluateRoute = (
             evaluatorConnectorId,
             graphs: graphNames,
             langSmithApiKey,
+            langSmithProject,
             connectorIds,
             size,
             replacements,
@@ -129,7 +131,9 @@ export const postEvaluateRoute = (
 
           logger.info('postEvaluateRoute:');
           logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
-          logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
+          logger.info(
+            `request.body:\n${JSON.stringify(omit(['langSmithApiKey'], request.body), null, 2)}`
+          );
           logger.info(`Evaluation ID: ${evaluationId}`);
 
           const totalExecutions = connectorIds.length * graphNames.length * dataset.length;
@@ -192,6 +196,7 @@ export const postEvaluateRoute = (
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
+                langSmithProject,
                 logger,
                 runName,
                 size,

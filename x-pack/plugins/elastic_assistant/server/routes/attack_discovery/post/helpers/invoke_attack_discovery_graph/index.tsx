@@ -94,11 +94,12 @@ export const invokeAttackDiscoveryGraph = async ({
     size,
   });
 
-  logger?.debug(() => 'AttackDiscoveryTool: invoking the Attack discovery graph');
+  logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
 
   const result: GraphState = await graph.invoke(
     {},
     {
+      callbacks: [...(traceOptions?.tracers ?? [])],
       runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
       tags,
     }

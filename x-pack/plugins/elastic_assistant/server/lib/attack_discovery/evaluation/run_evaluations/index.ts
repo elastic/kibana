@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { Logger } from '@kbn/core/server';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Client } from 'langsmith';
@@ -44,11 +45,15 @@ export const runEvaluations = async ({
     graph: DefaultAttackDiscoveryGraph;
     llmType: string | undefined;
     name: string;
+    traceOptions: {
+      projectName: string | undefined;
+      tracers: LangChainTracer[];
+    };
   }>;
   langSmithApiKey: string | undefined;
   logger: Logger;
 }): Promise<void> =>
-  asyncForEach(graphs, async ({ connector, graph, llmType, name }) => {
+  asyncForEach(graphs, async ({ connector, graph, llmType, name, traceOptions }) => {
     const subject = `connector "${connector.name}" (${llmType}), running experiment "${name}"`;
 
     try {
@@ -70,6 +75,7 @@ export const runEvaluations = async ({
             ...overrides,
           },
           {
+            callbacks: [...(traceOptions.tracers ?? [])],
             runName: name,
             tags: ['evaluation', llmType ?? ''],
           }
@@ -82,6 +88,7 @@ export const runEvaluations = async ({
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector: connector,
+        langSmithApiKey,
         logger,
       });
 

@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { Logger } from '@kbn/core/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -19,6 +20,7 @@ export const getEvaluatorLlm = async ({
   connectorTimeout,
   evaluatorConnectorId,
   experimentConnector,
+  langSmithApiKey,
   logger,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -26,6 +28,7 @@ export const getEvaluatorLlm = async ({
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   experimentConnector: Connector;
+  langSmithApiKey: string | undefined;
   logger: Logger;
 }): Promise<ActionsClientLlm> => {
   const evaluatorConnector =
@@ -41,6 +44,17 @@ export const getEvaluatorLlm = async ({
     `The ${evaluatorConnector.name} (${evaluatorLlmType}) connector will judge output from the ${experimentConnector.name} (${experimentLlmType}) connector`
   );
 
+  const traceOptions = {
+    projectName: 'evaluators',
+    tracers: [
+      ...getLangSmithTracer({
+        apiKey: langSmithApiKey,
+        projectName: 'evaluators',
+        logger,
+      }),
+    ],
+  };
+
   return new ActionsClientLlm({
     actionsClient,
     connectorId: evaluatorConnector.id,
@@ -48,5 +62,6 @@ export const getEvaluatorLlm = async ({
     logger,
     temperature: 0, // zero temperature for evaluation
     timeout: connectorTimeout,
+    traceOptions,
   });
 };

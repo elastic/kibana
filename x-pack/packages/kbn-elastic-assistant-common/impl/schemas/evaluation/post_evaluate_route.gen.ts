@@ -27,6 +27,7 @@ export const PostEvaluateBody = z.object({
   runName: z.string().optional(),
   alertsIndexPattern: z.string().optional().default('.alerts-security.alerts-default'),
   langSmithApiKey: z.string().optional(),
+  langSmithProject: z.string().optional(),
   replacements: Replacements.optional().default({}),
   size: z.number().optional().default(20),
 });

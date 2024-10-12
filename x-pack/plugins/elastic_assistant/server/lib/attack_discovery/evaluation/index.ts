@@ -10,7 +10,9 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/core/server';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -32,6 +34,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
+  langSmithProject,
   logger,
   runName,
   size,
@@ -47,6 +50,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
+  langSmithProject: string | undefined;
   logger: Logger;
   runName: string;
   size: number;
@@ -58,8 +62,23 @@ export const evaluateAttackDiscovery = async ({
       graph: DefaultAttackDiscoveryGraph;
       llmType: string | undefined;
       name: string;
+      traceOptions: {
+        projectName: string | undefined;
+        tracers: LangChainTracer[];
+      };
     }> = connectors.map((connector) => {
       const llmType = getLlmType(connector.actionTypeId);
+
+      const traceOptions = {
+        projectName: langSmithProject,
+        tracers: [
+          ...getLangSmithTracer({
+            apiKey: langSmithApiKey,
+            projectName: langSmithProject,
+            logger,
+          }),
+        ],
+      };
 
       const llm = new ActionsClientLlm({
         actionsClient,
@@ -68,6 +87,7 @@ export const evaluateAttackDiscovery = async ({
         logger,
         temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
         timeout: connectorTimeout,
+        traceOptions,
       });
 
       const graph = getDefaultAttackDiscoveryGraph({
@@ -84,6 +104,7 @@ export const evaluateAttackDiscovery = async ({
         graph,
         llmType,
         name: `${runName} - ${connector.name} - ${evaluationId} - Attack discovery`,
+        traceOptions,
       };
     });
 

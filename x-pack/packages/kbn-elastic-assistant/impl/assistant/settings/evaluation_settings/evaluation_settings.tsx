@@ -26,13 +26,14 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
-
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   GetEvaluateResponse,
   PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
+import { isEmpty } from 'lodash/fp';
+
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
@@ -192,11 +193,21 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         ? { evaluatorConnectorId: selectedEvaluatorModel[0]?.key }
         : {};
 
+    const langSmithApiKey = isEmpty(traceOptions.langSmithApiKey)
+      ? undefined
+      : traceOptions.langSmithApiKey;
+
+    const langSmithProject = isEmpty(traceOptions.langSmithProject)
+      ? undefined
+      : traceOptions.langSmithProject;
+
     const evalParams: PostEvaluateRequestBodyInput = {
       connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
       graphs: selectedGraphOptions.map((option) => option.label).sort(),
       datasetName: selectedDatasetOptions[0]?.label,
       ...evaluatorConnectorId,
+      langSmithApiKey,
+      langSmithProject,
       runName,
       size: Number(size),
     };
@@ -209,6 +220,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     selectedGraphOptions,
     selectedModelOptions,
     size,
+    traceOptions.langSmithApiKey,
+    traceOptions.langSmithProject,
   ]);
 
   const getSection = (title: string, description: string) => (
