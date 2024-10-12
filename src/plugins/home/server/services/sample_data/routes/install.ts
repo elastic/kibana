@@ -67,6 +67,8 @@ export function createInstallRoute(
           },
         });
       } catch (e) {
+        console.log('install exeception!!!!!', e);
+        console.log(JSON.stringify(e, null, ' '));
         if (e instanceof SampleDataInstallError) {
           return res.customError({
             body: {
