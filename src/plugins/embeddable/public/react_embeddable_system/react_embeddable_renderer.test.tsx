@@ -195,6 +195,7 @@ describe('react embeddable renderer', () => {
         snapshotRuntimeState: expect.any(Function),
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
+        lockHoverActions: expect.any(Function),
       })
     );
   });
