@@ -83,7 +83,7 @@ describe('ConfirmDeleteEndpointModal', () => {
 
     expect(mockUseScanUsage).toHaveBeenCalledWith({
       type: 'text_embedding',
-      id: 'my-cohere-endpoint',
+      id: 'my-hugging-face',
     });
   });
 

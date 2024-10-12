@@ -29,6 +29,7 @@ export const ListUsageResults: React.FC<ListUsageResultsProps> = ({ list }) => {
           isClearable={true}
           aria-label={i18n.SEARCH_ARIA_LABEL}
           fullWidth={true}
+          data-test-subj="usageFieldSearch"
         />
       </EuiFlexItem>
       <EuiFlexItem>

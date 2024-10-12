@@ -25,6 +25,8 @@ describe('ListUsageResults', () => {
   });
   it('renders', () => {
     expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    expect(screen.getAllByTestId('usageItem')).toHaveLength(2);
+
     expect(screen.getByText('index-1')).toBeInTheDocument();
     expect(screen.getByText('Index')).toBeInTheDocument();
     expect(screen.getByText('pipeline-1')).toBeInTheDocument();
@@ -34,7 +36,18 @@ describe('ListUsageResults', () => {
   it('filters list based on search term', () => {
     const searchBox = screen.getByRole('searchbox');
     fireEvent.change(searchBox, { target: { value: 'index' } });
+
+    expect(screen.getAllByTestId('usageItem')).toHaveLength(1);
     expect(screen.getByText('index-1')).toBeInTheDocument();
+    expect(screen.queryByText('pipeline-1')).not.toBeInTheDocument();
+  });
+
+  it('empty list', () => {
+    const searchBox = screen.getByRole('searchbox');
+    fireEvent.change(searchBox, { target: { value: 'coke' } });
+
+    expect(screen.queryAllByTestId('usageItem')).toHaveLength(0);
+    expect(screen.queryByText('index-1')).not.toBeInTheDocument();
     expect(screen.queryByText('pipeline-1')).not.toBeInTheDocument();
   });
 });
