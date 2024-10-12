@@ -6,6 +6,7 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 
 import { getExceptionList } from '../../../../../../objects/exception';
 import {
@@ -14,7 +15,8 @@ import {
 } from '../../../../../../screens/exceptions';
 import {
   createExceptionList,
-  deleteExceptionList,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
 } from '../../../../../../tasks/api_calls/exceptions';
 import {
   dismissCallOut,
@@ -26,10 +28,11 @@ import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
-describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Shared exception lists - read only', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList(), getExceptionList().list_id);
@@ -40,6 +43,12 @@ describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerle
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+  });
+
+  after(() => {
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
   });
 
   it('Displays missing privileges primary callout', () => {

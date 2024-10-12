@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 
@@ -20,7 +21,10 @@ import {
   validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
 } from '../../../../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
@@ -41,11 +45,11 @@ const getExceptionList1 = () => ({
 
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
-// FLAKY: https://github.com/elastic/kibana/issues/180740
-describe.skip('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
-
+    deleteExceptionLists();
+    deleteAlertsAndRules();
     // Create exception list associated with a rule
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
       createRule(
@@ -63,6 +67,11 @@ describe.skip('Exception list detail page', { tags: ['@ess', '@serverless'] }, (
     );
     createRule(getNewRule({ name: 'Rule to link to shared list' }));
     visit(EXCEPTIONS_URL);
+  });
+
+  after(() => {
+    deleteExceptionLists();
+    deleteAlertsAndRules();
   });
 
   it('Should edit list details', () => {
@@ -99,7 +108,7 @@ describe.skip('Exception list detail page', { tags: ['@ess', '@serverless'] }, (
   });
 
   // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980
-  it.skip('Should create a new list and link it to two rules', () => {
+  it('Should create a new list and link it to two rules', () => {
     createSharedExceptionList(
       { name: 'Newly created list', description: 'This is my list.' },
       true

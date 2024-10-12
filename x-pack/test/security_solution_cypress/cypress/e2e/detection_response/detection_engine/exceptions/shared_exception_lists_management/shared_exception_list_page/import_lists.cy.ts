@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
+import {
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 import {
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
@@ -22,14 +27,23 @@ import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
-describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Import Lists', { tags: ['@ess', '@serverless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   const ENDPOINT_LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/endpoint_exception_list.ndjson';
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
     visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
+  });
+
+  after(() => {
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
   });
 
   describe('Exception Lists', () => {
@@ -46,6 +60,11 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
 
     it('Should not import exception list if it exists', () => {
       importExceptionLists(LIST_TO_IMPORT_FILENAME);
+      validateImportExceptionListWentSuccessfully();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
+
+      // Import same list again
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
       validateImportExceptionListFailedBecauseExistingListFound();
 
@@ -55,12 +74,13 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
 
     it('Should import exception list if it exists but the user selected overwrite checkbox', () => {
       importExceptionLists(LIST_TO_IMPORT_FILENAME);
-
-      validateImportExceptionListFailedBecauseExistingListFound();
+      validateImportExceptionListWentSuccessfully();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
 
       // Validate table items count
       cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
 
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
       importExceptionListWithSelectingOverwriteExistingOption();
 
       validateImportExceptionListWentSuccessfully();
@@ -71,12 +91,13 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
 
     it('Should import exception list if it exists but the user selected create new checkbox', () => {
       importExceptionLists(LIST_TO_IMPORT_FILENAME);
-
-      validateImportExceptionListFailedBecauseExistingListFound();
+      validateImportExceptionListWentSuccessfully();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
 
       // Validate table items count
       cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
 
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
       importExceptionListWithSelectingCreateNewOption();
 
       validateImportExceptionListWentSuccessfully();
@@ -86,15 +107,12 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
   });
 
   describe('Endpoint Security Exception List', () => {
-    before(() => {
-      login();
-      visit(EXCEPTIONS_URL);
-
+    it('Should not allow to import or create a second Endpoint Security Exception List', () => {
       // Make sure we have Endpoint Security Exception List
       importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
-    });
+      validateImportExceptionListWentSuccessfully();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
 
-    it('Should not allow to import or create a second Endpoint Security Exception List', () => {
       // Try to import another Endpoint Security Exception List
       importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
 
