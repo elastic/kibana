@@ -18,9 +18,20 @@ const mockUseScanUsage = useScanUsage as jest.Mock;
 describe('ConfirmDeleteEndpointModal', () => {
   const mockOnCancel = jest.fn();
   const mockOnConfirm = jest.fn();
+
+  const mockProvider = {
+    inference_id: 'my-hugging-face',
+    service: 'hugging_face',
+    service_settings: {
+      api_key: 'aaaa',
+      url: 'https://dummy.huggingface.com',
+    },
+    task_settings: {},
+  } as any;
+
   const mockItem = {
-    endpoint: 'my-cohere-endpoint',
-    provider: 'Cohere',
+    endpoint: 'my-hugging-face',
+    provider: mockProvider,
     type: 'text_embedding',
   };
 
@@ -57,7 +68,7 @@ describe('ConfirmDeleteEndpointModal', () => {
     expect(screen.getByText(i18n.CONFIRM_DELETE_WARNING)).toBeInTheDocument();
     expect(screen.getByText(i18n.CANCEL)).toBeInTheDocument();
     expect(screen.getByText(i18n.DELETE_ACTION_LABEL)).toBeInTheDocument();
-    expect(screen.getByText('my-cohere-endpoint')).toBeInTheDocument();
+    expect(screen.getByText('my-hugging-face')).toBeInTheDocument();
   });
 
   it('calls onCancel when the cancel button is clicked', () => {

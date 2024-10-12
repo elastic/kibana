@@ -88,7 +88,12 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
         </EuiFlexItem>
         <EuiFlexItem>
           {isFetching ? (
-            <EuiButtonEmpty size="xs" onClick={() => {}} isLoading>
+            <EuiButtonEmpty
+              data-test-subj="scanningUsageText"
+              size="xs"
+              onClick={() => {}}
+              isLoading
+            >
               {i18n.SCANNING_USAGE_LABEL}&hellip;
             </EuiButtonEmpty>
           ) : listOfUsages.length === 0 ? (
