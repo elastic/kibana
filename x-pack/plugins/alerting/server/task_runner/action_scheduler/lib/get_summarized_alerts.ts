@@ -14,6 +14,7 @@ import {
   CombinedSummarizedAlerts,
   RuleAlertData,
 } from '../../../types';
+import { Alert } from '../../../alert';
 
 interface GetSummarizedAlertsOpts<
   State extends AlertInstanceState,
@@ -56,7 +57,8 @@ export const getSummarizedAlerts = async <
    * yet (the update call uses refresh: false). So we need to rely on the in
    * memory alerts to do this.
    */
-  const newAlertsInMemory = Object.values(alertsClient.getProcessedAlerts('new') || {}) || [];
+  const newAlertsInMemory: Array<Alert<State, Context, ActionGroupIds>> =
+    Object.values(alertsClient.getProcessedAlerts('new') || {}) || [];
 
   const newAlertsWithMaintenanceWindowIds = newAlertsInMemory.reduce<string[]>((result, alert) => {
     if (alert.getMaintenanceWindowIds().length > 0) {
