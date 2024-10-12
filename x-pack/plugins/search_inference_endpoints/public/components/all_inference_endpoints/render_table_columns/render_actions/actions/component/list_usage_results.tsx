@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { InferenceUsageInfo } from '../../../../../types';
-import * as i18n from './translations';
+import { InferenceUsageInfo } from '../../../../types';
+import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { UsageItem } from './usage_item';
 
 interface ListUsageResultsProps {

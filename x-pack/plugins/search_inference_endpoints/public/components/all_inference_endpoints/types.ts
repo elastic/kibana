@@ -61,3 +61,8 @@ export interface InferenceEndpointUI {
   provider: InferenceAPIConfigResponse;
   type: string;
 }
+
+export interface InferenceUsageInfo {
+  label: string;
+  type: string;
+}

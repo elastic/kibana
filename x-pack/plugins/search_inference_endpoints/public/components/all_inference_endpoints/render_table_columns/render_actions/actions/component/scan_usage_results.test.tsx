@@ -9,9 +9,9 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
 import { ScanUsageResults } from './scan_usage_results';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../../hooks/use_kibana');
+jest.mock('../../../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
 const mockNavigateToApp = jest.fn();
 const mockOnCheckboxChange = jest.fn();

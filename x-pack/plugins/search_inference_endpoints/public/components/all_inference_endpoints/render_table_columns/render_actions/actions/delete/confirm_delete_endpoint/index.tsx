@@ -7,9 +7,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import * as i18n from './translations';
-import { useShowUsage } from '../../../../../../../hooks/use_delete_endpoint';
-import { InferenceEndpointUI } from '../../../../../types';
+import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
+import { InferenceEndpointUI, InferenceUsageInfo } from '../../../../../types';
+import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
+import { ScanUsageResults } from '../../component/scan_usage_results';
 
 interface ConfirmDeleteEndpointModalProps {
   onCancel: () => void;
@@ -22,17 +27,39 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
   onConfirm,
   inferenceEndpoint,
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [list, setList] = useState(undefined);
-  const { data } = useShowUsage({
+  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [listOfUsages, setListOfUsages] = useState<InferenceUsageInfo[]>([]);
+  const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
+  const [ignoreWarningCheckbox, setIgnoreWarningCheckbox] = useState<boolean>(false);
+
+  const { data } = useScanUsage({
     type: inferenceEndpoint.type,
     id: inferenceEndpoint.endpoint,
   });
 
+  const onCheckboxChange = (state: boolean) => {
+    setIgnoreWarningCheckbox(state);
+    if (state) {
+      setDeleteDisabled(false);
+    } else {
+      setDeleteDisabled(true);
+    }
+  };
+
   useEffect(() => {
     if (!data) return;
+    setIsFetching(false);
 
-    setList(data);
+    const indices = data.indexes.map((index, id) => ({ label: index, type: 'Index' }));
+    const pipelines = data.pipelines.map((pipeline, id) => ({ label: pipeline, type: 'Pipeline' }));
+    const usages: InferenceUsageInfo[] = [...indices, ...pipelines];
+    if (usages.length > 0) {
+      setDeleteDisabled(true);
+    } else {
+      setDeleteDisabled(false);
+    }
+
+    setListOfUsages(usages);
   }, [data]);
 
   return (
@@ -44,18 +71,38 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
       onCancel={onCancel}
       onConfirm={onConfirm}
       title={i18n.DELETE_TITLE}
-      confirmButtonDisabled={true}
+      confirmButtonDisabled={deleteDisabled}
     >
-      <EuiFlexGroup gutterSize="s" direction="column">
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>{i18n.CONFIRM_DELETE_WARNING}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{inferenceEndpoint.endpoint}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isLoading ? (
+          <EuiText
+            size="xs"
+            css={css`
+              font-family: ${euiThemeVars.euiCodeFontFamily};
+              font-weight: ${euiThemeVars.euiCodeFontWeightBold};
+            `}
+          >
+            {inferenceEndpoint.endpoint}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {isFetching ? (
             <EuiButtonEmpty size="xs" onClick={() => {}} isLoading>
-              Scanning for usage&hellip;
+              {i18n.SCANNING_USAGE_LABEL}&hellip;
             </EuiButtonEmpty>
+          ) : listOfUsages.length === 0 ? (
+            <RenderMessageWithIcon
+              icon="checkInCircleFilled"
+              color="success"
+              label={i18n.NO_USAGE_FOUND_LABEL}
+            />
           ) : (
-            <EuiText>nothing found</EuiText>
+            <ScanUsageResults
+              list={listOfUsages}
+              ignoreWarningCheckbox={ignoreWarningCheckbox}
+              onCheckboxChange={onCheckboxChange}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

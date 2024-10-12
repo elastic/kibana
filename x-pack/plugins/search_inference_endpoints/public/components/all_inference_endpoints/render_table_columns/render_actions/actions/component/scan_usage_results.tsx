@@ -17,11 +17,11 @@ import {
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { InferenceUsageInfo } from '../../../../../types';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
+import { InferenceUsageInfo } from '../../../../types';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
 
-import * as i18n from './translations';
+import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { ListUsageResults } from './list_usage_results';
 
 interface ScanUsageResultsProps {

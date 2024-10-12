@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { useKibana } from '../../../../../../../hooks/use_kibana';
-import { InferenceUsageInfo } from '../../../../../types';
+import { useKibana } from '../../../../../../hooks/use_kibana';
+import { InferenceUsageInfo } from '../../../../types';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;

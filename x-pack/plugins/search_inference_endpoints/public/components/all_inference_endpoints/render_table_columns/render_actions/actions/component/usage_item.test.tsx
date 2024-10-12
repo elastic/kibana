@@ -9,10 +9,10 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
 import { UsageItem } from './usage_item';
-import { InferenceUsageInfo } from '../../../../../types';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
+import { InferenceUsageInfo } from '../../../../types';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../../hooks/use_kibana');
+jest.mock('../../../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
 const mockNavigateToApp = jest.fn();
 
