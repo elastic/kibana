@@ -242,6 +242,7 @@ export const PingType = t.intersection([
       type: t.string,
       dataset: t.string,
     }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 
