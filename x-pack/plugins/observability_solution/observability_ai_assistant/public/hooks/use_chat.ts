@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
-import { AssistantScope } from '../../common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   MessageRole,
   type Message,
