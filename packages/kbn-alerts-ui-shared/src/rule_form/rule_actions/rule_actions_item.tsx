@@ -55,6 +55,7 @@ import {
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
 } from '../translations';
+import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 const SUMMARY_GROUP_TITLE = i18n.translate('alertsUIShared.ruleActionsItem.summaryGroupTitle', {
   defaultMessage: 'Summary of alerts',
@@ -156,6 +157,16 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const templateFields = action.useAlertDataForTemplate
     ? aadTemplateFields
     : availableActionVariables;
+
+  const checkEnabledResult = useMemo(() => {
+    if (!actionType) {
+      return null;
+    }
+    return checkActionFormActionTypeEnabled(
+      actionType,
+      connectors.filter((c) => c.isPreconfigured)
+    );
+  }, [actionType, connectors]);
 
   const onDelete = (id: string) => {
     dispatch({ type: 'removeAction', payload: { uuid: id } });
@@ -444,9 +455,25 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   }, [action, storedActionParamsForAadToggle, dispatch]);
 
   const accordionContent = useMemo(() => {
-    if (!connector) {
+    if (!connector || !checkEnabledResult) {
       return null;
     }
+
+    if (!checkEnabledResult.isEnabled) {
+      return (
+        <EuiFlexGroup
+          direction="column"
+          style={{
+            padding: euiTheme.size.l,
+            backgroundColor: plain,
+            borderRadius: euiTheme.border.radius.medium,
+          }}
+        >
+          <EuiFlexItem>{checkEnabledResult.messageCard}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
       <EuiFlexGroup
         direction="column"
@@ -505,6 +532,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     templateFields,
     useDefaultMessage,
     warning,
+    checkEnabledResult,
     onNotifyWhenChange,
     onActionGroupChange,
     onAlertsFilterChange,

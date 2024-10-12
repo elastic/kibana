@@ -67,13 +67,13 @@ export const getAlertingSectionBreadcrumb = (
     case 'createRule':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.createRule.breadcrumbTitle', {
-          defaultMessage: 'Create Rule',
+          defaultMessage: 'Create',
         }),
       };
     case 'editRule':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.editRule.breadcrumbTitle', {
-          defaultMessage: 'Edit Rule',
+          defaultMessage: 'Edit',
         }),
       };
     default:

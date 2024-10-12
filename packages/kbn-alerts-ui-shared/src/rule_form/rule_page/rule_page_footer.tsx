@@ -34,6 +34,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
   const {
+    plugins: { application },
     formData: { actions },
     connectors,
     baseErrors = {},
@@ -78,11 +79,12 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     if (isEdit) {
       return onSave();
     }
-    if (actions.length === 0) {
+    const canReadConnectors = !!application.capabilities.actions?.show;
+    if (actions.length === 0 && canReadConnectors) {
       return setShowCreateConfirmation(true);
     }
     onSave();
-  }, [actions, isEdit, onSave]);
+  }, [actions, isEdit, application, onSave]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);

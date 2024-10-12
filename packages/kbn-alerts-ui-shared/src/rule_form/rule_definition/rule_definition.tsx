@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -71,13 +71,22 @@ export const RuleDefinition = () => {
   const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
+  useEffect(() => {
+    // Need to do a dry run validating the params because the Missing Monitor Data rule type
+    // does not properly initialize the params
+    if (selectedRuleType.id === 'monitoring_alert_missing_monitoring_data') {
+      dispatch({ type: 'runValidation' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
 
   const {
     capabilities: { rulesSettings },
   } = application;
 
-  const { writeFlappingSettingsUI } = rulesSettings || {};
+  const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
 
   const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
 
@@ -312,7 +321,7 @@ export const RuleDefinition = () => {
               >
                 <RuleAlertDelay />
               </EuiDescribedFormGroup>
-              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && (
+              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
                 <EuiDescribedFormGroup
                   fullWidth
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}

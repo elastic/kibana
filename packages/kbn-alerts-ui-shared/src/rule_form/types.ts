@@ -86,6 +86,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   canShowConsumerSelection?: boolean;
   validConsumers: RuleCreationValidConsumer[];
   flappingSettings?: RulesSettingsFlapping;
+  touched?: boolean;
 }
 
 export type InitialRule = Partial<Rule> &

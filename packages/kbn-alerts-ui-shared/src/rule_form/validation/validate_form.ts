@@ -109,17 +109,17 @@ export const validateRuleParams = ({
   return ruleTypeModel.validate(formData.params, isServerless).errors;
 };
 
-const hasRuleBaseErrors = (errors: RuleFormBaseErrors) => {
+export const hasRuleBaseErrors = (errors: RuleFormBaseErrors) => {
   return Object.values(errors).some((error: string[]) => error.length > 0);
 };
 
-const hasActionsError = (actionsErrors: Record<string, RuleFormActionsErrors>) => {
+export const hasActionsError = (actionsErrors: Record<string, RuleFormActionsErrors>) => {
   return Object.values(actionsErrors).some((errors: RuleFormActionsErrors) => {
     return Object.values(errors).some((error: string[]) => error.length > 0);
   });
 };
 
-const hasParamsErrors = (errors: RuleFormParamsErrors | string | string[]): boolean => {
+export const hasParamsErrors = (errors: RuleFormParamsErrors | string | string[]): boolean => {
   let hasError = false;
 
   if (typeof errors === 'string' && errors.trim() !== '') {
@@ -141,7 +141,9 @@ const hasParamsErrors = (errors: RuleFormParamsErrors | string | string[]): bool
   return hasError;
 };
 
-const hasActionsParamsErrors = (actionsParamsErrors: Record<string, RuleFormParamsErrors>) => {
+export const hasActionsParamsErrors = (
+  actionsParamsErrors: Record<string, RuleFormParamsErrors>
+) => {
   return Object.values(actionsParamsErrors).some((errors: RuleFormParamsErrors) => {
     return hasParamsErrors(errors);
   });
