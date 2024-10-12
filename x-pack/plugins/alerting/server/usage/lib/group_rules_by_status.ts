@@ -12,10 +12,9 @@ export function groupRulesByStatus(
 ): AlertingUsage['count_rules_by_execution_status'] {
   const ok = rulesByStatus.ok || 0;
   const active = rulesByStatus.active || 0;
-  const success = ok + active;
 
   return {
-    success,
+    success: ok + active,
     error: rulesByStatus.error || 0,
     warning: rulesByStatus.warning || 0,
   };
