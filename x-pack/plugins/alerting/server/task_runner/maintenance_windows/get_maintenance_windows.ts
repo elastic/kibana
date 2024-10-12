@@ -76,7 +76,7 @@ export const getMaintenanceWindows = async (
       );
     }
 
-    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+    const filteredMaintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
       // If category IDs array doesn't exist: allow all
       if (!Array.isArray(categoryIds)) {
         return true;
@@ -88,6 +88,6 @@ export const getMaintenanceWindows = async (
       return false;
     });
 
-    return maintenanceWindows;
+    return filteredMaintenanceWindows;
   });
 };
