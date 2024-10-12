@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -63,6 +63,12 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     currentlyVisibleIndices = matched.allIndices;
     currentViewMode = ViewMode.allIndices;
   }
+
+  useEffect(() => {
+    if (!matched.visibleIndices.length && viewMode === ViewMode.onlyMatchingIndices) {
+      setViewMode(ViewMode.allIndices);
+    }
+  }, [matched, viewMode]);
 
   const indicesListContent = currentlyVisibleIndices.length ? (
     <IndicesList
