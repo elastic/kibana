@@ -1192,8 +1192,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // skipped on MKI since feature flags are not supported there
-    describe('@skipInServerlessMKI preview logged requests', () => {
+    describe('preview logged requests', () => {
       it('should not return requests property when not enabled', async () => {
         const { logs } = await previewRule({
           supertest,

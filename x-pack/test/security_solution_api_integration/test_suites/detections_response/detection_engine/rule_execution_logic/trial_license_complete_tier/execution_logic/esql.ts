@@ -1413,8 +1413,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // skipped on MKI since feature flags are not supported there
-    describe('@skipInServerlessMKI preview logged requests', () => {
+    describe('preview logged requests', () => {
       let rule: EsqlRuleCreateProps;
       let id: string;
       beforeEach(async () => {
