@@ -42,7 +42,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
   };
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column">
+    <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="usageItem">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
