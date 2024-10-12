@@ -157,7 +157,7 @@ aggregations using that {data-source} in {kib} take advantage of {ccs}.
 
 For more information, refer to
 {ref}/modules-cross-cluster-search.html#exclude-problematic-clusters[Excluding
-clusters or indicies from cross-cluster search].
+clusters or indices from cross-cluster search].
 
 [float]
 [[delete-data-view]]
