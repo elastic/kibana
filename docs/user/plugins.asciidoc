@@ -29,7 +29,7 @@ We are unable to evaluate or maintain the known plugins, so care should be taken
 * https://github.com/TrumanDu/indices_view[Indices View] - View indices related information.
 * https://github.com/johtani/analyze-api-ui-plugin[Analyze UI] (johtani) - UI for elasticsearch _analyze API
 * https://github.com/TrumanDu/cleaner[Cleaner] (TrumanDu)- Setting index ttl.
-* https://github.com/bitsensor/elastalert-kibana-plugin[ElastAlert Kibana Plugin] (BitSensor) - UI to create, test and edit ElastAlert rules
+* https://github.com/Karql/elastalert-kibana-plugin[ElastAlert Kibana Plugin] - UI to create, test and edit https://github.com/jertel/elastalert2[ElastAlert2] rules
 * https://github.com/query-ai/queryai-kibana-plugin[AI Analyst] (Query.AI) - App providing: NLP queries, automation, ML visualizations and insights
 
 [float]
