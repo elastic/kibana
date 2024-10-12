@@ -3323,6 +3323,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant-common@link:x-pack/packages/kbn-ai-assistant-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
@@ -8471,7 +8475,7 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.4":
+"@redocly/cli@^1.25.5":
   version "1.25.5"
   resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.5.tgz#258f6d23e8298814518ec4d24d023c1e21e3b081"
   integrity sha512-sFh4A8wqwuig7mF/nYNVIyxSfKKZikWC+uVH6OB1IepYQXNsHFaLAU1VaNI9gS5mMvWmYx5SEuSCVB9LaNFBhw==
