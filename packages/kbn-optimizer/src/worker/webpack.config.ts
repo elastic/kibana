@@ -156,7 +156,6 @@ export function getWebpackConfig(
         },
         {
           test: /\.css$/,
-          resourceQuery: { not: /raw/ },
           include: /node_modules/,
           use: [
             {
@@ -241,7 +240,6 @@ export function getWebpackConfig(
         },
         {
           test: /\.(js|tsx?)$/,
-          resourceQuery: { not: /raw/ },
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
