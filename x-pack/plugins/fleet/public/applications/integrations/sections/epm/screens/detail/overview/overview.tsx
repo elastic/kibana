@@ -24,6 +24,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
 
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -109,6 +111,31 @@ const UnverifiedCallout: React.FC = () => {
         </p>
       </EuiCallOut>
       <EuiSpacer size="l" />
+    </>
+  );
+};
+
+const LS_CLOUD_POSTURE_3P_SUPPORT_WIZ_INTEGRATIONS_CALLOUT_KEY =
+  'fleet:cloudSecurityPosture:thirdPartySupport:wizIntegrationsCallout';
+
+const CloudPostureThirdPartySupportCallout = () => {
+  const [userHasDismissedWizCallout, setUserHasDismissedWizCallout] = useLocalStorage(
+    LS_CLOUD_POSTURE_3P_SUPPORT_WIZ_INTEGRATIONS_CALLOUT_KEY
+  );
+
+  if (userHasDismissedWizCallout) return null;
+
+  return (
+    <>
+      <EuiCallOut
+        onDismiss={() => setUserHasDismissedWizCallout(true)}
+        iconType="cheer"
+        title={i18n.translate('xpack.fleet.epm.wizIntegration.newFeaturesCallout', {
+          defaultMessage:
+            'New! You can now ingest vulnerability and misconfiguration findings from Wiz into Elastic! Leverage out of the box contextual investigation and threat-hunting workflows.',
+        })}
+      />
+      <EuiSpacer size="s" />
     </>
   );
 };
@@ -319,6 +346,7 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
+          {packageInfo.name === 'wiz' && <CloudPostureThirdPartySupportCallout />}
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}
