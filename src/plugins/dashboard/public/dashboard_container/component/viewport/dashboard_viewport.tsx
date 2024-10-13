@@ -26,6 +26,7 @@ import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -46,6 +47,7 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 
 export const DashboardViewportComponent = () => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
   const [
     controlGroupApi,
@@ -56,7 +58,6 @@ export const DashboardViewportComponent = () => {
     panels,
     viewMode,
     useMargins,
-    uuid,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -65,8 +66,7 @@ export const DashboardViewportComponent = () => {
     dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
-    dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.settings.useMargins$
   );
 
   const panelCount = useMemo(() => {
@@ -123,7 +123,7 @@ export const DashboardViewportComponent = () => {
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={uuid}
+            key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
@@ -131,11 +131,12 @@ export const DashboardViewportComponent = () => {
             getParentApi={() => {
               return {
                 ...dashboardApi,
-                getSerializedStateForChild: dashboardApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardApi.getRuntimeStateForControlGroup,
+                reload$: dashboardInternalApi.controlGroupReload$,
+                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}
+            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
       ) : null}

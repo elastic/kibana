@@ -77,43 +77,6 @@ const serializeAllPanelState = async (
 };
 
 /**
- * Save the current state of this dashboard to a saved object without showing any save modal.
- */
-export async function runQuickSave(this: DashboardContainer) {
-  const { explicitInput: currentState } = this.getState();
-
-  const lastSavedId = this.savedObjectId.value;
-
-  if (this.managed$.value) return;
-
-  const { panels: nextPanels, references } = await serializeAllPanelState(this);
-  const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
-  let stateToSave: SavedDashboardInput = dashboardStateToSave;
-  const controlGroupApi = this.controlGroupApi$.value;
-  let controlGroupReferences: Reference[] | undefined;
-  if (controlGroupApi) {
-    const { rawState: controlGroupSerializedState, references: extractedReferences } =
-      await controlGroupApi.serializeState();
-    controlGroupReferences = extractedReferences;
-    stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
-  }
-
-  const saveResult = await getDashboardContentManagementService().saveDashboardState({
-    controlGroupReferences,
-    panelReferences: references,
-    currentState: stateToSave,
-    saveOptions: {},
-    lastSavedId,
-  });
-
-  this.savedObjectReferences = saveResult.references ?? [];
-  this.setLastSavedInput(dashboardStateToSave);
-  this.saveNotification$.next();
-
-  return saveResult;
-}
-
-/**
  * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */

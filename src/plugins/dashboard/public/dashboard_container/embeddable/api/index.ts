@@ -10,4 +10,4 @@
 export { openSettingsFlyout } from './open_settings_flyout';
 export { addFromLibrary } from './add_panel_from_library';
 export { addOrUpdateEmbeddable } from './panel_management';
-export { runQuickSave, runInteractiveSave } from './run_save_functions';
+export { runInteractiveSave } from './run_save_functions';
