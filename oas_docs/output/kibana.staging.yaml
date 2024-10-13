@@ -1609,6 +1609,7 @@ paths:
                               - timeout
                               - disabled
                               - validate
+                              - shutdown
                             type: string
                         required:
                           - reason
@@ -1727,6 +1728,7 @@ paths:
                           - timeout
                           - disabled
                           - validate
+                          - shutdown
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
@@ -1834,6 +1836,7 @@ paths:
                                         - timeout
                                         - disabled
                                         - validate
+                                        - shutdown
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
@@ -2782,6 +2785,7 @@ paths:
                               - timeout
                               - disabled
                               - validate
+                              - shutdown
                             type: string
                         required:
                           - reason
@@ -2900,6 +2904,7 @@ paths:
                           - timeout
                           - disabled
                           - validate
+                          - shutdown
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
@@ -3007,6 +3012,7 @@ paths:
                                         - timeout
                                         - disabled
                                         - validate
+                                        - shutdown
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
@@ -3926,6 +3932,7 @@ paths:
                               - timeout
                               - disabled
                               - validate
+                              - shutdown
                             type: string
                         required:
                           - reason
@@ -4044,6 +4051,7 @@ paths:
                           - timeout
                           - disabled
                           - validate
+                          - shutdown
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
@@ -4151,6 +4159,7 @@ paths:
                                         - timeout
                                         - disabled
                                         - validate
+                                        - shutdown
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
@@ -5152,6 +5161,7 @@ paths:
                               - timeout
                               - disabled
                               - validate
+                              - shutdown
                             type: string
                         required:
                           - reason
@@ -5270,6 +5280,7 @@ paths:
                           - timeout
                           - disabled
                           - validate
+                          - shutdown
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
@@ -5377,6 +5388,7 @@ paths:
                                         - timeout
                                         - disabled
                                         - validate
+                                        - shutdown
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions

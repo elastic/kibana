@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { TaskPool, TaskPoolRunResult } from './task_pool';
+export { TaskCancellationReason, TaskPool, TaskPoolRunResult } from './task_pool';
 export { getCapacityInCost, getCapacityInWorkers } from './utils';

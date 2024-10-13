@@ -23,6 +23,7 @@ const executionStatusErrorReason = schema.oneOf([
   schema.literal('timeout'),
   schema.literal('disabled'),
   schema.literal('validate'),
+  schema.literal('shutdown'),
 ]);
 
 const rawRuleExecutionStatusSchema = schema.object({

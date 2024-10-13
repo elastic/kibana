@@ -147,6 +147,13 @@ export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_SHUTDOWN_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonShutdown',
+  {
+    defaultMessage: 'Rule execution cancelled due to Kibana shutdown.',
+  }
+);
+
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
@@ -191,6 +198,7 @@ export const rulesErrorReasonTranslationsMapping = {
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
   validate: ALERT_ERROR_VALIDATE_REASON,
+  shutdown: ALERT_ERROR_SHUTDOWN_REASON,
 };
 
 export const rulesWarningReasonTranslationsMapping = {

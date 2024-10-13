@@ -22,6 +22,7 @@ import {
   initializeExecuteBackfillRecord,
   SavedObjects,
   updateEventWithRuleData,
+  createSystemShutdownRecord,
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
@@ -706,6 +707,23 @@ describe('AlertingEventLogger', () => {
           },
         },
       });
+    });
+  });
+
+  describe('logShutdown()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() => alertingEventLogger.logShutdown()).toThrowErrorMatchingInlineSnapshot(
+        `"AlertingEventLogger not initialized"`
+      );
+    });
+
+    test('should log shutdown event', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.logShutdown();
+
+      const event = createSystemShutdownRecord(ruleContext, [alertSO], ruleData);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
   });
 
