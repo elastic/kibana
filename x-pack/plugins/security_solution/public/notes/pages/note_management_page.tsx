@@ -44,6 +44,7 @@ import { DeleteConfirmModal } from '../components/delete_confirm_modal';
 import * as i18n from './translations';
 import { OpenFlyoutButtonIcon } from '../components/open_flyout_button';
 import { OpenTimelineButtonIcon } from '../components/open_timeline_button';
+import { NoteContent } from '../components/note_content';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
@@ -94,6 +95,7 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
   {
     field: 'note',
     name: i18n.NOTE_CONTENT_COLUMN,
+    render: (note: Note['note']) => <>{note && <NoteContent note={note} />}</>,
   },
   {
     field: 'created',

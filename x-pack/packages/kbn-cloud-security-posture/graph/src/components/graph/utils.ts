@@ -16,10 +16,16 @@ export const calcLabelSize = (label?: string) => {
   return { width: currLblWidth, height: EdgeLabelHeight };
 };
 
-export function getTextWidth(text: string, font: string = LABEL_FONT) {
+interface GetTextWidth {
+  (text: string, font?: string): number;
+
+  // static canvas element for measuring text width
+  canvas?: HTMLCanvasElement;
+}
+
+export const getTextWidth: GetTextWidth = (text: string, font: string = LABEL_FONT) => {
   // re-use canvas object for better performance
   const canvas: HTMLCanvasElement =
-    // @ts-ignore
     getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
   const context = canvas.getContext('2d');
   if (context) {
@@ -27,7 +33,7 @@ export function getTextWidth(text: string, font: string = LABEL_FONT) {
   }
   const metrics = context?.measureText(text);
   return metrics?.width ?? 0;
-}
+};
 
 function getCssStyle(element: HTMLElement, prop: string) {
   return window.getComputedStyle(element, null).getPropertyValue(prop);

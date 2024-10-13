@@ -19,17 +19,20 @@ import {
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 
+const NODE_WIDTH = 90;
+const NODE_HEIGHT = 90;
+
 export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>
-      {!interactive || (
+      {interactive && (
         <NodeShapeOnHoverSvg
-          width="90"
-          height="90"
-          viewBox="0 0 90 90"
+          width={NODE_WIDTH}
+          height={NODE_HEIGHT}
+          viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -59,11 +62,11 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
         />
         {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
       </NodeShapeSvg>
-      {!interactive || (
+      {interactive && (
         <NodeButton
-          onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={`${90 - NodeButton.ExpandButtonSize / 2}px`}
-          y={`${(90 - NodeButton.ExpandButtonSize) / 2}px`}
+          onClick={(e) => expandButtonClick?.(e, props)}
+          x={`${NODE_WIDTH - NodeButton.ExpandButtonSize / 2}px`}
+          y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
       <Handle

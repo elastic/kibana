@@ -47,7 +47,7 @@ export const getGraph = async (
   const { esClient, logger } = services;
   const { actorIds, eventIds, spaceId = 'default', start, end } = query;
 
-  logger.debug(
+  logger.trace(
     `Fetching graph for [eventIds: ${eventIds.join(', ')}] [actorIds: ${actorIds.join(
       ', '
     )}] in [spaceId: ${spaceId}]`
@@ -82,17 +82,7 @@ const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
   );
 
   // Sort groups to be first (fixes minor layout issue)
-  const nodes = Object.values(nodesMap).sort((a, b) => {
-    if (a.shape === b.shape) {
-      return 0;
-    } else if (a.shape === 'group') {
-      return -1;
-    } else if (b.shape === 'group') {
-      return 1;
-    }
-
-    return 0;
-  });
+  const nodes = sortNodes(nodesMap);
 
   return { nodes, edges: Object.values(edgesMap) };
 };
@@ -127,7 +117,8 @@ const fetchGraph = async ({
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
-      isAlert`;
+      isAlert
+| LIMIT 1000`;
 
   logger.trace(`Executing query [${query}]`);
 
@@ -258,7 +249,22 @@ const determineEntityNodeShape = (
   return { shape: 'hexagon', icon: 'questionInCircle' };
 };
 
-function createEdgesAndGroups(logger: Logger, context: ParseContext) {
+const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
+  const groupNodes = [];
+  const otherNodes = [];
+
+  for (const node of Object.values(nodesMap)) {
+    if (node.shape === 'group') {
+      groupNodes.push(node);
+    } else {
+      otherNodes.push(node);
+    }
+  }
+
+  return [...groupNodes, ...otherNodes];
+};
+
+const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
   const { edgeLabelsNodes, edgesMap, nodesMap } = context;
 
   Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
@@ -303,7 +309,7 @@ function createEdgesAndGroups(logger: Logger, context: ParseContext) {
       });
     }
   });
-}
+};
 
 const connectEntitiesAndLabelNode = (
   logger: Logger,
