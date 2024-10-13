@@ -43,7 +43,7 @@ docker run \\
 
     --rm \\
 
-    docker.elastic.co/enterprise-search/elastic-connectors:${version} \\
+    docker.elastic.co/integrations/elastic-connectors:${version} \\
 
     /app/bin/elastic-ingest \\
 
