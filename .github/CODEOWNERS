@@ -1673,6 +1673,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/plugins/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 
+# Inference API
+/x-pack/plugins/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
