@@ -23,7 +23,6 @@ export interface ImportRuleActionConnectorsParams {
   actionConnectors: SavedObject[];
   actionsClient: ActionsClient;
   actionsImporter: ISavedObjectsImporter;
-  rules: Array<RuleToImport | Error>;
   overwrite: boolean;
 }
 
