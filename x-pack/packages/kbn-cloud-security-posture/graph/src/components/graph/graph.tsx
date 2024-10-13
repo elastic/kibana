@@ -86,6 +86,7 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         zoomOnScroll={interactive}
         zoomOnPinch={interactive}
         zoomOnDoubleClick={interactive}
+        preventScrolling={interactive}
       >
         {interactive && <Controls />}
         <Background />
