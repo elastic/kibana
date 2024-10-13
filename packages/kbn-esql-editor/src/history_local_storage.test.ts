@@ -25,6 +25,7 @@ describe('history local storage', function () {
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(1);
     expect(historyItems[0].timeRan).toBeDefined();
+    expect(historyItems[0].duration).toBeUndefined();
     expect(historyItems[0].status).toBeUndefined();
   });
 
@@ -33,11 +34,13 @@ describe('history local storage', function () {
       queryString: 'from kibana_sample_data_flights \n | limit 10 \n | stats meow = avg(woof)',
       timeZone: 'Browser',
       status: 'success',
+      duration: '1.2s',
     });
 
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(2);
     expect(historyItems[1].timeRan).toBeDefined();
+    expect(historyItems[1].duration).toBeDefined();
     expect(historyItems[1].status).toBe('success');
 
     expect(mockSetItem).toHaveBeenCalledWith(

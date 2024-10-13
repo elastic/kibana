@@ -31,6 +31,7 @@ export interface DiscoverTopNavProps {
   stateContainer: DiscoverStateContainer;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
+  esqlQueryTime?: number;
   onFieldEdited: () => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
@@ -41,6 +42,7 @@ export const DiscoverTopNav = ({
   stateContainer,
   esqlModeErrors,
   esqlModeWarning,
+  esqlQueryTime,
   onFieldEdited,
   isLoading,
   onCancelClick,
@@ -280,6 +282,7 @@ export const DiscoverTopNav = ({
         displayStyle="detached"
         textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
         textBasedLanguageModeWarning={esqlModeWarning}
+        esqlQueryTime={esqlQueryTime}
         prependFilterBar={
           searchBarCustomization?.PrependFilterBar ? (
             <searchBarCustomization.PrependFilterBar />

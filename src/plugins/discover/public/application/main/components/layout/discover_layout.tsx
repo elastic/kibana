@@ -279,6 +279,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
+  const esqlQueryTime = useMemo(() => {
+    if (isEsqlMode) {
+      return documentState.esqlQueryTime;
+    }
+  }, [documentState.esqlQueryTime, isEsqlMode]);
+
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
       return documentState.esqlHeaderWarning;
@@ -396,6 +402,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         stateContainer={stateContainer}
         esqlModeErrors={esqlModeErrors}
         esqlModeWarning={esqlModeWarning}
+        esqlQueryTime={esqlQueryTime}
         onFieldEdited={onFieldEdited}
         isLoading={isLoading}
         onCancelClick={onCancelClick}
