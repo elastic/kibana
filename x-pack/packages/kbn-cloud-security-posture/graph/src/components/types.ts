@@ -32,7 +32,6 @@ export interface GraphMetadata {
 }
 
 interface BaseNodeDataViewModel {
-  position: PositionXY;
   interactive?: boolean;
 }
 

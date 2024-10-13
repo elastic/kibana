@@ -7,16 +7,6 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import {
-  ReactFlow,
-  Controls,
-  Background,
-  Node,
-  Edge,
-  Position,
-  useNodesState,
-  useEdgesState,
-} from '@xyflow/react';
 import { Story } from '@storybook/react';
 import type {
   EdgeDataModel,
@@ -24,40 +14,12 @@ import type {
   NodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { Writable } from '@kbn/utility-types';
-import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-} from './node';
-import type { NodeViewModel } from './types';
-import { DefaultEdge } from './edge';
-import { SvgDefsMarker } from './edge/styles';
-import { GroupStyleOverride } from './node/styles';
-
-import '@xyflow/react/dist/style.css';
-import { layoutGraph } from './graph/layout_graph';
+import { css } from '@emotion/react';
+import { Graph } from './graph/graph';
 
 export default {
   title: 'Components/Graph Components/Dagree Layout Graph',
   description: 'CDR - Graph visualization',
-};
-
-const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
-  label: LabelNode,
-  group: EdgeGroupNode,
-};
-
-const edgeTypes = {
-  default: DefaultEdge,
 };
 
 interface GraphData {
@@ -189,28 +151,18 @@ const extractEdges = (
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
-const Template: Story<GraphData> = ({ nodes, edges }: GraphData) => {
-  const { initialNodes, initialEdges } = processGraph(nodes, edges);
-
-  const [nodesState, _setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
+const Template: Story<GraphData> = ({ nodes, edges, interactive }: GraphData) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
-      <SvgDefsMarker />
-      <ReactFlow
-        fitView
-        attributionPosition={undefined}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        nodes={nodesState}
-        edges={edgesState}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-      >
-        <Controls />
-        <Background />
-      </ReactFlow>
+      <Graph
+        css={css`
+          height: 100%;
+          width: 100%;
+        `}
+        nodes={nodes}
+        edges={edges}
+        interactive={interactive ?? true}
+      />
     </ThemeProvider>
   );
 };
@@ -359,7 +311,7 @@ GroupWithWarningAPIMock.args = {
   ],
 };
 
-export const Graph = Template.bind({});
+export const LargeGraph = Template.bind({});
 const baseGraph: NodeDataModel[] = [
   {
     id: 'siem-windows',
@@ -483,7 +435,7 @@ const baseGraph: NodeDataModel[] = [
   },
 ];
 
-Graph.args = {
+LargeGraph.args = {
   ...extractEdges(baseGraph),
 };
 
@@ -541,67 +493,3 @@ GraphStackedEdgeCases.args = {
     },
   ]),
 };
-
-function processGraph(
-  nodesModel: NodeDataModel[],
-  edgesModel: EdgeDataModel[]
-): {
-  initialNodes: Node[];
-  initialEdges: Edge[];
-} {
-  const { nodes: nodesViewModel } = layoutGraph(nodesModel, edgesModel);
-
-  const nodesById: { [key: string]: NodeViewModel } = {};
-
-  const initialNodes = nodesViewModel.map((nodeData) => {
-    nodesById[nodeData.id] = nodeData;
-
-    const node: Node = {
-      id: nodeData.id,
-      type: nodeData.shape,
-      data: { ...nodeData, interactive: true },
-      position: nodeData.position,
-      draggable: true,
-    };
-
-    if (node.type === 'group' && nodeData.shape === 'group') {
-      node.sourcePosition = Position.Right;
-      node.targetPosition = Position.Left;
-      node.resizing = false;
-      node.style = GroupStyleOverride({
-        width: nodeData.size?.width ?? 0,
-        height: nodeData.size?.height ?? 0,
-      });
-    } else if (nodeData.shape === 'label' && nodeData.parentId) {
-      node.parentId = nodeData.parentId;
-      node.extent = 'parent';
-      node.expandParent = false;
-      node.draggable = false;
-    }
-
-    return node;
-  });
-
-  const initialEdges: Edge[] = edgesModel.map((edgeData) => {
-    const isIn =
-      nodesById[edgeData.source].shape !== 'label' && nodesById[edgeData.target].shape === 'group';
-    const isInside =
-      nodesById[edgeData.source].shape === 'group' && nodesById[edgeData.target].shape === 'label';
-    const isOut =
-      nodesById[edgeData.source].shape === 'label' && nodesById[edgeData.target].shape === 'group';
-    const isOutside =
-      nodesById[edgeData.source].shape === 'group' && nodesById[edgeData.target].shape !== 'label';
-
-    return {
-      id: edgeData.id,
-      type: 'default',
-      source: edgeData.source,
-      sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
-      target: edgeData.target,
-      targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
-      data: { ...edgeData },
-    };
-  });
-
-  return { initialNodes, initialEdges };
-}
