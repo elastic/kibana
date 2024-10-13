@@ -338,7 +338,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         core,
         taskManager: plugins.taskManager,
         projectId: plugins.cloud.serverless.projectId,
-        caCertificatePath: this.actionsConfig.usage?.cert?.path,
+        config: this.actionsConfig.usage,
       });
     }
 

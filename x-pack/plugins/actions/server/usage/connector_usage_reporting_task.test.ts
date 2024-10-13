@@ -21,7 +21,6 @@ import {
   CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE,
   CONNECTOR_USAGE_REPORTING_TASK_TYPE,
   ConnectorUsageReportingTask,
-  USAGE_API_URL,
 } from './connector_usage_reporting_task';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { ActionsPluginsStart } from '../plugin';
@@ -74,7 +73,12 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core: mockCore,
       taskManager: mockTaskManagerSetup,
-      caCertificatePath: './ca.crt',
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
     });
 
     await task.start(mockTaskManagerStart);
@@ -112,7 +116,12 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core: createSetup(),
       taskManager: mockTaskManagerSetup,
-      caCertificatePath: './ca.crt',
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
     });
 
     expect(mockTaskManagerSetup.registerTaskDefinitions).toBeCalledTimes(1);
@@ -136,7 +145,12 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
-      caCertificatePath: './ca.crt',
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
     });
 
     await task.start(taskManagerStart);
@@ -164,7 +178,12 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
-      caCertificatePath: './ca.crt',
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
     });
 
     await task.start();
@@ -187,7 +206,12 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
-      caCertificatePath: './ca.crt',
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
     });
 
     await task.start(taskManagerStart);
@@ -278,7 +302,7 @@ describe('ConnectorUsageReportingTask', () => {
       usage_timestamp: nowStr,
     };
 
-    expect(mockedAxiosPost).toHaveBeenCalledWith(USAGE_API_URL, report, {
+    expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api', report, {
       headers: { 'Content-Type': 'application/json' },
       timeout: 30000,
       httpsAgent: expect.any(Object),

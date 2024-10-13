@@ -16,10 +16,10 @@ import {
 import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import https from 'https';
+import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const USAGE_API_URL = 'https://usage-api.elastic-system/api/v1/usage`';
 export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
@@ -33,6 +33,7 @@ export class ConnectorUsageReportingTask {
   private readonly eventLogIndex: string;
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
+  private readonly usageApiUrl: string;
 
   constructor({
     logger,
@@ -40,18 +41,20 @@ export class ConnectorUsageReportingTask {
     core,
     taskManager,
     projectId,
-    caCertificatePath,
+    config,
   }: {
     logger: Logger;
     eventLogIndex: string;
     core: CoreSetup<ActionsPluginsStart>;
     taskManager: TaskManagerSetupContract;
     projectId: string | undefined;
-    caCertificatePath?: string;
+    config: ActionsConfig['usage'];
   }) {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
+    this.usageApiUrl = config.url;
+    const caCertificatePath = config.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -281,7 +284,7 @@ export class ConnectorUsageReportingTask {
   };
 
   private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(USAGE_API_URL, record, {
+    return axios.post(this.usageApiUrl, record, {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
