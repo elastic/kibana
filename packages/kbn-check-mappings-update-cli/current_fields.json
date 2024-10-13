@@ -1080,9 +1080,11 @@
   ],
   "task": [
     "attempts",
+    "claimAt",
     "enabled",
     "ownerId",
     "partition",
+    "priority",
     "retryAt",
     "runAt",
     "schedule",

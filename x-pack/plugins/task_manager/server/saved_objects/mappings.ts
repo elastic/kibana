@@ -65,6 +65,12 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     partition: {
       type: 'integer',
     },
+    priority: {
+      type: 'integer',
+    },
+    claimAt: {
+      type: 'date',
+    },
   },
 };
 
