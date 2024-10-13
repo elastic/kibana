@@ -73,7 +73,7 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
       <ReactFlow
         fitView={true}
         onInit={(xyflow) => {
-          xyflow.fitView();
+          window.requestAnimationFrame(() => xyflow.fitView());
         }}
         attributionPosition={undefined}
         nodeTypes={nodeTypes}
