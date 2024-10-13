@@ -12,6 +12,7 @@ import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } f
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
+import { getOriginalId } from '@kbn/transpose-helpers';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
@@ -35,7 +36,6 @@ import {
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,
-  getOriginalId,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 import {
@@ -147,7 +147,7 @@ export const getDatatableVisualization = ({
               .filter(({ id }) => getOriginalId(id) === accessor)
               .map(({ id }) => id) || []
           : [accessor];
-        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
+        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
         const dataBounds = minMaxByColumnId.get(accessor);
         if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {

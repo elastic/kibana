@@ -7,10 +7,10 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { transposeTable } from '@kbn/transpose-helpers';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
-import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from './types';
 
@@ -60,7 +60,7 @@ export const datatableFn =
     if (hasTransposedColumns) {
       // store original shape of data separately
       untransposedData = cloneDeep(table);
-      // transposes table and args inplace
+      // transposes table and args in-place
       transposeTable(args, table, formatters);
 
       if (context?.inspectorAdapters?.tables) {

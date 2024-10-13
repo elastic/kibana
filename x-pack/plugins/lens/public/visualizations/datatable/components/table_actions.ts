@@ -18,9 +18,9 @@ import type {
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
+import { getOriginalId } from '@kbn/transpose-helpers';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { DatatableColumnConfig, LensGridDirection } from '../../../../common/expressions';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
 
