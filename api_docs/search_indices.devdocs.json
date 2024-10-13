@@ -208,6 +208,21 @@
     "misc": [
       {
         "parentPluginId": "searchIndices",
+        "id": "def-common.GLOBAL_EMPTY_STATE_FEATURE_FLAG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_EMPTY_STATE_FEATURE_FLAG_ID",
+        "description": [],
+        "signature": [
+          "\"searchIndices:globalEmptyStateEnabled\""
+        ],
+        "path": "x-pack/plugins/search_indices/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchIndices",
         "id": "def-common.INDICES_APP_ID",
         "type": "string",
         "tags": [],
