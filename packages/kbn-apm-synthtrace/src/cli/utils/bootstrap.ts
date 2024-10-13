@@ -16,6 +16,7 @@ import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
 import { getAssetsEsClient } from './get_assets_es_client';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getAlertsEsClient } from './get_alerts_es_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
@@ -69,12 +70,19 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
+  const alertsEsClient = getAlertsEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+
   if (runOptions.clean) {
     await apmEsClient.clean();
     await logsEsClient.clean();
     await infraEsClient.clean();
     await assetsEsClient.clean();
     await syntheticsEsClient.clean();
+    await alertsEsClient.clean();
   }
 
   return {
@@ -84,6 +92,7 @@ export async function bootstrap(runOptions: RunOptions) {
     infraEsClient,
     assetsEsClient,
     syntheticsEsClient,
+    alertsEsClient,
     version,
     kibanaUrl,
     esUrl,

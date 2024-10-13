@@ -17,6 +17,7 @@ export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_sy
 export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
 export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_client';
 export { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
+export { AlertsSynthtraceEsClient } from './src/lib/alerts/alerts_sythtrace_es_client';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

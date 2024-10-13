@@ -37,3 +37,4 @@ export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator }
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { type AssetDocument } from './src/lib/assets';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export { alert, type AlertEntityDocument } from './src/lib/alerts';
