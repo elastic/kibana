@@ -72,7 +72,7 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponse);
+      expect(response).toEqual(mockResponse.completion);
     });
 
     it('errors during API calls are properly handled', async () => {
@@ -140,7 +140,7 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponseRerank);
+      expect(response).toEqual(mockResponseRerank.rerank);
     });
   });
 
@@ -189,7 +189,7 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponse);
+      expect(response).toEqual(mockResponse.text_embedding);
     });
 
     it('errors during API calls are properly handled', async () => {

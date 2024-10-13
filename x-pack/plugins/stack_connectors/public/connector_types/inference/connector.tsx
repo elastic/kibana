@@ -285,15 +285,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           if (!secrets.providerSecrets) {
             secrets.providerSecrets = {};
           }
-          secrets.providerSecrets[key] = value;
-          setFieldValue('secrets.providerSecrets', secrets.providerSecrets);
+          const newSecrets = { ...secrets.providerSecrets };
+          newSecrets[key] = value;
+          setFieldValue('secrets.providerSecrets', newSecrets);
           await validateFields(['secrets.providerSecrets']);
         } else {
           if (!config.providerConfig) {
             config.providerConfig = {};
           }
-          config.providerConfig[key] = value;
-          setFieldValue('config.providerConfig', config.providerConfig);
+          const newConfig = { ...config.providerConfig };
+          newConfig[key] = value;
+          setFieldValue('config.providerConfig', newConfig);
           await validateFields(['config.providerConfig']);
         }
       }

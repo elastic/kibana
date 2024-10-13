@@ -40,7 +40,7 @@ const deleteInferenceEndpoint = async (
       task_type: taskType,
       inference_id: inferenceId,
     });
-    logger.info(
+    logger.debug(
       `Inference endpoint for task type "${taskType}" and inference id ${inferenceId} was successfuly deleted`
     );
   } catch (e) {
@@ -114,7 +114,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           task_settings: taskSettings,
         },
       });
-      logger.info(
+      logger.debug(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
           config?.inferenceId
         } was successfuly ${isUpdate ? 'updated' : 'created'}`

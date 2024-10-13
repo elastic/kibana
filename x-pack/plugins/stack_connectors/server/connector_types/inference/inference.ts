@@ -105,8 +105,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    // const usageMetadata = response?.data?.usageMetadata;
-    return response as ChatCompleteResponse;
+    return response.completion!;
   }
 
   /**
@@ -130,7 +129,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response as RerankResponse;
+    return response.rerank!;
   }
 
   /**
@@ -147,7 +146,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response as SparseEmbeddingResponse;
+    return response.sparse_embedding!;
   }
 
   /**
@@ -172,7 +171,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response as TextEmbeddingResponse;
+    return response.text_embedding!;
   }
 
   /**
