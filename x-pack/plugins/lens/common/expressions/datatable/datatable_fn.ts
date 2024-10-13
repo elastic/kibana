@@ -64,11 +64,23 @@ export const datatableFn =
       transposeTable(args, table, formatters);
 
       if (context?.inspectorAdapters?.tables) {
-        const exposedColumns = new Set(args.columns.map((c) => c.columnId));
-        context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, {
-          ...table,
-          columns: table.columns.filter((c) => exposedColumns.has(c.id)), // remove ghost formula columns
-        });
+        const logTransposedTable = prepareLogTable(
+          table,
+          [
+            [
+              args.columns.map((column) => column.columnId),
+              i18n.translate('xpack.lens.datatable.column.help', {
+                defaultMessage: 'Datatable column',
+              }),
+            ],
+          ],
+          true
+        );
+
+        context.inspectorAdapters.tables.logDatatable(
+          DatatableInspectorTables.Transpose,
+          logTransposedTable
+        );
         context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
       }
     }

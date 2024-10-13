@@ -610,7 +610,8 @@ export const LensTopNavMenu = ({
               activeData,
               sortedColumns: activeVisualization.getSortedColumns?.(
                 visualization.state,
-                datasourceLayers
+                datasourceLayers,
+                activeData
               ),
               columnSorting: activeVisualization.getColumnSorting?.(
                 visualization.state,

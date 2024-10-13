@@ -23,6 +23,10 @@ interface CSVOptions {
   escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
+  /** Order of exported columns. Should use transposed column ids if available.
+   *
+   * Defaults to order of columns in state
+   */
   sortedColumns?: string[];
   columnSorting?: EuiDataGridColumnSortingConfig[];
 }
@@ -45,23 +49,7 @@ export function datatableToCSV(
     escapeFormulaValues,
   });
 
-  const sortedIds = sortedColumns
-    ? columns
-        .map((c) => {
-          // need to find original id for transposed column
-          const sortIndex = sortedColumns.findIndex((id) => c.id.endsWith(id));
-          return {
-            id: c.id,
-            sortIndex,
-            isTransposed: (sortedColumns[sortIndex] ?? '') !== c.id,
-          };
-        })
-        .filter(({ sortIndex }) => sortIndex >= 0)
-        // keep original zipped order between multiple transposed columns
-        .sort((a, b) => (a.isTransposed && b.isTransposed ? 0 : a.sortIndex - b.sortIndex))
-        .map(({ id }) => id)
-    : columns.map(({ id }) => id);
-
+  const sortedIds = sortedColumns || columns.map((col) => col.id);
   const columnIndexLookup = new Map(sortedIds.map((id, i) => [id, i]));
 
   const header: string[] = [];

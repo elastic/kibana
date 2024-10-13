@@ -64,6 +64,7 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+import { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -1351,11 +1352,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
   /**
-   * A visualization can share how columns are visually sorted
+   * Set the order of columns when exporting to csv
    */
-  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
+  getSortedColumns?: (
+    state: T,
+    datasourceLayers?: DatasourceLayers,
+    activeData?: TableInspectorAdapter
+  ) => string[];
   /**
-   * A visualization can share how rows are sorted per column
+   * Set the row ordering of columns when exporting to csv
    */
   getColumnSorting?: (
     state: T,
