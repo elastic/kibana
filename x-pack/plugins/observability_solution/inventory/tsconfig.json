@@ -42,6 +42,10 @@
     "@kbn/shared-svg",
     "@kbn/features-plugin",
     "@kbn/es-query",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons",
+    "@kbn/ui-theme",
+    "@kbn/spaces-plugin"
   ]
 }

@@ -26,13 +26,14 @@ interface Props {
 export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }) => {
   // Name
   const setName = useCallback(
-    (e) => setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
     [setEntry]
   );
 
   // Sharing
   const setSharingOptions = useCallback(
-    (value) =>
+    (value: string) =>
       setEntry((prevEntry) => ({
         ...prevEntry,
         users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
@@ -126,7 +127,6 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntr
           id="requiredKnowledge"
           onChange={onRequiredKnowledgeChanged}
           checked={entry?.required ?? false}
-          disabled={true}
         />
       </EuiFormRow>
     </EuiForm>

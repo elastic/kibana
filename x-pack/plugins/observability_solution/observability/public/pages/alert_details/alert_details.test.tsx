@@ -9,7 +9,7 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { waitFor } from '@testing-library/react';
@@ -88,6 +88,7 @@ const useParamsMock = useParams as jest.Mock;
 const useLocationMock = useLocation as jest.Mock;
 const useHistoryMock = useHistory as jest.Mock;
 const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
+const TagsListMock = TagsList as jest.Mock;
 
 const chance = new Chance();
 
@@ -114,6 +115,7 @@ describe('Alert details', () => {
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
     useHistoryMock.mockReturnValue({ replace: jest.fn() });
     useBreadcrumbsMock.mockReturnValue([]);
+    TagsListMock.mockReturnValue(<div data-test-subj="TagsList" />);
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     ruleTypeRegistry.has.mockReturnValue(true);
