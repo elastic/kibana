@@ -75,7 +75,6 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         onInit={(xyflow) => {
           window.requestAnimationFrame(() => xyflow.fitView());
         }}
-        attributionPosition={undefined}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodes={nodesState}
@@ -83,8 +82,12 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         proOptions={{ hideAttribution: true }}
+        panOnDrag={interactive}
+        zoomOnScroll={interactive}
+        zoomOnPinch={interactive}
+        zoomOnDoubleClick={interactive}
       >
-        <Controls />
+        {interactive && <Controls />}
         <Background />
       </ReactFlow>
     </div>
@@ -108,7 +111,7 @@ const processGraph = (
       id: nodeData.id,
       type: nodeData.shape,
       data: { ...nodeData, interactive },
-      draggable: true,
+      draggable: interactive,
       position: { x: 0, y: 0 }, // Default position, should be updated later
     };
 
