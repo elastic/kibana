@@ -621,7 +621,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -795,7 +795,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1177,7 +1177,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1250,7 +1250,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1352,7 +1352,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1426,7 +1426,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1529,7 +1529,7 @@ describe('features', () => {
             : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Read, 'features')] : []),
           ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'taskManager')] : []),
-          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'manageSpaces')] : []),
+          ...(expectGetFeatures ? [actions.api.get(ApiOperation.Manage, 'spaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1799,7 +1799,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -1958,7 +1958,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2194,7 +2194,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2333,7 +2333,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2512,7 +2512,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2649,7 +2649,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2864,7 +2864,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3098,7 +3098,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3368,7 +3368,7 @@ describe('subFeatures', () => {
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
-        actions.api.get(ApiOperation.Manage, 'manageSpaces'),
+        actions.api.get(ApiOperation.Manage, 'spaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
