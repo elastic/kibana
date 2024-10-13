@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 export interface Props {
   http: HttpSetup | undefined;
   ruleTypeIds: string[];
+  consumers?: string[];
   ruleId: string;
   dateRange: {
     from: string;
@@ -49,6 +50,7 @@ export const EMPTY_ALERTS_HISTORY = {
 
 export function useAlertsHistory({
   ruleTypeIds,
+  consumers,
   ruleId,
   dateRange,
   http,
@@ -62,6 +64,7 @@ export function useAlertsHistory({
       }
       return fetchTriggeredAlertsHistory({
         ruleTypeIds,
+        consumers,
         http,
         ruleId,
         dateRange,
@@ -99,6 +102,7 @@ interface AggsESResponse {
 
 export async function fetchTriggeredAlertsHistory({
   ruleTypeIds,
+  consumers,
   http,
   ruleId,
   dateRange,
@@ -106,6 +110,7 @@ export async function fetchTriggeredAlertsHistory({
   instanceId,
 }: {
   ruleTypeIds: string[];
+  consumers?: string[];
   http: HttpSetup;
   ruleId: string;
   dateRange: {
@@ -121,6 +126,7 @@ export async function fetchTriggeredAlertsHistory({
       body: JSON.stringify({
         size: 0,
         rule_type_ids: ruleTypeIds,
+        consumers,
         query: {
           bool: {
             must: [

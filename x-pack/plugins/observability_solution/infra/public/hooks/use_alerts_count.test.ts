@@ -53,7 +53,8 @@ const mockUseKibana = () => {
 };
 
 describe('useAlertsCount', () => {
-  const ruleTypeIds: string[] = ['metrics.alert.inventory.threshold'];
+  const ruleTypeIds = ['metrics.alert.inventory.threshold'];
+  const consumers = ['foo'];
 
   beforeAll(() => {
     mockUseKibana();
@@ -91,6 +92,7 @@ describe('useAlertsCount', () => {
     const { waitForNextUpdate } = renderHook(() =>
       useAlertsCount({
         ruleTypeIds,
+        consumers,
         query,
       })
     );
@@ -104,6 +106,7 @@ describe('useAlertsCount', () => {
         },
       },
       rule_type_ids: ruleTypeIds,
+      consumers,
       query,
       size: 0,
     });

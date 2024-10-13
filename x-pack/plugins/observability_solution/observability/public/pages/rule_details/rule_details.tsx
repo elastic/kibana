@@ -29,6 +29,7 @@ import { ruleDetailsLocatorID } from '../../../common';
 import {
   ALERT_STATUS_ALL,
   OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import {
   RULE_DETAILS_EXECUTION_TAB,
@@ -225,6 +226,7 @@ export function RuleDetailsPage() {
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+            consumers={observabilityAlertFeatureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
             filter={{

@@ -25,6 +25,7 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
   enabled?: boolean;
   params: {
     ruleTypeIds: string[];
+    consumers?: string[];
     groupByField: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
     filters?: QueryDslQueryContainer[];

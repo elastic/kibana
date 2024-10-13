@@ -18,11 +18,13 @@ import { InfraClientCoreStart } from '../types';
 
 interface UseAlertsCountProps {
   ruleTypeIds: string[];
+  consumers?: string[];
   query?: estypes.QueryDslQueryContainer;
 }
 
 interface FetchAlertsCountParams {
   ruleTypeIds: string[];
+  consumers?: string[];
   query?: estypes.QueryDslQueryContainer;
   http: HttpSetup;
   signal: AbortSignal;
@@ -35,7 +37,7 @@ export interface AlertsCount {
 
 const ALERT_STATUS = 'kibana.alert.status';
 
-export function useAlertsCount({ ruleTypeIds, query }: UseAlertsCountProps) {
+export function useAlertsCount({ ruleTypeIds, consumers, query }: UseAlertsCountProps) {
   const { http } = useKibana<InfraClientCoreStart>().services;
 
   const abortCtrlRef = useRef(new AbortController());
@@ -46,6 +48,7 @@ export function useAlertsCount({ ruleTypeIds, query }: UseAlertsCountProps) {
       abortCtrlRef.current = new AbortController();
       return fetchAlertsCount({
         ruleTypeIds,
+        consumers,
         query,
         http,
         signal: abortCtrlRef.current.signal,
@@ -71,6 +74,7 @@ export function useAlertsCount({ ruleTypeIds, query }: UseAlertsCountProps) {
 
 async function fetchAlertsCount({
   ruleTypeIds,
+  consumers,
   http,
   query,
   signal,
@@ -85,6 +89,7 @@ async function fetchAlertsCount({
           },
         },
         rule_type_ids: ruleTypeIds,
+        consumers,
         query,
         size: 0,
       }),

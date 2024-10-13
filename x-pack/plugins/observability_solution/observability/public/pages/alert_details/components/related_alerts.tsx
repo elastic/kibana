@@ -101,6 +101,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
         {esQuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+            consumers={observabilityAlertFeatureIds}
             defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}

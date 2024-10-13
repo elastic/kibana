@@ -15,6 +15,7 @@ import { Alert, AlertSummaryTimeRange } from '../sections/alert_summary_widget/t
 
 interface UseLoadAlertSummaryProps {
   ruleTypeIds?: string[];
+  consumers?: string[];
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }
@@ -31,7 +32,12 @@ interface LoadAlertSummaryResponse {
   error?: string;
 }
 
-export function useLoadAlertSummary({ ruleTypeIds, timeRange, filter }: UseLoadAlertSummaryProps) {
+export function useLoadAlertSummary({
+  ruleTypeIds,
+  consumers,
+  timeRange,
+  filter,
+}: UseLoadAlertSummaryProps) {
   const { http } = useKibana().services;
   const [alertSummary, setAlertSummary] = useState<LoadAlertSummaryResponse>({
     isLoading: true,
@@ -52,6 +58,7 @@ export function useLoadAlertSummary({ ruleTypeIds, timeRange, filter }: UseLoadA
     try {
       const { activeAlertCount, activeAlerts, recoveredAlertCount } = await fetchAlertSummary({
         ruleTypeIds,
+        consumers,
         filter,
         http,
         signal: abortCtrlRef.current.signal,
@@ -79,7 +86,7 @@ export function useLoadAlertSummary({ ruleTypeIds, timeRange, filter }: UseLoadA
         }
       }
     }
-  }, [ruleTypeIds, filter, http, timeRange]);
+  }, [ruleTypeIds, consumers, filter, http, timeRange]);
 
   useEffect(() => {
     loadAlertSummary();
@@ -90,6 +97,7 @@ export function useLoadAlertSummary({ ruleTypeIds, timeRange, filter }: UseLoadA
 
 async function fetchAlertSummary({
   ruleTypeIds,
+  consumers,
   filter,
   http,
   signal,
@@ -97,6 +105,7 @@ async function fetchAlertSummary({
 }: {
   http: HttpSetup;
   ruleTypeIds: string[];
+  consumers?: string[];
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
@@ -108,6 +117,7 @@ async function fetchAlertSummary({
       gte: utcFrom,
       lte: utcTo,
       ruleTypeIds,
+      consumers,
       filter: [filter],
     }),
   });

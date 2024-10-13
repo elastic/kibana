@@ -13,6 +13,7 @@ import { AlertsGroupingProps } from '../types';
 export const mockGroupingId = 'test';
 
 export const mockRuleTypeIds = ['.es-query'];
+export const mockConsumers = ['stackAlerts'];
 
 export const mockDate = {
   from: '2020-07-07T08:20:18.966Z',
@@ -30,6 +31,7 @@ export const mockGroupingProps: Omit<AlertsGroupingProps, 'children'> = {
   ...mockDate,
   groupingId: mockGroupingId,
   ruleTypeIds: mockRuleTypeIds,
+  consumers: mockConsumers,
   defaultGroupingOptions: mockOptions,
   getAggregationsByGroupingField: () => [],
   getGroupStats: () => [{ title: 'Stat', component: <span /> }],

@@ -47,6 +47,7 @@ const typedMemo: <T>(c: T) => T = memo;
 export const AlertsGroupingLevel = typedMemo(
   <T extends BaseAlertsGroupAggregations>({
     ruleTypeIds,
+    consumers,
     defaultFilters = DEFAULT_FILTERS,
     from,
     getGrouping,
@@ -87,6 +88,7 @@ export const AlertsGroupingLevel = typedMemo(
     const aggregationsQuery = useMemo<UseGetAlertsGroupAggregationsQueryProps['params']>(() => {
       return {
         ruleTypeIds,
+        consumers,
         groupByField: selectedGroup,
         aggregations: getAggregationsByGroupingField(selectedGroup)?.reduce(
           (acc, val) => Object.assign(acc, val),
@@ -107,6 +109,7 @@ export const AlertsGroupingLevel = typedMemo(
         pageSize,
       };
     }, [
+      consumers,
       filters,
       from,
       getAggregationsByGroupingField,

@@ -22,17 +22,24 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
       path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
       validate: {
         body: buildRouteValidation(
-          t.exact(
-            t.type({
-              ruleTypeIds: t.array(t.string),
-              groupByField: t.string,
-              aggregations: t.union([alertsAggregationsSchema, t.undefined]),
-              filters: t.union([t.array(alertsGroupFilterSchema), t.undefined]),
-              sort: t.union([t.array(t.object), t.undefined]),
-              pageIndex: t.union([t.number, t.undefined]),
-              pageSize: t.union([t.number, t.undefined]),
-            })
-          )
+          t.intersection([
+            t.exact(
+              t.type({
+                ruleTypeIds: t.array(t.string),
+                groupByField: t.string,
+                aggregations: t.union([alertsAggregationsSchema, t.undefined]),
+                filters: t.union([t.array(alertsGroupFilterSchema), t.undefined]),
+                sort: t.union([t.array(t.object), t.undefined]),
+                pageIndex: t.union([t.number, t.undefined]),
+                pageSize: t.union([t.number, t.undefined]),
+              })
+            ),
+            t.exact(
+              t.partial({
+                consumers: t.array(t.string),
+              })
+            ),
+          ])
         ),
       },
       options: {
@@ -43,6 +50,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
     async (context, request, response) => {
       const {
         ruleTypeIds,
+        consumers,
         groupByField,
         aggregations,
         filters,
@@ -55,6 +63,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         const alertsClient = await racContext.getAlertsClient();
         const alerts = await alertsClient.getGroupAggregations({
           ruleTypeIds,
+          consumers,
           groupByField,
           aggregations,
           filters,

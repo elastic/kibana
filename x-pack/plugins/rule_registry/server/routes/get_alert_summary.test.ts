@@ -112,5 +112,41 @@ describe('getAlertSummaryRoute', () => {
         `"Request was rejected with message: 'invalid keys \\"boop\\"'"`
       );
     });
+
+    test('rejects without ruleTypeIds', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_alert_summary`,
+            body: {
+              gte: '2020-12-16T15:00:00.000Z',
+              lte: '2020-12-16T16:00:00.000Z',
+            },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+      );
+    });
+
+    test('accepts consumers', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_alert_summary`,
+            body: {
+              gte: '2020-12-16T15:00:00.000Z',
+              lte: '2020-12-16T16:00:00.000Z',
+              consumers: ['foo'],
+              ruleTypeIds: ['bar'],
+            },
+          }),
+          context
+        )
+      ).resolves.not.toThrow();
+    });
   });
 });

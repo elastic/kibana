@@ -34,6 +34,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
               t.partial({
                 fixed_interval: t.string,
                 filter: t.array(t.object),
+                consumers: t.array(t.string),
               })
             ),
           ])
@@ -48,7 +49,14 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { gte, lte, ruleTypeIds, filter, fixed_interval: fixedInterval } = request.body;
+        const {
+          gte,
+          lte,
+          ruleTypeIds,
+          consumers,
+          filter,
+          fixed_interval: fixedInterval,
+        } = request.body;
         if (
           !(
             moment(gte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid() &&
@@ -68,6 +76,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           gte,
           lte,
           ruleTypeIds,
+          consumers,
           filter: filter as estypes.QueryDslQueryContainer[],
           fixedInterval,
         });

@@ -113,6 +113,7 @@ export const AlertsOverview = ({
         <AlertSummaryWidget
           chartProps={chartProps}
           ruleTypeIds={INFRA_RULE_TYPE_IDS}
+          consumers={[AlertConsumers.INFRASTRUCTURE]}
           filter={alertsEsQuery}
           timeRange={summaryTimeRange}
           onLoaded={onLoaded}

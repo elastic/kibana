@@ -136,6 +136,7 @@ const MemoAlertSummaryWidget = React.memo(
       <AlertSummaryWidget
         chartProps={chartProps}
         ruleTypeIds={INFRA_RULE_TYPE_IDS}
+        consumers={[AlertConsumers.INFRASTRUCTURE]}
         filter={alertsQuery}
         fullSize
         timeRange={summaryTimeRange}

@@ -41,6 +41,7 @@ const toasts = mockToasts as unknown as ToastsStart;
 
 const params = {
   ruleTypeIds: ['.es-query'],
+  consumers: ['stackAlerts'],
   groupByField: 'kibana.alert.rule.name',
 };
 

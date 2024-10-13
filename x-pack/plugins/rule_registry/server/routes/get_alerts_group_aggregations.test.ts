@@ -298,4 +298,44 @@ describe('getAlertsGroupAggregations', () => {
       message: 'Unable to get alerts',
     });
   });
+
+  test('rejects without ruleTypeIds', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            groupByField: 'kibana.alert.rule.name',
+          },
+        }),
+        context
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+    );
+  });
+
+  test('accepts consumers', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            ruleTypeIds: [
+              'apm.anomaly',
+              'logs.alert.document.count',
+              'metrics.alert.threshold',
+              'slo.rules.burnRate',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
+            groupByField: 'kibana.alert.rule.name',
+            consumers: ['foo'],
+          },
+        }),
+        context
+      )
+    ).resolves.not.toThrow();
+  });
 });

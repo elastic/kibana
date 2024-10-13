@@ -59,6 +59,7 @@ export const getAlertsGroupAggregationsRequest = () =>
         'slo.rules.burnRate',
         'xpack.uptime.alerts.durationAnomaly',
       ],
+      consumers: ['apm'],
       groupByField: 'kibana.alert.rule.name',
       aggregations: {
         unitsCount: {

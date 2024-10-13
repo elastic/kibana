@@ -249,6 +249,7 @@ function InternalAlertsPage() {
           <EuiFlexItem>
             <AlertSummaryWidget
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -259,6 +260,7 @@ function InternalAlertsPage() {
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+                consumers={observabilityAlertFeatureIds}
                 defaultFilters={
                   ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
                 }

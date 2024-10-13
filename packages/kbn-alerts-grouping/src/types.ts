@@ -66,6 +66,10 @@ export interface AlertsGroupingProps<
    */
   ruleTypeIds: string[];
   /**
+   * The alerting consumers this grouping covers
+   */
+  consumers?: string[];
+  /**
    * Time filter start
    */
   from: string;

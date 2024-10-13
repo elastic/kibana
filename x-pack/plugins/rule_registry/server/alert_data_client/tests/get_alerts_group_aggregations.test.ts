@@ -71,6 +71,7 @@ describe('getGroupAggregations()', () => {
     alertsClient.find = jest.fn().mockResolvedValue({ aggregations: {} });
 
     const ruleTypeIds = ['.es-query'];
+    const consumers = ['stackAlerts'];
 
     const groupByField = 'kibana.alert.rule.name';
     const aggregations = {
@@ -84,6 +85,7 @@ describe('getGroupAggregations()', () => {
 
     await alertsClient.getGroupAggregations({
       ruleTypeIds,
+      consumers,
       groupByField,
       aggregations,
       filters,
@@ -93,6 +95,7 @@ describe('getGroupAggregations()', () => {
 
     expect(alertsClient.find).toHaveBeenCalledWith({
       ruleTypeIds,
+      consumers,
       aggs: {
         groupByFields: {
           terms: {

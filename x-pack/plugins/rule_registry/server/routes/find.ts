@@ -26,6 +26,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
             t.partial({
               aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
               rule_type_ids: t.union([t.array(t.string), t.undefined]),
+              consumers: t.union([t.array(t.string), t.undefined]),
               index: t.string,
               query: t.object,
               search_after: t.union([t.array(t.number), t.array(t.string), t.undefined]),
@@ -47,6 +48,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         const {
           aggs,
           rule_type_ids: ruleTypeIds,
+          consumers,
           index,
           query,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -62,6 +64,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         const alerts = await alertsClient.find({
           aggs,
           ruleTypeIds,
+          consumers,
           index,
           query,
           search_after,

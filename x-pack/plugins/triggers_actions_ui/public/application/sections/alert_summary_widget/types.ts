@@ -49,6 +49,7 @@ export interface DependencyProps {
 
 export interface AlertSummaryWidgetProps {
   ruleTypeIds?: string[];
+  consumers?: string[];
   filter?: estypes.QueryDslQueryContainer;
   fullSize?: boolean;
   onClick?: (status?: AlertStatus) => void;

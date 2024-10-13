@@ -234,6 +234,7 @@ export function OverviewPage() {
           >
             <AlertSummaryWidget
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
