@@ -200,6 +200,11 @@ export const allowedExperimentalValues = Object.freeze({
   analyzerDatePickersAndSourcererDisabled: false,
 
   /**
+   * Enables graph visualization in alerts flyout
+   */
+  graphVisualizationInFlyoutEnabled: true,
+
+  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
