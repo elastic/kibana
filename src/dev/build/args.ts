@@ -31,7 +31,6 @@ export function readCliArgs(argv: string[]) {
       'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-ubuntu',
       'skip-docker-wolfi',
       'skip-docker-cloud',
       'skip-docker-serverless',
@@ -140,8 +139,6 @@ export function readCliArgs(argv: string[]) {
     createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerUbuntu:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
     createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerServerless:

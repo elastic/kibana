@@ -31,7 +31,6 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerUbuntu: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
   createDockerServerless: boolean;
@@ -144,11 +143,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
     await run(Tasks.CreateDockerUBI);
-  }
-
-  if (options.createDockerUbuntu) {
-    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerWolfi) {
