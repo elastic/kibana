@@ -412,7 +412,7 @@ describe('aggregate()', () => {
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
-      `"((alert.attributes.tags: ['bar'] OR alert.attributes.alertTypeId: my-rule-type-id OR alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+      `"((alert.attributes.tags: ['bar'] AND alert.attributes.alertTypeId: my-rule-type-id AND alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
     );
   });
 

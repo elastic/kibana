@@ -54,7 +54,7 @@ export async function aggregateRules<T = Record<string, unknown>>(
   const consumersFilter = buildConsumersFilter(consumers);
   const combinedFilters = combineFilters(
     [filterKueryNode, ruleTypeIdsFilter, consumersFilter],
-    'or'
+    'and'
   );
 
   const { aggregations } = await findRulesSo<T>({
