@@ -49,6 +49,6 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
     hasUpdateAIAssistantAnonymization,
-    hasManageGlobalKnowledgeBase
+    hasManageGlobalKnowledgeBase,
   };
 };

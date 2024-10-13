@@ -30,23 +30,19 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <p>
-            <EuiText color="subdued" size="s" component='span'>
+            <EuiText color="subdued" size="s" component="span">
               {i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(knowledgeBase.latestAlerts)}
-            </EuiText>
-            {' '}
-            <EuiText color="subdued" size="s" component='span'>
+            </EuiText>{' '}
+            <EuiText color="subdued" size="s" component="span">
               {i18n.YOUR_ANONYMIZATION_SETTINGS}
-            </EuiText>
-          {' '}
-            <EuiText color="subdued" size="s" component='span'>
+            </EuiText>{' '}
+            <EuiText color="subdued" size="s" component="span">
               {i18n.SELECT_FEWER_ALERTS}
             </EuiText>
           </p>
         </EuiFlexItem>
 
-        <EuiFlexItem
-          grow={false}
-        >
+        <EuiFlexItem grow={false}>
           <EuiSpacer size="xs" />
           <AlertsRange
             knowledgeBase={knowledgeBase}

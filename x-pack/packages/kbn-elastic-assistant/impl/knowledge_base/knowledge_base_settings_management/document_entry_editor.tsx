@@ -24,114 +24,116 @@ interface Props {
   hasManageGlobalKnowledgeBase: boolean;
 }
 
-export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry, hasManageGlobalKnowledgeBase }) => {
-  // Name
-  const setName = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
-    [setEntry]
-  );
+export const DocumentEntryEditor: React.FC<Props> = React.memo(
+  ({ entry, setEntry, hasManageGlobalKnowledgeBase }) => {
+    // Name
+    const setName = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) =>
+        setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
+      [setEntry]
+    );
 
-  // Sharing
-  const setSharingOptions = useCallback(
-    (value: string) =>
-      setEntry((prevEntry) => ({
-        ...prevEntry,
-        users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
-      })),
-    [setEntry]
-  );
-  const sharingOptions = [
-    {
-      value: i18n.SHARING_PRIVATE_OPTION_LABEL,
-      inputDisplay: (
-        <EuiText size={'s'}>
-          <EuiIcon
-            color="subdued"
-            style={{ lineHeight: 'inherit', marginRight: '4px' }}
-            type="lock"
+    // Sharing
+    const setSharingOptions = useCallback(
+      (value: string) =>
+        setEntry((prevEntry) => ({
+          ...prevEntry,
+          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+        })),
+      [setEntry]
+    );
+    const sharingOptions = [
+      {
+        value: i18n.SHARING_PRIVATE_OPTION_LABEL,
+        inputDisplay: (
+          <EuiText size={'s'}>
+            <EuiIcon
+              color="subdued"
+              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              type="lock"
+            />
+            {i18n.SHARING_PRIVATE_OPTION_LABEL}
+          </EuiText>
+        ),
+      },
+      {
+        value: i18n.SHARING_GLOBAL_OPTION_LABEL,
+        inputDisplay: (
+          <EuiText size={'s'}>
+            <EuiIcon
+              color="subdued"
+              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              type="globe"
+            />
+            {i18n.SHARING_GLOBAL_OPTION_LABEL}
+          </EuiText>
+        ),
+        disabled: !hasManageGlobalKnowledgeBase,
+      },
+    ];
+    const selectedSharingOption =
+      entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
+
+    // Text / markdown
+    const setMarkdownValue = useCallback(
+      (value: string) => {
+        setEntry((prevEntry) => ({ ...prevEntry, text: value }));
+      },
+      [setEntry]
+    );
+
+    // Required checkbox
+    const onRequiredKnowledgeChanged = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEntry((prevEntry) => ({ ...prevEntry, required: e.target.checked }));
+      },
+      [setEntry]
+    );
+
+    return (
+      <EuiForm>
+        <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
+          <EuiFieldText
+            name="name"
+            placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
+            fullWidth
+            value={entry?.name}
+            onChange={setName}
           />
-          {i18n.SHARING_PRIVATE_OPTION_LABEL}
-        </EuiText>
-      ),
-    },
-    {
-      value: i18n.SHARING_GLOBAL_OPTION_LABEL,
-      inputDisplay: (
-        <EuiText size={'s'}>
-          <EuiIcon
-            color="subdued"
-            style={{ lineHeight: 'inherit', marginRight: '4px' }}
-            type="globe"
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.ENTRY_SHARING_INPUT_LABEL}
+          helpText={i18n.SHARING_HELP_TEXT}
+          fullWidth
+        >
+          <EuiSuperSelect
+            options={sharingOptions}
+            valueOfSelected={selectedSharingOption}
+            onChange={setSharingOptions}
+            fullWidth
           />
-          {i18n.SHARING_GLOBAL_OPTION_LABEL}
-        </EuiText>
-      ),
-      disabled: !hasManageGlobalKnowledgeBase
-    },
-  ];
-  const selectedSharingOption =
-    entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
-
-  // Text / markdown
-  const setMarkdownValue = useCallback(
-    (value: string) => {
-      setEntry((prevEntry) => ({ ...prevEntry, text: value }));
-    },
-    [setEntry]
-  );
-
-  // Required checkbox
-  const onRequiredKnowledgeChanged = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEntry((prevEntry) => ({ ...prevEntry, required: e.target.checked }));
-    },
-    [setEntry]
-  );
-
-  return (
-    <EuiForm>
-      <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
-        <EuiFieldText
-          name="name"
-          placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
-          fullWidth
-          value={entry?.name}
-          onChange={setName}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_SHARING_INPUT_LABEL}
-        helpText={i18n.SHARING_HELP_TEXT}
-        fullWidth
-      >
-        <EuiSuperSelect
-          options={sharingOptions}
-          valueOfSelected={selectedSharingOption}
-          onChange={setSharingOptions}
-          fullWidth
-        />
-      </EuiFormRow>
-      <EuiFormRow label={i18n.ENTRY_MARKDOWN_INPUT_TEXT} fullWidth>
-        <EuiMarkdownEditor
-          aria-label={i18n.ENTRY_MARKDOWN_INPUT_TEXT}
-          placeholder="# Title"
-          value={entry?.text ?? ''}
-          onChange={setMarkdownValue}
-          height={400}
-          initialViewMode={'editing'}
-        />
-      </EuiFormRow>
-      <EuiFormRow fullWidth helpText={i18n.ENTRY_REQUIRED_KNOWLEDGE_HELP_TEXT}>
-        <EuiCheckbox
-          label={i18n.ENTRY_REQUIRED_KNOWLEDGE_CHECKBOX_LABEL}
-          id="requiredKnowledge"
-          onChange={onRequiredKnowledgeChanged}
-          checked={entry?.required ?? false}
-        />
-      </EuiFormRow>
-    </EuiForm>
-  );
-});
+        </EuiFormRow>
+        <EuiFormRow label={i18n.ENTRY_MARKDOWN_INPUT_TEXT} fullWidth>
+          <EuiMarkdownEditor
+            aria-label={i18n.ENTRY_MARKDOWN_INPUT_TEXT}
+            placeholder="# Title"
+            value={entry?.text ?? ''}
+            onChange={setMarkdownValue}
+            height={400}
+            initialViewMode={'editing'}
+          />
+        </EuiFormRow>
+        <EuiFormRow fullWidth helpText={i18n.ENTRY_REQUIRED_KNOWLEDGE_HELP_TEXT}>
+          <EuiCheckbox
+            label={i18n.ENTRY_REQUIRED_KNOWLEDGE_CHECKBOX_LABEL}
+            id="requiredKnowledge"
+            onChange={onRequiredKnowledgeChanged}
+            checked={entry?.required ?? false}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    );
+  }
+);
 
 DocumentEntryEditor.displayName = 'DocumentEntryEditor';

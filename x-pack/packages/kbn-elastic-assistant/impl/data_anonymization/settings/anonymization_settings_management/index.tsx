@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiModal, EuiModalBody, EuiModalFooter, EuiModalHeader, EuiModalHeaderTitle, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -33,7 +45,11 @@ export interface Props {
   onClose?: () => void;
 }
 
-const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5, modalMode = false, onClose }) => {
+const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
+  defaultPageSize = 5,
+  modalMode = false,
+  onClose,
+}) => {
   const { toasts } = useAssistantContext();
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -105,47 +121,43 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   });
 
   if (modalMode) {
+    return (
+      <EuiModal onClose={onCancelClick}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>
 
-    return <EuiModal onClose={onCancelClick}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>
+          <EuiSpacer size="m" />
 
-        <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
+            <Stats
+              isDataAnonymizable={true}
+              anonymizationFields={updatedAnonymizationData.data}
+              titleSize="m"
+              gap={euiThemeVars.euiSizeS}
+            />
+          </EuiFlexGroup>
 
-        <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
-          <Stats
-            isDataAnonymizable={true}
-            anonymizationFields={updatedAnonymizationData.data}
-            titleSize="m"
-            gap={euiThemeVars.euiSizeS}
+          <EuiSpacer size="m" />
+
+          <ContextEditor
+            anonymizationFields={updatedAnonymizationData}
+            compressed={false}
+            onListUpdated={onListUpdated}
+            rawData={null}
+            pageSize={defaultPageSize}
           />
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        <ContextEditor
-          anonymizationFields={updatedAnonymizationData}
-          compressed={false}
-          onListUpdated={onListUpdated}
-          rawData={null}
-          pageSize={defaultPageSize}
-        />
-      </EuiModalBody>
-      <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancelClick}>Cancel</EuiButtonEmpty>
-            <EuiButton
-              type="submit"
-              onClick={onSaveButtonClicked}
-              fill
-              disabled={!hasPendingChanges}
-            >
-              {SAVE}
-            </EuiButton>
-          </EuiModalFooter>
-    </EuiModal>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancelClick}>Cancel</EuiButtonEmpty>
+          <EuiButton type="submit" onClick={onSaveButtonClicked} fill disabled={!hasPendingChanges}>
+            {SAVE}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
   }
 
   return (

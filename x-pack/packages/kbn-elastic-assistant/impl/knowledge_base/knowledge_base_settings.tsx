@@ -195,10 +195,12 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        {!modalMode && <AlertsSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />}
+        {!modalMode && (
+          <AlertsSettings
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+          />
+        )}
       </>
     );
   }

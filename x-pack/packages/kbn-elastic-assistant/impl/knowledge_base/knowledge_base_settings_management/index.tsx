@@ -133,10 +133,11 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     http,
     toasts,
   });
-  const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } = useUpdateKnowledgeBaseEntries({
-    http,
-    toasts,
-  });
+  const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } =
+    useUpdateKnowledgeBaseEntries({
+      http,
+      toasts,
+    });
   const { mutateAsync: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
     http,
     toasts,
@@ -181,14 +182,18 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase: true);
+          return (
+            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+          );
         },
         // Add delete popover
         onDeleteActionClicked: (item: KnowledgeBaseEntryResponse) => {
-          setDeleteKBItem(item)
+          setDeleteKBItem(item);
         },
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true);
+          return (
+            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+          );
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
@@ -285,7 +290,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   };
 
   const handleCancelDeleteEntry = useCallback(() => {
-     setDeleteKBItem(null)
+    setDeleteKBItem(null);
   }, [setDeleteKBItem]);
 
   const handleDeleteEntry = useCallback(async () => {
@@ -294,7 +299,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       setDeleteKBItem(null);
     }
   }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
-
 
   return (
     <>
@@ -366,7 +370,12 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry) || (selectedEntry.users != null && !selectedEntry.users.length && !hasManageGlobalKnowledgeBase)}
+        saveButtonDisabled={
+          !isKnowledgeBaseEntryCreateProps(selectedEntry) ||
+          (selectedEntry.users != null &&
+            !selectedEntry.users.length &&
+            !hasManageGlobalKnowledgeBase)
+        }
         saveButtonLoading={isModifyingEntry}
       >
         <>

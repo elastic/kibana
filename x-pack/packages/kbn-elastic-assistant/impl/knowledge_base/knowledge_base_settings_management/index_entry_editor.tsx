@@ -29,240 +29,239 @@ interface Props {
   hasManageGlobalKnowledgeBase: boolean;
 }
 
-export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase }) => {
-  // Name
-  const setName = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
-    [setEntry]
-  );
+export const IndexEntryEditor: React.FC<Props> = React.memo(
+  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase }) => {
+    // Name
+    const setName = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) =>
+        setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
+      [setEntry]
+    );
 
-  // Sharing
-  const setSharingOptions = useCallback(
-    (value: string) =>
-      setEntry((prevEntry) => ({
-        ...prevEntry,
-        users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
-      })),
-    [setEntry]
-  );
-  const sharingOptions = [
-    {
-      value: i18n.SHARING_PRIVATE_OPTION_LABEL,
-      inputDisplay: (
-        <EuiText size={'s'}>
-          <EuiIcon
-            color="subdued"
-            style={{ lineHeight: 'inherit', marginRight: '4px' }}
-            type="lock"
-          />
-          {i18n.SHARING_PRIVATE_OPTION_LABEL}
-        </EuiText>
-      ),
-    },
-    {
-      value: i18n.SHARING_GLOBAL_OPTION_LABEL,
-      inputDisplay: (
-        <EuiText size={'s'}>
-          <EuiIcon
-            color="subdued"
-            style={{ lineHeight: 'inherit', marginRight: '4px' }}
-            type="globe"
-          />
-          {i18n.SHARING_GLOBAL_OPTION_LABEL}
-        </EuiText>
-      ),
-      disabled: !hasManageGlobalKnowledgeBase,
-    },
-  ];
-  const selectedSharingOption =
-    entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
+    // Sharing
+    const setSharingOptions = useCallback(
+      (value: string) =>
+        setEntry((prevEntry) => ({
+          ...prevEntry,
+          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+        })),
+      [setEntry]
+    );
+    const sharingOptions = [
+      {
+        value: i18n.SHARING_PRIVATE_OPTION_LABEL,
+        inputDisplay: (
+          <EuiText size={'s'}>
+            <EuiIcon
+              color="subdued"
+              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              type="lock"
+            />
+            {i18n.SHARING_PRIVATE_OPTION_LABEL}
+          </EuiText>
+        ),
+      },
+      {
+        value: i18n.SHARING_GLOBAL_OPTION_LABEL,
+        inputDisplay: (
+          <EuiText size={'s'}>
+            <EuiIcon
+              color="subdued"
+              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              type="globe"
+            />
+            {i18n.SHARING_GLOBAL_OPTION_LABEL}
+          </EuiText>
+        ),
+        disabled: !hasManageGlobalKnowledgeBase,
+      },
+    ];
+    const selectedSharingOption =
+      entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
-  // Index
-  const indexOptions = useAsync(async () => {
-    const indices = await dataViews.getIndices({
-      pattern: '*',
-      isRollupIndex: () => false,
-    });
+    // Index
+    const indexOptions = useAsync(async () => {
+      const indices = await dataViews.getIndices({
+        pattern: '*',
+        isRollupIndex: () => false,
+      });
 
-    return indices.map((index) => ({label: index.name, value: index.name}));
-  }, [dataViews]);
+      return indices.map((index) => ({ label: index.name, value: index.name }));
+    }, [dataViews]);
 
-  const fieldOptions = useAsync(async () => {
-    const fields = await dataViews.getFieldsForWildcard({ pattern: entry?.index ?? '', fieldTypes: ['semantic_text'] });
+    const fieldOptions = useAsync(async () => {
+      const fields = await dataViews.getFieldsForWildcard({
+        pattern: entry?.index ?? '',
+        fieldTypes: ['semantic_text'],
+      });
 
-    const semanticFields = fields.filter((field) => field.esTypes?.includes('semantic_text'));
+      const semanticFields = fields.filter((field) => field.esTypes?.includes('semantic_text'));
 
-    return semanticFields.map((field) => ({label: field.name, value: field.name}));
-  }, [entry]);
+      return semanticFields.map((field) => ({ label: field.name, value: field.name }));
+    }, [entry]);
 
-  const setIndex = useCallback(
-    async (e: Array<EuiComboBoxOptionOption<string>>) => {
-      setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
-    },
-    [setEntry]
-  );
+    const setIndex = useCallback(
+      async (e: Array<EuiComboBoxOptionOption<string>>) => {
+        setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
+      },
+      [setEntry]
+    );
 
-  const onCreateOption = (searchValue: string) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+    const onCreateOption = (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-    if (!normalizedSearchValue) {
-      return;
-    }
+      if (!normalizedSearchValue) {
+        return;
+      }
 
-    const newOption: EuiComboBoxOptionOption<string> = {
-      label: searchValue,
-      value: searchValue,
+      const newOption: EuiComboBoxOptionOption<string> = {
+        label: searchValue,
+        value: searchValue,
+      };
+
+      setIndex([newOption]);
+      setField([{ label: '', value: '' }]);
     };
 
-    setIndex([newOption]);
-    setField([{ label: '', value: ''}])
-  };
+    const onCreateFieldOption = (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-  const onCreateFieldOption = (searchValue: string) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+      if (!normalizedSearchValue) {
+        return;
+      }
 
-    if (!normalizedSearchValue) {
-      return;
-    }
+      const newOption: EuiComboBoxOptionOption<string> = {
+        label: searchValue,
+        value: searchValue,
+      };
 
-    const newOption: EuiComboBoxOptionOption<string> = {
-      label: searchValue,
-      value: searchValue,
+      setField([newOption]);
     };
 
-    setField([newOption]);
-  };
+    // Field
+    const setField = useCallback(
+      async (e: Array<EuiComboBoxOptionOption<string>>) =>
+        setEntry((prevEntry) => ({ ...prevEntry, field: e[0]?.value })),
+      [setEntry]
+    );
 
-  // Field
-  const setField = useCallback(
-    async (e: Array<EuiComboBoxOptionOption<string>>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, field: e[0]?.value  })),
-    [setEntry]
-  );
+    // Description
+    const setDescription = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+        setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
+      [setEntry]
+    );
 
-  // Description
-  const setDescription = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
-    [setEntry]
-  );
+    // Query Description
+    const setQueryDescription = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+        setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
+      [setEntry]
+    );
 
-  // Query Description
-  const setQueryDescription = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-      setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
-    [setEntry]
-  );
-
-  return (
-    <EuiForm>
-      <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
-        <EuiFieldText
-          name="name"
-          placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
+    return (
+      <EuiForm>
+        <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
+          <EuiFieldText
+            name="name"
+            placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
+            fullWidth
+            value={entry?.name}
+            onChange={setName}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.ENTRY_SHARING_INPUT_LABEL}
+          helpText={i18n.SHARING_HELP_TEXT}
           fullWidth
-          value={entry?.name}
-          onChange={setName}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_SHARING_INPUT_LABEL}
-        helpText={i18n.SHARING_HELP_TEXT}
-        fullWidth
-      >
-        <EuiSuperSelect
-          options={sharingOptions}
-          valueOfSelected={selectedSharingOption}
-          onChange={setSharingOptions}
+        >
+          <EuiSuperSelect
+            options={sharingOptions}
+            valueOfSelected={selectedSharingOption}
+            onChange={setSharingOptions}
+            fullWidth
+          />
+        </EuiFormRow>
+        <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
+          <EuiComboBox
+            aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
+            isClearable={true}
+            singleSelection={{ asPlainText: true }}
+            onCreateOption={onCreateOption}
+            fullWidth
+            options={indexOptions.value ?? []}
+            selectedOptions={
+              entry?.index
+                ? [
+                    {
+                      label: entry?.index,
+                      value: entry?.index,
+                    },
+                  ]
+                : []
+            }
+            onChange={setIndex}
+          />
+        </EuiFormRow>
+        <EuiFormRow label={i18n.ENTRY_FIELD_INPUT_LABEL} fullWidth>
+          <EuiComboBox
+            aria-label={i18n.ENTRY_FIELD_PLACEHOLDER}
+            isClearable={true}
+            singleSelection={{ asPlainText: true }}
+            onCreateOption={onCreateFieldOption}
+            fullWidth
+            options={fieldOptions.value ?? []}
+            selectedOptions={
+              entry?.field
+                ? [
+                    {
+                      label: entry?.field,
+                      value: entry?.field,
+                    },
+                  ]
+                : []
+            }
+            onChange={setField}
+            isDisabled={!entry?.index}
+          />
+        </EuiFormRow>
+        <EuiFormRow label={i18n.ENTRY_DESCRIPTION_INPUT_LABEL} fullWidth>
+          <EuiTextArea
+            name="description"
+            fullWidth
+            placeholder={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
+            value={entry?.description}
+            onChange={setDescription}
+            rows={2}
+          />
+        </EuiFormRow>
+        <EuiFormRow label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL} fullWidth>
+          <EuiTextArea
+            name="query_description"
+            placeholder={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
+            value={entry?.queryDescription}
+            onChange={setQueryDescription}
+            fullWidth
+            rows={3}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.ENTRY_OUTPUT_FIELDS_INPUT_LABEL}
+          helpText={i18n.ENTRY_OUTPUT_FIELDS_HELP_LABEL}
           fullWidth
-        />
-      </EuiFormRow>
-      <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
-        <EuiComboBox
-          aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
-          isClearable={true}
-          singleSelection={{ asPlainText: true }}
-          onCreateOption={onCreateOption}
-          fullWidth
-          options={indexOptions.value ?? []}
-          selectedOptions={
-            entry?.index
-              ? [
-                  {
-                    label: entry?.index,
-                    value: entry?.index,
-                  },
-                ]
-              : []
-          }
-          onChange={setIndex}
-        />
-      </EuiFormRow>
-      <EuiFormRow label={i18n.ENTRY_FIELD_INPUT_LABEL} fullWidth>
-      <EuiComboBox
-          aria-label={i18n.ENTRY_FIELD_PLACEHOLDER}
-          isClearable={true}
-          singleSelection={{ asPlainText: true }}
-          onCreateOption={onCreateFieldOption}
-          fullWidth
-          options={fieldOptions.value ?? []}
-          selectedOptions={
-            entry?.field
-              ? [
-                  {
-                    label: entry?.field,
-                    value: entry?.field,
-                  },
-                ]
-              : []
-          }
-          onChange={setField}
-          isDisabled={!entry?.index}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_DESCRIPTION_INPUT_LABEL}
-        fullWidth
-      >
-        <EuiTextArea
-          name="description"
-          fullWidth
-          placeholder={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
-          value={entry?.description}
-          onChange={setDescription}
-          rows={2}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL}
-        fullWidth
-      >
-        <EuiTextArea
-          name="query_description"
-          placeholder={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
-          value={entry?.queryDescription}
-          onChange={setQueryDescription}
-          fullWidth
-          rows={3}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_OUTPUT_FIELDS_INPUT_LABEL}
-        helpText={i18n.ENTRY_OUTPUT_FIELDS_HELP_LABEL}
-        fullWidth
-      >
-        <EuiComboBox
-          aria-label={i18n.ENTRY_OUTPUT_FIELDS_INPUT_LABEL}
-          isClearable={true}
-          singleSelection={{ asPlainText: true }}
-          onCreateOption={onCreateOption}
-          fullWidth
-          selectedOptions={[]}
-          onChange={setIndex}
-        />
-      </EuiFormRow>
-    </EuiForm>
-  );
-});
+        >
+          <EuiComboBox
+            aria-label={i18n.ENTRY_OUTPUT_FIELDS_INPUT_LABEL}
+            isClearable={true}
+            singleSelection={{ asPlainText: true }}
+            onCreateOption={onCreateOption}
+            fullWidth
+            selectedOptions={[]}
+            onChange={setIndex}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    );
+  }
+);
 IndexEntryEditor.displayName = 'IndexEntryEditor';
