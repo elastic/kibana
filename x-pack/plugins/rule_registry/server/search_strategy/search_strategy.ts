@@ -31,7 +31,9 @@ import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 import { getConsumersFilter } from '../lib/get_consumers_filter';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
-  rawResponse: { hits: { total: 0 } } as RuleRegistrySearchResponse['rawResponse'],
+  rawResponse: {
+    hits: { total: 0, hits: [] },
+  } as unknown as RuleRegistrySearchResponse['rawResponse'],
 };
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';

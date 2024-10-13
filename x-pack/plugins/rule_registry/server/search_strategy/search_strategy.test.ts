@@ -165,6 +165,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
         },
         "rawResponse": Object {
           "hits": Object {
+            "hits": Array [],
             "total": 0,
           },
         },
