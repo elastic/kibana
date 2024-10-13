@@ -52,6 +52,9 @@ export const GraphPreviewContainer: React.FC = () => {
         iconType: 'indexMapping',
       }}
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
+      content={{
+        paddingSize: 'none',
+      }}
     >
       {isEnabled ? (
         <GraphPreview />
