@@ -78,7 +78,8 @@ describe('calculateExcludeFilters', () => {
   });
 
   it('ignores and returns errors for hooks that take longer than timeout', async () => {
-    const hook1 = jest.fn().mockReturnValue(new Promise((r) => setTimeout(r, 40_000)));
+    let timer1: NodeJS.Timeout | undefined;
+    const hook1 = jest.fn().mockReturnValue(new Promise((r) => (timer1 = setTimeout(r, 40_000))));
     const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({
@@ -98,5 +99,6 @@ describe('calculateExcludeFilters', () => {
     expect((result as Either.Right<any>).right.errorsByType.type1.toString()).toMatchInlineSnapshot(
       `"Error: excludeFromUpgrade hook timed out after 0.1 seconds."`
     );
+    timer1?.unref();
   });
 });
