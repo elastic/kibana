@@ -140,7 +140,7 @@ export const PackagePolicyBaseSchema = {
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
-
+  connector_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
   overrides: schema.maybe(
@@ -184,6 +184,7 @@ const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
+  connector_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,

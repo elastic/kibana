@@ -13,6 +13,8 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EndpointAppContext } from '../../../../types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
@@ -25,6 +27,7 @@ export interface NormalizedExternalConnectorClientExecuteOptions<
     subActionParams: TParams;
   };
   spaceId?: string;
+  elasticAgentId: string;
 }
 
 /**
@@ -36,11 +39,21 @@ export class NormalizedExternalConnectorClient {
   private connectorTypeId: string | undefined;
 
   protected readonly getConnectorInstance: () => Promise<ConnectorWithExtraFindData> = once(
-    async () => {
+    async (elasticAgentId) => {
       this.ensureSetupDone();
       let connectorList: ConnectorWithExtraFindData[] = [];
       const connectorTypeId = this.connectorTypeId as string;
+      const metadataService = this.options.endpointService.getEndpointMetadataService();
+      const fleetServices = this.options.endpointService.getInternalFleetServices();
+      const agent = await fleetServices?.agent.getAgent(elasticAgentId);
+      const agentPolicyService = metadataService?.agentPolicyService;
+      const soClient = this.options.soClient;
 
+      const agentPolicy = await agentPolicyService?.get(soClient, agent.policy_id);
+      // TODO this is our found policy that contains connector_id
+      const externalPolicy = agentPolicy.package_policies.find(
+        (policy) => policy.package?.name === 'crowdstrike'
+      );
       try {
         connectorList = await this.getAll();
       } catch (err) {
@@ -75,6 +88,8 @@ export class NormalizedExternalConnectorClient {
     protected readonly options?: {
       /** Used by `.execute()` when the `IUnsecuredActionsClient` is passed in */
       relatedSavedObjects?: RelatedSavedObjects;
+      endpointService: EndpointAppContext;
+      soClient: SavedObjectsClientContract;
     }
   ) {}
 
@@ -111,11 +126,12 @@ export class NormalizedExternalConnectorClient {
   >({
     spaceId = 'default',
     params,
+    elasticAgentId,
   }: NormalizedExternalConnectorClientExecuteOptions<TParams>): Promise<
     ActionTypeExecutorResult<TResponse>
   > {
     this.ensureSetupDone();
-    const { id: connectorId } = await this.getConnectorInstance();
+    const { id: connectorId } = await this.getConnectorInstance(elasticAgentId);
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
       return this.connectorsClient.execute({

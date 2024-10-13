@@ -569,6 +569,8 @@ export const getSavedObjectTypes = (
               requires_root: { type: 'boolean' },
             },
           },
+          connector_id: { type: 'keyword' },
+
           elasticsearch: {
             dynamic: false,
             properties: {},
@@ -773,6 +775,7 @@ export const getSavedObjectTypes = (
               requires_root: { type: 'boolean' },
             },
           },
+          connector_id: { type: 'keyword' },
           elasticsearch: {
             dynamic: false,
             properties: {},

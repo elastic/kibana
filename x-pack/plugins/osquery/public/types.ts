@@ -12,10 +12,6 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {

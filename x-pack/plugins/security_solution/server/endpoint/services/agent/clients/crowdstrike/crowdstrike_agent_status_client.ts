@@ -40,10 +40,14 @@ export enum CROWDSTRIKE_STATUS_RESPONSE {
 export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
 
-  private async getAgentStatusFromConnectorAction(agentIds: string[]) {
+  private async getAgentStatusFromConnectorAction(agentIds: string[], elasticAgentId: string) {
     const connectorActions = new NormalizedExternalConnectorClient(
       this.options.connectorActionsClient as ActionsClient,
-      this.log
+      this.log,
+      {
+        endpointService: this.options.endpointService,
+        soClient: this.options.soClient,
+      }
     );
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
 
@@ -54,6 +58,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           ids: agentIds,
         },
       },
+      elasticAgentId,
     })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
 
     return keyBy(agentStatusResponse.data?.resources, 'id');
@@ -129,7 +134,10 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
 
-      const agentStatuses = await this.getAgentStatusFromConnectorAction(agentIds);
+      const agentStatuses = await this.getAgentStatusFromConnectorAction(
+        agentIds,
+        mostRecentAgentInfosByAgentId[agentIds[0]]?.agent.id
+      );
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
         const { device, crowdstrike } = mostRecentAgentInfosByAgentId[agentId];
@@ -158,7 +166,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
-        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

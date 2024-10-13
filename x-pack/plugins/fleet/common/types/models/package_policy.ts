@@ -92,6 +92,7 @@ export interface NewPackagePolicy {
     };
     [key: string]: any;
   };
+  connector_id: string;
   overrides?: { inputs?: { [key: string]: any } } | null;
 }
 
