@@ -60,6 +60,9 @@ function getConfig(overrides = {}) {
     microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
     microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
     microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+    usage: {
+      url: 'ca.path',
+    },
     ...overrides,
   };
 }
@@ -85,6 +88,9 @@ describe('Actions Plugin', () => {
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
         microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+        usage: {
+          url: 'ca.path',
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -589,6 +595,9 @@ describe('Actions Plugin', () => {
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
         microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+        usage: {
+          url: 'ca.path',
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
