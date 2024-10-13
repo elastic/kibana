@@ -82,6 +82,7 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         edges={edgesState}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        proOptions={{ hideAttribution: true }}
       >
         <Controls />
         <Background />
