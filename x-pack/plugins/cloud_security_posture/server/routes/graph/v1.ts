@@ -6,6 +6,7 @@
  */
 
 import { castArray } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type {
   EdgeDataModel,
@@ -68,23 +69,23 @@ interface ParseContext {
 }
 
 const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
-  const nodesMap: Record<string, NodeDataModel> = {};
-  const edgeLabelsNodes: Record<string, string[]> = {};
-  const edgesMap: Record<string, EdgeDataModel> = {};
+  const ctx: ParseContext = { nodesMap: {}, edgeLabelsNodes: {}, edgesMap: {} };
 
   logger.trace(`Parsing records [length: ${records.length}]`);
 
-  createNodes(logger, records, { nodesMap, edgeLabelsNodes });
-  createEdgesAndGroups(logger, { edgeLabelsNodes, edgesMap, nodesMap });
+  createNodes(logger, records, ctx);
+  createEdgesAndGroups(logger, ctx);
 
   logger.trace(
-    `Parsed [nodes: ${Object.keys(nodesMap).length}, edges: ${Object.keys(edgesMap).length}]`
+    `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
+      Object.keys(ctx.edgesMap).length
+    }]`
   );
 
   // Sort groups to be first (fixes minor layout issue)
-  const nodes = sortNodes(nodesMap);
+  const nodes = sortNodes(ctx.nodesMap);
 
-  return { nodes, edges: Object.values(edgesMap) };
+  return { nodes, edges: Object.values(ctx.edgesMap) };
 };
 
 const fetchGraph = async ({
@@ -174,6 +175,13 @@ const createNodes = (
     const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+
+    // Ensure all targets has an id (target can return null from the query)
+    targetIdsArray.forEach((id, idx) => {
+      if (!id) {
+        targetIdsArray[idx] = `unknown ${uuidv4()}`;
+      }
+    });
 
     logger.trace(
       `Parsing record [actorIds: ${actorIdsArray.join(
