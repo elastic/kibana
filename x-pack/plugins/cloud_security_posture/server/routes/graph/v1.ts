@@ -175,11 +175,13 @@ const createNodes = (
     const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+    const unknownTargets: string[] = [];
 
     // Ensure all targets has an id (target can return null from the query)
     targetIdsArray.forEach((id, idx) => {
       if (!id) {
         targetIdsArray[idx] = `unknown ${uuidv4()}`;
+        unknownTargets.push(targetIdsArray[idx]);
       }
     });
 
@@ -194,7 +196,7 @@ const createNodes = (
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
-          label: id,
+          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: isAlert ? 'danger' : 'primary',
           ...determineEntityNodeShape(id, ips ?? [], hosts ?? [], users ?? []),
         };
