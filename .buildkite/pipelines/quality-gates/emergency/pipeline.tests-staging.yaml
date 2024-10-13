@@ -46,3 +46,4 @@ steps:
         command: "make -C /agent trigger-manual-verification-phase"
         agents:
           image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"
+        if: build.env("DEPLOYMENT_SLICES") =~ /.*staging-ds-2.*/
