@@ -54,9 +54,7 @@ export const GraphPreviewContainer: React.FC = () => {
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
     >
       {isEnabled ? (
-        <React.StrictMode>
-          <GraphPreview />
-        </React.StrictMode>
+        <GraphPreview />
       ) : (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.visualizations.graphPreview.noDataDescription"
