@@ -11,5 +11,4 @@ export {
   reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
 } from './react_embeddable_registry';
-export { ReactEmbeddableRenderer } from './react_embeddable_renderer';
 export type { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
