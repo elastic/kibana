@@ -18,6 +18,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     language: 'kuery',
     rule_id: 'rule-1',
     version: 1,
+    author: [],
     ...rewrites,
   } as PrebuiltRuleAsset);
 
@@ -51,6 +52,7 @@ export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({
   language: 'kuery',
   rule_id: 'rule-1',
   version: 1,
+  author: [],
   threat_query: '*:*',
   threat_index: ['list-index'],
   threat_mapping: [

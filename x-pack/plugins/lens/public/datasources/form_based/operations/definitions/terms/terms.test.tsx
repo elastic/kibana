@@ -2284,6 +2284,7 @@ describe('terms', () => {
 
       expect(select.prop('value')).toEqual('alphabetical');
 
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
       expect(select.prop('options')!.map((option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
@@ -2311,6 +2312,7 @@ describe('terms', () => {
 
       expect(select.prop('value')).toEqual('alphabetical');
 
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
       expect(select.prop('options')!.map((option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
@@ -2372,6 +2374,7 @@ describe('terms', () => {
 
       const selection = instance.find(EuiButtonGroup);
       expect(selection.prop('idSelected')).toContain('asc');
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
       expect(selection.prop('options').map((option) => option.value)).toEqual(['asc', 'desc']);
     });
 

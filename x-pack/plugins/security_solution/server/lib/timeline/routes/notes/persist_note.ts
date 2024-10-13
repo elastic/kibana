@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
-
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
@@ -22,7 +21,7 @@ import {
 } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
-export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: NOTE_URL,
@@ -38,7 +37,7 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: Config
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<PersistNoteRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

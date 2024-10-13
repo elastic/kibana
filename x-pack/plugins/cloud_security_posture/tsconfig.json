@@ -64,7 +64,9 @@
     "@kbn/react-kibana-mount",
     "@kbn/spaces-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/cloud-security-posture"
+    "@kbn/cloud-security-posture",
+    "@kbn/analytics",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

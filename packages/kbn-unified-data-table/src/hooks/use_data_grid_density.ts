@@ -30,8 +30,6 @@ interface UseDataGridDensityProps {
   onUpdateDataGridDensity?: (density: DataGridDensity) => void;
 }
 
-export const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';
-
 export function getDensityFromStyle(style: EuiDataGridStyle) {
   return style.cellPadding === DATA_GRID_STYLE_COMPACT.cellPadding &&
     style.fontSize === DATA_GRID_STYLE_COMPACT.fontSize
@@ -42,24 +40,30 @@ export function getDensityFromStyle(style: EuiDataGridStyle) {
     : DataGridDensity.EXPANDED;
 }
 
+const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';
+const getStorageKey = (consumer: string) => `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
+
+export const getDataGridDensity = (storage: Storage, consumer: string): DataGridDensity => {
+  return storage.get(getStorageKey(consumer)) ?? DataGridDensity.COMPACT;
+};
+
 export const useDataGridDensity = ({
   storage,
   consumer,
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UseDataGridDensityProps) => {
-  const storageKey = `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
   const dataGridDensity = useMemo<DataGridDensity>(() => {
-    return dataGridDensityState ?? storage.get(storageKey) ?? DataGridDensity.COMPACT;
-  }, [dataGridDensityState, storage, storageKey]);
+    return dataGridDensityState ?? getDataGridDensity(storage, consumer);
+  }, [consumer, dataGridDensityState, storage]);
 
   const onChangeDataGridDensity = useCallback(
     (gridStyle: EuiDataGridStyle) => {
       const newDensity = getDensityFromStyle(gridStyle);
-      storage.set(storageKey, newDensity);
+      storage.set(getStorageKey(consumer), newDensity);
       onUpdateDataGridDensity?.(newDensity);
     },
-    [storageKey, storage, onUpdateDataGridDensity]
+    [storage, consumer, onUpdateDataGridDensity]
   );
 
   return {

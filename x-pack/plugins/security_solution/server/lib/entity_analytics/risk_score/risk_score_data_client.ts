@@ -87,6 +87,17 @@ export class RiskScoreDataClient {
       soClient: this.options.soClient,
     });
 
+  public createRiskScoreLatestIndex = async () => {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        mappings: mappingFromFieldMap(riskScoreFieldMap, false),
+      },
+    });
+  };
+
   public async init() {
     const namespace = this.options.namespace;
 
@@ -152,14 +163,7 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
-      await createOrUpdateIndex({
-        esClient,
-        logger: this.options.logger,
-        options: {
-          index: getRiskScoreLatestIndex(namespace),
-          mappings: mappingFromFieldMap(riskScoreFieldMap, false),
-        },
-      });
+      await this.createRiskScoreLatestIndex();
 
       const transformId = getLatestTransformId(namespace);
       await createTransform({
@@ -203,29 +207,41 @@ export class RiskScoreDataClient {
     const addError = (e: Error) => errors.push(e);
 
     await esClient.transform
-      .deleteTransform({
-        transform_id: getLatestTransformId(namespace),
-        delete_dest_index: true,
-        force: true,
-      })
+      .deleteTransform(
+        {
+          transform_id: getLatestTransformId(namespace),
+          delete_dest_index: true,
+          force: true,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.indices
-      .deleteDataStream({
-        name: indexPatterns.alias,
-      })
+      .deleteDataStream(
+        {
+          name: indexPatterns.alias,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.indices
-      .deleteIndexTemplate({
-        name: indexPatterns.template,
-      })
+      .deleteIndexTemplate(
+        {
+          name: indexPatterns.template,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     await esClient.cluster
-      .deleteComponentTemplate({
-        name: mappingComponentName,
-      })
+      .deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      )
       .catch(addError);
 
     return errors;

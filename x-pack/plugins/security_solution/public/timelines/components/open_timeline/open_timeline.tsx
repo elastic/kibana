@@ -30,7 +30,6 @@ import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import type { OpenTimelineProps, ActionTimelineToShow, OpenTimelineResult } from './types';
-import { NoteManagementPage } from '../../../notes';
 
 const QueryText = styled.span`
   white-space: normal;
@@ -64,7 +63,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    tabName,
     timelineType = TimelineTypeEnum.default,
     timelineStatus,
     timelineFilter,
@@ -228,92 +226,86 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
         <div data-test-subj="timelines-page-container" className={OPEN_TIMELINE_CLASS_NAME}>
           {!!timelineFilter && timelineFilter}
-          {tabName !== 'notes' ? (
-            <>
-              <SearchRow
-                data-test-subj="search-row"
-                favoriteCount={favoriteCount}
-                onlyFavorites={onlyFavorites}
-                onQueryChange={onQueryChange}
-                onToggleOnlyFavorites={onToggleOnlyFavorites}
-                query={query}
-                timelineType={timelineType}
-              >
-                {SearchRowContent}
-              </SearchRow>
+          <>
+            <SearchRow
+              data-test-subj="search-row"
+              favoriteCount={favoriteCount}
+              onlyFavorites={onlyFavorites}
+              onQueryChange={onQueryChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              query={query}
+              timelineType={timelineType}
+            >
+              {SearchRowContent}
+            </SearchRow>
 
-              <UtilityBar border>
-                <UtilityBarSection>
-                  <UtilityBarGroup>
-                    <UtilityBarText data-test-subj="query-message">
-                      <>
-                        {i18n.SHOWING}{' '}
-                        {timelineType === TimelineTypeEnum.template ? nTemplates : nTimelines}
-                      </>
-                    </UtilityBarText>
-                  </UtilityBarGroup>
-                  <UtilityBarGroup>
-                    {timelineStatus !== TimelineStatusEnum.immutable && (
-                      <>
-                        <UtilityBarText data-test-subj="selected-count">
-                          {timelineType === TimelineTypeEnum.template
-                            ? i18n.SELECTED_TEMPLATES((selectedItems || []).length)
-                            : i18n.SELECTED_TIMELINES((selectedItems || []).length)}
-                        </UtilityBarText>
-                        <UtilityBarAction
-                          dataTestSubj="batchActions"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          popoverContent={getBatchItemsPopoverContent}
-                          data-test-subj="utility-bar-action"
-                        >
-                          <span data-test-subj="utility-bar-action-button">
-                            {i18n.BATCH_ACTIONS}
-                          </span>
-                        </UtilityBarAction>
-                      </>
-                    )}
-                    <UtilityBarAction
-                      dataTestSubj="refreshButton"
-                      iconSide="right"
-                      iconType="refresh"
-                      onClick={onRefreshBtnClick}
-                    >
-                      {i18n.REFRESH}
-                    </UtilityBarAction>
-                  </UtilityBarGroup>
-                </UtilityBarSection>
-              </UtilityBar>
+            <UtilityBar border>
+              <UtilityBarSection>
+                <UtilityBarGroup>
+                  <UtilityBarText data-test-subj="query-message">
+                    <>
+                      {i18n.SHOWING}{' '}
+                      {timelineType === TimelineTypeEnum.template ? nTemplates : nTimelines}
+                    </>
+                  </UtilityBarText>
+                </UtilityBarGroup>
+                <UtilityBarGroup>
+                  {timelineStatus !== TimelineStatusEnum.immutable && (
+                    <>
+                      <UtilityBarText data-test-subj="selected-count">
+                        {timelineType === TimelineTypeEnum.template
+                          ? i18n.SELECTED_TEMPLATES((selectedItems || []).length)
+                          : i18n.SELECTED_TIMELINES((selectedItems || []).length)}
+                      </UtilityBarText>
+                      <UtilityBarAction
+                        dataTestSubj="batchActions"
+                        iconSide="right"
+                        iconType="arrowDown"
+                        popoverContent={getBatchItemsPopoverContent}
+                        data-test-subj="utility-bar-action"
+                      >
+                        <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
+                      </UtilityBarAction>
+                    </>
+                  )}
+                  <UtilityBarAction
+                    dataTestSubj="refreshButton"
+                    iconSide="right"
+                    iconType="refresh"
+                    onClick={onRefreshBtnClick}
+                  >
+                    {i18n.REFRESH}
+                  </UtilityBarAction>
+                </UtilityBarGroup>
+              </UtilityBarSection>
+            </UtilityBar>
 
-              <TimelinesTable
-                actionTimelineToShow={actionTimelineToShow}
-                data-test-subj="timelines-table"
-                deleteTimelines={deleteTimelines}
-                defaultPageSize={defaultPageSize}
-                loading={isLoading}
-                itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-                enableExportTimelineDownloader={enableExportTimelineDownloader}
-                onCreateRule={onCreateRule}
-                onCreateRuleFromEql={onCreateRuleFromEql}
-                onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
-                onOpenTimeline={onOpenTimeline}
-                onSelectionChange={onSelectionChange}
-                onTableChange={onTableChange}
-                onToggleShowNotes={onToggleShowNotes}
-                pageIndex={pageIndex}
-                pageSize={pageSize}
-                searchResults={searchResults}
-                showExtendedColumns={true}
-                sortDirection={sortDirection}
-                sortField={sortField}
-                timelineType={timelineType}
-                totalSearchResultsCount={totalSearchResultsCount}
-                tableRef={tableRef}
-              />
-            </>
-          ) : (
-            <NoteManagementPage onOpenTimeline={onOpenTimeline} />
-          )}
+            <TimelinesTable
+              actionTimelineToShow={actionTimelineToShow}
+              data-test-subj="timelines-table"
+              deleteTimelines={deleteTimelines}
+              defaultPageSize={defaultPageSize}
+              loading={isLoading}
+              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              enableExportTimelineDownloader={enableExportTimelineDownloader}
+              onCreateRule={onCreateRule}
+              onCreateRuleFromEql={onCreateRuleFromEql}
+              onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
+              onOpenTimeline={onOpenTimeline}
+              onSelectionChange={onSelectionChange}
+              onTableChange={onTableChange}
+              onToggleShowNotes={onToggleShowNotes}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              searchResults={searchResults}
+              showExtendedColumns={true}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              timelineType={timelineType}
+              totalSearchResultsCount={totalSearchResultsCount}
+              tableRef={tableRef}
+            />
+          </>
         </div>
       </>
     );

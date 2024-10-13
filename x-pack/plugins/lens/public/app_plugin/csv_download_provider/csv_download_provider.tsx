@@ -162,8 +162,8 @@ export const downloadCsvShareProvider = ({
     return [
       {
         ...menuItemMetadata,
-        label: 'CSV',
-        reportType: 'lens_csv',
+        label: 'CSV' as const,
+        reportType: 'lens_csv' as const,
         generateExport: downloadCSVHandler,
         ...(atLeastGold()
           ? {

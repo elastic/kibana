@@ -68,5 +68,15 @@ describe('object_utils', () => {
 
     const test11 = setNestedProperty(getFalseyObject(), 'the.other_nested.value', 'update');
     expect(test11.the.other_nested.value).toBe('update');
+
+    expect(() => {
+      setNestedProperty(getTestObj(), 'the.__proto__', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(getTestObj(), 'the.prototype', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(getTestObj(), 'the.constructor', 'update');
+    }).toThrow('Invalid accessor');
   });
 });

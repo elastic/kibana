@@ -199,6 +199,17 @@ export interface ChromeStart {
      * will be closed.
      */
     setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+
+    /**
+     * Get an observable of the visibility state of the feedback button in the side nav.
+     */
+    getIsFeedbackBtnVisible$: () => Observable<boolean>;
+
+    /**
+     * Set the visibility state of the feedback button in the side nav.
+     * @param isVisible The visibility state of the feedback button in the side nav.
+     */
+    setIsFeedbackBtnVisible: (isVisible: boolean) => void;
   };
 
   /**

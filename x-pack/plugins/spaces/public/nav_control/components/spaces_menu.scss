@@ -3,8 +3,9 @@
 }
 
 .spcMenu__spacesList {
-  @include euiYScrollWithShadows;
   max-height: $euiSizeXL * 10;
+
+  @include euiYScrollWithShadows;
 }
 
 .spcMenu__searchFieldWrapper {
