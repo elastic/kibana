@@ -581,7 +581,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           value: null,
           ui_restrictions: [],
           default_value: null,
-          depends_on: [{ entra_id: null }],
+          depends_on: [],
         },
         entra_id: {
           display: DisplayType.TEXTBOX,
@@ -595,7 +595,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           value: null,
           ui_restrictions: [],
           default_value: null,
-          depends_on: [{ api_key: null }],
+          depends_on: [],
         },
         resource_name: {
           display: DisplayType.TEXTBOX,
@@ -877,7 +877,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           validations: [],
           value: null,
           ui_restrictions: [],
-          default_value: 'https://api.openai.com/v1/chat/completions',
+          default_value: null,
           depends_on: [],
         },
         max_input_tokens: {

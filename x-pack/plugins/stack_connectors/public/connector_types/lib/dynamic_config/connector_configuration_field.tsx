@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -53,6 +53,10 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   const [innerValue, setInnerValue] = useState(
     !value || value.toString().length === 0 ? default_value : value
   );
+
+  useEffect(() => {
+    setInnerValue(!value || value.toString().length === 0 ? default_value : value);
+  }, [default_value, value]);
   return (
     <EuiFieldText
       disabled={isLoading}
@@ -77,6 +81,9 @@ export const ConfigSwitchField: React.FC<ConfigInputFieldProps> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { label, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
+  useEffect(() => {
+    setInnerValue(value ?? default_value);
+  }, [default_value, value]);
   return (
     <EuiSwitch
       checked={ensureBooleanType(innerValue)}
@@ -99,6 +106,9 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { isValid, placeholder, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
+  useEffect(() => {
+    setInnerValue(value ?? default_value);
+  }, [default_value, value]);
   return (
     <EuiTextArea
       disabled={isLoading}
@@ -124,6 +134,9 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { isValid, placeholder, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
+  useEffect(() => {
+    setInnerValue(!value || value.toString().length === 0 ? default_value : value);
+  }, [default_value, value]);
   return (
     <EuiFieldNumber
       fullWidth
@@ -149,6 +162,9 @@ export const ConfigCheckableField: React.FC<ConfigInputFieldProps> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { value, options, default_value } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
+  useEffect(() => {
+    setInnerValue(value ?? default_value);
+  }, [default_value, value]);
   return (
     <>
       {options?.map((o) => (
@@ -194,6 +210,9 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
 }) => {
   const { value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? null);
+  useEffect(() => {
+    setInnerValue(value ?? null);
+  }, [value]);
   return (
     <>
       <EuiFieldPassword

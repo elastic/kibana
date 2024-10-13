@@ -248,8 +248,8 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       : [];
 
     existingConfiguration.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required));
-    setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required));
+    setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
+    setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets]);
 
   useEffect(() => {
