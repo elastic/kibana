@@ -75,8 +75,8 @@ export class ActionScheduler<
   }
 
   public async run({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeCurrentAlerts = {},
+    recoveredCurrentAlerts = {},
   }: {
     activeCurrentAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
     recoveredCurrentAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
