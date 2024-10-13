@@ -28,7 +28,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
-import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -72,6 +71,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -110,6 +110,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     theme,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
+
   const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
@@ -260,7 +263,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
+    if (!isUsingRuleCreateFlyout) {
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {

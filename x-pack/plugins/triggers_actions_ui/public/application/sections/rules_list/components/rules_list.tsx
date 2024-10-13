@@ -49,7 +49,6 @@ import {
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
-import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import {
   Rule,
   RuleTableItem,
@@ -216,6 +215,7 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -317,7 +317,7 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
+    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
         state: {
@@ -1021,7 +1021,7 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
+              if (!isUsingRuleCreateFlyout) {
                 navigateToApp('management', {
                   path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
                 });

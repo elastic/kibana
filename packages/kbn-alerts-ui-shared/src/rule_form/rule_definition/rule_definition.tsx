@@ -98,11 +98,9 @@ export const RuleDefinition = () => {
     if (consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
-
     const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
       return ruleType.id === selectedRuleType.id;
     });
-
     if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
@@ -323,6 +321,7 @@ export const RuleDefinition = () => {
               </EuiDescribedFormGroup>
               {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
                 <EuiDescribedFormGroup
+                  data-test-subj="ruleDefinitionFlappingFormGroup"
                   fullWidth
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={

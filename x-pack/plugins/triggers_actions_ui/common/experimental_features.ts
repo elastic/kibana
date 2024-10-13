@@ -21,7 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
-  ruleFormV2: false,
+  isUsingRuleCreateFlyout: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

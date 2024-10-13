@@ -35,7 +35,6 @@ import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -54,6 +53,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -123,17 +123,19 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     application: { navigateToApp },
   } = useKibana().services;
 
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
+
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Routes>
-        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+        {!isUsingRuleCreateFlyout && (
           <Route
             exact
             path={createRuleRoute}
             component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
           />
         )}
-        {USE_NEW_RULE_FORM_FEATURE_FLAG && (
+        {!isUsingRuleCreateFlyout && (
           <Route
             exact
             path={editRuleRoute}

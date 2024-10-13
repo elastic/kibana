@@ -19,11 +19,11 @@ import {
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
@@ -44,6 +44,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const {
     application: { capabilities, navigateToApp },
   } = useKibana().services;
+
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
@@ -106,7 +108,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   }, [rule, ruleTypeRegistry]);
 
   const onEditRuleClick = () => {
-    if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
+    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
