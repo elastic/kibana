@@ -137,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
+        'entity_store:field_retention:enrichment',
         'fleet:check-deleted-files-task',
         'fleet:deploy_agent_policies',
         'fleet:reassign_action:retry',
