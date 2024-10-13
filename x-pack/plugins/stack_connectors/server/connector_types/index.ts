@@ -20,6 +20,7 @@ import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getOpenAIConnectorType } from './openai';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getGeminiConnectorType } from './gemini';
+import { getConnectorType as getInferenceConnectorType } from './inference';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -117,5 +118,8 @@ export function registerConnectorTypes({
   }
   if (experimentalFeatures.crowdstrikeConnectorOn) {
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType());
+  }
+  if (experimentalFeatures.inferenceConnectorOn) {
+    actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
 }
