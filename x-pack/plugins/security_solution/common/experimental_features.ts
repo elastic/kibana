@@ -202,7 +202,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables graph visualization in alerts flyout
    */
-  graphVisualizationInFlyoutEnabled: true,
+  graphVisualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
