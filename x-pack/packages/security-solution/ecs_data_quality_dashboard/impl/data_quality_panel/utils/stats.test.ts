@@ -10,8 +10,9 @@ import {
   auditbeatWithAllResults,
 } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatWithSomeErrors } from '../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { mockStatsPacketbeatIndex } from '../mock/stats/mock_stats_auditbeat_index';
-import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
+import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_auditbeat_index';
+import { mockStatsPacketbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
+
 import { DataQualityCheckResult } from '../types';
 import {
   getDocsCount,
