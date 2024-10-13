@@ -69,8 +69,24 @@ NOTE: At this time, email notifications support only preconfigured connectors,
 which are defined in the `kibana.yml` file.
 For examples, refer to <<preconfigured-email-configuration>> and <<configuring-email>>.
 --
-. Set the `notifications.connectors.default.email` {kib} setting to the name of
+. Set the `notifications.connectors.default.email` {kib} setting in kibana.yml to the name of
 your email connector.
+```js
+notifications.connectors.default.email: ‘mail-dev’
+
+xpack.actions.preconfigured:
+  mail-dev:
+    name: preconfigured-email-notification-maildev
+    actionTypeId: .email
+    config:
+      service: other
+      from: from address
+      host: host name
+      port: port number
+      secure: true/false
+      hasAuth: true/false
+```
+
 . If you want the email notifications to contain links back to the case, you
 must configure the <<server-publicBaseUrl,server.publicBaseUrl>> setting.
 
