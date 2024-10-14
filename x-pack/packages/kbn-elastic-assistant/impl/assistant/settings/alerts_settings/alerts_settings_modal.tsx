@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback
+
+} from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,9 +18,9 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { ALERTS_LABEL } from '../../../knowledge_base/translations';
-import { useSettingsUpdater } from '../use_settings_updater/use_settings_updater';
+import { DEFAULT_CONVERSATIONS, DEFAULT_PROMPTS, useSettingsUpdater } from '../use_settings_updater/use_settings_updater';
 import { AlertsSettings } from './alerts_settings';
-import { SAVE } from '../translations';
+import { CANCEL, SAVE } from '../translations';
 
 interface AlertSettingsModalProps {
   onClose: () => void;
@@ -26,11 +28,16 @@ interface AlertSettingsModalProps {
 
 export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, saveSettings } = useSettingsUpdater(
-    {},
-    { page: 1, perPage: 10, total: 0, data: [] },
-    true,
-    true
+    DEFAULT_CONVERSATIONS, // Alerts settings do not require conversations
+    DEFAULT_PROMPTS, // Alerts settings do not require prompts
+    false, // Alerts settings do not require conversations
+    false // Alerts settings do not require prompts
   );
+
+  const handleSave = useCallback(() => {
+    saveSettings();
+    onClose();
+}, [])
 
   return (
     <EuiModal onClose={onClose}>
@@ -44,13 +51,10 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>{CANCEL}</EuiButtonEmpty>
         <EuiButton
           type="submit"
-          onClick={() => {
-            saveSettings();
-            onClose();
-          }}
+          onClick={handleSave}
           fill
         >
           {SAVE}

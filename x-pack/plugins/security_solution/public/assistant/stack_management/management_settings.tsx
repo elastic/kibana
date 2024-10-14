@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
 import type { Conversation } from '@kbn/elastic-assistant';
+import { useSearchParams} from 'react-router-dom-v5-compat'
+import { i18n } from '@kbn/i18n';
 import {
   mergeBaseWithPersistedConversations,
   useAssistantContext,
@@ -20,6 +22,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { useKibana } from '../../common/lib/kibana';
+import { CONNECTORS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
+import { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -80,6 +84,65 @@ export const ManagementSettings = React.memo(() => {
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
+  const [searchParams] = useSearchParams();
+  const defaultTab = useMemo(() => searchParams.get('tab') as SettingsTabs ?? CONNECTORS_TAB, [searchParams]);
+
+  const handleTabChange = useCallback((tab: string) => {
+    navigateToApp('management', {
+      path: `kibana/securityAiAssistantManagement?tab=${tab}`,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (serverless) {
+      serverless.setBreadcrumbs([
+        {
+          text: i18n.translate(
+            'xpack.elasticAssistant.assistant.settings.breadcrumb.serverless.security',
+            {
+              defaultMessage: 'AI Assistant for Security Settings',
+            }
+          )
+        },
+      ]);
+    } else {
+      setBreadcrumbs([
+        {
+          text:  i18n.translate(
+            'xpack.elasticAssistant.assistant.settings.breadcrumb.stackManagement',
+            {
+              defaultMessage: 'Stack Management'
+            }
+          ),
+          onClick: (e) => {
+            e.preventDefault();
+            navigateToApp('management');
+          },
+        },
+        {
+          text: i18n.translate(
+            'xpack.elasticAssistant.assistant.settings.breadcrumb.index',
+            {
+              defaultMessage: 'AI Assistants',
+            }
+          ),
+          onClick: (e) => {
+            e.preventDefault();
+            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+          },
+        },
+        {
+          text: i18n.translate(
+            'xpack.elasticAssistant.assistant.settings.breadcrumb.security',
+            {
+              defaultMessage: 'Security',
+            }
+          )
+        },
+      ]);
+    }
+  }, [navigateToApp, serverless, setBreadcrumbs]);
+
   if (!securityAIAssistantEnabled) {
     navigateToApp('home');
   }
@@ -89,9 +152,8 @@ export const ManagementSettings = React.memo(() => {
       <AssistantSettingsManagement
         selectedConversation={currentConversation}
         dataViews={dataViews}
-        navigateToApp={navigateToApp}
-        setBreadcrumbs={setBreadcrumbs}
-        serverless={serverless}
+        onTabChange={handleTabChange}
+        defaultTab={defaultTab}
       />
     );
   }
@@ -100,3 +162,4 @@ export const ManagementSettings = React.memo(() => {
 });
 
 ManagementSettings.displayName = 'ManagementSettings';
+

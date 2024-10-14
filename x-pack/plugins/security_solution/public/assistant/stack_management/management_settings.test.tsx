@@ -77,6 +77,11 @@ describe('ManagementSettings', () => {
             securitySolutionAssistant: { 'ai-assistant': false },
           },
         },
+        chrome: {
+          docTitle: {
+            change:jest.fn()
+          },
+        },
         data: {
           dataViews: {
             getIndices: jest.fn(),

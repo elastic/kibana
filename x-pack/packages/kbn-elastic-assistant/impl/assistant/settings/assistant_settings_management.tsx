@@ -9,8 +9,6 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -38,9 +36,8 @@ import { SettingsTabs } from './types';
 interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
-  navigateToApp: NonNullable<KibanaServices['application']>['navigateToApp'];
-  setBreadcrumbs: NonNullable<KibanaServices['chrome']>['setBreadcrumbs'];
-  serverless?: ServerlessPluginStart;
+  onTabChange?: (tabId: string) => void;
+  defaultTab?: SettingsTabs;
 }
 
 /**
@@ -51,9 +48,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
   ({
     dataViews,
     selectedConversation: defaultSelectedConversation,
-    navigateToApp,
-    setBreadcrumbs,
-    serverless,
+    onTabChange,
+    defaultTab
   }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
@@ -68,38 +64,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
-
-    useEffect(() => {
-      if (serverless) {
-        serverless.setBreadcrumbs([
-          {
-            text: i18n.SECURITY_AI_ASSISTANT_BREADCRUMB,
-          },
-        ]);
-      } else {
-        setBreadcrumbs([
-          {
-            text: i18n.ROOT_ASSISTANTS_MANAGEMENT_BREADCRUMB,
-            onClick: (e) => {
-              e.preventDefault();
-              navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
-            },
-          },
-          {
-            text: i18n.SECURITY,
-          },
-        ]);
-      }
-    }, [navigateToApp, serverless, setBreadcrumbs]);
-
-    useEffect(() => {
-      if (searchParams.get('tab')) {
-        setSelectedSettingsTab((searchParams.get('tab') as SettingsTabs) ?? CONNECTORS_TAB);
-      } else {
-        // setSearchParams({ tab: CONNECTORS_TAB });
-        setSelectedSettingsTab(CONNECTORS_TAB);
-      }
-    }, [searchParams]);
 
     const tabsConfig = useMemo(
       () => [
@@ -144,12 +108,19 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         ...t,
         'data-test-subj': `settingsPageTab-${t.id}`,
         onClick: () => {
-          // setSearchParams({ tab: t.id });
+          onTabChange?.(t.id);
           setSelectedSettingsTab(t.id);
         },
         isSelected: t.id === selectedSettingsTab,
       }));
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
+
+
+    useEffect(() => {
+      if (defaultTab) {
+        setSelectedSettingsTab(defaultTab);
+      }
+    }, [defaultTab]);
 
     return (
       <>
