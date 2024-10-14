@@ -72,13 +72,9 @@ export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: 
   const { onOpenTimeline } = useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const isSavedQueryRule = finalDiffableRule.type === 'saved_query';
-  const savedQueryId =
-    isSavedQueryRule && 'saved_query_id' in finalDiffableRule.kql_query
-      ? finalDiffableRule.kql_query.saved_query_id
-      : undefined;
 
   const { savedQuery } = useGetSavedQuery({
-    savedQueryId,
+    savedQueryId: getSavedQueryId(finalDiffableRule),
     ruleType: finalDiffableRule.type,
   });
 
@@ -232,4 +228,12 @@ function getUseRuleIndexPatternParameters(
   }
 
   return indexPatternParams;
+}
+
+function getSavedQueryId(diffableRule: DiffableRule): string | undefined {
+  if (diffableRule.type === 'saved_query' && 'saved_query_id' in diffableRule.kql_query) {
+    return diffableRule.kql_query.saved_query_id;
+  }
+
+  return undefined;
 }
