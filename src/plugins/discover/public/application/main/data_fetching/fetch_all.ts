@@ -92,15 +92,7 @@ export function fetchAll(
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, { query });
-
-    // histogram for data view mode will send `loading` for totalHits$
-    if (isEsqlQuery) {
-      sendLoadingMsg(dataSubjects.totalHits$, {
-        result: dataSubjects.totalHits$.getValue().result,
-      });
-    } else {
-      sendLoadingMsg(dataSubjects.totalHits$);
-    }
+    sendLoadingMsg(dataSubjects.totalHits$);
 
     // Start fetching all required requests
     const response = isEsqlQuery
@@ -129,22 +121,15 @@ export function fetchAll(
           });
         }
 
-        if (isEsqlQuery) {
+        const currentTotalHits = dataSubjects.totalHits$.getValue();
+        // If the total hits (or chart) query is still loading, emit a partial
+        // hit count that's at least our retrieved document count
+        if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+          // trigger `partial` only for the first request (if no total hits value yet)
           dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.COMPLETE,
+            fetchStatus: FetchStatus.PARTIAL,
             result: records.length,
           });
-        } else {
-          const currentTotalHits = dataSubjects.totalHits$.getValue();
-          // If the total hits (or chart) query is still loading, emit a partial
-          // hit count that's at least our retrieved document count
-          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-            // trigger `partial` only for the first request (if no total hits value yet)
-            dataSubjects.totalHits$.next({
-              fetchStatus: FetchStatus.PARTIAL,
-              result: records.length,
-            });
-          }
         }
 
         /**

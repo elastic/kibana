@@ -159,10 +159,6 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
-        if (isEsqlMode) {
-          // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
-          return;
-        }
 
         if (result instanceof Error) {
           // Set totalHits$ to an error state
