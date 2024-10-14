@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginSetupContract as AlertingPluginsSetup } from '@kbn/alerting-plugin/server/plugin';
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin, PluginInitializer } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
+  alerting: AlertingPluginsSetup;
 }
 
 export interface PluginStartDependencies {
@@ -99,17 +102,8 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_2_feature_a',
     name: 'Case #2 feature A (DEPRECATED)',
-    alerting: [
-      'alerting_rule_all_one',
-      'alerting_rule_all_two',
-      'alerting_rule_read_one',
-      'alerting_rule_read_two',
-      'alerting_alert_all_one',
-      'alerting_alert_all_two',
-      'alerting_alert_read_one',
-      'alerting_alert_read_two',
-    ],
-    cases: ['cases_all_one', 'cases_read_one', 'cases_all_two', 'cases_read_two'],
+    alerting: ['alerting_rule_type_one', 'alerting_rule_type_two'],
+    cases: ['cases_owner_one', 'cases_owner_two'],
     privileges: {
       all: {
         savedObject: { all: ['one', 'two'], read: [] },
@@ -120,22 +114,22 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
         management: { kibana: ['management_one', 'management_two'] },
         alerting: {
           rule: {
-            all: ['alerting_rule_all_one', 'alerting_rule_all_two'],
-            read: ['alerting_rule_read_one', 'alerting_rule_read_two'],
+            all: ['alerting_rule_type_one', 'alerting_rule_type_two'],
+            read: ['alerting_rule_type_one', 'alerting_rule_type_two'],
           },
           alert: {
-            all: ['alerting_alert_all_one', 'alerting_alert_all_two'],
-            read: ['alerting_alert_read_one', 'alerting_alert_read_two'],
+            all: ['alerting_rule_type_one', 'alerting_rule_type_two'],
+            read: ['alerting_rule_type_one', 'alerting_rule_type_two'],
           },
         },
         cases: {
-          all: ['cases_all_one', 'cases_all_two'],
-          push: ['cases_push_one', 'cases_push_two'],
-          create: ['cases_create_one', 'cases_create_two'],
-          read: ['cases_read_one', 'cases_read_two'],
-          update: ['cases_update_one', 'cases_update_two'],
-          delete: ['cases_delete_one', 'cases_delete_two'],
-          settings: ['cases_settings_one', 'cases_settings_two'],
+          all: ['cases_owner_one', 'cases_owner_two'],
+          push: ['cases_owner_one', 'cases_owner_two'],
+          create: ['cases_owner_one', 'cases_owner_two'],
+          read: ['cases_owner_one', 'cases_owner_two'],
+          update: ['cases_owner_one', 'cases_owner_two'],
+          delete: ['cases_owner_one', 'cases_owner_two'],
+          settings: ['cases_owner_one', 'cases_owner_two'],
         },
         replacedBy: [
           { feature: 'case_2_feature_b', privileges: ['all'] },
@@ -161,13 +155,8 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     app: ['app_one'],
     catalogue: ['cat_one'],
     management: { kibana: ['management_one'] },
-    alerting: [
-      'alerting_rule_all_one',
-      'alerting_rule_read_one',
-      'alerting_alert_all_one',
-      'alerting_alert_read_one',
-    ],
-    cases: ['cases_all_one', 'cases_read_one'],
+    alerting: ['alerting_rule_type_one'],
+    cases: ['cases_owner_one'],
     privileges: {
       all: {
         savedObject: { all: ['one'], read: [] },
@@ -177,23 +166,17 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
         catalogue: ['cat_one'],
         management: { kibana: ['management_one'] },
         alerting: {
-          rule: {
-            all: ['alerting_rule_all_one'],
-            read: ['alerting_rule_read_one'],
-          },
-          alert: {
-            all: ['alerting_alert_all_one'],
-            read: ['alerting_alert_read_one'],
-          },
+          rule: { all: ['alerting_rule_type_one'], read: ['alerting_rule_type_one'] },
+          alert: { all: ['alerting_rule_type_one'], read: ['alerting_rule_type_one'] },
         },
         cases: {
-          all: ['cases_all_one'],
-          push: ['cases_push_one'],
-          create: ['cases_create_one'],
-          read: ['cases_read_one'],
-          update: ['cases_update_one'],
-          delete: ['cases_delete_one'],
-          settings: ['cases_settings_one'],
+          all: ['cases_owner_one'],
+          push: ['cases_owner_one'],
+          create: ['cases_owner_one'],
+          read: ['cases_owner_one'],
+          update: ['cases_owner_one'],
+          delete: ['cases_owner_one'],
+          settings: ['cases_owner_one'],
         },
       },
       read: {
@@ -209,13 +192,8 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     app: ['app_two'],
     catalogue: ['cat_two'],
     management: { kibana: ['management_two'] },
-    alerting: [
-      'alerting_rule_all_two',
-      'alerting_rule_read_two',
-      'alerting_alert_all_two',
-      'alerting_alert_read_two',
-    ],
-    cases: ['cases_all_two', 'cases_read_two'],
+    alerting: ['alerting_rule_type_two'],
+    cases: ['cases_owner_two'],
     privileges: {
       all: {
         savedObject: { all: ['two'], read: [] },
@@ -225,23 +203,17 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
         catalogue: ['cat_two'],
         management: { kibana: ['management_two'] },
         alerting: {
-          rule: {
-            all: ['alerting_rule_all_two'],
-            read: ['alerting_rule_read_two'],
-          },
-          alert: {
-            all: ['alerting_alert_all_two'],
-            read: ['alerting_alert_read_two'],
-          },
+          rule: { all: ['alerting_rule_type_two'], read: ['alerting_rule_type_two'] },
+          alert: { all: ['alerting_rule_type_two'], read: ['alerting_rule_type_two'] },
         },
         cases: {
-          all: ['cases_all_two'],
-          push: ['cases_push_two'],
-          create: ['cases_create_two'],
-          read: ['cases_read_two'],
-          update: ['cases_update_two'],
-          delete: ['cases_delete_two'],
-          settings: ['cases_settings_two'],
+          all: ['cases_owner_two'],
+          push: ['cases_owner_two'],
+          create: ['cases_owner_two'],
+          read: ['cases_owner_two'],
+          update: ['cases_owner_two'],
+          delete: ['cases_owner_two'],
+          settings: ['cases_owner_two'],
         },
       },
       read: {
@@ -250,6 +222,24 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
       },
     },
   });
+
+  for (const [id, producer] of [
+    ['alerting_rule_type_one', 'case_2_feature_a'],
+    ['alerting_rule_type_two', 'case_2_feature_a'],
+  ]) {
+    deps.alerting.registerType({
+      id,
+      name: `${id}-${producer} name`,
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'kibana',
+      producer,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: () => ({ status: 'ok', actionId: '' }),
+      validate: { params: schema.any() },
+    });
+  }
 }
 
 function case3FeatureSplitSubFeature(deps: PluginSetupDependencies) {
