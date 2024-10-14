@@ -58,7 +58,7 @@ export function GroupSelector({ groupSelected = 'none', onGroupChange }: Grouped
       })}
       size="s"
     >
-      {'Group entities by: none'}
+      {`Group entities by: ${groupSelected}`}
     </StyledEuiButtonEmpty>
   );
 
