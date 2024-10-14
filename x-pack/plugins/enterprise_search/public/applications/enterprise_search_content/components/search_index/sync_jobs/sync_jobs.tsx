@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { Connector, SyncJobsTable } from '@kbn/search-connectors';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { hasDocumentLevelSecurityFeature } from '../../../utils/connector_helpers';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from '../components/access_control_index_selector/access_control_index_selector';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
@@ -31,6 +36,8 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
     productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature(connector);
   const errorOnAccessSync = Boolean(connector.last_access_control_sync_error);
   const errorOnContentSync = Boolean(connector.last_sync_error);
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
   const {
     connectorId,
     syncJobsPagination: pagination,
@@ -63,44 +70,84 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
     }
   }, [connectorId, selectedSyncJobCategory]);
 
+  useEffect(() => {
+    if (selectedIndexType === 'content-index') {
+      setSelectedSyncJobCategory('content');
+    } else {
+      setSelectedSyncJobCategory('access_control');
+    }
+  }, [selectedIndexType]);
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {shouldShowAccessSyncs && (
-        <EuiButtonGroup
-          legend={i18n.translate(
-            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.legend',
-            { defaultMessage: 'Select sync job type to display.' }
-          )}
-          name={i18n.translate(
-            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.name',
-            { defaultMessage: 'Sync job type' }
-          )}
-          idSelected={selectedSyncJobCategory}
-          onChange={(optionId) => {
-            if (optionId === 'content' || optionId === 'access_control') {
-              setSelectedSyncJobCategory(optionId);
-            }
-          }}
-          options={[
-            {
-              id: 'content',
-              label: i18n.translate(
-                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
-                { defaultMessage: 'Content syncs' }
-              ),
-              ...(errorOnContentSync ? { iconSide: 'right', iconType: 'warning' } : {}),
-            },
-
-            {
-              id: 'access_control',
-              label: i18n.translate(
-                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
-                { defaultMessage: 'Access control syncs' }
-              ),
-              ...(errorOnAccessSync ? { iconSide: 'right', iconType: 'warning' } : {}),
-            },
-          ]}
-        />
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: ${euiTheme.base * 18}px;
+              `}
+            >
+              <AccessControlIndexSelector
+                fullWidth
+                onChange={setSelectedIndexType}
+                valueOfSelected={selectedIndexType}
+                indexSelectorOptions={[
+                  {
+                    description: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.description',
+                      {
+                        defaultMessage: 'Browse content sync history',
+                      }
+                    ),
+                    error: errorOnContentSync,
+                    title: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.title',
+                      {
+                        defaultMessage: 'Content syncs',
+                      }
+                    ),
+                    value: 'content-index',
+                  },
+                  {
+                    description: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControlSync.description',
+                      {
+                        defaultMessage: 'Browse access control sync history',
+                      }
+                    ),
+                    error: errorOnAccessSync,
+                    title: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selectorSync.accessControl.title',
+                      {
+                        defaultMessage: 'Access control syncs',
+                      }
+                    ),
+                    value: 'access-control-index',
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel',
+                      {
+                        defaultMessage:
+                          'Access control syncs keep permissions information up to date for document level security (DLS)',
+                      }
+                    )}
+                  </p>
+                }
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
       )}
       {selectedSyncJobCategory === 'content' ? (
         <SyncJobsTable

@@ -539,13 +539,13 @@ describe('restrictInternalApis', () => {
       restrictInternalApis: true,
     });
   });
-  it('defaults to false', () => {
+  it('defaults to true', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
-    ).toMatchObject({ restrictInternalApis: false });
+    ).toMatchObject({ restrictInternalApis: true });
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
-    ).toMatchObject({ restrictInternalApis: false });
+    ).toMatchObject({ restrictInternalApis: true });
   });
 });
 
@@ -677,7 +677,7 @@ describe('HttpConfig', () => {
     });
   });
 
-  it('defaults restrictInternalApis to false', () => {
+  it('defaults restrictInternalApis to true', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
     const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
@@ -687,6 +687,6 @@ describe('HttpConfig', () => {
       ExternalUrlConfig.DEFAULT,
       rawPermissionsPolicyConfig
     );
-    expect(httpConfig.restrictInternalApis).toBe(false);
+    expect(httpConfig.restrictInternalApis).toBe(true);
   });
 });

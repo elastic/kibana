@@ -32,6 +32,7 @@ describe('request logging', () => {
         const root = createRoot({
           plugins: { initialize: false },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -74,6 +75,7 @@ describe('request logging', () => {
             initialize: false,
           },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -121,6 +123,7 @@ describe('request logging', () => {
           initialize: false,
         },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       };
 
       beforeEach(() => {
@@ -332,6 +335,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -431,6 +435,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();

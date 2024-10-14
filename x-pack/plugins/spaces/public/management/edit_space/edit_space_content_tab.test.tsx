@@ -39,7 +39,7 @@ const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
-const TestComponent: React.FC = ({ children }) => {
+const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <IntlProvider locale="en">
       <EditSpaceProvider

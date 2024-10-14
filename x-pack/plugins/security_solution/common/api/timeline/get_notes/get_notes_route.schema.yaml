@@ -2,13 +2,6 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Notes API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/note:
     get:
@@ -24,6 +17,10 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/DocumentIds'
+        - name: savedObjectIds
+          in: query
+          schema:
+            $ref: '#/components/schemas/SavedObjectIds'
         - name: page
           in: query
           schema:
@@ -67,6 +64,12 @@ paths:
 components:
   schemas:
     DocumentIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+        - type: string
+    SavedObjectIds:
       oneOf:
         - type: array
           items:

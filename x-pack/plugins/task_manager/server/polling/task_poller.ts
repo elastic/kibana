@@ -61,22 +61,30 @@ export function createTaskPoller<T, H>({
   async function runCycle() {
     timeoutId = null;
     const start = Date.now();
-    if (hasCapacity()) {
-      try {
+    try {
+      if (hasCapacity()) {
         const result = await work();
         subject.next(asOk(result));
-      } catch (e) {
-        subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+      } else {
+        logger.debug('Skipping polling cycle because there is no capacity available');
       }
+    } catch (e) {
+      subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
     }
+
     if (running) {
       // Set the next runCycle call
       timeoutId = setTimeout(
-        () => runCycle().catch(() => {}),
+        () =>
+          runCycle().catch((e) => {
+            subject.next(asPollingError(e, PollingErrorType.PollerError));
+          }),
         Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
       );
       // Reset delay, it's designed to shuffle only once
       pollIntervalDelay = 0;
+    } else {
+      logger.info('Task poller finished running its last cycle');
     }
   }
 
@@ -112,14 +120,18 @@ export function createTaskPoller<T, H>({
     events$: subject,
     start: () => {
       if (!running) {
+        logger.info('Starting the task poller');
         running = true;
-        runCycle().catch(() => {});
+        runCycle().catch((e) => {
+          subject.next(asPollingError(e, PollingErrorType.PollerError));
+        });
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
         setTimeout(() => subscribe(), 0);
       }
     },
     stop: () => {
+      logger.info('Stopping the task poller');
       if (timeoutId) {
         clearTimeout(timeoutId);
         timeoutId = null;
@@ -133,21 +145,25 @@ export enum PollingErrorType {
   WorkError,
   WorkTimeout,
   RequestCapacityReached,
+  PollerError,
 }
 
-function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Option<T> = none) {
-  return asErr(new PollingError<T>(`Failed to poll for work: ${err}`, type, data));
+function asPollingError<T>(err: Error, type: PollingErrorType, data: Option<T> = none) {
+  return asErr(new PollingError<T>(`Failed to poll for work: ${err.message}`, type, data, err));
 }
 
 export class PollingError<T> extends Error {
   public readonly type: PollingErrorType;
   public readonly data: Option<T>;
   public readonly source: TaskErrorSource;
-  constructor(message: string, type: PollingErrorType, data: Option<T>) {
-    super(message);
+  constructor(message: string, type: PollingErrorType, data: Option<T>, cause?: Error) {
+    super(message, { cause });
     Object.setPrototypeOf(this, new.target.prototype);
     this.type = type;
     this.data = data;
     this.source = TaskErrorSource.FRAMEWORK;
+    if (cause) {
+      this.stack = `${this.stack}\nCaused by:\n${cause.stack}`;
+    }
   }
 }

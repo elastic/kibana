@@ -354,7 +354,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
-                { defaultMessage: 'Select roles(s)' }
+                { defaultMessage: 'Select roles' }
               )}
               labelAppend={
                 <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
@@ -367,7 +367,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               helpText={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesHelp',
                 {
-                  defaultMessage: 'Select Kibana spaces to which you wish to assign privileges.',
+                  defaultMessage:
+                    'Users assigned to selected roles will gain access to this space.',
                 }
               )}
             >
@@ -379,6 +380,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     defaultMessage: 'Select role to assign to the "{spaceName}" space',
                     values: { spaceName: space.name },
                   }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
+                  { defaultMessage: 'Add a role...' }
                 )}
                 isLoading={fetchingDataDeps}
                 options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
@@ -538,11 +543,32 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     );
   };
 
+  const canSave = useCallback(() => {
+    if (selectedRoles.length === 0) {
+      return false;
+    }
+
+    const form = roleCustomizationAnchor.value.kibana[roleCustomizationAnchor.privilegeIndex] ?? {};
+    const formBase = form.base ?? [];
+    const formFeature = form.feature ?? {};
+
+    // ensure that the form has base privileges or has selected features that are valid
+    if (
+      formBase.length === 0 &&
+      (Object.keys(formFeature).length === 0 ||
+        Object.values(formFeature).every((privileges) => privileges.length === 0))
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [selectedRoles, roleCustomizationAnchor]);
+
   const getSaveButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        disabled={!selectedRoles.length}
+        disabled={!canSave()}
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
         data-test-subj={`space-${
@@ -558,7 +584,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             })}
       </EuiButton>
     );
-  }, [assignRolesToSpace, assigningToRole, selectedRoles.length]);
+  }, [assignRolesToSpace, assigningToRole, canSave]);
 
   return (
     <React.Fragment>

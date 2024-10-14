@@ -114,4 +114,5 @@ const mockRule: Rule = {
   related_integrations: [],
   required_fields: [],
   setup: '',
+  rule_source: { type: 'internal' },
 };

@@ -1434,7 +1434,7 @@ const topDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'keyword',
           optional: false,
         },
         {
@@ -1451,7 +1451,47 @@ const topDefinition: FunctionDefinition = {
           acceptedValues: ['asc', 'desc'],
         },
       ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'text',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics'],

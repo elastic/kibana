@@ -13,8 +13,10 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
+  EuiLoadingSpinner,
   EuiTabbedContentTab,
   useEuiTheme,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -30,15 +32,16 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { AlertDetailsSource } from './types';
+import { SourceBar } from './components';
+import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { RelatedAlerts } from './components/related_alerts';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
-import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
@@ -68,6 +71,16 @@ const RELATED_ALERTS_TAB_ID = 'related_alerts';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
+export const getPageTitle = (ruleCategory: string) => {
+  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
+    defaultMessage:
+      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
+    values: {
+      ruleCategory,
+    },
+  });
+};
+
 export function AlertDetails() {
   const {
     cases: {
@@ -92,10 +105,10 @@ export function AlertDetails() {
   const { rule } = useFetchRule({
     ruleId,
   });
-  const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
 
+  const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -154,7 +167,7 @@ export function AlertDetails() {
     },
     {
       text: alertDetail
-        ? pageTitleContent(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        ? getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
         : defaultBreadcrumb,
     },
   ]);
@@ -201,26 +214,26 @@ export function AlertDetails() {
     */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
-        <EuiSpacer size="l" />
-        <AlertSummary alert={alertDetail.formatted} alertSummaryFields={summaryFields} />
-        <AlertDetailContextualInsights alert={alertDetail} />
-        <EuiSpacer size="l" />
-        {rule && alertDetail.formatted && (
-          <>
-            <AlertDetailsAppSection
-              alert={alertDetail.formatted}
-              rule={rule}
-              timeZone={timeZone}
-              setAlertSummaryFields={setSummaryFields}
-              setRelatedAlertsKuery={setRelatedAlertsKuery}
-            />
-            <EuiSpacer size="l" />
-            <AlertHistoryChart
-              alert={alertDetail.formatted}
-              rule={rule as unknown as CustomThresholdRule}
-            />
-          </>
-        )}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <AlertDetailContextualInsights alert={alertDetail} />
+          {rule && alertDetail.formatted && (
+            <>
+              <AlertDetailsAppSection
+                alert={alertDetail.formatted}
+                rule={rule}
+                timeZone={timeZone}
+                setSources={setSources}
+                setRelatedAlertsKuery={setRelatedAlertsKuery}
+              />
+              <AlertHistoryChart
+                alert={alertDetail.formatted}
+                rule={rule as unknown as CustomThresholdRule}
+              />
+            </>
+          )}
+        </EuiFlexGroup>
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
@@ -274,12 +287,10 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <PageTitle
-            alert={alertDetail?.formatted ?? null}
-            alertStatus={alertStatus}
-            dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
-          />
+        pageTitle: alertDetail?.formatted ? (
+          getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        ) : (
+          <EuiLoadingSpinner />
         ),
         rightSideItems: [
           <CasesContext
@@ -296,6 +307,7 @@ export function AlertDetails() {
           </CasesContext>,
         ],
         bottomBorder: false,
+        'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
       pageSectionProps={{
         paddingSize: 'none',
@@ -305,6 +317,8 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
+      <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
+      <EuiSpacer size="l" />
       <HeaderMenu />
       <EuiTabbedContent
         data-test-subj="alertDetailsTabbedContent"

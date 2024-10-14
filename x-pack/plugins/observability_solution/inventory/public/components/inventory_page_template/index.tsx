@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import {
+  FeatureFeedbackButton,
+  TechnicalPreviewBadge,
+} from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchBar } from '../search_bar';
 import { getEntityManagerEnablement } from './no_data_config';
@@ -16,15 +19,24 @@ import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
 
-const pageTitle = {
-  pageTitle: i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
-    defaultMessage: 'Inventory',
-  }),
-};
+const pageTitle = (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFlexItem grow={false}>
+      {i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
+        defaultMessage: 'Inventory',
+      })}
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <TechnicalPreviewBadge />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/feedback-new-inventory';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: { observabilityShared, inventoryAPIClient },
+    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
@@ -52,7 +64,11 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
 
   if (isEnablementLoading || hasDataLoading) {
     return (
-      <ObservabilityPageTemplate pageHeader={pageTitle}>
+      <ObservabilityPageTemplate
+        pageHeader={{
+          pageTitle,
+        }}
+      >
         <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoObservability" size="xl" />} />
       </ObservabilityPageTemplate>
     );
@@ -60,12 +76,23 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
 
   return (
     <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle,
+        rightSideItems: [
+          <FeatureFeedbackButton
+            data-test-subj="inventoryFeedbackButton"
+            formUrl={INVENTORY_FEEDBACK_LINK}
+            kibanaVersion={kibanaEnvironment.kibanaVersion}
+            isCloudEnv={kibanaEnvironment.isCloudEnv}
+            isServerlessEnv={kibanaEnvironment.isServerlessEnv}
+          />,
+        ],
+      }}
       noDataConfig={getEntityManagerEnablement({
         enabled: isEntityManagerEnabled,
         loading: isEnablementLoading,
         onSuccess: handleSuccess,
       })}
-      pageHeader={pageTitle}
     >
       {value.hasData ? (
         <EuiFlexGroup direction="column">

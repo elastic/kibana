@@ -22,12 +22,16 @@ import {
   EuiLoadingSpinner,
   EuiLink,
   EuiSkeletonText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { ImmutableArray, PolicyData } from '../../../common/endpoint/types';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
-import { useKibana } from '../../common/lib/kibana';
+import { useAppUrl, useKibana } from '../../common/lib/kibana';
 
 const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
   textAlign: 'center',
@@ -103,12 +107,12 @@ const PolicyEmptyState = React.memo<{
               {policyEntryPoint ? (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
-                  defaultMessage="From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend."
+                  defaultMessage="From this page, you can view and manage the Elastic Defend integration policies in your environment running Elastic Defend."
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
-                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Defend."
+                  defaultMessage="From this page, you can view and manage the hosts in your environment running Elastic Defend."
                 />
               )}
             </EuiText>
@@ -170,107 +174,216 @@ const EndpointsEmptyState = React.memo<{
   actionDisabled: boolean;
   handleSelectableOnChange: (o: EuiSelectableProps['options']) => void;
   selectionOptions: EuiSelectableProps['options'];
-}>(({ loading, onActionClick, actionDisabled, handleSelectableOnChange, selectionOptions }) => {
-  const policySteps = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.list.stepOneTitle', {
-          defaultMessage: 'Select the integration you want to use',
-        }),
-        children: (
+  policyItems: ImmutableArray<PolicyData>;
+}>(
+  ({
+    loading,
+    onActionClick,
+    actionDisabled,
+    handleSelectableOnChange,
+    selectionOptions,
+    policyItems,
+  }) => {
+    const { getAppUrl } = useAppUrl();
+    const policyItemsWithoutAgentPolicy = useMemo(
+      () => policyItems.filter((policy) => !policy.policy_ids.length),
+      [policyItems]
+    );
+
+    const policiesNotAddedToAgentPolicyCallout = useMemo(
+      () =>
+        !!policyItemsWithoutAgentPolicy.length && (
           <>
-            <EuiText color="subdued" size="m" grow={false}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.stepOne"
-                defaultMessage="Select from existing integrations. This can be changed later."
-              />
-            </EuiText>
-            <EuiSpacer size="xxl" />
-            <EuiSelectable
-              options={selectionOptions}
-              singleSelection="always"
-              isLoading={loading}
-              height={100}
-              listProps={{ bordered: true, singleSelection: true }}
-              onChange={handleSelectableOnChange}
-              data-test-subj="onboardingPolicySelect"
+            <EuiSpacer size="xl" />
+            <EuiCallOut
+              color="primary"
+              iconType="iInCircle"
+              title={i18n.translate(
+                'xpack.securitySolution.endpoint.list.notAddedIntegrations.title',
+                {
+                  defaultMessage: 'Integrations not added to an Agent policy',
+                }
+              )}
+              data-test-subj="integrationsNotAddedToAgentPolicyCallout"
             >
-              {(list) => {
-                return loading ? (
-                  <EuiSelectableMessage>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.list.loadingPolicies"
-                      defaultMessage="Loading integrations"
-                    />
-                  </EuiSelectableMessage>
-                ) : selectionOptions.length ? (
-                  list
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.list.noPolicies"
-                    defaultMessage="There are no integrations."
-                  />
-                );
-              }}
-            </EuiSelectable>
-          </>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
-          defaultMessage: 'Enroll your agents enabled with Elastic Defend through Fleet',
-        }),
-        status: actionDisabled ? 'disabled' : '',
-        children: (
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiText color="subdued" size="m" grow={false}>
+              <EuiSpacer size="s" />
+
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.stepTwo"
-                  defaultMessage="You’ll be provided with the necessary commands to get started."
+                  id="xpack.securitySolution.endpoint.list.notAddedIntegrations.description"
+                  defaultMessage="The following Elastic Defend integrations aren't added to an Agent policy, so they can't be deployed to an Agent. Click on an integration to edit it, and add it to an Agent policy:"
+                />
+
+                <EuiSpacer size="s" />
+
+                <ul>
+                  {policyItemsWithoutAgentPolicy.map((policyItem) => (
+                    <li key={policyItem.id}>
+                      <EuiLink
+                        target="_blank"
+                        href={getAppUrl({
+                          appId: INTEGRATIONS_PLUGIN_ID,
+                          path: pagePathGetters.integration_policy_edit({
+                            packagePolicyId: policyItem.id,
+                          })[1],
+                        })}
+                        data-test-subj="integrationWithoutAgentPolicyListItem"
+                      >
+                        {policyItem.name}
+                      </EuiLink>
+                    </li>
+                  ))}
+                </ul>
+
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.notAddedIntegrations.visitIntegrations"
+                  defaultMessage="You can also view a list of all {integrationPolicies}."
+                  values={{
+                    integrationPolicies: (
+                      <EuiLink
+                        target="_blank"
+                        href={getAppUrl({
+                          appId: INTEGRATIONS_PLUGIN_ID,
+                          path: pagePathGetters.integration_details_policies({
+                            pkgkey: 'endpoint',
+                          })[1],
+                        })}
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.list.notAddedIntegrations.integrationPolicies"
+                          defaultMessage="Elastic Defend integration policies"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onActionClick}
-                isDisabled={actionDisabled}
-                data-test-subj="onboardingStartButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
-                  defaultMessage="Enroll Agent"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </EuiCallOut>
+          </>
         ),
-      },
-    ],
-    [selectionOptions, handleSelectableOnChange, loading, actionDisabled, onActionClick]
-  );
+      [getAppUrl, policyItemsWithoutAgentPolicy]
+    );
 
-  return (
-    <ManagementEmptyState
-      loading={loading}
-      dataTestSubj="emptyHostsTable"
-      steps={policySteps}
-      headerComponent={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.list.noEndpointsPrompt"
-          defaultMessage="Next step: Enroll an Agent with Elastic Defend"
-        />
-      }
-      bodyComponent={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.list.noEndpointsInstructions"
-          defaultMessage="You’ve added the Elastic Defend integration. Now enroll your agents using the steps below."
-        />
-      }
-    />
-  );
-});
+    const policySteps = useMemo(
+      () => [
+        {
+          title: i18n.translate('xpack.securitySolution.endpoint.list.stepOneTitle', {
+            defaultMessage: 'Select the integration you want to use',
+          }),
+          children: (
+            <>
+              <EuiText color="subdued" size="m" grow={false}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.stepOne"
+                  defaultMessage="Select from existing integrations. This can be changed later."
+                />
+              </EuiText>
+              <EuiSpacer size="xxl" />
+              <EuiSelectable
+                options={selectionOptions}
+                singleSelection="always"
+                isLoading={loading}
+                listProps={{ bordered: true, singleSelection: true }}
+                onChange={handleSelectableOnChange}
+                data-test-subj="onboardingPolicySelect"
+              >
+                {(list) => {
+                  if (loading) {
+                    return (
+                      <EuiSelectableMessage>
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.list.loadingPolicies"
+                          defaultMessage="Loading integrations"
+                        />
+                      </EuiSelectableMessage>
+                    );
+                  }
+
+                  if (!selectionOptions.length) {
+                    return (
+                      <EuiCallOut
+                        color="warning"
+                        data-test-subj="noIntegrationsAddedToAgentPoliciesCallout"
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.list.noPoliciesAssignedToAgentPolicies"
+                          defaultMessage="There are no Elastic Defend integrations added to Agent policies. To deploy Elastic Defend, add it to an Agent policy."
+                        />
+                      </EuiCallOut>
+                    );
+                  }
+
+                  return list;
+                }}
+              </EuiSelectable>
+
+              {policiesNotAddedToAgentPolicyCallout}
+            </>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
+            defaultMessage: 'Enroll your agents enabled with Elastic Defend through Fleet',
+          }),
+          status: actionDisabled ? 'disabled' : '',
+          children: (
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <EuiText color="subdued" size="m" grow={false}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.list.stepTwo"
+                    defaultMessage="You'll be provided with the necessary commands to get started."
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={onActionClick}
+                  isDisabled={actionDisabled}
+                  data-test-subj="onboardingStartButton"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
+                    defaultMessage="Enroll Agent"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
+      ],
+      [
+        selectionOptions,
+        loading,
+        handleSelectableOnChange,
+        policiesNotAddedToAgentPolicyCallout,
+        actionDisabled,
+        onActionClick,
+      ]
+    );
+
+    return (
+      <ManagementEmptyState
+        loading={loading}
+        dataTestSubj="emptyHostsTable"
+        steps={policySteps}
+        headerComponent={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.list.noEndpointsPrompt"
+            defaultMessage="Next step: Enroll an Agent with Elastic Defend"
+          />
+        }
+        bodyComponent={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.list.noEndpointsInstructions"
+            defaultMessage="You've added the Elastic Defend integration. Now enroll your agents using the steps below."
+          />
+        }
+      />
+    );
+  }
+);
 
 const ManagementEmptyState = React.memo<{
   loading: boolean;
@@ -284,7 +397,11 @@ const ManagementEmptyState = React.memo<{
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+            <EuiLoadingSpinner
+              size="xl"
+              className="essentialAnimation"
+              data-test-subj="management-empty-state-loading-spinner"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (

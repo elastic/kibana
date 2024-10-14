@@ -35,7 +35,8 @@
       "usageCollection",
       "visTypeTimeseries",
       "apmDataAccess",
-      "logsDataAccess"
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "spaces",

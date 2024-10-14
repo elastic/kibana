@@ -24,6 +24,7 @@ import {
   getAggregateQueryMode,
   ExecutionContextSearch,
   getLanguageDisplayName,
+  isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -1406,7 +1407,13 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
-    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
+    // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
+    // otherwise use the query from the saved object
+    let esqlQuery: AggregateQuery | Query | undefined;
+    if (this.isTextBasedLanguage()) {
+      const query = this.deps.data.query.queryString.getQuery();
+      esqlQuery = isOfAggregateQueryType(query) ? query : this.savedVis?.state.query;
+    }
 
     eventHandler?.({
       ...event.data,

@@ -19,7 +19,7 @@
             "section": "def-public.ESQLEditorProps",
             "text": "ESQLEditorProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/esql/public/create_editor.tsx",
         "deprecated": false,

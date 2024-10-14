@@ -10,7 +10,6 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
-import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -201,11 +200,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           esClient,
           logger,
           soClient,
-          entityClient: new EntityClient({
-            esClient,
-            soClient,
-            logger,
-          }),
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
         });
       }),
     };

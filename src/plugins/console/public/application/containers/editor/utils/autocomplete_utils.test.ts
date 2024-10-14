@@ -160,6 +160,10 @@ describe('autocomplete_utils', () => {
           name: 'index2',
           meta: 'index',
         },
+        {
+          name: '.index',
+          meta: 'index',
+        },
       ] as AutoCompleteContext['autoCompleteSet'];
       // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
       mockPopulateContext.mockImplementation((...args) => {
@@ -189,7 +193,7 @@ describe('autocomplete_utils', () => {
       expect(items.every((item) => item.detail === 'index')).toBe(true);
     });
 
-    it('suggest endpoints and index names if no comma', () => {
+    it('suggest endpoints and index names, excluding dot-prefixed ones, if no comma and no dot', () => {
       const mockModel = {
         getValueInRange: () => 'GET _search',
         getWordUntilPosition: () => ({ startColumn: 12 }),
@@ -197,6 +201,19 @@ describe('autocomplete_utils', () => {
       const mockPosition = { lineNumber: 1, column: 12 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
       expect(items.length).toBe(4);
+      expect(
+        items.every((item) => typeof item.label === 'string' && item.label.startsWith('.'))
+      ).toBe(false);
+    });
+
+    it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET .',
+        getWordUntilPosition: () => ({ startColumn: 6 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      expect(items.length).toBe(5);
     });
   });
 });

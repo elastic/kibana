@@ -35,9 +35,9 @@ export const findingsTableFieldLabels: Record<string, string> = {
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
     { defaultMessage: 'Framework Section' }
   ),
-  'data_stream.dataset': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.sourceColumnLabel',
-    { defaultMessage: 'Source' }
+  'observer.vendor': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.vendorColumnLabel',
+    { defaultMessage: 'Vendor' }
   ),
   '@timestamp': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',

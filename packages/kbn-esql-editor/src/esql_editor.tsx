@@ -251,7 +251,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const onMouseDownResize = useCallback(
+  const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
     (
       mouseDownEvent,
       firstPanelHeight,
@@ -270,7 +270,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     []
   );
 
-  const onKeyDownResize = useCallback(
+  const onKeyDownResize = useCallback<typeof onKeyDownResizeHandler>(
     (
       keyDownEvent,
       firstPanelHeight,
