@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
-            securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
               'update_anonymization',
             ],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
-            securitySolutionCases: [
+            securitySolutionCasesV2: [
               'all',
               'read',
               'minimal_all',

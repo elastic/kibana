@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
             'slo',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
-            'securitySolutionCases',
+            'securitySolutionCasesV2',
             'fleet',
             'fleetv2',
           ].sort()
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
           'slo',
           'securitySolutionAssistant',
           'securitySolutionAttackDiscovery',
-          'securitySolutionCases',
+          'securitySolutionCasesV2',
           'fleet',
           'fleetv2',
         ];

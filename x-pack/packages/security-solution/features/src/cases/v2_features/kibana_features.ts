@@ -9,33 +9,38 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import type { BaseKibanaFeatureConfig } from '../types';
-import { APP_ID, CASES_FEATURE_ID } from '../constants';
-import type { CasesFeatureParams } from './types';
+import type { BaseKibanaFeatureConfig } from '../../types';
+import {
+  APP_ID,
+  CASES_FEATURE_ID,
+  CASES_FEATURE_ID_V2,
+  SECURITY_SOLUTION_CASES_APP_ID,
+} from '../../constants';
+import type { CasesFeatureParams } from '../types';
 
-export const getCasesBaseKibanaFeature = ({
+export const getCasesBaseKibanaFeatureV2 = ({
   uiCapabilities,
   apiTags,
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
-    id: CASES_FEATURE_ID,
+    id: CASES_FEATURE_ID_V2,
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle',
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleV2',
       {
-        defaultMessage: 'Cases',
+        defaultMessage: 'Cases V2',
       }
     ),
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-    app: [CASES_FEATURE_ID, 'kibana'],
+    app: [SECURITY_SOLUTION_CASES_APP_ID, 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],
     privileges: {
       all: {
         api: apiTags.all,
-        app: [CASES_FEATURE_ID, 'kibana'],
+        app: [SECURITY_SOLUTION_CASES_APP_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
           create: [APP_ID],

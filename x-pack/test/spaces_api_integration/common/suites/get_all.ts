@@ -83,7 +83,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       'observabilityCases',
       'securitySolutionAssistant',
       'securitySolutionAttackDiscovery',
-      'securitySolutionCases',
+      'securitySolutionCasesV2',
       'siem',
       'slo',
       'uptime',

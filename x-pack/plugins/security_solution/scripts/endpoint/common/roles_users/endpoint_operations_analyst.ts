@@ -55,7 +55,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           fleet: ['all'],
           fleetv2: ['all'],
           osquery: ['all'],
-          securitySolutionCases: ['all'],
+          securitySolutionCasesV2: ['all'],
           builtinAlerts: ['all'],
           siem: [
             'all',
