@@ -20,20 +20,10 @@ describe('EntityStoreDataClient', () => {
   const esClientMock = clusterClientMock.asInternalUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClient = new EntityStoreDataClient({
-    esClient: esClientMock,
+    clusterClient: clusterClientMock,
     logger: loggerMock,
     namespace: 'default',
     soClient: mockSavedObjectClient,
-    entityClient: new EntityClient({
-      clusterClient: clusterClientMock,
-      soClient: mockSavedObjectClient,
-      logger,
-    }),
-    assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
-      esClient: esClientMock,
-      logger: loggerMock,
-      auditLogger: undefined,
-    }),
     kibanaVersion: '9.0.0',
   });
 

@@ -193,24 +193,13 @@ export class RequestContextFactory implements IRequestContextFactory {
       ),
       getEntityStoreDataClient: memoize(() => {
         const clusterClient = coreContext.elasticsearch.client;
-        const esClient = clusterClient.asCurrentUser;
         const logger = options.logger;
         const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
-          esClient,
+          clusterClient,
           logger,
           soClient,
-          entityClient: new EntityClient({
-            clusterClient,
-            soClient,
-            logger,
-          }),
-          assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
-            logger,
-            auditLogger: getAuditLogger(),
-            esClient,
-          }),
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,

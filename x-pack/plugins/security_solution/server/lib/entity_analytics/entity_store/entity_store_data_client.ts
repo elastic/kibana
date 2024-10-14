@@ -10,6 +10,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   AuditLogger,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -47,7 +48,7 @@ import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 
 interface EntityStoreClientOpts {
   logger: Logger;
-  esClient: ElasticsearchClient;
+  clusterClient: IScopedClusterClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
   taskManager?: TaskManagerStartContract;
@@ -69,12 +70,14 @@ export class EntityStoreDataClient {
   private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
+  private esClient: ElasticsearchClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
-    const { esClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    const { clusterClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    this.esClient = clusterClient.asCurrentUser;
 
     this.entityClient = new EntityClient({
-      esClient,
+      clusterClient,
       soClient,
       logger,
     });
@@ -85,14 +88,14 @@ export class EntityStoreDataClient {
     });
 
     this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
-      esClient,
+      esClient: this.esClient,
       logger,
       auditLogger,
     });
 
     this.riskScoreDataClient = new RiskScoreDataClient({
       soClient,
-      esClient,
+      esClient: this.esClient,
       logger,
       namespace,
       kibanaVersion,
@@ -108,7 +111,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger, esClient, namespace, taskManager } = this.options;
+    const { logger, namespace, taskManager } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -157,12 +160,12 @@ export class EntityStoreDataClient {
     // this is because the enrich policy will fail if the index does not exist with the correct fields
     await createEntityIndexComponentTemplate({
       unitedDefinition,
-      esClient,
+      esClient: this.esClient,
     });
     debugLog(`Created entity index component template`);
     await createEntityIndex({
       entityType,
-      esClient,
+      esClient: this.esClient,
       namespace,
       logger,
     });
@@ -172,12 +175,12 @@ export class EntityStoreDataClient {
     // this is because the pipeline will fail if the enrich index does not exist
     await createFieldRetentionEnrichPolicy({
       unitedDefinition,
-      esClient,
+      esClient: this.esClient,
     });
     debugLog(`Created field retention enrich policy`);
     await executeFieldRetentionEnrichPolicy({
       unitedDefinition,
-      esClient,
+      esClient: this.esClient,
       logger,
     });
     debugLog(`Executed field retention enrich policy`);
@@ -185,7 +188,7 @@ export class EntityStoreDataClient {
       debugMode: pipelineDebugMode,
       unitedDefinition,
       logger,
-      esClient,
+      esClient: this.esClient,
     });
     debugLog(`Created @platform pipeline`);
 
@@ -273,7 +276,7 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     deleteData: boolean
   ) {
-    const { namespace, logger, esClient } = this.options;
+    const { namespace, logger } = this.options;
     const descriptor = await this.engineClient.maybeGet(entityType);
     const unitedDefinition = getUnitedEntityDefinition({
       entityType,
@@ -293,22 +296,22 @@ export class EntityStoreDataClient {
       }
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       await deletePlatformPipeline({
         unitedDefinition,
         logger,
-        esClient,
+        esClient: this.esClient,
       });
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
 
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
-          esClient,
+          esClient: this.esClient,
           namespace,
           logger,
         });
@@ -347,7 +350,7 @@ export class EntityStoreDataClient {
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
     const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
-    const response = await this.options.esClient.search<Entity>({
+    const response = await this.esClient.search<Entity>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
