@@ -78,7 +78,7 @@ async function buildPackage(packageRoot: string, log: ToolingLog, dist = false) 
 
   log.info(`building packages/${packageName}`);
 
-  return execa('webpack-cli', argsProcessed, {
+  return execa('node_modules/.bin/webpack-cli', argsProcessed, {
     stdio: 'inherit',
     env: { ...process.env, ...env },
     cwd: REPO_ROOT,
