@@ -62,6 +62,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
     {
+      'data-test-subj': 'searchSideNav-Home',
       id: 'home',
       name: (
         <EuiText size="s">
@@ -77,9 +78,11 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       }),
     },
     {
+      'data-test-subj': 'searchSideNav-Content',
       id: 'content',
       items: [
         {
+          'data-test-subj': 'searchSideNav-Indices',
           id: 'search_indices',
           name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle', {
             defaultMessage: 'Indices',
@@ -92,6 +95,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-Connectors',
           id: 'connectors',
           name: i18n.translate('xpack.enterpriseSearch.nav.connectorsTitle', {
             defaultMessage: 'Connectors',
@@ -103,6 +107,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-Crawlers',
           id: 'crawlers',
           name: i18n.translate('xpack.enterpriseSearch.nav.crawlersTitle', {
             defaultMessage: 'Web crawlers',
@@ -119,9 +124,11 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       }),
     },
     {
+      'data-test-subj': 'searchSideNav-Build',
       id: 'build',
       items: [
         {
+          'data-test-subj': 'searchSideNav-Playground',
           id: 'playground',
           name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
             defaultMessage: 'Playground',
@@ -133,6 +140,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-SearchApplications',
           id: 'searchApplications',
           name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
             defaultMessage: 'Search Applications',
@@ -143,6 +151,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-BehavioralAnalytics',
           id: 'analyticsCollections',
           name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
             defaultMessage: 'Behavioral Analytics',
@@ -160,9 +169,11 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
     ...(hasEnterpriseLicense
       ? [
           {
+            'data-test-subj': 'searchSideNav-Relevance',
             id: 'relevance',
             items: [
               {
+                'data-test-subj': 'searchSideNav-InferenceEndpoints',
                 id: 'inference_endpoints',
                 name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
                   defaultMessage: 'Inference Endpoints',
@@ -181,9 +192,11 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
         ]
       : []),
     {
+      'data-test-subj': 'searchSideNav-GettingStarted',
       id: 'es_getting_started',
       items: [
         {
+          'data-test-subj': 'searchSideNav-Elasticsearch',
           id: 'elasticsearch',
           name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
             defaultMessage: 'Elasticsearch',
@@ -194,6 +207,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-VectorSearch',
           id: 'vectorSearch',
           name: VECTOR_SEARCH_PLUGIN.NAME,
           ...generateNavLink({
@@ -202,6 +216,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-SemanticSearch',
           id: 'semanticSearch',
           name: SEMANTIC_SEARCH_PLUGIN.NAME,
           ...generateNavLink({
@@ -210,6 +225,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           }),
         },
         {
+          'data-test-subj': 'searchSideNav-AISearch',
           id: 'aiSearch',
           name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
             defaultMessage: 'AI Search',
@@ -227,11 +243,13 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [
           {
+            'data-test-subj': 'searchSideNav-EnterpriseSearch',
             id: 'enterpriseSearch',
             items: [
               ...(productAccess.hasAppSearchAccess
                 ? [
                     {
+                      'data-test-subj': 'searchSideNav-AppSearch',
                       id: 'app_search',
                       name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
                         defaultMessage: 'App Search',
@@ -246,6 +264,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
               ...(productAccess.hasWorkplaceSearchAccess
                 ? [
                     {
+                      'data-test-subj': 'searchSideNav-WorkplaceSearch',
                       id: 'workplace_search',
                       name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
                         defaultMessage: 'Workplace Search',
