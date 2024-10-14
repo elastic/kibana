@@ -281,7 +281,7 @@ export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
     defaultMessage:
-      'Describe what query should be constructed by the model to retrieve this custom knowledge Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
+      'Describe what query should be constructed by the model to retrieve this custom knowledge. Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
   }
 );
 
