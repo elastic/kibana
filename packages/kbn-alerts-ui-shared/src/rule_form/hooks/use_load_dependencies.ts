@@ -66,7 +66,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     data: fetchedFormData,
     isLoading: isLoadingRule,
     isInitialLoading: isInitialLoadingRule,
-  } = useResolveRule({ http, id });
+  } = useResolveRule({ http, id, cacheTime: 0 });
 
   const {
     ruleTypesState: {
@@ -97,6 +97,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     includeSystemActions: true,
     enabled: canReadConnectors,
+    cacheTime: 0,
   });
 
   const computedRuleTypeId = useMemo(() => {
@@ -122,6 +123,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
+    cacheTime: 0,
   });
 
   const ruleType = useMemo(() => {
