@@ -14,7 +14,7 @@ export const useIngestPipelines = () => {
   return useQuery({
     queryKey: ['fetchIngestPipelines'],
     queryFn: async () =>
-      http.fetch<Record<string, IngestGetPipelineResponse>>(
+      http.fetch<{ pipelines: IngestGetPipelineResponse; canGetPipelines: boolean }>(
         `/internal/serverless_search/ingest_pipelines`
       ),
   });

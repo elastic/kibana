@@ -16,11 +16,23 @@ export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependenci
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const privileges = await client.asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_pipeline'],
+      });
+
+      const canGetPipelines = privileges?.cluster.manage_pipeline;
+
+      if (!canGetPipelines) {
+        return response.ok({
+          body: { pipelines: {}, canGetPipelines: false },
+        });
+      }
       const pipelines = await client.asCurrentUser.ingest.getPipeline();
 
       return response.ok({
         body: {
           pipelines,
+          canGetPipelines,
         },
         headers: { 'content-type': 'application/json' },
       });
