@@ -95,12 +95,14 @@ export function useSetupTechnology({
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
-  const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({
+  const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(() => {
+    const agentless = generateNewAgentPolicyWithDefaults({
+      inactivity_timeout: 3600,
       supports_agentless: true,
       monitoring_enabled: ['logs', 'metrics'],
-    })
-  );
+    });
+    return agentless;
+  });
 
   useEffect(() => {
     if (isEditPage && agentPolicies && agentPolicies.some((policy) => policy.supports_agentless)) {
@@ -112,7 +114,7 @@ export function useSetupTechnology({
         ...newAgentlessPolicy,
         name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
       };
-      if (nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
+      if (!newAgentlessPolicy.name || nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
         setNewAgentlessPolicy(nextNewAgentlessPolicy);
         setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
