@@ -114,14 +114,7 @@ export function GroupedInventoryPage({
   }
 
   const onChange = (groupSelection: string) => {
-    let newSelectedGroup: string = '';
-    if (groupSelection === groupSelected) {
-      newSelectedGroup = 'none';
-    } else {
-      newSelectedGroup = groupSelection;
-    }
-
-    setGroupSelected(newSelectedGroup);
+    setGroupSelected(groupSelection === groupSelected ? 'none' : groupSelection);
   };
 
   return (
