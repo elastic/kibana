@@ -17,7 +17,7 @@ export const getSafePostureTypeRuntimeMapping = (): MappingRuntimeFields => ({
     script: {
       source: `
         def postureTypeAvailable = doc.containsKey("rule.benchmark.posture_type") && !doc["rule.benchmark.posture_type"].empty;
-        boolean isNativeCsp = doc.containsKey("data_stream.dataset") && doc["data_stream.dataset"].value == "cloud_security_posture.findings";
+        boolean isNativeCsp = doc.containsKey("data_stream.dataset") && !doc["data_stream.dataset"].empty && doc["data_stream.dataset"].value == "cloud_security_posture.findings";
 
         if (isNativeCsp) {
           if (!postureTypeAvailable) {
