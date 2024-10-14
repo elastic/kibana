@@ -52,7 +52,11 @@ interface KqlQueryEditProps {
   setFieldValue: (fieldName: string, fieldValue: unknown) => void;
 }
 
-export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: KqlQueryEditProps) {
+export function KqlQueryEdit({
+  finalDiffableRule,
+  setValidity,
+  setFieldValue,
+}: KqlQueryEditProps): JSX.Element {
   const defaultIndexPattern = useDefaultIndexPattern();
   const indexPatternParameters = getUseRuleIndexPatternParameters(
     finalDiffableRule,

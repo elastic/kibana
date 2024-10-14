@@ -13,7 +13,7 @@ import type { RuleName } from '../../../../../../../../common/api/detection_engi
 
 export const nameSchema = { name: schema.name } as FormSchema<{ name: RuleName }>;
 
-export function NameEdit() {
+export function NameEdit(): JSX.Element {
   return (
     <UseField
       path="name"
