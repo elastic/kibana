@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -35,6 +35,5 @@
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/rison",
-    "@kbn/storybook",
   ]
 }

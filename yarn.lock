@@ -3639,7 +3639,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture-common":
+"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
@@ -3651,7 +3651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture":
+"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 

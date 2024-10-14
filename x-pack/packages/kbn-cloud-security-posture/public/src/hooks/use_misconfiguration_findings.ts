@@ -15,7 +15,7 @@ import type {
   LatestFindingsRequest,
   LatestFindingsResponse,
   UseCspOptions,
-} from '../../type';
+} from '../types';
 
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 import {
