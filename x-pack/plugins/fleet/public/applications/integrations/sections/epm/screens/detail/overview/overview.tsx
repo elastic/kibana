@@ -24,8 +24,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
 
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -43,6 +41,8 @@ import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
+
+import { CloudPostureThirdPartySupportCallout } from '../components/cloud_posture_third_party_support_callout';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -111,31 +111,6 @@ const UnverifiedCallout: React.FC = () => {
         </p>
       </EuiCallOut>
       <EuiSpacer size="l" />
-    </>
-  );
-};
-
-const LS_CLOUD_POSTURE_3P_SUPPORT_WIZ_INTEGRATIONS_CALLOUT_KEY =
-  'fleet:cloudSecurityPosture:thirdPartySupport:wizIntegrationsCallout';
-
-const CloudPostureThirdPartySupportCallout = () => {
-  const [userHasDismissedWizCallout, setUserHasDismissedWizCallout] = useLocalStorage(
-    LS_CLOUD_POSTURE_3P_SUPPORT_WIZ_INTEGRATIONS_CALLOUT_KEY
-  );
-
-  if (userHasDismissedWizCallout) return null;
-
-  return (
-    <>
-      <EuiCallOut
-        onDismiss={() => setUserHasDismissedWizCallout(true)}
-        iconType="cheer"
-        title={i18n.translate('xpack.fleet.epm.wizIntegration.newFeaturesCallout', {
-          defaultMessage:
-            'New! Starting from version 1.9, ingest vulnerability and misconfiguration findings from Wiz into Elastic. Leverage out-of-the-box contextual investigation and threat-hunting workflows.',
-        })}
-      />
-      <EuiSpacer size="s" />
     </>
   );
 };
@@ -346,7 +321,7 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
-          {packageInfo.name === 'wiz' && <CloudPostureThirdPartySupportCallout />}
+          <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}
