@@ -6,19 +6,19 @@
  */
 
 import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
-import { getDataTestSubjectSelector } from '../../../../helpers/common';
+import { createRule } from '../../tasks/api_calls/rules';
+import { getNewRule } from '../../objects/rule';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
-import { rootRequest, deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { rootRequest, deleteAlertsAndRules } from '../../tasks/api_calls/common';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
-} from '../../../../tasks/asset_criticality/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import { visit } from '../../../../tasks/navigation';
+} from '../../tasks/asset_criticality/common';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { login } from '../../tasks/login';
+import { ALERTS_URL } from '../../urls/navigation';
+import { visit } from '../../tasks/navigation';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
