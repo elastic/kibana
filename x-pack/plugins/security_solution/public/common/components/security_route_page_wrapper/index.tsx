@@ -43,24 +43,31 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   redirectOnMissing,
 }) => {
   const link = useLinkInfo(pageName);
-  const UpsellPage = useUpsellingPage(pageName);
+  const UpsellingPage = useUpsellingPage(pageName);
+
+  // The upselling page is only returned when the license/product requirements are not met,
+  // When it is defined it must be rendered, no need to check anything else.
+  if (UpsellingPage) {
+    return (
+      <>
+        <SpyRoute pageName={pageName} />
+        <UpsellingPage />
+      </>
+    );
+  }
 
   const isAuthorized = link != null && !link.unauthorized;
   if (isAuthorized) {
-    return <TrackApplicationView viewId={pageName}>{children}</TrackApplicationView>;
+    return (
+      <TrackApplicationView viewId={pageName}>
+        {children}
+        <SpyRoute pageName={pageName} />
+      </TrackApplicationView>
+    );
   }
 
   if (redirectOnMissing && link == null) {
     return <Redirect to="" />; // redirects to the home page
-  }
-
-  if (UpsellPage) {
-    return (
-      <>
-        <SpyRoute pageName={pageName} />
-        <UpsellPage />
-      </>
-    );
   }
 
   return (
@@ -72,4 +79,21 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
       />
     </>
   );
+};
+
+/**
+ * HOC to wrap a component with the `SecurityRoutePageWrapper`.
+ */
+export const withSecurityRoutePageWrapper = <T extends {}>(
+  Component: React.ComponentType<T>,
+  pageName: SecurityPageName,
+  redirectOnMissing?: boolean
+) => {
+  return function WithSecurityRoutePageWrapper(props: T) {
+    return (
+      <SecurityRoutePageWrapper pageName={pageName} redirectOnMissing={redirectOnMissing}>
+        <Component {...props} />
+      </SecurityRoutePageWrapper>
+    );
+  };
 };
