@@ -23,6 +23,7 @@ import type { PostValidationMetadata } from '@kbn/core-http-server';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
+import type { RateLimiterConfig } from './rate_limiter';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -57,6 +58,7 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  rateLimiter: RateLimiterConfig;
   registerOnPostValidation(
     cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
   ): void;
