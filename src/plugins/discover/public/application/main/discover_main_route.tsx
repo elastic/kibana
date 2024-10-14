@@ -219,7 +219,6 @@ export function DiscoverMainRoute({
       }
     },
     [
-      checkData,
       skipNoDataPage,
       stateContainer,
       savedSearchId,
