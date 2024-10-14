@@ -208,6 +208,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
   return (
     <EuiBasicTable
       items={indices}
+      rowHeader="name"
       columns={columns}
       onChange={onChange}
       pagination={{
