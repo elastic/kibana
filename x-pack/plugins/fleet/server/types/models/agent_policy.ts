@@ -393,3 +393,23 @@ export const FullAgentPolicyResponseSchema = schema.object({
     })
   ),
 });
+const MinimalOutputSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+});
+
+const IntegrationsOutputSchema = schema.arrayOf(
+  schema.object({ pkgName: schema.string(), id: schema.string() })
+);
+
+export const GetAgentPolicyOutputsResponseSchema = schema.object({
+  item: schema.object({
+    monitoring: schema.object({
+      output: MinimalOutputSchema,
+    }),
+    data: schema.object({
+      output: MinimalOutputSchema,
+      integrations: schema.maybe(IntegrationsOutputSchema),
+    }),
+  }),
+});

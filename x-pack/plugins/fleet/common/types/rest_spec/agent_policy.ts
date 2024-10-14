@@ -92,3 +92,24 @@ export type FetchAllAgentPoliciesOptions = Pick<
 export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
   spaceId?: string;
 };
+
+export interface GetAgentPolicyOutputsResponse {
+  item: {
+    monitoring: {
+      output: MinimalOutput;
+    };
+    data: {
+      output: MinimalOutput;
+      integrations?: IntegrationsOutput[];
+    };
+  };
+}
+
+export interface MinimalOutput {
+  name?: string;
+  id?: string;
+}
+export interface IntegrationsOutput {
+  pkgName?: string;
+  id?: string | null;
+}

@@ -27,7 +27,7 @@ const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
 
 export const AgentPolicyOutputsSummary = memo<{
   outputs: Output[];
-  agentPolicy: AgentPolicy | undefined;
+  agentPolicy?: AgentPolicy;
   monitoring?: boolean;
 }>(({ outputs, agentPolicy, monitoring }) => {
   const { getHref } = useLink();

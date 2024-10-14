@@ -28,6 +28,8 @@ import {
   GetFullAgentPolicyResponseSchema,
   DownloadFullAgentPolicyResponseSchema,
   GetK8sManifestResponseScheme,
+  GetAgentPolicyOutputsRequestSchema,
+  GetAgentPolicyOutputsResponseSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
@@ -47,6 +49,7 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  GetAgentPolicyOutputsHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -389,5 +392,35 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       downloadK8sManifest
+    );
+
+  router.versioned
+    .get({
+      path: AGENT_POLICY_API_ROUTES.INFO_OUTPUTS_PATTERN,
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies && authz.fleet.readSettings;
+      },
+      description: `Get list of outputs associated with agent policy by policy id`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetAgentPolicyOutputsRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentPolicyOutputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      GetAgentPolicyOutputsHandler
     );
 };
