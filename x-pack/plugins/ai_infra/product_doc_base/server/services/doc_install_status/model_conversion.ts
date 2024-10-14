@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ProductDocInstallStatus } from '../../../common/saved_objects';
+import type { ProductDocInstallStatus } from '../../../common/install_status';
 import type { ProductDocInstallStatusAttributes } from '../../saved_objects';
 
 export const soToModel = (
