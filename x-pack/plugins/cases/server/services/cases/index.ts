@@ -19,7 +19,7 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
@@ -383,14 +383,31 @@ export class CasesService {
     }
   }
 
-  public async findSimilarCases(
-    options?: SavedObjectFindOptionsKueryNode
-  ): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
+  public async findSimilarCases(options: {
+    caseId: string;
+    observables: Record<string, string[]>;
+    pageIndex: number;
+    pageSize: number;
+  }): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find similar cases`);
+
+      const filterExpressions = Object.keys(options.observables).flatMap((typeKey) => {
+        return Object.values(options.observables[typeKey]).map((observableValue) => {
+          return fromKueryExpression(
+            `cases.attributes.observables:{value: "${observableValue}" AND typeKey: "${typeKey}"}`
+          );
+        });
+      });
+
       const cases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
         sortField: defaultSortField,
-        ...options,
+        search: `-"cases:${options?.caseId}"`,
+        rootSearchFields: ['_id'],
+        filter: nodeBuilder.or(filterExpressions),
+        page: options.pageIndex + 1,
+        perPage: options.pageSize,
+
         type: CASE_SAVED_OBJECT,
       });
 
