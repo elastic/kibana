@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import type {
   PostTransformsUpdateRequestSchema,
   PostTransformsUpdateResponseSchema,
-} from '../../../common/api_schemas/update_transforms';
+} from '../../../server/routes/api_schemas/update_transforms';
 import { addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 

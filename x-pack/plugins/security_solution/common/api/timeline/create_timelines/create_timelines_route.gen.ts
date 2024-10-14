@@ -14,32 +14,26 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
+  SavedTimeline,
   TimelineStatus,
   TimelineType,
-  SavedTimeline,
-  TimelineResponse,
+  PersistTimelineResponse,
 } from '../model/components.gen';
 
 export type CreateTimelinesRequestBody = z.infer<typeof CreateTimelinesRequestBody>;
 export const CreateTimelinesRequestBody = z.object({
+  timeline: SavedTimeline,
   status: TimelineStatus.nullable().optional(),
   timelineId: z.string().nullable().optional(),
   templateTimelineId: z.string().nullable().optional(),
   templateTimelineVersion: z.number().nullable().optional(),
   timelineType: TimelineType.nullable().optional(),
   version: z.string().nullable().optional(),
-  timeline: SavedTimeline,
 });
 export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequestBody>;
 
 export type CreateTimelinesResponse = z.infer<typeof CreateTimelinesResponse>;
-export const CreateTimelinesResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse.optional(),
-    }),
-  }),
-});
+export const CreateTimelinesResponse = PersistTimelineResponse;

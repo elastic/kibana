@@ -80,7 +80,7 @@ export function ProcessTreeAlerts({
     [onAlertSelected]
   );
 
-  const handleProcessEventAlertCategorySelected = useCallback((eventCategory) => {
+  const handleProcessEventAlertCategorySelected = useCallback((eventCategory: any) => {
     setSelectedProcessEventAlertCategory(eventCategory);
   }, []);
 

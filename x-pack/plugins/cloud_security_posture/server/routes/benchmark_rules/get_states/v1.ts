@@ -10,12 +10,13 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
+import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { CspSettings } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
   return soClient.create<CspSettings>(

@@ -17,9 +17,6 @@ export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery`;
 export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}`;
 export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/cancel/{connectorId}`;
 
-// Model Evaluation
-export const EVALUATE = `${BASE_PATH}/evaluate`;
-
 export const MAX_CONVERSATIONS_TO_UPDATE_IN_PARALLEL = 50;
 export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;
 

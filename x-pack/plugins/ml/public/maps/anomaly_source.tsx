@@ -35,7 +35,7 @@ import { ML_PAGES } from '../../common/constants/locator';
 import type { MlAnomalyLayersType } from './util';
 import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
 
@@ -45,7 +45,7 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 }
 
 export class AnomalySource implements IVectorSource {
-  static mlResultsService: MlApiServices['results'];
+  static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
@@ -284,7 +284,7 @@ export class AnomalySource implements IVectorSource {
       if (key === GEOJSON_FEATURE_ID_PROPERTY_NAME) {
         continue;
       }
-      if (properties.hasOwnProperty(key)) {
+      if (Object.hasOwn(properties, key)) {
         tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
       }
     }

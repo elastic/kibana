@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ESQLErrorListener, getLexer as _getLexer } from '@kbn/esql-ast';
@@ -45,9 +46,17 @@ describe('ESQL Theme', () => {
     // see packages/kbn-monaco/src/esql/lib/esql_token_helpers.ts
     const syntheticNames = ['functions', 'nulls_order', 'timespan_literal'];
 
+    const rulesWithNoName: string[] = [];
     for (const rule of theme.rules) {
-      expect([...lexicalNames, ...syntheticNames]).toContain(
-        rule.token.replace(ESQL_TOKEN_POSTFIX, '').toLowerCase()
+      const token = rule.token.replace(ESQL_TOKEN_POSTFIX, '');
+      if (![...lexicalNames, ...syntheticNames].includes(token)) {
+        rulesWithNoName.push(token);
+      }
+    }
+
+    if (rulesWithNoName.length) {
+      throw new Error(
+        `These rules have no corresponding lexical name: ${rulesWithNoName.join(', ')}`
       );
     }
   });
@@ -72,63 +81,53 @@ describe('ESQL Theme', () => {
       'expr_ws', // whitespace, so no reason to style it
       'unknown_cmd', // unknown command, so no reason to style it
 
-      // Lexer-mode-specific stuff
-      'explain_line_comment',
-      'explain_multiline_comment',
       'explain_ws',
-      'project_line_comment',
-      'project_multiline_comment',
       'project_ws',
-      'rename_line_comment',
-      'rename_multiline_comment',
       'rename_ws',
-      'from_line_comment',
-      'from_multiline_comment',
       'from_ws',
-      'enrich_line_comment',
-      'enrich_multiline_comment',
       'enrich_ws',
-      'mvexpand_line_comment',
-      'mvexpand_multiline_comment',
       'mvexpand_ws',
-      'enrich_field_line_comment',
-      'enrich_field_multiline_comment',
       'enrich_field_ws',
-      'lookup_line_comment',
-      'lookup_multiline_comment',
       'lookup_ws',
-      'lookup_field_line_comment',
-      'lookup_field_multiline_comment',
       'lookup_field_ws',
-      'show_line_comment',
-      'show_multiline_comment',
       'show_ws',
-      'meta_line_comment',
-      'meta_multiline_comment',
       'meta_ws',
       'setting',
-      'setting_line_comment',
-      'settting_multiline_comment',
       'setting_ws',
-      'metrics_line_comment',
-      'metrics_multiline_comment',
       'metrics_ws',
-      'closing_metrics_line_comment',
-      'closing_metrics_multiline_comment',
       'closing_metrics_ws',
-      'match_operator',
     ];
 
     // First, check that every valid exception is actually valid
+    const invalidExceptions: string[] = [];
     for (const name of validExceptions) {
-      expect(lexicalNames).toContain(name);
+      if (!lexicalNames.includes(name)) {
+        invalidExceptions.push(name);
+      }
+    }
+
+    if (invalidExceptions.length) {
+      throw new Error(
+        `These rule requirement exceptions are not valid lexical names: ${invalidExceptions.join(
+          ', '
+        )}`
+      );
     }
 
     const namesToCheck = lexicalNames.filter((name) => !validExceptions.includes(name));
 
     // Now, check that every lexical name has a corresponding rule
+    const missingRules: string[] = [];
     for (const name of namesToCheck) {
-      expect(tokenIDs).toContain(name);
+      if (!tokenIDs.includes(name)) {
+        missingRules.push(name);
+      }
+    }
+
+    if (missingRules.length) {
+      throw new Error(
+        `These lexical names are missing corresponding rules: ${missingRules.join(', ')}`
+      );
     }
   });
 });

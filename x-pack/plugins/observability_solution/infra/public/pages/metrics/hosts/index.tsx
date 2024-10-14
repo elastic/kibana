@@ -10,7 +10,6 @@ import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
@@ -19,7 +18,6 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
-import { BetaBadge } from '../../../components/beta_badge';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
@@ -55,12 +53,6 @@ export const HostsPage = () => {
                 `}
               >
                 <h1>{hostsTitle}</h1>
-                <BetaBadge
-                  tooltipContent={i18n.translate('xpack.infra.hostsViewPage.betaBadgeDescription', {
-                    defaultMessage:
-                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
-                  })}
-                />
               </div>
             ),
             rightSideItems: [

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -25,7 +26,7 @@ import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
+import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
@@ -85,6 +86,7 @@ export const IndexPatternTable = ({
     application,
     chrome,
     dataViews,
+    share,
     IndexPatternEditor,
     spaces,
     overlays,
@@ -114,6 +116,12 @@ export const IndexPatternTable = ({
   );
   const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
   const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
+
+  const useOnTryESQLParams = {
+    locatorClient: share?.url.locators,
+    navigateToApp: application.navigateToApp,
+  };
+  const onTryESQL = useOnTryESQL(useOnTryESQLParams);
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
@@ -369,6 +377,8 @@ export const IndexPatternTable = ({
           onClickCreate={() => setShowCreateDialog(true)}
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+          onTryESQL={onTryESQL}
+          esqlDocLink={docLinks.links.query.queryESQL}
           emptyPromptColor={'subdued'}
         />
       </>

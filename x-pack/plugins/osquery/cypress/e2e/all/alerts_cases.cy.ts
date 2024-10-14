@@ -30,11 +30,9 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
   let packId: string;
   let packName: string;
   const packData = packFixture();
-  before(() => {
-    initializeDataViews();
-  });
 
   beforeEach(() => {
+    initializeDataViews();
     loadPack(packData).then((data) => {
       packId = data.saved_object_id;
       packName = data.name;
@@ -86,16 +84,17 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  describe('Case', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187182
+  describe.skip('Case', () => {
     let caseId: string;
 
-    before(() => {
+    beforeEach(() => {
       loadCase('securitySolution').then((data) => {
         caseId = data.id;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 

@@ -28,10 +28,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -49,32 +49,29 @@ import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-interface LogCategorizationPageProps {
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
-}
-
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
   const [stateFromUrl, setUrlState] = usePageUrlState<LogCategorizationPageUrlState>(
@@ -159,13 +156,12 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -229,7 +225,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
 
@@ -336,6 +332,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     setUrlState({ field });
   };
 
+  const actions = getActions(true);
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -435,14 +433,16 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           <CategoryTable
             categories={data.categories}
             eventRate={eventRate}
-            pinnedCategory={pinnedCategory}
-            setPinnedCategory={setPinnedCategory}
-            highlightedCategory={highlightedCategory}
-            setHighlightedCategory={setHighlightedCategory}
+            mouseOver={{
+              pinnedCategory,
+              setPinnedCategory,
+              highlightedCategory,
+              setHighlightedCategory,
+            }}
             displayExamples={data.displayExamples}
             setSelectedCategories={setSelectedCategories}
-            openInDiscover={openInDiscover}
             tableState={tableState}
+            actions={actions}
           />
         </>
       ) : null}

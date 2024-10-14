@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import { PY_LANG_CLIENT } from './py_lang_client'; // Adjust the import path according to your project structure
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ChatForm } from '../../../types';
 
 describe('PY_LANG_CLIENT function', () => {
@@ -24,9 +23,7 @@ describe('PY_LANG_CLIENT function', () => {
       summarization_model: 'Your-new-model',
     } as unknown as ChatForm;
 
-    const clientDetails = ES_CLIENT_DETAILS({
-      elasticsearchUrl: 'http://my-local-cloud-instance',
-    } as unknown as CloudSetup);
+    const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
     const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
 

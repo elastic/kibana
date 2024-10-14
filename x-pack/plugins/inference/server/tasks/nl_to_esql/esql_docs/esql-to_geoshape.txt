@@ -1,0 +1,25 @@
+# TO_GEOSHAPE
+
+The TO_GEOSHAPE function converts an input value into a `geo_shape` value.
+
+## Syntax
+
+`TO_GEOSHAPE(field)`
+
+### Parameters
+
+#### field
+
+This is the input value. It can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
+| EVAL geom = TO_GEOSHAPE(wkt)
+```
+
+```esql
+ROW wkt = "LINESTRING (30 10, 10 30, 40 40)"
+| EVAL geom = TO_GEOSHAPE(wkt)
+```

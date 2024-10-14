@@ -8,7 +8,7 @@
 import {
   ENTRA_ID_PACKAGE_NAME,
   OKTA_PACKAGE_NAME,
-} from '@kbn/security-solution-plugin/public/timelines/components/side_panel/new_user_detail/constants';
+} from '@kbn/security-solution-plugin/public/flyout/entity_details/shared/constants';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,

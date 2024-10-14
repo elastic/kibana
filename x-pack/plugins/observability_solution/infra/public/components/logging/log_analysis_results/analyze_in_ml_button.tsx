@@ -19,7 +19,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   } = useKibanaContextForPlugin();
 
   const handleClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!href || !shouldHandleLinkEvent(e)) return;
       application.navigateToUrl(href);
     },

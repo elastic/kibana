@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_CONVERSATION_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.defaultConversationTitle',
-  {
-    defaultMessage: 'Conversations',
-  }
-);
-
-export const NEXT_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.nextConversationTitle',
-  {
-    defaultMessage: 'Next conversation',
-  }
-);
-
 export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel',
   {

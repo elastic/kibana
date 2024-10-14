@@ -16,7 +16,7 @@ export const ConnectorsCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.title', {
-        defaultMessage: 'Sync your data with a connector client',
+        defaultMessage: 'Sync your data with a self-managed connector',
       })}
       size="s"
       iconType="iInCircle"

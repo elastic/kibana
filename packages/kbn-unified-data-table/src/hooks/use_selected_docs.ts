@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface UseSelectedDocsState {
@@ -16,6 +17,7 @@ export interface UseSelectedDocsState {
   selectedDocsCount: number;
   docIdsInSelectionOrder: string[];
   toggleDocSelection: (docId: string) => void;
+  toggleMultipleDocsSelection: (toDocId: string) => void;
   selectAllDocs: () => void;
   selectMoreDocs: (docIds: string[]) => void;
   deselectSomeDocs: (docIds: string[]) => void;
@@ -24,8 +26,11 @@ export interface UseSelectedDocsState {
   getSelectedDocsOrderedByRows: (rows: DataTableRecord[]) => DataTableRecord[];
 }
 
-export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelectedDocsState => {
+export const useSelectedDocs = (
+  docMap: Map<string, { doc: DataTableRecord; docIndex: number }>
+): UseSelectedDocsState => {
   const [selectedDocsSet, setSelectedDocsSet] = useState<Set<string>>(new Set());
+  const lastCheckboxToggledDocId = useRef<string | undefined>();
 
   const toggleDocSelection = useCallback((docId: string) => {
     setSelectedDocsSet((prevSelectedRowsSet) => {
@@ -37,6 +42,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       }
       return newSelectedRowsSet;
     });
+    lastCheckboxToggledDocId.current = docId;
   }, []);
 
   const replaceSelectedDocs = useCallback((docIds: string[]) => {
@@ -72,6 +78,42 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     [selectedDocsSet, docMap]
   );
 
+  const toggleMultipleDocsSelection = useCallback(
+    (toDocId: string) => {
+      const shouldSelect = !isDocSelected(toDocId);
+
+      const lastToggledDocIdIndex = docMap.get(
+        lastCheckboxToggledDocId.current ?? toDocId
+      )?.docIndex;
+      const currentToggledDocIdIndex = docMap.get(toDocId)?.docIndex;
+      const docIds: string[] = [];
+
+      if (
+        typeof lastToggledDocIdIndex === 'number' &&
+        typeof currentToggledDocIdIndex === 'number' &&
+        lastToggledDocIdIndex !== currentToggledDocIdIndex
+      ) {
+        const startIndex = Math.min(lastToggledDocIdIndex, currentToggledDocIdIndex);
+        const endIndex = Math.max(lastToggledDocIdIndex, currentToggledDocIdIndex);
+
+        docMap.forEach(({ doc, docIndex }) => {
+          if (docIndex >= startIndex && docIndex <= endIndex) {
+            docIds.push(doc.id);
+          }
+        });
+      }
+
+      if (shouldSelect) {
+        selectMoreDocs(docIds);
+      } else {
+        deselectSomeDocs(docIds);
+      }
+
+      lastCheckboxToggledDocId.current = toDocId;
+    },
+    [selectMoreDocs, deselectSomeDocs, docMap, isDocSelected]
+  );
+
   const getSelectedDocsOrderedByRows = useCallback(
     (rows: DataTableRecord[]) => {
       return rows.filter((row) => isDocSelected(row.id));
@@ -82,7 +124,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
   const selectedDocsCount = selectedDocIds.length;
 
   const getCountOfFilteredSelectedDocs = useCallback(
-    (docIds) => {
+    (docIds: string[]) => {
       if (!selectedDocsCount) {
         return 0;
       }
@@ -100,6 +142,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       docIdsInSelectionOrder: selectedDocIds,
       getCountOfFilteredSelectedDocs,
       toggleDocSelection,
+      toggleMultipleDocsSelection,
       selectAllDocs,
       selectMoreDocs,
       deselectSomeDocs,
@@ -111,6 +154,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       isDocSelected,
       getCountOfFilteredSelectedDocs,
       toggleDocSelection,
+      toggleMultipleDocsSelection,
       selectAllDocs,
       selectMoreDocs,
       deselectSomeDocs,

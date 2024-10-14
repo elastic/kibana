@@ -23,7 +23,7 @@ callAs.search.mockResponse({
   hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } },
 });
 
-const authHeader: AuthorizationHeader = {};
+const authHeader: AuthorizationHeader = Object.create(null);
 
 const mlClusterClient = {
   asCurrentUser: callAs,

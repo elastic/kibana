@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { ScheduleNowTransformsRequestSchema } from '../../../../common/api_schemas/schedule_now_transforms';
+import type { ScheduleNowTransformsRequestSchema } from '../../api_schemas/schedule_now_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

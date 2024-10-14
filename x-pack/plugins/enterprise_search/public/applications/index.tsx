@@ -117,7 +117,6 @@ export const renderApp = (
     guidedOnboarding,
     history,
     indexMappingComponent,
-    isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
     isSidebarEnabled,
     lens,
     ml,
@@ -128,7 +127,6 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
-    searchHomepage: plugins.searchHomepage,
     searchPlayground: plugins.searchPlayground,
     searchInferenceEndpoints: plugins.searchInferenceEndpoints,
     security,
@@ -152,7 +150,12 @@ export const renderApp = (
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+          }}
+        >
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>

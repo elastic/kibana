@@ -32,7 +32,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
   });
   const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(-1);
   const onChangePageSize = useCallback(
-    (_pageSize) => {
+    (_pageSize: number) => {
       setPagination((state) => ({
         ...state,
         pageSize: _pageSize,
@@ -44,7 +44,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     [updateBulkActionsState, onPageChange]
   );
   const onChangePageIndex = useCallback(
-    (_pageIndex) => {
+    (_pageIndex: number) => {
       setPagination((state) => ({ ...state, pageIndex: _pageIndex }));
       updateBulkActionsState({ action: BulkActionsVerbs.clear });
       onPageChange({ pageIndex: _pageIndex, pageSize: pagination.pageSize });

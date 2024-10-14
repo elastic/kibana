@@ -49,7 +49,7 @@ const UserNameComponent: React.FC<Props> = ({
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const openUserDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
 
       if (onClick) {

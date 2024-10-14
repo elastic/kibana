@@ -625,12 +625,46 @@ describe('StepDefineRule', () => {
   });
 
   describe('AI assistant', () => {
-    it('renders assistant when query is not valid', () => {
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
-        wrapper: TestProviders,
-      });
+    it('renders assistant when query is not valid and not empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
 
       expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
+    });
+
+    it('does not render assistant when query is not valid and empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
 
     it('does not render assistant when query is valid', () => {

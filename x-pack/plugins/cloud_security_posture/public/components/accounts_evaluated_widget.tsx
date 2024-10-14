@@ -7,11 +7,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { CLOUD_PROVIDERS, getBenchmarkApplicableTo } from '../../common/utils/helpers';
 import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/constants';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
-import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
 import { BenchmarkData } from '../../common/types_old';
 import { FINDINGS_GROUPING_OPTIONS } from '../common/constants';
 

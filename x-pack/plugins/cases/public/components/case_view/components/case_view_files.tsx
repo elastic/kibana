@@ -57,7 +57,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   );
 
   const onSearchChange = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, filteringOptions.searchTerm)) {
         setFilteringOptions({

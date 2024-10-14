@@ -15,7 +15,7 @@ import {
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 import TestAgent from 'supertest/lib/agent';
 
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';

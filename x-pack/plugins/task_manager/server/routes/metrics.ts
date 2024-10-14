@@ -37,15 +37,12 @@ const QuerySchema = schema.object({
 });
 
 export function metricsRoute(params: MetricsRouteParams) {
-  const { router, logger, metrics$, resetMetrics$, taskManagerId } = params;
+  const { router, metrics$, resetMetrics$, taskManagerId } = params;
 
-  const debugLogger = logger.get(`metrics-debugger`);
-  const additionalDebugLogger = logger.get(`metrics-subscribe-debugger`);
   let lastMetrics: NodeMetrics | null = null;
 
   metrics$.subscribe((metrics) => {
     lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
-    additionalDebugLogger.debug(() => `subscribed metrics ${JSON.stringify(metrics)}`);
   });
 
   router.get(
@@ -68,12 +65,6 @@ export function metricsRoute(params: MetricsRouteParams) {
       req: KibanaRequest<unknown, TypeOf<typeof QuerySchema>, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
-      debugLogger.debug(
-        () =>
-          `/api/task_manager/metrics route accessed with reset=${req.query.reset} - metrics ${
-            lastMetrics ? JSON.stringify(lastMetrics) : 'not available'
-          }`
-      );
       if (req.query.reset) {
         resetMetrics$.next(true);
       }

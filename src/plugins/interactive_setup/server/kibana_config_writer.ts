@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { X509Certificate } from 'crypto';
@@ -117,14 +118,14 @@ export class KibanaConfigWriter {
       );
 
       const existingCommentedConfig = KibanaConfigWriter.commentOutKibanaConfig(existingConfig.raw);
-      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.safeDump(
+      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.dump(
         { ...existingConfig.parsed, ...config },
         { flowLevel: 1 }
       )}\n`;
     } else {
       configToWrite = `${
         existingConfig.raw
-      }\n\n# This section was automatically generated during setup.\n${yaml.safeDump(config, {
+      }\n\n# This section was automatically generated during setup.\n${yaml.dump(config, {
         flowLevel: 1,
       })}\n`;
     }
@@ -171,7 +172,7 @@ export class KibanaConfigWriter {
 
     let parsedConfig: Record<string, unknown>;
     try {
-      parsedConfig = getFlattenedObject(yaml.safeLoad(rawConfig) ?? {});
+      parsedConfig = getFlattenedObject(yaml.load(rawConfig) ?? {});
     } catch (err) {
       this.logger.error(`Failed to parse configuration file: ${getDetailedErrorMessage(err)}.`);
       throw err;

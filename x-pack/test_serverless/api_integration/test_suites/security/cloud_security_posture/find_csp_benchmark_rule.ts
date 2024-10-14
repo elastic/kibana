@@ -9,7 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
 
   // find csp benchmark rule tests
-  describe('GET internal/cloud_security_posture/rules/_find', function () {
+  describe.skip('GET internal/cloud_security_posture/rules/_find', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
     this.tags(['failsOnMKI']);
 

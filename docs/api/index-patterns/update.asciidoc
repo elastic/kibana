@@ -4,7 +4,7 @@
 <titleabbrev>Update index pattern</titleabbrev>
 ++++
 
-deprecated::[8.0.0,Use <<data-views-api-update>> instead.]
+deprecated::[8.0.0,Use the {api-kibana}/group/endpoint-data-views[data views API] instead.]
 
 experimental[] Update part of an index pattern. Only the specified fields are updated in the
 index pattern. Unspecified fields stay as they are persisted.

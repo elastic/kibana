@@ -20,7 +20,9 @@ export type FieldsType = string[] | number[] | boolean[] | object[];
 export type MergeStrategyFunction = ({
   doc,
   ignoreFields,
+  ignoreFieldsRegexes,
 }: {
   doc: SignalSourceHit;
-  ignoreFields: string[];
+  ignoreFields: Record<string, boolean>;
+  ignoreFieldsRegexes: string[];
 }) => SignalSourceHit;

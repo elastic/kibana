@@ -10,7 +10,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-export const BackButton: React.FC = ({ children }) => {
+export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 

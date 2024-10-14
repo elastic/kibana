@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { TelemetryServiceSetupParams, ITelemetryClient, InfraTelemetryEventParams } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type {
+  TelemetryServiceSetupParams,
+  TelemetryServiceStart,
+  InfraTelemetryEventParams,
+} from './types';
 import { infraTelemetryEvents } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 
@@ -23,7 +27,7 @@ export class TelemetryService {
     );
   }
 
-  public start(): ITelemetryClient {
+  public start(): TelemetryServiceStart {
     if (!this.analytics) {
       throw new Error(
         'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'

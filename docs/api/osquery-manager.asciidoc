@@ -3,7 +3,7 @@
 
 experimental[] Run live queries, manage packs and saved queries
 
-WARNING: Use the osquery manager APIs for managing packs and saved queries instead of lower-level <<saved-objects-api, saved objects API>>.
+Use the osquery manager APIs for managing packs and saved queries.
 
 The following osquery manager APIs are available: 
 

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault, processDeprecated } from './utils';
+import { deleteField, stripBadDefault, processDeprecated, processDiscontinued } from './utils';
 import { IContext } from '../context';
 
 const {
@@ -57,13 +58,14 @@ export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void 
 
 export const processAllTypes = (schema: OpenAPIV3.SchemaObject): void => {
   processDeprecated(schema);
+  processDiscontinued(schema);
   stripBadDefault(schema);
 };
 
 export const processAnyType = (schema: OpenAPIV3.SchemaObject): void => {
   // Map schema to an empty object: `{}`
   for (const key of Object.keys(schema)) {
-    deleteField(schema as Record<any, unknown>, key);
+    deleteField(schema as unknown as Record<any, unknown>, key);
   }
 };
 

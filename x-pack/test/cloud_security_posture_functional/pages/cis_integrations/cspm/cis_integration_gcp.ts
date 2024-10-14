@@ -36,7 +36,8 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    describe('CIS_GCP Organization', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191027
+    describe.skip('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
@@ -131,7 +132,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_GCP Organization Credentials File', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/190779
+    describe.skip('CIS_GCP Organization Credentials File', () => {
       it('CIS_GCP Organization Credentials File workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
@@ -177,7 +179,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_GCP Single', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191144
+    describe.skip('CIS_GCP Single', () => {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);

@@ -14,7 +14,7 @@ import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { router, getStartServices, isServerless } = deps;
 
   const spacesSchema = schema.arrayOf(
     schema.string({
@@ -37,6 +37,7 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/_update_objects_spaces',
       options: {
+        access: isServerless ? 'internal' : 'public',
         description: `Update saved objects in spaces`,
       },
       validate: {

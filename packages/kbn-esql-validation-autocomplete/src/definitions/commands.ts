@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -172,6 +173,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
+    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -382,11 +384,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
-      ],
+      params: [{ name: 'expression', type: 'any' }],
     },
   },
   {
@@ -415,8 +413,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -433,8 +430,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -449,7 +445,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'any' }],
+      params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
   },
   {
@@ -467,7 +463,19 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [ENRICH_MODES],
     signature: {
       multipleParams: false,
-      params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
+      params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    },
+  },
+  {
+    name: 'hidden_command',
+    description: 'A test fixture to test hidden-ness',
+    hidden: true,
+    examples: [],
+    modes: [],
+    options: [],
+    signature: {
+      params: [],
+      multipleParams: false,
     },
   },
 ];

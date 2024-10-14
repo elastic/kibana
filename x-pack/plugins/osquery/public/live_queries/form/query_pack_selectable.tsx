@@ -72,7 +72,7 @@ export const QueryPackSelectable = ({
   });
 
   const handleChange = useCallback(
-    (type) => {
+    (type: any) => {
       setQueryType(type);
     },
     [setQueryType]

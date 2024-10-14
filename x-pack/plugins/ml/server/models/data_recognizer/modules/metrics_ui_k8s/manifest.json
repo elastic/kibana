@@ -2,7 +2,7 @@
   "id": "metrics_ui_k8s",
   "title": "Metrics Kubernetes",
   "description": "Detect anomalous memory and network behavior on Kubernetes pods.",
-  "type": "Metricbeat Data",
+  "type": "Infrastructure",
   "logoFile": "logo.json",
   "jobs": [
     {

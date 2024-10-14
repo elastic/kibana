@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiHorizontalRule,
   EuiPanel,
   EuiSelectable,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
-  EuiHighlight,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -25,9 +26,9 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayLabel, getUserDisplayName } from './user_profile';
 import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
+import { getUserDisplayLabel, getUserDisplayName } from './user_profile';
 
 const NULL_OPTION_KEY = 'null';
 

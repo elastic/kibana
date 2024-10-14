@@ -20,11 +20,16 @@ import {
   isUntitled,
   omitTypenameInTimeline,
   useQueryTimelineById,
-  formatTimelineResultToModel,
+  formatTimelineResponseToModel,
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import {
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+  type ColumnHeaderResult,
+  type RowRendererId,
+} from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -378,7 +383,7 @@ describe('helpers', () => {
       );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: columnsWithoutEventAction,
+        columns: columnsWithoutEventAction as ColumnHeaderResult[],
         version: '1',
       };
 
@@ -395,7 +400,7 @@ describe('helpers', () => {
       );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: columnsWithoutEventAction,
+        columns: columnsWithoutEventAction as ColumnHeaderResult[],
         filters: [
           {
             meta: {
@@ -559,7 +564,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineDisabled is false and custom set of columns is passed', () => {
+    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of columns is passed', () => {
       const customColumns = defaultUdtHeaders.slice(0, 2);
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -567,7 +572,7 @@ describe('helpers', () => {
         version: '1',
         status: TimelineStatusEnum.active,
         timelineType: TimelineTypeEnum.default,
-        columns: customColumns,
+        columns: customColumns as ColumnHeaderResult[],
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
@@ -584,6 +589,35 @@ describe('helpers', () => {
         timelineType: TimelineTypeEnum.default,
         defaultColumns: defaultUdtHeaders,
         columns: customColumns,
+      });
+    });
+
+    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of excludedRowRendererIds is passed', () => {
+      const excludedRowRendererIds: RowRendererId[] = ['zeek'];
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
+        excludedRowRendererIds,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineTypeEnum.default,
+        false
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatusEnum.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineTypeEnum.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: defaultUdtHeaders,
+        excludedRowRendererIds,
       });
     });
   });
@@ -661,7 +695,7 @@ describe('helpers', () => {
       });
 
       test('Do not override daterange if TimelineStatus is active', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
@@ -714,7 +748,7 @@ describe('helpers', () => {
       });
 
       test('should not override daterange if TimelineStatus is active', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
@@ -788,7 +822,7 @@ describe('helpers', () => {
       });
 
       test('override daterange if TimelineStatus is immutable', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
           args.duplicate,
           args.timelineType

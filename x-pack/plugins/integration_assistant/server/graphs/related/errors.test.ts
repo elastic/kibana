@@ -18,15 +18,15 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: JSON.stringify(relatedMockProcessors, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const testState: RelatedState = relatedTestState;
+const state: RelatedState = relatedTestState;
 
 describe('Testing related handler', () => {
   it('handleErrors()', async () => {
-    const response = await handleErrors(testState, mockLlm);
+    const response = await handleErrors({ state, model });
     expect(response.currentPipeline).toStrictEqual(relatedExpectedHandlerResponse.currentPipeline);
     expect(response.lastExecutedChain).toBe('error');
   });

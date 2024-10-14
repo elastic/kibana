@@ -22,5 +22,29 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
       });
     },
+    async navigateToGettingStartedPage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('serverlessElasticsearch');
+        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
+      });
+    },
+    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('elasticsearchStart', {
+          shouldLoginIfPrompted: false,
+        });
+        if (!expectRedirect) {
+          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
+        }
+      });
+    },
+    async navigateToIndexDetailPage(indexName: string) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+          shouldLoginIfPrompted: false,
+        });
+      });
+      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+    },
   };
 }

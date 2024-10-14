@@ -231,10 +231,9 @@ describe('AlertsTable', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((props) => {
-        return `${props.colIndex}:${props.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
     useBulkActions: () => [
       {
         id: 0,
@@ -371,27 +370,19 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
 
       expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
@@ -402,8 +393,8 @@ describe('AlertsTable', () => {
       const renderResult = render(
         <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
       );
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
       expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
@@ -739,7 +730,7 @@ describe('AlertsTable', () => {
         render(<AlertsTableWithProviders {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
-        userEvent.hover(screen.getByText('Test case'));
+        await userEvent.hover(screen.getByText('Test case'));
 
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });

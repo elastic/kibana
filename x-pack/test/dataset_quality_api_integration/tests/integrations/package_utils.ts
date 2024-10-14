@@ -7,47 +7,24 @@
 
 import { Agent as SuperTestAgent } from 'supertest';
 
-export interface IntegrationPackage {
-  name: string;
-  version: string;
-}
-
-export interface CustomIntegration {
-  integrationName: string;
-  datasets: IntegrationDataset[];
-}
-
-export interface IntegrationDataset {
-  name: string;
-  type: 'logs' | 'metrics' | 'synthetics';
-}
-
-export async function installCustomIntegration({
-  supertest,
-  customIntegration,
-}: {
-  supertest: SuperTestAgent;
-  customIntegration: CustomIntegration;
-}) {
-  const { integrationName, datasets } = customIntegration;
-
-  return supertest
-    .post(`/api/fleet/epm/custom_integrations`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({ integrationName, datasets });
-}
-
 export async function installPackage({
   supertest,
   pkg,
 }: {
   supertest: SuperTestAgent;
-  pkg: IntegrationPackage;
+  pkg: string;
 }) {
-  const { name, version } = pkg;
+  const {
+    body: {
+      item: { latestVersion: version },
+    },
+  } = await supertest
+    .get(`/api/fleet/epm/packages/${pkg}`)
+    .set('kbn-xsrf', 'xxxx')
+    .send({ force: true });
 
   return supertest
-    .post(`/api/fleet/epm/packages/${name}/${version}`)
+    .post(`/api/fleet/epm/packages/${pkg}/${version}`)
     .set('kbn-xsrf', 'xxxx')
     .send({ force: true });
 }
@@ -57,9 +34,7 @@ export async function uninstallPackage({
   pkg,
 }: {
   supertest: SuperTestAgent;
-  pkg: IntegrationPackage;
+  pkg: string;
 }) {
-  const { name, version } = pkg;
-
-  return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
+  return supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
 }

@@ -1,0 +1,267 @@
+{
+  "id": "@kbn/core-feature-flags-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-server-internal",
+        "id": "def-server.FeatureFlagsService",
+        "type": "Class",
+        "tags": [
+          "private"
+        ],
+        "label": "FeatureFlagsService",
+        "description": [
+          "\nThe server-side Feature Flags Service"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.FeatureFlagsService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nThe core service's constructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-server-internal",
+                "id": "def-server.FeatureFlagsService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [
+                  "{@link CoreContext }"
+                ],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.FeatureFlagsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [
+              "\nSetup lifecycle method"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-feature-flags-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
+                "section": "def-server.InternalFeatureFlagsSetup",
+                "text": "InternalFeatureFlagsSetup"
+              }
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.FeatureFlagsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStart lifecycle method"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              }
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.FeatureFlagsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nStop lifecycle method"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-server-internal",
+        "id": "def-server.InternalFeatureFlagsSetup",
+        "type": "Interface",
+        "tags": [
+          "private"
+        ],
+        "label": "InternalFeatureFlagsSetup",
+        "description": [
+          "\nCore-internal contract for the setup lifecycle step."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-feature-flags-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
+            "section": "def-server.InternalFeatureFlagsSetup",
+            "text": "InternalFeatureFlagsSetup"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-feature-flags-server",
+            "scope": "server",
+            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+            "section": "def-server.FeatureFlagsSetup",
+            "text": "FeatureFlagsSetup"
+          }
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.InternalFeatureFlagsSetup.getOverrides",
+            "type": "Function",
+            "tags": [],
+            "label": "getOverrides",
+            "description": [
+              "\nUsed by the rendering service to share the overrides with the service on the browser side."
+            ],
+            "signature": [
+              "() => Record<string, unknown>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-server-internal",
+        "id": "def-server.featureFlagsConfig",
+        "type": "Object",
+        "tags": [
+          "private"
+        ],
+        "label": "featureFlagsConfig",
+        "description": [
+          "\nConfig descriptor for the feature flags service"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.featureFlagsConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "/**\n   * All config is prefixed by `feature_flags`\n   */"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-internal",
+            "id": "def-server.featureFlagsConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "/**\n   * The definition of the validation config schema\n   */"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<{ overrides: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Record<string, any> | undefined>; }>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

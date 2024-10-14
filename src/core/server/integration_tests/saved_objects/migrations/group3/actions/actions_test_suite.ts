@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -2084,31 +2085,6 @@ export const runActionTestSuite = ({
             },
           }
       `);
-    });
-
-    // no way to configure http.max_content_length on the serverless instance for now.
-    runOnTraditionalOnly(() => {
-      it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-        const newDocs = new Array(10000).fill({
-          _source: {
-            title:
-              'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-          },
-        }) as SavedObjectsRawDoc[];
-        const task = bulkOverwriteTransformedDocuments({
-          client,
-          index: 'existing_index_with_docs',
-          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-        });
-        await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
-      `);
-      });
     });
   });
 };

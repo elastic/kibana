@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/reauthorize_transforms';
+import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reauthorize_transforms';
 import expect from '@kbn/expect';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';

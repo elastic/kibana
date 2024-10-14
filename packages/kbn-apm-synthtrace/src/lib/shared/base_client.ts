@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -16,7 +17,6 @@ import {
 import { castArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 
@@ -54,6 +54,17 @@ export class SynthtraceEsClient<TFields extends Fields> {
       )}"`
     );
 
+    const resolvedIndices = this.indices.length
+      ? (
+          await this.client.indices.resolveIndex({
+            name: this.indices.join(','),
+            expand_wildcards: ['open', 'hidden'],
+            // @ts-expect-error ignore_unavailable is not in the type definition, but it is accepted by es
+            ignore_unavailable: true,
+          })
+        ).indices.map((index: { name: string }) => index.name)
+      : [];
+
     await Promise.all([
       ...(this.dataStreams.length
         ? [
@@ -63,29 +74,17 @@ export class SynthtraceEsClient<TFields extends Fields> {
             }),
           ]
         : []),
-      this.cleanIndices(),
+      ...(resolvedIndices.length
+        ? [
+            this.client.indices.delete({
+              index: resolvedIndices.join(','),
+              expand_wildcards: ['open', 'hidden'],
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }),
+          ]
+        : []),
     ]);
-  }
-
-  async cleanIndices() {
-    if (this.indices.length === 0) {
-      return;
-    }
-    const allIndices = (await this.client.cat.indices({
-      format: 'json',
-      index: this.indices,
-    })) as CatIndicesResponse;
-    const indexNames = allIndices.map((index) => index.index).join(',');
-    if (!indexNames) {
-      return;
-    }
-    this.logger.debug(`Cleaning indices: "${indexNames}"`);
-    return this.client.indices.delete({
-      index: indexNames,
-      expand_wildcards: ['open', 'hidden'],
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
   }
 
   async refresh() {

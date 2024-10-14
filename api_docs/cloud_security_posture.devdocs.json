@@ -117,23 +117,6 @@
     "misc": [
       {
         "parentPluginId": "cloudSecurityPosture",
-        "id": "def-public.CLOUD_SECURITY_POSTURE_BASE_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CLOUD_SECURITY_POSTURE_BASE_PATH",
-        "description": [
-          "The base path for all cloud security posture pages."
-        ],
-        "signature": [
-          "\"/cloud_security_posture\""
-        ],
-        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cloudSecurityPosture",
         "id": "def-public.CloudSecurityPosturePageId",
         "type": "Type",
         "tags": [],

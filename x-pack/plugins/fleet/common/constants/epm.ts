@@ -10,6 +10,7 @@ import { ElasticsearchAssetType, KibanaSavedObjectType } from '../types/models';
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const MAX_TIME_COMPLETE_INSTALL = 30 * 60 * 1000; // 30 minutes
+export const MAX_REINSTALL_RETRIES = 3;
 
 export const FLEET_SYSTEM_PACKAGE = 'system';
 export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
@@ -26,6 +27,7 @@ export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
 export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
+export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
 export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   FLEET_APM_PACKAGE,

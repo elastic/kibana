@@ -7,9 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewAgentPolicySchema } from '../models';
-
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
+import {
+  AgentPolicyResponseSchema,
+  FullAgentPolicyResponseSchema,
+  NewAgentPolicySchema,
+} from '../models';
+import { inputsFormat } from '../../../common/constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
@@ -27,7 +31,7 @@ export const GetAgentPoliciesRequestSchema = {
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
-            [AGENT_POLICY_SAVED_OBJECT_TYPE],
+            [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
             AGENT_POLICY_MAPPINGS,
             true
           );
@@ -39,18 +43,39 @@ export const GetAgentPoliciesRequestSchema = {
     ),
     noAgentCount: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
 export const BulkGetAgentPoliciesRequestSchema = {
   body: BulkRequestBodySchema.extends({
-    full: schema.maybe(schema.boolean()),
+    full: schema.maybe(
+      schema.boolean({
+        meta: { description: 'get full policies with package policies populated' },
+      })
+    ),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
+
+export const BulkGetAgentPoliciesResponseSchema = schema.object({
+  items: schema.arrayOf(AgentPolicyResponseSchema),
+});
 
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -79,9 +104,18 @@ export const CopyAgentPolicyRequestSchema = {
 export const DeleteAgentPolicyRequestSchema = {
   body: schema.object({
     agentPolicyId: schema.string(),
-    force: schema.maybe(schema.boolean()),
+    force: schema.maybe(
+      schema.boolean({
+        meta: { description: 'bypass validation checks that can prevent agent policy deletion' },
+      })
+    ),
   }),
 };
+
+export const DeleteAgentPolicyResponseSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+});
 
 export const GetFullAgentPolicyRequestSchema = {
   params: schema.object({
@@ -94,6 +128,12 @@ export const GetFullAgentPolicyRequestSchema = {
   }),
 };
 
+export const GetFullAgentPolicyResponseSchema = schema.object({
+  item: schema.oneOf([schema.string(), FullAgentPolicyResponseSchema]),
+});
+
+export const DownloadFullAgentPolicyResponseSchema = schema.string();
+
 export const GetK8sManifestRequestSchema = {
   query: schema.object({
     download: schema.maybe(schema.boolean()),
@@ -101,3 +141,7 @@ export const GetK8sManifestRequestSchema = {
     enrolToken: schema.maybe(schema.string()),
   }),
 };
+
+export const GetK8sManifestResponseScheme = schema.object({
+  item: schema.string(),
+});

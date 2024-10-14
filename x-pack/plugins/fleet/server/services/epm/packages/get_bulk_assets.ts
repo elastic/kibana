@@ -33,11 +33,9 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
     case 'data_stream_ilm_policy':
       return `/app/management/data/index_lifecycle_management/policies/edit/${id}`;
     case 'transform':
-      // TODO: Confirm link for transforms
-      return '';
+      return `/app/management/data/transform?_a=(transform:(queryText:${id}))`;
     case 'ml_model':
-      // TODO: Confirm link for ml models
-      return '';
+      return `/app/ml/trained_models?_a=(trained_models:(queryText:'model_id:(${id})'))`;
     default:
       return '';
   }
@@ -73,7 +71,6 @@ export async function getBulkAssets(
       }
 
       // TODO: Ask for Kibana SOs to have `getInAppUrl()` registered so that the above works safely:
-      //  ml-module
       //  security-rule
       //  csp-rule-template
       //  osquery-pack-asset

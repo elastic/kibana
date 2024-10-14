@@ -16,7 +16,10 @@ import {
   AppPluginSetupDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { DatasetQualityLocatorDefinition } from '../common/locators';
+import {
+  DatasetQualityLocatorDefinition,
+  DatasetQualityDetailsLocatorDefinition,
+} from '../common/locators';
 
 export class DataQualityPlugin
   implements
@@ -63,6 +66,12 @@ export class DataQualityPlugin
     if (managementLocator) {
       share.url.locators.create(
         new DatasetQualityLocatorDefinition({
+          useHash,
+          managementLocator,
+        })
+      );
+      share.url.locators.create(
+        new DatasetQualityDetailsLocatorDefinition({
           useHash,
           managementLocator,
         })

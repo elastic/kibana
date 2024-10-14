@@ -78,7 +78,7 @@ describe('helpers', () => {
             },
           },
           _owner: null,
-        },
+        } as unknown as React.ReactNode,
         isSortable: true,
       },
       {
@@ -113,7 +113,7 @@ describe('helpers', () => {
             },
           },
           _owner: null,
-        },
+        } as unknown as React.ReactNode,
         isSortable: true,
       },
     ];

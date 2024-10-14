@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,15 +15,19 @@ import {
   EuiIcon,
   EuiImage,
   useEuiTheme,
+  useEuiShadow,
   makeHighContrastColor,
 } from '@elastic/eui';
+// EUI allows reaching into internal folders for component-specific exports, but they aren't typed in Kibana
+// @ts-ignore
+import { useEuiButtonFocusCSS } from '@elastic/eui/lib/themes/amsterdam/global_styling/mixins/button';
+// @ts-ignore
+import { euiButtonDisplayStyles } from '@elastic/eui/lib/components/button/button_display/_button_display.styles';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';
 
 import type { ExitFullScreenButtonComponentProps as Props } from '../types';
-
-import './exit_full_screen_button.scss';
 
 const text = i18n.translate('sharedUXPackages.exitFullScreenButton.exitFullScreenModeButtonText', {
   defaultMessage: 'Exit full screen',
@@ -39,17 +44,23 @@ const description = i18n.translate(
  * A presentational component that renders a button designed to exit "full screen" mode.
  */
 export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const { colors, size, border } = euiTheme;
+  const euiThemeContext = useEuiTheme();
+  const { euiButtonDisplay } = euiButtonDisplayStyles(euiThemeContext);
+  const { colors, size, border } = euiThemeContext.euiTheme;
 
-  const buttonCSS = css`
-    padding: ${size.xs} ${size.s};
-    background: ${colors.fullShade};
-    border-radius: ${border.radius.small};
-    height: ${size.xl};
-    color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
-    outline-color: ${colors.emptyShade};
-  `;
+  const buttonCSS = [
+    euiButtonDisplay,
+    css`
+      padding: ${size.xs} ${size.s};
+      background: ${colors.fullShade};
+      border-radius: ${border.radius.small};
+      height: ${size.xl};
+      color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
+      outline-color: ${colors.emptyShade};
+    `,
+    useEuiShadow('l'),
+    useEuiButtonFocusCSS(),
+  ];
 
   return (
     <div>

@@ -52,10 +52,12 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
+  enableSizeAndDocCount?: boolean;
   enableDataStreamStats?: boolean;
   editableIndexSettings?: 'all' | 'limited';
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
+  enableProjectLevelRetentionChecks?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   id?: string;
   name: string;
   namespace: string;
+  space_ids?: string[];
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
@@ -43,6 +44,26 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
+  monitoring_pprof_enabled?: boolean;
+  monitoring_http?: {
+    enabled: boolean;
+    host?: string;
+    port?: number;
+    buffer?: {
+      enabled: boolean;
+    };
+  };
+  monitoring_diagnostics?: {
+    limit?: {
+      interval?: string;
+      burst?: number;
+    };
+    uploader?: {
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
+    };
+  };
 }
 
 export interface GlobalDataTag {
@@ -53,7 +74,7 @@ export interface GlobalDataTag {
 // SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
-  space_id?: string | undefined;
+  space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
@@ -70,7 +91,7 @@ export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
   };
   [key: string]: any;
 }
@@ -117,6 +138,26 @@ export interface FullAgentPolicyMonitoring {
   enabled: boolean;
   metrics: boolean;
   logs: boolean;
+  traces: boolean;
+  pprof?: {
+    enabled: boolean;
+  };
+  http?: {
+    enabled: boolean;
+    host?: string;
+    port?: number;
+  };
+  diagnostics?: {
+    limit?: {
+      interval?: string;
+      burst?: number;
+    };
+    uploader?: {
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
+    };
+  };
 }
 
 export interface FullAgentPolicy {

@@ -10,10 +10,12 @@ import { mapPercentageToQuality } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
+import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
+import { flattenStats } from './flatten_stats';
 
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],
-  degradedDocStats: DegradedDocsStat[] = [],
+  degradedDocStats: DictionaryType<DegradedDocsStat>,
   integrations: Integration[]
 ): DataStreamStat[] {
   if (!dataStreamStats.length && !integrations.length) {
@@ -48,8 +50,10 @@ export function generateDatasets(
     { datasetIntegrationMap: {}, integrationsMap: {} }
   );
 
+  const degradedDocs = flattenStats(degradedDocStats);
+
   if (!dataStreamStats.length) {
-    return degradedDocStats.map((degradedDocStat) =>
+    return degradedDocs.map((degradedDocStat) =>
       DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
     );
   }
@@ -62,8 +66,8 @@ export function generateDatasets(
       docsCount: DegradedDocsStat['docsCount'];
       quality: DegradedDocsStat['quality'];
     }
-  > = degradedDocStats.reduce(
-    (degradedMapAcc, { dataset, percentage, count, docsCount, quality }) =>
+  > = degradedDocs.reduce(
+    (degradedMapAcc, { dataset, percentage, count, docsCount }) =>
       Object.assign(degradedMapAcc, {
         [dataset]: {
           percentage,

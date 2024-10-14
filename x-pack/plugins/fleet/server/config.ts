@@ -26,7 +26,7 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.0';
+const REGISTRY_SPEC_MAX_VERSION = '3.2';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -35,9 +35,7 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     agentless: {
-      api: {
-        url: true,
-      },
+      enabled: true,
     },
     enableExperimental: true,
     developer: {
@@ -132,6 +130,7 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -149,14 +148,19 @@ export const config: PluginConfigDescriptor = {
       }),
       agentless: schema.maybe(
         schema.object({
-          api: schema.object({
-            url: schema.uri({ scheme: ['http', 'https'] }),
-            tls: schema.object({
-              certificate: schema.string(),
-              key: schema.string(),
-              ca: schema.string(),
-            }),
-          }),
+          enabled: schema.boolean({ defaultValue: false }),
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

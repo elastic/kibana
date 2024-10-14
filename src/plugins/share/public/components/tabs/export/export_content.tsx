@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -63,7 +64,7 @@ const ExportContentUi = ({
     helpText,
     renderCopyURLButton,
     generateExport,
-    absoluteUrl,
+    generateExportUrl,
     renderLayoutOptionSwitch,
   } = useMemo(() => {
     return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
@@ -123,7 +124,8 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton && publicAPIEnabled)
+    if (renderCopyURLButton && publicAPIEnabled) {
+      const absoluteUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
@@ -159,7 +161,8 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
+    }
+  }, [renderCopyURLButton, publicAPIEnabled, usePrintLayout, generateExportUrl, intl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

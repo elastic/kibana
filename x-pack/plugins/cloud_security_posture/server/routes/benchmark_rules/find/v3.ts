@@ -6,14 +6,14 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { getBenchmarkFilterQueryV2 } from '../../../../common/utils/helpers';
-import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/latest';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { getBenchmarkFilterQueryV2 } from '../../../../common/utils/helpers';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+
 import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
 export const findBenchmarkRuleHandler = async (

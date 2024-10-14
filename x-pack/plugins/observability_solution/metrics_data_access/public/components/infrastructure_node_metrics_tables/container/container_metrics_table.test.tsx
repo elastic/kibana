@@ -15,9 +15,9 @@ import { createLazyContainerMetricsTable } from './create_lazy_container_metrics
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
 import { metricByField } from './use_container_metrics_table';
 
-jest.mock('../../../pages/link_to/use_node_details_redirect', () => ({
-  useNodeDetailsRedirect: jest.fn(() => ({
-    getNodeDetailUrl: jest.fn(() => ({
+jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
+  useAssetDetailsRedirect: jest.fn(() => ({
+    getAssetDetailUrl: jest.fn(() => ({
       app: 'metrics',
       pathname: 'link-to/container-detail/example-01',
       search: { from: '1546340400000', to: '1546344000000' },

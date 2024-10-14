@@ -23,8 +23,5 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
-export { FORMATTERS } from '../common/formatters';
-export { InfraFormatterType } from './common/inventory/types';
-
 // Shared components
 export type { InfraClientStartExports } from './types';

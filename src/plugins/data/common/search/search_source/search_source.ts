@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -808,7 +809,7 @@ export class SearchSource {
 
     // set defaults
     const _source =
-      index && !body.hasOwnProperty('_source') ? dataView?.getSourceFiltering() : body._source;
+      index && !Object.hasOwn(body, '_source') ? dataView?.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
@@ -962,7 +963,7 @@ export class SearchSource {
   private getBuiltEsQuery({ index, query = [], filters = [], getConfig, sort }: SearchRequest) {
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
-      srt.hasOwnProperty('_score')
+      Object.hasOwn(srt, '_score')
     );
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),

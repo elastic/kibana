@@ -33,7 +33,7 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 `;
 
 type Props = {
-  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'name'>>;
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'name' | 'supports_agentless'>>;
   selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
@@ -115,10 +115,12 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
         <EuiSelect
           fullWidth
           isLoading={!agentPolicies}
-          options={agentPolicies.map((agentPolicy) => ({
-            value: agentPolicy.id,
-            text: agentPolicy.name,
-          }))}
+          options={agentPolicies
+            .filter((policy) => !policy?.supports_agentless)
+            .map((agentPolicy) => ({
+              value: agentPolicy.id,
+              text: agentPolicy.name,
+            }))}
           value={selectedPolicyId}
           onChange={onChangeCallback}
           aria-label={i18n.translate(

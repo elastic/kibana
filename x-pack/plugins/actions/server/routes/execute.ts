@@ -13,6 +13,7 @@ import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
 
 const paramSchema = schema.object({
   id: schema.string({
@@ -46,12 +47,19 @@ export const executeActionRoute = (
         summary: `Run a connector`,
         description:
           'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.',
-        // You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
         tags: ['oas-tag:connectors'],
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
+          },
+        },
       },
     },
     router.handleLegacyErrors(

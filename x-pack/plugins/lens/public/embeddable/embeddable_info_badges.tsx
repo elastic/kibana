@@ -99,7 +99,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 </EuiTitle>
                 <ul className="lnsEmbeddablePanelFeatureList">
                   {messageGroup.map(({ longMessage }, i) => (
-                    <Fragment key={`${uniqueId}-${i}`}>{longMessage}</Fragment>
+                    <Fragment key={`${uniqueId}-${i}`}>{longMessage as React.ReactNode}</Fragment>
                   ))}
                 </ul>
               </aside>

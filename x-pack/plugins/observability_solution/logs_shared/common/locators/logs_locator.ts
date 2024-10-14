@@ -9,7 +9,6 @@ import { ALL_DATASETS_LOCATOR_ID, AllDatasetsLocatorParams } from '@kbn/deeplink
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 
-import { INFRA_LOGS_LOCATOR_ID } from './infra';
 import { LogsLocatorParams } from './types';
 import { getLogsQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
 
@@ -21,11 +20,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   constructor(private readonly locators: LocatorClient) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
-    const infraLogsLocator = this.locators.get<LogsLocatorParams>(INFRA_LOGS_LOCATOR_ID);
-    if (infraLogsLocator) {
-      return infraLogsLocator.getLocation(params);
-    }
-
     const allDatasetsLocator =
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
     const { time } = params;

@@ -20,7 +20,7 @@ interface LocatorPathConstructionParams {
 
 export const constructDatasetQualityLocatorPath = async (params: LocatorPathConstructionParams) => {
   const {
-    locatorParams: { filters, flyout },
+    locatorParams: { filters },
     useHash,
     managementLocator,
   } = params;
@@ -29,7 +29,6 @@ export const constructDatasetQualityLocatorPath = async (params: LocatorPathCons
     deepCompactObject({
       v: 1,
       filters,
-      flyout,
     })
   );
 

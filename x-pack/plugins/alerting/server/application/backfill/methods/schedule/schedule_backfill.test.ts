@@ -73,6 +73,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
+const fakeRuleName = 'fakeRuleName';
+
 const existingRule = {
   id: '1',
   type: RULE_SAVED_OBJECT_TYPE,
@@ -99,7 +101,7 @@ const existingRule = {
     notifyWhen: null,
     actions: [],
     systemActions: [],
-    name: 'my rule name',
+    name: fakeRuleName,
     revision: 0,
   },
   references: [],
@@ -382,8 +384,8 @@ describe('scheduleBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
-      message: 'User has scheduled backfill for rule [id=1]',
+      kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
+      message: 'User has scheduled backfill for rule [id=1] [name=fakeRuleName]',
     });
     expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
       event: {
@@ -392,8 +394,8 @@ describe('scheduleBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE } },
-      message: 'User has scheduled backfill for rule [id=2]',
+      kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
+      message: 'User has scheduled backfill for rule [id=2] [name=fakeRuleName]',
     });
 
     expect(backfillClient.bulkQueue).toHaveBeenCalledWith({
@@ -578,6 +580,7 @@ describe('scheduleBackfill()', () => {
       await expect(
         rulesClient.scheduleBackfill(mockData)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized"`);
+
       expect(auditLogger?.log).toHaveBeenCalledWith({
         error: { code: 'Error', message: 'Unauthorized' },
         event: {

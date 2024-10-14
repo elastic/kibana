@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server } from 'http';
@@ -43,6 +44,7 @@ describe('Http server', () => {
         enabled: false,
       },
       shutdownTimeout: moment.duration(5, 's'),
+      restrictInternalApis: false,
     } as any;
 
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
@@ -98,8 +100,8 @@ describe('Http server', () => {
       expect(response.header.connection).toBe('close');
     });
 
-    test('any requests triggered while stopping should be rejected with 503', async () => {
-      const [, , response] = await Promise.all([
+    test('any requests triggered while stopping should be rejected', async () => {
+      await Promise.all([
         // Trigger a request that should hold the server from stopping until fulfilled (otherwise the server will stop straight away)
         supertest(innerServerListener).post('/'),
         // Stop the server while the request is in progress
@@ -110,16 +112,11 @@ describe('Http server', () => {
         // Trigger a new request while shutting down (should be rejected)
         (async () => {
           await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
-          return supertest(innerServerListener).post('/');
+          const request = supertest(innerServerListener).post('/');
+          await expect(request).rejects.toThrow('socket hang up');
+          await request.catch((err) => expect(err.code).toBe('ECONNRESET'));
         })(),
       ]);
-      expect(response.status).toBe(503);
-      expect(response.body).toStrictEqual({
-        statusCode: 503,
-        error: 'Service Unavailable',
-        message: 'Kibana is shutting down and not accepting new incoming requests',
-      });
-      expect(response.header.connection).toBe('close');
     });
 
     test('when no ongoing connections, the server should stop without waiting any longer', async () => {

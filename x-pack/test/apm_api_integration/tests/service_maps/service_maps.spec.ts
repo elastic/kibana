@@ -25,32 +25,35 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const metadata = archives_metadata[archiveName];
 
   registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
-    it('is only be available to users with Platinum license (or higher)', async () => {
-      try {
-        await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map`,
-          params: {
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
+    describe('basic license', function () {
+      this.tags('skipFIPS');
+      it('is only be available to users with Platinum license (or higher)', async () => {
+        try {
+          await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map`,
+            params: {
+              query: {
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+              },
             },
-          },
-        });
+          });
 
-        expect(true).to.be(false);
-      } catch (e) {
-        const err = e as ApmApiError;
-        expect(err.res.status).to.be(403);
-        expectSnapshot(err.res.body.message).toMatchInline(
-          `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
-        );
-      }
+          expect(true).to.be(false);
+        } catch (e) {
+          const err = e as ApmApiError;
+          expect(err.res.status).to.be(403);
+          expectSnapshot(err.res.body.message).toMatchInline(
+            `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+          );
+        }
+      });
     });
   });
 
   registry.when('Service Map without data', { config: 'trial', archives: [] }, () => {
-    describe('/internal/apm/service-map', () => {
+    describe('/internal/apm/service-map without data', () => {
       it('returns an empty list', async () => {
         const response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/service-map`,
@@ -68,7 +71,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName} without data', () => {
       let response: ServiceNodeResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -128,7 +131,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   });
 
   registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    describe('/internal/apm/service-map', () => {
+    describe('/internal/apm/service-map with data', () => {
       let response: ServiceMapResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -322,7 +325,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName} with data', () => {
       let response: ServiceNodeResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -371,7 +374,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/dependency', () => {
+    describe('/internal/apm/service-map/dependency with data', () => {
       let response: DependencyResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -416,7 +419,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
 
     describe('With comparison', () => {
-      describe('/internal/apm/service-map/dependency', () => {
+      describe('/internal/apm/service-map/dependency with comparison', () => {
         let response: DependencyResponse;
         before(async () => {
           response = await apmApiClient.readUser({
@@ -467,7 +470,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
       });
 
-      describe('/internal/apm/service-map/service/{serviceName}', () => {
+      describe('/internal/apm/service-map/service/{serviceName} with comparison', () => {
         let response: ServiceNodeResponse;
         before(async () => {
           response = await apmApiClient.readUser({

@@ -146,7 +146,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           size: 100,
           body: {
             query: {
-              match_all: {},
+              bool: {
+                filter: [{ term: { type: 'task' } }],
+              },
             },
           },
         },
@@ -173,7 +175,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           size: 100,
           body: {
             query: {
-              match_all: {},
+              bool: {
+                filter: [{ term: { type: 'task' } }],
+              },
             },
           },
         },
@@ -199,7 +203,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           {
             index: '.kibana_task_manager',
             size: 100,
-            body: { query: { match_all: {} } },
+            body: {
+              query: {
+                bool: {
+                  filter: [{ term: { type: 'task' } }],
+                },
+              },
+            },
           },
           { meta: true }
         );
@@ -232,7 +242,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           {
             index: '.kibana_task_manager',
             size: 100,
-            body: { query: { match_all: {} } },
+            body: {
+              query: {
+                bool: {
+                  filter: [{ term: { type: 'task' } }],
+                },
+              },
+            },
           },
           { meta: true }
         );

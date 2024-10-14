@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server, Request } from '@hapi/hapi';
@@ -14,7 +15,6 @@ import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn
 import type { Duration } from 'moment';
 import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
-// @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -699,6 +699,7 @@ export class HttpServer {
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      security: route.security,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
@@ -720,7 +721,6 @@ export class HttpServer {
         // validation applied in ./http_tools#getServerOptions
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
-        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
         payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
           (x) => x !== undefined
         )

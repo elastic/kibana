@@ -65,7 +65,7 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback(
+  const renderSelectionContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
     (list, search) => {
       return (
         <>
@@ -108,7 +108,9 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
-  const handleOnActiveOptionChange: EuiSelectableProps['onActiveOptionChange'] = useCallback(
+  const handleOnActiveOptionChange = useCallback<
+    NonNullable<EuiSelectableProps['onActiveOptionChange']>
+  >(
     (option) => {
       if (option) {
         dispatch({
@@ -122,9 +124,12 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
-  const handleRenderOption = useCallback((option) => {
-    return <UserCommandInput input={option.label} />;
-  }, []);
+  const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
+    (option) => {
+      return <UserCommandInput input={option.label} />;
+    },
+    []
+  );
 
   // When first loaded, clear out the current text entered, and when this component
   // unloads, if no option from the history was selected, then set the prior text

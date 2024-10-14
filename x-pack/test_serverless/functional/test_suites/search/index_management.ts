@@ -12,7 +12,7 @@ import { testHasEmbeddedConsole } from './embedded_console';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
-    'svlCommonNavigation',
+    'embeddedConsole',
     'common',
     'header',
     'indexManagement',

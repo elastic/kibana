@@ -10,8 +10,7 @@ import type {
   IndicesDataStreamsStatsDataStreamsStatsItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-
-import { streamPartsToIndexPattern } from '../../common/utils';
+import { reduceAsyncChunks } from '../utils/reduce_async_chunks';
 
 class DataStreamService {
   public async getMatchingDataStreams(
@@ -21,34 +20,11 @@ class DataStreamService {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
         name: datasetName,
+        // @ts-expect-error
+        verbose: true,
       });
 
       return dataStreamsInfo;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return [];
-      }
-      throw e;
-    }
-  }
-
-  public async getMatchingDataStreamsStats(
-    esClient: ElasticsearchClient,
-    dataStreamParts: {
-      dataset: string;
-      type: string;
-    }
-  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
-    try {
-      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
-        name: streamPartsToIndexPattern({
-          typePattern: dataStreamParts.type,
-          datasetPattern: dataStreamParts.dataset,
-        }),
-        human: true,
-      });
-
-      return dataStreamsStats;
     } catch (e) {
       if (e.statusCode === 404) {
         return [];
@@ -62,10 +38,11 @@ class DataStreamService {
     dataStreams: string[]
   ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
     try {
-      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
-        name: dataStreams.join(','),
-        human: true,
-      });
+      const { data_streams: dataStreamsStats } = await reduceAsyncChunks(
+        dataStreams,
+        (dataStreamsChunk) =>
+          esClient.indices.dataStreamsStats({ name: dataStreamsChunk.join(','), human: true })
+      );
 
       return dataStreamsStats;
     } catch (e) {
@@ -76,7 +53,7 @@ class DataStreamService {
     }
   }
 
-  public async getDataSteamIndexSettings(
+  public async getDataStreamIndexSettings(
     esClient: ElasticsearchClient,
     dataStream: string
   ): Promise<Awaited<ReturnType<ElasticsearchClient['indices']['getSettings']>>> {

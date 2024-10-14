@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -48,7 +49,7 @@ export const ReputationService = React.memo(
     const checkboxChecked =
       policy.windows.behavior_protection.reputation_service && protectionTurnedOn;
 
-    const handleChange = useCallback(
+    const handleChange = useCallback<EuiCheckboxProps['onChange']>(
       (event) => {
         const newPayload = cloneDeep(policy);
         newPayload.windows.behavior_protection.reputation_service = event.target.checked;

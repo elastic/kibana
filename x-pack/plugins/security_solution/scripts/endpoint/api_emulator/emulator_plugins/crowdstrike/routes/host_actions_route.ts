@@ -17,6 +17,30 @@ export const hostActionsRouteDefinition = (): EmulatorServerRouteDefinition => {
   };
 };
 
+// @ts-expect-error - example of missing action parameter error
+const hostActionsMissingActionParameterError = async () => {
+  return {
+    errors: [
+      {
+        code: 400,
+        message: "Provided data does not match expected 'Action Parameter' format",
+      },
+    ],
+  };
+};
+
+// @ts-expect-error - example of missing agent id error
+const hostActionsInvalidAgentIdError = async () => {
+  return {
+    errors: [
+      {
+        code: 404,
+        message: 'No matching device found for ID wrongAgentId',
+      },
+    ],
+  };
+};
+
 const hostActionsHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
   CrowdstrikeHostActionsParams
@@ -24,7 +48,7 @@ const hostActionsHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
   return {
     resources: [
       {
-        id: 'test',
+        id: 'test_id',
         path: 'test',
       },
     ],

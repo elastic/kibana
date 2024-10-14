@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
@@ -23,7 +25,7 @@ export const FilterGroupContextMenu = () => {
 
   const {
     isViewMode,
-    controlGroupInputUpdates,
+    controlGroupStateUpdates,
     controlGroup,
     switchToViewMode,
     switchToEditMode,
@@ -50,29 +52,31 @@ export const FilterGroupContextMenu = () => {
   );
 
   const resetSelection = useCallback(async () => {
-    if (!controlGroupInputUpdates) return;
-
+    if (!controlGroupStateUpdates) return;
     // remove existing embeddables
-    controlGroup?.updateInput({
-      panels: {},
-    });
+
+    const newInput = { initialChildControlState: {} };
 
     for (let counter = 0; counter < initialControls.length; counter++) {
       const control = initialControls[counter];
-      await controlGroup?.addOptionsListControl({
-        controlId: String(counter),
-        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-        // option List controls will handle an invalid dataview
-        // & display an appropriate message
-        dataViewId: dataViewId ?? '',
-        ...control,
-      });
+      controlGroupStateBuilder.addOptionsListControl(
+        newInput,
+        {
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+          // option List controls will handle an invalid dataview
+          // & display an appropriate message
+          dataViewId: dataViewId ?? '',
+          ...control,
+        },
+        String(counter)
+      );
+      controlGroup?.updateInput(newInput);
     }
 
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [
-    controlGroupInputUpdates,
+    controlGroupStateUpdates,
     controlGroup,
     initialControls,
     dataViewId,

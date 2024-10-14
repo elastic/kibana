@@ -61,21 +61,22 @@ export const forceStartDatafeedSchema = schema.object({
   end: schema.maybe(schema.number()),
 });
 
+const jobIds = {
+  jobIds: schema.arrayOf(schema.string(), { meta: { description: 'List of job IDs.' } }),
+};
+
 export const jobIdsSchema = schema.object({
-  /** List of job IDs. */
-  jobIds: schema.arrayOf(schema.string()),
+  ...jobIds,
 });
 
 export const deleteJobsSchema = schema.object({
-  /** List of job IDs. */
-  jobIds: schema.arrayOf(schema.string()),
+  ...jobIds,
   deleteUserAnnotations: schema.maybe(schema.boolean()),
   deleteAlertingRules: schema.maybe(schema.boolean()),
 });
 
 export const optionalJobIdsSchema = schema.object({
-  /** Optional list of job IDs. */
-  jobIds: schema.maybe(schema.arrayOf(schema.string())),
+  jobIds: schema.maybe(jobIds.jobIds),
 });
 
 export const lookBackProgressSchema = {

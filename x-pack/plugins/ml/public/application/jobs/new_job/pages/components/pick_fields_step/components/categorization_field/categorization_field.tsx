@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { CategorizationFieldSelect } from './categorization_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type {
   AdvancedJobCreator,
   CategorizationJobCreator,
@@ -21,7 +21,7 @@ import { Description } from './description';
 export const CategorizationField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
-  const { catFields } = newJobCapsService;
+  const { catFields } = useNewJobCapsService();
   const [categorizationFieldName, setCategorizationFieldName] = useState(
     jobCreator.categorizationFieldName
   );

@@ -94,7 +94,15 @@
     "@kbn/search-types",
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/security-solution-common",
+    "@kbn/router-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/react-hooks",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

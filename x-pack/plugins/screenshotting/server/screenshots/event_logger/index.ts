@@ -6,11 +6,11 @@
  */
 
 import { Logger, LogMeta } from '@kbn/core/server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
-import { ConfigType } from '../../config';
 import { ElementPosition } from '../get_element_position_data';
 import type { Screenshot } from '../types';
 

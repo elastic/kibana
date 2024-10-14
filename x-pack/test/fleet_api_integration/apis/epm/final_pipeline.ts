@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
@@ -24,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   function indexUsingApiKey(body: any, apiKey: string): Promise<{ body: Record<string, unknown> }> {
     const supertestWithoutAuth = getService('esSupertestWithoutAuth');
@@ -38,30 +38,22 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    setupFleetAndAgents(providerContext);
-
-    // Use the custom log package to test the fleet final pipeline
-    before(async () => {
+      await fleetAndAgents.setup();
+      // Use the custom log package to test the fleet final pipeline
       await supertest
         .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
+
     after(async () => {
       await supertest
         .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
-    });
-
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    after(async () => {
       const res = await es.search({
         index: TEST_INDEX,
       });

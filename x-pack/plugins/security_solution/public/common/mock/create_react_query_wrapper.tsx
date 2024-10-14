@@ -8,7 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-export function createReactQueryWrapper(): React.FC {
+export function createReactQueryWrapper(): React.FC<React.PropsWithChildren<{}>> {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

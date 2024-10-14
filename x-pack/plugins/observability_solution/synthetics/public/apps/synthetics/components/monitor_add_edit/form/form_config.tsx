@@ -19,6 +19,7 @@ const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   }),
   components: [
     FIELD(readOnly)[ConfigKey.TAGS],
+    FIELD(readOnly)[ConfigKey.LABELS],
     FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
     FIELD(readOnly)[ConfigKey.NAMESPACE],
   ],
@@ -147,6 +148,7 @@ export const BROWSER_ADVANCED = (readOnly: boolean) => [
       FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
       FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
       FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
+      FIELD(readOnly)[ConfigKey.PARAMS],
     ],
   },
 ];
@@ -247,6 +249,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
         ...DEFAULT_DATA_OPTIONS(readOnly),
         components: [
           FIELD(readOnly)[ConfigKey.TAGS],
+          FIELD(readOnly)[ConfigKey.LABELS],
           FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
           FIELD(readOnly)[ConfigKey.SCREENSHOTS],
           FIELD(readOnly)[ConfigKey.NAMESPACE],
@@ -272,6 +275,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
         ...DEFAULT_DATA_OPTIONS(readOnly),
         components: [
           FIELD(readOnly)[ConfigKey.TAGS],
+          FIELD(readOnly)[ConfigKey.LABELS],
           FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
           FIELD(readOnly)[ConfigKey.SCREENSHOTS],
           FIELD(readOnly)[ConfigKey.NAMESPACE],

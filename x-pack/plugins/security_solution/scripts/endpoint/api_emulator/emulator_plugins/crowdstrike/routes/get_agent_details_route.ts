@@ -21,6 +21,29 @@ export const getAgentDetailsRouteDefinition = (): EmulatorServerRouteDefinition 
   };
 };
 
+// @ts-expect-error - example of missing file error
+const getAgentDetailsMissingIdsError = async () => {
+  return {
+    errors: [
+      {
+        code: 400,
+        message: "The 'ids' parameter must be present at least once.",
+      },
+    ],
+  };
+};
+// @ts-expect-error - example of missing file error
+const getAgentDetailsInvalidIdsError = async () => {
+  return {
+    errors: [
+      {
+        code: 400,
+        message: 'invalid device id [asdasd]',
+      },
+    ],
+  };
+};
+
 const getAgentDetailsHandler: ExternalEdrServerEmulatorRouteHandlerMethod<{}> = async () => {
   return createCrowdstrikeGetAgentsApiResponseMock([createCrowdstrikeAgentDetailsMock({})]);
 };

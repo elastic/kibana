@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
@@ -31,7 +31,7 @@ import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './rule/apis/resolve';
 import { ruleTypesRoute } from './rule_types';
-import { muteAllRuleRoute } from './mute_all_rule';
+import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
@@ -79,6 +79,7 @@ export interface RouteOptions {
   getAlertIndicesAlias?: GetAlertIndicesAlias;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
+  isServerless?: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {

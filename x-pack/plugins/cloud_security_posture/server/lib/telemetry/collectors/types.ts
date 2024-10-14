@@ -6,7 +6,7 @@
  */
 
 import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
-import { CspStatusCode } from '../../../../common/types_old';
+import { CspStatusCode } from '@kbn/cloud-security-posture-common';
 
 export type CloudSecurityUsageCollectorType =
   | 'Indices'

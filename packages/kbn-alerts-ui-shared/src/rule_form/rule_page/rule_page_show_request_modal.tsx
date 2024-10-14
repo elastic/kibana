@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -24,7 +25,7 @@ import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { RuleFormData } from '../types';
 import {
   CreateRuleBody,
-  UPDATE_FIELDS,
+  UPDATE_FIELDS_WITH_ACTIONS,
   UpdateRuleBody,
   transformCreateRuleBody,
   transformUpdateRuleBody,
@@ -40,7 +41,7 @@ const stringifyBodyRequest = ({
 }): string => {
   try {
     const request = isEdit
-      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS) as UpdateRuleBody)
+      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
       : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
   } catch {

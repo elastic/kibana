@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiSelectProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
-  EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -50,37 +50,21 @@ const StyledLabelAppend = styled(EuiFlexItem)`
 const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
-  .euiFormControlLayout {
-    max-width: auto;
-    width: auto;
-  }
-
-  .euiFormControlLayout__childrenWrapper > *:first-child {
-    box-shadow: none;
-    height: 38px;
-    width: 100%;
-  }
-
-  .euiFormControlLayout__childrenWrapper > select {
-    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-
-  .euiFormControlLayout--group .euiFormControlLayout {
-    min-width: 100px;
+  .euiFormControlLayout__append {
+    padding-inline: 0 !important;
   }
 
   .euiFormControlLayoutIcons {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
-
-  .euiFormControlLayout:not(:first-child) {
-    border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  }
 `;
 
 const MyEuiSelect = styled(EuiSelect)`
-  width: auto;
+  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+  background: ${({ theme }) =>
+    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
+  color: ${({ theme }) => theme.eui.euiColorPrimary};
+  box-shadow: none;
 `;
 
 const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
@@ -106,7 +90,7 @@ export const ScheduleItem = ({
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
 
-  const onChangeTimeType = useCallback(
+  const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       setTimeType(e.target.value);
       setValue(`${timeVal}${e.target.value}`);
@@ -114,7 +98,7 @@ export const ScheduleItem = ({
     [setValue, timeVal]
   );
 
-  const onChangeTimeVal = useCallback(
+  const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
       const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);
@@ -172,10 +156,10 @@ export const ScheduleItem = ({
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiFormControlLayout
+      <EuiFieldNumber
         append={
           <MyEuiSelect
-            fullWidth={false}
+            fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
             value={timeType}
@@ -184,17 +168,14 @@ export const ScheduleItem = ({
             {...rest}
           />
         }
-      >
-        <EuiFieldNumber
-          fullWidth
-          min={minimumValue}
-          max={Number.MAX_SAFE_INTEGER}
-          onChange={onChangeTimeVal}
-          value={timeVal}
-          data-test-subj="interval"
-          {...rest}
-        />
-      </EuiFormControlLayout>
+        fullWidth
+        min={minimumValue}
+        max={Number.MAX_SAFE_INTEGER}
+        onChange={onChangeTimeVal}
+        value={timeVal}
+        data-test-subj="interval"
+        {...rest}
+      />
     </StyledEuiFormRow>
   );
 };

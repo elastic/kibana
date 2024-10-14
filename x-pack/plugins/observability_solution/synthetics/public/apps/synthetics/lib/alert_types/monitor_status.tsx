@@ -16,7 +16,8 @@ import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
-import type { AlertTypeInitializer } from '.';
+import type { AlertTypeInitializer } from './types';
+
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 
@@ -40,7 +41,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
   format: ({ fields }) => {
     return {
       reason: fields[ALERT_REASON] || '',

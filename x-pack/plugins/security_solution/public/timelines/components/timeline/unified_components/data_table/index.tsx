@@ -186,7 +186,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const onColumnResize = useCallback(
-      ({ columnId, width }: { columnId: string; width: number }) => {
+      ({ columnId, width }: { columnId: string; width?: number }) => {
         dispatch(
           timelineActions.updateColumnWidth({
             columnId,
@@ -198,14 +198,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const onResizeDataGrid = useCallback(
+    const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
       (colSettings) => {
-        onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
+        onColumnResize({
+          columnId: colSettings.columnId,
+          ...(colSettings.width ? { width: Math.round(colSettings.width) } : {}),
+        });
       },
       [onColumnResize]
     );
 
-    const onChangeItemsPerPage = useCallback(
+    const onChangeItemsPerPage = useCallback<
+      NonNullable<UnifiedDataTableProps['onUpdateRowsPerPage']>
+    >(
       (itemsChangedPerPage) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
@@ -326,15 +331,21 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         visibleRowData,
         visibleColumns,
         setCustomGridBodyProps,
+        gridWidth,
+        headerRow,
+        footerRow,
       }: EuiDataGridCustomBodyProps) => (
         <CustomTimelineDataGridBody
           rows={tableRows}
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
           rowHeight={rowHeight}
+          gridWidth={gridWidth}
           refetch={refetch}
         />
       ),

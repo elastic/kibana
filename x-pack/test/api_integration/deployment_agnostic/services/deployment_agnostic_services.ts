@@ -15,6 +15,7 @@ import { services as apiIntegrationServices } from '../../services';
 export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
   'supertest', // TODO: review its behaviour
   'es',
+  'esDeleteAllIndices', // TODO: review its behaviour
   'esArchiver',
   'esSupertest', // TODO: review its behaviour
   'indexPatterns',

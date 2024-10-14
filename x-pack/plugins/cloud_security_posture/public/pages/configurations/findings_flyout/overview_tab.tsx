@@ -18,19 +18,19 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+} from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import {
-  INTERNAL_FEATURE_FLAGS,
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-} from '../../../../common/constants';
-import { useDataView } from '../../../common/api/use_data_view';
+import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import {
   BenchmarkIcons,
   CodeBlock,
@@ -107,11 +107,10 @@ const getDetailsList = (
     description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
-      defaultMessage: 'Source',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle', {
+      defaultMessage: 'Vendor',
     }),
-    description:
-      getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
+    description: getVendorName(data) || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {

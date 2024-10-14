@@ -26,6 +26,7 @@ import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
@@ -94,9 +95,10 @@ declare type BasicTableColumns =
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns
-  | UsersTableColumns;
+  | UsersTableColumns
+  | EntitiesListColumns;
 
-declare type SiemTables = BasicTableProps<BasicTableColumns>;
+export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {
@@ -307,7 +309,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 onChange={onChange}
                 sorting={tableSorting}
               />
-              <FooterAction justifyContent="space-between">
+              <FooterAction justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&

@@ -260,6 +260,9 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                intended_timestamp: {
+                  type: 'date',
+                },
                 rule: {
                   properties: {
                     category: {

@@ -6,6 +6,7 @@
  */
 
 import { get, set } from 'lodash';
+import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 
@@ -20,6 +21,28 @@ const allOsValues = [
   PolicyOperatingSystem.mac,
   PolicyOperatingSystem.linux,
   PolicyOperatingSystem.windows,
+];
+
+const getPolicyPopupReference = (): Array<{
+  keyPath: string;
+  osList: PolicyOperatingSystem[];
+}> => [
+  {
+    keyPath: 'popup.malware.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.memory_protection.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.behavior_protection.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.ransomware.message',
+    osList: [PolicyOperatingSystem.windows],
+  },
 ];
 
 export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
@@ -210,3 +233,28 @@ export function isBillablePolicy(policy: PolicyConfig) {
 
   return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
 }
+
+export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.some(({ keyPath, osList }) => {
+    return osList.some((osValue) => {
+      const fullKeyPathForOs = `${osValue}.${keyPath}`;
+      const currentValue = get(policy, fullKeyPathForOs);
+      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+    });
+  });
+};
+
+export const resetCustomNotifications = (
+  customNotification = DefaultPolicyNotificationMessage
+): Partial<PolicyConfig> => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.reduce((acc, { keyPath, osList }) => {
+    osList.forEach((osValue) => {
+      set(acc, `${osValue}.${keyPath}`, customNotification);
+    });
+    return acc;
+  }, {});
+};

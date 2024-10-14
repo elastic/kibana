@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
-import { CspClientPluginStartDeps } from '../../types';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { TestProvider } from '../test_provider';
 import { getMockServerDependencies } from './mock_server';
 interface MockServerDependencies {

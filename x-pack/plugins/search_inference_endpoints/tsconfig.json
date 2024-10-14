@@ -29,7 +29,8 @@
     "@kbn/doc-links",
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/features-plugin"
   ],
   "exclude": [
     "target/**/*",

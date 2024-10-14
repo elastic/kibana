@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodError } from 'zod';
+import { ZodError } from '@kbn/zod';
 
 import { Direction } from '../../../../../common/search_strategy';
 import * as buildQuery from './query.first_or_last_seen.dsl';

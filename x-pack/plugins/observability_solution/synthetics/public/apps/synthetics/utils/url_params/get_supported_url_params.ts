@@ -7,8 +7,6 @@
 
 import { MonitorOverviewState } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
-import { parseIsPaused } from './parse_is_paused';
-import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
@@ -16,8 +14,6 @@ import { parseAbsoluteDate } from './parse_absolute_date';
 export interface SyntheticsUrlParams {
   absoluteDateRangeStart: number;
   absoluteDateRangeEnd: number;
-  refreshInterval: number;
-  refreshPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination?: string;
@@ -43,8 +39,7 @@ export interface SyntheticsUrlParams {
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
   CLIENT_DEFAULTS;
 
-const { DATE_RANGE_START, DATE_RANGE_END, AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } =
-  CLIENT_DEFAULTS_SYNTHETICS;
+const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
 /**
  * Gets the current URL values for the application. If no item is present
@@ -76,8 +71,6 @@ export const getSupportedUrlParams = (params: {
   });
 
   const {
-    refreshInterval,
-    refreshPaused,
     dateRangeStart,
     dateRangeEnd,
     filters,
@@ -112,8 +105,6 @@ export const getSupportedUrlParams = (params: {
       ABSOLUTE_DATE_RANGE_END,
       { roundUp: true }
     ),
-    refreshInterval: parseUrlInt(refreshInterval, AUTOREFRESH_INTERVAL_SECONDS),
-    refreshPaused: parseIsPaused(refreshPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,

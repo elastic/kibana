@@ -25,7 +25,7 @@ const customPipeline = {
 };
 const defaultRequest = {
   pipeline: customPipeline,
-  rawSamples: integrationSettings.logsSampleParsed!,
+  rawSamples: integrationSettings.logSamples!,
 };
 const mockRunCheckPipelineResults = jest.fn((_: unknown) => ({ results: mockResults }));
 jest.mock('../../../../../common/lib/api', () => ({
@@ -44,7 +44,7 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>

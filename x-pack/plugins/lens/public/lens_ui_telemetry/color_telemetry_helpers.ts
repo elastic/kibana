@@ -9,7 +9,7 @@ import { ColorMapping, NeutralPalette, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@k
 import { isEqual } from 'lodash';
 import { nonNullable } from '../utils';
 
-const COLOR_MAPPING_PREFIX = 'lens_color_mapping_';
+const COLOR_MAPPING_PREFIX = 'color_mapping_';
 
 export const getColorMappingTelemetryEvents = (
   colorMapping: ColorMapping.Config | undefined,

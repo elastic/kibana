@@ -13,7 +13,7 @@ import {
   type CategoryFieldExample,
   type FieldExampleCheck,
 } from '@kbn/ml-category-validator';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -33,6 +33,7 @@ interface Props {
 export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [loadingData, setLoadingData] = useState(false);
   const [ccsVersionFailure, setCcsVersionFailure] = useState(false);
@@ -102,7 +103,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
         setFieldExamples(null);
         setValidationChecks([]);
         setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setCcsVersionFailure(false);
       }
     } else {

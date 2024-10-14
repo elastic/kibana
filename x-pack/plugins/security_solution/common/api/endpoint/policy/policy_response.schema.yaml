@@ -5,7 +5,7 @@ info:
 paths:
   /api/endpoint/policy_response:
     get:
-      summary: Get Policy Response schema
+      summary: Get a policy response
       operationId: GetPolicyResponse
       x-codegen-enabled: true
       x-labels: [ess, serverless]

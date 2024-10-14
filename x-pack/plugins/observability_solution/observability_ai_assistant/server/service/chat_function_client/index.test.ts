@@ -34,7 +34,8 @@ describe('chatFunctionClient', () => {
             required: ['foo'],
           },
         },
-        respondFn
+        respondFn,
+        ['all']
       );
     });
 
@@ -48,6 +49,8 @@ describe('chatFunctionClient', () => {
           }),
           messages: [],
           signal: new AbortController().signal,
+          connectorId: 'foo',
+          useSimulatedFunctionCalling: false,
         });
       }).rejects.toThrowError(`Function arguments are invalid`);
 
@@ -107,6 +110,8 @@ describe('chatFunctionClient', () => {
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
         signal: new AbortController().signal,
+        connectorId: 'foo',
+        useSimulatedFunctionCalling: false,
       });
 
       expect(result).toEqual({

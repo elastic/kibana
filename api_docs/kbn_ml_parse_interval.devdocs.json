@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/ml-parse-interval",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-parse-interval",
+        "id": "def-common.parseInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "parseInterval",
+        "description": [
+          "\nParses an interval string, such as 7d, 1h, or 30m to a moment duration.\nOptionally carries out an additional check that the interval is supported as a\ntime unit by Elasticsearch, as units greater than 'd' for example cannot be used\nfor anomaly detection job bucket spans.\n\nDiffers from the Kibana ui/utils/parse_interval in the following ways:\n1. A value-less interval such as 'm' is not allowed - in line with the ML back-end\n   not accepting such interval strings for the bucket span of a job.\n2. Zero length durations 0ms, 0s, 0m, and 0h are accepted as-is.\n   Note that when adding or subtracting fractional durations, moment is only designed\n   to work with units less than 'day'.\n3. Fractional intervals e.g. 1.5h or 4.5d are not allowed, in line with the behaviour\n   of the Elasticsearch date histogram aggregation.\n"
+        ],
+        "signature": [
+          "(interval: string | number, checkValidEsUnit: boolean) => moment.Duration | null"
+        ],
+        "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-parse-interval",
+            "id": "def-common.parseInterval.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "- The interval to parse."
+            ],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-parse-interval",
+            "id": "def-common.parseInterval.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "checkValidEsUnit",
+            "description": [
+              "- Optional. Specifies whether to check if the unit is a valid Elasticsearch duration unit. Default is false."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The parsed Duration object, or null if the interval is invalid."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

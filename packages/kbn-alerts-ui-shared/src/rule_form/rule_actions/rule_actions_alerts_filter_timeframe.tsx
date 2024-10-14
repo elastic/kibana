@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment, { Moment } from 'moment';
@@ -23,9 +24,10 @@ import {
 import deepEqual from 'fast-deep-equal';
 import { ISO_WEEKDAYS, type IsoWeekday, type AlertsFilterTimeframe } from '@kbn/alerting-types';
 import { I18N_WEEKDAY_OPTIONS_DDD } from '../../common/constants';
+import { RuleAction } from '../../common';
 
-interface RuleActionsAlertsFilterTimeframeProps {
-  state?: AlertsFilterTimeframe;
+export interface RuleActionsAlertsFilterTimeframeProps {
+  action: RuleAction;
   settings: SettingsStart;
   onChange: (update?: AlertsFilterTimeframe) => void;
 }
@@ -75,29 +77,30 @@ const useTimeFormat = (settings: SettingsStart) => {
 };
 
 export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterTimeframeProps> = ({
-  state,
+  action,
   settings,
   onChange,
 }) => {
+  const actionTimeFrame = action.alertsFilter?.timeframe;
   const timeFormat = useTimeFormat(settings);
   const [timeframe, setTimeframe] = useTimeframe({
-    initialTimeframe: state,
+    initialTimeframe: actionTimeFrame,
     settings,
   });
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
 
-  const timeframeEnabled = useMemo(() => Boolean(state), [state]);
+  const timeframeEnabled = useMemo(() => Boolean(actionTimeFrame), [actionTimeFrame]);
 
   const weekdayOptions = useSortedWeekdayOptions(settings);
 
   useEffect(() => {
     const nextState = timeframeEnabled ? timeframe : undefined;
-    if (!deepEqual(state, nextState)) onChange(nextState);
-  }, [timeframeEnabled, timeframe, state, onChange]);
+    if (!deepEqual(actionTimeFrame, nextState)) onChange(nextState);
+  }, [timeframeEnabled, timeframe, actionTimeFrame, onChange]);
 
   const toggleTimeframe = useCallback(
-    () => onChange(state ? undefined : timeframe),
-    [state, timeframe, onChange]
+    () => onChange(actionTimeFrame ? undefined : timeframe),
+    [actionTimeFrame, timeframe, onChange]
   );
   const updateTimeframe = useCallback(
     (update: Partial<AlertsFilterTimeframe>) => {
@@ -142,7 +145,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
   );
 
   const onChangeTimezone = useCallback(
-    (value) => {
+    (value: Array<{ label: string }>) => {
       setSelectedTimezone(value);
       if (value[0].label) updateTimeframe({ timezone: value[0].label });
     },

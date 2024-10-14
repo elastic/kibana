@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './setup_jest_mocks';
 import { of } from 'rxjs';
 import type {
@@ -112,7 +114,7 @@ describe('builds navigation tree', () => {
 
       const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
       accordionToggleButton.click();
-      expect(navigateToUrl).not.toHaveBeenCalled();
+      expect(navigateToUrl).not.toHaveBeenCalled(); // Should not navigate to the href
       unmount();
     }
 
@@ -133,6 +135,85 @@ describe('builds navigation tree', () => {
       accordionToggleButton.click();
 
       expect(navigateToUrl).toHaveBeenCalledWith('/app/foo'); // Should navigate to the href
+    }
+  });
+
+  test('should render panel opener groups as accordion when the sideNav is collapsed', async () => {
+    const panelOpenerNode: ChromeProjectNavigationNode = {
+      id: 'nestedGroup1',
+      title: 'Nested Group 1',
+      path: 'group1.nestedGroup1',
+      renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
+    };
+
+    const nodes: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      children: [panelOpenerNode],
+    };
+
+    {
+      // Side nav is collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: true },
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']); // 2 accordion buttons
+
+      unmount();
+    }
+
+    {
+      // Side nav is not collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: false }, // No conversion to accordion
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
+    }
+
+    {
+      // Panel opener with a link
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [
+            {
+              ...nodes,
+              children: [
+                {
+                  ...panelOpenerNode,
+                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
+                },
+              ],
+            },
+          ],
+        }),
+        services: { isSideNavCollapsed: true }, // SideNav is collapsed
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
     }
   });
 

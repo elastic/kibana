@@ -45,6 +45,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'name',
     'description',
     'namespace',
+    'space_ids',
     'monitoring_enabled',
     'unenroll_timeout',
     'inactivity_timeout',
@@ -56,6 +57,9 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'is_protected',
     'advanced_settings',
     'global_data_tags',
+    'monitoring_pprof_enabled',
+    'monitoring_http',
+    'monitoring_diagnostics',
   ]);
 
 const FormWrapper = styled.div`
@@ -240,6 +244,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           Object.keys(validation).length > 0 ||
                           hasAdvancedSettingsErrors
                         }
+                        data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"
                         color="primary"
                         fill

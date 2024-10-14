@@ -29,7 +29,7 @@ import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-compon
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-type ContextMenuItem = EuiContextMenuPanelItemDescriptor & { content?: ReactNode };
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & { content?: ReactNode };
 
 interface ContextMenuProps {
   items: ContextMenuItem[];

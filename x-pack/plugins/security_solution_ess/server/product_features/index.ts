@@ -10,11 +10,13 @@ import type { ProductFeaturesConfigurator } from '@kbn/security-solution-plugin/
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
+import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
 
 export const getProductProductFeaturesConfigurator = (
   enabledProductFeatureKeys: ProductFeatureKeys
 ): ProductFeaturesConfigurator => {
   return {
+    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
     security: getSecurityProductFeaturesConfigurator(enabledProductFeatureKeys),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),

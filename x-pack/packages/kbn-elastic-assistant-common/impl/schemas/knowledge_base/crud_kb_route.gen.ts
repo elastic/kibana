@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * AI assistant KnowledgeBase.
@@ -26,6 +26,15 @@ export const KnowledgeBaseResponse = z.object({
    */
   success: z.boolean().optional(),
 });
+
+export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
+export const CreateKnowledgeBaseRequestQuery = z.object({
+  /**
+   * Optional ELSER modelId to use when setting up the Knowledge Base
+   */
+  modelId: z.string().optional(),
+});
+export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
 export const CreateKnowledgeBaseRequestParams = z.object({
@@ -67,9 +76,9 @@ export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBa
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
 export const ReadKnowledgeBaseResponse = z.object({
   elser_exists: z.boolean().optional(),
-  esql_exists: z.boolean().optional(),
   index_exists: z.boolean().optional(),
   is_setup_available: z.boolean().optional(),
   is_setup_in_progress: z.boolean().optional(),
   pipeline_exists: z.boolean().optional(),
+  security_labs_exists: z.boolean().optional(),
 });

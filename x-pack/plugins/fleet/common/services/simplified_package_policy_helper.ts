@@ -41,8 +41,9 @@ export type SimplifiedInputs = Record<
 
 export interface SimplifiedPackagePolicy {
   id?: string;
-  policy_id?: string;
+  policy_id?: string | null;
   policy_ids: string[];
+  output_id?: string;
   namespace: string;
   name: string;
   description?: string;
@@ -147,6 +148,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   const {
     policy_id: policyId,
     policy_ids: policyIds,
+    output_id: outputId,
     namespace,
     name,
     description,
@@ -160,6 +162,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     name,
     description
   );
+
+  if (outputId) {
+    packagePolicy.output_id = outputId;
+  }
 
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =

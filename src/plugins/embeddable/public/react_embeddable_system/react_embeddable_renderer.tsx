@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -65,6 +66,7 @@ export const ReactEmbeddableRenderer = <
     | 'showBorder'
     | 'showBadges'
     | 'showNotifications'
+    | 'hideLoader'
     | 'hideHeader'
     | 'hideInspector'
   >;
@@ -100,22 +102,10 @@ export const ReactEmbeddableRenderer = <
        */
       return (async () => {
         const parentApi = getParentApi();
-        const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
         const subscriptions = new Subscription();
 
-        const setApi = (
-          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
-        ) => {
-          return {
-            ...apiRegistration,
-            uuid,
-            phase$,
-            parentApi,
-            type: factory.type,
-          } as unknown as Api;
-        };
-
         const buildEmbeddable = async () => {
+          const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
@@ -128,6 +118,18 @@ export const ReactEmbeddableRenderer = <
             : ({} as Partial<RuntimeState>);
 
           const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
+
+          const setApi = (
+            apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
+          ) => {
+            return {
+              ...apiRegistration,
+              uuid,
+              phase$,
+              parentApi,
+              type: factory.type,
+            } as unknown as Api;
+          };
 
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<
@@ -177,7 +179,10 @@ export const ReactEmbeddableRenderer = <
               ...unsavedChanges.api,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
-            cleanupFunction.current = () => unsavedChanges.cleanup();
+            cleanupFunction.current = () => {
+              subscriptions.unsubscribe();
+              unsavedChanges.cleanup();
+            };
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 

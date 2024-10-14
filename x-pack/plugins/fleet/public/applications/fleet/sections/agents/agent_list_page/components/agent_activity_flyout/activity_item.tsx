@@ -55,7 +55,7 @@ export const ActivityItem: React.FunctionComponent<{
                 ? action.nbAgentsAck
                 : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
             agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-            completedText: getAction(action.type).completedText,
+            completedText: getAction(action.type, action.actionId).completedText,
             offlineText:
               action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
                 ? `, ${
@@ -175,7 +175,7 @@ export const ActivityItem: React.FunctionComponent<{
             id="xpack.fleet.agentActivityFlyout.cancelledTitle"
             defaultMessage="Agent {cancelledText} cancelled"
             values={{
-              cancelledText: getAction(action.type).cancelledText,
+              cancelledText: getAction(action.type, action.actionId).cancelledText,
             }}
           />
         </EuiText>
@@ -201,7 +201,7 @@ export const ActivityItem: React.FunctionComponent<{
             id="xpack.fleet.agentActivityFlyout.expiredTitle"
             defaultMessage="Agent {expiredText} expired"
             values={{
-              expiredText: getAction(action.type).cancelledText,
+              expiredText: getAction(action.type, action.actionId).cancelledText,
             }}
           />
         </EuiText>

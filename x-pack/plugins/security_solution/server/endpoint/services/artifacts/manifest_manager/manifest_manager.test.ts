@@ -84,9 +84,11 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
-    jest.fn(async function* () {
-      yield items;
-    });
+    jest.fn(async () =>
+      jest.fn(async function* () {
+        yield items;
+      })()
+    );
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
@@ -909,7 +911,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`when it has endpoint artifact management and response actions app features it should generate all exceptions`, async () => {
+    test(`when it has endpoint artifact management and endpoint host isolation exceptions app features it should generate all exceptions`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -929,7 +931,7 @@ describe('ManifestManager', () => {
       });
       const context = buildManifestManagerContextMock({}, [
         ProductFeatureSecurityKey.endpointArtifactManagement,
-        ProductFeatureSecurityKey.endpointResponseActions,
+        ProductFeatureSecurityKey.endpointHostIsolationExceptions,
       ]);
       const manifestManager = new ManifestManager(context);
 
@@ -1265,9 +1267,11 @@ describe('ManifestManager', () => {
 
   describe('tryDispatch', () => {
     const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
-      jest.fn(async function* () {
-        yield items;
-      });
+      jest.fn(async () =>
+        jest.fn(async function* () {
+          yield items;
+        })()
+      );
 
     test(`Should not dispatch if no policies`, async () => {
       const context = buildManifestManagerContextMock({});

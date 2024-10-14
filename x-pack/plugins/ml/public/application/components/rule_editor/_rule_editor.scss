@@ -34,7 +34,7 @@
 
   // SASSTODO: Dangerous EUI overwrite
   .scope-enable-checkbox {
-    .euiCheckbox__input[disabled] ~ .euiCheckbox__label {
+    .euiCheckbox__label {
       color: inherit;
     }
   }

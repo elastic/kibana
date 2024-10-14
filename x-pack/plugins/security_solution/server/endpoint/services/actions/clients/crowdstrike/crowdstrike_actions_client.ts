@@ -70,9 +70,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     LogsEndpointAction<TParameters, TOutputContent, TMeta & CrowdstrikeActionRequestCommonMeta>
   > {
     const agentId = actionRequest.endpoint_ids[0];
-    const eventDetails = await this.getEventDetailsById(agentId);
+    const hostname = await this.getHostNameByAgentId(agentId);
 
-    const hostname = eventDetails.host.name;
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
@@ -124,13 +123,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
-  private async getEventDetailsById(agentId: string): Promise<{
-    host: { name: string };
-  }> {
+  private async getHostNameByAgentId(agentId: string): Promise<string> {
     const search = {
-      index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
+      // Multiple indexes:  .falcon, .fdr, .host, .alert
+      index: ['logs-crowdstrike*'],
       size: 1,
-      _source: ['host.name'],
+      _source: ['host.hostname', 'host.name'],
       body: {
         query: {
           bool: {
@@ -140,13 +138,14 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       },
     };
     try {
-      const result: SearchResponse<{ host: { name: string } }> =
-        await this.options.esClient.search<{ host: { name: string } }>(search, {
+      const result: SearchResponse<{ host: { name: string; hostname: string } }> =
+        await this.options.esClient.search<{ host: { name: string; hostname: string } }>(search, {
           ignore: [404],
         });
 
       // Check if host name exists
-      const hostName = result.hits.hits?.[0]?._source?.host?.name;
+      const host = result.hits.hits?.[0]?._source?.host;
+      const hostName = host?.name || host?.hostname;
       if (!hostName) {
         throw new ResponseActionsClientError(
           `Host name not found in the event document for agentId: ${agentId}`,
@@ -154,7 +153,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         );
       }
 
-      return result.hits.hits[0]._source as { host: { name: string } };
+      return hostName;
     } catch (err) {
       throw new ResponseActionsClientError(
         `Failed to fetch event document: ${err.message}`,

@@ -17,6 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 import type {
@@ -134,27 +135,36 @@ export function createAddFieldStatsTableAction(
     id: 'create-field-stats-table',
     grouping: COMMON_VISUALIZATION_GROUPING,
     order: 10,
-    getIconType: () => 'inspect',
+    getIconType: () => 'fieldStatistics',
     getDisplayName: () =>
       i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
         defaultMessage: 'Field statistics',
       }),
+    disabled: !coreStart.uiSettings.get(ENABLE_ESQL),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      return (
+        Boolean(await parentApiIsCompatible(context.embeddable)) &&
+        coreStart.uiSettings.get(ENABLE_ESQL)
+      );
     },
     async execute(context) {
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
+      const isEsqlEnabled = coreStart.uiSettings.get(ENABLE_ESQL);
       try {
         const defaultIndexPattern = await pluginStart.data.dataViews.getDefault();
-        const defaultInitialState: FieldStatsInitialState = {
-          viewType: FieldStatsInitializerViewType.ESQL,
-          query: {
-            // Initial default query
-            esql: `from ${defaultIndexPattern?.getIndexPattern()} | limit 10`,
-          },
-        };
+        const defaultInitialState: FieldStatsInitialState = isEsqlEnabled
+          ? {
+              viewType: FieldStatsInitializerViewType.ESQL,
+              query: {
+                // Initial default query
+                esql: `from ${defaultIndexPattern?.getIndexPattern()} | limit 10`,
+              },
+            }
+          : {
+              viewType: FieldStatsInitializerViewType.DATA_VIEW,
+            };
         const embeddable = await presentationContainerParent.addNewPanel<
           object,
           FieldStatisticsTableEmbeddableApi

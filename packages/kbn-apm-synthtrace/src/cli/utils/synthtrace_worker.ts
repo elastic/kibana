@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { parentPort, workerData } from 'worker_threads';
 import pidusage from 'pidusage';
 import { castArray } from 'lodash';
@@ -17,6 +19,8 @@ import { RunOptions } from './parse_run_cli_flags';
 import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getEntityEsClient } from './get_entity_es_client';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -59,6 +63,18 @@ async function start() {
     logger,
   });
 
+  const syntheticsEsClient = getSyntheticsEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const otelEsClient = getOtelSynthtraceEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -73,6 +89,8 @@ async function start() {
       logsEsClient,
       infraEsClient,
       entityEsClient,
+      syntheticsEsClient,
+      otelEsClient,
     });
   }
 
@@ -81,7 +99,14 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, entityEsClient },
+      clients: {
+        logsEsClient,
+        apmEsClient,
+        infraEsClient,
+        syntheticsEsClient,
+        otelEsClient,
+        entityEsClient,
+      },
     })
   );
 

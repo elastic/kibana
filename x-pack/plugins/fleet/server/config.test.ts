@@ -102,12 +102,20 @@ describe('Config schema', () => {
       });
     }).not.toThrow();
   });
-  it('should not allow to specify a agentless.api.url in xpack.fleet.agentless.api without the tls config  ', () => {
+
+  it('should allow to specify xpack.fleet.agentless.enabled flag ', () => {
+    expect(() => {
+      config.schema.validate({
+        agentless: { enabled: true },
+      });
+    }).not.toThrow();
+  });
+  it('should allow to specify a agentless.api.url in xpack.fleet.agentless.api without the tls config  ', () => {
     expect(() => {
       config.schema.validate({
         agentless: { api: { url: 'https://agentless.api.url' } },
       });
-    }).toThrow();
+    }).not.toThrow();
   });
 
   it('should allow to specify agentless.api.url and the tls config in in xpack.fleet.agentless.api', () => {

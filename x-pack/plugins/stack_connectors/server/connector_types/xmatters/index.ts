@@ -8,7 +8,7 @@
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import type {
+import {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
@@ -247,7 +247,8 @@ function validateConnectorTypeSecrets(
 export async function executor(
   execOptions: XmattersConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, configurationUtilities, config, params, logger } = execOptions;
+  const { actionId, configurationUtilities, config, params, logger, connectorUsageCollector } =
+    execOptions;
   const { configUrl, usesBasic } = config;
   const data = getPayloadForRequest(params);
 
@@ -263,7 +264,12 @@ export async function executor(
     if (!url) {
       throw new Error('Error: no url provided');
     }
-    result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
+    result = await postXmatters(
+      { url, data, basicAuth },
+      logger,
+      configurationUtilities,
+      connectorUsageCollector
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.xmatters.postingErrorMessage', {
       defaultMessage: 'Error triggering xMatters workflow',

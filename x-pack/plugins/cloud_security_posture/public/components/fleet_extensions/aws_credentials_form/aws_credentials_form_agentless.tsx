@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
@@ -68,7 +68,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ),
         }}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiText size="s" color="subdued">
         <ol>
           {isOrganization ? (
@@ -119,12 +119,12 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
-                  <em>
+                  <strong>
                     <FormattedMessage
                       id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
-                  </em>
+                  </strong>
                 ),
                 capabilities: (
                   <strong>
@@ -184,7 +184,7 @@ export const AwsCredentialsFormAgentless = ({
   const options = getAwsCredentialsFormOptions();
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   const isValidSemantic = semverValid(packageInfo.version);
@@ -209,7 +209,7 @@ export const AwsCredentialsFormAgentless = ({
             defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
-                <EuiLink href={integrationLink} target="_blank">
+                <EuiLink href={documentationLink} target="_blank">
                   <FormattedMessage
                     id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
@@ -251,8 +251,16 @@ export const AwsCredentialsFormAgentless = ({
       {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
         showCloudCredentialsButton && (
           <>
-            <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
             <EuiSpacer size="m" />
+            <EuiAccordion
+              id="cloudFormationAccordianInstructions"
+              data-test-subj="launchGoogleCloudFormationAccordianInstructions"
+              buttonContent={<EuiLink>Steps to Generate AWS Account Credentials</EuiLink>}
+              paddingSize="l"
+            >
+              <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
+            </EuiAccordion>
+            <EuiSpacer size="l" />
             <EuiButton
               data-test-subj="launchCloudFormationAgentlessButton"
               target="_blank"
@@ -275,7 +283,7 @@ export const AwsCredentialsFormAgentless = ({
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
       />
-      <ReadDocumentation url={integrationLink} />
+      <ReadDocumentation url={documentationLink} />
     </>
   );
 };

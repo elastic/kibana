@@ -13,7 +13,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
-import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -148,7 +148,7 @@ describe('createManagedConfiguration()', () => {
   describe('capacity configuration', () => {
     function setupScenario(
       startingCapacity: number,
-      claimStrategy: string = CLAIM_STRATEGY_DEFAULT
+      claimStrategy: string = CLAIM_STRATEGY_UPDATE_BY_QUERY
     ) {
       const errors$ = new Subject<Error>();
       const subscription = jest.fn();

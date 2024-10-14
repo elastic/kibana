@@ -80,6 +80,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.intended_timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.last_detected": Object {
         "array": false,
         "required": false,

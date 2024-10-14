@@ -162,7 +162,7 @@ describe('runSoon()', () => {
             action: 'rule_run_soon',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'name' } },
         })
       );
     });
@@ -181,6 +181,7 @@ describe('runSoon()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'name',
             },
           },
           error: {

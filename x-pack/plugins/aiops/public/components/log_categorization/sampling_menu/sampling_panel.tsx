@@ -19,11 +19,19 @@ import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_s
 
 interface Props {
   randomSampler: RandomSampler;
+  displayProbability?: boolean;
   calloutPosition?: 'top' | 'bottom';
+  compressed?: boolean;
   reload: () => void;
 }
 
-export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPosition = 'top' }) => {
+export const SamplingPanel: FC<Props> = ({
+  randomSampler,
+  reload,
+  displayProbability = true,
+  calloutPosition = 'top',
+  compressed = false,
+}) => {
   const samplingProbability = useObservable(
     randomSampler.getProbability$(),
     randomSampler.getProbability()
@@ -60,6 +68,7 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPositio
       ) : null}
 
       <EuiFormRow
+        fullWidth
         data-test-subj="aiopsRandomSamplerOptionsFormRow"
         label={i18n.translate(
           'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
@@ -68,12 +77,14 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPositio
           }
         )}
         helpText={
-          randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
+          displayProbability && randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
             <ProbabilityUsedMessage samplingProbability={samplingProbability} />
           ) : null
         }
       >
         <EuiSuperSelect
+          fullWidth
+          compressed={compressed}
           data-test-subj="aiopsRandomSamplerOptionsSelect"
           options={RANDOM_SAMPLER_SELECT_OPTIONS}
           valueOfSelected={randomSamplerPreference}

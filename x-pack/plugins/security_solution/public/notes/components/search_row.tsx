@@ -37,7 +37,7 @@ export const SearchRow = React.memo(() => {
   );
 
   const onQueryChange = useCallback(
-    ({ queryText }) => {
+    ({ queryText }: { queryText: string }) => {
       dispatch(userSearchedNotes(queryText.trim()));
     },
     [dispatch]

@@ -126,7 +126,6 @@ export const useSourcererDataView = (
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,
-      runtimeMappings: sourcererDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter

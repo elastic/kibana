@@ -16,7 +16,7 @@ import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Logger } from '@kbn/logging';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import {

@@ -50,7 +50,7 @@ const EditableMarkDownRenderer = forwardRef<
     const { submit, setFieldValue, isValid: isFormValid } = form;
 
     const setComment = useCallback(
-      (newComment) => {
+      (newComment: string) => {
         setFieldValue(fieldName, newComment);
       },
       [setFieldValue, fieldName]

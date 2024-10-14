@@ -48,11 +48,10 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       data,
       share,
       uiSettings,
-      mlServices: { mlApiServices },
       dashboardService,
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
-
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
     CATEGORIZATION_TYPE.COUNT
   );
@@ -72,7 +71,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useMemo(() => {
-    const newJobCapsService = new NewJobCapsService(mlApiServices);
+    const newJobCapsService = new NewJobCapsService(mlApi);
     newJobCapsService.initializeFromDataVIew(dataView).then(() => {
       const options: EuiComboBoxOptionOption[] = [
         ...createFieldOptions(newJobCapsService.categoryFields, []),
@@ -81,7 +80,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       }));
       setCategoryFieldsOptions(options);
     });
-  }, [dataView, mlApiServices]);
+  }, [dataView, mlApi]);
 
   const quickJobCreator = useMemo(
     () =>
@@ -91,10 +90,9 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.query.timefilter.timefilter,
         dashboardService,
         data,
-        mlApiServices
+        mlApi
       ),
-
-    [dashboardService, data, mlApiServices, uiSettings]
+    [dashboardService, data, mlApi, uiSettings]
   );
 
   function createADJobInWizard() {

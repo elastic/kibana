@@ -70,6 +70,7 @@ describe('SyntheticsPrivateLocation', () => {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: mockBuildPackagePolicy,
         bulkCreate: jest.fn(),
+        getByIDs: jest.fn(),
       },
     },
     spaces: {
@@ -287,7 +288,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   tags: [],
   timeout: null,
   name: 'Browser monitor',
-  locations: [{ isServiceManaged: false, id: '1' }],
+  locations: [{ isServiceManaged: false, id: '1', label: 'Fleet managed' }],
   namespace: 'default',
   origin: SourceType.UI,
   journey_id: '',

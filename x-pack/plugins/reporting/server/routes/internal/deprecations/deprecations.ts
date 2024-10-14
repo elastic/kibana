@@ -38,7 +38,13 @@ const getAuthzWrapper =
         });
 
         if (!body.has_all_requested) {
-          return res.notFound();
+          const responseString = JSON.stringify(body);
+          logger.debug(
+            `Current user does not have manage privilege for Reporting indices: ${responseString}`
+          );
+          return res.forbidden({
+            body: `The current user requires "manage" privilege on the "${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}" indices.`,
+          });
         }
       } catch (e) {
         logger.error(e);

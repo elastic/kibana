@@ -17,7 +17,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
-  getAlertUrl,
+  getAlertDetailsUrl,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -127,8 +127,8 @@ export function registerErrorCountRuleType({
         ErrorCountAlert
       >
     ) => {
-      const { params: ruleParams, services, spaceId, startedAt, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { params: ruleParams, services, spaceId, getTimeRange } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -187,6 +187,7 @@ export function registerErrorCountRuleType({
 
       const response = await alertingEsClient({
         scopedClusterClient,
+        uiSettingsClient,
         params: searchParams,
       });
 
@@ -220,11 +221,10 @@ export function registerErrorCountRuleType({
             groupByFields,
           });
 
-          const { uuid, start } = alertsClient.report({
+          const { uuid } = alertsClient.report({
             id: alertId,
             actionGroup: ruleTypeConfig.defaultActionGroupId,
           });
-          const indexedStartedAt = start ?? startedAt.toISOString();
 
           const relativeViewInAppUrl = getAlertUrlErrorCount(
             groupByFields[SERVICE_NAME],
@@ -235,13 +235,7 @@ export function registerErrorCountRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const alertDetailsUrl = await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          );
+          const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
           const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
           const payload = {

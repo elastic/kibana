@@ -246,7 +246,7 @@ export class DataVisualizer {
   ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
-    const batchedFields: { [key: string]: Field[][] } = {};
+    const batchedFields: { [key: string]: Field[][] } = Object.create(null);
     each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
@@ -409,9 +409,9 @@ export class DataVisualizer {
       };
 
       let cardinalityField: AggCardinality;
-      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+      if (Object.hasOwn(datafeedConfig?.script_fields ?? {}, field)) {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-          cardinality: { script: datafeedConfig?.script_fields[field].script },
+          cardinality: { script: datafeedConfig?.script_fields![field].script },
         };
       } else {
         cardinalityField = {
@@ -475,8 +475,8 @@ export class DataVisualizer {
         });
       } else {
         if (
-          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
-          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+          Object.hasOwn(datafeedConfig?.script_fields ?? {}, field) ||
+          Object.hasOwn(datafeedConfig?.runtime_mappings ?? {}, field)
         ) {
           const cardinality = get(
             aggregations,
@@ -584,7 +584,7 @@ export class DataVisualizer {
       { maxRetries: 0 }
     );
 
-    const buckets: { [key: string]: number } = {};
+    const buckets: { [key: string]: number } = Object.create(null);
     const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
       body,
       ['aggregations', 'eventRate', 'buckets'],
@@ -628,7 +628,7 @@ export class DataVisualizer {
       () => (count += PERCENTILE_SPACING)
     );
 
-    const aggs: { [key: string]: any } = {};
+    const aggs: { [key: string]: any } = Object.create(null);
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
@@ -757,7 +757,7 @@ export class DataVisualizer {
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
-    const aggs: Aggs = {};
+    const aggs: Aggs = Object.create(null);
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       const top = {
@@ -839,7 +839,7 @@ export class DataVisualizer {
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
-    const aggs: Aggs = {};
+    const aggs: Aggs = Object.create(null);
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
@@ -910,7 +910,7 @@ export class DataVisualizer {
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
-    const aggs: Aggs = {};
+    const aggs: Aggs = Object.create(null);
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_value_count`] = {

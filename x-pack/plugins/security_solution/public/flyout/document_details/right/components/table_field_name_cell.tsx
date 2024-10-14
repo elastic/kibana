@@ -17,11 +17,14 @@ import {
 } from './test_ids';
 import { getExampleText } from '../../../../common/components/event_details/helpers';
 
-const getEcsField = (field: string): { example?: string; description?: string } | undefined => {
+export const getEcsField = (
+  field: string
+): { example?: string; description?: string; type?: string } | undefined => {
   return EcsFlat[field as keyof typeof EcsFlat] as
     | {
         example?: string;
         description?: string;
+        type?: string;
       }
     | undefined;
 };

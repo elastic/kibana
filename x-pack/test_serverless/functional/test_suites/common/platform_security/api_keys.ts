@@ -15,7 +15,7 @@ async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
   if (existingKeys.count > 0) {
     await Promise.all(
       existingKeys.api_keys.map(async (key) => {
-        esClient.security.invalidateApiKey({ ids: [key.id] });
+        await esClient.security.invalidateApiKey({ ids: [key.id] });
       })
     );
   } else {

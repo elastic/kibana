@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless create_rules_bulk', () => {
+  describe('@ess @serverless @skipInServerlessMKI create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);

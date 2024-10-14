@@ -51,7 +51,7 @@ describe('useTimelineTypes', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
-        UseTimelineTypesArgs,
+        React.PropsWithChildren<UseTimelineTypesArgs>,
         UseTimelineTypesResult
       >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
         wrapper: TestProviders,
@@ -69,7 +69,7 @@ describe('useTimelineTypes', () => {
     it('render timelineTabs', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,
@@ -89,7 +89,7 @@ describe('useTimelineTypes', () => {
     it('set timelineTypes correctly', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,
@@ -117,7 +117,7 @@ describe('useTimelineTypes', () => {
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,
@@ -147,7 +147,7 @@ describe('useTimelineTypes', () => {
     it('render timelineFilters', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,
@@ -167,7 +167,7 @@ describe('useTimelineTypes', () => {
     it('set timelineTypes correctly', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,
@@ -195,7 +195,7 @@ describe('useTimelineTypes', () => {
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
+          React.PropsWithChildren<UseTimelineTypesArgs>,
           UseTimelineTypesResult
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
           wrapper: TestProviders,

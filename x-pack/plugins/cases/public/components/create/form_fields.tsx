@@ -92,7 +92,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     );
 
     const onTemplateChange = useCallback(
-      (caseFields: CasesConfigurationUITemplate['caseFields']) => {
+      ({ caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
         const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
           configurationOwner,
           caseFields

@@ -470,7 +470,7 @@
               "\nOpens the popover for the date picker"
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
@@ -522,7 +522,7 @@
               "\nActivates the refresh button"
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
@@ -543,7 +543,7 @@
         "label": "getSelectedButtonInGroup",
         "description": [],
         "signature": [
-          "(testId: string) => () => HTMLElement"
+          "(testId: string, container?: any) => () => HTMLElement"
         ],
         "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
         "deprecated": false,
@@ -558,6 +558,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.getSelectedButtonInGroup.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "any"
             ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,

@@ -44,7 +44,8 @@ const CaseContainerComponent: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+    (ruleId: string | null | undefined) =>
+      detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 

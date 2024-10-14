@@ -273,7 +273,7 @@ export class NotificationsService {
 
     return res.reduce((acc, curr) => {
       for (const levelKey in curr) {
-        if (curr.hasOwnProperty(levelKey)) {
+        if (Object.hasOwn(curr, levelKey)) {
           acc[levelKey as MlNotificationMessageLevel] +=
             curr[levelKey as MlNotificationMessageLevel];
         }

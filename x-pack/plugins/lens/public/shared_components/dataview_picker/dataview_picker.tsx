@@ -14,6 +14,9 @@ import { css } from '@emotion/react';
 import { type IndexPatternRef } from '../../types';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
+const MAX_WIDTH = 600;
+const MIN_WIDTH = 320;
+
 export function ChangeIndexPattern({
   indexPatternRefs,
   isMissingCurrent,
@@ -52,8 +55,8 @@ export function ChangeIndexPattern({
       <div
         css={css`
           width: ${calculateWidthFromEntries(indexPatternRefs, ['name', 'id'], {
-            minWidth: 320,
-            maxWidth: 600,
+            minWidth: MIN_WIDTH,
+            maxWidth: MAX_WIDTH,
           })}px;
         `}
       >

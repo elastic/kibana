@@ -120,6 +120,7 @@ export type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   InstallationStatus,
   Installable,

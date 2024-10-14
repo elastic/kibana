@@ -27,7 +27,7 @@ jest.mock('../../common/components/link_to', () => ({
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
-    wrapper: ({ children }) => (
+    wrapper: ({ children }: React.PropsWithChildren<{}>) => (
       <TestProviders>
         <DashboardContextProvider>{children}</DashboardContextProvider>
       </TestProviders>

@@ -45,7 +45,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"fleet:settings\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"fleet:agents\""
+          "\"fleet\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
         ],
         "path": "packages/deeplinks/fleet/deep_links.ts",
         "deprecated": false,
@@ -60,7 +60,7 @@
         "label": "LinkId",
         "description": [],
         "signature": [
-          "\"settings\" | \"policies\" | \"data_streams\" | \"enrollment_tokens\" | \"uninstall_tokens\" | \"agents\""
+          "\"settings\" | \"agents\" | \"policies\" | \"data_streams\" | \"enrollment_tokens\" | \"uninstall_tokens\""
         ],
         "path": "packages/deeplinks/fleet/deep_links.ts",
         "deprecated": false,

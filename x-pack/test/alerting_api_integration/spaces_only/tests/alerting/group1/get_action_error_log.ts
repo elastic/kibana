@@ -146,7 +146,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
-            schedule: { interval: '5s' },
+            schedule: { interval: '6s' },
             actions: [
               {
                 id: createdConnector1.id,

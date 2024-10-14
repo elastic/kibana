@@ -8,8 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const jobAuditMessagesJobIdSchema = schema.object({
-  /** Job ID. */
-  jobId: schema.maybe(schema.string()),
+  jobId: schema.maybe(schema.string({ meta: { description: 'Job ID' } })),
 });
 
 export const jobAuditMessagesQuerySchema = schema.object({

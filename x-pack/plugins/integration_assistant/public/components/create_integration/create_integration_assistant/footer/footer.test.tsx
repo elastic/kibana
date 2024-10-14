@@ -13,6 +13,7 @@ import { ActionsProvider } from '../state';
 import { mockActions } from '../mocks/state';
 import { mockReportEvent } from '../../../../services/telemetry/mocks/service';
 import { TelemetryEventType } from '../../../../services/telemetry/types';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 const mockNavigate = jest.fn();
 jest.mock('../../../../common/hooks/use_navigate', () => ({
@@ -20,7 +21,10 @@ jest.mock('../../../../common/hooks/use_navigate', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-const wrapper: React.FC = ({ children }) => (
+jest.mock('../../../../services');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
@@ -29,6 +33,10 @@ const wrapper: React.FC = ({ children }) => (
 describe('Footer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      generateCel: false,
+    } as never);
   });
 
   describe('when rendered', () => {

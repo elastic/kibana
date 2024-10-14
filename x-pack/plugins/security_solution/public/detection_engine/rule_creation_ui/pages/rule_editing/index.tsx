@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
@@ -38,7 +39,6 @@ import {
   getRuleDetailsUrl,
   getDetectionEngineUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
@@ -67,12 +67,13 @@ import {
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useRuleForms, useRuleIndexPattern } from '../form';
+import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
+import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
-  const [, dispatchToaster] = useStateToaster();
+  const { addSuccess } = useAppToasts();
   const [
     {
       loading: userInfoLoading,
@@ -98,6 +99,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
+
+  const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
+  const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -148,6 +152,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepDefault: scheduleRuleData,
     actionsStepDefault: ruleActionsData,
   });
+
+  const { getRuleFormsErrors } = useRuleFormsErrors();
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -386,53 +392,95 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { startTransaction } = useStartTransaction();
 
+  const saveChanges = useCallback(async () => {
+    startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
+    const updatedRule = await updateRule({
+      ...formatRule<RuleUpdateProps>(
+        defineStepData,
+        aboutStepData,
+        scheduleStepData,
+        actionsStepData,
+        triggersActionsUi.actionTypeRegistry,
+        rule?.exceptions_list
+      ),
+      ...(ruleId ? { id: ruleId } : {}),
+    });
+
+    addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId ?? ''),
+    });
+  }, [
+    aboutStepData,
+    actionsStepData,
+    addSuccess,
+    defineStepData,
+    navigateToApp,
+    rule?.exceptions_list,
+    ruleId,
+    scheduleStepData,
+    startTransaction,
+    triggersActionsUi.actionTypeRegistry,
+    updateRule,
+  ]);
+
+  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
+  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
+  const onConfirmSaveWithErrors = useCallback(async () => {
+    closeSaveWithErrorsModal();
+    await saveChanges();
+  }, [closeSaveWithErrorsModal, saveChanges]);
+
   const onSubmit = useCallback(async () => {
+    setNonBlockingRuleErrors([]);
+
+    const actionsStepFormValid = await actionsStepForm.validate();
+    if (rule.immutable) {
+      // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
+      // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
+      // We will need to remove this condition once rule customization work is done.
+      if (actionsStepFormValid) {
+        await saveChanges();
+      }
+      return;
+    }
+
     const defineStepFormValid = await defineStepForm.validate();
     const aboutStepFormValid = await aboutStepForm.validate();
     const scheduleStepFormValid = await scheduleStepForm.validate();
-    const actionsStepFormValid = await actionsStepForm.validate();
-
     if (
       defineStepFormValid &&
       aboutStepFormValid &&
       scheduleStepFormValid &&
       actionsStepFormValid
     ) {
-      startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
-      await updateRule({
-        ...formatRule<RuleUpdateProps>(
-          defineStepData,
-          aboutStepData,
-          scheduleStepData,
-          actionsStepData,
-          triggersActionsUi.actionTypeRegistry,
-          rule?.exceptions_list
-        ),
-        ...(ruleId ? { id: ruleId } : {}),
-      });
+      await saveChanges();
+      return;
+    }
 
-      displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(ruleId ?? ''),
-      });
+    const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({
+      defineStepForm,
+      aboutStepForm,
+      scheduleStepForm,
+      actionsStepForm,
+    });
+    if (blockingErrors.length > 0) {
+      return;
+    }
+    if (nonBlockingErrors.length > 0) {
+      setNonBlockingRuleErrors(nonBlockingErrors);
+      showSaveWithErrorsModal();
     }
   }, [
+    rule.immutable,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
     actionsStepForm,
-    startTransaction,
-    updateRule,
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    actionsStepData,
-    rule,
-    ruleId,
-    dispatchToaster,
-    navigateToApp,
-    triggersActionsUi.actionTypeRegistry,
+    getRuleFormsErrors,
+    saveChanges,
+    showSaveWithErrorsModal,
   ]);
 
   const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
@@ -455,7 +503,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   };
 
   const goToDetailsRule = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
@@ -488,6 +536,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   return (
     <>
+      {isSaveWithErrorsModalVisible && (
+        <SaveWithErrorsModal
+          errors={nonBlockingRuleErrors}
+          onCancel={closeSaveWithErrorsModal}
+          onConfirm={onConfirmSaveWithErrors}
+        />
+      )}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {

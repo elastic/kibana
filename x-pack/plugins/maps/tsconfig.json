@@ -8,8 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
-    "../../../typings/**/*",
+    "server/config.ts",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

@@ -17,6 +17,28 @@
         "children": [
           {
             "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isDev",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDev",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
             "id": "def-public.AppContext.isServerless",
             "type": "boolean",
             "tags": [],
@@ -33,6 +55,20 @@
             "tags": [],
             "label": "stackVersion",
             "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.cloudServiceProvider",
+            "type": "string",
+            "tags": [],
+            "label": "cloudServiceProvider",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false

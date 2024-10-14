@@ -196,7 +196,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
@@ -342,7 +342,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -359,11 +359,9 @@
           "\nThe Lazily-loaded `CustomizablePalette` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ palettes, activePalette, setPalette, dataBounds, showExtraActions, showRangeTypeSelector, disableSwitchingContinuity, }: ",
           "CustomizablePaletteProps",
-          "> & { readonly _result: ({ palettes, activePalette, setPalette, dataBounds, showExtraActions, showRangeTypeSelector, disableSwitchingContinuity, }: ",
-          "CustomizablePaletteProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "packages/kbn-coloring/src/shared_components/index.ts",
         "deprecated": false,
@@ -380,7 +378,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1299,6 +1297,41 @@
       },
       {
         "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getSpecialString",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpecialString",
+        "description": [
+          "\nReturns special string for sake of color mapping/syncing"
+        ],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getSpecialString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
         "id": "def-common.getStepValue",
         "type": "Function",
         "tags": [],
@@ -1819,6 +1852,111 @@
       },
       {
         "parentPluginId": "@kbn/coloring",
+        "id": "def-common.ColorMappingInputCategoricalData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorMappingInputCategoricalData",
+        "description": [],
+        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputCategoricalData.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"categories\""
+            ],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputCategoricalData.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [
+              "an ORDERED array of categories rendered in the visualization"
+            ],
+            "signature": [
+              "(string | string[])[]"
+            ],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.ColorMappingInputContinuousData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorMappingInputContinuousData",
+        "description": [],
+        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputContinuousData.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ranges\""
+            ],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputContinuousData.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputContinuousData.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorMappingInputContinuousData.bins",
+            "type": "number",
+            "tags": [],
+            "label": "bins",
+            "description": [],
+            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
         "id": "def-common.ColorMappingProps",
         "type": "Interface",
         "tags": [],
@@ -1874,7 +2012,21 @@
               "A data description of what needs to be colored"
             ],
             "signature": [
-              "{ type: \"categories\"; categories: (string | string[])[]; } | { type: \"ranges\"; min: number; max: number; bins: number; }"
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorMappingInputCategoricalData",
+                "text": "ColorMappingInputCategoricalData"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorMappingInputContinuousData",
+                "text": "ColorMappingInputContinuousData"
+              }
             ],
             "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
@@ -2790,7 +2942,21 @@
           "\nA configuration object that is required to populate correctly the visible categories\nor the ranges in the CategoricalColorMapping component"
         ],
         "signature": [
-          "{ type: \"categories\"; categories: (string | string[])[]; } | { type: \"ranges\"; min: number; max: number; bins: number; }"
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorMappingInputCategoricalData",
+            "text": "ColorMappingInputCategoricalData"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorMappingInputContinuousData",
+            "text": "ColorMappingInputContinuousData"
+          }
         ],
         "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
@@ -3686,10 +3852,10 @@
       },
       {
         "parentPluginId": "@kbn/coloring",
-        "id": "def-common.SPECIAL_TOKENS_STRING_CONVERTION",
+        "id": "def-common.SPECIAL_TOKENS_STRING_CONVERSION",
         "type": "Object",
         "tags": [],
-        "label": "SPECIAL_TOKENS_STRING_CONVERTION",
+        "label": "SPECIAL_TOKENS_STRING_CONVERSION",
         "description": [],
         "signature": [
           "Map<string, string>"

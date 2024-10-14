@@ -36,7 +36,7 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { getPipelineConfig } from '../get_pipeline_config';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import type { MlInferenceState } from '../types';
@@ -67,10 +67,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const [lastFetchedSampleDocsString, setLastFetchedSampleDocsString] = useState<string>('');
   const [isValid, setIsValid] = useState<boolean>(true);
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
-  const {
-    esSearch,
-    trainedModels: { trainedModelPipelineSimulate },
-  } = useMlApiContext();
+  const mlApi = useMlApi();
   const {
     notifications: { toasts },
     services: {
@@ -91,7 +88,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
 
   const simulatePipeline = async () => {
     try {
-      const result = await trainedModelPipelineSimulate(
+      const result = await mlApi.trainedModels.trainedModelPipelineSimulate(
         pipelineConfig,
         JSON.parse(sampleDocsString) as IngestSimulateDocument[]
       );
@@ -130,7 +127,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
       let records: IngestSimulateDocument[] = [];
       let resp;
       try {
-        resp = await esSearch(body);
+        resp = await mlApi.esSearch(body);
 
         if (resp && resp.hits.total.value > 0) {
           records = resp.hits.hits;
@@ -144,7 +141,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
       setLastFetchedSampleDocsString(JSON.stringify(records, null, 2));
       setIsValid(true);
     },
-    [esSearch]
+    // skip ml API service from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const { getSampleDoc, getRandomSampleDoc } = useMemo(
@@ -178,7 +177,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   useEffect(
     function checkSourceIndexExists() {
       async function ensureSourceIndexExists() {
-        const resp = await checkIndexExists(sourceIndex!);
+        const resp = await checkIndexExists(sourceIndex!, mlApi);
         const indexExists = resp.resp && resp.resp[sourceIndex!] && resp.resp[sourceIndex!].exists;
         if (indexExists === false) {
           setSourceIndexMissingError(sourceIndexMissingMessage);
@@ -188,6 +187,8 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         ensureSourceIndexExists();
       }
     },
+    // skip ml API service from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sourceIndex, sourceIndexMissingError]
   );
 

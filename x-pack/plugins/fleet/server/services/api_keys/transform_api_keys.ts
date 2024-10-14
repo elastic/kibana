@@ -26,8 +26,8 @@ import type {
 export function isTransformApiKey(arg: any): arg is TransformAPIKey {
   return (
     arg &&
-    arg.hasOwnProperty('api_key') &&
-    arg.hasOwnProperty('encoded') &&
+    Object.hasOwn(arg, 'api_key') &&
+    Object.hasOwn(arg, 'encoded') &&
     typeof arg.encoded === 'string'
   );
 }

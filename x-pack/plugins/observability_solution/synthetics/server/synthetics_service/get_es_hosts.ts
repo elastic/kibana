@@ -13,7 +13,7 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { ServiceConfig } from '../../common/config';
+import { ServiceConfig } from '../config';
 
 export function getEsHosts({
   cloud,

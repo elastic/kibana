@@ -8,6 +8,7 @@
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import type { SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
@@ -160,7 +161,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
 
     const goToDetectionEngine = useCallback(
-      (ev) => {
+      (ev: SyntheticEvent) => {
         ev.preventDefault();
         navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,

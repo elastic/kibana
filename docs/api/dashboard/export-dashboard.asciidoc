@@ -4,7 +4,7 @@
 <titleabbrev>Export dashboard</titleabbrev>
 ++++
 
-deprecated::[7.15.0,Use <<saved-objects-api-export>> instead.]
+deprecated::[7.15.0,Use the {api-kibana}/group/endpoint-saved-objects[saved objects API] instead.]
 
 Export dashboards and corresponding saved objects.
 

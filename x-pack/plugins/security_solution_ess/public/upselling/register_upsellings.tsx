@@ -25,6 +25,7 @@ import type React from 'react';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
+  AttackDiscoveryUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
 } from './lazy_upselling';
@@ -91,6 +92,11 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.entityAnalytics,
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingPageLazy,
+  },
+  {
+    pageName: SecurityPageName.attackDiscovery,
+    minimumLicenseRequired: 'enterprise',
+    component: AttackDiscoveryUpsellingPageLazy,
   },
 ];
 

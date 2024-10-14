@@ -19,6 +19,9 @@ export type {
   IndexMappingProps,
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
-} from '@kbn/index-management';
+} from '@kbn/index-management-shared-types';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
+
+export type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+export { INDEX_MANAGEMENT_LOCATOR_ID } from './locator';

@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting CSV Generation from ES|QL export from non-timebased data view csv from es|ql csv file matches 1`] = `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`;
+
+exports[`Reporting CSV Generation from ES|QL export from non-timebased data view csv from es|ql job response data is correct 1`] = `
+Object {
+  "contentDisposition": undefined,
+  "contentType": "application/json; charset=utf-8",
+  "title": "CSV Report",
+}
+`;
+
+exports[`Reporting CSV Generation from ES|QL export from timebased data view csv from es|ql export with time filter csv file matches 1`] = `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`;
+
+exports[`Reporting CSV Generation from ES|QL export from timebased data view csv from es|ql export with time filter job response data is correct 1`] = `
+Object {
+  "contentDisposition": undefined,
+  "contentType": "application/json; charset=utf-8",
+  "title": "Untitled discover search",
+}
+`;

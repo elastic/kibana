@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useCallback } from 'react';
@@ -20,6 +21,7 @@ import {
   SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
+import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
@@ -146,7 +148,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   );
 
   const updateState = useCallback(
-    (changes) => {
+    (changes: Partial<DataVisualizerTableState>) => {
       if (changes.showDistributions !== undefined && stateContainer) {
         stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions }, true);
       }

@@ -120,7 +120,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -135,7 +135,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf?jobParams=foo:`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
@@ -146,7 +146,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -172,7 +172,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -188,7 +188,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
@@ -199,11 +199,10 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          relativeUrls: ['test'],
           layout: { id: 'test' },
           objectType: 'canvas workpad',
         }),
@@ -216,19 +215,14 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
             created_by: 'Tom Riddle',
             id: 'foo',
             index: 'foo-index',
-            jobtype: 'printable_pdf',
+            jobtype: 'printable_pdf_v2',
             payload: {
               forceNow: expect.any(String),
-              isDeprecated: true,
+              isDeprecated: false,
               layout: {
                 id: 'test',
               },
               objectType: 'canvas workpad',
-              objects: [
-                {
-                  relativeUrl: 'test',
-                },
-              ],
               title: 'abc',
               version: '7.14.0',
             },
@@ -246,11 +240,10 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       await server.start();
 
       await supertest(httpSetup.server.listener)
-        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            relativeUrls: ['test'],
             layout: { id: 'test' },
             objectType: 'canvas workpad',
           }),
@@ -259,7 +252,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `post /internal/reporting/generate/printablePdf`,
+        counterName: `post /internal/reporting/generate/printablePdfV2`,
         counterType: 'reportingApi',
       });
     });
@@ -271,11 +264,10 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          relativeUrls: ['test'],
           layout: { id: 'test' },
           objectType: 'canvas workpad',
         }),

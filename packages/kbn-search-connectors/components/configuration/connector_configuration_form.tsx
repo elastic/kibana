@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -108,6 +109,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
             setConfigEntry={(key, value) => {
+              const entry = localConfig[key];
+              if (entry && !isCategoryEntry(entry)) {
+                const newConfiguration: ConnectorConfiguration = {
+                  ...localConfig,
+                  [key]: { ...entry, value },
+                };
+                setLocalConfig(newConfiguration);
+              }
+
               const categories = configView.categories;
               categories[index] = { ...categories[index], [key]: value };
               setConfigView({
@@ -135,6 +145,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
               setConfigEntry={(key, value) => {
+                const entry = localConfig[key];
+                if (entry && !isCategoryEntry(entry)) {
+                  const newConfiguration: ConnectorConfiguration = {
+                    ...localConfig,
+                    [key]: { ...entry, value },
+                  };
+                  setLocalConfig(newConfiguration);
+                }
+
                 setConfigView({
                   ...configView,
                   advancedConfigurations: configView.advancedConfigurations.map((config) =>

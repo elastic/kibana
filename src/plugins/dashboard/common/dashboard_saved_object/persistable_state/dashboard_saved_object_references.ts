@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
-import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 
 import {
   convertPanelMapToSavedPanels,
@@ -16,6 +16,10 @@ import {
 } from '../../lib/dashboard_panel_converters';
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
 import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
+import {
+  createExtract,
+  createInject,
+} from '../../dashboard_container/persistable_state/dashboard_container_references';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
@@ -33,9 +37,6 @@ function parseDashboardAttributesWithType(
   }
 
   return {
-    controlGroupInput:
-      attributes.controlGroupInput &&
-      rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
     type: 'dashboard',
     panels: convertSavedPanelsToPanelMap(parsedPanels),
   } as ParsedDashboardAttributesWithType;
@@ -48,23 +49,14 @@ export function injectReferences(
   const parsedAttributes = parseDashboardAttributesWithType(attributes);
 
   // inject references back into panels via the Embeddable persistable state service.
-  const injectedState = deps.embeddablePersistableStateService.inject(
-    parsedAttributes,
-    references
-  ) as ParsedDashboardAttributesWithType;
+  const inject = createInject(deps.embeddablePersistableStateService);
+  const injectedState = inject(parsedAttributes, references) as ParsedDashboardAttributesWithType;
   const injectedPanels = convertPanelMapToSavedPanels(injectedState.panels);
 
   const newAttributes = {
     ...attributes,
     panelsJSON: JSON.stringify(injectedPanels),
   } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && injectedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
-    };
-  }
 
   return newAttributes;
 }
@@ -84,24 +76,17 @@ export function extractReferences(
     );
   }
 
-  const { references: extractedReferences, state: extractedState } =
-    deps.embeddablePersistableStateService.extract(parsedAttributes) as {
-      references: Reference[];
-      state: ParsedDashboardAttributesWithType;
-    };
+  const extract = createExtract(deps.embeddablePersistableStateService);
+  const { references: extractedReferences, state: extractedState } = extract(parsedAttributes) as {
+    references: Reference[];
+    state: ParsedDashboardAttributesWithType;
+  };
   const extractedPanels = convertPanelMapToSavedPanels(extractedState.panels);
 
   const newAttributes = {
     ...attributes,
     panelsJSON: JSON.stringify(extractedPanels),
   } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && extractedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
-    };
-  }
 
   return {
     references: [...references, ...extractedReferences],

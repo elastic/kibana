@@ -26,7 +26,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -48,7 +48,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 
 export function LensEditConfigurationFlyout({
@@ -153,9 +153,6 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-    return () => {
-      abortController.abort();
-    };
   }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
@@ -239,6 +236,11 @@ export function LensEditConfigurationFlyout({
     onCancelCb,
   ]);
 
+  const textBasedMode = useMemo(
+    () => (isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined),
+    [query]
+  );
+
   const onApply = useCallback(() => {
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
@@ -246,18 +248,21 @@ export function LensEditConfigurationFlyout({
         return [id, dsState];
       })
     );
-    const references = extractReferencesFromState({
-      activeDatasources: Object.keys(datasourceStates).reduce(
-        (acc, id) => ({
-          ...acc,
-          [id]: datasourceMap[id],
-        }),
-        {}
-      ),
-      datasourceStates,
-      visualizationState: visualization.state,
-      activeVisualization,
-    });
+    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
+    const references = !textBasedMode
+      ? extractReferencesFromState({
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, id) => ({
+              ...acc,
+              [id]: datasourceMap[id],
+            }),
+            {}
+          ),
+          datasourceStates,
+          visualizationState: visualization.state,
+          activeVisualization,
+        })
+      : [];
     const attrs = {
       ...attributes,
       state: {
@@ -283,20 +288,21 @@ export function LensEditConfigurationFlyout({
       prevVisState
     );
     if (telemetryEvents && telemetryEvents.length) {
-      trackUiCounterEvents(telemetryEvents);
+      trackSaveUiCounterEvents(telemetryEvents);
     }
 
     onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
-    visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCb,
     datasourceStates,
+    textBasedMode,
     visualization.state,
+    visualization.activeId,
     activeVisualization,
     attributes,
+    savedObjectId,
+    onApplyCb,
+    closeFlyout,
     datasourceMap,
     saveByRef,
     updateByRefInput,
@@ -315,7 +321,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q, abortController) => {
+    async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -331,6 +337,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
     [
@@ -384,8 +391,6 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     getUserMessages,
   ]);
-
-  const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
@@ -473,11 +478,10 @@ export function LensEditConfigurationFlyout({
         >
           {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-              <TextBasedLangEditor
+              <ESQLLangEditor
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
-                  prevQuery.current = q;
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
@@ -493,7 +497,8 @@ export function LensEditConfigurationFlyout({
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
-                  if (q) {
+                  // do not run the suggestions if the query is the same as the previous one
+                  if (q && !isEqual(q, prevQuery.current)) {
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }

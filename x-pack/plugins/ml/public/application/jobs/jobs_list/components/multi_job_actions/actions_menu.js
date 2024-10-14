@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
+
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+
+import { isManagedJob } from '../../../jobs_utils';
 
 import {
   closeJobs,
@@ -20,13 +27,12 @@ import {
   isClosable,
   isResettable,
 } from '../utils';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isManagedJob } from '../../../jobs_utils';
 
 class MultiJobActionsMenuUI extends Component {
-  constructor(props) {
-    super(props);
+  static contextType = context;
+
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
 
     this.state = {
       isOpen: false,
@@ -37,6 +43,9 @@ class MultiJobActionsMenuUI extends Component {
     this.canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
     this.canResetJob = checkPermission('canResetJob') && mlNodesAvailable();
     this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
+
+    this.toastNotifications = constructorContext.services.notifications.toasts;
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   onButtonClick = () => {
@@ -101,7 +110,7 @@ class MultiJobActionsMenuUI extends Component {
             if (this.props.jobs.some((j) => isManagedJob(j))) {
               this.props.showCloseJobsConfirmModal(this.props.jobs);
             } else {
-              closeJobs(this.props.jobs);
+              closeJobs(this.toastNotifications, this.mlApi, this.props.jobs);
             }
 
             this.closePopover();
@@ -148,7 +157,12 @@ class MultiJobActionsMenuUI extends Component {
             if (this.props.jobs.some((j) => isManagedJob(j))) {
               this.props.showStopDatafeedsConfirmModal(this.props.jobs);
             } else {
-              stopDatafeeds(this.props.jobs, this.props.refreshJobs);
+              stopDatafeeds(
+                this.toastNotifications,
+                this.mlApi,
+                this.props.jobs,
+                this.props.refreshJobs
+              );
             }
             this.closePopover();
           }}

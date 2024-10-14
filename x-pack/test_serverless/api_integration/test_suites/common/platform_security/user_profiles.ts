@@ -7,23 +7,25 @@
 
 import expect from 'expect';
 import { kibanaTestUser } from '@kbn/test';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlTools = getService('samlTools');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/user_profiles', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
+
     describe('route access', () => {
       describe('internal', () => {
         // When we run tests on MKI, SAML realm is configured differently, and we cannot handcraft SAML responses to
@@ -31,29 +33,23 @@ export default function ({ getService }: FtrProviderContext) {
         this.tags(['skipMKI']);
 
         it('update', async () => {
-          const { status } = await supertestWithoutAuth
+          const { status } = await supertestViewerWithCookieCredentials
             .post(`/internal/security/user_profile/_data`)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .set(await samlTools.login(kibanaTestUser.username))
             .send({ key: 'value' });
           expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const { status } = await supertestWithoutAuth
+          const { status } = await supertestViewerWithCookieCredentials
             .get(`/internal/security/user_profile`)
-            .set(roleAuthc.apiKeyHeader)
-            .set(svlCommonApi.getInternalRequestHeader())
             .set(await samlTools.login(kibanaTestUser.username));
           expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const { status } = await supertestWithoutAuth
+          const { status } = await supertestViewerWithCookieCredentials
             .get(`/internal/security/user_profile`)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .set(await samlTools.login(kibanaTestUser.username))
             .send({ uids: ['12345678'] });
           expect(status).not.toBe(404);

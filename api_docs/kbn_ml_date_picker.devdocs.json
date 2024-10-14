@@ -15,7 +15,7 @@
           "\nReact Component that acts as a wrapper for DatePickerContext.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<React.PropsWithChildren<",
+          "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/ml-date-picker",
             "scope": "public",
@@ -23,7 +23,7 @@
             "section": "def-public.DatePickerDependencies",
             "text": "DatePickerDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
@@ -39,7 +39,7 @@
               "- The component props"
             ],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
                 "scope": "public",
@@ -47,7 +47,7 @@
                 "section": "def-public.DatePickerDependencies",
                 "text": "DatePickerDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -72,7 +72,7 @@
           "\nDatePickerWrapper React Component\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<DatePickerWrapperProps>) => JSX.Element | null"
+          "(props: DatePickerWrapperProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
         "deprecated": false,
@@ -81,14 +81,14 @@
           {
             "parentPluginId": "@kbn/ml-date-picker",
             "id": "def-public.DatePickerWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `DatePickerWrapper` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<DatePickerWrapperProps>"
+              "DatePickerWrapperProps"
             ],
             "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
             "deprecated": false,
@@ -113,7 +113,7 @@
           "\nComponent for rendering a button which automatically sets the range of the time filter\nto the time range of data in the index(es) mapped to the supplied Kibana data view or query.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-date-picker",
             "scope": "public",
@@ -121,7 +121,7 @@
             "section": "def-public.FullTimeRangeSelectorProps",
             "text": "FullTimeRangeSelectorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
@@ -130,22 +130,20 @@
           {
             "parentPluginId": "@kbn/ml-date-picker",
             "id": "def-public.FullTimeRangeSelector.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `FullTimeRangeSelectorProps` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
                 "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
                 "section": "def-public.FullTimeRangeSelectorProps",
                 "text": "FullTimeRangeSelectorProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
@@ -728,7 +726,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",

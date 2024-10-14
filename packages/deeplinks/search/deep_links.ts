@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,6 +20,8 @@ import {
   SERVERLESS_ES_SEARCH_PLAYGROUND_ID,
   SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
+  SEARCH_INDICES_START,
+  SEARCH_INDICES,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -33,6 +36,8 @@ export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type SearchPlaygroundId = typeof SERVERLESS_ES_SEARCH_PLAYGROUND_ID;
 export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
+export type SearchStart = typeof SEARCH_INDICES_START;
+export type SearchIndices = typeof SEARCH_INDICES;
 
 export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
 
@@ -58,4 +63,6 @@ export type DeepLinkId =
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
-  | `${EnterpriseSearchRelevanceApp}:${RelevanceLinkId}`;
+  | `${EnterpriseSearchRelevanceApp}:${RelevanceLinkId}`
+  | SearchStart
+  | SearchIndices;

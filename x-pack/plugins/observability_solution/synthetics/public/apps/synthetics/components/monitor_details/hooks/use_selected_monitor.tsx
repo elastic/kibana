@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
@@ -16,7 +15,6 @@ import {
   selectMonitorListState,
   selectorMonitorDetailsState,
   selectorError,
-  selectRefreshInterval,
 } from '../../../state';
 
 export const useSelectedMonitor = (monId?: string) => {
@@ -27,14 +25,13 @@ export const useSelectedMonitor = (monId?: string) => {
   }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
-  const refreshInterval = useSelector(selectRefreshInterval);
 
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
   const error = useSelector(selectorError);
-  const { lastRefresh } = useSyntheticsRefreshContext();
+  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
@@ -43,7 +40,8 @@ export const useSelectedMonitor = (monId?: string) => {
     monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
     monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
-  const availableMonitor: EncryptedSyntheticsSavedMonitor | null = isLoadedSyntheticsMonitorValid
+
+  const availableMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
     ? monitorFromList

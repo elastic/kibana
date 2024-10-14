@@ -97,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -107,10 +107,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     () =>
       fields != null
         ? {
-            hasLabels: Object.prototype.hasOwnProperty.call(fields, 'labels'),
-            hasDescription: Object.prototype.hasOwnProperty.call(fields, 'description'),
-            hasPriority: Object.prototype.hasOwnProperty.call(fields, 'priority'),
-            hasParent: Object.prototype.hasOwnProperty.call(fields, 'parent'),
+            hasLabels: Object.hasOwn(fields, 'labels'),
+            hasDescription: Object.hasOwn(fields, 'description'),
+            hasPriority: Object.hasOwn(fields, 'priority'),
+            hasParent: Object.hasOwn(fields, 'parent'),
           }
         : { hasLabels: false, hasDescription: false, hasPriority: false, hasParent: false },
     [fields]
@@ -279,7 +279,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <EuiFormRow
           data-test-subj="summary-row"
           fullWidth
-          error={errors['subActionParams.incident.summary']}
+          error={errors['subActionParams.incident.summary'] as string}
           isInvalid={
             errors['subActionParams.incident.summary'] !== undefined &&
             Number(errors['subActionParams.incident.summary'].length) > 0 &&
@@ -385,7 +385,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         />
         <EuiFormRow
           fullWidth
-          error={errors['subActionParams.incident.otherFields']}
+          error={errors['subActionParams.incident.otherFields'] as string}
           isInvalid={
             errors['subActionParams.incident.otherFields'] !== undefined &&
             Number(errors['subActionParams.incident.otherFields'].length) > 0

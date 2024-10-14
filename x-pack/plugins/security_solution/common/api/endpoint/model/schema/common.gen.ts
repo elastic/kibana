@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AlertIds } from '../../../model/alert.gen';
 
@@ -162,19 +162,15 @@ export const NoParametersRequestSchema = z.object({
   body: BaseActionSchema,
 });
 
-export type KillOrSuspendActionSchema = z.infer<typeof KillOrSuspendActionSchema>;
-export const KillOrSuspendActionSchema = BaseActionSchema.merge(
-  z.object({
-    parameters: z.union([
-      z.object({
-        pid: z.number().int().min(1).optional(),
-      }),
-      z.object({
-        entity_id: z.string().min(1).optional(),
-      }),
-    ]),
-  })
-);
+export type Pid = z.infer<typeof Pid>;
+export const Pid = z.object({
+  pid: z.number().int().min(1).optional(),
+});
+
+export type EntityId = z.infer<typeof EntityId>;
+export const EntityId = z.object({
+  entity_id: z.string().min(1).optional(),
+});
 
 export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;
 export const ProtectionUpdatesNoteResponse = z.object({

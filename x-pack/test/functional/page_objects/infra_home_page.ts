@@ -37,7 +37,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getWaffleMap() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const element = await testSubjects.find('waffleMap');
         if (!element) {
           throw new Error();
@@ -98,13 +98,13 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickOnGoToNodeDetails() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('viewAssetDetailsContextMenuItem');
       });
     },
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
@@ -139,7 +139,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const value = await input.getAttribute('value');
         expect(value).to.eql(query);
       });
@@ -201,18 +201,22 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async goToHost() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToHost');
     },
 
     async goToPods() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
+
       return testSubjects.click('goToPods');
     },
 
     async goToContainer() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToContainer');
@@ -507,6 +511,20 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async ensureCustomMetricAddButtonIsDisabled() {
       const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
       expect(await button.getAttribute('disabled')).to.be('true');
+    },
+
+    async clickAnomalyActionMenuButton() {
+      await testSubjects.click('infraAnomalyActionMenuButton');
+    },
+
+    async clickShowAffectedHostsButton() {
+      await this.clickAnomalyActionMenuButton();
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
+    },
+
+    async getAnomalyHostName() {
+      const element = await testSubjects.find('nodeNameRow');
+      return await element.getVisibleText();
     },
   };
 }

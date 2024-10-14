@@ -1,16 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { useCallback, useEffect, useMemo } from 'react';
-import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
+import {
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramSuggestionContext,
+} from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
@@ -29,12 +37,14 @@ export const useStateProps = ({
   query,
   searchSessionId,
   requestAdapter,
+  columns,
 }: {
   stateService: UnifiedHistogramStateService | undefined;
   dataView: DataView;
   query: Query | AggregateQuery | undefined;
   searchSessionId: string | undefined;
   requestAdapter: RequestAdapter | undefined;
+  columns: DatatableColumn[] | undefined;
 }) => {
   const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
@@ -81,14 +91,29 @@ export const useStateProps = ({
   }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
-    if (isPlainRecord || !isTimeBased) {
+    if (!isTimeBased) {
       return undefined;
+    }
+
+    // hide the breakdown field selector when the ES|QL query has a transformational command (STATS, KEEP etc)
+    if (query && isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql)) {
+      return undefined;
+    }
+
+    if (isPlainRecord) {
+      const breakdownColumn = columns?.find((column) => column.name === breakdownField);
+      const field = breakdownColumn
+        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
+        : undefined;
+      return {
+        field,
+      };
     }
 
     return {
       field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [breakdownField, dataView, isPlainRecord, isTimeBased]);
+  }, [isTimeBased, query, isPlainRecord, breakdownField, dataView, columns]);
 
   const request = useMemo(() => {
     return {
@@ -150,7 +175,7 @@ export const useStateProps = ({
   );
 
   const onSuggestionContextChange = useCallback(
-    (suggestionContext) => {
+    (suggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
       stateService?.setCurrentSuggestionContext(suggestionContext);
     },
     [stateService]

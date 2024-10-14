@@ -5,27 +5,8 @@
  * 2.0.
  */
 
-import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
-
-export enum SignalTypes {
+export enum EntityDataStreamType {
   METRICS = 'metrics',
   TRACES = 'traces',
   LOGS = 'logs',
-}
-
-export interface EntityMetrics {
-  latency: number | null;
-  throughput: number | null;
-  failedTransactionRate: number | null;
-  logRate: number | null;
-  logErrorRate: number | null;
-}
-
-export interface EntityServiceListItem {
-  signalTypes: SignalTypes[];
-  metrics: EntityMetrics;
-  environments: string[];
-  serviceName: string;
-  agentName: AgentName;
-  hasLogMetrics: boolean;
 }

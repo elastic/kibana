@@ -155,16 +155,6 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () => {
-  return {
-    useDetailPanel: () => ({
-      openEventDetailsPanel: jest.fn(),
-      handleOnDetailsPanelClosed: () => {},
-      DetailsPanel: () => <div />,
-      shouldShowDetailsPanel: false,
-    }),
-  };
-});
 const dataViewId = 'security-solution-default';
 
 const stateWithBuildingBlockAlertsEnabled: State = {

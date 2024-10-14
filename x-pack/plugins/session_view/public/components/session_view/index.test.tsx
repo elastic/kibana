@@ -136,7 +136,7 @@ describe('SessionView component', () => {
           expect(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle')).toBeTruthy();
         });
 
-        userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
+        await userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
         expect(renderResult.getByText('Process')).toBeTruthy();
         expect(renderResult.getByText('Metadata')).toBeTruthy();
         expect(renderResult.getByText('Alerts')).toBeTruthy();
@@ -149,7 +149,7 @@ describe('SessionView component', () => {
           expect(renderResult.getByTestId('sessionView:sessionViewOptionButton')).toBeTruthy();
         });
 
-        userEvent.click(renderResult.getByTestId('sessionView:sessionViewOptionButton'));
+        await userEvent.click(renderResult.getByTestId('sessionView:sessionViewOptionButton'));
         expect(renderResult.getByText('Display options')).toBeTruthy();
         expect(renderResult.getByText('Timestamp')).toBeTruthy();
         expect(renderResult.getByText('Verbose mode')).toBeTruthy();

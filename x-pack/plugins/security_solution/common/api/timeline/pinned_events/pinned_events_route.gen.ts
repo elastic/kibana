@@ -14,9 +14,21 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { PinnedEvent } from '../model/components.gen';
+
+export type PinnedEventBaseResponseBody = z.infer<typeof PinnedEventBaseResponseBody>;
+export const PinnedEventBaseResponseBody = z.object({
+  code: z.number(),
+  message: z.string().optional(),
+});
+
+export type PersistPinnedEventResponse = z.infer<typeof PersistPinnedEventResponse>;
+export const PersistPinnedEventResponse = z.union([
+  PinnedEvent.merge(PinnedEventBaseResponseBody),
+  z.object({}).nullable(),
+]);
 
 export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEventRouteRequestBody>;
 export const PersistPinnedEventRouteRequestBody = z.object({
@@ -31,11 +43,6 @@ export type PersistPinnedEventRouteRequestBodyInput = z.input<
 export type PersistPinnedEventRouteResponse = z.infer<typeof PersistPinnedEventRouteResponse>;
 export const PersistPinnedEventRouteResponse = z.object({
   data: z.object({
-    persistPinnedEventOnTimeline: PinnedEvent.merge(
-      z.object({
-        code: z.number().optional(),
-        message: z.string().optional(),
-      })
-    ),
+    persistPinnedEventOnTimeline: PersistPinnedEventResponse,
   }),
 });

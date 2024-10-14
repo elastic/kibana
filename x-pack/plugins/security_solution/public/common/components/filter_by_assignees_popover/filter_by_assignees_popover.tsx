@@ -85,7 +85,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
       <EuiFilterGroup>
         <EuiPopover
           panelPaddingSize="none"
-          initialFocus={`#${searchInputId}`}
+          initialFocus={`[id="${searchInputId}"]`}
           button={button}
           isOpen={isPopoverOpen}
           panelStyle={{

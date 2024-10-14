@@ -32,6 +32,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -46,6 +47,7 @@ interface StartPlugins {
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
   maps?: MapsStartApi;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;

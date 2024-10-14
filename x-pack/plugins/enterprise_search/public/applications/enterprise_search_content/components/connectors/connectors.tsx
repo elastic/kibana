@@ -160,7 +160,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
                               {
-                                defaultMessage: 'New Native Connector',
+                                defaultMessage: 'New Elastic managed Connector',
                               }
                             )}
                           </EuiContextMenuItem>,
@@ -176,7 +176,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                              { defaultMessage: 'New Connector Client' }
+                              { defaultMessage: 'New Self-managed Connector' }
                             )}
                           </EuiContextMenuItem>,
                         ]}

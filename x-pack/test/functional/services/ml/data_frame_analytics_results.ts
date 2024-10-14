@@ -320,7 +320,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async openFeatureImportancePopover() {
-      this.assertResultsTableNotEmpty();
+      await this.assertResultsTableNotEmpty();
 
       await retry.tryForTime(30 * 1000, async () => {
         const featureImportanceCell = await this.getFirstFeatureImportanceCell();

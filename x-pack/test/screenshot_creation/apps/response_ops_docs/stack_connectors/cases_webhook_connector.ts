@@ -82,6 +82,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1920,
         1400
       );
+      const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');
+      await saveTestButton.click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('titleInput', 'Example case');
+      await commonScreenshots.takeScreenshot('cases-webhook-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });

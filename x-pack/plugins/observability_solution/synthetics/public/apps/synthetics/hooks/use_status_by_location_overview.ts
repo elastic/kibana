@@ -29,9 +29,8 @@ export const getConfigStatusByLocation = (
   if (!status) {
     return { status: 'unknown' };
   }
-  const allConfigs = status.allConfigs;
   const configIdByLocation = `${configId}-${locationId}`;
-  const config = allConfigs[configIdByLocation];
+  const config = status.upConfigs[configIdByLocation] || status.downConfigs[configIdByLocation];
 
   return {
     configIdByLocation,

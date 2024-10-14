@@ -8,7 +8,6 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -20,6 +19,7 @@ import {
   ScheduleUnit,
   SourceType,
   MonitorFields,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -27,7 +27,7 @@ import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -94,6 +94,7 @@ export const getNormalizeCommonFields = ({
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
+    [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
   };
   return { normalizedFields, errors };
 };
@@ -196,7 +197,7 @@ export const getMonitorLocations = ({
     locations?: string[];
     privateLocations?: string[];
   };
-  allPrivateLocations: PrivateLocationAttributes[];
+  allPrivateLocations: SyntheticsPrivateLocations;
   allPublicLocations: Locations;
 }) => {
   const invalidPublicLocations: string[] = [];
@@ -331,7 +332,7 @@ const getInvalidLocationError = (
   invalidPublic: string[],
   invalidPrivate: string[],
   allPublicLocations: Locations,
-  allPrivateLocations: PrivateLocationAttributes[]
+  allPrivateLocations: SyntheticsPrivateLocations
 ) => {
   const availablePublicMsg =
     allPublicLocations.length === 0
@@ -459,7 +460,9 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
     return acc;
   }, {});
 
-export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
+export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => {
+  // we map fields to labels
+  const { fields: _fields, ...monitor } = data;
   const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);

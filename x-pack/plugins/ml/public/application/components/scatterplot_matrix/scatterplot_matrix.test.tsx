@@ -25,7 +25,7 @@ const mockEsSearch = jest.fn((body) => ({
 const mockEuiTheme = euiThemeLight;
 
 jest.mock('../../contexts/kibana', () => ({
-  useMlApiContext: () => ({
+  useMlApi: () => ({
     esSearch: mockEsSearch,
   }),
   useMlKibana: () => ({

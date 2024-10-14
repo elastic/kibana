@@ -11,11 +11,11 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { addInternalBasePath } from '../../../common/constants';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
-} from '../../../common/api_schemas/schedule_now_transforms';
+} from '../../../server/routes/api_schemas/schedule_now_transforms';
+import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -51,7 +51,7 @@ export const useScheduleNowTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const result = results[transformId];
           if (!result.success) {
             toastNotifications.addError(

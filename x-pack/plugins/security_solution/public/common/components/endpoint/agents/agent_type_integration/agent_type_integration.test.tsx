@@ -51,5 +51,19 @@ describe('AgentTypeIntegration component', () => {
 
       expect(getByTestId('test-tooltipAnchor'));
     });
+
+    if (agentType === 'sentinel_one' || agentType === 'crowdstrike') {
+      it('should display tech preview badge', () => {
+        const { getByTestId } = render();
+
+        expect(getByTestId('test-betaBadge')).not.toBeNull();
+      });
+    } else {
+      it('should NOT display tech preview badge', () => {
+        const { queryByTestId } = render();
+
+        expect(queryByTestId('test-betaBadge')).toBeNull();
+      });
+    }
   });
 });

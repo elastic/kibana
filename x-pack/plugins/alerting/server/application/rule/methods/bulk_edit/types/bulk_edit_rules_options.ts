@@ -12,14 +12,15 @@ import {
   bulkEditOperationsSchema,
   bulkEditOperationSchema,
 } from '../schemas';
-import { RuleParams, RuleDomain, Rule } from '../../../types';
+import { RuleParams, RuleDomain } from '../../../types';
+import { Rule } from '../../../../../../common';
 
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
 export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;
 export type BulkEditOperations = TypeOf<typeof bulkEditOperationsSchema>;
 
 export type ParamsModifier<Params extends RuleParams> = (
-  params: Params
+  rule: Rule<Params>
 ) => Promise<ParamsModifierResult<Params>>;
 
 interface ParamsModifierResult<Params extends RuleParams> {

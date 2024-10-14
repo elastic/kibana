@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
+import type { EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
-import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
-import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 import type { UserProfileWithAvatar } from './user_avatar';
+import type { UserProfilesSelectableProps } from './user_profiles_selectable';
+import { UserProfilesSelectable } from './user_profiles_selectable';
 
 /**
  * Props of {@link UserProfilesPopover} component
@@ -45,7 +47,7 @@ export const UserProfilesPopover = <Option extends UserProfileWithAvatar | null>
   });
 
   return (
-    <EuiPopover panelPaddingSize="none" initialFocus={`#${searchInputId}`} {...popoverProps}>
+    <EuiPopover panelPaddingSize="none" initialFocus={`[id="${searchInputId}"]`} {...popoverProps}>
       <EuiContextMenuPanel title={title}>
         <UserProfilesSelectable {...selectableProps} searchInputId={searchInputId} />
       </EuiContextMenuPanel>

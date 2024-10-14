@@ -8,6 +8,8 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
   getDecryptedRule,
@@ -16,19 +18,22 @@ import {
 } from './rule_loader';
 import { TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { rulesClientMock } from '../rules_client.mock';
 import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 
 // create mocks
-const rulesClient = rulesClientMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const mockBasePathService = { set: jest.fn() };
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
 // assign default parameters/data
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
@@ -49,6 +54,7 @@ describe('rule_loader', () => {
   });
 
   const getDefaultValidateRuleParams = (ruleEnabled: boolean = true) => ({
+    logger: mockLogger,
     paramValidator,
     ruleId,
     spaceId,
@@ -70,7 +76,17 @@ describe('rule_loader', () => {
         consumer,
       })
     );
-    contextMock = getTaskRunnerContext(ruleParams, MONITORING_HISTORY_LIMIT);
+    mockGetAlertFromRaw.mockReturnValue({
+      name: ruleName,
+      alertTypeId: ruleTypeId,
+      params: ruleParams,
+      monitoring: {
+        run: {
+          history: new Array(MONITORING_HISTORY_LIMIT),
+        },
+      },
+    } as Rule);
+    contextMock = getTaskRunnerContext();
     context = contextMock as unknown as TaskRunnerContext;
   });
 
@@ -91,7 +107,6 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rulesClient).toBe(rulesClient);
         expect(result.validatedParams).toEqual(ruleParams);
         expect(result.version).toBe('1');
       });
@@ -133,7 +148,17 @@ describe('rule_loader', () => {
     });
 
     test('test throws when rule params fail validation', async () => {
-      contextMock = getTaskRunnerContext({ bar: 'foo' }, MONITORING_HISTORY_LIMIT);
+      mockGetAlertFromRaw.mockReturnValueOnce({
+        name: ruleName,
+        alertTypeId: ruleTypeId,
+        params: { bar: 'foo' },
+        monitoring: {
+          run: {
+            history: new Array(MONITORING_HISTORY_LIMIT),
+          },
+        },
+      } as Rule);
+      contextMock = getTaskRunnerContext();
       context = contextMock as unknown as TaskRunnerContext;
       let outcome = 'success';
       try {
@@ -284,26 +309,10 @@ function mockGetDecrypted(attributes: { apiKey?: string; enabled: boolean; consu
 }
 
 // return enough of TaskRunnerContext that rule_loader needs
-function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) {
+function getTaskRunnerContext() {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
     basePathService: mockBasePathService,
-    getRulesClientWithRequest,
   };
-
-  function getRulesClientWithRequest() {
-    // only need get() mocked
-    rulesClient.getAlertFromRaw.mockReturnValue({
-      name: ruleName,
-      alertTypeId: ruleTypeId,
-      params: ruleParameters,
-      monitoring: {
-        run: {
-          history: new Array(historyElements),
-        },
-      },
-    } as Rule);
-    return rulesClient;
-  }
 }

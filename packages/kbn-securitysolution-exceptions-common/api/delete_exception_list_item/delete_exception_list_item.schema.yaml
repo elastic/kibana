@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteExceptionListItem
       x-codegen-enabled: true
-      summary: Deletes an exception list item
+      summary: Delete an exception list item
+      description: Delete an exception list item using the `id` or `item_id` field.
       parameters:
         - name: id
           in: query

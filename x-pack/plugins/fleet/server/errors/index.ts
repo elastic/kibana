@@ -57,6 +57,12 @@ export class AgentlessAgentCreateError extends FleetError {
   }
 }
 
+export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
+  constructor(message: string) {
+    super(`Unable to create integration. ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
@@ -65,6 +71,8 @@ export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 
 export class PackagePolicyRequestError extends FleetError {}
+export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
+export class PackagePolicyOutputError extends FleetError {}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
@@ -92,6 +100,7 @@ export class OutputUnauthorizedError extends FleetError {}
 export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
+export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
 
 // Not found errors
 export class AgentNotFoundError extends FleetNotFoundError {}

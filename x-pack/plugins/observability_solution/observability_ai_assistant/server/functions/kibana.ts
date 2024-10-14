@@ -95,6 +95,7 @@ export function registerKibanaFunction({
       }).then((response) => {
         return { content: response.data };
       });
-    }
+    },
+    ['all']
   );
 }

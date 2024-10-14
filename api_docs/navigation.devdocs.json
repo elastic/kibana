@@ -106,7 +106,9 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => ",
+              "<object, unknown>, deps: ",
+              "NavigationPublicSetupDependencies",
+              ") => ",
               {
                 "pluginId": "navigation",
                 "scope": "public",
@@ -135,6 +137,21 @@
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
+                ],
+                "path": "src/plugins/navigation/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.NavigationPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "NavigationPublicSetupDependencies"
                 ],
                 "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
@@ -299,7 +316,7 @@
             "section": "def-public.TopNavMenuBadgeProps",
             "text": "TopNavMenuBadgeProps"
           },
-          "[] | undefined; }) => JSX.Element | null"
+          "[] | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "deprecated": false,
@@ -359,7 +376,7 @@
             "section": "def-public.TopNavMenuData",
             "text": "TopNavMenuData"
           },
-          "[] | undefined; className?: string | undefined; }) => JSX.Element | null"
+          "[] | undefined; className?: string | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
         "deprecated": false,
@@ -1109,7 +1126,7 @@
               "section": "def-public.TopNavMenuProps",
               "text": "TopNavMenuProps"
             },
-            "<QT>) => JSX.Element; }"
+            "<QT>) => React.JSX.Element; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,

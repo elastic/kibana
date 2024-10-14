@@ -7,10 +7,9 @@
 import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/core/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
-import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';
 import { mergeEntities } from '../utils/merge_entities';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
@@ -41,7 +40,7 @@ export async function getServiceEntities({
         size: MAX_NUMBER_OF_SERVICES,
       });
 
-      return calculateAvgMetrics(mergeEntities({ entities }));
+      return mergeEntities({ entities });
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (

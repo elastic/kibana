@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
-import versionCompare from 'compare-versions';
+import semVerCompare from 'semver/functions/compare';
+import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -16,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion } from 'vega';
 import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
+
 import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
@@ -557,8 +560,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const schema = schemaParser(spec.$schema);
       const isVegaLite = schema.library === 'vega-lite';
       const libVersion = isVegaLite ? vegaLiteVersion : vegaVersion;
+      const schemaSemVer = semVerCoerce(schema.version) ?? '';
+      const libSemVersion = semVerCoerce(libVersion) ?? '';
 
-      if (versionCompare(schema.version, libVersion) > 0) {
+      if (semVerCompare(schemaSemVer, libSemVersion) > 0) {
         this._onWarning(
           i18n.translate(
             'visTypeVega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage',

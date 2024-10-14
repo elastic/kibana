@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
 import { expectType } from 'tsd';
-import { schema } from '../..';
+import { offeringBasedSchema, schema } from '../..';
 import { TypeOf } from './object_type';
 
 test('returns value by default', () => {
@@ -682,6 +683,10 @@ test('returns schema structure', () => {
     boolean: schema.boolean(),
     buffer: schema.buffer(),
     byteSize: schema.byteSize(),
+    svlConditional: offeringBasedSchema({
+      serverless: schema.literal('serverless'),
+      traditional: schema.literal('stateful'),
+    }),
     conditional: schema.conditional(
       schema.contextRef('context_value_1'),
       schema.contextRef('context_value_2'),
@@ -699,8 +704,9 @@ test('returns schema structure', () => {
     record: schema.recordOf(schema.string(), schema.string()),
     stream: schema.stream(),
     string: schema.string(),
-    union: schema.oneOf([schema.string()]),
+    union: schema.oneOf([schema.string(), schema.number(), schema.boolean()]),
     uri: schema.uri(),
+    null: schema.literal(null),
   });
   const type = objSchema.extends({
     nested: objSchema,
@@ -711,39 +717,43 @@ test('returns schema structure', () => {
     { path: ['boolean'], type: 'boolean' },
     { path: ['buffer'], type: 'binary' },
     { path: ['byteSize'], type: 'bytes' },
-    { path: ['conditional'], type: 'any' },
+    { path: ['svlConditional'], type: 'serverless|stateful' },
+    { path: ['conditional'], type: 'string' },
     { path: ['duration'], type: 'duration' },
     { path: ['ip'], type: 'string' },
-    { path: ['literal'], type: 'any' },
+    { path: ['literal'], type: 'foo' },
     { path: ['map'], type: 'map' },
-    { path: ['maybe'], type: 'string' },
-    { path: ['never'], type: 'any' },
-    { path: ['nullable'], type: 'alternatives' },
+    { path: ['maybe'], type: 'string?' },
+    { path: ['never'], type: 'never' },
+    { path: ['nullable'], type: 'string?|null' },
     { path: ['number'], type: 'number' },
     { path: ['record'], type: 'record' },
     { path: ['stream'], type: 'stream' },
     { path: ['string'], type: 'string' },
-    { path: ['union'], type: 'alternatives' },
+    { path: ['union'], type: 'string|number|boolean' },
     { path: ['uri'], type: 'string' },
+    { path: ['null'], type: 'null' },
     { path: ['nested', 'any'], type: 'any' },
     { path: ['nested', 'array'], type: 'array' },
     { path: ['nested', 'boolean'], type: 'boolean' },
     { path: ['nested', 'buffer'], type: 'binary' },
     { path: ['nested', 'byteSize'], type: 'bytes' },
-    { path: ['nested', 'conditional'], type: 'any' },
+    { path: ['nested', 'svlConditional'], type: 'serverless|stateful' },
+    { path: ['nested', 'conditional'], type: 'string' },
     { path: ['nested', 'duration'], type: 'duration' },
     { path: ['nested', 'ip'], type: 'string' },
-    { path: ['nested', 'literal'], type: 'any' },
+    { path: ['nested', 'literal'], type: 'foo' },
     { path: ['nested', 'map'], type: 'map' },
-    { path: ['nested', 'maybe'], type: 'string' },
-    { path: ['nested', 'never'], type: 'any' },
-    { path: ['nested', 'nullable'], type: 'alternatives' },
+    { path: ['nested', 'maybe'], type: 'string?' },
+    { path: ['nested', 'never'], type: 'never' },
+    { path: ['nested', 'nullable'], type: 'string?|null' },
     { path: ['nested', 'number'], type: 'number' },
     { path: ['nested', 'record'], type: 'record' },
     { path: ['nested', 'stream'], type: 'stream' },
     { path: ['nested', 'string'], type: 'string' },
-    { path: ['nested', 'union'], type: 'alternatives' },
+    { path: ['nested', 'union'], type: 'string|number|boolean' },
     { path: ['nested', 'uri'], type: 'string' },
+    { path: ['nested', 'null'], type: 'null' },
   ]);
 });
 

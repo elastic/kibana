@@ -13,16 +13,22 @@ import React, {
   useMemo,
   useState,
   FC,
-  PropsWithChildren,
 } from 'react';
-import { useSelector } from 'react-redux';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEvent } from 'react-use';
 import moment from 'moment';
-import { selectRefreshInterval, selectRefreshPaused } from '../state';
+import { Subject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
+const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
   refreshApp: () => void;
+  refreshInterval: number;
+  refreshPaused: boolean;
+  setRefreshInterval: (interval: number) => void;
+  setRefreshPaused: (paused: boolean) => void;
 }
 
 const defaultContext: SyntheticsRefreshContext = {
@@ -30,15 +36,41 @@ const defaultContext: SyntheticsRefreshContext = {
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },
+  refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+  refreshPaused: AUTOREFRESH_IS_PAUSED,
+  setRefreshInterval: () => {
+    throw new Error(
+      i18n.translate('xpack.synthetics.refreshContext.intervalNotInitialized', {
+        defaultMessage: 'Refresh interval was not initialized, set it when you invoke the context',
+      })
+    );
+  },
+  setRefreshPaused: () => {
+    throw new Error(
+      i18n.translate('xpack.synthetics.refreshContext.pausedNotInitialized', {
+        defaultMessage: 'Refresh paused was not initialized, set it when you invoke the context',
+      })
+    );
+  },
 };
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
+export const SyntheticsRefreshContextProvider: FC<
+  React.PropsWithChildren<{
+    reload$?: Subject<boolean>;
+  }>
+> = ({ children, reload$ }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
-  const refreshPaused = useSelector(selectRefreshPaused);
-  const refreshInterval = useSelector(selectRefreshInterval);
+  const [refreshInterval, setRefreshInterval] = useLocalStorage<number>(
+    'xpack.synthetics.refreshInterval',
+    AUTOREFRESH_INTERVAL_SECONDS
+  );
+  const [refreshPaused, setRefreshPaused] = useLocalStorage<boolean>(
+    'xpack.synthetics.refreshPaused',
+    AUTOREFRESH_IS_PAUSED
+  );
 
   const refreshApp = useCallback(() => {
     const refreshTime = Date.now();
@@ -51,17 +83,37 @@ export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = 
     }
   }, [refreshApp, refreshPaused]);
 
+  useEffect(() => {
+    const subscription = reload$?.subscribe(() => {
+      refreshApp();
+    });
+    return () => subscription?.unsubscribe();
+  }, [reload$, refreshApp]);
+
   const value = useMemo(() => {
     return {
       lastRefresh,
       refreshApp,
+      refreshInterval: refreshInterval ?? AUTOREFRESH_INTERVAL_SECONDS,
+      refreshPaused: refreshPaused ?? AUTOREFRESH_IS_PAUSED,
+      setRefreshInterval,
+      setRefreshPaused,
     };
-  }, [lastRefresh, refreshApp]);
+  }, [
+    lastRefresh,
+    refreshApp,
+    refreshInterval,
+    refreshPaused,
+    setRefreshInterval,
+    setRefreshPaused,
+  ]);
 
   useEvent(
     'visibilitychange',
     () => {
-      const isOutdated = moment().diff(new Date(lastRefresh), 'seconds') > refreshInterval;
+      const isOutdated =
+        moment().diff(new Date(lastRefresh), 'seconds') >
+        (refreshInterval || AUTOREFRESH_INTERVAL_SECONDS);
       if (document.visibilityState !== 'hidden' && !refreshPaused && isOutdated) {
         refreshApp();
       }
@@ -77,7 +129,7 @@ export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = 
       if (document.visibilityState !== 'hidden') {
         refreshApp();
       }
-    }, refreshInterval * 1000);
+    }, (refreshInterval || AUTOREFRESH_INTERVAL_SECONDS) * 1000);
     return () => clearInterval(interval);
   }, [refreshPaused, refreshApp, refreshInterval]);
 

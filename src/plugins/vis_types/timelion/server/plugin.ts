@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,7 +13,7 @@ import type { PluginStart, DataRequestHandlerContext } from '@kbn/data-plugin/se
 import type { PluginStart as DataViewPluginStart } from '@kbn/data-views-plugin/server';
 import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import type { TimelionConfig } from '../config';
+import type { TimelionConfig } from './config';
 import { TIMELION_VIS_NAME } from '../common/constants';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';

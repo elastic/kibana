@@ -89,4 +89,6 @@ export type FetchAllAgentPoliciesOptions = Pick<
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
 > & { fields?: string[] };
 
-export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
+  spaceId?: string;
+};

@@ -21,7 +21,6 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { AnimatedCounter } from './animated_counter';
 import * as i18n from './translations';
 
@@ -39,7 +38,6 @@ const EmptyPromptComponent: React.FC<Props> = ({
   onGenerate,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { hasAssistantPrivilege } = useAssistantAvailability();
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -112,7 +110,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
   );
 
   const actions = useMemo(() => {
-    const disabled = !hasAssistantPrivilege || isLoading || isDisabled;
+    const disabled = isLoading || isDisabled;
 
     return (
       <EuiToolTip
@@ -129,7 +127,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
         </EuiButton>
       </EuiToolTip>
     );
-  }, [hasAssistantPrivilege, isDisabled, isLoading, onGenerate]);
+  }, [isDisabled, isLoading, onGenerate]);
 
   return (
     <EuiFlexGroup

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { shareReplay } from 'rxjs';
@@ -211,11 +212,16 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
       getAsLabels: deps.executionContext.getAsLabels,
+    },
+    featureFlags: {
+      setProvider: deps.featureFlags.setProvider,
+      appendContext: deps.featureFlags.appendContext,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
@@ -331,6 +337,15 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
+    featureFlags: {
+      appendContext: deps.featureFlags.appendContext,
+      getBooleanValue: deps.featureFlags.getBooleanValue,
+      getStringValue: deps.featureFlags.getStringValue,
+      getNumberValue: deps.featureFlags.getNumberValue,
+      getBooleanValue$: deps.featureFlags.getBooleanValue$,
+      getStringValue$: deps.featureFlags.getStringValue$,
+      getNumberValue$: deps.featureFlags.getNumberValue$,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

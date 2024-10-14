@@ -46,7 +46,7 @@ export const checkAccess = async ({
 }: CheckAccess): Promise<ProductAccess> => {
   const isRbacEnabled = security.authz.mode.useRbacForRequest(request);
 
-  // If security has been disabled, always hide the plugin
+  // If security has been disabled, always hide app search and workplace search
   if (!isRbacEnabled) {
     return DENY_ALL_PLUGINS;
   }
@@ -79,7 +79,7 @@ export const checkAccess = async ({
       const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
         .globally({ kibana: security.authz.actions.ui.get('enterpriseSearch', 'all') });
-      return hasAllRequested;
+      return hasAllRequested || false;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {
         return false;

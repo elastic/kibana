@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
 import { of } from 'rxjs';
 import type {
   IKibanaSearchResponse,
@@ -16,7 +15,6 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -26,8 +24,6 @@ import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 import type { AppDependencies } from '../app_dependencies';
-import { MlSharedContext } from './shared_context';
-import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -70,6 +66,9 @@ dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
   });
 }) as ISearchGeneric;
 
+// Replace mock to support tests for `use_index_data`.
+coreSetup.http.post = jest.fn().mockResolvedValue([]);
+
 const appDependencies: AppDependencies = {
   analytics: coreStart.analytics,
   application: coreStart.application,
@@ -88,9 +87,7 @@ const appDependencies: AppDependencies = {
   theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
-  savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
-  ml: {} as GetMlSharedImportsReturnType,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
@@ -100,8 +97,7 @@ const appDependencies: AppDependencies = {
 };
 
 export const useAppDependencies = () => {
-  const ml = useContext(MlSharedContext);
-  return { ...appDependencies, ml };
+  return appDependencies;
 };
 
 export const useToastNotifications = () => {

@@ -68,30 +68,6 @@ describe('EmptyPrompt', () => {
     });
   });
 
-  describe('when the user does NOT have the assistant privilege', () => {
-    it('disables the generate button when the user does NOT have the assistant privilege', () => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: false, // <-- the user does NOT have the assistant privilege
-        isAssistantEnabled: true,
-      });
-
-      render(
-        <TestProviders>
-          <EmptyPrompt
-            alertsCount={alertsCount}
-            isLoading={false}
-            isDisabled={false}
-            onGenerate={onGenerate}
-          />
-        </TestProviders>
-      );
-
-      const generateButton = screen.getByTestId('generate');
-
-      expect(generateButton).toBeDisabled();
-    });
-  });
-
   describe('when loading is true', () => {
     const isLoading = true;
 

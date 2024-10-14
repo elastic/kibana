@@ -19,10 +19,9 @@ interface ElasticsearchTemplateProps extends PageTemplateProps {
   cluster?: any;
 }
 
-export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
-  cluster,
-  ...props
-}) => {
+export const ElasticsearchTemplate: React.FC<
+  React.PropsWithChildren<ElasticsearchTemplateProps>
+> = ({ cluster, ...props }) => {
   const { services } = useKibana<MonitoringStartServices>();
 
   const tabs: TabMenuItem[] = [

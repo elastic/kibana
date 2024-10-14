@@ -24,7 +24,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/discover-utils",
-    "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/fleet-plugin",

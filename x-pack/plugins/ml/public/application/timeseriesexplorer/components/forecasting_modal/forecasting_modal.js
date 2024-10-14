@@ -19,20 +19,24 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
 import { isJobVersionGte } from '../../../../../common/util/job_utils';
-import { parseInterval } from '../../../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
 import { forecastServiceFactory } from '../../../services/forecast_service';
 import { ForecastButton } from './forecast_button';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
-
-const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
+const STATUS_FINISHED_QUERY = {
+  term: {
+    forecast_status: FORECAST_REQUEST_STATE.FINISHED,
+  },
+};
 const FORECASTS_VIEW_MAX = 5; // Display links to a maximum of 5 forecasts.
+const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECAST_DURATION_MAX_MS = FORECAST_DURATION_MAX_DAYS * 86400000;
 const WARN_NUM_PARTITIONS = 100; // Warn about running a forecast with this number of field values.
 const FORECAST_STATS_POLL_FREQUENCY = 250; // Frequency in ms at which to poll for forecast request stats.
@@ -64,6 +68,7 @@ export class ForecastingModal extends Component {
     latestRecordTimestamp: PropTypes.number,
     entities: PropTypes.array,
     setForecastId: PropTypes.func,
+    selectedForecastId: PropTypes.string,
   };
 
   constructor(props) {
@@ -82,7 +87,7 @@ export class ForecastingModal extends Component {
   static contextType = context;
 
   componentDidMount() {
-    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApi);
   }
 
   addMessage = (message, status, clearFirst = false) => {
@@ -170,7 +175,7 @@ export class ForecastingModal extends Component {
       jobOpeningState: PROGRESS_STATES.WAITING,
     });
 
-    this.context.services.mlServices.mlApiServices
+    this.context.services.mlServices.mlApi
       .openJob({ jobId: this.props.job.job_id })
       .then(() => {
         // If open was successful run the forecast, then close the job again.
@@ -227,7 +232,7 @@ export class ForecastingModal extends Component {
 
     if (closeJob === true) {
       this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-      this.context.services.mlServices.mlApiServices
+      this.context.services.mlServices.mlApi
         .closeJob({ jobId: this.props.job.job_id })
         .then(() => {
           this.setState({ jobClosingState: PROGRESS_STATES.DONE });
@@ -308,7 +313,7 @@ export class ForecastingModal extends Component {
 
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              this.context.services.mlServices.mlApiServices
+              this.context.services.mlServices.mlApi
                 .closeJob({ jobId: this.props.job.job_id })
                 .then(() => {
                   this.setState({
@@ -405,13 +410,8 @@ export class ForecastingModal extends Component {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
       const { timefilter } = this.context.services.data.query.timefilter;
       const bounds = timefilter.getActiveBounds();
-      const statusFinishedQuery = {
-        term: {
-          forecast_status: FORECAST_REQUEST_STATE.FINISHED,
-        },
-      };
       this.mlForecastService
-        .getForecastsSummary(job, statusFinishedQuery, bounds.min.valueOf(), FORECASTS_VIEW_MAX)
+        .getForecastsSummary(job, STATUS_FINISHED_QUERY, bounds.min.valueOf(), FORECASTS_VIEW_MAX)
         .then((resp) => {
           this.setState({
             previousForecasts: resp.forecasts,
@@ -434,7 +434,7 @@ export class ForecastingModal extends Component {
       // of partitioning fields.
       const entityFieldNames = entities.map((entity) => entity.fieldName);
       if (entityFieldNames.length > 0) {
-        this.context.services.mlServices.mlApiServices
+        this.context.services.mlServices.mlApi
           .getCardinalityOfFields({
             index: job.datafeed_config.indices,
             fieldNames: entityFieldNames,
@@ -558,6 +558,7 @@ export class ForecastingModal extends Component {
             jobOpeningState={this.state.jobOpeningState}
             jobClosingState={this.state.jobClosingState}
             messages={this.state.messages}
+            selectedForecastId={this.props.selectedForecastId}
           />
         )}
       </div>

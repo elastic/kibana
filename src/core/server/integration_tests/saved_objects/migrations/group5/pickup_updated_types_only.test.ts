@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { clearLog, defaultKibanaIndex, startElasticsearch } from '../kibana_migrator_test_kit';
+
 import {
-  clearLog,
   createBaseline,
-  defaultKibanaIndex,
-  getCompatibleMappingsMigrator,
-  getIdenticalMappingsMigrator,
-  getIncompatibleMappingsMigrator,
-  startElasticsearch,
-} from '../kibana_migrator_test_kit';
+  getCompatibleMigratorTestKit,
+  getUpToDateMigratorTestKit,
+  getReindexingMigratorTestKit,
+} from '../kibana_migrator_test_kit.fixtures';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
 
@@ -36,22 +36,24 @@ describe('pickupUpdatedMappings', () => {
 
   describe('when performing a reindexing migration', () => {
     it('should pickup all documents from the index', async () => {
-      const { runMigrations } = await getIncompatibleMappingsMigrator({ logFilePath });
+      const { runMigrations } = await getReindexingMigratorTestKit({ logFilePath });
 
       await runMigrations();
 
       const logs = await parseLogFile(logFilePath);
 
-      expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
       expect(logs).not.toContainLogEntry(
-        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
+        `[${defaultKibanaIndex}] Documents of the following SO types will be updated`
+      );
+      expect(logs).not.toContainLogEntry(
+        `[${defaultKibanaIndex}] There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.`
       );
     });
   });
 
   describe('when performing a compatible migration', () => {
     it('should pickup only the types that have been updated', async () => {
-      const { runMigrations } = await getCompatibleMappingsMigrator({ logFilePath });
+      const { runMigrations } = await getCompatibleMigratorTestKit({ logFilePath });
 
       await runMigrations();
 
@@ -63,7 +65,7 @@ describe('pickupUpdatedMappings', () => {
     });
 
     it('should NOT pickup any documents if only root fields have been updated', async () => {
-      const { runMigrations, client } = await getIdenticalMappingsMigrator({ logFilePath });
+      const { runMigrations, client } = await getUpToDateMigratorTestKit({ logFilePath });
 
       // we tamper the baseline mappings to simulate some root fields changes
       const baselineMappings = await client.indices.getMapping({ index: defaultKibanaIndex });

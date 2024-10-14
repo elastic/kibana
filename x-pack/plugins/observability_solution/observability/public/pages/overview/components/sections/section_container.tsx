@@ -23,6 +23,7 @@ import { ExperimentalBadge } from '../../../../components/experimental_badge';
 interface AppLink {
   label: string;
   href?: string;
+  prependBasePath?: boolean;
 }
 
 interface Props {
@@ -44,6 +45,7 @@ export function SectionContainer({
 }: Props) {
   const { http } = useKibana().services;
   const euiAccordionId = useGeneratedHtmlId({ prefix: 'euiAccordion' });
+  const prependBasePath = appLink?.prependBasePath !== undefined ? appLink?.prependBasePath : true;
 
   return (
     <EuiPanel color="subdued">
@@ -76,7 +78,7 @@ export function SectionContainer({
               iconType={'sortRight'}
               size="xs"
               color="text"
-              href={http.basePath.prepend(appLink.href)}
+              href={prependBasePath ? http.basePath.prepend(appLink.href) : appLink.href}
             >
               {appLink.label}
             </EuiButtonEmpty>

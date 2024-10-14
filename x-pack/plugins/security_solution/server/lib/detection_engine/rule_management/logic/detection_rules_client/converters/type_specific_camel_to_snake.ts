@@ -7,7 +7,6 @@
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import type { TypeSpecificRuleParams } from '../../../../rule_schema';
@@ -67,7 +66,6 @@ export const typeSpecificCamelToSnake = (
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
       };
     }
@@ -80,7 +78,6 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
       };
     }

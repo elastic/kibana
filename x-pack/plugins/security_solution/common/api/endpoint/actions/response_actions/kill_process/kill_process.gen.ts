@@ -14,14 +14,30 @@
  *   version: 2023-10-31
  */
 
-import type { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import { KillOrSuspendActionSchema, SuccessResponse } from '../../../model/schema/common.gen';
+import { SuccessResponse, BaseActionSchema, Pid, EntityId } from '../../../model/schema/common.gen';
+
+export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
+export const KillProcessRouteRequestBody = BaseActionSchema.merge(
+  z.object({
+    parameters: z.union([
+      Pid,
+      EntityId,
+      z.object({
+        /**
+         * Valid for SentinelOne agent type only
+         */
+        process_name: z.string().min(1).optional(),
+      }),
+    ]),
+  })
+);
 
 export type EndpointKillProcessActionRequestBody = z.infer<
   typeof EndpointKillProcessActionRequestBody
 >;
-export const EndpointKillProcessActionRequestBody = KillOrSuspendActionSchema;
+export const EndpointKillProcessActionRequestBody = KillProcessRouteRequestBody;
 export type EndpointKillProcessActionRequestBodyInput = z.input<
   typeof EndpointKillProcessActionRequestBody
 >;

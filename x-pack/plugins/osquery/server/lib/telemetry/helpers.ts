@@ -7,7 +7,7 @@
 
 import { filter, find, isEmpty, pick, isString } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 
 /**
@@ -33,7 +33,8 @@ export const templatePacks = (packsData: PackSavedObject[]) => {
         name: item.name,
         enabled: item.enabled,
         queries: item.queries,
-        policies: (filter(item.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')?.length,
+        policies: (filter(item.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')
+          ?.length,
         prebuilt:
           !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
       },

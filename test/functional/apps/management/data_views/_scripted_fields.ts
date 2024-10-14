@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // Tests for 4 scripted fields;
@@ -18,10 +19,6 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
 
-// NOTE: Scripted field input is managed by Ace editor, which automatically
-//   appends closing braces, for exmaple, if you type opening square brace [
-//   it will automatically insert a a closing square brace ], etc.
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -32,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
@@ -56,17 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function afterAll() {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.common.unsetTime();
     });
-
-    /**
-     * @param field field name to sort
-     * @param optionIndex index of the option to choose in dropdown
-     */
-    const clickSort = async (field: string, optionIndex: number) => {
-      await testSubjects.click(`dataGridHeaderCell-${field}`);
-      const optionButtons = await find.allByCssSelector('.euiListGroupItem__button');
-      await optionButtons[optionIndex].click();
-    };
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
@@ -145,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('discover scripted field', async () => {
+      describe('discover scripted field', () => {
         before(async () => {
           const from = 'Sep 17, 2015 @ 06:31:44.000';
           const to = 'Sep 18, 2015 @ 18:31:44.000';
@@ -168,13 +155,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // add a test to sort numeric scripted field
         it('should sort scripted field value in Discover', async function () {
-          await clickSort(scriptedPainlessFieldName, 1);
+          await dataGrid.clickColumnActionAt(scriptedPainlessFieldName, 1);
           await PageObjects.common.sleep(500);
 
           // after the first click on the scripted field, it becomes secondary sort after time.
           // click on the timestamp twice to make it be the secondary sort key.
-          await clickSort('@timestamp', 1);
-          await clickSort('@timestamp', 0);
+          await dataGrid.clickColumnActionAt('@timestamp', 1);
+          await dataGrid.clickColumnActionAt('@timestamp', 0);
 
           await PageObjects.header.waitUntilLoadingHasFinished();
           await retry.try(async function () {
@@ -182,11 +169,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181-1');
           });
 
-          await clickSort(scriptedPainlessFieldName, 2);
+          await dataGrid.clickColumnActionAt(scriptedPainlessFieldName, 2);
           // after the first click on the scripted field, it becomes primary sort after time.
           // click on the scripted field twice then, makes it be the secondary sort key.
-          await clickSort(scriptedPainlessFieldName, 2);
-          await clickSort(scriptedPainlessFieldName, 2);
+          await dataGrid.clickColumnActionAt(scriptedPainlessFieldName, 2);
+          await dataGrid.clickColumnActionAt(scriptedPainlessFieldName, 2);
 
           await PageObjects.header.waitUntilLoadingHasFinished();
           await retry.try(async function () {
@@ -273,25 +260,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
-        await clickSort(scriptedPainlessFieldName2, 1);
+        await dataGrid.clickColumnActionAt(scriptedPainlessFieldName2, 1);
         // await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.common.sleep(500);
 
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.
-        await clickSort('@timestamp', 1);
-        await clickSort('@timestamp', 0);
+        await dataGrid.clickColumnActionAt('@timestamp', 1);
+        await dataGrid.clickColumnActionAt('@timestamp', 0);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = (await dataGrid.getRowsText())[0];
           expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594bad');
         });
 
-        await clickSort(scriptedPainlessFieldName2, 2);
+        await dataGrid.clickColumnActionAt(scriptedPainlessFieldName2, 2);
         // after the first click on the scripted field, it becomes primary sort after time.
         // click on the scripted field twice then, makes it be the secondary sort key.
-        await clickSort(scriptedPainlessFieldName2, 2);
-        await clickSort(scriptedPainlessFieldName2, 2);
+        await dataGrid.clickColumnActionAt(scriptedPainlessFieldName2, 2);
+        await dataGrid.clickColumnActionAt(scriptedPainlessFieldName2, 2);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
@@ -496,7 +483,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dataGrid.clickCellFilterForButton(0, 3);
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
@@ -514,10 +501,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return elements[0] === 'painDate';
         });
       });
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
     });
   });
 }

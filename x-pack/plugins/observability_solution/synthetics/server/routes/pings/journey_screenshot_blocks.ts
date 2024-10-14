@@ -23,8 +23,8 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
     }),
   },
   writeAccess: false,
-  handler: async (routeProps) => {
-    return await journeyScreenshotBlocksHandler(routeProps);
+  handler: (routeProps) => {
+    return journeyScreenshotBlocksHandler(routeProps);
   },
 });
 

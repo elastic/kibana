@@ -26,7 +26,7 @@ describe('useProfilingKuery', () => {
 
   it('gets initial search value from the URL if present', () => {
     const { result } = renderHook(() => useProfilingKuery(), {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <MemoryRouter
           initialEntries={[
             '/metrics/detail/host?assetDetails=(profilingSearch:%27Stacktrace.count%20%3E%3D%205%27)',
@@ -45,7 +45,7 @@ describe('useProfilingKuery', () => {
     const { result } = renderHook(
       () => ({ profilingKuery: useProfilingKuery(), history: useHistory() }),
       {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <MemoryRouter initialEntries={['/metrics/detail/host']}>{children}</MemoryRouter>
         ),
       }
