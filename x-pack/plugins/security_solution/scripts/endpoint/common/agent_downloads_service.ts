@@ -86,6 +86,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
   /**
    * Downloads the agent and stores it locally. Reuses existing downloads if available.
+   * version is returned instead
+   * @param agentDownloadUrl
+   * @param agentFileName
    */
   public async downloadAndStore(
     agentDownloadUrl: string,
