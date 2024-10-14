@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
+
+import expect from '@kbn/expect';
 import {
   createTokens,
   getStateAndNonce,
 } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

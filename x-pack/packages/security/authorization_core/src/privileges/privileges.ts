@@ -12,12 +12,12 @@ import type {
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
-
-import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
   getMinimalPrivilegeId,
   isMinimalPrivilegeId,
 } from '@kbn/security-authorization-core-common';
+import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
+
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type { Actions } from '../actions';
 
