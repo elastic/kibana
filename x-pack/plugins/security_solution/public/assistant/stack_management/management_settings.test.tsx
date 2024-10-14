@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ManagementSettings } from './management_settings';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
@@ -81,6 +82,7 @@ describe('ManagementSettings', () => {
           docTitle: {
             change: jest.fn(),
           },
+          setBreadcrumbs: jest.fn(),
         },
         data: {
           dataViews: {
@@ -100,9 +102,11 @@ describe('ManagementSettings', () => {
     });
 
     return render(
-      <QueryClientProvider client={queryClient}>
-        <ManagementSettings />
-      </QueryClientProvider>
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <ManagementSettings />
+        </QueryClientProvider>
+      </MemoryRouter>
     );
   };
 
