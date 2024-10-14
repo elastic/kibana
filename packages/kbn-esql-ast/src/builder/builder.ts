@@ -90,12 +90,30 @@ export namespace Builder {
     };
 
     export const source = (
-      template: AstNodeTemplate<ESQLSource>,
+      template: Omit<AstNodeTemplate<ESQLSource>, 'name'>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLSource => {
       return {
         ...template,
         ...Builder.parserFields(fromParser),
+        type: 'source',
+        name: (template.cluster ? template.cluster + ':' : '') + template.index,
+      };
+    };
+
+    export const indexSource = (
+      index: string,
+      cluster?: string,
+      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        index,
+        cluster,
+        name: (cluster ? cluster + ':' : '') + index,
+        sourceType: 'index',
         type: 'source',
       };
     };
