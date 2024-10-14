@@ -143,6 +143,8 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
   /** {@inheritDoc KibanaRequest.httpVersion} */
   public readonly httpVersion: string;
+  /** {@inheritDoc KibanaRequest.apiVersion} */
+  public readonly apiVersion: undefined;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
@@ -185,6 +187,7 @@ export class CoreKibanaRequest<
     });
 
     this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
     this.route = deepFreeze(this.getRouteInfo(request));
@@ -216,6 +219,7 @@ export class CoreKibanaRequest<
       },
       route: this.route,
       authzResult: this.authzResult,
+      apiVersion: this.apiVersion,
     };
   }
 
@@ -266,6 +270,8 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.deprecated,
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       security: this.getSecurity(request),

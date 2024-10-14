@@ -93,6 +93,7 @@ export type {
   IRouter,
   RouteRegistrar,
   RouterRoute,
+  RouterDeprecatedRouteDetails,
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,

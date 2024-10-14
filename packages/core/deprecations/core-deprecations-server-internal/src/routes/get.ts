@@ -11,19 +11,34 @@ import type { DeprecationsGetResponse } from '@kbn/core-deprecations-common';
 import type { InternalDeprecationRouter } from '../internal_types';
 
 export const registerGetRoute = (router: InternalDeprecationRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/',
-      validate: false,
-    },
-    async (context, req, res) => {
-      const deprecationsClient = (await context.core).deprecations.client;
+      access: 'public',
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        validate: false,
+        version: '2023-10-31',
+        options: {
+          deprecated: {
+            documentationUrl: 'https://google2.com',
+            severity: 'warning',
+            reason: {
+              type: 'bump',
+              newApiVersion: '2024-10-13',
+            },
+          },
+        },
+      },
+      async (context, req, res) => {
+        const deprecationsClient = (await context.core).deprecations.client;
+        const body: DeprecationsGetResponse = {
+          deprecations: await deprecationsClient.getAllDeprecations(),
+        };
 
-      const body: DeprecationsGetResponse = {
-        deprecations: await deprecationsClient.getAllDeprecations(),
-      };
-
-      return res.ok({ body });
-    }
-  );
+        return res.ok({ body });
+      }
+    );
 };

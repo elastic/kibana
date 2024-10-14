@@ -43,6 +43,7 @@ import {
   registerUsageCountersUsageCollector,
   registerSavedObjectsCountUsageCollector,
   registerEventLoopDelaysCollector,
+  fetchDeprecatedApiCounterStats,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -74,6 +75,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerEbtCounters(coreSetup.analytics, usageCollection);
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
+    coreSetup.coreUsageData.registerDeprecatedUsageFetch(
+      fetchDeprecatedApiCounterStats(this.logger.get('deprecated-api-usage'))
+    );
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,

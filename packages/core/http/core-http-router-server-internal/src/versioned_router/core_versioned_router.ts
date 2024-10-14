@@ -10,8 +10,8 @@
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { omit } from 'lodash';
 import { CoreVersionedRoute } from './core_versioned_route';
-import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
-import type { Router } from '../router';
+import type { HandlerResolutionStrategy, Method, Options, VersionedRouterRoute } from './types';
+import { getRouteFullPath, type Router } from '../router';
 
 /** @internal */
 export interface VersionedRouterArgs {
@@ -98,10 +98,15 @@ export class CoreVersionedRouter implements VersionedRouter {
   public getRoutes(): VersionedRouterRoute[] {
     return [...this.routes].map((route) => {
       return {
-        path: route.path,
+        path: getRouteFullPath(this.router.routerPath, route.path),
         method: route.method,
         options: omit(route.options, 'path'),
+        versionsOptions: [...route.handlers.entries()].reduce((acc, [version, { options }]) => {
+          acc[version] = options;
+          return acc;
+        }, {} as Record<string, Options>),
         handlers: route.getHandlers(),
+        isVersioned: true,
       };
     });
   }

@@ -18,7 +18,6 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   ApiVersion,
-  AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
@@ -28,7 +27,7 @@ import type {
   RouteMethod,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, Options, VersionedRouterRoute } from './types';
 
 import { validate } from './validate';
 import {
@@ -45,8 +44,6 @@ import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
 import { Router } from '../router';
-
-type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;
@@ -68,7 +65,7 @@ function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handl
 }
 
 export class CoreVersionedRoute implements VersionedRoute {
-  private readonly handlers = new Map<
+  public readonly handlers = new Map<
     ApiVersion,
     {
       fn: RequestHandler;
@@ -127,7 +124,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         security: this.getSecurity,
       },
       this.requestHandler,
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   }
 
@@ -230,6 +227,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.query = {};
     }
 
+    req.apiVersion = version;
+    this.router.emitPostValidate(req, handler.options.options);
+
     const response = await handler.fn(ctx, req, res);
 
     if (this.isDev && validation?.response?.[response.status]?.body) {
@@ -280,7 +280,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
-
     this.handlers.set(options.version, {
       fn: handler,
       options,

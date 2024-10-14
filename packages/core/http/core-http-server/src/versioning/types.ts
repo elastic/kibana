@@ -9,6 +9,7 @@
 
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
+import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal';
 import type {
   RouteConfig,
   RouteMethod,
@@ -20,7 +21,7 @@ import type {
   RouteValidationFunction,
   LazyValidator,
 } from '../..';
-
+import type { RouteDeprecationInfo } from '../router/route';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -90,16 +91,8 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   description?: string;
 
   /**
-   * Declares this operation to be deprecated. Consumers SHOULD refrain from usage
-   * of this route. This will be surfaced in OAS documentation.
-   *
-   * @default false
-   */
-  deprecated?: boolean;
-
-  /**
    * Release version or date that this route will be removed
-   * Use with `deprecated: true`
+   * Use with `deprecated: {@link RouteDeprecationInfo}`
    *
    * @default undefined
    */
@@ -234,6 +227,11 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
    * @track-adoption
    */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
+
+  /**
+   * @public
+   */
+  getRoutes: () => VersionedRouterRoute[];
 }
 
 /** @public */
@@ -341,6 +339,10 @@ export interface AddVersionOpts<P, Q, B> {
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
   security?: Exclude<RouteConfigOptions<RouteMethod>['security'], undefined>;
+
+  options?: {
+    deprecated: RouteDeprecationInfo;
+  };
 }
 
 /**

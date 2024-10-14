@@ -17,14 +17,16 @@ import type {
 export type Method = Exclude<RouteMethod, 'options'>;
 
 /** @internal */
+export type Options = AddVersionOpts<unknown, unknown, unknown>;
+
+/** @internal */
 export interface VersionedRouterRoute {
   method: string;
   path: string;
   options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
-  handlers: Array<{
-    fn: RequestHandler;
-    options: AddVersionOpts<unknown, unknown, unknown>;
-  }>;
+  handlers: Array<{ fn: RequestHandler; options: Options }>;
+  versionsOptions: Record<string, Options>;
+  isVersioned: true;
 }
 
 /**

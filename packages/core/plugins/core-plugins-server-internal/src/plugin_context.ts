@@ -283,6 +283,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+      registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
