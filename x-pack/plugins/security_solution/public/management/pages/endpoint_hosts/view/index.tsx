@@ -180,7 +180,7 @@ const getEndpointListColumns = ({
             policyId={policy.id}
             revision={policy.endpoint_policy_version}
             isOutdated={isPolicyOutOfDate(policy, item.policy_info)}
-            policyExists={!missingPolicies[policy.id]}
+            policyExists={!missingPolicies.has(policy.id)}
             data-test-subj="policyNameCellLink"
             backLink={backToEndpointList}
           >
@@ -301,7 +301,7 @@ const getEndpointListColumns = ({
       actions: [
         {
           render: (item: HostInfo) => {
-            return <TableRowActions endpointMetadata={item.metadata} />;
+            return <TableRowActions endpointInfo={item} />;
           },
         },
       ],

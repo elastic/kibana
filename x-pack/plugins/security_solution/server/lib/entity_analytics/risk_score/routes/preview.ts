@@ -63,6 +63,7 @@ export const riskScorePreviewRoute = (
           filter,
           range: userRange,
           weights,
+          excludeAlertStatuses,
         } = request.body;
 
         const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -93,6 +94,7 @@ export const riskScorePreviewRoute = (
             runtimeMappings,
             weights,
             alertSampleSizePerShard,
+            excludeAlertStatuses,
           });
 
           securityContext.getAuditLogger()?.log({
