@@ -941,6 +941,7 @@ packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
+packages/kbn-transpose-helpers @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
