@@ -7,7 +7,6 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { castArray } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -155,7 +154,10 @@ export async function getErrorSampleDetails({
       },
       error: {
         ...errorFromFields.error,
-        exception: castArray(source?.error.exception ?? errorFromFields?.error.exception),
+        exception:
+          (source?.error.exception?.length ?? 0) > 1
+            ? source?.error.exception
+            : errorFromFields?.error.exception && [errorFromFields.error.exception],
         log: source?.error?.log,
       },
     },
