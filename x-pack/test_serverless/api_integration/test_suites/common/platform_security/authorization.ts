@@ -47,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAdminWithApiKey.destroy();
     });
     describe('route access', () => {
-      describe('disabled', () => {
+      // skipped, see https://github.com/elastic/kibana/issues/194933
+      describe.skip('disabled', () => {
         // Skipped due to change in QA environment for role management and spaces
         // TODO: revisit once the change is rolled out to all environments
         it.skip('get all privileges', async () => {
