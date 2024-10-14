@@ -29,6 +29,7 @@ export function getCustomQueryRuleParams(
     index: ['logs-*'],
     interval: '100m',
     from: 'now-6m',
+    author: [],
     enabled: false,
     ...rewrites,
   };
