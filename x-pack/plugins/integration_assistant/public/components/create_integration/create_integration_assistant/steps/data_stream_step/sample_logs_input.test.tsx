@@ -167,7 +167,7 @@ describe('SampleLogsInput', () => {
       });
 
       describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(6).fill(logsSampleRaw).join(','); // 12 entries
+        const tooLargeLogsSample = Array(60).fill(logsSampleRaw).join(','); // 12 entries
         beforeEach(async () => {
           await changeFile(input, new File([`[${tooLargeLogsSample}]`], 'test.json', { type }));
         });
@@ -180,7 +180,7 @@ describe('SampleLogsInput', () => {
         });
         it('should add a notification toast', () => {
           expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 10 rows.`
+            `The logs sample has been truncated to 100 rows.`
           );
         });
       });
@@ -238,7 +238,7 @@ describe('SampleLogsInput', () => {
       });
 
       describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(6).fill(simpleNDJSON).join('\n'); // 12 entries
+        const tooLargeLogsSample = Array(60).fill(simpleNDJSON).join('\n'); // 12 entries
         beforeEach(async () => {
           await changeFile(input, new File([tooLargeLogsSample], 'test.json', { type }));
         });
@@ -251,7 +251,7 @@ describe('SampleLogsInput', () => {
         });
         it('should add a notification toast', () => {
           expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 10 rows.`
+            `The logs sample has been truncated to 100 rows.`
           );
         });
       });
