@@ -139,7 +139,7 @@ export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?
             : startingXPos;
         svg
           .append('rect')
-          .classed('mlAnnotationRect', true)
+          .classed('ml-annotation__rect', true)
           // If annotation is at the end, prevent overflow by shifting it back
           .attr('x', xPos + annotationWidth >= endingXPos ? endingXPos - annotationWidth : xPos)
           .attr('y', 0)

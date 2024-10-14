@@ -7,9 +7,11 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-const METRIC_TYPE_VALUES = [
-  'storage_retained',
-  'ingest_rate',
+// note these should be sorted alphabetically as we sort the URL params on the browser side
+// before making the request, else the cache key will be different and that would invoke a new request
+export const DEFAULT_METRIC_TYPES = ['ingest_rate', 'storage_retained'] as const;
+export const METRIC_TYPE_VALUES = [
+  ...DEFAULT_METRIC_TYPES,
   'search_vcu',
   'ingest_vcu',
   'ml_vcu',
@@ -20,6 +22,22 @@ const METRIC_TYPE_VALUES = [
 ] as const;
 
 export type MetricTypes = (typeof METRIC_TYPE_VALUES)[number];
+
+export const isDefaultMetricType = (metricType: string) =>
+  // @ts-ignore
+  DEFAULT_METRIC_TYPES.includes(metricType);
+
+export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<MetricTypes, string>>({
+  storage_retained: 'Data Retained in Storage',
+  ingest_rate: 'Data Ingested',
+  search_vcu: 'Search VCU',
+  ingest_vcu: 'Ingest VCU',
+  ml_vcu: 'ML VCU',
+  index_latency: 'Index Latency',
+  index_rate: 'Index Rate',
+  search_latency: 'Search Latency',
+  search_rate: 'Search Rate',
+});
 
 // type guard for MetricTypes
 export const isMetricType = (type: string): type is MetricTypes =>
@@ -47,21 +65,20 @@ export const UsageMetricsRequestSchema = schema.object({
       if (trimmedValues.some((v) => !v.length)) {
         return '[metricTypes] list cannot contain empty values';
       } else if (trimmedValues.some((v) => !isValidMetricType(v))) {
-        return `[metricTypes] must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
+        return `must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
       }
     },
   }),
   dataStreams: schema.arrayOf(schema.string(), {
-    minSize: 1,
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {
-        return '[dataStreams] list cannot contain empty values';
+        return 'list cannot contain empty values';
       }
     },
   }),
 });
 
-export type UsageMetricsRequestSchemaQueryParams = TypeOf<typeof UsageMetricsRequestSchema>;
+export type UsageMetricsRequestBody = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
