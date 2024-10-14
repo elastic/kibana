@@ -18,6 +18,7 @@ import {
   buildConstantsDefinitions,
 } from './factories';
 import { FunctionParameterType, FunctionReturnType } from '../definitions/types';
+import { getTestFunctions } from '../shared/test_functions';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
@@ -60,7 +61,7 @@ export const getBuiltinCompatibleFunctionDefinition = (
   returnTypes?: FunctionReturnType[],
   { skipAssign }: { skipAssign?: boolean } = {}
 ): SuggestionRawDefinition[] => {
-  const compatibleFunctions = builtinFunctions.filter(
+  const compatibleFunctions = [...builtinFunctions, ...getTestFunctions()].filter(
     ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
       !ignoreAsSuggestion &&
       !/not_/.test(name) &&
