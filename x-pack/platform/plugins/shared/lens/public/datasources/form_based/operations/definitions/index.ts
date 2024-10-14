@@ -431,7 +431,8 @@ interface BaseOperationDefinitionProps<
     indexPattern: IndexPattern,
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient,
-    dateRange: DateRange
+    dateRange: DateRange,
+    data: DataPublicPluginStart
   ) => ESQLExpressionWithParams | undefined;
 }
 
