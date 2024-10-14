@@ -25,7 +25,7 @@ export const getCasesFeature = (
           'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
         values: {
           currentId: casesFeatureId,
-          newId: casesFeatureIdV2,
+          casesFeatureIdV2,
         },
       }
     ),
