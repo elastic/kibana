@@ -77,7 +77,12 @@ export const ListCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldListTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
   rt.strict({
-    options: rt.array(ListCustomFieldOptionRt),
+    options: limitedArraySchema({
+      codec: ListCustomFieldOptionRt,
+      min: 1,
+      max: 10,
+      fieldName: 'options',
+    }),
   }),
   rt.exact(
     rt.partial({

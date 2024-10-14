@@ -34,6 +34,7 @@ interface Props {
   field: FieldHook<ListCustomFieldOption[]>;
   idAria?: string;
   [key: string]: unknown;
+  maxOptions?: number;
 }
 
 type OptionsFieldOption = ListCustomFieldOption & { isFresh?: boolean };
@@ -48,7 +49,7 @@ export const INITIAL_OPTIONS = [
   },
 ];
 
-const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
+const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   // Add a state to track if an option has just been created. This is used to auto-focus the input, and to prevent
@@ -175,17 +176,19 @@ const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
             ))}
           </EuiDroppable>
         </EuiDragDropContext>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              iconType={'plusInCircle'}
-              onClick={onAddOption}
-              data-test-subj="options-field-add-option"
-            >
-              {i18n.ADD_LIST_OPTION}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {maxOptions && currentOptions.length < maxOptions && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                iconType={'plusInCircle'}
+                onClick={onAddOption}
+                data-test-subj="options-field-add-option"
+              >
+                {i18n.ADD_LIST_OPTION}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </EuiFormRow>
   );
