@@ -176,11 +176,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const columns = useMemo(
     () =>
       getColumns({
-        onEntryNameClicked: ({ id }: KnowledgeBaseEntryResponse) => {
-          const entry = entries.data.find((e) => e.id === id);
-          setSelectedEntry(entry);
-          openFlyout();
-        },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return (
             !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
@@ -266,21 +261,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       : i18n.NEW_INDEX_FLYOUT_TITLE;
   }, [selectedEntry]);
 
-  if (!enableKnowledgeBaseByDefault) {
-    return (
-      <>
-        <KnowledgeBaseSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
-        />
-        <AssistantSettingsBottomBar
-          hasPendingChanges={hasPendingChanges}
-          onCancelClick={onCancelClick}
-          onSaveButtonClicked={onSaveButtonClicked}
-        />
-      </>
-    );
-  }
+
 
   const sorting = {
     sort: {
@@ -299,6 +280,22 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       setDeleteKBItem(null);
     }
   }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
+
+  if (!enableKnowledgeBaseByDefault) {
+    return (
+      <>
+        <KnowledgeBaseSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
+        />
+        <AssistantSettingsBottomBar
+          hasPendingChanges={hasPendingChanges}
+          onCancelClick={onCancelClick}
+          onSaveButtonClicked={onSaveButtonClicked}
+        />
+      </>
+    );
+  }
 
   return (
     <>

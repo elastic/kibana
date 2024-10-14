@@ -13,7 +13,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -74,6 +74,7 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  userProfileService: UserProfileService;
 }
 
 export interface UserAvatar {
@@ -125,6 +126,7 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  userProfileService: UserProfileService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -147,6 +149,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
+  userProfileService
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -285,6 +288,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      userProfileService
     }),
     [
       actionTypeRegistry,
@@ -319,6 +323,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      userProfileService
     ]
   );
 

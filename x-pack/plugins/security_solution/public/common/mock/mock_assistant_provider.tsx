@@ -11,6 +11,7 @@ import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
+import { UserProfileService } from '@kbn/core/public';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -52,6 +53,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
     >
       {children}
     </AssistantProvider>

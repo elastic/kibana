@@ -7,7 +7,7 @@
 
 import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
 import {
   DocumentEntryType,
@@ -19,6 +19,56 @@ import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
 import { isSystemEntry } from './helpers';
+import { useAsync } from 'react-use';
+
+const AuthorColumn = ({entry}:{entry: KnowledgeBaseEntryResponse}) => {
+  const { currentUserAvatar, userProfileService } = useAssistantContext();
+
+  const userProfile = useAsync(async () => {
+    const profile = await  userProfileService?.bulkGet({ uids: new Set([entry.createdBy])});
+    return profile?.[0].user.username
+  }, []);
+
+  const userName = useMemo(() => userProfile?.value ?? 'Unknown', [userProfile?.value]);
+ const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
+ const userImage = isSystemEntry(entry) ? (
+   <EuiIcon
+     type={'logoElastic'}
+     css={css`
+       margin-left: 4px;
+       margin-right: 14px;
+     `}
+   />
+ ) : currentUserAvatar?.imageUrl != null ? (
+   <EuiAvatar
+     name={userName}
+     imageUrl={currentUserAvatar.imageUrl}
+     size={'s'}
+     color={currentUserAvatar?.color ?? 'subdued'}
+     css={css`
+       margin-right: 10px;
+     `}
+   />
+ ) : (
+   <EuiAvatar
+     name={userName}
+     initials={currentUserAvatar?.initials}
+     size={'s'}
+     color={currentUserAvatar?.color ?? 'subdued'}
+     css={css`
+       margin-right: 10px;
+     `}
+   />
+ );
+ return (
+   <>
+     {userImage}
+     <EuiText size={'s'}>{badgeItem}</EuiText>
+   </>
+ );
+
+
+}
 
 export const useKnowledgeBaseTable = () => {
   const { currentUserAvatar } = useAssistantContext();
@@ -43,13 +93,11 @@ export const useKnowledgeBaseTable = () => {
     ({
       isDeleteEnabled,
       isEditEnabled,
-      onEntryNameClicked,
       onDeleteActionClicked,
       onEditActionClicked,
     }: {
       isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
-      onEntryNameClicked: (entry: KnowledgeBaseEntryResponse) => void;
       onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
       onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
@@ -78,46 +126,7 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_AUTHOR,
           sortable: ({ users }: KnowledgeBaseEntryResponse) => users[0]?.name,
-          render: (entry: KnowledgeBaseEntryResponse) => {
-            // TODO: Look up user from `createdBy` id if privileges allow
-            const userName = entry.users?.[0]?.name ?? 'Unknown';
-            const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
-            const userImage = isSystemEntry(entry) ? (
-              <EuiIcon
-                type={'logoElastic'}
-                css={css`
-                  margin-left: 4px;
-                  margin-right: 14px;
-                `}
-              />
-            ) : currentUserAvatar?.imageUrl != null ? (
-              <EuiAvatar
-                name={userName}
-                imageUrl={currentUserAvatar.imageUrl}
-                size={'s'}
-                color={currentUserAvatar?.color ?? 'subdued'}
-                css={css`
-                  margin-right: 10px;
-                `}
-              />
-            ) : (
-              <EuiAvatar
-                name={userName}
-                initials={currentUserAvatar?.initials}
-                size={'s'}
-                color={currentUserAvatar?.color ?? 'subdued'}
-                css={css`
-                  margin-right: 10px;
-                `}
-              />
-            );
-            return (
-              <>
-                {userImage}
-                <EuiText size={'s'}>{badgeItem}</EuiText>
-              </>
-            );
-          },
+          render:  (entry: KnowledgeBaseEntryResponse) => <AuthorColumn entry={entry}/>,
         },
         {
           name: i18n.COLUMN_ENTRIES,

@@ -85,7 +85,7 @@ export const ManagementSettings = React.memo(() => {
   docTitle.change(SECURITY_AI_SETTINGS);
 
   const [searchParams] = useSearchParams();
-  const defaultTab = useMemo(() => searchParams.get('tab') as SettingsTabs ?? CONNECTORS_TAB, [searchParams]);
+  const currentTab = useMemo(() => searchParams.get('tab') as SettingsTabs ?? CONNECTORS_TAB, [searchParams]);
 
   const handleTabChange = useCallback((tab: string) => {
     navigateToApp('management', {
@@ -153,7 +153,7 @@ export const ManagementSettings = React.memo(() => {
         selectedConversation={currentConversation}
         dataViews={dataViews}
         onTabChange={handleTabChange}
-        defaultTab={defaultTab}
+        currentTab={currentTab}
       />
     );
   }

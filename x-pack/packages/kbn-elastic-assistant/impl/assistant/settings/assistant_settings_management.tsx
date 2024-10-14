@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -37,7 +37,7 @@ interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
   onTabChange?: (tabId: string) => void;
-  defaultTab?: SettingsTabs;
+  currentTab?: SettingsTabs;
 }
 
 /**
@@ -49,13 +49,11 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     dataViews,
     selectedConversation: defaultSelectedConversation,
     onTabChange,
-    defaultTab
+    currentTab: selectedSettingsTab,
   }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
     } = useAssistantContext();
     const { data: connectors } = useLoadConnectors({
       http,
@@ -109,18 +107,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         'data-test-subj': `settingsPageTab-${t.id}`,
         onClick: () => {
           onTabChange?.(t.id);
-          setSelectedSettingsTab(t.id);
         },
-        isSelected: t.id === selectedSettingsTab,
+        isSelected: t.id ===       selectedSettingsTab,
       }));
-    }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
-
-
-    useEffect(() => {
-      if (defaultTab) {
-        setSelectedSettingsTab(defaultTab);
-      }
-    }, [defaultTab]);
+    }, [ selectedSettingsTab, tabsConfig]);
 
     return (
       <>
