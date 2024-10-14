@@ -318,9 +318,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
               <EuiText size="s" textAlign="center">
                 {i18n.LOGS_SAMPLE_DESCRIPTION}
               </EuiText>
-              <EuiText size="xs" color="subdued" textAlign="center">
-                {i18n.LOGS_SAMPLE_DESCRIPTION_2}
-              </EuiText>
             </>
           }
           onChange={onChangeLogsSample}
