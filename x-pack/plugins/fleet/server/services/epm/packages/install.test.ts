@@ -416,8 +416,9 @@ describe('install', () => {
       });
     });
 
-    // failing
     it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
