@@ -55,7 +55,7 @@ export interface CspClientPluginStartDeps {
   usageCollection?: UsageCollectionStart;
 }
 
-export interface MisconfigurationBaseEsQuery {
+export interface CspBaseEsQuery {
   query?: {
     bool: {
       filter: estypes.QueryDslQueryContainer[];
@@ -63,7 +63,7 @@ export interface MisconfigurationBaseEsQuery {
   };
 }
 
-export interface UseMisconfigurationOptions extends MisconfigurationBaseEsQuery {
+export interface UseCspOptions extends CspBaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;

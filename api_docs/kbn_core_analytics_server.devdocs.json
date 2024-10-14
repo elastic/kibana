@@ -583,22 +583,6 @@
                 "path": "packages/core/root/core-root-server-internal/src/events/kibana_started.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-              },
-              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -645,6 +629,22 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -911,6 +911,10 @@
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -977,14 +981,6 @@
               {
                 "plugin": "securitySolutionServerless",
                 "path": "x-pack/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "apm",
@@ -1835,10 +1831,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/analytics/register_service_inventory_view_type_context.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",

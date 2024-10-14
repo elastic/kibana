@@ -46,7 +46,7 @@ import {
   openAIFunctionAgentPrompt,
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
-import { getLlmClass, getLlmType } from '../utils';
+import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -174,11 +174,13 @@ export const postEvaluateRoute = (
             name: string;
             graph: DefaultAssistantGraph;
             llmType: string | undefined;
+            isOssModel: boolean | undefined;
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
-              const isOpenAI = llmType === 'openai';
-              const llmClass = getLlmClass(llmType, true);
+              const isOssModel = isOpenSourceModel(connector);
+              const isOpenAI = llmType === 'openai' && !isOssModel;
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = () =>
                 new llmClass({
                   actionsClient,
@@ -232,8 +234,8 @@ export const postEvaluateRoute = (
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
+                isOssModel,
                 logger,
-                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
@@ -274,6 +276,7 @@ export const postEvaluateRoute = (
               return {
                 name: `${runName} - ${connector.name}`,
                 llmType,
+                isOssModel,
                 graph: getDefaultAssistantGraph({
                   agentRunnable,
                   dataClients,
@@ -287,7 +290,7 @@ export const postEvaluateRoute = (
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
@@ -298,8 +301,8 @@ export const postEvaluateRoute = (
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  bedrockChatEnabled: true,
                   isStreaming: false,
+                  isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,
@@ -310,15 +313,20 @@ export const postEvaluateRoute = (
               return output;
             };
 
-            const evalOutput = await evaluate(predict, {
+            evaluate(predict, {
               data: datasetName ?? '',
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
               maxConcurrency: 5,
-            });
-            logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
+            })
+              .then((output) => {
+                logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
+              })
+              .catch((err) => {
+                logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
+              });
           });
 
           return response.ok({

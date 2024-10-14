@@ -6,7 +6,7 @@
  */
 import { css } from '@emotion/react';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
@@ -21,7 +21,7 @@ import {
   type ChangePointAnnotation,
 } from '../components/change_point_detection/change_point_detection_context';
 import { ChartGridEmbeddableWrapper } from '../embeddables/change_point_chart/embeddable_chart_component_wrapper';
-import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
+import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -85,18 +85,19 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   lastReloadRequestTime,
 }) => {
   const deps = useMemo(() => {
-    const { http, uiSettings, notifications, ...startServices } = coreStart;
-    const { lens, data, usageCollection, fieldFormats } = pluginStart;
+    const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
+      pluginStart;
 
     return {
-      http,
-      uiSettings,
+      charts,
       data,
-      notifications,
       lens,
       usageCollection,
       fieldFormats,
-      ...startServices,
+      unifiedSearch,
+      share,
+      storage,
+      ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
@@ -105,11 +106,11 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
+  const aiopsAppContextValue = useMemo<AiopsAppContextValue>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
-    } as unknown as AiopsAppDependencies;
+    };
   }, [deps, embeddingOrigin]);
 
   const [manualReload$] = useState<BehaviorSubject<number>>(

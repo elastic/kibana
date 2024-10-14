@@ -273,6 +273,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean?)',
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
+        'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
         'xpack.integration_assistant.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
@@ -315,7 +316,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean?)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
-        'xpack.search.homepage.ui.enabled (boolean?)',
+
+        'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
@@ -348,6 +350,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
+        'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

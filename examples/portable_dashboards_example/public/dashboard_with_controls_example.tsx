@@ -68,7 +68,6 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
             });
 
             return {
-              useControlGroupIntegration: true,
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
