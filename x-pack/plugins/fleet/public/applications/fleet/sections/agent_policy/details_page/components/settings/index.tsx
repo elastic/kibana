@@ -72,8 +72,9 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
     useBreadcrumbs('policy_details', { policyName: originalAgentPolicy.name });
     const { notifications } = useStartServices();
-    const config = useConfig();
-    const isFleetEnabled = config?.agents?.enabled ?? false;
+    const {
+      agents: { enabled: isFleetEnabled },
+    } = useConfig();
     const hasAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({

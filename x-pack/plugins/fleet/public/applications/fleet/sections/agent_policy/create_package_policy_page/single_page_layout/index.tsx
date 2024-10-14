@@ -106,8 +106,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
   prerelease,
 }) => {
-  const config = useConfig();
-  const isFleetEnabled = config?.agents?.enabled ?? false;
+  const {
+    agents: { enabled: isFleetEnabled },
+  } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();

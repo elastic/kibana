@@ -23,12 +23,12 @@ import { NoAccessPage } from './error_pages/no_access';
 
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
-  const config = useConfig();
+  const { agents } = useConfig();
   const authz = useAuthz();
   const fleetStatus = useFleetStatus();
   const flyoutContext = useFlyoutContext();
 
-  if (!config?.agents.enabled) return null;
+  if (!agents.enabled) return null;
   if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
     return <Loading />;
   }

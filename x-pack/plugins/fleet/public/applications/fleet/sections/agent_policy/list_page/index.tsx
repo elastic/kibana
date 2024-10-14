@@ -53,8 +53,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const { getPath } = useLink();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
 
-  const config = useConfig();
-  const isFleetEnabled = config?.agents?.enabled ?? false;
+  const {
+    agents: { enabled: isFleetEnabled },
+  } = useConfig();
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();

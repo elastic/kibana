@@ -24,7 +24,7 @@ export function useConfig(): FleetConfigType {
 
   if (baseConfig === null && pluginConfig) {
     // eslint-disable-next-line no-console
-    console.error('Fleet ConfigContext not initialized, using from plugin context');
+    console.warn('Fleet ConfigContext not initialized, using from plugin context');
   }
 
   if (!config) {

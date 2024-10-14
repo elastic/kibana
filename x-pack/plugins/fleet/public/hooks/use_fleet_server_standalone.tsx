@@ -9,7 +9,7 @@ import { useConfig } from './use_config';
 
 export function useFleetServerStandalone() {
   const config = useConfig();
-  const isFleetServerStandalone = config?.internal?.fleetServerStandalone ?? false;
+  const isFleetServerStandalone = config.internal?.fleetServerStandalone ?? false;
 
   return { isFleetServerStandalone };
 }
