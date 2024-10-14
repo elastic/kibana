@@ -20,7 +20,7 @@
       "share"
     ],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": ["spaces", "cloud"],
     "extraPublicDirs": []
   }
 }

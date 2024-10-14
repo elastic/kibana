@@ -7,12 +7,12 @@
 
 import {
   AppMountParameters,
+  AppStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  AppStatus,
 } from '@kbn/core/public';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
@@ -40,10 +40,14 @@ export class InventoryPlugin
 {
   logger: Logger;
   telemetry: TelemetryService;
+  kibanaVersion: string;
+  isServerlessEnv: boolean;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
     this.telemetry = new TelemetryService();
+    this.kibanaVersion = context.env.packageInfo.version;
+    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
@@ -104,6 +108,9 @@ export class InventoryPlugin
     this.telemetry.setup({ analytics: coreSetup.analytics });
     const telemetry = this.telemetry.start();
 
+    const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
+    const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
+
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
       title: i18n.translate('xpack.inventory.appTitle', {
@@ -134,6 +141,11 @@ export class InventoryPlugin
           pluginsStart,
           services,
           appMountParameters,
+          kibanaEnvironment: {
+            isCloudEnv,
+            isServerlessEnv,
+            kibanaVersion: this.kibanaVersion,
+          },
         });
       },
     });
