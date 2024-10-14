@@ -18,6 +18,7 @@ export interface ServerlessSearchContext {
   console: ConsolePluginStart;
   history: AppMountParameters['history'];
   searchConnectors?: SearchConnectorsPluginStart;
+  security: SecurityPluginStart;
   share: SharePluginStart;
   user?: AuthenticatedUser;
 }
