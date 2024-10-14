@@ -55,20 +55,21 @@ const degradedDocButtonLabelWhenNotPresent = i18n.translate(
   { defaultMessage: 'All fields in this document were parsed correctly' }
 );
 
-const getFormattedCTAMessage = ({ hasClickAction }: { hasClickAction: boolean }) => (
+const directive = <EuiCode css={{ display: 'inline-block' }}>METADATA _ignored</EuiCode>;
+
+const formattedCTAMessage = (
   <FormattedMessage
     id="discover.customControl.degradedDocDisabled"
-    defaultMessage="Degraded document field detection is disabled for this search. {action} to add {directive} to your ES|QL query."
-    values={{
-      directive: <EuiCode css={{ display: 'inline-block' }}>METADATA _ignored</EuiCode>,
-      action: hasClickAction
-        ? i18n.translate('discover.customControl.degradedDocDisabled.click', {
-            defaultMessage: 'Click',
-          })
-        : i18n.translate('discover.customControl.degradedDocDisabled.consider', {
-            defaultMessage: 'Consider',
-          }),
-    }}
+    defaultMessage="Degraded document field detection is disabled for this search. Consider adding {directive} to your ES|QL query."
+    values={{ directive }}
+  />
+);
+
+const formattedCTAMessageWithAction = (
+  <FormattedMessage
+    id="discover.customControl.degradedDocDisabled"
+    defaultMessage="Degraded document field detection is disabled for this search. Click to add {directive} to your ES|QL query."
+    values={{ directive }}
   />
 );
 
@@ -94,7 +95,7 @@ const DegradedDocs = ({
           data-test-subj="docTableDegradedDocDisabled"
           iconType="indexClose"
           label={actionsHeaderAriaLabelDegradedAction}
-          tooltipContent={getFormattedCTAMessage({ hasClickAction: true })}
+          tooltipContent={formattedCTAMessageWithAction}
           onClick={addIgnoredMetadataToQuery}
         />
       );
@@ -104,7 +105,7 @@ const DegradedDocs = ({
         <Control
           disabled
           data-test-subj="docTableDegradedDocDisabled"
-          tooltipContent={getFormattedCTAMessage({ hasClickAction: false })}
+          tooltipContent={formattedCTAMessage}
           label={actionsHeaderAriaLabelDegradedAction}
           iconType="indexClose"
           onClick={undefined}

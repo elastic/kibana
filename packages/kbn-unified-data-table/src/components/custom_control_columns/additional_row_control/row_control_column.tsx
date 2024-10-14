@@ -39,10 +39,13 @@ export const RowControlCell = ({
         tooltipContent,
         ...extraProps
       }) => {
+        const classNameProp = Boolean(tooltipContent)
+          ? {}
+          : { className: 'unifiedDataTable__rowControl' };
+
         const control = (
           <EuiButtonIcon
             aria-label={label}
-            className="unifiedDataTable__rowControl"
             color={color ?? 'text'}
             data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
             disabled={disabled}
@@ -53,6 +56,7 @@ export const RowControlCell = ({
                 onClick({ record, rowIndex });
               }
             }}
+            {...classNameProp}
             {...extraProps}
           />
         );
