@@ -11,24 +11,20 @@ import {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchema,
   UsageMetricsAutoOpsResponseSchemaBody,
-  UsageMetricsRequestSchemaQueryParams,
+  UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
+import { CustomHttpRequestError } from '../../utils';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
 
 export const getUsageMetricsHandler = (
   dataUsageContext: DataUsageContext
-): RequestHandler<
-  never,
-  UsageMetricsRequestSchemaQueryParams,
-  unknown,
-  DataUsageRequestHandlerContext
-> => {
+): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
 
   return async (context, request, response) => {
@@ -36,8 +32,16 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
 
-      const { from, to, metricTypes, dataStreams: requestDsNames } = request.query;
       logger.debug(`Retrieving usage metrics`);
+      const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
+
+      if (!requestDsNames?.length) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
+        );
+      }
 
       const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
         await esClient.indices.getDataStream({
@@ -52,10 +56,10 @@ export const getUsageMetricsHandler = (
         dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });
 
-      const processedMetrics = transformMetricsData(metrics);
+      const body = transformMetricsData(metrics);
 
       return response.ok({
-        body: processedMetrics,
+        body,
       });
     } catch (error) {
       logger.error(`Error retrieving usage metrics: ${error.message}`);
