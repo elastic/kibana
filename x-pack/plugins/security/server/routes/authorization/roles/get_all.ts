@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import type { RouteDefinitionParams } from '../..';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -14,9 +16,9 @@ export function defineGetAllRolesRoutes({
   router,
   authz,
   getFeatures,
+  subFeaturePrivilegeIterator,
   logger,
   buildFlavor,
-  config,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -25,7 +27,13 @@ export function defineGetAllRolesRoutes({
         access: 'public',
         summary: `Get all roles`,
       },
-      validate: false,
+      validate: {
+        request: {
+          query: schema.maybe(
+            schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
+          ),
+        },
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
@@ -40,14 +48,16 @@ export function defineGetAllRolesRoutes({
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole(
+              transformElasticsearchRoleToRole({
                 features,
-                // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
+                subFeaturePrivilegeIterator, // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
-                roleName,
-                authz.applicationName,
-                logger
-              )
+                name: roleName,
+                application: authz.applicationName,
+                logger,
+                replaceDeprecatedKibanaPrivileges:
+                  request.query?.replaceDeprecatedPrivileges ?? false,
+              })
             )
             .filter((role) => {
               return !hideReservedRoles || !role.metadata?._reserved;
