@@ -334,6 +334,10 @@ export const getDefaultRecoveredSummary = ({
         name: hit['monitor.name'],
         type: hit['monitor.type'],
       },
+      service: {
+        name: hit['service.name'],
+      },
+      labels: hit.labels,
       config_id: configId,
       observer: {
         geo: {

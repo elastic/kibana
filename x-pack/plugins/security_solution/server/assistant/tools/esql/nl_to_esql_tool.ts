@@ -13,6 +13,7 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './common';
 
+// select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
 
 const TOOL_NAME = 'NaturalLanguageESQLTool';
@@ -32,8 +33,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
-    const { inference, connectorId, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && inference != null && connectorId != null;
+    const { inference, connectorId } = params;
+    return inference != null && connectorId != null;
   },
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
