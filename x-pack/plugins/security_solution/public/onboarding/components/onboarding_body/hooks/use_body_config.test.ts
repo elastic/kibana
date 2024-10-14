@@ -43,7 +43,7 @@ const bodyConfig = [
 ];
 
 // Mock dependencies
-jest.mock('react-use');
+jest.mock('react-use/lib/useObservable');
 jest.mock('../../../../common/lib/kibana/kibana_react');
 jest.mock('../../../../common/lib/capabilities');
 jest.mock('../body_config', () => ({ bodyConfig }));
