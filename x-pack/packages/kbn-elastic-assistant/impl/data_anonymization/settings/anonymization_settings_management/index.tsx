@@ -37,7 +37,11 @@ import {
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
-import { SAVE, SETTINGS_UPDATED_TOAST_TITLE } from '../../../assistant/settings/translations';
+import {
+  CANCEL,
+  SAVE,
+  SETTINGS_UPDATED_TOAST_TITLE,
+} from '../../../assistant/settings/translations';
 
 export interface Props {
   defaultPageSize?: number;
@@ -73,7 +77,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     onClose?.();
     resetSettings();
     setHasPendingChanges(false);
-  }, [resetSettings]);
+  }, [onClose, resetSettings]);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
@@ -91,7 +95,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
     onClose?.();
-  }, [handleSave]);
+  }, [handleSave, onClose]);
 
   const handleAnonymizationFieldsBulkActions = useCallback<
     UseAnonymizationListUpdateProps['setAnonymizationFieldsBulkActions']
@@ -151,7 +155,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
           />
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancelClick}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onCancelClick}>{CANCEL}</EuiButtonEmpty>
           <EuiButton type="submit" onClick={onSaveButtonClicked} fill disabled={!hasPendingChanges}>
             {SAVE}
           </EuiButton>

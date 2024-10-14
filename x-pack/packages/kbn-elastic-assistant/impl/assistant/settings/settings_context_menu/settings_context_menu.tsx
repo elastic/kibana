@@ -74,7 +74,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const handleNavigateToAnonymization = useCallback(() => {
       showAnonymizationModal();
       closePopover();
-    }, [navigateToApp]);
+    }, [closePopover]);
 
     const handleNavigateToKnowledgeBase = useCallback(
       () =>
@@ -131,7 +131,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           </EuiFlexGroup>
         </EuiContextMenuItem>,
       ],
-      [handleNavigateToKnowledgeBase, handleNavigateToSettings, knowledgeBase]
+      [
+        closePopover,
+        handleNavigateToAnonymization,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToSettings,
+        knowledgeBase.latestAlerts,
+      ]
     );
 
     const items = useMemo(
