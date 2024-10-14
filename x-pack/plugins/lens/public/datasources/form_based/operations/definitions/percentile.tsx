@@ -197,6 +197,7 @@ export const percentileOperation: OperationDefinition<
     };
   },
   toESQL: (column, columnId) => {
+    if (column.timeShift) return;
     return `PERCENTILE(${column.sourceField}, ${column.params.percentile})`;
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {

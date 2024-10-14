@@ -186,6 +186,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     ];
   },
   toESQL: (column, columnId, indexPattern, layer) => {
+    if (column.params?.emptyAsNull === false || column.timeShift) return;
+
     const field = indexPattern.getFieldByName(column.sourceField);
     if (!field || field?.type === 'document') {
       return `COUNT(*)`;

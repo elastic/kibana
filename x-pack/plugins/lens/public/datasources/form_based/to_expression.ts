@@ -168,13 +168,31 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     const canUseESQL = esAggEntries.every(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
-      return def.toESQL !== undefined;
+      return (
+        def.toESQL !== undefined &&
+        def.toESQL(
+          {
+            ...col,
+            timeShift: resolveTimeShift(
+              col.timeShift,
+              absDateRange,
+              histogramBarsTarget,
+              hasDateHistogram
+            ),
+          },
+          colId,
+          indexPattern,
+          layer,
+          uiSettings
+        ) !== undefined
+      );
     });
 
     let esql = '';
 
     if (canUseESQL) {
       esql = `FROM ${indexPattern.title} | `;
+      esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
       const metrics = esAggEntries
         .filter(([id, col]) => !col.isBucketed)
         .map(([colId, col], index) => {

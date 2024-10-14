@@ -451,7 +451,7 @@ interface BaseOperationDefinitionProps<
     indexPattern: IndexPattern,
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient
-  ) => string;
+  ) => string | undefined;
 }
 
 interface BaseBuildColumnArgs {

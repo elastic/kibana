@@ -162,14 +162,35 @@ export const dateHistogramOperation: OperationDefinition<
       timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
     }
 
+    if (timeZone || dropPartials || column.params?.includeEmptyRows) return;
+
     // todo: add auto interval calculation and conversion from dropdown values
-    interval = '50';
+    console.log('interval', interval);
 
-    // todo: add drop partial support
+    function mapToEsqlInterval(_interval: string) {
+      switch (_interval) {
+        case '1M':
+          return '1 month';
+        case 'd':
+          return '1d';
+        case 'h':
+          return '1h';
+        case 'm':
+          return '1 minute';
+        case 's':
+          return '1s';
+        case 'ms':
+          return '1ms';
+        default:
+          return _interval;
+      }
+    }
 
-    // todo: add missing values support
-
-    return `BUCKET(${column.sourceField}, ${interval}, ?_tstart, ?_tend)`;
+    if (interval === 'auto') {
+      return `BUCKET(${column.sourceField}, 50, ?_tstart, ?_tend)`;
+    } else {
+      return `BUCKET(${column.sourceField}, ${mapToEsqlInterval(interval)})`;
+    }
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const usedField = indexPattern.getFieldByName(column.sourceField);
