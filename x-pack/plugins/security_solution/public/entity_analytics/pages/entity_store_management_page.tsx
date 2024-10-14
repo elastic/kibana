@@ -53,7 +53,24 @@ export const EntityStoreManagementPage = () => {
   } = useAssetCriticalityPrivileges('AssetCriticalityUploadPage');
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
 
-  const entityStoreStatus = useEntityEngineStatus();
+  const [polling, setPolling] = useState(false);
+  const entityStoreStatus = useEntityEngineStatus({
+    disabled: false,
+    polling: !polling
+      ? undefined
+      : (data) => {
+          const shouldStopPolling =
+            data?.engines &&
+            data.engines.length > 0 &&
+            data.engines.every((engine) => engine.status === 'started');
+
+          if (shouldStopPolling) {
+            setPolling(false);
+            return false;
+          }
+          return 1000;
+        },
+  });
   const initEntityEngineMutation = useInitEntityEngineMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation();
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation();
@@ -308,9 +325,12 @@ export const EntityStoreManagementPage = () => {
     );
   };
 
-  const entityStoreEnabledStatuses = ['enabled', 'installing'];
-  const switchDisabledStatuses = ['error', 'loading'];
-  const canDeleteEntityEngine = !['not_installed', 'loading'].includes(entityStoreStatus.status);
+  const entityStoreEnabledStatuses = ['enabled'];
+  const switchDisabledStatuses = ['error', 'loading', 'installing'];
+  const entityStoreInstallingStatuses = ['installing', 'loading'];
+  const canDeleteEntityEngine = !['not_installed', 'loading', 'installing'].includes(
+    entityStoreStatus.status
+  );
 
   const onSwitchClick = () => {
     if (switchDisabledStatuses.includes(entityStoreStatus.status)) {
@@ -320,6 +340,7 @@ export const EntityStoreManagementPage = () => {
     if (entityStoreEnabledStatuses.includes(entityStoreStatus.status)) {
       stopEntityEngineMutation.mutate();
     } else {
+      setPolling(true);
       initEntityEngineMutation.mutate();
     }
   };
@@ -329,7 +350,8 @@ export const EntityStoreManagementPage = () => {
       <EuiFlexGroup alignItems={'center'}>
         {(initEntityEngineMutation.isLoading ||
           stopEntityEngineMutation.isLoading ||
-          deleteEntityEngineMutation.isLoading) && (
+          deleteEntityEngineMutation.isLoading ||
+          entityStoreInstallingStatuses.includes(entityStoreStatus.status)) && (
           <EuiFlexItem>
             <EuiLoadingSpinner data-test-subj="entity-store-status-loading" size="m" />
           </EuiFlexItem>

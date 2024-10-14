@@ -67,17 +67,20 @@ export const useInvalidateEntityEngineStatusQuery = () => {
 export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { initEntityStore } = useEntityStoreRoutes();
-  return useMutation<[InitEntityEngineResponse]>(() => Promise.all([initEntityStore('user')]), {
-    ...options,
-    mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
-    onSettled: (...args) => {
-      invalidateEntityEngineStatusQuery();
+  return useMutation<InitEntityEngineResponse[]>(
+    () => Promise.all([initEntityStore('user'), initEntityStore('host')]),
+    {
+      ...options,
+      mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
+      onSettled: (...args) => {
+        invalidateEntityEngineStatusQuery();
 
-      if (options?.onSettled) {
-        options.onSettled(...args);
-      }
-    },
-  });
+        if (options?.onSettled) {
+          options.onSettled(...args);
+        }
+      },
+    }
+  );
 };
 
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
@@ -85,17 +88,20 @@ export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { stopEntityStore } = useEntityStoreRoutes();
-  return useMutation<[StopEntityEngineResponse]>(() => Promise.all([stopEntityStore('user')]), {
-    ...options,
-    mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
-    onSettled: (...args) => {
-      invalidateEntityEngineStatusQuery();
+  return useMutation<StopEntityEngineResponse[]>(
+    () => Promise.all([stopEntityStore('user'), stopEntityStore('host')]),
+    {
+      ...options,
+      mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
+      onSettled: (...args) => {
+        invalidateEntityEngineStatusQuery();
 
-      if (options?.onSettled) {
-        options.onSettled(...args);
-      }
-    },
-  });
+        if (options?.onSettled) {
+          options.onSettled(...args);
+        }
+      },
+    }
+  );
 };
 
 export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
@@ -103,8 +109,8 @@ export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { deleteEntityEngine } = useEntityStoreRoutes();
-  return useMutation<[DeleteEntityEngineResponse]>(
-    () => Promise.all([deleteEntityEngine('user')]),
+  return useMutation<DeleteEntityEngineResponse[]>(
+    () => Promise.all([deleteEntityEngine('user'), deleteEntityEngine('host')]),
     {
       ...options,
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
