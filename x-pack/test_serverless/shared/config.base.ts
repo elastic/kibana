@@ -171,7 +171,11 @@ export default async () => {
         `--xpack.cloud.serverless.project_id=fakeprojectid`,
         `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
         `--xpack.cloud.projects_url=/projects/`,
-        `--xpack.cloud.organization_url=/account/members`,
+        `--xpack.cloud.profile_url=/user/settings/`,
+        `--xpack.cloud.billing_url=/billing/overview/`,
+        `--xpack.cloud.deployments_url=/deployments`,
+        `--xpack.cloud.organization_url=/account/`,
+        `--xpack.cloud.users_and_roles_url=/account/members/`,
       ],
     },
 
