@@ -187,6 +187,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (!field || field?.type === 'document') {
       return { template: 'COUNT(*)' };
     }
+
     return {
       template: `COUNT(${esql.col(field.name)})`,
     };
