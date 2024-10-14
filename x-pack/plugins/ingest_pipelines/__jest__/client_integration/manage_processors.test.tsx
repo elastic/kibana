@@ -40,13 +40,19 @@ describe('<ManageProcessors />', () => {
       type: 'maxmind',
     };
 
-    const database3 = {
+    const database3: GeoipDatabase = {
       name: 'GeoIP2-Country',
       id: 'geoip2-country',
       type: 'maxmind',
     };
 
-    const databases = [database1, database2, database3];
+    const database4: GeoipDatabase = {
+      name: 'Free-IP-to-ASN',
+      id: 'free-ip-to-asn',
+      type: 'ipinfo',
+    };
+
+    const databases = [database1, database2, database3, database4];
 
     httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
 
@@ -65,29 +71,34 @@ describe('<ManageProcessors />', () => {
       tableCellsValues.forEach((row, i) => {
         const database = databases[i];
 
-        expect(row).toEqual([database.name, 'MaxMind', 'Delete']);
+        expect(row).toEqual([
+          database.name,
+          database.type === 'maxmind' ? 'MaxMind' : 'IPInfo',
+          '',
+        ]);
       });
     });
 
     test('deletes a database', async () => {
       const { actions } = testBed;
-      const { name: databaseName } = database1;
+      const databaseIndexToDelete = 0;
+      const databaseName = databases[databaseIndexToDelete].name;
       httpRequestsMockHelpers.setDeleteDatabasesResponse(databaseName, {});
 
-      await actions.clickDeleteDatabaseButton(0);
+      await actions.clickDeleteDatabaseButton(databaseIndexToDelete);
 
       await actions.confirmDeletingDatabase();
 
       expect(httpSetup.delete).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/geoip_database/${databaseName.toLowerCase()}`,
+        `${API_BASE_PATH}/databases/${databaseName.toLowerCase()}`,
         expect.anything()
       );
     });
   });
 
   describe('Creates a database', () => {
-    it('creates a database when none with the same name exists', async () => {
-      const { actions } = testBed;
+    it('creates a MaxMind database when none with the same name exists', async () => {
+      const { actions, exists } = testBed;
       const databaseName = 'GeoIP2-ISP';
       const maxmind = '123456';
       httpRequestsMockHelpers.setCreateDatabasesResponse({
@@ -97,13 +108,39 @@ describe('<ManageProcessors />', () => {
 
       await actions.clickAddDatabaseButton();
 
-      await actions.fillOutDatabaseValues(maxmind, databaseName);
+      expect(exists('addGeoipDatabaseForm')).toBe(true);
+
+      await actions.fillOutDatabaseValues('maxmind', databaseName, maxmind);
 
       await actions.confirmAddingDatabase();
 
-      expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/geoip_database`, {
+      expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/databases`, {
         asSystemRequest: undefined,
-        body: '{"maxmind":"123456","databaseName":"GeoIP2-ISP"}',
+        body: '{"databaseType":"maxmind","databaseName":"GeoIP2-ISP","maxmind":"123456"}',
+        query: undefined,
+        version: undefined,
+      });
+    });
+
+    it('creates an IPInfo database when none with the same name exists', async () => {
+      const { actions, exists } = testBed;
+      const databaseName = 'ASN';
+      httpRequestsMockHelpers.setCreateDatabasesResponse({
+        name: databaseName,
+        id: databaseName.toLowerCase(),
+      });
+
+      await actions.clickAddDatabaseButton();
+
+      expect(exists('addGeoipDatabaseForm')).toBe(true);
+
+      await actions.fillOutDatabaseValues('ipinfo', databaseName);
+
+      await actions.confirmAddingDatabase();
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/databases`, {
+        asSystemRequest: undefined,
+        body: '{"databaseType":"ipinfo","databaseName":"ASN","maxmind":""}',
         query: undefined,
         version: undefined,
       });

@@ -109,7 +109,7 @@ export const AddDatabaseModal = ({
       `}
       aria-labelledby={ADD_DATABASE_MODAL_TITLE_ID}
       onClose={closeModal}
-      initialFocus={'[data-test-subj="datanaseTypeSelect"]'}
+      initialFocus={'[data-test-subj="databaseTypeSelect"]'}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={ADD_DATABASE_MODAL_TITLE_ID}>
@@ -126,6 +126,7 @@ export const AddDatabaseModal = ({
           id={ADD_DATABASE_MODAL_FORM_ID}
           component="form"
           onSubmit={(event) => onAddDatabase(event)}
+          data-test-subj="addGeoipDatabaseForm"
         >
           <EuiFormRow
             label={
@@ -146,7 +147,7 @@ export const AddDatabaseModal = ({
               hasNoInitialSelection={true}
               value={databaseType}
               onChange={(e) => onDatabaseTypeChange(e.target.value)}
-              data-test-subj="datanaseTypeSelect"
+              data-test-subj="databaseTypeSelect"
             />
           </EuiFormRow>
           {databaseType === 'maxmind' && (

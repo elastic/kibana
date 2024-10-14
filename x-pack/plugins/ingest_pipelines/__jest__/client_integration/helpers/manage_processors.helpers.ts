@@ -62,6 +62,7 @@ const createActions = (testBed: TestBed) => {
 
   const clickAddDatabaseButton = async () => {
     const button = find('addGeoipDatabaseButton');
+    expect(button).not.toBe(undefined);
     await act(async () => {
       button.simulate('click');
     });
@@ -69,21 +70,38 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
-  const fillOutDatabaseValues = async (maxmind: string, databaseName: string) => {
+  const fillOutDatabaseValues = async (
+    databaseType: string,
+    databaseName: string,
+    maxmind?: string
+  ) => {
     await act(async () => {
-      form.setInputValue('addDatabaseMaxmind', maxmind);
+      form.setSelectValue('databaseTypeSelect', databaseType);
     });
+    component.update();
+
+    if (maxmind) {
+      await act(async () => {
+        form.setInputValue('maxmindField', maxmind);
+      });
+    }
     await act(async () => {
-      form.setInputValue('addDatabaseName', databaseName);
+      form.setSelectValue('databaseNameSelect', databaseName);
     });
+
+    component.update();
   };
 
   const confirmAddingDatabase = async () => {
-    const button: HTMLButtonElement | null = document.body.querySelector(
+    const confirmButton: HTMLButtonElement | null = document.body.querySelector(
       '[data-test-subj="addGeoipDatabaseSubmit"]'
     );
+
+    expect(confirmButton).not.toBe(null);
+    expect(confirmButton!.disabled).toBe(false);
+
     await act(async () => {
-      button!.click();
+      confirmButton!.click();
     });
 
     component.update();
@@ -115,6 +133,10 @@ export type ManageProcessorsTestSubjects =
   | 'manageProcessorsTitle'
   | 'addGeoipDatabaseButton'
   | 'geoipDatabaseList'
+  | 'databaseTypeSelect'
+  | 'maxmindField'
+  | 'databaseNameSelect'
+  | 'addGeoipDatabaseSubmit'
   | 'deleteGeoipDatabaseButton'
   | 'geoipDatabaseConfirmation'
   | 'geoipEmptyListPrompt'
