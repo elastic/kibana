@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -31,7 +33,6 @@ import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
 import { ConnectorViewLogic } from '../connector_view_logic';
-import { useValues } from 'kea';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
