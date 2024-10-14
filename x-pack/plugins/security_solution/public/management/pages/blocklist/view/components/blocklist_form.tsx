@@ -114,10 +114,8 @@ function isValid(itemValidation: ItemValidation): boolean {
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, policies, policiesIsLoading, onChange, mode }) => {
-    const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
-      name: false,
-      value: false,
-    });
+    const [nameVisited, setNameVisited] = useState(false);
+    const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
@@ -280,32 +278,43 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       // value can be a string when isOperator is selected
       const values = Array.isArray(value) ? value : [value].filter(Boolean);
 
-      const newValueWarnings: ItemValidationNodes = {};
-      const newNameErrors: ItemValidationNodes = {};
-      const newValueErrors: ItemValidationNodes = {};
+      const newValueWarnings: ItemValidationNodes = { ...warningsRef.current.value };
+      const newNameErrors: ItemValidationNodes = { ...errorsRef.current.name };
+      const newValueErrors: ItemValidationNodes = { ...errorsRef.current.value };
+
       // error if name empty
       if (!nextItem.name.trim()) {
         newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
+      } else {
+        delete newNameErrors.NAME_REQUIRED;
       }
 
       // error if no values
       if (!values.length) {
         newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
+      } else {
+        delete newValueErrors.VALUE_REQUIRED;
       }
 
       // error if invalid hash
       if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
         newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
+      } else {
+        delete newValueErrors.INVALID_HASH;
       }
 
       const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
       // warn if invalid path
       if (field !== 'file.hash.*' && isInvalidPath) {
         newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
+      } else {
+        delete newValueWarnings.INVALID_PATH;
       }
       // warn if duplicates
       if (values.length !== uniq(values).length) {
         newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
+      } else {
+        delete newValueWarnings.DUPLICATE_VALUES;
       }
 
       warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
@@ -314,12 +323,12 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnNameBlur = useCallback(() => {
       validateValues(item);
-      setVisited((prevVisited) => ({ ...prevVisited, name: true }));
+      setNameVisited(true);
     }, [item, validateValues]);
 
     const handleOnValueBlur = useCallback(() => {
       validateValues(item);
-      setVisited((prevVisited) => ({ ...prevVisited, value: true }));
+      setValueVisited({ value: true });
     }, [item, validateValues]);
 
     const handleOnNameChange = useCallback(
@@ -463,7 +472,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         };
 
         // trigger re-render without modifying item
-        setVisited((prevVisited) => ({ ...prevVisited }));
+        setValueVisited((prevState) => ({ ...prevState }));
       },
       [blocklistEntry]
     );
@@ -518,7 +527,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         validateValues(nextItem as ArtifactFormComponentProps['item']);
         nextItem.entries[0].value = uniq(nextItem.entries[0].value);
 
-        setVisited((prevVisited) => ({ ...prevVisited, value: true }));
+        setValueVisited({ value: true });
         onChange({
           isValid: isValid(errorsRef.current),
           item: nextItem as ArtifactFormComponentProps['item'],
@@ -563,7 +572,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
         <EuiFormRow
           label={NAME_LABEL}
-          isInvalid={visited.name && !!Object.keys(errorsRef.current.name).length}
+          isInvalid={nameVisited && !!Object.keys(errorsRef.current.name).length}
           error={Object.values(errorsRef.current.name)}
           fullWidth
         >
@@ -572,7 +581,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             value={item.name}
             onChange={handleOnNameChange}
             onBlur={handleOnNameBlur}
-            required={visited.name}
+            required={nameVisited}
             maxLength={256}
             data-test-subj={getTestId('name-input')}
             fullWidth
@@ -651,7 +660,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         </EuiFormRow>
         <EuiFormRow
           label={valueLabel}
-          isInvalid={visited.value && !!Object.keys(errorsRef.current.value).length}
+          isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
           helpText={Object.values(warningsRef.current.value)}
           error={Object.values(errorsRef.current.value)}
           fullWidth
