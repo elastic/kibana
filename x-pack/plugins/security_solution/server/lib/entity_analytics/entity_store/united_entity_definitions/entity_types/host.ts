@@ -8,11 +8,12 @@
 import { collectValuesWithLength } from '../definition_utils';
 import type { UnitedDefinitionBuilder } from '../types';
 
+export const HOST_DEFINITION_VERSION = '1.0.0';
 export const getHostUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
   const collect = collectValuesWithLength(fieldHistoryLength);
   return {
     entityType: 'host',
-    version: '1.0.0',
+    version: HOST_DEFINITION_VERSION,
     fields: [
       collect({ field: 'host.domain' }),
       collect({ field: 'host.hostname' }),
