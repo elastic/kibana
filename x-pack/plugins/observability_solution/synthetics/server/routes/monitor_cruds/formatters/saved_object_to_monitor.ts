@@ -41,6 +41,7 @@ type Result = MonitorFieldsResult & {
   check: Record<string, any>;
   locations: string[];
   private_locations: string[];
+  spaceId: string;
 };
 
 export const transformPublicKeys = (result: Result) => {
@@ -83,6 +84,7 @@ export function mapSavedObjectToMonitor({
 }) {
   const result = {
     ...monitor.attributes,
+    spaceId: monitor.namespaces?.[0],
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;

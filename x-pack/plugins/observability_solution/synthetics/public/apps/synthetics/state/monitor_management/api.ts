@@ -6,6 +6,8 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { kibanaService } from '../../../../utils/kibana_service';
 import type { ProjectAPIKeyResponse } from '../../../../../server/routes/monitor_cruds/get_api_key';
 import { apiService } from '../../../../utils/api_service';
 import {
@@ -49,14 +51,31 @@ export const inspectMonitorAPI = async ({
 export const updateMonitorAPI = async ({
   monitor,
   id,
+  spaceId,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+  spaceId: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
-    internal: true,
-    version: INITIAL_REST_VERSION,
-  });
+  const basePath = kibanaService.coreSetup.http.basePath;
+  const url = addSpaceIdToPath(
+    basePath.serverBasePath,
+    spaceId,
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
+  );
+
+  return await apiService.put(
+    `${url}/${id}`,
+    monitor,
+    null,
+    {
+      internal: true,
+      version: INITIAL_REST_VERSION,
+    },
+    {
+      prependBasePath: false,
+    }
+  );
 };
 
 export const fetchProjectAPIKey = async (

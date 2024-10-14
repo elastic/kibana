@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { kibanaService } from '../../../../utils/kibana_service';
 import { UpsertMonitorRequest } from '..';
 import { UpsertMonitorResponse } from '../monitor_management/api';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -36,6 +38,7 @@ function toMonitorManagementListQueryArgs(
     monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
     internal: true,
+    showFromAllSpaces: pageState.showFromAllSpaces,
   };
 }
 
@@ -50,12 +53,28 @@ export const fetchMonitorManagementList = async (
   });
 };
 
-export const fetchDeleteMonitor = async ({ configIds }: { configIds: string[] }): Promise<void> => {
+export const fetchDeleteMonitor = async ({
+  configIds,
+  spaceId,
+}: {
+  configIds: string[];
+  spaceId: string;
+}): Promise<void> => {
+  const basePath = kibanaService.coreSetup.http.basePath;
+  const url = addSpaceIdToPath(
+    basePath.serverBasePath,
+    spaceId,
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
+  );
+
   return await apiService.delete(
-    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+    url,
     { version: INITIAL_REST_VERSION },
     {
       ids: configIds,
+    },
+    {
+      prependBasePath: false,
     }
   );
 };

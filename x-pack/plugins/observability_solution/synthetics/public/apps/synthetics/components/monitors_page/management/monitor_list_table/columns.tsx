@@ -204,7 +204,9 @@ export function useMonitorListColumns({
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
           href: (fields) => {
-            return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
+            return http?.basePath.prepend(
+              `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
+            )!;
           },
         },
         {

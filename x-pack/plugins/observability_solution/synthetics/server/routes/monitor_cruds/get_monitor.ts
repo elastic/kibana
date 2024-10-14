@@ -25,6 +25,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
       }),
       query: schema.object({
+        spaceId: schema.maybe(schema.string()),
         internal: schema.maybe(
           schema.boolean({
             defaultValue: false,

@@ -6,6 +6,8 @@
  */
 
 import moment from 'moment';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitorCodec,
@@ -65,15 +67,26 @@ export const fetchMonitorRecentPings = async ({
 
 export const fetchSyntheticsMonitor = async ({
   monitorId,
+  spaceId,
 }: {
   monitorId: string;
+  spaceId?: string;
 }): Promise<SyntheticsMonitorWithId> => {
+  const basePath = kibanaService.coreSetup.http.basePath;
+  const url = addSpaceIdToPath(
+    basePath.serverBasePath,
+    spaceId,
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR
+  );
   return apiService.get<SyntheticsMonitorWithId>(
-    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+    url.replace('{monitorId}', monitorId),
     {
       internal: true,
       version: INITIAL_REST_VERSION,
     },
-    EncryptedSyntheticsMonitorCodec
+    EncryptedSyntheticsMonitorCodec,
+    {
+      prependBasePath: false,
+    }
   );
 };
