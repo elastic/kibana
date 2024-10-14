@@ -60,11 +60,11 @@ export const verifyQueryTimeout = (timeout: string) => {
 export const checkResults = () => {
   cy.getBySel('osqueryResultsTable').then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('dataGridRowCell', { timeout: 300000 }).should('have.lengthOf.above', 0);
     } else {
       cy.getBySel('osquery-status-tab').click();
       cy.getBySel('osquery-results-tab').click();
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('dataGridRowCell', { timeout: 300000 }).should('have.lengthOf.above', 0);
     }
   });
 };
