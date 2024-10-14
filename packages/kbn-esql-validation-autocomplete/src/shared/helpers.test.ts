@@ -127,4 +127,53 @@ describe('getExpressionType', () => {
       }
     );
   });
+
+  describe('fields and variables', () => {
+    it('detects the type of fields and variables which exist', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('fieldName'),
+          new Map([
+            [
+              'fieldName',
+              {
+                name: 'fieldName',
+                type: 'geo_shape',
+              },
+            ],
+          ]),
+          new Map()
+        )
+      ).toBe('geo_shape');
+
+      expect(
+        getExpressionType(
+          getASTForExpression('var0'),
+          new Map(),
+          new Map([
+            [
+              'var0',
+              [
+                {
+                  name: 'var0',
+                  type: 'long',
+                  location: { min: 0, max: 0 },
+                },
+              ],
+            ],
+          ])
+        )
+      ).toBe('long');
+    });
+
+    it('handles fields and variables which do not exist', () => {
+      expect(() =>
+        getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())
+      ).toThrow();
+    });
+  });
+
+  describe('lists', () => {});
+
+  describe('functions', () => {});
 });

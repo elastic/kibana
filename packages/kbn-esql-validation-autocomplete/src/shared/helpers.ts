@@ -725,9 +725,9 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
  * Determines the type of the expression
  */
 export function getExpressionType(
-  root: ESQLAstItem
-  // fields: Map<string, ESQLRealField>,
-  // variables: Map<string, ESQLVariable[]>
+  root: ESQLAstItem,
+  fields: Map<string, ESQLRealField>,
+  variables: Map<string, ESQLVariable[]>
 ): SupportedDataType {
   if (!isSingleItem(root)) {
     throw new Error('Lists not implemented');
@@ -754,5 +754,13 @@ export function getExpressionType(
       default:
         return root.castType;
     }
+  }
+
+  if (isColumnItem(root)) {
+    const column = getColumnForASTNode(root, { fields, variables });
+    if (!column) {
+      throw new Error(`Type of column ${root.name} unknown`);
+    }
+    return column.type;
   }
 }

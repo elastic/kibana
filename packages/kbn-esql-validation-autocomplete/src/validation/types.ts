@@ -8,12 +8,12 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
-import { FieldType } from '../definitions/types';
+import { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
   name: string;
-  type: string;
+  type: SupportedDataType;
   location: ESQLLocation;
 }
 
