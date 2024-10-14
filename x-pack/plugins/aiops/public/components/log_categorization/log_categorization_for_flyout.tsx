@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
@@ -64,8 +64,6 @@ export interface LogCategorizationPageProps {
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   onClose: () => void;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
 }
 
@@ -76,7 +74,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   savedSearch,
   selectedField,
   onClose,
-  embeddingOrigin,
   additionalFilter,
 }) => {
   const {
@@ -85,6 +82,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       query: { getState },
     },
     uiSettings,
+    embeddingOrigin,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -198,7 +196,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
         runCategorizeRequest(

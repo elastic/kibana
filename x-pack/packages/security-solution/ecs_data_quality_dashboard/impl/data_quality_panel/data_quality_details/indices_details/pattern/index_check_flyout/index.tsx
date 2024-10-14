@@ -15,24 +15,29 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
-import moment from 'moment';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
-import { getIlmPhase } from '../../../../utils/get_ilm_phase';
-import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
+import { useAbortControllerRef } from '../../../../hooks/use_abort_controller_ref';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
-import { EMPTY_STAT } from '../../../../constants';
 import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
-import { IndexProperties } from './index_properties';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
-import { CHECK_NOW } from './translations';
+import { HISTORY, LATEST_CHECK } from './translations';
+import { LatestResults } from './latest_results';
+import { HistoricalResults } from './historical_results';
+import { useHistoricalResultsContext } from '../contexts/historical_results_context';
+import { getFormattedCheckTime } from './utils/get_formatted_check_time';
+import { CHECK_NOW } from '../translations';
+import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
+import { IndexCheckFlyoutTabId } from './types';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -41,20 +46,35 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
+  initialSelectedTabId: IndexCheckFlyoutTabId;
 }
+
+const tabs = [
+  {
+    id: LATEST_CHECK_TAB_ID,
+    name: LATEST_CHECK,
+  },
+  {
+    id: HISTORY_TAB_ID,
+    name: HISTORY,
+  },
+] as const;
 
 export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   ilmExplain,
   indexName,
+  initialSelectedTabId,
   pattern,
   patternRollup,
   stats,
   onClose,
 }) => {
+  const didSwitchToLatestTabOnceRef = useRef(false);
+  const { fetchHistoricalResults } = useHistoricalResultsContext();
   const currentWindowWidth = useCurrentWindowWidth();
   const isLargeScreen = currentWindowWidth > 1720;
   const isMediumScreen = currentWindowWidth > 1200;
-  const { httpFetch, formatBytes, formatNumber, isILMAvailable } = useDataQualityContext();
+  const { httpFetch, formatBytes, formatNumber } = useDataQualityContext();
   const { checkState, checkIndex } = useIndicesCheckContext();
   const indexCheckState = checkState[indexName];
   const isChecking = indexCheckState?.isChecking ?? false;
@@ -63,25 +83,87 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   const indexCheckFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'indexCheckFlyoutTitle',
   });
-  const abortControllerRef = React.useRef(new AbortController());
+  const [selectedTabId, setSelectedTabId] = useState(initialSelectedTabId);
+  const checkNowButtonAbortControllerRef = useAbortControllerRef();
+  const checkLatestTabAbortControllerRef = useAbortControllerRef();
+  const fetchHistoricalResultsAbortControllerRef = useAbortControllerRef();
+
+  const handleTabClick = useCallback(
+    (tabId: IndexCheckFlyoutTabId) => {
+      if (tabId === HISTORY_TAB_ID) {
+        fetchHistoricalResults({
+          abortController: fetchHistoricalResultsAbortControllerRef.current,
+          indexName,
+        });
+        setSelectedTabId(tabId);
+      }
+
+      if (tabId === LATEST_CHECK_TAB_ID) {
+        if (!didSwitchToLatestTabOnceRef.current) {
+          didSwitchToLatestTabOnceRef.current = true;
+          checkIndex({
+            abortController: checkLatestTabAbortControllerRef.current,
+            indexName,
+            pattern,
+            httpFetch,
+            formatBytes,
+            formatNumber,
+          });
+        }
+        setSelectedTabId(tabId);
+      }
+    },
+    [
+      checkIndex,
+      checkLatestTabAbortControllerRef,
+      fetchHistoricalResults,
+      fetchHistoricalResultsAbortControllerRef,
+      formatBytes,
+      formatNumber,
+      httpFetch,
+      indexName,
+      pattern,
+    ]
+  );
 
   const handleCheckNow = useCallback(() => {
     checkIndex({
-      abortController: abortControllerRef.current,
+      abortController: checkNowButtonAbortControllerRef.current,
       indexName,
       pattern,
       httpFetch,
       formatBytes,
       formatNumber,
     });
-  }, [checkIndex, formatBytes, formatNumber, httpFetch, indexName, pattern]);
+    if (selectedTabId === HISTORY_TAB_ID) {
+      setSelectedTabId(LATEST_CHECK_TAB_ID);
+    }
+  }, [
+    checkIndex,
+    checkNowButtonAbortControllerRef,
+    formatBytes,
+    formatNumber,
+    httpFetch,
+    indexName,
+    pattern,
+    selectedTabId,
+  ]);
 
-  useEffect(() => {
-    const abortController = abortControllerRef.current;
-    return () => {
-      abortController.abort();
-    };
-  }, []);
+  const renderTabs = useMemo(
+    () =>
+      tabs.map((tab, index) => {
+        return (
+          <EuiTab
+            onClick={() => handleTabClick(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+          >
+            {tab.name}
+          </EuiTab>
+        );
+      }),
+    [handleTabClick, selectedTabId]
+  );
 
   return (
     <div data-test-subj="indexCheckFlyout">
@@ -104,26 +186,24 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
             <>
               <EuiSpacer size="xs" />
               <EuiText size="s" data-test-subj="latestCheckedAt">
-                {moment(indexResult.checkedAt).isValid()
-                  ? moment(indexResult.checkedAt).format('MMM DD, YYYY @ HH:mm:ss.SSS')
-                  : EMPTY_STAT}
+                {getFormattedCheckTime(indexResult.checkedAt)}
               </EuiText>
             </>
           )}
+          <EuiSpacer />
+          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <IndexProperties
-            docsCount={getDocsCount({ stats, indexName })}
-            sizeInBytes={getSizeInBytes({ stats, indexName })}
-            ilmPhase={
-              isILMAvailable && ilmExplain != null
-                ? getIlmPhase(ilmExplain?.[indexName], isILMAvailable)
-                : undefined
-            }
-            indexName={indexName}
-            pattern={pattern}
-            patternRollup={patternRollup}
-          />
+          {selectedTabId === LATEST_CHECK_TAB_ID ? (
+            <LatestResults
+              indexName={indexName}
+              stats={stats}
+              ilmExplain={ilmExplain}
+              patternRollup={patternRollup}
+            />
+          ) : (
+            <HistoricalResults indexName={indexName} />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">

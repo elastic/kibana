@@ -92,16 +92,9 @@ const TemplatesComponent: React.FC<Props> = ({
               onEditTemplate={handleEditTemplate}
               onDeleteTemplate={handleDeleteTemplate}
             />
-            {error ? (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger">{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : null}
           </>
         ) : null}
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         {!templates.length ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false} data-test-subj="empty-templates">
@@ -113,16 +106,25 @@ const TemplatesComponent: React.FC<Props> = ({
         {canAddTemplates ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                isLoading={isLoading}
-                isDisabled={disabled || error}
-                size="s"
-                onClick={handleAddTemplate}
-                iconType="plusInCircle"
-                data-test-subj="add-template"
-              >
-                {i18n.ADD_TEMPLATE}
-              </EuiButtonEmpty>
+              {templates.length < MAX_TEMPLATES_LENGTH ? (
+                <EuiButtonEmpty
+                  isLoading={isLoading}
+                  isDisabled={disabled || error}
+                  size="s"
+                  onClick={handleAddTemplate}
+                  iconType="plusInCircle"
+                  data-test-subj="add-template"
+                >
+                  {i18n.ADD_TEMPLATE}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText>{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+              <EuiSpacer size="s" />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}

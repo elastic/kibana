@@ -73,7 +73,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      api: [],
+      api: ['rac'],
       ui: [],
     },
     read: {
@@ -108,7 +108,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      api: [],
+      api: ['rac'],
       ui: [],
     },
   },

@@ -103,7 +103,6 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
-      useControlGroupIntegration: true,
     });
   }, [rangeFrom, rangeTo]);
 
