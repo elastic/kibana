@@ -17,8 +17,9 @@
 }
 
 .dshDashboardGrid__item {
-  scroll-margin-top: calc((var(--euiFixedHeadersOffset, 100) * 2) + $euiSizeS);
   scroll-margin-bottom: $euiSizeS;
+  scroll-snap-align: start;
+  scroll-snap-type: y;
 }
 
 // LAYOUT MODES
