@@ -6,15 +6,16 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { ProductName } from '@kbn/product-doc-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
 import type { InstallationStatus } from '../../common/install_status';
 
 /**
- * Interface describing the raw attributes of the KB Entry SO type.
+ * Interface describing the raw attributes of the product doc install SO type.
  * Contains more fields than the mappings, which only list
  * indexed fields.
  */
-export interface KnowledgeBaseProductDocInstallAttributes {
+export interface ProductDocInstallStatusAttributes {
   product_name: ProductName;
   product_version: string;
   installation_status: InstallationStatus;
@@ -23,7 +24,7 @@ export interface KnowledgeBaseProductDocInstallAttributes {
   index_name?: string;
 }
 
-export const knowledgeBaseProductDocInstallSavedObjectType: SavedObjectsType<KnowledgeBaseProductDocInstallAttributes> =
+export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
   {
     name: productDocInstallStatusSavedObjectTypeName,
     hidden: true,

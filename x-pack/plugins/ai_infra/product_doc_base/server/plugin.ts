@@ -18,7 +18,7 @@ import type {
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies,
 } from './types';
-import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
+import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
@@ -45,7 +45,7 @@ export class KnowledgeBaseRegistryPlugin
     coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
     pluginsSetup: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
-    coreSetup.savedObjects.registerType(knowledgeBaseProductDocInstallSavedObjectType);
+    coreSetup.savedObjects.registerType(productDocInstallStatusSavedObjectType);
 
     const router = coreSetup.http.createRouter();
     registerRoutes({

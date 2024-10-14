@@ -7,10 +7,10 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { ProductDocInstallStatus } from '../../../common/saved_objects';
-import type { KnowledgeBaseProductDocInstallAttributes } from '../../saved_objects';
+import type { ProductDocInstallStatusAttributes } from '../../saved_objects';
 
 export const soToModel = (
-  so: SavedObject<KnowledgeBaseProductDocInstallAttributes>
+  so: SavedObject<ProductDocInstallStatusAttributes>
 ): ProductDocInstallStatus => {
   return {
     id: so.id,

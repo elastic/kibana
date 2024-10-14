@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
 import type { ProductInstallState } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
-import type { KnowledgeBaseProductDocInstallAttributes as TypeAttributes } from '../../saved_objects';
+import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
 // import { soToModel } from './model_conversion';
 
 export class ProductDocInstallClient {

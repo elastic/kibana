@@ -6,6 +6,6 @@
  */
 
 export {
-  knowledgeBaseProductDocInstallSavedObjectType,
-  type KnowledgeBaseProductDocInstallAttributes,
+  productDocInstallStatusSavedObjectType,
+  type ProductDocInstallStatusAttributes,
 } from './product_doc_install';
