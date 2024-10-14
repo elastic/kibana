@@ -170,7 +170,7 @@ describe('Common authentication routes', () => {
     });
 
     it('correctly defines route.', async () => {
-      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.options).toEqual({ access: 'internal' });
       expect(routeConfig.validate).toBe(false);
     });
 
