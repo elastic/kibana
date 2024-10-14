@@ -13,7 +13,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import { initialState, State } from './state';
-import { savePushVsOverlayToLocalStorageMiddleware } from './middlewares';
+import {
+  savePushVsOverlayToLocalStorageMiddleware,
+  saveUserSectionWidthsToLocalStorageMiddleware,
+  saveUserFlyoutWidthsToLocalStorageMiddleware,
+  clearAllUserWidthsFromLocalStorageMiddleware,
+} from './middlewares';
 
 export const store = configureStore({
   reducer: {
@@ -21,7 +26,12 @@ export const store = configureStore({
     ui: uiReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
-  middleware: [savePushVsOverlayToLocalStorageMiddleware],
+  middleware: [
+    savePushVsOverlayToLocalStorageMiddleware,
+    saveUserSectionWidthsToLocalStorageMiddleware,
+    saveUserFlyoutWidthsToLocalStorageMiddleware,
+    clearAllUserWidthsFromLocalStorageMiddleware,
+  ],
 });
 
 export const Context = createContext<ReactReduxContextValue<State>>({
@@ -41,3 +51,9 @@ export const selectNeedsSync = () => createSelector(panelsSelector, (state) => s
 
 const uiSelector = createSelector(stateSelector, (state) => state.ui);
 export const selectPushVsOverlay = createSelector(uiSelector, (state) => state.pushVsOverlay);
+export const selectDefaultWidths = createSelector(uiSelector, (state) => state.defaultWidths);
+export const selectUserFlyoutWidths = createSelector(uiSelector, (state) => state.userFlyoutWidths);
+export const selectUserSectionWidths = createSelector(
+  uiSelector,
+  (state) => state.userSectionWidths
+);

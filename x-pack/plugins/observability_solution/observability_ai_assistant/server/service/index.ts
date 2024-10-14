@@ -12,6 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   KnowledgeBaseEntryRole,
   ObservabilityAIAssistantScreenContextRequest,
@@ -248,8 +249,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
+    scope,
   }: {
     request: KibanaRequest;
+    scope?: AssistantScope;
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -288,6 +291,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
+      scope: scope || 'all',
     });
   }
 

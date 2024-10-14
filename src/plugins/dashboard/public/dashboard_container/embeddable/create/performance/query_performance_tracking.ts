@@ -7,69 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
+
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
-import { apiPublishesPhaseEvents, PublishesPhaseEvents } from '@kbn/presentation-publishing';
-import { combineLatest, map, of, pairwise, startWith, switchMap } from 'rxjs';
+import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+
 import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
-import { pluginServices } from '../../../../services/plugin_services';
+import { coreServices } from '../../../../services/kibana_services';
 import { DashboardLoadType } from '../../../types';
 
 let isFirstDashboardLoadOfSession = true;
 
 const loadTypesMapping: { [key in DashboardLoadType]: number } = {
-  sessionFirstLoad: 0,
-  dashboardFirstLoad: 1,
-  dashboardSubsequentLoad: 2,
+  sessionFirstLoad: 0, // on first time the SO is loaded
+  dashboardFirstLoad: 1, // on initial load navigating into it
+  dashboardSubsequentLoad: 2, // on filter-refresh
 };
 
-export const startQueryPerformanceTracking = (
+export function startQueryPerformanceTracking(
   dashboard: PresentationContainer & TracksQueryPerformance
-) => {
-  const { analytics } = pluginServices.getServices();
-  const reportPerformanceMetrics = ({
-    timeToData,
-    panelCount,
-    totalLoadTime,
-    loadType,
-  }: {
-    timeToData: number;
-    panelCount: number;
-    totalLoadTime: number;
-    loadType: DashboardLoadType;
-  }) => {
-    const duration =
-      loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
-
-    reportPerformanceMetricEvent(analytics, {
-      eventName: DASHBOARD_LOADED_EVENT,
-      duration,
-      key1: 'time_to_data',
-      value1: timeToData,
-      key2: 'num_of_panels',
-      value2: panelCount,
-      key4: 'load_type',
-      value4: loadTypesMapping[loadType],
-    });
-  };
-
+) {
   return dashboard.children$
     .pipe(
-      switchMap((children) => {
-        const childPhaseEventTrackers: PublishesPhaseEvents[] = [];
-        for (const child of Object.values(children)) {
-          if (apiPublishesPhaseEvents(child)) childPhaseEventTrackers.push(child);
-        }
-        if (childPhaseEventTrackers.length === 0) return of([]);
-        return combineLatest(childPhaseEventTrackers.map((child) => child.phase$));
+      skipWhile((children) => {
+        // Don't track render-status when the dashboard is still adding embeddables.
+        return Object.values(children).length !== dashboard.getPanelCount();
       }),
-      map((latestPhaseEvents) =>
-        latestPhaseEvents.some((phaseEvent) => phaseEvent && phaseEvent.status !== 'rendered')
-      ),
+      map((children) => {
+        // Filter for embeddables which publish phase events
+        const childPhaseEventTrackers: PublishesPhaseEvents[] = [];
+        const values = Object.values(children);
+        for (const child of values) {
+          if (apiPublishesPhaseEvents(child)) {
+            childPhaseEventTrackers.push(child);
+          }
+        }
+        return childPhaseEventTrackers;
+      }),
+      switchMap((children) => {
+        if (children.length === 0) {
+          return of([]); // map to empty stream
+        }
+        // Map to new stream of phase-events for each embeddable
+        return combineLatest(children.map((child) => child.phase$));
+      }),
+      map((latestPhaseEvents) => {
+        // Map individual render-state of panels to global render-state.
+        return latestPhaseEvents.some((phaseEvent) => {
+          return phaseEvent && phaseEvent.status !== 'rendered';
+        });
+      }),
       startWith(false),
       pairwise()
     )
-    .subscribe(([lastLoading, currentLoading]) => {
+    .subscribe(([wasDashboardStillLoading, isDashboardStillLoading]: [boolean, boolean]) => {
       const panelCount = dashboard.getPanelCount();
       const now = performance.now();
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
@@ -78,8 +70,8 @@ export const startQueryPerformanceTracking = (
         ? 'dashboardFirstLoad'
         : 'dashboardSubsequentLoad';
 
-      const queryHasStarted = !lastLoading && currentLoading;
-      const queryHasFinished = lastLoading && !currentLoading;
+      const queryHasStarted = !wasDashboardStillLoading && isDashboardStillLoading;
+      const queryHasFinished = wasDashboardStillLoading && !isDashboardStillLoading;
 
       if (dashboard.firstLoad && (panelCount === 0 || queryHasFinished)) {
         /**
@@ -89,10 +81,12 @@ export const startQueryPerformanceTracking = (
         isFirstDashboardLoadOfSession = false;
         dashboard.firstLoad = false;
       }
+
       if (queryHasStarted) {
         dashboard.lastLoadStartTime = now;
         return;
       }
+
       if (queryHasFinished) {
         const timeToData = now - (dashboard.lastLoadStartTime ?? now);
         const completeLoadDuration =
@@ -105,4 +99,31 @@ export const startQueryPerformanceTracking = (
         });
       }
     });
-};
+}
+
+function reportPerformanceMetrics({
+  timeToData,
+  panelCount,
+  totalLoadTime,
+  loadType,
+}: {
+  timeToData: number;
+  panelCount: number;
+  totalLoadTime: number;
+  loadType: DashboardLoadType;
+}) {
+  const duration =
+    loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
+
+  const e = {
+    eventName: DASHBOARD_LOADED_EVENT,
+    duration,
+    key1: 'time_to_data',
+    value1: timeToData,
+    key2: 'num_of_panels',
+    value2: panelCount,
+    key4: 'load_type',
+    value4: loadTypesMapping[loadType],
+  };
+  reportPerformanceMetricEvent(coreServices.analytics, e);
+}

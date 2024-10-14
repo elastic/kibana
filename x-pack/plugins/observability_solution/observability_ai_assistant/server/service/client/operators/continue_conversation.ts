@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -137,6 +138,7 @@ function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
   disableFunctions,
+  scope,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
@@ -145,13 +147,14 @@ function getFunctionDefinitions({
     | {
         except: string[];
       };
+  scope: AssistantScope;
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
   let systemFunctions = functionClient
-    .getFunctions()
+    .getFunctions({ scope })
     .map((fn) => fn.definition)
     .filter(
       (def) =>
@@ -184,6 +187,7 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
+  scope,
   useSimulatedFunctionCalling,
 }: {
   messages: Message[];
@@ -201,6 +205,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
+  scope: AssistantScope;
   useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
@@ -211,11 +216,12 @@ export function continueConversation({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
+    scope,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(),
+      applicationInstructions: functionClient.getInstructions(scope),
       userInstructions,
       adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
@@ -344,6 +350,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
+              scope,
               useSimulatedFunctionCalling,
             });
           })

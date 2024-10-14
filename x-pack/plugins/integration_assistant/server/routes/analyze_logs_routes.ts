@@ -16,6 +16,9 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -40,7 +43,14 @@ export function registerAnalyzeLogsRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeLogsResponse>> => {
-        const { packageName, dataStreamName, logSamples, langSmithOptions } = req.body;
+        const {
+          packageName,
+          dataStreamName,
+          packageTitle,
+          dataStreamTitle,
+          logSamples,
+          langSmithOptions,
+        } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -76,20 +86,26 @@ export function registerAnalyzeLogsRoutes(
           const logFormatParameters = {
             packageName,
             dataStreamName,
+            packageTitle,
+            dataStreamTitle,
             logSamples,
           };
           const graph = await getLogFormatDetectionGraph({ model, client });
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
-          if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
-            return res.customError({
-              statusCode: 501,
-              body: { message: `Unsupported log samples format` },
-            });
+          if (graphLogFormat === 'unsupported') {
+            throw new UnsupportedLogFormatError(GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
-        } catch (e) {
-          return res.badRequest({ body: e });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
+          }
+          return res.badRequest({ body: err });
         }
       })
     );

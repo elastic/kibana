@@ -34,6 +34,7 @@ export function defineInvalidateSessionsRoutes({ router, getSession }: RouteDefi
         }),
       },
       options: {
+        access: 'public',
         tags: ['access:sessionManagement'],
         summary: `Invalidate user sessions`,
       },

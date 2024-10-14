@@ -21,192 +21,19 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type { ESProcessorItem } from '../../../../../../common';
-import {
-  type AnalyzeLogsRequestBody,
-  type CategorizationRequestBody,
-  type EcsMappingRequestBody,
-  type RelatedRequestBody,
-} from '../../../../../../common';
-import {
-  runCategorizationGraph,
-  runEcsGraph,
-  runRelatedGraph,
-  runAnalyzeLogsGraph,
-} from '../../../../../common/lib/api';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
-import { useTelemetry } from '../../../telemetry';
 
-export type OnComplete = (result: State['result']) => void;
-
-const ProgressOrder = ['ecs', 'categorization', 'related'];
-type ProgressItem = (typeof ProgressOrder)[number];
+import type { OnComplete, ProgressItem } from './use_generation';
+import { ProgressOrder, useGeneration } from './use_generation';
 
 const progressText: Record<ProgressItem, string> = {
   analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
-};
-
-interface UseGenerationProps {
-  integrationSettings: State['integrationSettings'];
-  connector: State['connector'];
-  onComplete: OnComplete;
-}
-export const useGeneration = ({
-  integrationSettings,
-  connector,
-  onComplete,
-}: UseGenerationProps) => {
-  const { reportGenerationComplete } = useTelemetry();
-  const { http, notifications } = useKibana().services;
-  const [progress, setProgress] = useState<ProgressItem>();
-  const [error, setError] = useState<null | string>(null);
-  const [isRequesting, setIsRequesting] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (
-      !isRequesting ||
-      http == null ||
-      connector == null ||
-      integrationSettings == null ||
-      notifications?.toasts == null
-    ) {
-      return;
-    }
-    const generationStartedAt = Date.now();
-    const abortController = new AbortController();
-    const deps = { http, abortSignal: abortController.signal };
-
-    (async () => {
-      try {
-        let additionalProcessors: ESProcessorItem[] | undefined;
-
-        // logSamples may be modified to JSON format if they are in different formats
-        // Keeping originalLogSamples for running pipeline and generating docs
-        const originalLogSamples = integrationSettings.logSamples;
-        let logSamples = integrationSettings.logSamples;
-        let samplesFormat = integrationSettings.samplesFormat;
-
-        if (integrationSettings.samplesFormat === undefined) {
-          const analyzeLogsRequest: AnalyzeLogsRequestBody = {
-            packageName: integrationSettings.name ?? '',
-            dataStreamName: integrationSettings.dataStreamName ?? '',
-            logSamples: integrationSettings.logSamples ?? [],
-            connectorId: connector.id,
-            langSmithOptions: getLangSmithOptions(),
-          };
-
-          setProgress('analyzeLogs');
-          const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
-          if (abortController.signal.aborted) return;
-          if (isEmpty(analyzeLogsResult?.results)) {
-            setError('No results from Analyze Logs Graph');
-            return;
-          }
-          logSamples = analyzeLogsResult.results.parsedSamples;
-          samplesFormat = analyzeLogsResult.results.samplesFormat;
-          additionalProcessors = analyzeLogsResult.additionalProcessors;
-        }
-
-        const ecsRequest: EcsMappingRequestBody = {
-          packageName: integrationSettings.name ?? '',
-          dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: logSamples ?? [],
-          samplesFormat: samplesFormat ?? { name: 'json' },
-          additionalProcessors: additionalProcessors ?? [],
-          connectorId: connector.id,
-          langSmithOptions: getLangSmithOptions(),
-        };
-
-        setProgress('ecs');
-        const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
-        if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.results)) {
-          setError('No results from ECS graph');
-          return;
-        }
-        const categorizationRequest: CategorizationRequestBody = {
-          ...ecsRequest,
-          rawSamples: originalLogSamples ?? [],
-          samplesFormat: samplesFormat ?? { name: 'json' },
-          currentPipeline: ecsGraphResult.results.pipeline,
-        };
-
-        setProgress('categorization');
-        const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
-        if (abortController.signal.aborted) return;
-        const relatedRequest: RelatedRequestBody = {
-          ...categorizationRequest,
-          currentPipeline: categorizationResult.results.pipeline,
-        };
-
-        setProgress('related');
-        const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
-        if (abortController.signal.aborted) return;
-
-        if (isEmpty(relatedGraphResult?.results)) {
-          throw new Error('Results not found in response');
-        }
-
-        reportGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-        });
-
-        const result = {
-          pipeline: relatedGraphResult.results.pipeline,
-          docs: relatedGraphResult.results.docs,
-          samplesFormat,
-        };
-
-        onComplete(result);
-      } catch (e) {
-        if (abortController.signal.aborted) return;
-        const errorMessage = `${e.message}${
-          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
-        }`;
-
-        reportGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-          error: errorMessage,
-        });
-
-        setError(errorMessage);
-      } finally {
-        setIsRequesting(false);
-      }
-    })();
-    return () => {
-      abortController.abort();
-    };
-  }, [
-    isRequesting,
-    onComplete,
-    setProgress,
-    connector,
-    http,
-    integrationSettings,
-    reportGenerationComplete,
-    notifications?.toasts,
-  ]);
-
-  const retry = useCallback(() => {
-    setError(null);
-    setIsRequesting(true);
-  }, []);
-
-  return { progress, error, retry };
 };
 
 const useModalCss = () => {
@@ -255,7 +82,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 {error ? (
                   <EuiFlexItem>
                     <EuiCallOut
-                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
                       iconType="alert"
                       data-test-subj="generationErrorCallout"

@@ -7,6 +7,7 @@
 
 import Url from 'url';
 
+import { createEsClientForFtrConfig } from '@kbn/test';
 import { TransportResult } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
@@ -20,7 +21,7 @@ export async function SecuritySolutionConfigurableCypressTestRunner({
 }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
-  const es = getService('es');
+  const es = createEsClientForFtrConfig(config);
 
   const pipelines = [tiAbusechMalware, tiAbusechMalwareBazaar, tiAbusechUrl];
 

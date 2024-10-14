@@ -11,7 +11,7 @@ import { getCasesSystemActionData } from './queries/case_system_action';
 import { getUserCommentsTelemetryData } from './queries/comments';
 import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
-import { getPushedTelemetryData } from './queries/pushes';
+import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 

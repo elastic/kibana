@@ -11,6 +11,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import type { LegacyKnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
 import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
@@ -27,8 +28,8 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseWriteToolParams => {
-    const { isEnabledKnowledgeBase, kbDataClient, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+    const { isEnabledKnowledgeBase, kbDataClient } = params;
+    return isEnabledKnowledgeBase && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
@@ -56,21 +57,24 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        // Backwards compatibility with v1 schema -- createKnowledgeBaseEntry() technically supports both for now
-        const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps =
-          kbDataClient.isV2KnowledgeBaseEnabled
-            ? {
-                name: input.name,
-                kbResource: 'user',
-                source: 'conversation',
-                required: input.required,
-                text: input.query,
-                type: DocumentEntryType.value,
-              }
-            : ({
-                metadata: { kbResource: 'user', source: 'conversation', required: input.required },
-                text: input.query,
-              } as unknown as KnowledgeBaseEntryCreateProps);
+        // Backwards compatibility with v1 schema since this feature is technically supported in `8.15`
+        const knowledgeBaseEntry:
+          | KnowledgeBaseEntryCreateProps
+          | LegacyKnowledgeBaseEntryCreateProps = kbDataClient.isV2KnowledgeBaseEnabled
+          ? {
+              name: input.name,
+              kbResource: 'user',
+              source: 'conversation',
+              required: input.required,
+              text: input.query,
+              type: DocumentEntryType.value,
+            }
+          : {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              metadata: { kbResource: 'user', source: 'conversation', required: input.required },
+              text: input.query,
+            };
 
         logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
         const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });

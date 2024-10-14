@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { safeDump, safeLoad } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream } from '../../../../types';
@@ -127,7 +127,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
   }));
 
   if (pipeline.extension === 'yml') {
-    const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
+    const parsedPipelineContent = load(pipeline.contentForInstallation);
     customPipelineProcessors.forEach((processor) =>
       mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
     );
@@ -136,7 +136,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
     );
     return {
       ...pipeline,
-      contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
+      contentForInstallation: `---\n${dump(parsedPipelineContent)}`,
     };
   }
 

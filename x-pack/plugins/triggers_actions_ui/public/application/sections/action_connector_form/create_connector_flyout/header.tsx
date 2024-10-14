@@ -47,17 +47,21 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           {actionTypeName && actionTypeMessage ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-                <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+                <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
-                      <FormattedMessage
-                        defaultMessage="{actionTypeName} connector"
-                        id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
-                        values={{
-                          actionTypeName,
-                        }}
-                      />
+                      {actionTypeName && actionTypeName.toLowerCase().includes('connector') ? (
+                        actionTypeName
+                      ) : (
+                        <FormattedMessage
+                          defaultMessage="{actionTypeName} connector"
+                          id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                          values={{
+                            actionTypeName,
+                          }}
+                        />
+                      )}
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>

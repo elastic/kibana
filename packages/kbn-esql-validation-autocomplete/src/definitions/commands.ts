@@ -173,6 +173,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
+    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -383,11 +384,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
-      ],
+      params: [{ name: 'expression', type: 'any' }],
     },
   },
   {
@@ -467,6 +464,18 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    },
+  },
+  {
+    name: 'hidden_command',
+    description: 'A test fixture to test hidden-ness',
+    hidden: true,
+    examples: [],
+    modes: [],
+    options: [],
+    signature: {
+      params: [],
+      multipleParams: false,
     },
   },
 ];

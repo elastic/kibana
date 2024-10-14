@@ -62,7 +62,6 @@ describe('DashboardRenderer', () => {
         filters: undefined,
       })
     );
-    expect(options.useControlGroupIntegration).toEqual(true);
   });
 
   it('does not render when No Read Permission', () => {

@@ -12,7 +12,7 @@ import type {
   RuleCreateProps,
   RulePreviewResponse,
 } from '../../../../../common/api/detection_engine';
-
+import { useKibana } from '../../../../common/lib/kibana';
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
@@ -27,14 +27,17 @@ const emptyPreviewRule: RulePreviewResponse = {
 
 export const usePreviewRule = ({
   timeframeOptions,
+  enableLoggedRequests,
 }: {
   timeframeOptions: TimeframePreviewOptions;
+  enableLoggedRequests?: boolean;
 }) => {
   const [rule, setRule] = useState<RuleCreateProps | null>(null);
   const [response, setResponse] = useState<RulePreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   const { invocationCount, interval, from } = usePreviewInvocationCount({ timeframeOptions });
+  const { telemetry } = useKibana().services;
 
   const timeframeEnd = useMemo(
     () => timeframeOptions.timeframeEnd.toISOString(),
@@ -55,6 +58,10 @@ export const usePreviewRule = ({
     const createPreviewId = async () => {
       if (rule != null) {
         try {
+          telemetry.reportPreviewRule({
+            loggedRequestsEnabled: enableLoggedRequests ?? false,
+            ruleType: rule.type,
+          });
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
             rule: {
@@ -66,6 +73,7 @@ export const usePreviewRule = ({
               invocationCount,
               timeframeEnd,
             },
+            enableLoggedRequests,
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -87,7 +95,16 @@ export const usePreviewRule = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
+  }, [
+    rule,
+    addError,
+    invocationCount,
+    from,
+    interval,
+    timeframeEnd,
+    enableLoggedRequests,
+    telemetry,
+  ]);
 
   return { isLoading, response, rule, setRule };
 };

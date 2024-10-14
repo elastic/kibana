@@ -15,7 +15,7 @@ interface EntityParam {
 
 export type ReportEntityDetailsClickedParams = EntityParam;
 export type ReportEntityAlertsClickedParams = EntityParam;
-export interface ReportEntityRiskFilteredParams extends EntityParam {
+export interface ReportEntityRiskFilteredParams extends Partial<EntityParam> {
   selectedSeverity: RiskSeverity;
 }
 

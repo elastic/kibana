@@ -41,7 +41,7 @@ export const entityRiskFilteredEvent: TelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Entity name (host|user)',
-        optional: false,
+        optional: true,
       },
     },
     selectedSeverity: {

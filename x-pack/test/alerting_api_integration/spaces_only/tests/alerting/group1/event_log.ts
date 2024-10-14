@@ -8,6 +8,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
@@ -21,6 +22,7 @@ import {
   resetRulesSettings,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 const InstanceActions = new Set<string | undefined>([
   'new-instance',
@@ -1682,6 +1684,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, window3.id, 'rules/maintenance_window', 'alerting', true);
 
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1742,13 +1747,21 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          const actionsToCheck = [
-            'new-instance',
-            'active-instance',
-            'recovered-instance',
-            'execute',
-          ];
+          const executeEvents = events.filter((event) => event?.event?.action === 'execute');
 
+          // the first execute event should not have any maintenance window ids because there were no alerts during the
+          // first execution
+          for (let i = 0; i < executeEvents.length; i++) {
+            if (i === 0) {
+              expect(executeEvents[i]?.kibana?.alert?.maintenance_window_ids).to.be(undefined);
+            } else {
+              const alertMaintenanceWindowIds =
+                executeEvents[i]?.kibana?.alert?.maintenance_window_ids?.sort();
+              expect(alertMaintenanceWindowIds).eql([window1.id, window2.id].sort());
+            }
+          }
+
+          const actionsToCheck = ['new-instance', 'active-instance', 'recovered-instance'];
           events.forEach((event) => {
             if (actionsToCheck.includes(event?.event?.action || '')) {
               const alertMaintenanceWindowIds =
@@ -1774,6 +1787,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
           objectRemover.add(space.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
@@ -1857,6 +1873,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
 
         it('should generate expected events with a alertDelay', async () => {
+          // wait so cache expires so maintenance window from previous test will be cleared
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const ACTIVE_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.active';
           const NEW_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.new';
           const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';

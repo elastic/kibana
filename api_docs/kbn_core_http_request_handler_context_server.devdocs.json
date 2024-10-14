@@ -31,7 +31,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
-            "description": [],
+            "description": [
+              "\n{@link SavedObjectsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -51,7 +53,9 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": [],
+            "description": [
+              "\n{@link ElasticsearchRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -67,11 +71,29 @@
           },
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-server.CoreRequestHandlerContext.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "\n{@link FeatureFlagsRequestHandlerContext}"
+            ],
+            "signature": [
+              "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
             "id": "def-server.CoreRequestHandlerContext.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": [],
+            "description": [
+              "\n{@link UiSettingsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -91,7 +113,9 @@
             "type": "Object",
             "tags": [],
             "label": "deprecations",
-            "description": [],
+            "description": [
+              "\n{@link DeprecationsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
@@ -111,7 +135,9 @@
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": [],
+            "description": [
+              "\n{@link SecurityRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -131,7 +157,9 @@
             "type": "Object",
             "tags": [],
             "label": "userProfile",
-            "description": [],
+            "description": [
+              "\n{@link UserProfileRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-server",
@@ -154,7 +182,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PrebootCoreRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\nThe `core` context provided to route handler during the preboot phase."
+        ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -165,7 +195,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": [],
+            "description": [
+              "\n{@link PrebootUiSettingsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
@@ -188,7 +220,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PrebootRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\nBase context passed to a route handler during the preboot phase, containing the `core` context part."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-request-handler-context-server",
@@ -216,7 +250,9 @@
             "type": "Object",
             "tags": [],
             "label": "core",
-            "description": [],
+            "description": [
+              "\nPromise that resolves the {@link PrebootCoreRequestHandlerContext}"
+            ],
             "signature": [
               "Promise<",
               {
@@ -241,7 +277,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PrebootUiSettingsRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\n`uiSettings` http request context provider during the preboot phase."
+        ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -252,7 +290,9 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [],
+            "description": [
+              "\nThe {@link IUiSettingsClient | UI Settings client}."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -305,7 +345,9 @@
             "type": "Object",
             "tags": [],
             "label": "core",
-            "description": [],
+            "description": [
+              "\nPromise that resolves the {@link CoreRequestHandlerContext}"
+            ],
             "signature": [
               "Promise<",
               {

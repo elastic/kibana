@@ -6,7 +6,6 @@ info:
 paths: {}
 components:
   schemas:
-
     EntityType:
       type: string
       enum:
@@ -15,6 +14,11 @@ components:
 
     EngineDescriptor:
       type: object
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
       properties:
         type:
           $ref: '#/components/schemas/EntityType'
@@ -24,6 +28,8 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         filter:
           type: string
+        fieldHistoryLength:
+          type: integer
 
     EngineStatus:
       type: string
@@ -31,7 +37,21 @@ components:
         - installing
         - started
         - stopped
-    
+
     IndexPattern:
       type: string
-        
+
+    InspectQuery:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            type: string
+        dsl:
+          type: array
+          items:
+            type: string
+      required:
+        - dsl
+        - response

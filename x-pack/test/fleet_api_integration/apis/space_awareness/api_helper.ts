@@ -554,4 +554,19 @@ export class SpaceTestApiClient {
 
     return res;
   }
+
+  async postStandaloneApiKey(name: string, spaceId?: string) {
+    const { body: res, statusCode } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/create_standalone_agent_api_key`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .send({ name });
+
+    if (statusCode !== 200) {
+      throw new Error(`${statusCode} ${res?.error} ${res.message}`);
+    }
+
+    return res;
+  }
 }

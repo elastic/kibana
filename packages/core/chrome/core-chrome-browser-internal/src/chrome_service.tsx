@@ -54,6 +54,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -86,7 +87,10 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
-  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private readonly isSideNavCollapsed$ = new BehaviorSubject(
+    localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
+  );
+  private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
 
@@ -360,6 +364,11 @@ export class ChromeService {
       projectNavigation.setProjectName(projectName);
     };
 
+    const setIsSideNavCollapsed = (isCollapsed: boolean) => {
+      localStorage.setItem(IS_SIDENAV_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+      this.isSideNavCollapsed$.next(isCollapsed);
+    };
+
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning({
         title: mountReactNode(
@@ -414,6 +423,7 @@ export class ChromeService {
 
             return (
               <ProjectHeader
+                isServerless={this.isServerless}
                 application={application}
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
@@ -431,9 +441,8 @@ export class ChromeService {
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
-                toggleSideNav={(isCollapsed) => {
-                  this.isSideNavCollapsed$.next(isCollapsed);
-                }}
+                isSideNavCollapsed$={this.isSideNavCollapsed$}
+                toggleSideNav={setIsSideNavCollapsed}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -445,6 +454,7 @@ export class ChromeService {
 
         return (
           <Header
+            isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}
             headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
@@ -556,7 +566,17 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$,
-      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      sideNav: {
+        getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+        setIsCollapsed: setIsSideNavCollapsed,
+        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
+        getIsFeedbackBtnVisible$: () =>
+          combineLatest([this.isFeedbackBtnVisible$, this.isSideNavCollapsed$]).pipe(
+            map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
+          ),
+        setIsFeedbackBtnVisible: (isVisible: boolean) => this.isFeedbackBtnVisible$.next(isVisible),
+      },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,

@@ -206,7 +206,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         >
           <FormattedMessage
             id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
-            defaultMessage="Add Kibana privilege"
+            defaultMessage="Assign to space"
           />
         </EuiButton>
       );

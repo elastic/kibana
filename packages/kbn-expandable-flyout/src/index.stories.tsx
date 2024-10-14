@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { State } from './store/state';
+import { initialUiState, State } from './store/state';
 
 export default {
   component: ExpandableFlyout,
@@ -114,9 +114,7 @@ export const Right: Story<void> = () => {
         },
       },
     },
-    ui: {
-      pushVsOverlay: 'overlay',
-    },
+    ui: initialUiState,
   };
 
   return (
@@ -144,9 +142,7 @@ export const Left: Story<void> = () => {
         },
       },
     },
-    ui: {
-      pushVsOverlay: 'overlay',
-    },
+    ui: initialUiState,
   };
 
   return (
@@ -178,9 +174,7 @@ export const Preview: Story<void> = () => {
         },
       },
     },
-    ui: {
-      pushVsOverlay: 'overlay',
-    },
+    ui: initialUiState,
   };
 
   return (
@@ -215,9 +209,7 @@ export const MultiplePreviews: Story<void> = () => {
         },
       },
     },
-    ui: {
-      pushVsOverlay: 'overlay',
-    },
+    ui: initialUiState,
   };
 
   return (
@@ -230,7 +222,7 @@ export const MultiplePreviews: Story<void> = () => {
   );
 };
 
-export const CollapsedPushVsOverlay: Story<void> = () => {
+export const CollapsedPushMode: Story<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -244,6 +236,7 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
       },
     },
     ui: {
+      ...initialUiState,
       pushVsOverlay: 'push',
     },
   };
@@ -255,7 +248,7 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
   );
 };
 
-export const ExpandedPushVsOverlay: Story<void> = () => {
+export const ExpandedPushMode: Story<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -271,6 +264,7 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
       },
     },
     ui: {
+      ...initialUiState,
       pushVsOverlay: 'push',
     },
   };
@@ -297,9 +291,7 @@ export const DisableTypeSelection: Story<void> = () => {
         },
       },
     },
-    ui: {
-      pushVsOverlay: 'overlay',
-    },
+    ui: initialUiState,
   };
 
   return (
@@ -308,6 +300,61 @@ export const DisableTypeSelection: Story<void> = () => {
         registeredPanels={registeredPanels}
         flyoutCustomProps={{
           pushVsOverlay: { disabled: true, tooltip: 'This option is disabled' },
+        }}
+      />
+    </TestProvider>
+  );
+};
+
+export const ResetWidths: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout registeredPanels={registeredPanels} />
+    </TestProvider>
+  );
+};
+
+export const DisableResizeWidthSelection: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{
+          resize: { disabled: true, tooltip: 'This option is disabled' },
         }}
       />
     </TestProvider>

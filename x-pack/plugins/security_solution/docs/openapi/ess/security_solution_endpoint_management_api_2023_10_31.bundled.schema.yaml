@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   description: Interact with and manage endpoints running the Elastic Defend integration.
-  title: Security Solution Endpoint Management API (Elastic Cloud and self-hosted)
+  title: Security Endpoint Management API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -30,8 +30,8 @@ paths:
           description: OK
       summary: Get response actions
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/action_log/{agent_id}':
+        - Security Endpoint Management API
+  /api/endpoint/action_log/{agent_id}:
     get:
       deprecated: true
       description: Get an action request log for the specified agent ID.
@@ -56,7 +56,7 @@ paths:
           description: OK
       summary: Get an action request log
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action_status:
     get:
       description: Get the status of response actions for the specified agent IDs.
@@ -79,8 +79,8 @@ paths:
           description: OK
       summary: Get response actions status
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}':
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}:
     get:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
@@ -99,8 +99,8 @@ paths:
           description: OK
       summary: Get action details
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}':
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
@@ -124,8 +124,8 @@ paths:
           description: OK
       summary: Get file information
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}/download':
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: Download a file from an endpoint.
       operationId: EndpointFileDownload
@@ -149,7 +149,7 @@ paths:
           description: OK
       summary: Download a file
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/execute:
     post:
       description: Run a shell command on an endpoint.
@@ -169,7 +169,7 @@ paths:
           description: OK
       summary: Run a command
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/get_file:
     post:
       description: Get a file from an endpoint.
@@ -189,7 +189,7 @@ paths:
           description: OK
       summary: Get a file
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/isolate:
     post:
       description: >-
@@ -211,7 +211,7 @@ paths:
           description: OK
       summary: Isolate an endpoint
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/kill_process:
     post:
       description: Terminate a running process on an endpoint.
@@ -231,7 +231,7 @@ paths:
           description: OK
       summary: Terminate a process
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -251,7 +251,7 @@ paths:
           description: OK
       summary: Get running processes
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -271,7 +271,7 @@ paths:
           description: OK
       summary: Scan a file or directory
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/state:
     get:
       description: >-
@@ -287,7 +287,7 @@ paths:
           description: OK
       summary: Get actions state
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/suspend_process:
     post:
       description: Suspend a running process on an endpoint.
@@ -307,10 +307,10 @@ paths:
           description: OK
       summary: Suspend a process
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -327,7 +327,7 @@ paths:
           description: OK
       summary: Release an isolated endpoint
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/action/upload:
     post:
       description: Upload a file to an endpoint.
@@ -347,7 +347,7 @@ paths:
           description: OK
       summary: Upload a file
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/isolate:
     post:
       deprecated: true
@@ -397,7 +397,7 @@ paths:
                 type: string
       summary: Isolate an endpoint
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/metadata:
     get:
       operationId: GetEndpointMetadataList
@@ -416,8 +416,8 @@ paths:
           description: OK
       summary: Get a metadata list
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/metadata/{id}':
+        - Security Endpoint Management API
+  /api/endpoint/metadata/{id}:
     get:
       operationId: GetEndpointMetadata
       parameters:
@@ -435,9 +435,10 @@ paths:
           description: OK
       summary: Get metadata
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
@@ -448,7 +449,7 @@ paths:
           description: OK
       summary: Get metadata transforms
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/policy_response:
     get:
       operationId: GetPolicyResponse
@@ -470,7 +471,7 @@ paths:
           description: OK
       summary: Get a policy response
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/policy/summaries:
     get:
       deprecated: true
@@ -496,8 +497,8 @@ paths:
           description: OK
       summary: Get an agent policy summary
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/protection_updates_note/{package_policy_id}':
+        - Security Endpoint Management API
+  /api/endpoint/protection_updates_note/{package_policy_id}:
     get:
       operationId: GetProtectionUpdatesNote
       parameters:
@@ -515,7 +516,7 @@ paths:
           description: OK
       summary: Get a protection updates note
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
     post:
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
@@ -542,9 +543,10 @@ paths:
           description: OK
       summary: Create or update a protection updates note
       tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/suggestions/{suggestion_type}':
+        - Security Endpoint Management API
+  /api/endpoint/suggestions/{suggestion_type}:
     post:
+      deprecated: true
       operationId: GetEndpointSuggestions
       parameters:
         - in: path
@@ -578,7 +580,7 @@ paths:
           description: OK
       summary: Get suggestions
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
   /api/endpoint/unisolate:
     post:
       deprecated: true
@@ -628,7 +630,7 @@ paths:
                 type: string
       summary: Release an isolated endpoint
       tags:
-        - Security Solution Endpoint Management API
+        - Security Endpoint Management API
 components:
   schemas:
     ActionLogRequestQuery:
@@ -1135,4 +1137,5 @@ security:
   - BasicAuth: []
 tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
-    name: Security Solution Endpoint Management API
+    name: Security Endpoint Management API
+    x-displayName: Security endpoint management

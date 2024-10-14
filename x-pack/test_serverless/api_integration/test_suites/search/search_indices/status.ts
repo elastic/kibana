@@ -6,25 +6,26 @@
  */
 
 import expect from 'expect';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let credentials: { Cookie: string };
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('search_indices Status APIs', function () {
     describe('indices status', function () {
       before(async () => {
-        // get auth header for Viewer role
-        credentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('developer');
+        supertestDeveloperWithCookieCredentials =
+          await roleScopedSupertest.getSupertestWithRoleScope('developer', {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
       });
       it('returns list of index names', async () => {
-        const { body } = await supertestWithoutAuth
+        const { body } = await supertestDeveloperWithCookieCredentials
           .get('/internal/search_indices/status')
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(credentials)
           .expect(200);
 
         expect(body.indexNames).toBeDefined();
@@ -34,16 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
     describe('user privileges', function () {
       // GET /internal/search_indices/start_privileges
       describe('developer', function () {
-        before(async () => {
-          // get auth header for Viewer role
-          credentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('developer');
-        });
-
         it('returns expected privileges', async () => {
-          const { body } = await supertestWithoutAuth
+          const { body } = await supertestDeveloperWithCookieCredentials
             .get('/internal/search_indices/start_privileges')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(credentials)
             .expect(200);
 
           expect(body).toEqual({
@@ -56,15 +50,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
       describe('viewer', function () {
         before(async () => {
-          // get auth header for Viewer role
-          credentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('viewer');
+          supertestViewerWithCookieCredentials =
+            await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+              useCookieHeader: true,
+              withInternalHeaders: true,
+            });
         });
 
         it('returns expected privileges', async () => {
-          const { body } = await supertestWithoutAuth
+          const { body } = await supertestViewerWithCookieCredentials
             .get('/internal/search_indices/start_privileges')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(credentials)
             .expect(200);
 
           expect(body).toEqual({

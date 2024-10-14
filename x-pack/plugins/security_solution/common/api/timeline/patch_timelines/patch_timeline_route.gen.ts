@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { SavedTimeline, TimelineResponse } from '../model/components.gen';
+import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen';
 
 export type PatchTimelineRequestBody = z.infer<typeof PatchTimelineRequestBody>;
 export const PatchTimelineRequestBody = z.object({
@@ -27,10 +27,4 @@ export const PatchTimelineRequestBody = z.object({
 export type PatchTimelineRequestBodyInput = z.input<typeof PatchTimelineRequestBody>;
 
 export type PatchTimelineResponse = z.infer<typeof PatchTimelineResponse>;
-export const PatchTimelineResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
-  }),
-});
+export const PatchTimelineResponse = PersistTimelineResponse;

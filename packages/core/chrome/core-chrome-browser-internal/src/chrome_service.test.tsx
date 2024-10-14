@@ -11,7 +11,7 @@ import { registerAnalyticsContextProviderMock } from './chrome_service.test.mock
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs';
+import { toArray, firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -554,6 +554,74 @@ describe('start', () => {
                         ],
                       ]
                   `);
+    });
+  });
+
+  describe('side nav', () => {
+    describe('isCollapsed$', () => {
+      it('should return false by default', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsCollapsed$());
+        service.stop();
+        expect(isCollapsed).toBe(false);
+      });
+
+      it('should read the localStorage value', async () => {
+        store.set('core.chrome.isSideNavCollapsed', 'true');
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsCollapsed$());
+        service.stop();
+        expect(isCollapsed).toBe(true);
+      });
+    });
+
+    describe('setIsCollapsed', () => {
+      it('should update the isCollapsed$ observable', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed$ = chrome.sideNav.getIsCollapsed$();
+        const isCollapsed = await firstValueFrom(isCollapsed$);
+
+        chrome.sideNav.setIsCollapsed(!isCollapsed);
+
+        const updatedIsCollapsed = await firstValueFrom(isCollapsed$);
+        service.stop();
+        expect(updatedIsCollapsed).toBe(!isCollapsed);
+      });
+    });
+
+    describe('getIsFeedbackBtnVisible$', () => {
+      it('should return false by default', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsFeedbackBtnVisible$());
+        service.stop();
+        expect(isCollapsed).toBe(false);
+      });
+
+      it('should return "false" when the sidenav is collapsed', async () => {
+        const { chrome, service } = await start();
+
+        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
+        chrome.sideNav.setIsFeedbackBtnVisible(true); // Mark it as visible
+        chrome.sideNav.setIsCollapsed(true); // But the sidenav is collapsed
+
+        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+        service.stop();
+        expect(isFeedbackBtnVisible).toBe(false);
+      });
+    });
+
+    describe('setIsFeedbackBtnVisible', () => {
+      it('should update the isFeedbackBtnVisible$ observable', async () => {
+        const { chrome, service } = await start();
+        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
+        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+
+        chrome.sideNav.setIsFeedbackBtnVisible(!isFeedbackBtnVisible);
+
+        const updatedIsFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+        service.stop();
+        expect(updatedIsFeedbackBtnVisible).toBe(!isFeedbackBtnVisible);
+      });
     });
   });
 });

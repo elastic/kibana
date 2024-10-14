@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -28,7 +30,7 @@ import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 
 export interface UserPanelProps extends Record<string, unknown> {
@@ -81,6 +83,7 @@ export const UserPanel = ({
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -93,6 +96,19 @@ export const UserPanel = ({
     userName,
     { onSuccess: refetchRiskScore }
   );
+
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('user.name', userName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+    ignore_unavailable: true,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
   useQueryInspector({
     deleteQuery,
@@ -119,14 +135,30 @@ export const UserPanel = ({
             name: userName,
             email,
           },
+          path: tab ? { tab } : undefined,
+          hasMisconfigurationFindings,
         },
-        path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
+    [
+      telemetry,
+      openLeftPanel,
+      userRiskData?.user?.risk,
+      scopeId,
+      userName,
+      email,
+      hasMisconfigurationFindings,
+    ]
   );
-
-  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
+  const openPanelFirstTab = useCallback(
+    () =>
+      openPanelTab(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openPanelTab]
+  );
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
@@ -156,7 +188,9 @@ export const UserPanel = ({
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!isPreviewMode && hasUserDetailsData}
+              flyoutIsExpandable={
+                !isPreviewMode && (hasUserDetailsData || hasMisconfigurationFindings)
+              }
               expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader

@@ -35,6 +35,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
+import { useFieldStatsFlyoutContext } from '@kbn/ml-field-stats-flyout';
 
 import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
@@ -59,7 +60,7 @@ import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
@@ -124,22 +125,24 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
-  const appDependencies = useAppDependencies();
-  const {
-    ml: { useFieldStatsFlyoutContext },
-  } = appDependencies;
-
   const fieldStatsContext = useFieldStatsFlyoutContext();
-  const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      transformConfigQuery,
-      runtimeMappings,
-      timeRangeMs,
+
+  const populatedFields = useMemo(
+    () =>
       isPopulatedFields(fieldStatsContext?.populatedFields)
         ? [...fieldStatsContext.populatedFields]
-        : []
-    ),
+        : [],
+    [fieldStatsContext?.populatedFields]
+  );
+
+  const indexPreviewProps = {
+    ...useIndexData({
+      dataView,
+      query: transformConfigQuery,
+      populatedFields,
+      combinedRuntimeMappings: runtimeMappings,
+      timeRangeMs,
+    }),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };

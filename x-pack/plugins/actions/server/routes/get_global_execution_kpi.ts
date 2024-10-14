@@ -45,6 +45,9 @@ export const getGlobalExecutionKPIRoute = (
       validate: {
         body: bodySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

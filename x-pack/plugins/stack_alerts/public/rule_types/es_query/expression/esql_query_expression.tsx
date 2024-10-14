@@ -16,8 +16,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextBasedLangEditor } from '@kbn/esql/public';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+import { ESQLLangEditor } from '@kbn/esql/public';
+import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
@@ -187,7 +187,7 @@ export const EsqlQueryExpression: React.FC<
           />
         }
       >
-        <TextBasedLangEditor
+        <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
             setQuery(q);
@@ -198,6 +198,7 @@ export const EsqlQueryExpression: React.FC<
           detectedTimestamp={detectedTimestamp}
           hideRunQueryText={true}
           isLoading={isLoading}
+          editorIsInline
           hasOutline
         />
       </EuiFormRow>

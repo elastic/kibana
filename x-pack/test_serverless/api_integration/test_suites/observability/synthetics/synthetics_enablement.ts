@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       return supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(internalRequestHeader as unknown as Record<string, string>)
-        .set(await svlUserManager.getM2MApiCredentialsWithRoleScope(role))
+        .set(await svlUserManager.getM2MApiCookieCredentialsWithRoleScope(role))
         .expect(expectedStatus);
     }
 
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       return supertestWithoutAuth
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(internalRequestHeader as unknown as Record<string, string>)
-        .set(await svlUserManager.getM2MApiCredentialsWithRoleScope(role))
+        .set(await svlUserManager.getM2MApiCookieCredentialsWithRoleScope(role))
         .expect(expectedStatus);
     }
 

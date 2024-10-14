@@ -1613,13 +1613,29 @@
             "label": "getRulesSettingsClient",
             "description": [],
             "signature": [
-              "() => ",
+              "(withoutAuth?: boolean | undefined) => ",
               "RulesSettingsClient"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingApiRequestHandlerContext.getRulesSettingsClient.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "withoutAuth",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -3428,6 +3444,20 @@
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.flapping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flapping",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { lookBackWindow: number; statusChangeThreshold: number; }> | null | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3628,26 +3658,12 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RulesSettingsFlappingProperties",
                 "text": "RulesSettingsFlappingProperties"
               }
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.maintenanceWindowIds",
-            "type": "Array",
-            "tags": [],
-            "label": "maintenanceWindowIds",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3712,59 +3728,16 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.savedObjectsClient",
-            "type": "Object",
+            "id": "def-server.RuleExecutorServices.alertsClient",
+            "type": "CompoundType",
             "tags": [],
-            "label": "savedObjectsClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+            "label": "alertsClient",
+            "description": [
+              "\nOnly available when framework alerts are enabled and rule\ntype has registered alert context with the framework with shouldWrite set to true"
             ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.uiSettingsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettingsClient",
-            "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.scopedClusterClient",
-            "type": "Object",
-            "tags": [],
-            "label": "scopedClusterClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "PublicAlertsClient",
+              "<AlertData, State, Context, ActionGroupIds> | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3818,105 +3791,6 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.alertsClient",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "alertsClient",
-            "description": [
-              "\nOnly available when framework alerts are enabled and rule\ntype has registered alert context with the framework with shouldWrite set to true"
-            ],
-            "signature": [
-              "PublicAlertsClient",
-              "<AlertData, State, Context, ActionGroupIds> | null"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.shouldWriteAlerts",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldWriteAlerts",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.shouldStopExecution",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldStopExecution",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.ruleMonitoringService",
-            "type": "Object",
-            "tags": [],
-            "label": "ruleMonitoringService",
-            "description": [],
-            "signature": [
-              "PublicMetricsSetters",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.share",
-            "type": "Object",
-            "tags": [],
-            "label": "share",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "server",
-                "docId": "kibSharePluginApi",
-                "section": "def-server.SharePublicStart",
-                "text": "SharePublicStart"
-              }
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorServices.ruleResultService",
-            "type": "Object",
-            "tags": [],
-            "label": "ruleResultService",
-            "description": [],
-            "signature": [
-              "PublicLastRunSetters",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.getDataViews",
             "type": "Function",
             "tags": [],
@@ -3932,6 +3806,22 @@
                 "text": "DataViewsContract"
               },
               ">"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.getMaintenanceWindowIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getMaintenanceWindowIds",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3962,6 +3852,148 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.ruleMonitoringService",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleMonitoringService",
+            "description": [],
+            "signature": [
+              "PublicMetricsSetters",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.ruleResultService",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleResultService",
+            "description": [],
+            "signature": [
+              "PublicLastRunSetters",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.scopedClusterClient",
+            "type": "Object",
+            "tags": [],
+            "label": "scopedClusterClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.share",
+            "type": "Object",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "server",
+                "docId": "kibSharePluginApi",
+                "section": "def-server.SharePublicStart",
+                "text": "SharePublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.shouldStopExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldStopExecution",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.shouldWriteAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldWriteAlerts",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.uiSettingsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettingsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4092,7 +4124,7 @@
             "label": "schemas",
             "description": [],
             "signature": [
-              "{ params?: { type: \"zod\"; schema: any; } | { type: \"config-schema\"; schema: ",
+              "{ params?: { type: \"zod\"; schema: Zod.ZodObject<Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodIntersection<Zod.ZodTypeAny, Zod.ZodTypeAny>; } | { type: \"config-schema\"; schema: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -5102,23 +5134,7 @@
           "SnoozeRuleOptions",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; clearExpiredSnoozes: (options: { rule: Pick<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; featureIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
+          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; featureIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>[]; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
@@ -5136,19 +5152,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
-          "GetAlertFromRawParams",
-          ") => ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Rule",
-            "text": "Rule"
-          },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>; }"
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; }"
         ],
         "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
@@ -7193,6 +7197,59 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.Flapping",
+        "type": "Interface",
+        "tags": [],
+        "label": "Flapping",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Flapping",
+            "text": "Flapping"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          }
+        ],
+        "path": "packages/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Flapping.lookBackWindow",
+            "type": "number",
+            "tags": [],
+            "label": "lookBackWindow",
+            "description": [],
+            "path": "packages/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Flapping.statusChangeThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "statusChangeThreshold",
+            "description": [],
+            "path": "packages/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.IExecutionErrors",
         "type": "Interface",
         "tags": [],
@@ -8525,12 +8582,19 @@
           {
             "parentPluginId": "alerting",
             "id": "def-common.Rule.flapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "flapping",
             "description": [],
             "signature": [
-              "{ lookBackWindow: number; statusChangeThreshold: number; } | undefined"
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Flapping",
+                "text": "Flapping"
+              },
+              " | null | undefined"
             ],
             "path": "packages/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -9429,7 +9493,7 @@
         "tags": [],
         "label": "RuleSpecificFlappingProperties",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9440,7 +9504,7 @@
             "tags": [],
             "label": "lookBackWindow",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9451,7 +9515,7 @@
             "tags": [],
             "label": "statusChangeThreshold",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9465,7 +9529,7 @@
         "tags": [],
         "label": "RulesSettings",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9478,15 +9542,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RulesSettingsFlapping",
                 "text": "RulesSettingsFlapping"
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9499,15 +9563,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RulesSettingsQueryDelay",
                 "text": "RulesSettingsQueryDelay"
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9521,7 +9585,7 @@
         "tags": [],
         "label": "RulesSettingsFlappingProperties",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9532,7 +9596,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9543,7 +9607,7 @@
             "tags": [],
             "label": "lookBackWindow",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9554,7 +9618,7 @@
             "tags": [],
             "label": "statusChangeThreshold",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9568,7 +9632,7 @@
         "tags": [],
         "label": "RulesSettingsModificationMetadata",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9582,7 +9646,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9596,7 +9660,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9607,7 +9671,7 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9618,7 +9682,7 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9632,7 +9696,7 @@
         "tags": [],
         "label": "RulesSettingsProperties",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9645,15 +9709,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RulesSettingsFlappingProperties",
                 "text": "RulesSettingsFlappingProperties"
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9666,15 +9730,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RulesSettingsQueryDelayProperties",
                 "text": "RulesSettingsQueryDelayProperties"
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9688,7 +9752,7 @@
         "tags": [],
         "label": "RulesSettingsQueryDelayProperties",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9699,7 +9763,7 @@
             "tags": [],
             "label": "delay",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "path": "packages/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11122,7 +11186,7 @@
         "signature": [
           "20"
         ],
-        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "path": "packages/kbn-alerting-types/flapping/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11152,7 +11216,7 @@
         "signature": [
           "20"
         ],
-        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "path": "packages/kbn-alerting-types/flapping/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11167,7 +11231,7 @@
         "signature": [
           "2"
         ],
-        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "path": "packages/kbn-alerting-types/flapping/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11197,7 +11261,7 @@
         "signature": [
           "2"
         ],
-        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "path": "packages/kbn-alerting-types/flapping/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11656,22 +11720,22 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RulesSettingsFlappingProperties",
             "text": "RulesSettingsFlappingProperties"
           },
           " & ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RulesSettingsModificationMetadata",
             "text": "RulesSettingsModificationMetadata"
           }
         ],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11685,22 +11749,22 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RulesSettingsQueryDelayProperties",
             "text": "RulesSettingsQueryDelayProperties"
           },
           " & ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RulesSettingsModificationMetadata",
             "text": "RulesSettingsModificationMetadata"
           }
         ],
-        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "path": "packages/kbn-alerting-types/rule_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13377,7 +13441,7 @@
                 "tags": [],
                 "label": "executionStatus",
                 "description": [
-                  "// NO NEED TO BE INDEXED\n// nextRun: {\n//   type: 'date',\n// },\n// Deprecated, if you need to add new property please do it in `last_run`"
+                  "// NO NEED TO BE INDEXED\n// flapping: {\n//   index: false,\n//   properties: {\n//     lookBackWindow: {\n//       type: 'long',\n//     },\n//     statusChangeThreshold: {\n//       type: 'long',\n//     },\n//   },\n// },\n// NO NEED TO BE INDEXED\n// nextRun: {\n//   type: 'date',\n// },\n// Deprecated, if you need to add new property please do it in `last_run`"
                 ],
                 "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                 "deprecated": false,
