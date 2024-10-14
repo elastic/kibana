@@ -20,6 +20,7 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
+import { EntityDefinitionWithState } from './entities/types';
 
 export class EntityClient {
   constructor(
@@ -54,17 +55,16 @@ export class EntityClient {
   async updateInEntityDefinition({
     id,
     definitionUpdate,
-    installOnly = false,
   }: {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
-    installOnly?: boolean;
   }) {
     const [definition] = await findEntityDefinitions({
       id,
       perPage: 1,
       soClient: this.options.soClient,
       esClient: this.options.esClient,
+      includeState: true,
     });
 
     if (!definition) {
@@ -79,6 +79,10 @@ export class EntityClient {
       throw new EntityDefinitionNotFound(message);
     }
 
+    const shouldRestartTransforms = (
+      definition as EntityDefinitionWithState
+    ).state.components.transforms.some((transform) => transform.running);
+
     const updatedDefinition = await reinstallEntityDefinition({
       definition,
       definitionUpdate,
@@ -87,7 +91,7 @@ export class EntityClient {
       logger: this.options.logger,
     });
 
-    if (!installOnly) {
+    if (!shouldRestartTransforms) {
       await startTransforms(this.options.esClient, updatedDefinition, this.options.logger);
     }
     return updatedDefinition;

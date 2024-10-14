@@ -432,7 +432,6 @@ export class EntityStoreDataClient {
               ...definition,
               indexPatterns,
             },
-            installOnly: originalStatus === ENGINE_STATUS.STOPPED,
           });
 
           // Restore the savedObject status and set the new index pattern
