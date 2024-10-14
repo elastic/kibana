@@ -542,12 +542,16 @@ export const getLatestAgentDownloadVersion = async (
   const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await pRetry(
     async () => {
-      return axios
-        .get<{ versions: string[] }>(artifactsUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      try {
+        return axios
+          .get<{ versions: string[] }>(artifactsUrl)
+          .catch(catchAxiosErrorFormatAndThrow)
+          .then((response) => {
+            return response.data;
+          });
+      } catch (error) {
+        log?.error(`Error fetching artifact versions: ${error.message}`);
+      }
     },
     { maxTimeout: 10000 }
   );
