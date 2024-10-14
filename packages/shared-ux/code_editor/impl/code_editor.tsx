@@ -533,7 +533,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
-          {accessibilityOverlayEnabled && renderPrompt()}
+          {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
             theme={theme}
             language={languageId}
