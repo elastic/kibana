@@ -30,12 +30,17 @@ import type {
   DashboardGetOut,
   DashboardItem,
   DashboardOptions,
+  PartialDashboardItem,
 } from './types';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../../dashboard_saved_object';
 import type {
   ControlGroupAttributes as ControlGroupAttributesV2,
   DashboardCrudTypes as DashboardCrudTypesV2,
 } from '../../../common/content_management/v2';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 function controlGroupInputOut(
   controlGroupInput?: DashboardSavedObjectAttributes['controlGroupInput']
@@ -46,34 +51,46 @@ function controlGroupInputOut(
   const {
     panelsJSON,
     ignoreParentSettingsJSON,
-    controlStyle,
-    chainingSystem,
-    showApplySelections,
+    controlStyle = DEFAULT_CONTROL_LABEL_POSITION,
+    chainingSystem = DEFAULT_CONTROL_CHAINING,
+    showApplySelections = DEFAULT_SHOW_APPLY_SELECTIONS,
   } = controlGroupInput;
-  const panels = panelsJSON
+  const controls = panelsJSON
     ? Object.entries(JSON.parse(panelsJSON) as ControlPanelsState<SerializedControlState>).map(
-        ([id, { explicitInput, type, grow, width, order }]) => ({
-          embeddableConfig: explicitInput,
-          grow: grow ?? DEFAULT_CONTROL_GROW,
+        ([
           id,
+          {
+            explicitInput,
+            type,
+            grow = DEFAULT_CONTROL_GROW,
+            width = DEFAULT_CONTROL_WIDTH,
+            order,
+          },
+        ]) => ({
+          controlConfig: explicitInput,
+          id,
+          grow,
           order,
           type,
-          width: width ?? DEFAULT_CONTROL_WIDTH,
+          width,
         })
       )
     : [];
 
-  const ignoreParentSettings = ignoreParentSettingsJSON
-    ? JSON.parse(ignoreParentSettingsJSON)
-    : DEFAULT_IGNORE_PARENT_SETTINGS;
+  const {
+    ignoreFilters = DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
+    ignoreQuery = DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
+    ignoreTimerange = DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
+    ignoreValidations = DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
+  } = ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : {};
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    chainingSystem: (chainingSystem as ControlGroupChainingSystem) ?? DEFAULT_CONTROL_CHAINING,
-    controlStyle: (controlStyle as ControlLabelPosition) ?? DEFAULT_CONTROL_LABEL_POSITION,
-    ignoreParentSettings,
-    panels,
-    showApplySelections: showApplySelections ?? DEFAULT_SHOW_APPLY_SELECTIONS,
+    chainingSystem: chainingSystem as ControlGroupChainingSystem,
+    controls,
+    controlStyle: controlStyle as ControlLabelPosition,
+    ignoreParentSettings: { ignoreFilters, ignoreQuery, ignoreTimerange, ignoreValidations },
+    showApplySelections,
   };
 }
 
@@ -81,31 +98,51 @@ function kibanaSavedObjectMetaOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta']
 ): DashboardAttributes['kibanaSavedObjectMeta'] {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
-  const searchSource = searchSourceJSON ? parseSearchSourceJSON(searchSourceJSON) : undefined;
-  return {
-    searchSource,
-  };
+  if (!searchSourceJSON) {
+    return {};
+  }
+  return { searchSource: parseSearchSourceJSON(searchSourceJSON) };
 }
 
 function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
-  const { hidePanelTitles, useMargins, syncColors, syncTooltips, syncCursor } = JSON.parse(
-    optionsJSON
-  ) as DashboardOptions;
+  const {
+    hidePanelTitles = DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
+    useMargins = DEFAULT_DASHBOARD_OPTIONS.useMargins,
+    syncColors = DEFAULT_DASHBOARD_OPTIONS.syncColors,
+    syncCursor = DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+    syncTooltips = DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+  } = JSON.parse(optionsJSON) as DashboardOptions;
   return {
     hidePanelTitles,
     useMargins,
     syncColors,
-    syncTooltips,
     syncCursor,
+    syncTooltips,
   };
+}
+
+function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
+  const panels = JSON.parse(panelsJSON) as SavedDashboardPanel[];
+  return panels.map(
+    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+      gridData,
+      id,
+      panelConfig: embeddableConfig,
+      panelIndex,
+      panelRefName,
+      title,
+      type,
+      version,
+    })
+  );
 }
 
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
-    description,
     controlGroupInput,
+    description,
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
@@ -116,22 +153,23 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
+  // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
-    description,
+    ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: kibanaSavedObjectMetaOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: optionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: JSON.parse(panelsJSON) }),
+    ...(panelsJSON && { panels: panelsOut(panelsJSON) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
-    timeFrom,
+    ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
-    timeTo,
+    ...(timeTo && { timeTo }),
     title,
-    version,
+    ...(version && { version }),
   };
 }
 
@@ -141,19 +179,18 @@ function controlGroupInputIn(
   if (!controlGroupInput) {
     return;
   }
-  const { panels, ignoreParentSettings, controlStyle, chainingSystem, showApplySelections } =
+  const { controls, ignoreParentSettings, controlStyle, chainingSystem, showApplySelections } =
     controlGroupInput;
-  const updatedPanels = Object.fromEntries(
-    panels.map(({ embeddableConfig, ...restOfPanel }) => {
-      const id = embeddableConfig.id ?? uuidv4();
-      return [id, { ...restOfPanel, explicitInput: { ...embeddableConfig, id } }];
+  const updatedControls = Object.fromEntries(
+    controls.map(({ controlConfig, id = uuidv4(), ...restOfControl }) => {
+      return [id, { ...restOfControl, explicitInput: { ...controlConfig, id } }];
     })
   );
   return {
     chainingSystem,
     controlStyle,
     ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
-    panelsJSON: JSON.stringify(updatedPanels),
+    panelsJSON: JSON.stringify(updatedControls),
     showApplySelections,
   };
 }
@@ -161,14 +198,11 @@ function controlGroupInputIn(
 function panelsIn(
   panels: DashboardAttributes['panels']
 ): DashboardSavedObjectAttributes['panelsJSON'] {
-  const updatedPanels = panels.map(({ panelIndex, gridData, embeddableConfig, ...restPanel }) => {
+  const updatedPanels = panels.map(({ panelIndex, gridData, panelConfig, ...restPanel }) => {
     const idx = panelIndex ?? uuidv4();
     return {
       ...restPanel,
-      embeddableConfig: {
-        ...embeddableConfig,
-        id: idx,
-      },
+      embeddableConfig: panelConfig,
       panelIndex: idx,
       gridData: {
         ...gridData,
@@ -180,13 +214,20 @@ function panelsIn(
   return JSON.stringify(updatedPanels);
 }
 
+function kibanaSavedObjectMetaIn(
+  kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
+) {
+  const { searchSource } = kibanaSavedObjectMeta;
+  return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
+}
+
 export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
     controlGroupInput,
     description,
-    kibanaSavedObjectMeta: { searchSource },
+    kibanaSavedObjectMeta,
     options,
     panels,
     refreshInterval,
@@ -202,15 +243,15 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       controlGroupInput: controlGroupInputIn(controlGroupInput) as ControlGroupAttributesV2,
     }),
     description,
-    kibanaSavedObjectMeta: { searchSourceJSON: searchSource ? JSON.stringify(searchSource) : '{}' },
+    kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
     ...(options && { optionsJSON: JSON.stringify(options) }),
     panelsJSON: panels ? panelsIn(panels) : '[]',
     refreshInterval,
-    timeFrom,
+    ...(timeFrom && { timeFrom }),
     timeRestore,
-    timeTo,
+    ...(timeTo && { timeTo }),
     title,
-    version,
+    ...(version && { version }),
   };
   return {
     meta,
@@ -237,20 +278,13 @@ export const itemAttrsToSavedObjectAttrs = (
       panelsJSON: panelsIn(panels),
     }),
     ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify(kibanaSavedObjectMeta.searchSource),
-      },
+      kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
     }),
   };
   return soAttributes;
 };
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
-  references: SavedObjectReference[] | undefined;
-};
-
-type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
-  attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
 };
 
