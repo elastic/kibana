@@ -10,20 +10,37 @@
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import { AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
+import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {
     const additionalControls = prev(params) || [];
-    const { query } = params;
+    const { updateESQLQuery, query } = params;
 
     const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
       ? queryContainsMetadataIgnored(query)
       : true;
 
+    const addIgnoredMetadataToQuery = updateESQLQuery
+      ? () => {
+          updateESQLQuery((prevQuery) => {
+            const { root } = parse(prevQuery);
+            // Add _ignored field to metadata directive if not present
+            mutate.commands.from.metadata.upsert(root, IGNORED_FIELD);
+
+            return BasicPrettyPrinter.print(root);
+          });
+        }
+      : undefined;
+
     return [
       ...additionalControls,
-      createDegradedDocsControl({ enabled: isDegradedDocsControlEnabled }),
+      createDegradedDocsControl({
+        enabled: isDegradedDocsControlEnabled,
+        addIgnoredMetadataToQuery,
+      }),
       createStacktraceControl(),
     ];
   };

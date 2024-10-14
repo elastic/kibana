@@ -73,7 +73,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
             soClient,
-            installSecurityLabsDocs: v2KnowledgeBaseEnabled,
+            v2KnowledgeBaseEnabled,
           });
 
           return response.ok({ body: { success: true } });

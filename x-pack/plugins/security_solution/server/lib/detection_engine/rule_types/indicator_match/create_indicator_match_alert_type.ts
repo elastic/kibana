@@ -82,6 +82,7 @@ export const createIndicatorMatchAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          intendedTimestamp,
         },
         services,
         spaceId,
@@ -105,6 +106,7 @@ export const createIndicatorMatchAlertType = (
           publicBaseUrl: runOpts.publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
 
       const result = await indicatorMatchExecutor({

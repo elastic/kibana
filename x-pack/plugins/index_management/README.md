@@ -7,7 +7,6 @@ This service is exposed from the Index Management setup contract and can be used
 - `addToggle(toggle: any)`: adds a toggle to the indices list, for example to display hidden indices
 - `addColumn(column: IndicesListColumn)`: adds a column to the indices list, for example to display an ILM phase
 - `setEmptyListContent(content: EmptyListContent)`: replaces the default empty prompt displayed when there are no indices in the indices list. The empty list content has the following interface:
-
 ```ts
 export interface EmptyListContent {
   renderContent: (args: {
@@ -15,6 +14,8 @@ export interface EmptyListContent {
   }) => ReturnType<FunctionComponent>;
 }
 ```
+- `setIndexDetailsPageRoute`: registers a new route for index details page in indices list table. For example, for serverless search users, navigating to an index on the indices list page will lead to the Search Indices detail page.
+
 
 #### Extensions to the indices list and the index details page
 - `addAction(action: any)`: adds an option to the "manage index" menu, for example to add an ILM policy to the index

@@ -172,7 +172,7 @@ export interface CommandBaseDefinition {
       name: string;
       type: string;
       optional?: boolean;
-      innerTypes?: string[];
+      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;

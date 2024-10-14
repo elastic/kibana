@@ -40,65 +40,18 @@ describe('NaturalLanguageESQLTool', () => {
     request,
     inference,
     connectorId,
+    isEnabledKnowledgeBase: true,
   };
 
   describe('isSupported', () => {
-    it('returns false if isEnabledKnowledgeBase is false', () => {
-      const params = {
-        isEnabledKnowledgeBase: false,
-        modelExists: true,
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(false);
-    });
-
-    it('returns false if modelExists is false (the ELSER model is not installed)', () => {
-      const params = {
-        isEnabledKnowledgeBase: true,
-        modelExists: false, // <-- ELSER model is not installed
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(false);
-    });
-
-    it('returns true if isEnabledKnowledgeBase and modelExists are true', () => {
-      const params = {
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
-        ...rest,
-      };
-
-      expect(NL_TO_ESQL_TOOL.isSupported(params)).toBe(true);
+    it('returns true if connectorId and inference have values', () => {
+      expect(NL_TO_ESQL_TOOL.isSupported(rest)).toBe(true);
     });
   });
 
   describe('getTool', () => {
-    it('returns null if isEnabledKnowledgeBase is false', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: false,
-        modelExists: true,
-        ...rest,
-      });
-
-      expect(tool).toBeNull();
-    });
-
-    it('returns null if modelExists is false (the ELSER model is not installed)', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: false, // <-- ELSER model is not installed
-        ...rest,
-      });
-
-      expect(tool).toBeNull();
-    });
-
     it('returns null if inference plugin is not provided', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
         inference: undefined,
       });
@@ -108,8 +61,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('returns null if connectorId is not provided', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
         connectorId: undefined,
       });
@@ -117,10 +68,8 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('should return a Tool instance if isEnabledKnowledgeBase and modelExists are true', () => {
+    it('should return a Tool instance when given required properties', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
       });
 
@@ -129,8 +78,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return a tool with the expected tags', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         ...rest,
       }) as DynamicTool;
 
@@ -139,8 +86,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return tool with the expected description for OSS model', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         isOssModel: true,
         ...rest,
       }) as DynamicTool;
@@ -150,8 +95,6 @@ describe('NaturalLanguageESQLTool', () => {
 
     it('should return tool with the expected description for non-OSS model', () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
-        isEnabledKnowledgeBase: true,
-        modelExists: true,
         isOssModel: false,
         ...rest,
       }) as DynamicTool;

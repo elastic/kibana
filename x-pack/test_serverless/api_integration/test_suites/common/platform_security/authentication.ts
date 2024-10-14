@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'saml',
               },
               enabled: true,
-              full_name: 'test viewer',
+              roles: [expect.stringContaining('viewer')],
             })
           );
           expect(status).toBe(200);

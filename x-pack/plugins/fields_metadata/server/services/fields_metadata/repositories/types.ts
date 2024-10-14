@@ -20,3 +20,11 @@ export type ExtractedDatasetFields = Record<DatasetName, FieldMetadataPlain>;
 export type IntegrationFieldsExtractor = (
   params: IntegrationFieldsSearchParams
 ) => Promise<ExtractedIntegrationFields>;
+
+export interface ExtractedIntegration {
+  id: string;
+  name: string;
+  version: string;
+}
+
+export type IntegrationListExtractor = () => Promise<ExtractedIntegration[]>;

@@ -33,11 +33,6 @@ describe(
   'Detection rules, preview',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['loggingRequestsEnabled'])}`,
-      ],
-    },
   },
   () => {
     beforeEach(() => {

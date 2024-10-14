@@ -7,6 +7,7 @@
 
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
@@ -17,7 +18,6 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
   InstructionOrPlainText,
-  AssistantScope,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';

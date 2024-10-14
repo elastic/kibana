@@ -138,7 +138,8 @@ const deleteDataStream = () => {
   });
 };
 
-describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
+// skipping because failure on MKI environment (https://buildkite.com/elastic/kibana-serverless-security-solution-quality-gate-investigations/builds/1390#01927579-caed-41bc-9440-3cf29629a263)
+describe.skip('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();

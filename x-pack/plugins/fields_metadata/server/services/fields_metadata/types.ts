@@ -6,7 +6,11 @@
  */
 
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
-import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './repositories/types';
+import {
+  IntegrationFieldsExtractor,
+  IntegrationFieldsSearchParams,
+  IntegrationListExtractor,
+} from './repositories/types';
 
 export * from './repositories/types';
 
@@ -15,6 +19,7 @@ export interface FieldsMetadataServiceStartDeps {}
 
 export interface FieldsMetadataServiceSetup {
   registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => void;
+  registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => void;
 }
 
 export interface FieldsMetadataServiceStart {

@@ -8,8 +8,8 @@
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface MetricFieldSelectorProps {
   value: string;
@@ -19,9 +19,10 @@ interface MetricFieldSelectorProps {
 
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange, inline = true }) => {
+    const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
-    const { renderOption, closeFlyout } = useFieldStatsTrigger();
+    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
     const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return metricFieldOptions.map((v) => {

@@ -53,6 +53,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.gen-ai',
           '.bedrock',
           '.gemini',
+          '.inference',
           '.sentinelone',
           '.cases',
           '.crowdstrike',

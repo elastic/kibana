@@ -26,7 +26,7 @@ export default createTestConfig({
     `--xpack.cloud.organization_url=/account/members`,
     `--xpack.security.roleManagementEnabled=true`,
     `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
-    `--xpack.searchIndices.enabled=true`, // global empty state FF
+    `--uiSettings.overrides.searchIndices:globalEmptyStateEnabled=true`, // global empty state FF
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],

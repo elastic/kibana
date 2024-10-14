@@ -41,6 +41,7 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
+import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import type { ModelItem } from './models_list';
@@ -220,7 +221,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   const helperText = useMemo<string | undefined>(() => {
     const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
 
-    if (cloudInfo.isCloud && cloudInfo.isMlAutoscalingEnabled) {
+    if (cloudInfo.isCloud && cloudInfo.isMlAutoscalingEnabled && showNodeInfo) {
       // Running in cloud with ML autoscaling enabled
       if (config.adaptiveResources) {
         // With adaptive resources
@@ -285,7 +286,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         }
       }
     } else if (
-      (cloudInfo.isCloud && !cloudInfo.isMlAutoscalingEnabled) ||
+      (cloudInfo.isCloud && !cloudInfo.isMlAutoscalingEnabled && showNodeInfo) ||
       (!cloudInfo.isCloud && showNodeInfo)
     ) {
       // Running in cloud with autoscaling disabled or on-prem
@@ -352,7 +353,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         }
       }
     } else if (!showNodeInfo) {
-      // Running a Search project in serverless
+      // Running in serverless
       const vcuRange = deploymentParamsMapper.getVCURange(config.vCPUUsage);
 
       if (config.adaptiveResources) {
@@ -383,6 +384,29 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 defaultMessage:
                   'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcuRange.max },
+              }
+            );
+        }
+      } else {
+        // Static allocations are allowed for Search projects
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuStaticHelp',
+              {
+                defaultMessage:
+                  'This level set resources to {staticVCUs, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { staticVCUs: vcuRange.static },
+              }
+            );
+          case 'medium':
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCUs, plural, one {VCU} other {# VCUs}}, even when not in use.',
+                values: { staticVCUs: vcuRange.static },
               }
             );
         }
@@ -570,8 +594,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           <EuiSpacer size={'s'} />
 
           <EuiFormHelpText id={'vCpuRangeHelp'}>
-            <EuiCallOut size="s">
-              <p>{helperText}</p>
+            <EuiCallOut size="s" data-test-subj="mlModelsStartDeploymentModalVCPUHelperText">
+              {helperText}
             </EuiCallOut>
           </EuiFormHelpText>
         </EuiPanel>
@@ -630,6 +654,7 @@ interface StartDeploymentModalProps {
   cloudInfo: CloudInfo;
   deploymentParamsMapper: DeploymentParamsMapper;
   showNodeInfo: boolean;
+  nlpSettings: NLPSettings;
 }
 
 /**
@@ -645,6 +670,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   cloudInfo,
   deploymentParamsMapper,
   showNodeInfo,
+  nlpSettings,
 }) => {
   const isUpdate = !!initialParams;
 
@@ -653,20 +679,22 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       deploymentParamsMapper.mapApiToUiDeploymentParams(v)
     );
 
+    const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
+
     return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
       ? {
           deploymentId: `${model.model_id}_search`,
           optimized: 'optimizedForSearch',
-          vCPUUsage: 'medium',
+          vCPUUsage: defaultVCPUUsage,
           adaptiveResources: true,
         }
       : {
           deploymentId: `${model.model_id}_ingest`,
           optimized: 'optimizedForIngest',
-          vCPUUsage: 'medium',
+          vCPUUsage: defaultVCPUUsage,
           adaptiveResources: true,
         };
-  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats]);
+  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats, showNodeInfo]);
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
@@ -721,7 +749,9 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
-          disableAdaptiveResourcesControl={!showNodeInfo}
+          disableAdaptiveResourcesControl={
+            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+          }
           deploymentsParams={model.stats?.deployment_stats.reduce<
             Record<string, DeploymentParamsUI>
           >((acc, curr) => {
@@ -811,7 +841,8 @@ export const getUserInputModelDeploymentParamsProvider =
     startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
     startModelDeploymentDocUrl: string,
     cloudInfo: CloudInfo,
-    showNodeInfo: boolean
+    showNodeInfo: boolean,
+    nlpSettings: NLPSettings
   ) =>
   (
     model: ModelItem,
@@ -822,7 +853,8 @@ export const getUserInputModelDeploymentParamsProvider =
       model.model_id,
       getNewJobLimits(),
       cloudInfo,
-      showNodeInfo
+      showNodeInfo,
+      nlpSettings
     );
 
     const params = initialParams
@@ -834,6 +866,7 @@ export const getUserInputModelDeploymentParamsProvider =
         const modalSession = overlays.openModal(
           toMountPoint(
             <StartUpdateDeploymentModal
+              nlpSettings={nlpSettings}
               showNodeInfo={showNodeInfo}
               deploymentParamsMapper={deploymentParamsMapper}
               cloudInfo={cloudInfo}

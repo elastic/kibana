@@ -24,6 +24,12 @@ import { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/type
 import { getMergeResultsRollupContextProps } from './utils/get_merged_results_rollup_context_props';
 import { getMergedDataQualityContextProps } from './utils/get_merged_data_quality_context_props';
 import { getMergedIndicesCheckContextProps } from './utils/get_merged_indices_check_context_props';
+import { HistoricalResultsContext } from '../../data_quality_details/indices_details/pattern/contexts/historical_results_context';
+import { initialFetchHistoricalResultsReducerState } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results';
+import {
+  FetchHistoricalResultsReducerState,
+  UseHistoricalResultsReturnValue,
+} from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -171,3 +177,30 @@ const TestDataQualityProvidersComponent: React.FC<TestDataQualityProvidersProps>
 TestDataQualityProvidersComponent.displayName = 'TestDataQualityProvidersComponent';
 
 export const TestDataQualityProviders = React.memo(TestDataQualityProvidersComponent);
+
+export interface TestHistoricalResultsProviderProps {
+  children: React.ReactNode;
+  historicalResultsState?: FetchHistoricalResultsReducerState;
+  fetchHistoricalResults?: UseHistoricalResultsReturnValue['fetchHistoricalResults'];
+}
+
+const TestHistoricalResultsProviderComponent: React.FC<TestHistoricalResultsProviderProps> = ({
+  children,
+  historicalResultsState = initialFetchHistoricalResultsReducerState,
+  fetchHistoricalResults = jest.fn(),
+}) => {
+  return (
+    <HistoricalResultsContext.Provider
+      value={{
+        historicalResultsState,
+        fetchHistoricalResults,
+      }}
+    >
+      {children}
+    </HistoricalResultsContext.Provider>
+  );
+};
+
+TestHistoricalResultsProviderComponent.displayName = 'TestHistoricalResultsProviderComponent';
+
+export const TestHistoricalResultsProvider = React.memo(TestHistoricalResultsProviderComponent);

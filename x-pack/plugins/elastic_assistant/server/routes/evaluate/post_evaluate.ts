@@ -236,7 +236,6 @@ export const postEvaluateRoute = (
                 llm,
                 isOssModel,
                 logger,
-                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,

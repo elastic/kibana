@@ -39,6 +39,7 @@ import {
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { getLongMessage } from '../../user_messages_utils';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -128,9 +129,7 @@ export function EditorFrame(props: EditorFrameProps) {
         bannerMessages={
           bannerMessages.length ? (
             <ErrorBoundary onError={onError}>
-              <BannerWrapper
-                nodes={bannerMessages.map(({ longMessage }) => longMessage as React.ReactNode)}
-              />
+              <BannerWrapper nodes={bannerMessages.map(getLongMessage)} />
             </ErrorBoundary>
           ) : undefined
         }

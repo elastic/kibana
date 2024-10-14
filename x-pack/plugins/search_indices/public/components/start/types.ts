@@ -9,5 +9,6 @@ import type { AvailableLanguages } from '../../code_examples';
 
 export interface CreateIndexFormState {
   indexName: string;
+  defaultIndexName: string;
   codingLanguage: AvailableLanguages;
 }

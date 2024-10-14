@@ -55,6 +55,8 @@ const fields = await client.find({
 */
 ```
 
+> The service will try to extract the integration and dataset name as they are conventionally named in their static definition, providing a much simpler usage of this API for integration fields.
+
 > N.B. Passing the `dataset` name parameter to `.find` helps narrowing the scope of the integration assets that need to be fetched, increasing the performance of the request. 
 In case the exact dataset for a field is unknown, is it still possible to pass a `*` value as `dataset` parameter to access all the integration datasets' fields. 
 Still, is recommended always passing the `dataset` as well if known or unless the required fields come from different datasets of the same integration.

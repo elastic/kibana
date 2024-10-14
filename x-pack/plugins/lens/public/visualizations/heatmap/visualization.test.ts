@@ -437,7 +437,9 @@ describe('heatmap', () => {
                       function: LEGEND_FUNCTION,
                       arguments: {
                         isVisible: [true],
-                        position: [Position.Right],
+                        maxLines: [1],
+                        position: ['right'],
+                        shouldTruncate: [true],
                       },
                     },
                   ],

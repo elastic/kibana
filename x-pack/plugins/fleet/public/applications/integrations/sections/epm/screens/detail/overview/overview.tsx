@@ -42,6 +42,8 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
+import { CloudPostureThirdPartySupportCallout } from '../components/cloud_posture_third_party_support_callout';
+
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';
@@ -319,6 +321,7 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
+          <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}

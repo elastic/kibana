@@ -11,8 +11,8 @@ import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { UserProfileAvatarData } from './types';
 
+import type { UserProfileAvatarData } from './types';
 import type { UserProfile, UserProfileUserInfo } from './user_profile';
 import {
   getUserAvatarColor,

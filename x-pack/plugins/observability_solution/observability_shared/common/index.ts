@@ -217,3 +217,5 @@ export {
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
+
+export { EntityType, EntityDataStreamType } from './entity';
