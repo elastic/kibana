@@ -602,7 +602,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     : [];
 
                 const augmentedBuildingBlockAlerts =
-                  getMatchingBuildingBlockAlerts != null && newAlerts?.length > 0
+                  matchingBuildingBlockAlerts.length > 0
                     ? await augmentAlerts({
                         alerts: matchingBuildingBlockAlerts,
                         options,
