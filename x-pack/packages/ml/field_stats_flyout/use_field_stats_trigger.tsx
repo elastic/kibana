@@ -72,3 +72,5 @@ export const useFieldStatsTrigger = () => {
     populatedFields,
   };
 };
+
+export type UseFieldStatsTrigger = typeof useFieldStatsTrigger;
