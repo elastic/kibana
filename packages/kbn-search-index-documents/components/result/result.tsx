@@ -36,6 +36,7 @@ export interface ResultProps {
   showScore?: boolean;
   compactCard?: boolean;
   onDocumentClick?: () => void;
+  onDocumentDelete?: () => void;
 }
 
 export const Result: React.FC<ResultProps> = ({
@@ -45,6 +46,7 @@ export const Result: React.FC<ResultProps> = ({
   compactCard = true,
   showScore = false,
   onDocumentClick,
+  onDocumentDelete,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipText =
@@ -87,7 +89,10 @@ export const Result: React.FC<ResultProps> = ({
                       values: { id: metaData.id },
                     })
                   }
-                  metaData={metaData}
+                  metaData={{
+                    ...metaData,
+                    onDocumentDelete,
+                  }}
                 />
               )}
               {!compactCard && (
@@ -101,7 +106,10 @@ export const Result: React.FC<ResultProps> = ({
                     })
                   }
                   onTitleClick={onDocumentClick}
-                  metaData={metaData}
+                  metaData={{
+                    ...metaData,
+                    onDocumentDelete,
+                  }}
                   rightSideActions={
                     <EuiFlexItem grow={false}>
                       <EuiToolTip position="left" content={toolTipContent}>

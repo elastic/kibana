@@ -106,7 +106,7 @@ export const LOGS_FEATURE = {
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: ['infra', 'logs', 'kibana'],
+  app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
   catalogue: ['infralogging', 'logs'],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -114,7 +114,7 @@ export const LOGS_FEATURE = {
   alerting: logsRuleTypes,
   privileges: {
     all: {
-      app: ['infra', 'logs', 'kibana'],
+      app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       savedObject: {
@@ -135,7 +135,7 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
-      app: ['infra', 'logs', 'kibana'],
+      app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       alerting: {

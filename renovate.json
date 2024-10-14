@@ -21,6 +21,15 @@
       "enabled": false
     },
     {
+      "groupName": "webpack",
+      "matchDepNames": ["webpack", "@types/webpack", "webpack-cli", "webpack-dev-server", "webpack-merge"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:all-open", "release_note:skip", "ci:build-webpack-bundle-analyzer"],
+      "minimumReleaseAge": "30 days",
+      "enabled": true
+    },
+    {
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -41,6 +50,7 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": [
         "actions/checkout",
+        "actions/github-script",
         "elastic/github-actions/project-assigner",
         "hmarr/auto-approve-action",
         "octokit/graphql-action",
@@ -57,7 +67,7 @@
       "matchDepNames": ["@elastic/charts"],
       "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:prev-minor", "Team:Visualizations"],
       "enabled": true
     },
     {
@@ -102,7 +112,7 @@
     },
     {
       "groupName": "APM",
-      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react", "@elastic/apm-rum-core"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],

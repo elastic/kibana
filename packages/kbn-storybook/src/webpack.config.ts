@@ -10,9 +10,9 @@
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
@@ -119,18 +119,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
                   quietDeps: true,
-                  logger: {
-                    warn: (message: string, warning: any) => {
-                      // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
-                      if (warning?.deprecationType?.id === 'mixed-decls') return;
-
-                      if (warning.deprecation)
-                        return process.stderr.write(
-                          `DEPRECATION WARNING: ${message}\n${warning.stack}`
-                        );
-                      process.stderr.write('WARNING: ' + message);
-                    },
-                  },
                 },
               },
             },
@@ -138,12 +126,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
       ],
     },
-    plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
-      new IgnoreNotFoundExportPlugin(),
-    ],
+    plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],

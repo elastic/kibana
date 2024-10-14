@@ -180,5 +180,18 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         apiKey
       );
     },
+
+    async clickFirstDocumentDeleteAction() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      await testSubjects.click('deleteDocumentButton');
+    },
+
+    async expectDeleteDocumentActionNotVisible() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.missingOrFail('deleteDocumentButton');
+    },
   };
 }

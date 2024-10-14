@@ -62,7 +62,7 @@ export const EmptyList = {
     />
   ),
 
-  args: args,
+  args,
 };
 
 export const List = {
@@ -80,6 +80,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['category_two'],
+          installStatus: 'installed',
         },
         {
           title: 'Package Two',
@@ -92,6 +93,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['category_one'],
+          installStatus: 'installed',
         },
         {
           title: 'Package Three',
@@ -104,6 +106,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['web'],
+          installStatus: 'installed',
         },
         {
           title: 'Package Four',
@@ -116,6 +119,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['category_one'],
+          installStatus: 'install_failed',
         },
         {
           title: 'Package Five',
@@ -128,6 +132,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['category_two'],
+          installStatus: 'install_failed',
         },
         {
           title: 'Package Six',
@@ -140,6 +145,7 @@ export const List = {
           icons: [],
           integration: 'integration',
           categories: ['category_two'],
+          installStatus: 'install_failed',
         },
       ]}
       searchTerm=""
@@ -153,5 +159,5 @@ export const List = {
     />
   ),
 
-  args: args,
+  args,
 };

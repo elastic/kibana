@@ -58,11 +58,12 @@ describe('SaveTimelineButton', () => {
 
     expect(getByTestId('timeline-modal-save-timeline')).toBeInTheDocument();
     expect(getByText('Save')).toBeInTheDocument();
+    expect(getByTestId('timeline-modal-save-timeline')).toHaveStyle('background-color: #07C');
 
     expect(queryByTestId('save-timeline-modal')).not.toBeInTheDocument();
   });
 
-  it('should override the default text in the button', async () => {
+  it('should override the default text and color of the button', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
@@ -73,14 +74,20 @@ describe('SaveTimelineButton', () => {
     });
     (useCreateTimeline as jest.Mock).mockReturnValue({});
 
-    const { getByText, queryByText } = render(
+    const { getByTestId, getByText, queryByText } = render(
       <TestProviders>
-        <SaveTimelineButton timelineId="timeline-1" buttonText={'TEST'} />
+        <SaveTimelineButton
+          timelineId="timeline-1"
+          buttonText="TEST"
+          buttonColor="warning"
+          data-test-subj={'TEST_ID'}
+        />
       </TestProviders>
     );
 
     expect(queryByText('Save')).not.toBeInTheDocument();
     expect(getByText('TEST')).toBeInTheDocument();
+    expect(getByTestId('TEST_ID')).toHaveStyle('background-color: #FEC514');
   });
 
   it('should open the timeline save modal', async () => {

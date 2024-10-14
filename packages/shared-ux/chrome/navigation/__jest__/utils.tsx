@@ -39,6 +39,7 @@ export const getServicesMock = (): NavigationServices => {
     activeNodes$: of(activeNodes),
     isSideNavCollapsed: false,
     eventTracker,
+    isFeedbackBtnVisible$: of(false),
   };
 };
 

@@ -10,16 +10,3 @@ export enum EntityDataStreamType {
   TRACES = 'traces',
   LOGS = 'logs',
 }
-
-interface TraceMetrics {
-  latency?: number | null;
-  throughput?: number | null;
-  failedTransactionRate?: number | null;
-}
-
-interface LogsMetrics {
-  logRate?: number | null;
-  logErrorRate?: number | null;
-}
-
-export type EntityMetrics = TraceMetrics & LogsMetrics;

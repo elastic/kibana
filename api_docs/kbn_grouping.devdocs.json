@@ -245,9 +245,9 @@
           "Type for dynamic grouping component props where T is the consumer `GroupingAggregation`"
         ],
         "signature": [
-          "{ isLoading: boolean; data?: ",
+          "{ data?: ",
           "ParsedGroupingAggregation",
-          "<T> | undefined; activePage: number; selectedGroup: string; takeActionItems?: ((groupFilters: ",
+          "<T> | undefined; isLoading: boolean; activePage: number; selectedGroup: string; takeActionItems?: ((groupFilters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

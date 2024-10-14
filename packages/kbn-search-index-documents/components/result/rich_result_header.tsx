@@ -70,6 +70,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       size="xs"
       iconType="iInCircle"
       color="primary"
+      data-test-subj="documentMetadataButton"
       onClick={(e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         setPopoverIsOpen(!popoverIsOpen);
@@ -121,8 +122,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
             iconType="trash"
             color="danger"
             size="s"
+            data-test-subj="deleteDocumentButton"
             onClick={(e: React.MouseEvent<HTMLElement>) => {
               e.stopPropagation();
+              onDocumentDelete();
               closePopover();
             }}
             fullWidth

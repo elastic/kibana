@@ -70,8 +70,5 @@ xpack.searchInferenceEndpoints.ui.enabled: false
 # Search Notebooks
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
-# Search Homepage
-xpack.search.homepage.ui.enabled: true
-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: false

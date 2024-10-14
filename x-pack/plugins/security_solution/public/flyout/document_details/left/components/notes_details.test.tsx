@@ -57,14 +57,16 @@ const mockGlobalStateWithSavedTimeline = {
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.test],
         savedObjectId: 'savedObjectId',
+        pinnedEventIds: {},
       },
     },
   },
 };
 
+const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
 const renderNotesDetails = () =>
   render(
-    <TestProviders>
+    <TestProviders store={mockStore}>
       <DocumentDetailsContext.Provider value={panelContextValue}>
         <NotesDetails />
       </DocumentDetailsContext.Provider>
@@ -81,16 +83,7 @@ describe('NotesDetails', () => {
   });
 
   it('should fetch notes for the document id', () => {
-    const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
-
-    render(
-      <TestProviders store={mockStore}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
+    renderNotesDetails();
     expect(mockDispatch).toHaveBeenCalled();
   });
 

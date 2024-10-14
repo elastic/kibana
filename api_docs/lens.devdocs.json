@@ -9869,7 +9869,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { title?: string | undefined; style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -9881,7 +9881,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+              ", \"gridLine\">> | undefined>; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -12101,7 +12101,7 @@
           },
           "<{ duration: number; } | undefined>; valueGetter?: ",
           "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -12113,7 +12113,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",

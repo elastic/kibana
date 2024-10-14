@@ -18,7 +18,6 @@ export default function (providerContext: FtrProviderContext) {
       await cspSecurity.createUsers();
     });
 
-    loadTestFile(require.resolve('../telemetry/telemetry.ts'));
     loadTestFile(require.resolve('./vulnerabilities_dashboard.ts'));
     loadTestFile(require.resolve('./stats.ts'));
     loadTestFile(require.resolve('./csp_benchmark_rules_bulk_update.ts'));

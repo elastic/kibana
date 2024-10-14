@@ -33,9 +33,8 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
   noSingleMetricJobsFound,
 }) => {
   const {
-    services: { cases, docLinks, presentationUtil },
+    services: { cases, docLinks },
   } = useMlKibana();
-  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
   const casesPermissions = cases?.helpers.canUseCases();
   const helpLink = docLinks.links.ml.anomalyDetection;
@@ -65,7 +64,7 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
           <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
         )}
         <CasesContext owner={[]} permissions={casesPermissions!}>
-          <PresentationContextProvider>{children}</PresentationContextProvider>
+          {children}
         </CasesContext>
         <HelpMenu docLink={helpLink} />
       </div>

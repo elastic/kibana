@@ -1968,7 +1968,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { title?: string | undefined; style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -1980,7 +1980,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+              ", \"gridLine\">> | undefined>; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2209,7 +2209,7 @@
         "label": "AllowedXYOverrides",
         "description": [],
         "signature": [
-          "{ axisX?: { style?: ",
+          "{ axisX?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2221,7 +2221,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2243,7 +2243,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { style?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2255,7 +2255,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2277,7 +2277,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { style?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2289,7 +2289,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",

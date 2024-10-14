@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { mapValues } from 'lodash';
+import React from 'react';
 
 import { EnvironmentStatus, ProjectConfig, ProjectID, ProjectStatus } from '../../../common';
-import { applyProjectStatus } from '../../services/labs/types';
 import { ProjectListItem, Props } from './project_list_item';
 
 import { projects as projectConfigs } from '../../../common';
+import { applyProjectStatus } from '../../services/presentation_labs_service';
 import { ProjectList } from './project_list';
 
 export default {

@@ -9,7 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -86,7 +86,6 @@ module.exports = (_, argv) => {
         'moment-timezone/moment-timezone',
         'moment-timezone/data/packed/latest.json',
         'moment',
-        'react-ace',
         'react-dom',
         'react-dom/server',
         'react-router-dom',
@@ -143,12 +142,10 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      mainFields: ['browser', 'main'],
-      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
-      fallback: {
-        child_process: false,
-        fs: false,
-      },
+      mainFields: ['browser', 'module', 'main'],
+      conditionNames: ['browser', 'module', 'import', 'require', 'default'],
+      // mainFields: ['browser', 'main', 'module'],
+      // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
     },
 
     optimization: {
@@ -166,9 +163,7 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
@@ -181,6 +176,7 @@ module.exports = (_, argv) => {
       }),
       new webpack.DllPlugin({
         context: REPO_ROOT,
+        entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),

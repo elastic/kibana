@@ -8,6 +8,7 @@
  */
 
 const path = require('path');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 const getWorkerEntry = (language) => {
   switch (language) {
@@ -47,6 +48,7 @@ const workerConfig = (languages) => ({
       buffer: require.resolve('buffer'),
     },
   },
+  plugins: [new NodeLibsBrowserPlugin()],
   stats: 'errors-only',
   module: {
     rules: [

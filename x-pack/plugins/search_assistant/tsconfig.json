@@ -16,11 +16,13 @@
     "@kbn/react-kibana-context-render",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/ai-assistant",
+    "@kbn/i18n",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
     "target/**/*",

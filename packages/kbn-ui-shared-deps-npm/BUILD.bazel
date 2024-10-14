@@ -27,6 +27,7 @@ RUNTIME_DEPS = [
   "@npm//babel-loader",
   "@npm//@babel/plugin-proposal-optional-chaining",
   "@npm//val-loader",
+  "//packages/kbn-node-libs-browser-webpack-plugin",
   "//packages/kbn-repo-info",
   # deps in the dll need to be included in the sandbox for consumers
   # of this DLL (ui-shared-deps-src) because webpack won't actually
@@ -52,7 +53,7 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//react-ace",
+  "@npm//node-libs-browser",
   "@npm//react-dom",
   "@npm//react-router-dom",
   "@npm//react-router-dom-v5-compat",
@@ -61,7 +62,6 @@ RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",
-  "@npm//util",
   "@npm//uuid",
   "@npm//io-ts",
   "@npm//@reduxjs/toolkit",
@@ -78,7 +78,6 @@ webpack_cli(
     ":webpack.config.js",
 
     "@npm//webpack",
-    "@npm//node-polyfill-webpack-plugin",
     "@npm//clean-webpack-plugin",
     "@npm//mini-css-extract-plugin",
     "@npm//moment",
@@ -96,11 +95,9 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
   })
 )

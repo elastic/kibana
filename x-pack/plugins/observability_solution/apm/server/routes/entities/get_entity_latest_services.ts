@@ -7,12 +7,11 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
-  AGENT_NAME,
-  DATA_STEAM_TYPE,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
-import { ENTITY, ENTITY_TYPE } from '../../../common/es_fields/entities';
+  ENTITY,
+  ENTITY_TYPE,
+  SOURCE_DATA_STREAM_TYPE,
+} from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { entitiesRangeQuery } from './get_entities';
@@ -40,7 +39,7 @@ export async function getEntityLatestServices({
       body: {
         size,
         track_total_hits: false,
-        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
+        _source: [AGENT_NAME, ENTITY, SOURCE_DATA_STREAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
         query: {
           bool: {
             filter: [

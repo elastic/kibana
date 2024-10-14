@@ -129,10 +129,10 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
           paddingSize="m"
           id={`${type}-content-sync-schedule`}
           buttonContent={
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h4>{getAccordionTitle(type)}</h4>
+                <EuiTitle size="xs">
+                  <h5>{getAccordionTitle(type)}</h5>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>

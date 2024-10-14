@@ -253,6 +253,97 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
+    it('should create an alert with composite query in filter for conditional action', async () => {
+      const alertName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(alertName);
+
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
+
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
+      // Alerts search bar (conditional actions)
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('addFilter');
+      // Add first part of query before AND
+      await testSubjects.click('filterFieldSuggestionList');
+      await comboBox.set('filterFieldSuggestionList', '_id');
+      await comboBox.set('filterOperatorList', 'is not');
+      await testSubjects.setValue('filterParams', 'fake-rule-id');
+      await testSubjects.click('add-and-filter');
+      // Add second part of query after AND
+      const firstDropdown = await find.byCssSelector(
+        '[data-test-subj="filter-0.1"] [data-test-subj="filterFieldSuggestionList"] [data-test-subj="comboBoxSearchInput"]'
+      );
+      await firstDropdown.click();
+      await firstDropdown.type('kibana.alert.action_group');
+      await find.clickByButtonText('kibana.alert.action_group');
+      const secondDropdown = await find.byCssSelector(
+        '[data-test-subj="filter-0.1"] [data-test-subj="filterOperatorList"] [data-test-subj="comboBoxSearchInput"]'
+      );
+      await secondDropdown.click();
+      await secondDropdown.type('exists');
+      await find.clickByButtonText('exists');
+      await testSubjects.click('saveFilter');
+      await testSubjects.setValue('queryInput', '_id: *');
+
+      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        `Rule {{rule.name}} is active for group {{context.group}}:
+
+- Value: {{context.value}}
+- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+- Timestamp: {{context.date}}`
+      );
+      await testSubjects.setValue('messageTextArea', 'test message ');
+      await testSubjects.click('messageAddVariableButton');
+      await testSubjects.click('variableMenuButton-alert.actionGroup');
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alert.actionGroup}}'
+      );
+      await messageTextArea.type(' some additional text ');
+
+      await testSubjects.click('messageAddVariableButton');
+      await testSubjects.setValue('messageVariablesSelectableSearch', 'rule.id');
+      await testSubjects.click('variableMenuButton-rule.id');
+
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alert.actionGroup}} some additional text {{rule.id}}'
+      );
+      await testSubjects.click('saveRuleButton');
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Index threshold`,
+        tags: '',
+        interval: '1 min',
+      });
+      expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);

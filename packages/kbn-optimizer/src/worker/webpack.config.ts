@@ -11,7 +11,6 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -23,6 +22,7 @@ import {
   STATS_WARNINGS_FILTER,
   STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
 } from '@kbn/optimizer-webpack-helpers';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -86,9 +86,7 @@ export function getWebpackConfig(
     },
 
     plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -158,7 +156,6 @@ export function getWebpackConfig(
         },
         {
           test: /\.css$/,
-          resourceQuery: { not: /raw/ },
           include: /node_modules/,
           use: [
             {
@@ -227,18 +224,6 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
-                      logger: {
-                        warn: (message: string, warning: any) => {
-                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
-                          if (warning?.deprecationType?.id === 'mixed-decls') return;
-
-                          if (warning.deprecation)
-                            return process.stderr.write(
-                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
-                            );
-                          process.stderr.write('WARNING: ' + message);
-                        },
-                      },
                     },
                   },
                 },
@@ -255,14 +240,25 @@ export function getWebpackConfig(
         },
         {
           test: /\.(js|tsx?)$/,
-          resourceQuery: { not: /raw/ },
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
+              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+            },
+          },
+        },
+        {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
               presets: [BABEL_PRESET],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
             },
           },
         },
@@ -302,20 +298,17 @@ export function getWebpackConfig(
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
-      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
+      mainFields: ['browser', 'module', 'main'],
+      // conditionNames: ['browser', 'module', 'import', 'require', 'default'],
+      //
+      // mainFields: ['browser', 'main', 'module'],
+      // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
-        child_process: false,
-        fs: false,
-      },
-      fallback: {
-        child_process: false,
-        fs: false,
       },
     },
 
@@ -400,7 +393,7 @@ export function getWebpackConfig(
       ],
       // TODO: try to understand why usedExports is treeShaking code it shouldn't be
       usedExports: false,
-      sideEffects: false,
+      // sideEffects: false,
       //
     },
   };
