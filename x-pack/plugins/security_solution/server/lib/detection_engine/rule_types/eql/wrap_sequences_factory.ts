@@ -25,6 +25,7 @@ export const wrapSequencesFactory =
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
+    intendedTimestamp,
   }: {
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
     completeRule: CompleteRule<RuleParams>;
@@ -34,6 +35,7 @@ export const wrapSequencesFactory =
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
     publicBaseUrl: string | undefined;
+    intendedTimestamp: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -48,7 +50,8 @@ export const wrapSequencesFactory =
           buildReasonMessage,
           indicesToQuery,
           alertTimestampOverride,
-          publicBaseUrl
+          publicBaseUrl,
+          intendedTimestamp
         ),
       ],
       []
