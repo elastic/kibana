@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { isESQLColumnSortable } from './esql_fields_utils';
+import { isESQLColumnSortable, isESQLColumnGroupable } from './esql_fields_utils';
 
 describe('esql fields helpers', () => {
   describe('isESQLColumnSortable', () => {
@@ -61,6 +61,47 @@ describe('esql fields helpers', () => {
         isNull: false,
       } as DatatableColumn;
       expect(isESQLColumnSortable(keywordField)).toBeTruthy();
+    });
+  });
+
+  describe('isESQLColumnGroupable', () => {
+    it('returns false for unsupported fields', () => {
+      const unsupportedField = {
+        id: 'unsupported',
+        name: 'unsupported',
+        meta: {
+          type: 'unknown',
+          esType: 'unknown',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(unsupportedField)).toBeFalsy();
+    });
+
+    it('returns false for counter fields', () => {
+      const tsdbField = {
+        id: 'tsbd_counter',
+        name: 'tsbd_counter',
+        meta: {
+          type: 'number',
+          esType: 'counter_long',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(tsdbField)).toBeFalsy();
+    });
+
+    it('returns true for everything else', () => {
+      const keywordField = {
+        id: 'sortable',
+        name: 'sortable',
+        meta: {
+          type: 'string',
+          esType: 'keyword',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(keywordField)).toBeTruthy();
     });
   });
 });
