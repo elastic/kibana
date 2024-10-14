@@ -9,7 +9,7 @@ import React from 'react';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 import type { NonUpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/types';
-import { inNonUpgradeableFieldName } from '../../../../model/prebuilt_rule_upgrade/constants';
+import { isNonUpgradeableFieldName } from '../../../../model/prebuilt_rule_upgrade/constants';
 
 type FieldDiffEntries<FieldsDiff, ExcludedFields extends keyof FieldsDiff = never> = Array<
   [
@@ -30,7 +30,7 @@ export function RuleUpgradeConflictsResolver({
   >;
 
   const fields = fieldDiffEntries.filter(([fieldName]) => {
-    return inNonUpgradeableFieldName(fieldName) === false;
+    return isNonUpgradeableFieldName(fieldName) === false;
   }) as FieldDiffEntries<typeof ruleUpgradeState.diff.fields, NonUpgradeableDiffableFields>;
 
   fields.map(([fieldName, fieldDiff]) => (
