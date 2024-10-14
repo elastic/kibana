@@ -44,7 +44,7 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
         <strong>{title}</strong>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiThemeProvider colorMode="dark">
+      <EuiThemeProvider colorMode="INVERSE">
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
             <EuiCodeBlock
@@ -54,6 +54,11 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
               paddingSize="m"
               isCopyable
               transparentBackground
+              css={{
+                '*::selection': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                },
+              }}
             >
               {code}
             </EuiCodeBlock>
