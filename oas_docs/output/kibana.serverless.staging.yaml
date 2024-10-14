@@ -47932,6 +47932,7 @@ components:
         - installing
         - started
         - stopped
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
