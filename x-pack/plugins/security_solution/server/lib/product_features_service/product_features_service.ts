@@ -108,6 +108,7 @@ export class ProductFeaturesService {
     this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
 
     const casesProductFeaturesConfig = configurator.cases();
+    this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
     this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
 
     const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
@@ -138,6 +139,7 @@ export class ProductFeaturesService {
   public isActionRegistered(action: string) {
     return (
       this.securityProductFeatures.isActionRegistered(action) ||
+      this.casesProductFeatures.isActionRegistered(action) ||
       this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
       this.attackDiscoveryProductFeatures.isActionRegistered(action)
