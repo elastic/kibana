@@ -19,7 +19,7 @@ import {
 } from './v2_features/kibana_sub_features';
 
 /**
- * @deprecated - deprecated in 8.16, use getCasesV2Feature instead
+ * @deprecated Use getCasesV2Feature instead
  */
 export const getCasesFeature = (
   params: CasesFeatureParams

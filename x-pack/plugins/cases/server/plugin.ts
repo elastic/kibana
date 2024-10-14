@@ -44,6 +44,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { getCasesKibanaFeatureV2 } from './features_v2';
 
 export class CasePlugin
   implements
@@ -92,7 +93,10 @@ export class CasePlugin
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
     if (this.caseConfig.stack.enabled) {
+      // V1 is deprecated, but has to be maintained for the time being
+      // https://github.com/elastic/kibana/pull/186800#issue-2369812818
       plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+      plugins.features.registerKibanaFeature(getCasesKibanaFeatureV2());
     }
 
     registerSavedObjects({

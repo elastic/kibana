@@ -7,7 +7,7 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
-  FEATURE_ID,
+  FEATURE_ID_V2,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -81,7 +81,7 @@ export const canUseCases =
 
 const getFeatureID = (owner: CasesOwners) => {
   if (owner === GENERAL_CASES_OWNER) {
-    return FEATURE_ID;
+    return FEATURE_ID_V2;
   }
 
   return `${owner}CasesV2`;

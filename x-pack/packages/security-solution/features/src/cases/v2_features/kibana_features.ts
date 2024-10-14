@@ -26,9 +26,9 @@ export const getCasesBaseKibanaFeatureV2 = ({
   return {
     id: CASES_FEATURE_ID_V2,
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleV2',
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle',
       {
-        defaultMessage: 'Cases V2',
+        defaultMessage: 'Cases',
       }
     ),
     order: 1100,
