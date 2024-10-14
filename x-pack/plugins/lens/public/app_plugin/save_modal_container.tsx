@@ -321,6 +321,7 @@ export const runSaveLensVisualization = async (
       docToSave,
       {
         timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
+        savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput
     );
@@ -351,7 +352,7 @@ export const runSaveLensVisualization = async (
     const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
     const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
 
-    // is a redirect was set, prevent the validation on app leave
+    // if a redirect was set, prevent the validation on app leave
     if (hasRedirect) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {
@@ -372,7 +373,7 @@ export const runSaveLensVisualization = async (
     // without redirect?
     if (saveProps.dashboardId) {
       redirectToDashboard({
-        embeddableInput: newDoc,
+        embeddableInput: { ...newDoc, savedObjectId },
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         originatingApp: props.originatingApp,
