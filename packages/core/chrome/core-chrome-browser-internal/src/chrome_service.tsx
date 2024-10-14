@@ -596,6 +596,7 @@ export class ChromeService {
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$.bind(projectNavigation),
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,

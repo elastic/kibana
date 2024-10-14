@@ -87,6 +87,9 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSideNavComponent(component: SideNavComponent | null): void;
 
+    /** Get an Observable of the current project breadcrumbs */
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
     /**
      * Set project breadcrumbs
      * @param breadcrumbs
