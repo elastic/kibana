@@ -11,7 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import z from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -64,6 +64,7 @@ import {
   AlertsFilterTimeframe,
   RuleAlertData,
   AlertDelay,
+  Flapping,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -77,7 +78,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
-  getRulesSettingsClient: () => RulesSettingsClient;
+  getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
@@ -505,6 +506,7 @@ export interface RawRule extends SavedObjectAttributes {
   revision: number;
   running?: boolean | null;
   alertDelay?: AlertDelay;
+  flapping?: Flapping | null;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

@@ -83,52 +83,46 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
-  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PresentationContextProvider>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
-                  isServerless,
+                  config,
+                  appMountParameters,
+                  observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    config,
-                    appMountParameters,
-                    observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                          <HideableReactQueryDevTools />
-                        </QueryClientProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
-      </PresentationContextProvider>
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <QueryClientProvider client={queryClient}>
+                        <App />
+                        <HideableReactQueryDevTools />
+                      </QueryClientProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>,
     element
   );

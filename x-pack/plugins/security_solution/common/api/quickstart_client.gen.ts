@@ -554,7 +554,7 @@ If asset criticality records already exist for the specified entities, those rec
       .request<CleanUpRiskEngineResponse>({
         path: '/api/risk_score/engine/dangerously_delete_data',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
       })

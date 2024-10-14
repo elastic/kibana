@@ -543,11 +543,32 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     );
   };
 
+  const canSave = useCallback(() => {
+    if (selectedRoles.length === 0) {
+      return false;
+    }
+
+    const form = roleCustomizationAnchor.value.kibana[roleCustomizationAnchor.privilegeIndex] ?? {};
+    const formBase = form.base ?? [];
+    const formFeature = form.feature ?? {};
+
+    // ensure that the form has base privileges or has selected features that are valid
+    if (
+      formBase.length === 0 &&
+      (Object.keys(formFeature).length === 0 ||
+        Object.values(formFeature).every((privileges) => privileges.length === 0))
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [selectedRoles, roleCustomizationAnchor]);
+
   const getSaveButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        disabled={!selectedRoles.length}
+        disabled={!canSave()}
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
         data-test-subj={`space-${
@@ -563,7 +584,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             })}
       </EuiButton>
     );
-  }, [assignRolesToSpace, assigningToRole, selectedRoles.length]);
+  }, [assignRolesToSpace, assigningToRole, canSave]);
 
   return (
     <React.Fragment>
