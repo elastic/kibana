@@ -22,7 +22,10 @@ describe('get_cluster_stats', () => {
       }
     );
     const result = await getClusterStats(esClient);
-    expect(esClient.cluster.stats).toHaveBeenCalledWith({ timeout: CLUSTER_STAT_TIMEOUT });
+    expect(esClient.cluster.stats).toHaveBeenCalledWith(
+      { timeout: CLUSTER_STAT_TIMEOUT, include_remotes: true },
+      { requestTimeout: CLUSTER_STAT_TIMEOUT }
+    );
     expect(result).toStrictEqual(response);
   });
 });
