@@ -430,7 +430,9 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
       ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
     );
   } else if (ctx instanceof QualifiedNameContext) {
-    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+    parts.push(
+      ...ctx.identifierOrParameter_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
   } else {
     parts.push(sanitizeIdentifierString(ctx));
   }

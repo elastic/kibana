@@ -276,7 +276,7 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'row', 'show'}`,
           ])
       );
     });

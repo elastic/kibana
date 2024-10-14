@@ -16,7 +16,7 @@ import {
   BooleanDefaultContext,
   type BooleanExpressionContext,
   BooleanLiteralContext,
-  InputParamsContext,
+  InputParameterContext,
   BooleanValueContext,
   type CommandOptionsContext,
   ComparisonContext,
@@ -385,7 +385,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     }
     return createList(ctx, values);
   }
-  if (ctx instanceof InputParamsContext && ctx.children) {
+  if (ctx instanceof InputParameterContext && ctx.children) {
     const values: ESQLLiteral[] = [];
 
     for (const child of ctx.children) {
@@ -478,7 +478,7 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
     const fn = createFunction(
-      functionExpressionCtx.identifier().getText().toLowerCase(),
+      functionExpressionCtx.identifierOrParameter().getText().toLowerCase(),
       ctx,
       undefined,
       'variadic-call'
