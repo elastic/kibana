@@ -16,11 +16,10 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
-import type { EngineDataviewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type { AppClient } from '../../..';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   Entity,
+  EngineDataviewUpdateResult,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
   EntityType,
@@ -119,7 +118,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger, esClient, namespace, taskManager, appClient, dataViewsService } = this.options;
+    const { logger } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -166,7 +165,7 @@ export class EntityStoreDataClient {
     filter: string,
     pipelineDebugMode: boolean
   ) {
-    const { esClient, logger, namespace } = this.options;
+    const { esClient, logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
     const unitedDefinition = getUnitedEntityDefinition({

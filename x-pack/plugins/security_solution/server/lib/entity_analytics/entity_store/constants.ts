@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { EngineStatus } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-
-/**
- * Default index pattern for entity store
- * This is the same as the default index pattern for the SIEM app but might diverge in the future
- */
+import type { EngineStatus } from '../../../../common/api/entity_analytics';
 
 export const DEFAULT_LOOKBACK_PERIOD = '24h';
 
