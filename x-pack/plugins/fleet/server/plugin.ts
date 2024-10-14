@@ -139,7 +139,7 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
-import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
+import { registerFieldsMetadataExtractors } from './services/register_fields_metadata_extractors';
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
@@ -637,8 +637,8 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
     });
 
-    // Register fields metadata extractor
-    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
+    // Register fields metadata extractors
+    registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
