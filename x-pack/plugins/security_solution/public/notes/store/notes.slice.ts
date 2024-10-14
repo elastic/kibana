@@ -196,7 +196,7 @@ const notesSlice = createSlice({
     userClosedDeleteModal: (state) => {
       state.pendingDeleteIds = [];
     },
-    userSelectedRowForDeletion: (state, action: { payload: string }) => {
+    userSelectedNotesForDeletion: (state, action: { payload: string }) => {
       state.pendingDeleteIds = [action.payload];
     },
     userSelectedBulkDelete: (state) => {
@@ -398,6 +398,6 @@ export const {
   userSelectedRow,
   userClosedDeleteModal,
   userClosedCreateErrorToast,
-  userSelectedRowForDeletion,
+  userSelectedNotesForDeletion,
   userSelectedBulkDelete,
 } = notesSlice.actions;

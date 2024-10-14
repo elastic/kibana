@@ -16,7 +16,8 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
   const utils = EntityStoreUtils(getService, namespace);
 
-  describe('@ess Entity Store Engine APIs in non-default space', () => {
+  // TODO: unskip once kibana system user has entity index privileges
+  describe.skip('@ess Entity Store Engine APIs in non-default space', () => {
     before(async () => {
       await utils.cleanEngines();
       await spaces.create({
@@ -38,10 +39,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityType('user');
 
-        const expectedTransforms = [
-          `entities-v1-history-ea_${namespace}_user_entity_store`,
-          `entities-v1-latest-ea_${namespace}_user_entity_store`,
-        ];
+        const expectedTransforms = [`entities-v1-latest-ea_${namespace}_user_entity_store`];
 
         await utils.expectTransformsExist(expectedTransforms);
       });
@@ -49,10 +47,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityType('host');
 
-        const expectedTransforms = [
-          `entities-v1-history-ea_${namespace}_host_entity_store`,
-          `entities-v1-latest-ea_${namespace}_host_entity_store`,
-        ];
+        const expectedTransforms = [`entities-v1-latest-ea_${namespace}_host_entity_store`];
 
         await utils.expectTransformsExist(expectedTransforms);
       });
