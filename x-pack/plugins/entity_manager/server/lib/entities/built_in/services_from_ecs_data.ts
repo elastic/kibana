@@ -17,7 +17,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    indexPatterns: ['logs-*', 'filebeat*', 'traces-apm*'],
+    indexPatterns: ['logs-*', 'filebeat*', 'traces*'],
     latest: {
       timestampField: '@timestamp',
       lookbackPeriod: '10m',
