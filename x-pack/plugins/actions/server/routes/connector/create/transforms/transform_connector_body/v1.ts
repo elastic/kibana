@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { ConnectorCreateParams } from '../../../../../application/connector/methods/create/types';
 import { CreateConnectorRequestBodyV1 } from '../../../../../../common/routes/connector/apis/create';
-import { CreateOptions } from '../../../../../actions_client';
 
 export const transformCreateConnectorBody = ({
   connector_type_id: actionTypeId,
   name,
   config,
   secrets,
-}: CreateConnectorRequestBodyV1): CreateOptions['action'] => ({
+}: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
   config,
