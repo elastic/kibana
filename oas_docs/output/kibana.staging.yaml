@@ -27081,7 +27081,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
-      description: Generate Logstash API keyy
+      description: Generate Logstash API key
       operationId: '%2Fapi%2Ffleet%2Flogstash_api_keys#0'
       parameters:
         - description: The version of the API to use
@@ -36712,6 +36712,17 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      delete_unenrolled_agents:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
@@ -36743,7 +36754,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - prerelease_integrations_enabled
                       - id
                 required:
                   - item
@@ -36805,6 +36815,17 @@ paths:
               properties:
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
+                  required:
+                    - enabled
+                    - is_preconfigured
                 fleet_server_hosts:
                   items:
                     format: uri
@@ -36833,6 +36854,17 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      delete_unenrolled_agents:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
@@ -36864,7 +36896,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - prerelease_integrations_enabled
                       - id
                 required:
                   - item
