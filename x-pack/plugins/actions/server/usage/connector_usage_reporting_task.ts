@@ -110,12 +110,9 @@ export class ConnectorUsageReportingTask {
     const { state } = taskInstance;
 
     if (!this.projectId) {
-      this.logger.error(
+      this.logger.warn(
         `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
-      return {
-        state,
-      };
     }
 
     if (!this.caCertificate) {
@@ -163,7 +160,7 @@ export class ConnectorUsageReportingTask {
       totalUsage,
       fromDate,
       toDate,
-      projectId: this.projectId,
+      projectId: this.projectId || 'missing-project-id',
     });
 
     try {
