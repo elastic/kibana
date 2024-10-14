@@ -11,7 +11,6 @@ module.exports = {
   roots: [
     '<rootDir>/x-pack/plugins/ai_infra/llm_tasks/public',
     '<rootDir>/x-pack/plugins/ai_infra/llm_tasks/server',
-    '<rootDir>/x-pack/plugins/ai_infra/llm_tasks/common',
   ],
   setupFiles: [],
   collectCoverage: true,
