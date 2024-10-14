@@ -38,6 +38,7 @@ export { CaseSeverity } from './types/domain';
 export {
   APP_ID,
   FEATURE_ID,
+  FEATURE_ID_V2,
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,

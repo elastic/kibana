@@ -15,7 +15,7 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
-  FEATURE_ID,
+  FEATURE_ID_V2,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
@@ -178,7 +178,7 @@ interface UseApplicationCapabilities {
 
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID];
+  const casesCapabilities = capabilities[FEATURE_ID_V2];
   const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
