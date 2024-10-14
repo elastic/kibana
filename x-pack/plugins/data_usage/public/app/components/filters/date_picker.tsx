@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,7 +36,6 @@ interface UsageMetricsDateRangePickerProps {
 
 export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps>(
   ({ dateRangePickerState, isDataLoading, onRefresh, onRefreshChange, onTimeChange }) => {
-    const { euiTheme } = useEuiTheme();
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
@@ -55,32 +53,22 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
     });
 
     return (
-      <div
-        css={css`
-          padding-bottom: ${euiTheme.size.l};
-        `}
-      >
-        <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiSuperDatePicker
-              isLoading={isDataLoading}
-              dateFormat={uiSettings.get('dateFormat')}
-              commonlyUsedRanges={commonlyUsedRanges}
-              end={dateRangePickerState.endDate}
-              isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
-              onTimeChange={onTimeChange}
-              onRefreshChange={onRefreshChange}
-              refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
-              onRefresh={onRefresh}
-              recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-              start={dateRangePickerState.startDate}
-              showUpdateButton
-              updateButtonProps={{ iconOnly: false, fill: false }}
-              width="auto"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <EuiSuperDatePicker
+        isLoading={isDataLoading}
+        dateFormat={uiSettings.get('dateFormat')}
+        commonlyUsedRanges={commonlyUsedRanges}
+        end={dateRangePickerState.endDate}
+        isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
+        onTimeChange={onTimeChange}
+        onRefreshChange={onRefreshChange}
+        refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
+        onRefresh={onRefresh}
+        recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
+        start={dateRangePickerState.startDate}
+        showUpdateButton={false}
+        updateButtonProps={{ iconOnly: false, fill: false }}
+        width="auto"
+      />
     );
   }
 );

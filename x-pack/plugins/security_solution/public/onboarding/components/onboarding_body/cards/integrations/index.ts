@@ -27,6 +27,5 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilities: ['fleet.all', 'fleetv2.all'],
-  licenseType: 'basic',
+  capabilities: 'fleet.read',
 };
