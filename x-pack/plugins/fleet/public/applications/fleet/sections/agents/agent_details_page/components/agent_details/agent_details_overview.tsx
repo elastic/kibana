@@ -215,7 +215,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
-                defaultMessage: 'Output for Integrations',
+                defaultMessage: 'Output for integrations',
               }),
               description: agentPolicy ? (
                 <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />
@@ -225,7 +225,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
-                defaultMessage: 'Output for Monitoring',
+                defaultMessage: 'Output for monitoring',
               }),
               description: agentPolicy ? (
                 <AgentPolicyOutputsSummary

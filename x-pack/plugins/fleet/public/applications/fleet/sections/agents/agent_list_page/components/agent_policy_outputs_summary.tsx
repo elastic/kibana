@@ -110,7 +110,7 @@ export const AgentPolicyOutputsSummary = memo<{
           >
             <EuiPopoverTitle>
               {i18n.translate('xpack.fleet.AgentPolicyOutputsSummary.popover.title', {
-                defaultMessage: 'Output for Integrations',
+                defaultMessage: 'Output for integrations',
               })}
             </EuiPopoverTitle>
             <div style={{ width: '280px' }}>

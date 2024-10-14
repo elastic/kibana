@@ -306,7 +306,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       field: AGENTS_TABLE_FIELDS.OUTPUT_MONITORING,
       sortable: true,
       name: i18n.translate('xpack.fleet.agentList.monitoringOutputTitle', {
-        defaultMessage: 'Output for Monitoring',
+        defaultMessage: 'Output for monitoring',
       }),
       width: '180px',
       render: (outputs: Output[], agent: Agent) => {
