@@ -146,7 +146,7 @@ export interface RouterOptions {
 }
 
 /** @internal */
-interface InternalRegistrarOptions {
+export interface InternalRegistrarOptions {
   isVersioned: boolean;
   /**
    * @default false
