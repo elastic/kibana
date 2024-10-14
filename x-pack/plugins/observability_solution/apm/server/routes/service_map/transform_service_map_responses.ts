@@ -51,7 +51,7 @@ function addMessagingConnections(
   const newConnections = messagingDestinations
     .map((node) => {
       const matchedService = discoveredServices.find(
-        ({ from }) =>
+        ({ from, to }) =>
           node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE]
       )?.to;
       if (matchedService) {
@@ -86,9 +86,25 @@ export function getAllNodes(
   return allNodes;
 }
 
-export function getServiceNodes(allNodes: ConnectionNode[]) {
+export function getServiceNodes(
+  allNodes: ConnectionNode[],
+  discoveredServices: Array<{
+    from: ExternalConnectionNode;
+    to: ServiceConnectionNode;
+  }>
+) {
+  const connectionFromDiscoveredServices = discoveredServices
+    .filter(({ from, to }) => {
+      return (
+        allNodes.some((node) => node.id === getConnectionNodeId(from)) &&
+        !allNodes.some((node) => node.id === to[SERVICE_NAME])
+      );
+    })
+    .map(({ to }) => ({ ...to }));
   // List of nodes that are services
-  const serviceNodes = allNodes.filter((node) => SERVICE_NAME in node) as ServiceConnectionNode[];
+  const serviceNodes = [...allNodes, ...connectionFromDiscoveredServices].filter(
+    (node) => SERVICE_NAME in node
+  ) as ServiceConnectionNode[];
 
   return serviceNodes;
 }
@@ -108,12 +124,16 @@ export function transformServiceMapResponses({
   const { discoveredServices, services, connections, anomalies } = response;
   const allConnections = addMessagingConnections(connections, discoveredServices);
   const allNodes = getAllNodes(services, allConnections);
-  const serviceNodes = getServiceNodes(allNodes);
+  const serviceNodes = getServiceNodes(allNodes, discoveredServices);
 
   // List of nodes that are externals
-  const externalNodes = allNodes.filter(
-    (node) => SPAN_DESTINATION_SERVICE_RESOURCE in node
-  ) as ExternalConnectionNode[];
+  const externalNodes = [
+    ...new Set(
+      allNodes.filter(
+        (node) => SPAN_DESTINATION_SERVICE_RESOURCE in node
+      ) as ExternalConnectionNode[]
+    ),
+  ];
 
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource
@@ -202,9 +222,11 @@ export function transformServiceMapResponses({
     })
     .filter((connection) => connection.source !== connection.target);
 
-  const nodes = mappedConnections
-    .flatMap((connection) => [connection.sourceData, connection.targetData])
-    .concat(serviceNodes);
+  const nodes = mappedConnections.flatMap((connection) => [
+    connection.sourceData,
+    connection.targetData,
+  ]);
+  // .concat(serviceNodes);
 
   const dedupedNodes: typeof nodes = [];
 
