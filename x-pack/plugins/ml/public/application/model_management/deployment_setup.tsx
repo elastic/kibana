@@ -221,7 +221,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   const helperText = useMemo<string | undefined>(() => {
     const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
 
-    if (cloudInfo.isCloud && cloudInfo.isMlAutoscalingEnabled) {
+    if (cloudInfo.isCloud && cloudInfo.isMlAutoscalingEnabled && showNodeInfo) {
       // Running in cloud with ML autoscaling enabled
       if (config.adaptiveResources) {
         // With adaptive resources
@@ -286,7 +286,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         }
       }
     } else if (
-      (cloudInfo.isCloud && !cloudInfo.isMlAutoscalingEnabled) ||
+      (cloudInfo.isCloud && !cloudInfo.isMlAutoscalingEnabled && showNodeInfo) ||
       (!cloudInfo.isCloud && showNodeInfo)
     ) {
       // Running in cloud with autoscaling disabled or on-prem
@@ -384,6 +384,29 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 defaultMessage:
                   'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcuRange.max },
+              }
+            );
+        }
+      } else {
+        // Static allocations are allowed for Search projects
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuStaticHelp',
+              {
+                defaultMessage:
+                  'This level set resources to {staticVCUs, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { staticVCUs: vcuRange.static },
+              }
+            );
+          case 'medium':
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCUs, plural, one {VCU} other {# VCUs}}, even when not in use.',
+                values: { staticVCUs: vcuRange.static },
               }
             );
         }

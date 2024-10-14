@@ -565,6 +565,33 @@ export function TrainedModelsTableProvider(
       await this.assertAdvancedConfigurationOpen(open);
     }
 
+    public async assertAdaptiveResourcesSwitchExists(expectExist: boolean) {
+      if (expectExist) {
+        await testSubjects.existOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      } else {
+        await testSubjects.missingOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      }
+    }
+
+    public async toggleAdaptiveResourcesSwitch(enabled: boolean) {
+      await mlCommonUI.toggleSwitchIfNeeded(
+        'mlModelsStartDeploymentModalAdaptiveResources',
+        enabled
+      );
+
+      await this.assertAdaptiveResourcesSwitchChecked(enabled);
+    }
+
+    public async assertAdaptiveResourcesSwitchChecked(expectedValue: boolean) {
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlModelsStartDeploymentModalAdaptiveResources'
+      );
+      expect(isChecked).to.eql(
+        expectedValue,
+        `Expected adaptive resources switch to be ${expectedValue ? 'checked' : 'unchecked'}`
+      );
+    }
+
     public async startDeploymentWithParams(
       modelId: string,
       params: {
