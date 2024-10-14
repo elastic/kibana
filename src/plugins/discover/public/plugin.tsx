@@ -24,9 +24,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -63,12 +60,6 @@ import { DataSourceProfileService } from './context_awareness/profiles/data_sour
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
 import { ProfilesManager } from './context_awareness/profiles_manager';
 import { DiscoverEBTManager } from './services/discover_ebt_manager';
-import type { AllSummaryColumnProps } from './components/data_types/logs/summary_column/summary_column';
-import { getLogLevelBadgeCell } from './components/data_types/logs/log_level_badge_cell';
-
-const LazySummaryColumn = dynamic(
-  () => import('./components/data_types/logs/summary_column/summary_column')
-);
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -323,25 +314,6 @@ export class DiscoverPlugin
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
-      logColumns: {
-        SummaryColumn: (props: AllSummaryColumnProps) => {
-          return (
-            <KibanaContextProvider services={{ core, plugins }}>
-              <LazySummaryColumn {...props} />
-            </KibanaContextProvider>
-          );
-        },
-        getLogLevelCell: (
-          logLevelField: string
-        ): React.ComponentType<DataGridCellValueElementProps> => {
-          const LogLevelCell = getLogLevelBadgeCell(logLevelField);
-          return (props: DataGridCellValueElementProps) => (
-            <KibanaContextProvider services={{ core, plugins }}>
-              <LogLevelCell {...props} />
-            </KibanaContextProvider>
-          );
-        },
-      },
     };
   }
 

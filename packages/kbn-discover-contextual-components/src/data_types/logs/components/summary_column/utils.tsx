@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldValue, LogDocument, ResourceFields } from '@kbn/discover-utils/src';
-import { DataTableRecord } from '@kbn/discover-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { css } from '@emotion/react';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getAvailableResourceFields } from '../../../../utils/get_available_resource_fields';
-import * as constants from '../../../../../common/data_types/logs/constants';
-import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
+import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { LogDocument, ResourceFields } from '@kbn/discover-utils/src';
+import { getAvailableResourceFields } from '@kbn/discover-utils/src/data_types/logs/utils/get_available_resource_fields';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
-
+import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 /**
  * getUnformattedResourceFields definitions
  */
@@ -58,33 +59,43 @@ const resourceCustomComponentsMap: Partial<
 };
 
 export interface ResourceFieldDescriptor {
-  ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
+  ResourceBadge: React.ComponentType<Omit<FieldBadgeWithActionsProps, 'core' | 'share'>>;
   Icon?: () => JSX.Element;
   name: keyof ResourceFields;
   value: string;
 }
 
-export const createResourceFields = (row: DataTableRecord): ResourceFieldDescriptor[] => {
+export const createResourceFields = (
+  row: DataTableRecord,
+  core: CoreStart,
+  share?: SharePluginStart
+): ResourceFieldDescriptor[] => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);
 
   const availableResourceFields = getAvailableResourceFields(resourceDoc);
 
-  const resourceFields = availableResourceFields.map((name) => ({
-    name,
-    value: resourceDoc[name] as string,
-    ResourceBadge: resourceCustomComponentsMap[name] ?? FieldBadgeWithActions,
-    ...(name === constants.SERVICE_NAME_FIELD && {
-      Icon: () => (
-        <AgentIcon
-          agentName={resourceDoc[constants.AGENT_NAME_FIELD] as AgentName}
-          size="m"
-          css={css`
-            margin-right: ${euiThemeVars.euiSizeXS};
-          `}
-        />
-      ),
-    }),
-  }));
+  const resourceFields = availableResourceFields.map((name) => {
+    const ResourceBadgeComponent = resourceCustomComponentsMap[name] ?? FieldBadgeWithActions;
+    const resourceBadgeComponentWithDependencies = (props: FieldBadgeWithActionsProps) => (
+      <ResourceBadgeComponent {...props} share={share} core={core} />
+    );
+    return {
+      name,
+      value: resourceDoc[name] as string,
+      ResourceBadge: resourceBadgeComponentWithDependencies,
+      ...(name === constants.SERVICE_NAME_FIELD && {
+        Icon: () => (
+          <AgentIcon
+            agentName={resourceDoc[constants.AGENT_NAME_FIELD] as AgentName}
+            size="m"
+            css={css`
+              margin-right: ${euiThemeVars.euiSizeXS};
+            `}
+          />
+        ),
+      }),
+    };
+  });
 
   return resourceFields;
 };

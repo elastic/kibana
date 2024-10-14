@@ -42,11 +42,9 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { DiscoverAppLocator } from '../common';
 import { DiscoverCustomizationContext } from './customizations';
 import { type DiscoverContainerProps } from './components/discover_container';
-import type { AllSummaryColumnProps } from './components/data_types/logs/summary_column/summary_column';
 
 /**
  * @public
@@ -123,10 +121,6 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-  logColumns: {
-    SummaryColumn: (props: AllSummaryColumnProps) => React.JSX.Element;
-    getLogLevelCell: (logLevelField: string) => React.ComponentType<DataGridCellValueElementProps>;
-  };
 }
 
 /**

@@ -14,7 +14,7 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import * as constants from '../../../../../common/data_types/logs/constants';
+import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {

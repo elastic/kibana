@@ -20,10 +20,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { StateFrom } from 'xstate5';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { LogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
+import type { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
 import { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
 import { categoryDetailsService } from '../../services/category_details_service';
@@ -39,8 +40,8 @@ export interface LogCategoriesFlyoutDependencies {
   fieldFormats: FieldFormatsStart;
   share: SharePluginStart;
   columns: {
-    SummaryColumn: DiscoverStart['logColumns']['SummaryColumn'];
-    LogLevelCell: ReturnType<DiscoverStart['logColumns']['getLogLevelCell']>;
+    SummaryColumn: React.ComponentType<Omit<AllSummaryColumnProps, 'share' | 'core'>>;
+    LogLevelCell: LogLevelBadgeCell;
   };
 }
 

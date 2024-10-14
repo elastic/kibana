@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResourceFields } from '@kbn/discover-utils/src';
-import * as constants from '../../common/data_types/logs/constants';
+import { ResourceFields } from '../../..';
+import * as constants from '../constants';
 
 export const getAvailableResourceFields = (resourceDoc: ResourceFields) => {
   const resourceFields: Array<keyof ResourceFields> = [

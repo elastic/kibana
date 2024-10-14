@@ -23,7 +23,7 @@
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
     "extraPublicDirs": ["common"]
   }
 }

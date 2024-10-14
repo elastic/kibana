@@ -24,7 +24,9 @@ import {
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -158,6 +160,8 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
+  core?: CoreStart;
+  share?: SharePluginStart;
 }
 
 export function FieldBadgeWithActions({
