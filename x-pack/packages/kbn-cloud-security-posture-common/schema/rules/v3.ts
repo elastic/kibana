@@ -37,6 +37,7 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   profile_applicability: schema.string(),
   rationale: schema.string(),
   references: schema.maybe(schema.string()),
+  reference: schema.maybe(schema.string()),
   rego_rule_id: schema.string(),
   remediation: schema.string(),
   section: schema.string(),

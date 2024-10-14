@@ -51,10 +51,14 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('metrics in*ex', []);
             await expectErrors('metrics ind*ex', []);
             await expectErrors('metrics *,-.*', []);
-            await expectErrors('metrics remote-*:indexes*', []);
-            await expectErrors('metrics remote-*:indexes', []);
-            await expectErrors('metrics remote-ccs:indexes', []);
-            await expectErrors('metrics a_index, remote-ccs:indexes', []);
+            await expectErrors('metrics remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
+            await expectErrors('metrics remote-*:indexes', ['Unknown index [remote-*:indexes]']);
+            await expectErrors('metrics remote-ccs:indexes', [
+              'Unknown index [remote-ccs:indexes]',
+            ]);
+            await expectErrors('metrics a_index, remote-ccs:indexes', [
+              'Unknown index [remote-ccs:indexes]',
+            ]);
             await expectErrors('metrics .secret_index', []);
           });
 

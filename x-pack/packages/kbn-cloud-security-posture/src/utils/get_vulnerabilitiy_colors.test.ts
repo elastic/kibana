@@ -6,7 +6,7 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getSeverityStatusColor } from './get_vulnerability_colors';
+import { getCvsScoreColor, getSeverityStatusColor } from './get_vulnerability_colors';
 describe('getSeverityStatusColor', () => {
   it('should return the correct color for LOW severity', () => {
     expect(getSeverityStatusColor('LOW')).toBe(euiThemeVars.euiColorVis0);
@@ -26,5 +26,27 @@ describe('getSeverityStatusColor', () => {
 
   it('should return #aaa for an unknown severity', () => {
     expect(getSeverityStatusColor('UNKNOWN')).toBe('#aaa');
+  });
+});
+
+describe('getCvsScoreColor', () => {
+  it('returns correct color for low severity score', () => {
+    expect(getCvsScoreColor(1.5)).toBe(euiThemeVars.euiColorVis0);
+  });
+
+  it('returns correct color for medium severity score', () => {
+    expect(getCvsScoreColor(5.5)).toBe(euiThemeVars.euiColorVis7);
+  });
+
+  it('returns correct color for high severity score', () => {
+    expect(getCvsScoreColor(7.9)).toBe(euiThemeVars.euiColorVis9);
+  });
+
+  it('returns correct color for critical severity score', () => {
+    expect(getCvsScoreColor(10.0)).toBe(euiThemeVars.euiColorDanger);
+  });
+
+  it('returns correct color for low severity score for undefined value', () => {
+    expect(getCvsScoreColor(-0.2)).toBe(euiThemeVars.euiColorVis0);
   });
 });
