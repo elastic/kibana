@@ -14,6 +14,9 @@ import { generateEvent as generateHeartbeat } from '../fake_stack/heartbeat';
 import { Doc, GeneratorFunction } from '../../types';
 import { ADMIN_CONSOLE } from '../fake_stack/common/constants';
 
+export { ingestPipelines } from './ingest_pipelines';
+export { indexTemplates } from './index_templates';
+
 const convertToMongoDBRawLog = (event: any) => {
   return {
     '@timestamp': event['@timestamp'],
@@ -61,7 +64,7 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
       namespace: ADMIN_CONSOLE,
       '@timestamp': event['@timestamp'],
       message,
-      data_stream: { dataset: ADMIN_CONSOLE.replaceAll('-', '.'), namespace: 'default' },
+      data_stream: { dataset: 'general', namespace: 'default' },
     };
 
     return finalDoc;

@@ -12,7 +12,6 @@ import { ApiScraperSecurityException } from '../../lib/api/errors/api_scraper_se
 import { createApiScraperServerRoute } from '../create_api_scraper_server_route';
 import { findApiScraperDefinitionById } from '../../lib/api/find_api_scraper_definition_by_id';
 import { deleteApiScraperDefinition } from '../../lib/api/delete_api_scraper_definition';
-import { generateInstanceIndexName } from '../../lib/api/helpers/generate_component_id';
 
 export const deleteApiDefinitionRoute = createApiScraperServerRoute({
   endpoint: 'DELETE /internal/api-scraper/definition/{id}',
@@ -33,7 +32,7 @@ export const deleteApiDefinitionRoute = createApiScraperServerRoute({
 
       if (params.query.deleteData) {
         await scopedClusterClient.asCurrentUser.indices.delete({
-          index: generateInstanceIndexName(definition),
+          index: `.${definition.id}`,
         });
       }
 

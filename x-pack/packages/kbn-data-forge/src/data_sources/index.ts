@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { GeneratorFunction, Dataset, IndexTemplateDef } from '../types';
 import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, FAKE_STACK_DS, SERVICE_LOGS } from '../constants';
 
@@ -14,12 +15,20 @@ import * as fakeStack from './fake_stack';
 import * as serviceLogs from './service_logs';
 import * as fakeStackDs from './fake_stack_ds';
 
+export const ingestPipelines: Record<Dataset, IngestPutPipelineRequest[]> = {
+  [FAKE_HOSTS]: [],
+  [FAKE_LOGS]: [],
+  [FAKE_STACK]: [],
+  [SERVICE_LOGS]: [],
+  [FAKE_STACK_DS]: fakeStackDs.ingestPipelines,
+};
+
 export const indexTemplates: Record<Dataset, IndexTemplateDef[]> = {
   [FAKE_HOSTS]: [fakeHosts.indexTemplate],
   [FAKE_LOGS]: [fakeLogs.indexTemplate],
   [FAKE_STACK]: fakeStack.indexTemplate,
   [SERVICE_LOGS]: [], // uses logs-*-* index templates
-  [FAKE_STACK_DS]: [], // uses logs-*-* index templates
+  [FAKE_STACK_DS]: fakeStackDs.indexTemplates, // uses logs-*-* index templates
 };
 
 export const generateEvents: Record<Dataset, GeneratorFunction> = {

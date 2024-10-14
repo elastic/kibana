@@ -14,15 +14,20 @@ import { parseCliOptions } from './lib/parse_cli_options';
 import { run } from './run';
 
 export async function cli(cliOptions?: CliOptions) {
-  const options = cliOptions ?? parseCliOptions();
-  const partialConfig = options.config
-    ? await readConfig(options.config)
-    : cliOptionsToPartialConfig(options);
-  const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
-  const config = createConfig(partialConfig);
-  const client = getEsClient(config);
-  logger.info(
-    `Starting index to ${config.elasticsearch.host} with a payload size of ${config.indexing.payloadSize} using ${config.indexing.concurrency} workers to index ${config.indexing.eventsPerCycle} events per cycle`
-  );
-  return run(config, client, logger);
+  try {
+    const options = cliOptions ?? parseCliOptions();
+    const partialConfig = options.config
+      ? await readConfig(options.config)
+      : cliOptionsToPartialConfig(options);
+    const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
+    const config = createConfig(partialConfig);
+    const client = getEsClient(config);
+    logger.info(
+      `Starting index to ${config.elasticsearch.host} with a payload size of ${config.indexing.payloadSize} using ${config.indexing.concurrency} workers to index ${config.indexing.eventsPerCycle} events per cycle`
+    );
+    return run(config, client, logger);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.dir(e, { depth: 10 });
+  }
 }
