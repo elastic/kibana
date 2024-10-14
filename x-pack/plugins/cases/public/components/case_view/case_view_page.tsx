@@ -127,7 +127,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
             <CaseViewObservables isLoading={isLoading} caseData={caseData} />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR && (
+          {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseData} />
           )}
         </EuiFlexGroup>

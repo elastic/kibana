@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { SimilarCasesSearchRequest } from '../../../common/types/api';
 import {
   type CasesFindResponse,
@@ -35,20 +34,11 @@ export const similar = async (
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
 
-    const filterExpressions = Object.keys(paramArgs.observables).flatMap((typeKey) => {
-      return Object.values(paramArgs.observables[typeKey]).map((observableValue) => {
-        return fromKueryExpression(
-          `cases.attributes.observables:{value: "${observableValue}" AND typeKey: "${typeKey}"}`
-        );
-      });
-    });
-
     const cases = await caseService.findSimilarCases({
-      search: `-"cases:${params.case_id}"`,
-      rootSearchFields: ['_id'],
-      filter: nodeBuilder.or(filterExpressions),
-      page: params.pageIndex + 1,
-      perPage: params.pageSize,
+      caseId: paramArgs.case_id,
+      pageSize: paramArgs.pageSize,
+      pageIndex: paramArgs.pageIndex,
+      observables: paramArgs.observables,
     });
 
     const res = {

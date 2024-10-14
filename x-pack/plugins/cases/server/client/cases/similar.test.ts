@@ -24,17 +24,24 @@ describe('similar', () => {
       jest.clearAllMocks();
     });
 
-    it('search by uuid updates search term and adds rootSearchFields', async () => {
+    it('search by uuid calls case service correctly', async () => {
       await similar(
-        { case_id: mockCase.id, observables: {}, pageIndex: 1, pageSize: 10 },
+        {
+          case_id: mockCase.id,
+          observables: { '4e7142ad-2c54-4ac8-84fb-38c8842d7b3f': ['test@email.com'] },
+          pageIndex: 1,
+          pageSize: 10,
+        },
         clientArgs
       );
       expect(clientArgs.services.caseService.findSimilarCases).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findSimilarCases.mock.calls[0][0];
 
-      expect(call?.search).toBe(`-"cases:${mockCase.id}"`);
-      expect(call).toHaveProperty('rootSearchFields', ['_id']);
+      expect(call?.caseId).toBe(mockCase.id);
+      expect(call?.observables).toEqual({
+        '4e7142ad-2c54-4ac8-84fb-38c8842d7b3f': ['test@email.com'],
+      });
     });
   });
 });

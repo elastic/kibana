@@ -108,7 +108,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR} />
+        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
         <EuiFlexGroup>
           <EuiFlexItem>
             <CasesTable

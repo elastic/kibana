@@ -219,7 +219,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       },
       // FIXME: add feature flag
       {
-        id: CASE_VIEW_PAGE_TABS.SIMILAR,
+        id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
         name: SIMILAR_CASES_TAB,
         badge: <ExperimentalBadge euiTheme={euiTheme} />,
       },
