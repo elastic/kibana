@@ -13,7 +13,7 @@ export function filterFunctionDefinitions({
 }: {
   filter?: string;
   definitions: FunctionDefinition[];
-}) {
+}): FunctionDefinition[] {
   return filter
     ? definitions.filter((fn) => {
         const matchesFilter =
