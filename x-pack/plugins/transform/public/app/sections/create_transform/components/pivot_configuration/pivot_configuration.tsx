@@ -60,9 +60,9 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             />
           ),
         };
-        opts.push(aggOption);
 
         if (options.length) {
+          opts.push(aggOption);
           opts.push(
             ...options.map((o) => ({
               ...o,
