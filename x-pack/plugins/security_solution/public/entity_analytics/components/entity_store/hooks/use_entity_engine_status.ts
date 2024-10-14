@@ -9,7 +9,6 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ListEntityEnginesResponse } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
-import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 export const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
 
@@ -19,7 +18,6 @@ interface Options {
 }
 
 export const useEntityEngineStatus = (opts: Options = {}) => {
-  const riskEngineStatus = useRiskEngineStatus();
   // QUESTION: Maybe we should have an `EnablementStatus` API route for this?
   const { listEntityEngines } = useEntityStoreRoutes();
 
@@ -56,6 +54,5 @@ export const useEntityEngineStatus = (opts: Options = {}) => {
 
   return {
     status,
-    riskEngineStatus,
   };
 };

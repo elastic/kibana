@@ -14,15 +14,13 @@ import type {
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
+  Entity,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
-} from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-import type {
   EntityType,
   InspectQuery,
-} from '../../../../common/api/entity_analytics/entity_store/common.gen';
+} from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { buildEntityDefinitionId, getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -140,7 +138,9 @@ export class EntityStoreDataClient {
       indexPattern,
       filter,
       pipelineDebugMode
-    );
+    ).catch((error) => {
+      logger.error('There was an error during Async setup for Entity Store', error);
+    });
 
     return descriptor;
   }

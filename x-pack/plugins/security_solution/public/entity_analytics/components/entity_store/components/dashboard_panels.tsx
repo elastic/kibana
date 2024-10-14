@@ -38,12 +38,15 @@ import {
   ENABLE_ENTITY_STORE_TITLE,
   ENABLE_RISK_SCORE_TITLE,
 } from '../translations';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 const EntityStoreDashboardPanelsComponent = () => {
   const [modal, setModalState] = useState({ visible: false });
   const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
 
   const entityStore = useEntityEngineStatus();
+  const riskEngineStatus = useRiskEngineStatus();
+
   const { enable: enableStore } = useEntityStoreEnablement();
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
@@ -98,8 +101,8 @@ const EntityStoreDashboardPanelsComponent = () => {
   }
 
   const isRiskScoreAvailable =
-    entityStore.riskEngineStatus.data &&
-    entityStore.riskEngineStatus.data.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
+    riskEngineStatus.data &&
+    riskEngineStatus.data.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
