@@ -23,8 +23,8 @@ import type {
   UpgradeableThreatMatchFields,
   UpgradeableThresholdFields,
   UpgradeableNewTermsFields,
-} from '../../../../model/prebuilt_rule_upgrade/types';
-import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/constants';
+} from '../../../../model/prebuilt_rule_upgrade/fields';
+import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 interface FinalEditProps {
   fieldName: UpgradeableDiffableFields;

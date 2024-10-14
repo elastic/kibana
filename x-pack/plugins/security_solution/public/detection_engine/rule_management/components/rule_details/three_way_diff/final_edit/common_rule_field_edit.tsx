@@ -8,7 +8,7 @@
 import React from 'react';
 import { FieldFormWrapper } from './field_form_wrapper';
 import { NameEdit, nameSchema } from './fields/name';
-import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/types';
+import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
 }

@@ -13,7 +13,7 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
-import type { UpgradeableNewTermsFields } from '../../../../model/prebuilt_rule_upgrade/types';
+import type { UpgradeableNewTermsFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 interface NewTermsRuleFieldEditProps {
   fieldName: UpgradeableNewTermsFields;

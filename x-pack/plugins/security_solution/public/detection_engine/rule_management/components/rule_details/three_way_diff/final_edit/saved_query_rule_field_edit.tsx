@@ -13,7 +13,7 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
-import type { UpgradeableSavedQueryFields } from '../../../../model/prebuilt_rule_upgrade/types';
+import type { UpgradeableSavedQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 interface SavedQueryRuleFieldEditProps {
   fieldName: UpgradeableSavedQueryFields;

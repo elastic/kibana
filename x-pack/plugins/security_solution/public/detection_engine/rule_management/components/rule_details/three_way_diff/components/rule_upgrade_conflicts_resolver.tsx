@@ -8,8 +8,8 @@
 import React from 'react';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
-import type { NonUpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/types';
-import { isNonUpgradeableFieldName } from '../../../../model/prebuilt_rule_upgrade/constants';
+import type { NonUpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { isNonUpgradeableFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 type FieldDiffEntries<FieldsDiff, ExcludedFields extends keyof FieldsDiff = never> = Array<
   [

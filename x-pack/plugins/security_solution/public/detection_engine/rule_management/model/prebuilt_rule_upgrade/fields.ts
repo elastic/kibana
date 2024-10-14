@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { NON_UPGRADEABLE_DIFFABLE_FIELDS } from './constants';
+import { DiffableCommonFields } from '../../../../../common/api/detection_engine';
 import type {
-  DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
   DiffableEsqlFields,
@@ -61,3 +60,23 @@ export type UpgradeableNewTermsFields = Exclude<
   keyof DiffableNewTermsFields,
   NonUpgradeableDiffableFields
 >;
+
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = [
+  'author',
+  'license',
+  'rule_id',
+  'type',
+  'version',
+] as const;
+
+export const COMMON_FIELD_NAMES = DiffableCommonFields.keyof().options;
+
+export function isCommonFieldName(fieldName: string): fieldName is keyof DiffableCommonFields {
+  return (COMMON_FIELD_NAMES as string[]).includes(fieldName);
+}
+
+export function isNonUpgradeableFieldName(
+  fieldName: string
+): fieldName is NonUpgradeableDiffableFields {
+  return (NON_UPGRADEABLE_DIFFABLE_FIELDS as Readonly<string[]>).includes(fieldName);
+}

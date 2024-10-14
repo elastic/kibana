@@ -13,7 +13,7 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
-import type { UpgradeableThresholdFields } from '../../../../model/prebuilt_rule_upgrade/types';
+import type { UpgradeableThresholdFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 interface ThresholdRuleFieldEditProps {
   fieldName: UpgradeableThresholdFields;
