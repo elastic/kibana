@@ -840,7 +840,6 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
-      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]

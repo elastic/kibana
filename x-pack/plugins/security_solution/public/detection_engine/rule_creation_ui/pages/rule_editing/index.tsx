@@ -361,7 +361,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [
       rule?.immutable,
       rule?.id,
-      rule?.type,
       activeStep,
       loading,
       isSavedQueryLoading,
