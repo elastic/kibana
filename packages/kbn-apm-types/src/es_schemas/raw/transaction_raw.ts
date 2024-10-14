@@ -35,7 +35,7 @@ export interface TransactionRaw extends APMBaseDoc {
   trace: { id: string }; // trace is required
   event?: { outcome?: EventOutcome };
   transaction: {
-    duration: { us: number };
+    duration?: { us?: number };
     id: string;
     marks?: {
       // "agent": not defined by APM Server - only sent by RUM agent
@@ -46,12 +46,12 @@ export interface TransactionRaw extends APMBaseDoc {
     name?: string;
     page?: Page; // special property for RUM: shared by error and transaction
     result?: string;
-    sampled: boolean;
+    sampled?: boolean;
     span_count?: {
       started?: number;
       dropped?: number;
     };
-    type: string;
+    type?: string;
     custom?: Record<string, unknown>;
     message?: {
       queue?: { name: string };

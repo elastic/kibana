@@ -15,7 +15,7 @@ import { Agent } from './fields/agent';
 // and thus it doesn't make sense to treat it as optional
 type InnerTransaction = TransactionRaw['transaction'];
 interface InnerTransactionWithName extends InnerTransaction {
-  name: string;
+  name?: string;
 }
 
 export interface Transaction extends TransactionRaw {
