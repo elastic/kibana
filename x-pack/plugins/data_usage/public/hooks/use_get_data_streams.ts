@@ -13,6 +13,7 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type GetDataUsageDataStreamsResponse = Array<{
   name: string;
+  storageSizeBytes: number;
   selected: boolean;
 }>;
 
@@ -49,12 +50,13 @@ export const useGetDataUsageDataStreams = ({
         selected: GetDataUsageDataStreamsResponse;
         rest: GetDataUsageDataStreamsResponse;
       }>(
-        (acc, list) => {
+        (acc, ds) => {
           const item = {
-            name: list.name,
+            name: ds.name,
+            storageSizeBytes: ds.storageSizeBytes ?? 0,
           };
 
-          if (selectedDataStreams?.includes(list.name)) {
+          if (selectedDataStreams?.includes(ds.name)) {
             acc.selected.push({ ...item, selected: true });
           } else {
             acc.rest.push({ ...item, selected: false });

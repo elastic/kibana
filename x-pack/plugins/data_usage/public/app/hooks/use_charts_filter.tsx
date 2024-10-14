@@ -14,6 +14,7 @@ import {
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { FILTER_NAMES } from '../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
+import { formatBytes } from '../../utils/format_bytes';
 
 export type FilterName = keyof typeof FILTER_NAMES;
 
@@ -91,6 +92,7 @@ export const useChartsFilter = ({
         dataStreams?.map((dataStream) => ({
           key: dataStream.name,
           label: dataStream.name,
+          append: formatBytes(dataStream.storageSizeBytes),
           checked: dataStream.selected ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
