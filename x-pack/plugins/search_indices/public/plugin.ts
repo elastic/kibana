@@ -87,11 +87,13 @@ export class SearchIndicesPlugin
   ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
-    indexManagement?.extensionsService.setIndexDetailsPageRoute({
-      renderRoute: (indexName) => {
-        return `/app/elasticsearch/indices/index_details/${indexName}`;
-      },
-    });
+    if (this.pluginEnabled) {
+      indexManagement?.extensionsService.setIndexDetailsPageRoute({
+        renderRoute: (indexName) => {
+          return `/app/elasticsearch/indices/index_details/${indexName}`;
+        },
+      });
+    }
     return {
       enabled: this.pluginEnabled,
       startAppId: START_APP_ID,
