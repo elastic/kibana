@@ -134,11 +134,14 @@ export const functionRt = t.intersection([
   }),
 ]);
 
-export const starterPromptRt: t.Type<StarterPrompt> = t.type({
-  title: t.string,
-  prompt: t.string,
-  icon: t.any,
-});
+export const starterPromptRt: t.Type<StarterPrompt> = t.intersection([
+  t.type({
+    title: t.string,
+    prompt: t.string,
+    icon: t.any,
+  }),
+  t.partial({ scopes: t.array(assistantScopeType) }),
+]);
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
   description: t.string,
