@@ -18,8 +18,6 @@ import {
 } from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
-import { useQuery } from '@tanstack/react-query';
-import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONNECTORS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
@@ -32,7 +30,6 @@ export const ManagementSettings = React.memo(() => {
     baseConversations,
     http,
     assistantAvailability: { isAssistantEnabled },
-    setCurrentUserAvatar,
   } = useAssistantContext();
 
   const {
@@ -43,24 +40,9 @@ export const ManagementSettings = React.memo(() => {
       },
     },
     data: { dataViews },
-    security,
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
-
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: () =>
-      security?.userProfiles.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
-    select: (d) => {
-      return d.data.avatar;
-    },
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
-  setCurrentUserAvatar(currentUserAvatar);
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>

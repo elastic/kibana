@@ -14,6 +14,7 @@ import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -108,7 +109,6 @@ export interface UseAssistantContext {
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
-  setCurrentUserAvatar: React.Dispatch<React.SetStateAction<UserAvatar | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
@@ -226,7 +226,18 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Current User Avatar
    */
-  const [currentUserAvatar, setCurrentUserAvatar] = useState<UserAvatar>();
+  const { data: currentUserAvatar } = useQuery({
+    queryKey: ['currentUserAvatar'],
+    queryFn: async () =>
+      userProfileService.getCurrent<{ avatar: UserAvatar }>({
+        dataPath: 'avatar',
+      }),
+    select: (data) => {
+      return data.data.avatar;
+    },
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
 
   /**
    * Settings State
@@ -274,7 +285,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
-      setCurrentUserAvatar,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
