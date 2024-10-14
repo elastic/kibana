@@ -183,12 +183,9 @@ export const useDiscoverHistogram = ({
         }
 
         const fetchStatus = status.toString() as FetchStatus;
-        const isSavedSearchLoading =
-          savedSearchHits$.getValue().fetchStatus === FetchStatus.LOADING;
-        const isUnifiedHistogramLoading = status === UnifiedHistogramFetchStatus.loading;
 
-        // Sync the totalHits$ observable with the unified histogram state unless both are set to loading
-        if (isSavedSearchLoading !== isUnifiedHistogramLoading) {
+        // Do not sync the loading state since it's already handled by the saved search
+        if (fetchStatus !== FetchStatus.LOADING) {
           savedSearchHits$.next({
             fetchStatus,
             result,
