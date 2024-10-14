@@ -56,7 +56,7 @@ export function GroupSelector({ groupSelected = 'none', onGroupChange }: Grouped
       title={i18n.translate('xpack.inventory.groupedInventoryPage.styledEuiButtonEmpty.noneLabel', {
         defaultMessage: 'none',
       })}
-      size="xs"
+      size="s"
     >
       {'Group entities by: none'}
     </StyledEuiButtonEmpty>
