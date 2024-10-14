@@ -366,6 +366,13 @@ describe('install', () => {
     });
 
     describe('agentless', () => {
+      beforeEach(() => {
+        jest.mocked(appContextService.getConfig).mockClear();
+        jest.spyOn(licenseService, 'hasAtLeast').mockClear();
+        jest.mocked(isAgentlessEnabled).mockClear();
+        jest.mocked(isOnlyAgentlessIntegration).mockClear();
+      });
+
       it('should not allow to install agentless only integration if agentless is not enabled', async () => {
         jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
         jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
@@ -417,13 +424,13 @@ describe('install', () => {
     });
 
     it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
         },
       } as any);
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValueOnce(true);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,

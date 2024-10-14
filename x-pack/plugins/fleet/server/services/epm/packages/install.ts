@@ -512,7 +512,9 @@ async function installPackageFromRegistry({
     }
 
     // only allow install of agentless packages if agentless is enabled, or if using force flag
-    if (!isAgentlessEnabled() && isOnlyAgentlessIntegration(packageInfo)) {
+    const agentlessEnabled = isAgentlessEnabled();
+    const agentlessOnlyIntegration = isOnlyAgentlessIntegration(packageInfo);
+    if (!agentlessEnabled && agentlessOnlyIntegration) {
       if (!force) {
         throw new PackageInvalidDeploymentMode(
           `${pkgkey} contains agentless policy templates, agentless is not available on this deployment`
