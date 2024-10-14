@@ -132,7 +132,7 @@ const CloudPostureThirdPartySupportCallout = () => {
         iconType="cheer"
         title={i18n.translate('xpack.fleet.epm.wizIntegration.newFeaturesCallout', {
           defaultMessage:
-            'New! You can now ingest vulnerability and misconfiguration findings from Wiz into Elastic! Leverage out of the box contextual investigation and threat-hunting workflows.',
+            'New! Starting from version 1.9, ingest vulnerability and misconfiguration findings from Wiz into Elastic. Leverage out-of-the-box contextual investigation and threat-hunting workflows.',
         })}
       />
       <EuiSpacer size="s" />
