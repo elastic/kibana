@@ -9,7 +9,7 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { EventTracker } from '../src/analytics';
 import { NavigationServices } from '../src/types';
 
@@ -43,6 +43,7 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
       activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),
       isSideNavCollapsed: true,
       eventTracker: new EventTracker({ reportEvent: action('Report event') }),
+      isFeedbackBtnVisible$: of(false),
     };
   }
 
