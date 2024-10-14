@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
@@ -211,53 +213,53 @@ export const SEARCH_RELEVANCE_PLUGIN = {
 };
 
 export const CREATE_CONNECTOR_PLUGIN = {
-  CLI_SNIPPET: `./bin/connectors connector create \  
-  --index-name my-index \    
-  --index-language en \  
+  CLI_SNIPPET: dedent`./bin/connectors connector create
+  --index-name my-index
+  --index-language en
   --from-file config.yml
   `,
-  CONSOLE_SNIPPET: `#Create an index
+  CONSOLE_SNIPPET: dedent`# Create an index
 PUT /my-index-000001
 {
   "settings": {
     "index": {
-      "number_of_shards": 3,  
-      "number_of_replicas": 2 
+      "number_of_shards": 3,
+      "number_of_replicas": 2
     }
   }
 }
 
 # Create an API key
 POST /_security/api_key
-{   
-  "name": "my-api-key",   
-  "expiration": "1d",      
-  "role_descriptors": 
+{
+  "name": "my-api-key",
+  "expiration": "1d",
+  "role_descriptors":
     {
-       "role-a": {       
+       "role-a": {
           "cluster": ["all"],
             "indices": [
-                          {           
+                          {
                             "names": ["index-a*"],
                              "privileges": ["read"]
-                          }       
-                        ]     
-                          }, 
-                            "role-b": {  
-                            "cluster": ["all"],       
-                            "indices": [ 
-                              { 
+                          }
+                        ]
+                          },
+                            "role-b": {
+                            "cluster": ["all"],
+                            "indices": [
+                              {
                                 "names": ["index-b*"],
                                   "privileges": ["all"]
-                              }]     
-                            }   
-                          }, "metadata": 
-                          {  "application": "my-application",     
-                             "environment": { 
-                              "level": 1,        
-                              "trusted": true,        
-                              "tags": ["dev", "staging"]     
-                          }  
+                              }]
+                            }
+                          }, "metadata":
+                          {  "application": "my-application",
+                             "environment": {
+                              "level": 1,
+                              "trusted": true,
+                              "tags": ["dev", "staging"]
+                          }
       }
   }`,
 };

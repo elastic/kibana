@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-
-import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -104,44 +102,24 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   }, [selfManaged]);
   const [searchValue, setSearchValue] = useState('');
 
-  return (
-    <EuiFlexItem
-      css={css`
-        position: relative;
-      `}
-    >
-      {selectedConnector?.iconPath && ( // TODO: this is a hack, that shouldn't be merged like this.
-        <EuiIcon
-          type={selectedConnector.iconPath}
-          size="l"
-          css={css`
-            position: absolute;
-            top: 8px;
-            left: 10px;
-            z-index: 2;
-          `}
-        />
-      )}
+  const openPopover = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
+  return (
+    <EuiFlexItem>
       <EuiSelectable
         aria-label={i18n.translate(
           'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
           { defaultMessage: 'Selectable + input popover example' }
         )}
-        css={css`
-          .euiFormControlLayoutIcons--left {
-            display: ${selectedConnector?.iconPath
-              ? 'none'
-              : ''}; // TODO this is a hack, that shouldn't be merged like this.
-          }
-          .euiFieldSearch {
-            padding-left: 45px;
-          }
-        `}
         options={selectableOptions}
         onChange={(newOptions, _, changedOption) => {
           selectableSetOptions(newOptions);
-          setIsOpen(false);
+          closePopover();
           if (changedOption.checked === 'on') {
             const keySelected = Number(changedOption.key);
             setSelectedConnector(allConnectors[keySelected]);
@@ -166,8 +144,8 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
               setSearchValue(value);
             }
           },
-          onClick: () => setIsOpen(true), // TODO useCallback
-          onFocus: () => setIsOpen(true), // TODO useCallback
+          onClick: openPopover,
+          onFocus: openPopover,
           placeholder: i18n.translate(
             'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
             { defaultMessage: 'Choose a data source' }
@@ -178,7 +156,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         {(list, search) => (
           <EuiInputPopover
             fullWidth
-            closePopover={() => setIsOpen(false)}
+            closePopover={closePopover}
             disableFocusTrap
             closeOnScroll
             isOpen={isOpen}
