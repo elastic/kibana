@@ -20,16 +20,16 @@ export const EntityAnalyticsManagementPage = () => {
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
-      <EuiFlexGroup gutterSize="s" alignItems="baseline">
-        <EuiFlexItem grow={false}>
-          <EuiPageHeader
-            data-test-subj="entityAnalyticsManagementPageTitle"
-            pageTitle={ENTITY_ANALYTICS_RISK_SCORE}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} />
-        <EuiBetaBadge label={BETA} size="s" />
-      </EuiFlexGroup>
+      <EuiPageHeader
+        pageTitle={
+          <EuiFlexGroup>
+            <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
+              {ENTITY_ANALYTICS_RISK_SCORE}
+            </EuiFlexItem>
+            <EuiBetaBadge label={BETA} size="s" />
+          </EuiFlexGroup>
+        }
+      />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={2}>

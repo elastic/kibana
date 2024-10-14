@@ -1854,7 +1854,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"aggregate\" | \"disabled\" | \"custom\" | \"color\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"color\" | \"aggregate\" | \"disabled\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,

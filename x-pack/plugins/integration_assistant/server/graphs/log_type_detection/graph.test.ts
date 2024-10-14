@@ -29,11 +29,7 @@ describe('LogFormatDetectionGraph', () => {
     it('Ensures that the graph compiles', async () => {
       // When getLogFormatDetectionGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
-      try {
-        await getLogFormatDetectionGraph({ model, client });
-      } catch (error) {
-        fail(`getLogFormatDetectionGraph threw an error: ${error}`);
-      }
+      await getLogFormatDetectionGraph({ model, client });
     });
   });
 });

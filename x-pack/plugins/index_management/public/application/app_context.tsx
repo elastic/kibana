@@ -68,6 +68,7 @@ export interface AppDependencies {
     editableIndexSettings: 'all' | 'limited';
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
+    enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
   history: ScopedHistory;

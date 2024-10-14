@@ -76,7 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
-import { isStringType } from '../shared/esql_types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -870,10 +870,12 @@ function validateColumnForCommand(
       const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
-          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
-          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
-        });
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
+          ({ innerTypes }) =>
+            innerTypes &&
+            !innerTypes.includes('any') &&
+            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
+        );
         if (hasSomeWrongInnerTypes) {
           const supportedTypes: string[] = columnParamsWithInnerTypes
             .map(({ innerTypes }) => innerTypes)

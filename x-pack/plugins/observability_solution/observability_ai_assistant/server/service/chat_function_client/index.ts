@@ -9,12 +9,9 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
+import { type AssistantScope, filterScopes } from '@kbn/ai-assistant-common';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
-import type {
-  AssistantScope,
-  Message,
-  ObservabilityAIAssistantScreenContextRequest,
-} from '../../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
@@ -114,11 +111,7 @@ export class ChatFunctionClient {
   }
 
   getInstructions(scope: AssistantScope): InstructionOrCallback[] {
-    return this.instructions
-      .filter(
-        (instruction) => instruction.scopes.includes(scope) || instruction.scopes.includes('all')
-      )
-      .map((i) => i.instruction);
+    return this.instructions.filter(filterScopes(scope)).map((i) => i.instruction);
   }
 
   hasAction(name: string) {
@@ -133,9 +126,7 @@ export class ChatFunctionClient {
     scope?: AssistantScope;
   } = {}): FunctionHandler[] {
     const allFunctions = Array.from(this.functionRegistry.values())
-      .filter(({ handler, scopes }) =>
-        scope ? scopes.includes(scope) || scopes.includes('all') : true
-      )
+      .filter(filterScopes(scope))
       .map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);

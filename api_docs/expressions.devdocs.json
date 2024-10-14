@@ -12672,7 +12672,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -22577,7 +22577,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -38082,7 +38082,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,

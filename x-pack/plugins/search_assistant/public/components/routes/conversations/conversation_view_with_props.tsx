@@ -30,6 +30,7 @@ export function ConversationViewWithProps() {
       getConversationHref={(id: string) =>
         http?.basePath.prepend(`/app/searchAssistant/conversations/${id || ''}`) || ''
       }
+      scope="search"
     />
   );
 }

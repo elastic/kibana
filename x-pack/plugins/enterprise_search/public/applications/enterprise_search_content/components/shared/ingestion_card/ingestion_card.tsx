@@ -18,6 +18,8 @@ import {
   IconType,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 interface IngestionCardProps {
@@ -25,6 +27,7 @@ interface IngestionCardProps {
   buttonLabel: string;
   description: string;
   href?: string;
+  isBeta?: boolean;
   isDisabled?: boolean;
   logo: IconType;
   onClick?: () => void;
@@ -37,6 +40,7 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
   description,
   href,
   isDisabled,
+  isBeta,
   logo,
   onClick,
   title,
@@ -44,6 +48,15 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
   return (
     <EuiCard
       hasBorder
+      betaBadgeProps={
+        isBeta
+          ? {
+              label: i18n.translate('xpack.enterpriseSearch.ingestionCard.betaBadgeLabel', {
+                defaultMessage: 'Beta',
+              }),
+            }
+          : undefined
+      }
       isDisabled={isDisabled}
       textAlign="left"
       titleElement="h3"

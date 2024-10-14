@@ -6279,7 +6279,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "; }) => JSX.Element | React.ReactNode) | undefined; fieldFormats: ",
+          "; }) => React.ReactNode | JSX.Element) | undefined; fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "public",
@@ -6289,7 +6289,7 @@
           },
           "; } & Partial<Pick<",
           "EuiDataGridProps",
-          ", \"gridStyle\" | \"rowHeightsOptions\">>"
+          ", \"height\" | \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -8119,7 +8119,7 @@
               "section": "def-common.Alert",
               "text": "Alert"
             },
-            "; }) => JSX.Element | React.ReactNode) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
+            "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
             "EuiDataGridProps",
             ">, \"renderCellPopover\"> & ",
             "LazyLoadProps",
@@ -8191,7 +8191,7 @@
                   "section": "def-common.Alert",
                   "text": "Alert"
                 },
-                "; }) => JSX.Element | React.ReactNode) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
+                "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
                 "EuiDataGridProps",
                 ">, \"renderCellPopover\"> & ",
                 "LazyLoadProps"

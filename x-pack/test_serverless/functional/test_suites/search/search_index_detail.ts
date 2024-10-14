@@ -13,9 +13,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
     'svlSearchIndexDetailPage',
     'svlApiKeys',
+    'header',
+    'common',
+    'indexManagement',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
+  const security = getService('security');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
@@ -39,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('can load index detail page', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+        await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
       });
       it('should have embedded dev console', async () => {
@@ -167,6 +172,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
           await pageObjects.svlSearchIndexDetailPage.clickConfirmingDeleteIndex();
+        });
+      });
+    });
+    describe('index management index details', () => {
+      before(async () => {
+        await es.indices.create({ index: indexName });
+        await security.testUser.setRoles(['index_management_user']);
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the indices tab
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      describe('can view search index details', function () {
+        it('renders search index details with no documents', async () => {
+          await pageObjects.svlSearchIndexDetailPage.openIndicesDetailFromIndexManagementIndicesListTable(
+            0
+          );
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
         });
       });
     });

@@ -202,6 +202,59 @@ describe("my internal APIs test suite", async function() {
 });
 ```
 
+#### Testing with custom roles
+
+With custom native roles now enabled for the Security and Search projects on MKI, the FTR supports
+defining and authenticating with custom roles in both UI functional tests and API integration tests.
+
+For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
+
+Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
+
+FTR UI test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+// Then, log in via the browser as a user with the newly defined privileges
+await pageObjects.svlCommonPage.loginWithCustomRole();
+```
+
+FTR api_integration test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+
+// Then, generate an API key with the newly defined privileges
+const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+
+// Remember to invalidate the API key after use
+await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+```
+
 ### Testing with feature flags
 
 **tl;dr:** Tests specific to functionality behind a feature flag need special

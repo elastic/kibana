@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { timelineSelectors } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types';
@@ -37,9 +38,11 @@ export const FETCH_NOTES_ERROR = i18n.translate(
     defaultMessage: 'Error fetching notes',
   }
 );
-export const NO_NOTES = i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
-  defaultMessage: 'No notes have been created for this document',
-});
+export const NO_NOTES = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
+    defaultMessage: 'No notes have been created for this {value}',
+    values: { value: isAlert ? 'alert' : 'event' },
+  });
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
@@ -48,7 +51,7 @@ export const NO_NOTES = i18n.translate('xpack.securitySolution.flyout.left.notes
 export const NotesDetails = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
-  const { eventId } = useDocumentDetailsContext();
+  const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
@@ -105,17 +108,25 @@ export const NotesDetails = memo(() => {
     }
   }, [addErrorToast, fetchError, fetchStatus]);
 
+  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const noNotesMessage = useMemo(
+    () => (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <p>{NO_NOTES(isAlert)}</p>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [isAlert]
+  );
+
   return (
     <>
       {fetchStatus === ReqStatus.Loading && (
         <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
       )}
       {fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <p>{NO_NOTES}</p>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>{noNotesMessage}</>
       ) : (
         <NotesList notes={notes} options={{ hideFlyoutIcon: true }} />
       )}

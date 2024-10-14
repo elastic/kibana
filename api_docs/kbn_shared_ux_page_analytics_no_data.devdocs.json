@@ -13,7 +13,7 @@
           "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
         ],
         "signature": [
-          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
+          "({ onDataViewCreated, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, }: ",
           "AnalyticsNoDataPageProps",
           ") => React.JSX.Element"
         ],
@@ -26,7 +26,7 @@
             "id": "def-public.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n}",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
@@ -50,7 +50,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, showPlainSpinner, ...services }: AnalyticsNoDataPageProps) => React.JSX.Element"
+          "({ onDataViewCreated, allowAdHocDataView, showPlainSpinner, onTryESQL, onESQLNavigationComplete, ...services }: AnalyticsNoDataPageProps) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
@@ -61,7 +61,7 @@
             "id": "def-public.AnalyticsNoDataPage.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n  showPlainSpinner,\n  ...services\n}",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n  onTryESQL,\n  onESQLNavigationComplete,\n  ...services\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
@@ -280,6 +280,24 @@
             "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-public.AnalyticsNoDataPageProps.onTryESQL",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryESQL",
+            "description": [
+              "If the cluster has data, this handler allows the user to try ES|QL"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",

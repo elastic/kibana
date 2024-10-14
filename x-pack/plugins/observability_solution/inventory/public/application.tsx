@@ -11,27 +11,21 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { InventoryStartDependencies } from './types';
 import { InventoryServices } from './services/types';
 import { AppRoot } from './components/app_root';
+import { KibanaEnvironment } from './hooks/use_kibana';
 
-export const renderApp = ({
-  coreStart,
-  pluginsStart,
-  services,
-  appMountParameters,
-}: {
+export const renderApp = (props: {
   coreStart: CoreStart;
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
-} & { appMountParameters: AppMountParameters }) => {
+  appMountParameters: AppMountParameters;
+  kibanaEnvironment: KibanaEnvironment;
+}) => {
+  const { appMountParameters, coreStart } = props;
   const { element } = appMountParameters;
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
-      <AppRoot
-        appMountParameters={appMountParameters}
-        coreStart={coreStart}
-        pluginsStart={pluginsStart}
-        services={services}
-      />
+      <AppRoot {...props} />
     </KibanaRenderContextProvider>,
     element
   );

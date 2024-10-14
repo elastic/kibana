@@ -16,6 +16,7 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { OnboardingCardId } from '../../../onboarding/constants';
 import { SecurityPageName } from '../../../../common';
 
 import * as i18n from './translations';
@@ -23,8 +24,7 @@ import endpointSvg from './images/endpoint1.svg';
 import cloudSvg from './images/cloud1.svg';
 import siemSvg from './images/siem1.svg';
 import { useNavigateTo } from '../../lib/kibana';
-import { VIDEO_SOURCE } from './constants';
-import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
+import { ONBOARDING_VIDEO_SOURCE } from '../../constants';
 
 const imgUrls = {
   cloud: cloudSvg,
@@ -75,7 +75,7 @@ export const EmptyPromptComponent = memo(() => {
   const navigateToAddIntegrations = useCallback(() => {
     navigateTo({
       deepLinkId: SecurityPageName.landing,
-      path: `#${AddIntegrationsSteps.connectToDataSources}`,
+      path: `#${OnboardingCardId.integrations}`,
     });
   }, [navigateTo]);
 
@@ -115,7 +115,7 @@ export const EmptyPromptComponent = memo(() => {
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               scrolling="no"
-              src={VIDEO_SOURCE}
+              src={ONBOARDING_VIDEO_SOURCE}
               title={i18n.SIEM_HEADER}
               width="100%"
             />

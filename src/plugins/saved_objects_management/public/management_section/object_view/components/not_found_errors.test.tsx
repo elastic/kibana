@@ -26,7 +26,7 @@ describe('NotFoundErrors component', () => {
     const callOut = mounted.find('EuiCallOut');
     expect(callOut.render()).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectThe saved search associated with this object no longer exists.If you know what this error means, you can use the Saved objects APIsExternal link(opens in a new tab or window) to fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectThe saved search associated with this object no longer exists.If you know what this error means, you can use the Saved objects APIs(external, opens in a new tab or window) to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -35,7 +35,7 @@ describe('NotFoundErrors component', () => {
     const callOut = mounted.find('EuiCallOut');
     expect(callOut.render()).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectThe data view associated with this object no longer exists.If you know what this error means, you can use the Saved objects APIsExternal link(opens in a new tab or window) to fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectThe data view associated with this object no longer exists.If you know what this error means, you can use the Saved objects APIs(external, opens in a new tab or window) to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -44,7 +44,7 @@ describe('NotFoundErrors component', () => {
     const callOut = mounted.find('EuiCallOut');
     expect(callOut.render()).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectA field associated with this object no longer exists in the data view.If you know what this error means, you can use the Saved objects APIsExternal link(opens in a new tab or window) to fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectA field associated with this object no longer exists in the data view.If you know what this error means, you can use the Saved objects APIs(external, opens in a new tab or window) to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -53,7 +53,7 @@ describe('NotFoundErrors component', () => {
     const callOut = mounted.find('EuiCallOut');
     expect(callOut.render()).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectIf you know what this error means, you can use the Saved objects APIsExternal link(opens in a new tab or window) to fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectIf you know what this error means, you can use the Saved objects APIs(external, opens in a new tab or window) to fix it — otherwise click the delete button above."`
     );
   });
 });

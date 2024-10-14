@@ -45,8 +45,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
 
       render: (record: Entity) => {
-        const field = record.entity?.identityFields[0];
-        const value = record.entity?.displayName;
+        const value = record.entity.name;
         const onClick = () => {
           const id = isUserEntity(record) ? UserPanelKey : HostPanelKey;
           const params = {
@@ -58,7 +57,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           openRightPanel({ id, params });
         };
 
-        if (!field || !value) {
+        if (!value) {
           return null;
         }
 
@@ -91,7 +90,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         return (
           <span>
             {isUserEntity(record) ? <EuiIcon type="user" /> : <EuiIcon type="storage" />}
-            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity?.displayName}</span>
+            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
           </span>
         );
       },

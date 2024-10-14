@@ -268,6 +268,50 @@
       },
       {
         "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.reorderFieldsInImportance",
+        "type": "Function",
+        "tags": [],
+        "label": "reorderFieldsInImportance",
+        "description": [
+          "\nReorders an array of fields based on their importance.\n\nThe function sorts the fields by checking if their names are in the `SPECIAL_NAME_FIELDS` array first and then by\ntheir mapping type (semantic_text, dense_vector, sparse_vector) if they are not in the `SPECIAL_NAME_FIELDS` array.\n"
+        ],
+        "signature": [
+          "(fields: ",
+          "FieldProps",
+          "[]) => ",
+          "FieldProps",
+          "[]"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.reorderFieldsInImportance.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "- An array of field properties to be reordered."
+            ],
+            "signature": [
+              "FieldProps",
+              "[]"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The reordered array of field properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
         "id": "def-common.Result",
         "type": "Function",
         "tags": [],
@@ -350,7 +394,9 @@
           "SearchHit",
           "<unknown>, mappings?: ",
           "IndicesGetMappingResponse",
-          " | undefined) => { fieldName: string; fieldType: \"boolean\" | \"object\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"date_nanos\" | \"completion\" | \"version\" | \"murmur3\" | \"token_count\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"alias\" | \"join\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"aggregate_metric_double\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"icu_collation_keyword\" | \"{dynamic_type}\" | \"point\" | \"unsigned_long\"; fieldValue: string; }[]"
+          " | undefined) => ",
+          "FieldProps",
+          "[]"
         ],
         "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
@@ -404,7 +450,9 @@
           "SearchHit",
           "<unknown>, mappings?: Record<string, ",
           "MappingProperty",
-          "> | undefined) => { fieldName: string; fieldType: \"boolean\" | \"object\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"date_nanos\" | \"completion\" | \"version\" | \"murmur3\" | \"token_count\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"alias\" | \"join\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"aggregate_metric_double\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"icu_collation_keyword\" | \"{dynamic_type}\" | \"point\" | \"unsigned_long\"; fieldValue: string; }[]"
+          "> | undefined) => ",
+          "FieldProps",
+          "[]"
         ],
         "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
