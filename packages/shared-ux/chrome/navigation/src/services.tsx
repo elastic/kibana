@@ -44,7 +44,6 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       basePath,
       recentlyAccessed$: chrome.recentlyAccessed.get$(),
       navigateToUrl,
-      navIsOpen: true,
       activeNodes$,
       isSideNavCollapsed,
       eventTracker: new EventTracker({ reportEvent: analytics.reportEvent }),

@@ -346,7 +346,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               defaultMessage: 'Other tools',
             }),
             renderAs: 'panelOpener',
-            icon: 'editorCodeBlock',
             children: [
               {
                 link: 'logs:stream',
