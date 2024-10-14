@@ -1147,7 +1147,6 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": true,
-            "removeBy": "8.8.0",
             "trackAdoption": false,
             "references": [
               {
