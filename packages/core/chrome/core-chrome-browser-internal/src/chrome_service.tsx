@@ -357,16 +357,13 @@ export class ChromeService {
 
     const setClassicBreadcrumbs = (
       newBreadcrumbs: ChromeBreadcrumb[],
-      {
-        project: { isSameAsClassic = false, value: _projectValue, absolute = false } = {},
-      }: ChromeSetBreadcrumbsParams = {}
+      { project }: ChromeSetBreadcrumbsParams = {}
     ) => {
-      if (isSameAsClassic && _projectValue !== undefined) {
-        throw new Error('`isSameAsClassic` and `value` cannot be set at the same time.');
-      }
-      const projectValue = isSameAsClassic ? newBreadcrumbs : _projectValue;
       breadcrumbs$.next(newBreadcrumbs);
-      setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      if (project) {
+        const { value: projectValue, absolute = false } = project;
+        setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      }
     };
 
     const setProjectHome = (homeHref: string) => {

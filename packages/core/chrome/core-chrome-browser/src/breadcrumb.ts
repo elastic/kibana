@@ -33,14 +33,9 @@ export interface ChromeSetBreadcrumbsParams {
    */
   project?: {
     /**
-     * If the same breadcrumb should be used as in classic, set this flag to true.
-     * @default: false
-     */
-    isSameAsClassic?: boolean;
-    /**
      * The breadcrumb value to set. Can be a single breadcrumb or an array of breadcrumbs.
      */
-    value?: ChromeBreadcrumb | ChromeBreadcrumb[];
+    value: ChromeBreadcrumb | ChromeBreadcrumb[];
     /**
      * Indicates whether the breadcrumb should be absolute (replaces the full path) or relative.
      * @default false
