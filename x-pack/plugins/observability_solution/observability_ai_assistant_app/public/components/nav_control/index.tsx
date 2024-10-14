@@ -18,6 +18,7 @@ import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
+import { useNavControlScope } from '../../hooks/use_nav_control_scope';
 
 interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
@@ -61,6 +62,7 @@ export function NavControl() {
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
   useNavControlScreenContext();
+  useNavControlScope();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
