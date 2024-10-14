@@ -184,14 +184,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
-    let esql = '';
     if (!field || field?.type === 'document') {
-      esql = `COUNT(*)`;
+      return `COUNT(*)`;
     } else {
-      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
+      return `COUNT(${field.name})`;
     }
-
-    return esql;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
