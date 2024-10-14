@@ -131,6 +131,7 @@ export const setup = async (httpSetup: HttpSetup): Promise<ManageProcessorsTestB
 
 export type ManageProcessorsTestSubjects =
   | 'manageProcessorsTitle'
+  | 'addGeoipDatabaseForm'
   | 'addGeoipDatabaseButton'
   | 'geoipDatabaseList'
   | 'databaseTypeSelect'
