@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const DataStreamsResponseSchema = {
   body: () =>
@@ -16,3 +16,5 @@ export const DataStreamsResponseSchema = {
       })
     ),
 };
+
+export type DataStreamsResponseBodySchemaBody = TypeOf<typeof DataStreamsResponseSchema.body>;
