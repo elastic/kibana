@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
-import { mockServices } from '../../../../../services/mocks/services';
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
@@ -165,25 +165,6 @@ describe('SampleLogsInput', () => {
           samplesFormat: { name: 'json', json_path: [] },
         });
       });
-
-      describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(60).fill(logsSampleRaw).join(','); // 12 entries
-        beforeEach(async () => {
-          await changeFile(input, new File([`[${tooLargeLogsSample}]`], 'test.json', { type }));
-        });
-
-        it('should truncate the logs sample', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split(',').slice(0, 2),
-            samplesFormat: { name: 'json', json_path: [] },
-          });
-        });
-        it('should add a notification toast', () => {
-          expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 100 rows.`
-          );
-        });
-      });
     });
 
     describe('when the file is a json array under a key', () => {
@@ -234,25 +215,6 @@ describe('SampleLogsInput', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: false },
-        });
-      });
-
-      describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(60).fill(simpleNDJSON).join('\n'); // 12 entries
-        beforeEach(async () => {
-          await changeFile(input, new File([tooLargeLogsSample], 'test.json', { type }));
-        });
-
-        it('should truncate the logs sample', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split('\n').slice(0, 2),
-            samplesFormat: { name: 'ndjson', multiline: false },
-          });
-        });
-        it('should add a notification toast', () => {
-          expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 100 rows.`
-          );
         });
       });
     });

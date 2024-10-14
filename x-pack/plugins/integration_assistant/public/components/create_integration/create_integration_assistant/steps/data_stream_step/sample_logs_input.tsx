@@ -8,12 +8,11 @@
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { isPlainObject } from 'lodash/fp';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
-import { partialShuffleArray } from './utils';
+import { partialShuffleArray } from '../../../../../../common';
 
 const MaxLogsSampleRows = 100;
 
@@ -215,7 +214,6 @@ interface SampleLogsInputProps {
 }
 
 export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSettings }) => {
-  const { notifications } = useKibana().services;
   const { setIntegrationSettings } = useActions();
   const [isParsing, setIsParsing] = useState(false);
   const [sampleFileError, setSampleFileError] = useState<string>();
@@ -266,11 +264,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           return;
         }
 
-        const { samplesFormat, logSamples, isTruncated } = prepareResult;
-
-        if (isTruncated) {
-          notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
-        }
+        const { samplesFormat, logSamples } = prepareResult;
 
         setIntegrationSettings({
           ...integrationSettings,
@@ -293,7 +287,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
       reader.readAsText(logsSampleFile);
     },
-    [integrationSettings, setIntegrationSettings, notifications?.toasts, setIsParsing]
+    [integrationSettings, setIntegrationSettings, setIsParsing]
   );
   return (
     <EuiFormRow
