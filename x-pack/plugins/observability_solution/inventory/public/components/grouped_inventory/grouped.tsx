@@ -8,12 +8,10 @@ import {
   EuiDataGridSorting,
   EuiAccordion,
   EuiSpacer,
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { EntityType } from '../../../common/entities';
@@ -24,6 +22,8 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { UngroupedInventoryPage } from './ungrouped';
 import { GroupSelector } from './group_selector';
+import { groupCountCss, groupingContainerCss } from './styles';
+import { InventoryGroupPanel } from './inventory_group_panel';
 
 export interface GroupedInventoryPageProps {
   groupSelected: string;
@@ -40,7 +40,6 @@ export function GroupedInventoryPage({
   } = useKibana();
   const { query } = useInventoryParams('/');
   const { pageIndex, kuery, entityTypes } = query;
-  const { euiTheme } = useEuiTheme();
 
   const inventoryRoute = useInventoryRouter();
 
@@ -126,33 +125,25 @@ export function GroupedInventoryPage({
   };
 
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.subduedText};
-          `}
-        >
-          <FormattedMessage
-            id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
-            defaultMessage="{total} Entities"
-            values={{ total: totalEntities }}
-          />
+    <div css={groupingContainerCss}>
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <span css={groupCountCss}>
+            <FormattedMessage
+              id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
+              defaultMessage="{total} Entities"
+              values={{ total: totalEntities }}
+            />
+          </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.subduedText};
-          `}
-        >
-          <FormattedMessage
-            id="xpack.inventory.groupedInventoryPage.groupsTotalLabel"
-            defaultMessage="{total} Groups"
-            values={{ total: value.groups.length }}
-          />
+        <EuiFlexItem grow={false}>
+          <span css={groupCountCss} style={{ borderRight: 'none' }}>
+            <FormattedMessage
+              id="xpack.inventory.groupedInventoryPage.groupsTotalLabel"
+              defaultMessage="{total} Groups"
+              values={{ total: value.groups.length }}
+            />
+          </span>
         </EuiFlexItem>
         <EuiFlexItem grow />
         <EuiFlexItem grow={false} className="">
@@ -166,16 +157,14 @@ export function GroupedInventoryPage({
         return (
           <>
             <EuiAccordion
+              className="inventoryGroupAccordion"
+              data-test-subj="inventory-grouping-accordion"
               key={field}
               id={field}
-              css={css`
-                border-radius: ${euiTheme.border.radius.medium};
-                font-weight: ${euiTheme.font.weight.bold};
-              `}
-              buttonContent={`Type: ${field} (${group.count})`}
+              buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
+              buttonElement="div"
               buttonProps={{ paddingSize: 'm' }}
-              paddingSize="l"
-              borders="all"
+              paddingSize="m"
             >
               <UngroupedInventoryPage
                 entityType={field}
@@ -187,6 +176,6 @@ export function GroupedInventoryPage({
           </>
         );
       })}
-    </>
+    </div>
   );
 }
