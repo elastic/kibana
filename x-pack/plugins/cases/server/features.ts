@@ -31,11 +31,16 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     deprecated: {
       // TODO: Add docLinks to link to documentation about the deprecation
       notice: i18n.translate('xpack.cases.features.casesFeature.deprecationMessage', {
-        defaultMessage: 'The original cases permissions is deprecated, please see Cases V2.',
+        defaultMessage:
+          'The {{currentId}} permissions are deprecated, please see {{casesFeatureIdV2}}.',
+        values: {
+          currentId: FEATURE_ID,
+          casesFeatureIdV2: FEATURE_ID_V2,
+        },
       }),
     },
     id: FEATURE_ID,
-    name: i18n.translate('xpack.cases.features.casesFeatureName', {
+    name: i18n.translate('xpack.cases.features.casesFeatureNameDeprecated', {
       defaultMessage: 'Cases (Deprecated)',
     }),
     category: DEFAULT_APP_CATEGORIES.management,

@@ -35,7 +35,7 @@ export const getCasesKibanaFeatureV2 = (): KibanaFeatureConfig => {
   return {
     id: FEATURE_ID_V2,
     name: i18n.translate('xpack.cases.features.casesFeatureName', {
-      defaultMessage: 'Cases V2',
+      defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],

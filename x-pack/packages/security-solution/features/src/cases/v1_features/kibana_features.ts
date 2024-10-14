@@ -14,7 +14,7 @@ import { APP_ID, CASES_FEATURE_ID, CASES_FEATURE_ID_V2 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 /**
- * @deprecated - deprecated in 8.16. Use getCasesBaseKibanaFeatureV2 instead
+ * @deprecated Use getCasesBaseKibanaFeatureV2 instead
  */
 export const getCasesBaseKibanaFeature = ({
   uiCapabilities,
@@ -27,7 +27,12 @@ export const getCasesBaseKibanaFeature = ({
       notice: i18n.translate(
         'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCase.deprecationMessage',
         {
-          defaultMessage: 'The original cases permissions is deprecated, please see Cases V2.',
+          defaultMessage:
+            'The {{currentId}} permissions are deprecated, please see {{casesFeatureIdV2}}.',
+          values: {
+            currentId: CASES_FEATURE_ID,
+            casesFeatureIdV2: CASES_FEATURE_ID_V2,
+          },
         }
       ),
     },

@@ -23,7 +23,7 @@ export const getCasesBaseKibanaSubFeatureIdsV2 = (): CasesSubFeatureId[] => [
 ];
 
 /**
- * Defines all the Security Assistant subFeatures available.
+ * Defines all the Security Solution Cases subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
 export const getCasesSubFeaturesMapV2 = ({

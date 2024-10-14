@@ -21,9 +21,9 @@ export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
 ];
 
 /**
- * @description- Defines all the Security Assistant subFeatures available.
+ * @deprecated Use getCasesSubFeaturesMapV2 instead
+ * @description - Defines all the Security Solution Cases available.
  * The order of the subFeatures is the order they will be displayed
- * @deprecated - deprecated in 8.16. Use getCasesSubFeaturesMapV2 instead
  */
 export const getCasesSubFeaturesMap = ({
   uiCapabilities,
