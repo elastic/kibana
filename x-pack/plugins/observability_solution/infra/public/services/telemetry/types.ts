@@ -22,6 +22,10 @@ export enum InfraTelemetryEventTypes {
   ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
   ASSET_DETAILS_PAGE_VIEWED = 'Asset Details Page Viewed',
   ASSET_DASHBOARD_LOADED = 'Asset Dashboard Loaded',
+  ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED = 'Add Metrics Callout Add Metrics Clicked',
+  ADD_METRICS_CALLOUT_TRY_IT_CLICKED = 'Add Metrics Callout Try It Clicked',
+  ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED = 'Add Metrics Callout Learn More Clicked',
+  ADD_METRICS_CALLOUT_DISMISSED = 'Add Metrics Callout Dismissed',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -61,13 +65,18 @@ export interface AssetDashboardLoadedParams {
   filtered_by?: string[];
 }
 
+export interface AddMetricsCalloutEventParams {
+  view: string;
+}
+
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
   | HostFlyoutFilterActionParams
   | HostsViewQueryHostsCountRetrievedParams
   | AssetDetailsFlyoutViewedParams
-  | AssetDashboardLoadedParams;
+  | AssetDashboardLoadedParams
+  | AddMetricsCalloutEventParams;
 
 export interface PerformanceMetricInnerEvents {
   key1?: string;
@@ -89,6 +98,10 @@ export interface ITelemetryClient {
     meta: Record<string, unknown>
   ): void;
   reportAssetDashboardLoaded(params: AssetDashboardLoadedParams): void;
+  reportAddMetricsCalloutAddMetricsClicked(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutTryItClicked(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutLearnMoreClicked(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutDismissed(params: AddMetricsCalloutEventParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -123,4 +136,20 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED;
       schema: RootSchema<AssetDashboardLoadedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
     };

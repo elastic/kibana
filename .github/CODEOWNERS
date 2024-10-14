@@ -90,8 +90,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud @elastic/kibana-core
-x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture-common @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
