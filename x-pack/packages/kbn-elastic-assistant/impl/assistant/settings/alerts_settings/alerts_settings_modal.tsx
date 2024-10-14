@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback
-
-} from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,7 +16,11 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { ALERTS_LABEL } from '../../../knowledge_base/translations';
-import { DEFAULT_CONVERSATIONS, DEFAULT_PROMPTS, useSettingsUpdater } from '../use_settings_updater/use_settings_updater';
+import {
+  DEFAULT_CONVERSATIONS,
+  DEFAULT_PROMPTS,
+  useSettingsUpdater,
+} from '../use_settings_updater/use_settings_updater';
 import { AlertsSettings } from './alerts_settings';
 import { CANCEL, SAVE } from '../translations';
 
@@ -37,7 +39,7 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
   const handleSave = useCallback(() => {
     saveSettings();
     onClose();
-}, [])
+  }, []);
 
   return (
     <EuiModal onClose={onClose}>
@@ -52,11 +54,7 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>{CANCEL}</EuiButtonEmpty>
-        <EuiButton
-          type="submit"
-          onClick={handleSave}
-          fill
-        >
+        <EuiButton type="submit" onClick={handleSave} fill>
           {SAVE}
         </EuiButton>
       </EuiModalFooter>

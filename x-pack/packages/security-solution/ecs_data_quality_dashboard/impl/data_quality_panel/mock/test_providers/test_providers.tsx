@@ -30,6 +30,7 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { UserProfileService } from '@kbn/core/public';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             currentAppId={'securitySolutionUI'}
+            userProfileService={jest.fn() as unknown as UserProfileService}
           >
             {children}
           </AssistantProvider>

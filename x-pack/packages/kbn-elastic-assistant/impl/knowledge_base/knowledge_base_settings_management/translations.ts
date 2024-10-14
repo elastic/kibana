@@ -215,7 +215,7 @@ export const DELETE_ENTRY_CONFIRMATION_TITLE = (title: string) =>
 export const DELETE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryContent',
   {
-    defaultMessage: 'You will not be able to recover this knowledge base entry once its deleted.',
+    defaultMessage: 'You will not be able to recover this knowledge base entry once it's deleted.',
   }
 );
 
@@ -281,7 +281,7 @@ export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
     defaultMessage:
-      'Describe what query should be constructed by the model to retrieve this custom knowledge Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
+      'Describe what query should be constructed by the model to retrieve this custom knowledge. Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
   }
 );
 

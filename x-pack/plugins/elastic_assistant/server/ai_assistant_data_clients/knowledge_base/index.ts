@@ -294,7 +294,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
-      throw new Error('Not sufficient privileges to create global knowledge base entries');
+      throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
     const { errors, docs_created: docsCreated } = await writer.bulk({
@@ -513,7 +513,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
-      throw new Error('Not sufficient privileges to create global knowledge base entries');
+      throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
     this.options.logger.debug(
