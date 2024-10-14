@@ -21,5 +21,6 @@
     "@kbn/product-doc-common",
     "@kbn/core-saved-objects-server",
     "@kbn/utils",
+    "@kbn/core-http-browser",
   ]
 }

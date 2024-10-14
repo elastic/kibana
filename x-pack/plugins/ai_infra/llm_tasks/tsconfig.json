@@ -19,7 +19,7 @@
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/product-doc-common",
-    "@kbn/core-saved-objects-server",
-    "@kbn/utils",
+    "@kbn/inference-plugin",
+    "@kbn/product-doc-base-plugin",
   ]
 }
