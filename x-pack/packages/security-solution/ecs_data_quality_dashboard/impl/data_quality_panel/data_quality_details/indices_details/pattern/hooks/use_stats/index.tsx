@@ -12,7 +12,7 @@ import { useDataQualityContext } from '../../../../../data_quality_context';
 import * as i18n from '../../../../../translations';
 import { INTERNAL_API_VERSION } from '../../../../../constants';
 import { MeteringStatsIndex } from '../../../../../types';
-import { useIsMounted } from '../../../../../hooks/use_is_mounted';
+import { useIsMountedRef } from '../../../../../hooks/use_is_mounted_ref';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
@@ -31,7 +31,7 @@ export const useStats = ({
   pattern: string;
   startDate?: string | null;
 }): UseStats => {
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, MeteringStatsIndex> | null>(null);
   const [error, setError] = useState<string | null>(null);
