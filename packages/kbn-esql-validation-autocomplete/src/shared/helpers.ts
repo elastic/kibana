@@ -764,9 +764,9 @@ export function getExpressionType(
   root: ESQLAstItem,
   fields: Map<string, ESQLRealField>,
   variables: Map<string, ESQLVariable[]>
-): SupportedDataType {
+): SupportedDataType | 'unknown' {
   if (!isSingleItem(root)) {
-    throw new Error('Lists not implemented');
+    return getExpressionType(root[0], fields, variables);
   }
 
   if (isLiteralItem(root) && root.literalType !== 'param') {
@@ -795,7 +795,7 @@ export function getExpressionType(
   if (isColumnItem(root)) {
     const column = getColumnForASTNode(root, { fields, variables });
     if (!column) {
-      throw new Error(`Expression type cannot be determined; column ${root.name} unknown`);
+      return 'unknown';
     }
     return column.type;
   }
@@ -803,15 +803,13 @@ export function getExpressionType(
   if (isFunctionItem(root)) {
     const fnDefinition = getFunctionDefinition(root.name);
     if (!fnDefinition) {
-      throw new Error(`Expression type cannot be determined; function ${root.name} unknown`);
+      return 'unknown';
     }
 
     const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
 
     if (!signaturesWithCorrectArity.length) {
-      throw new Error(
-        `Expression type cannot be determined; function ${root.name} does not accept ${root.args.length} arguments`
-      );
+      return 'unknown';
     }
 
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, variables));
@@ -828,11 +826,11 @@ export function getExpressionType(
     });
 
     if (!matchingSignature) {
-      throw new Error(
-        `Expression type cannot be determined; no signature matching the provided arguments was found for function ${root.name}`
-      );
+      return 'unknown';
     }
 
     return matchingSignature.returnType;
   }
+
+  return 'unknown';
 }

@@ -50,7 +50,7 @@ import {
   sourceExists,
   findFinalWord,
 } from '../shared/helpers';
-import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
+import { excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
   allStarConstant,
@@ -114,6 +114,8 @@ import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { countBracketsUnclosed } from '../shared/helpers';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+
+const collectVariables = () => new Map<string, ESQLVariable[]>();
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;

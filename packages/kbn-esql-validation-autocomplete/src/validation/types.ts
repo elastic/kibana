@@ -13,7 +13,8 @@ import type { EditorError } from '../types';
 
 export interface ESQLVariable {
   name: string;
-  type: SupportedDataType;
+  // invalid expressions produce columns of type "unknown"
+  type: SupportedDataType | 'unknown';
   location: ESQLLocation;
 }
 

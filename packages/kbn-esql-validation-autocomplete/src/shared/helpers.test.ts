@@ -168,9 +168,9 @@ describe('getExpressionType', () => {
     });
 
     it('handles fields and variables which do not exist', () => {
-      expect(() =>
-        getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())
-      ).toThrow();
+      expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
+        'unknown'
+      );
     });
   });
 
@@ -251,19 +251,23 @@ describe('getExpressionType', () => {
     });
 
     it('deals with functions that do not exist', () => {
-      expect(() =>
-        getExpressionType(getASTForExpression('does_not_exist()'), new Map(), new Map())
-      ).toThrow();
+      expect(getExpressionType(getASTForExpression('does_not_exist()'), new Map(), new Map())).toBe(
+        'unknown'
+      );
     });
 
     it('deals with bad function invocations', () => {
-      expect(() =>
+      expect(
         getExpressionType(getASTForExpression('test(1., "foo", "bar")'), new Map(), new Map())
-      ).toThrow();
+      ).toBe('unknown');
 
-      expect(() =>
-        getExpressionType(getASTForExpression('test()'), new Map(), new Map())
-      ).toThrow();
+      expect(getExpressionType(getASTForExpression('test()'), new Map(), new Map())).toBe(
+        'unknown'
+      );
+
+      expect(getExpressionType(getASTForExpression('test("foo", 1.)'), new Map(), new Map())).toBe(
+        'unknown'
+      );
     });
   });
 
