@@ -9,6 +9,7 @@ import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -26,6 +27,7 @@ interface ConversationViewProps {
   navigateToConversation: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
+  scope?: AssistantScope;
 }
 
 export const ConversationView: React.FC<ConversationViewProps> = ({
@@ -33,6 +35,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   navigateToConversation,
   getConversationHref,
   newConversationHref,
+  scope,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -56,6 +59,12 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
     },
     [service]
   );
+
+  useEffect(() => {
+    if (scope) {
+      service.setScope(scope);
+    }
+  }, [scope, service]);
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
