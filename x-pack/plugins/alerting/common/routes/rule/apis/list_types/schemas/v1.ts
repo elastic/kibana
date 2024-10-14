@@ -50,8 +50,7 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
     default_schedule_interval: schema.maybe(schema.string()),
     does_set_recovery_context: schema.maybe(schema.boolean()),
     enabled_in_license: schema.boolean(),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    fields_for_AAD: schema.maybe(schema.arrayOf(schema.string())), // we cannot introduce breaking changes yet
+    fieldsForAAD: schema.maybe(schema.arrayOf(schema.string())),
     has_alerts_mappings: schema.boolean(),
     has_fields_for_a_a_d: schema.boolean(),
     id: schema.string(),
