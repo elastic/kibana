@@ -267,59 +267,66 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       );
     }, [displaySingleValueInput]);
 
-    const validateValues = useCallback((nextItem: ArtifactFormComponentProps['item']) => {
-      const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
-      const {
-        field = 'file.hash.*',
-        type = ListOperatorTypeEnum.MATCH_ANY,
-        value = [],
-      } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
+    const validateValues = useCallback(
+      (nextItem: ArtifactFormComponentProps['item'], cleanState = false) => {
+        const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
+        const {
+          field = 'file.hash.*',
+          type = ListOperatorTypeEnum.MATCH_ANY,
+          value = [],
+        } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
 
-      // value can be a string when isOperator is selected
-      const values = Array.isArray(value) ? value : [value].filter(Boolean);
+        // value can be a string when isOperator is selected
+        const values = Array.isArray(value) ? value : [value].filter(Boolean);
 
-      const newValueWarnings: ItemValidationNodes = { ...warningsRef.current.value };
-      const newNameErrors: ItemValidationNodes = { ...errorsRef.current.name };
-      const newValueErrors: ItemValidationNodes = { ...errorsRef.current.value };
+        const newValueWarnings: ItemValidationNodes = cleanState
+          ? {}
+          : { ...warningsRef.current.value };
+        const newNameErrors: ItemValidationNodes = cleanState ? {} : { ...errorsRef.current.name };
+        const newValueErrors: ItemValidationNodes = cleanState
+          ? {}
+          : { ...errorsRef.current.value };
 
-      // error if name empty
-      if (!nextItem.name.trim()) {
-        newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
-      } else {
-        delete newNameErrors.NAME_REQUIRED;
-      }
+        // error if name empty
+        if (!nextItem.name.trim()) {
+          newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
+        } else {
+          delete newNameErrors.NAME_REQUIRED;
+        }
 
-      // error if no values
-      if (!values.length) {
-        newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
-      } else {
-        delete newValueErrors.VALUE_REQUIRED;
-      }
+        // error if no values
+        if (!values.length) {
+          newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
+        } else {
+          delete newValueErrors.VALUE_REQUIRED;
+        }
 
-      // error if invalid hash
-      if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
-        newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
-      } else {
-        delete newValueErrors.INVALID_HASH;
-      }
+        // error if invalid hash
+        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
+          newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
+        } else {
+          delete newValueErrors.INVALID_HASH;
+        }
 
-      const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
-      // warn if invalid path
-      if (field !== 'file.hash.*' && isInvalidPath) {
-        newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
-      } else {
-        delete newValueWarnings.INVALID_PATH;
-      }
-      // warn if duplicates
-      if (values.length !== uniq(values).length) {
-        newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
-      } else {
-        delete newValueWarnings.DUPLICATE_VALUES;
-      }
+        const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
+        // warn if invalid path
+        if (field !== 'file.hash.*' && isInvalidPath) {
+          newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
+        } else {
+          delete newValueWarnings.INVALID_PATH;
+        }
+        // warn if duplicates
+        if (values.length !== uniq(values).length) {
+          newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
+        } else {
+          delete newValueWarnings.DUPLICATE_VALUES;
+        }
 
-      warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
-      errorsRef.current = { name: newNameErrors, value: newValueErrors };
-    }, []);
+        warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
+        errorsRef.current = { name: newNameErrors, value: newValueErrors };
+      },
+      []
+    );
 
     const handleOnNameBlur = useCallback(() => {
       validateValues(item);
@@ -504,7 +511,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           entries: [{ ...blocklistEntry, value }],
         } as ArtifactFormComponentProps['item'];
 
-        validateValues(nextItem);
+        validateValues(nextItem, true);
         onChange({
           isValid: isValid(errorsRef.current),
           item: nextItem,
