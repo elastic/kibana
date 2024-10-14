@@ -38,7 +38,7 @@ import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/c
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { EuiButtonIconProps, EuiDataGridColumnSortingConfig } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -1352,24 +1352,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
   /**
-   * Set the order of columns when exporting to csv
+   * Get all datatables to be exported as csv
    */
-  getSortedColumns?: (
+  getExportDatatables?: (
     state: T,
     datasourceLayers?: DatasourceLayers,
     activeData?: TableInspectorAdapter
-  ) => string[];
-  /**
-   * Set the row ordering of columns when exporting to csv
-   */
-  getColumnSorting?: (
-    state: T,
-    datasourceLayers?: DatasourceLayers
-  ) => EuiDataGridColumnSortingConfig[];
-  /**
-   * Table ids to export via csv, corresponding to the tables in inspector adapter
-   */
-  getTablesToShare?: () => string[];
+  ) => Datatable[];
   /**
    * returns array of telemetry events for the visualization on save
    */

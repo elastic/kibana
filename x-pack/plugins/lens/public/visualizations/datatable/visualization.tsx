@@ -16,6 +16,7 @@ import { getOriginalId } from '@kbn/transpose-helpers';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import { getSortingCriteria } from '@kbn/sort-predicates';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -26,7 +27,7 @@ import type {
 } from '../../types';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { LayerType } from '../../../common/types';
+import type { FormatFactory, LayerType } from '../../../common/types';
 import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import {
@@ -52,6 +53,7 @@ import {
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
+import { getSimpleColumnType } from './components/table_actions';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -71,9 +73,11 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 export const getDatatableVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
+  formatFactory: FormatFactory;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -732,30 +736,40 @@ export const getDatatableVisualization = ({
     return suggestion;
   },
 
-  getSortedColumns(state, datasourceLayers = {}, activeData) {
+  getExportDatatables(state, datasourceLayers = {}, activeData) {
     const columnMap = new Map(state.columns.map((c) => [c.columnId, c]));
-    const { columns } =
+    const datatable =
       activeData?.[DatatableInspectorTables.Transpose] ??
-      activeData?.[DatatableInspectorTables.Default] ??
-      {};
-    const columnIds = columns?.map(({ id }) => id) ?? [...columnMap.keys()];
+      activeData?.[DatatableInspectorTables.Default];
+    if (!datatable) return [];
 
-    return columnIds.filter((id) => !columnMap.get(getOriginalId(id))?.hidden);
-  },
+    const columns = datatable.columns.filter(({ id }) => !columnMap.get(getOriginalId(id))?.hidden);
+    let rows = datatable.rows;
 
-  getColumnSorting(state) {
-    if (!state.sorting?.columnId || state.sorting.direction === 'none') return [];
+    const sortColumn =
+      state.sorting?.columnId && columns.find(({ id }) => id === state.sorting?.columnId);
+    const sortDirection = state.sorting?.direction;
+
+    if (sortColumn && sortDirection && sortDirection !== 'none') {
+      const datasource = datasourceLayers[state.layerId];
+      const schemaType =
+        datasource?.getOperationForColumnId?.(sortColumn.id)?.sortingHint ??
+        getSimpleColumnType(sortColumn.meta);
+      const sortingCriteria = getSortingCriteria(
+        schemaType,
+        sortColumn.id,
+        formatFactory(sortColumn.meta?.params)
+      );
+      rows = [...rows].sort((rA, rB) => sortingCriteria(rA, rB, sortDirection));
+    }
 
     return [
       {
-        id: state.sorting.columnId,
-        direction: state.sorting.direction,
+        ...datatable,
+        columns,
+        rows,
       },
     ];
-  },
-
-  getTablesToShare() {
-    return [DatatableInspectorTables.Transpose];
   },
 
   getVisualizationInfo(state) {

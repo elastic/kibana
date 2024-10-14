@@ -606,18 +606,16 @@ export const LensTopNavMenu = ({
               dataViews.indexPatterns
             );
 
-            const sharingData = {
-              activeData,
-              sortedColumns: activeVisualization.getSortedColumns?.(
+            const exportDatatables =
+              activeVisualization.getExportDatatables?.(
                 visualization.state,
                 datasourceLayers,
                 activeData
-              ),
-              columnSorting: activeVisualization.getColumnSorting?.(
-                visualization.state,
-                datasourceLayers
-              ),
-              tablesToShare: activeVisualization.getTablesToShare?.(),
+              ) ?? [];
+            const datatables =
+              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+            const sharingData = {
+              datatables,
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
