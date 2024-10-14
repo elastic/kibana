@@ -91,6 +91,7 @@ const SelectablePopover = () => {
                       showFromAllSpaces: false,
                     })
                   );
+                  setIsPopoverOpen(false);
                 },
               },
               {
@@ -106,6 +107,7 @@ const SelectablePopover = () => {
                       showFromAllSpaces: true,
                     })
                   );
+                  setIsPopoverOpen(false);
                 },
               },
             ],
