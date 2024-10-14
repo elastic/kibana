@@ -205,29 +205,25 @@ function getUseRuleIndexPatternParameters(
   finalDiffableRule: DiffableRule,
   defaultIndexPattern: string[]
 ): UseRuleIndexPatternParameters {
-  let indexPatternParams: UseRuleIndexPatternParameters = {
+  if (!('data_source' in finalDiffableRule) || !finalDiffableRule.data_source) {
+    return {
+      dataSourceType: DataSourceType.IndexPatterns,
+      index: defaultIndexPattern,
+      dataViewId: undefined,
+    };
+  }
+  if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
+    return {
+      dataSourceType: DataSourceType.DataView,
+      index: [],
+      dataViewId: finalDiffableRule.data_source.data_view_id,
+    };
+  }
+  return {
     dataSourceType: DataSourceType.IndexPatterns,
-    index: defaultIndexPattern,
+    index: finalDiffableRule.data_source.index_patterns,
     dataViewId: undefined,
   };
-
-  if ('data_source' in finalDiffableRule && finalDiffableRule.data_source) {
-    if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
-      indexPatternParams = {
-        dataSourceType: DataSourceType.DataView,
-        index: [],
-        dataViewId: finalDiffableRule.data_source.data_view_id,
-      };
-    } else {
-      indexPatternParams = {
-        dataSourceType: DataSourceType.IndexPatterns,
-        index: finalDiffableRule.data_source.index_patterns,
-        dataViewId: undefined,
-      };
-    }
-  }
-
-  return indexPatternParams;
 }
 
 function getSavedQueryId(diffableRule: DiffableRule): string | undefined {
