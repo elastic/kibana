@@ -149,7 +149,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
-  userProfileService
+  userProfileService,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -288,7 +288,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
-      userProfileService
+      userProfileService,
     }),
     [
       actionTypeRegistry,
@@ -323,7 +323,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
-      userProfileService
+      userProfileService,
     ]
   );
 

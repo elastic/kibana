@@ -23,7 +23,6 @@ import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
 import { AIConnector } from '../connectorland/connector_selector';
-import { omit } from 'lodash';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');

@@ -79,7 +79,7 @@ describe('ManagementSettings', () => {
         },
         chrome: {
           docTitle: {
-            change:jest.fn()
+            change: jest.fn(),
           },
         },
         data: {
