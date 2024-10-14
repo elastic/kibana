@@ -21,17 +21,6 @@ import {
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
-export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
-  /**
-   * Rule containing desired values users expect to see in the upgraded rule.
-   */
-  finalRule: DiffableRule;
-  /**
-   * Indicates whether there are conflicts blocking rule upgrading.
-   */
-  hasUnresolvedConflicts: boolean;
-}
-
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
 type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
 
