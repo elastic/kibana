@@ -344,6 +344,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {

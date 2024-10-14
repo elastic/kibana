@@ -18,14 +18,38 @@ import { css } from '@emotion/css';
 import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
-const DISMISSAL_STORAGE_KEY = 'log_stream_deprecation_callout_dismissed';
+const pageConfigurations = {
+  stream: {
+    dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
+    message: i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
+      defaultMessage:
+        'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
+    }),
+  },
+  settings: {
+    dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
+    message: i18n.translate(
+      'xpack.infra.logsSettingsDeprecationCallout.p.theNewLogsExplorerLabel',
+      {
+        defaultMessage:
+          'These settings only apply to the legacy Logs Stream app, and we do not recommend configuring them. Instead, use Logs Explorer which makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.',
+      }
+    ),
+  },
+};
 
-export const LogsDeprecationCallout = () => {
+interface LogsDeprecationCalloutProps {
+  page: keyof typeof pageConfigurations;
+}
+
+export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
 
-  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
+  const { dismissalStorageKey, message } = pageConfigurations[page];
+
+  const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);
 
   if (isDismissed) {
     return null;
@@ -42,12 +66,7 @@ export const LogsDeprecationCallout = () => {
       onDismiss={() => setDismissed(true)}
       className={calloutStyle}
     >
-      <p>
-        {i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
-          defaultMessage:
-            'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
-        })}
-      </p>
+      <p>{message}</p>
       <EuiButton
         fill
         data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"

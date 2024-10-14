@@ -1060,6 +1060,10 @@
   "entity-engine-status": {
     "dynamic": false,
     "properties": {
+      "fieldHistoryLength": {
+        "index": false,
+        "type": "integer"
+      },
       "filter": {
         "type": "keyword"
       },
@@ -2872,6 +2876,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "excludeAlertStatuses": {
+        "type": "keyword"
       },
       "filter": {
         "dynamic": false,
