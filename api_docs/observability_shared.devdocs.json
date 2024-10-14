@@ -6789,6 +6789,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_IDENTITY_FIELDS",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_IDENTITY_FIELDS",
+        "description": [],
+        "signature": [
+          "\"entity.identityFields\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ENTITY_LAST_SEEN",
         "type": "string",
         "tags": [],

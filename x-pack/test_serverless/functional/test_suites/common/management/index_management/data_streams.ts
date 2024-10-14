@@ -121,6 +121,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
     });
 
+    describe('Project level data retention checks - security solution', () => {
+      this.tags(['skipSvlOblt', 'skipSvlSearch']);
+
+      it('shows project data retention in the datastreams list', async () => {
+        expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
+        expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
+      });
+    });
+
     it('disabling data retention in serverless is not allowed', async () => {
       // Open details flyout
       await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
