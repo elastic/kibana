@@ -159,7 +159,10 @@ export class ServerlessSearchPlugin
     serverless.setProjectHome(homeRoute);
 
     const navigationTree$ = of(
-      navigationTree(services.searchIndices?.startAppId, useGlobalEmptyState)
+      navigationTree(
+        useGlobalEmptyState ? services.searchIndices?.startAppId : undefined,
+        useGlobalEmptyState
+      )
     );
     serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
