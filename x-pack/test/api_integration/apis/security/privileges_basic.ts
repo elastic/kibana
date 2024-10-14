@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
-            savedQueryManagement: ['all', 'minimal_all'],
+            savedQueryManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             graph: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -201,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
-            savedQueryManagement: ['all', 'minimal_all'],
+            savedQueryManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [
               'all',
               'read',

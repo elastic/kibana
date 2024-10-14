@@ -157,6 +157,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.rule.execution.type": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.rule.execution.uuid": Object {
         "array": false,
         "required": false,
