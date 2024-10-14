@@ -16,7 +16,8 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
   const utils = EntityStoreUtils(getService, namespace);
 
-  describe('@ess Entity Store Engine APIs in non-default space', () => {
+  // TODO: unskip once kibana system user has entity index privileges
+  describe.skip('@ess Entity Store Engine APIs in non-default space', () => {
     before(async () => {
       await utils.cleanEngines();
       await spaces.create({
