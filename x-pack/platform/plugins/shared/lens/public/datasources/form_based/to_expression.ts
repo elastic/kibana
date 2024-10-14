@@ -10,6 +10,7 @@ import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import type {
   AggFunctionsMapping,
+  DataPublicPluginStart,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
@@ -82,6 +83,7 @@ function getExpressionForLayer(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
+  data: DataPublicPluginStart,
   searchSessionId?: string,
   forceDSL?: boolean
 ): ExpressionAstExpression | null {
@@ -569,6 +571,7 @@ export function toExpression(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
+  data: DataPublicPluginStart,
   searchSessionId?: string,
   forceDSL?: boolean
 ) {
@@ -579,6 +582,7 @@ export function toExpression(
       uiSettings,
       dateRange,
       nowInstant,
+      data,
       searchSessionId,
       forceDSL
     );

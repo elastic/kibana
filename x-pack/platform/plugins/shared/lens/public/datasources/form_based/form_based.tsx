@@ -506,6 +506,7 @@ export function getFormBasedDatasource({
         uiSettings,
         dateRange,
         nowInstant,
+        data,
         searchSessionId,
         forceDSL
       ),
