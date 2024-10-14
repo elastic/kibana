@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ApiKeyBadgeProps {

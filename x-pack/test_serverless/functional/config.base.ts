@@ -24,6 +24,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...(options.esServerArgs ?? []),
         ],
       },
@@ -37,6 +41,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
             'isUsingRuleCreateFlyout',
           ])}`,
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['--xpack.security.roleManagementEnabled=true']
+            : []),
           ...(options.kbnServerArgs ?? []),
         ],
       },
