@@ -106,14 +106,13 @@ const EntityStoreDashboardPanelsComponent = () => {
       {entityStore.status === 'enabled' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
-            <EntitiesList />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
             <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EntitiesList />
           </EuiFlexItem>
         </>
       )}
