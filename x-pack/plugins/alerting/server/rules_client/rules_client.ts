@@ -58,7 +58,7 @@ import { enableRule } from '../application/rule/methods/enable_rule/enable_rule'
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
-import { muteAll } from './methods/mute_all';
+import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteAll } from './methods/unmute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { runSoon } from './methods/run_soon';
