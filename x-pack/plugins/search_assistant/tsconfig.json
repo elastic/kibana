@@ -22,7 +22,8 @@
     "@kbn/config-schema",
     "@kbn/ai-assistant",
     "@kbn/i18n",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/serverless"
   ],
   "exclude": [
     "target/**/*",
