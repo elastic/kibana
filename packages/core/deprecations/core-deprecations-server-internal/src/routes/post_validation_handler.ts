@@ -45,7 +45,7 @@ export function createRouteDeprecationsHandler({
 
       const client = coreUsageData.getClient();
       // no await we just fire it off.
-      client.incrementDeprecatedApi(counterName, { resolved: false });
+      void client.incrementDeprecatedApi(counterName, { resolved: false });
     }
   };
 }

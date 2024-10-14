@@ -21,7 +21,7 @@ export interface CoreUsageDataSetup {
    * when tracking events.
    */
   registerUsageCounter: (usageCounter: CoreUsageCounter) => void;
-  registerDeprecatedUsageFetch: DeprecatedApiUsageFetcher;
+  registerDeprecatedUsageFetch: (fetchFn: DeprecatedApiUsageFetcher) => void;
 }
 
 /**

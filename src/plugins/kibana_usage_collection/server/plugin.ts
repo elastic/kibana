@@ -75,9 +75,10 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerEbtCounters(coreSetup.analytics, usageCollection);
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
-    coreSetup.coreUsageData.registerDeprecatedUsageFetch(
-      fetchDeprecatedApiCounterStats(this.logger.get('deprecated-api-usage'))
+    const deprecatedUsageFetch = fetchDeprecatedApiCounterStats(
+      this.logger.get('deprecated-api-usage')
     );
+    coreSetup.coreUsageData.registerDeprecatedUsageFetch(deprecatedUsageFetch);
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,

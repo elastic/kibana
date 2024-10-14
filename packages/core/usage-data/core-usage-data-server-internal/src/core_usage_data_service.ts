@@ -520,8 +520,8 @@ export class CoreUsageDataService
       this.deprecatedApiUsageFetcher = fetchFn;
     };
 
-    const fetchDeprecatedUsageStats = ({ soClient }: { soClient: ISavedObjectsRepository }) => {
-      return this.deprecatedApiUsageFetcher({ soClient });
+    const fetchDeprecatedUsageStats = (params: { soClient: ISavedObjectsRepository }) => {
+      return this.deprecatedApiUsageFetcher(params);
     };
 
     this.coreUsageStatsClient = new CoreUsageStatsClient({
