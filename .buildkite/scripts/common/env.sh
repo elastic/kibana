@@ -110,7 +110,6 @@ export TEST_CORS_SERVER_PORT=6105
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
   export DETECT_CHROMEDRIVER_VERSION=true
-  export CHROMEDRIVER_FORCE_DOWNLOAD=true
 else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
