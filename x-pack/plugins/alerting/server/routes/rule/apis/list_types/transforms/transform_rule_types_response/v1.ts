@@ -21,7 +21,7 @@ export const transformRuleTypesResponse = (
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
       ...(ruleType.defaultScheduleInterval
-        ? { defaultScheduleInterval: ruleType.defaultScheduleInterval }
+        ? { default_schedule_interval: ruleType.defaultScheduleInterval }
         : {}),
       ...(isBoolean(ruleType.doesSetRecoveryContext)
         ? { does_set_recovery_context: ruleType.doesSetRecoveryContext }
