@@ -162,7 +162,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
 
   const apiKeyRef = useRef<HTMLDivElement>(null);
 
-  const titleId = useGeneratedHtmlId();
+  const uniqueId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (createdApiKey && apiKeyRef) {
@@ -181,11 +181,11 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
       css={css`
         max-width: calc(${euiTheme.size.xxxxl} * 10);
       `}
-      aria-labelledby={titleId}
+      aria-labelledby={`${uniqueId}-header`}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={titleId}>
+          <h2 id={`${uniqueId}-header`}>
             {i18n.translate('xpack.enterpriseSearch.apiKey.flyoutTitle', {
               defaultMessage: 'Create an API key',
             })}
@@ -243,6 +243,8 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
             id="apiKey.setup"
             paddingSize="l"
             initialIsOpen
+            aria-labelledby={`${uniqueId}-setupHeader`}
+            role="region"
             buttonContent={
               <div>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
@@ -251,7 +253,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="xs">
-                      <h4>
+                      <h4 id={`${uniqueId}-setupHeader`}>
                         {i18n.translate('xpack.enterpriseSearch.apiKey.setup.title', {
                           defaultMessage: 'Setup',
                         })}
@@ -287,6 +289,8 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
           <EuiAccordion
             id="apiKey.privileges"
             paddingSize="l"
+            role="region"
+            aria-labelledby={`${uniqueId}-privilegesHeader`}
             buttonContent={
               <div style={{ paddingRight: euiTheme.size.s }}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
@@ -295,7 +299,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="xs">
-                      <h4>
+                      <h4 id={`${uniqueId}-privilegesHeader`}>
                         {i18n.translate('xpack.enterpriseSearch.apiKey.privileges.title', {
                           defaultMessage: 'Security Privileges',
                         })}
@@ -342,6 +346,8 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
           <EuiAccordion
             id="apiKey.metadata"
             paddingSize="l"
+            role="region"
+            aria-labelledby={`${uniqueId}-metadataHeader`}
             buttonContent={
               <div style={{ paddingRight: euiTheme.size.s }}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
@@ -350,7 +356,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="xs">
-                      <h4>
+                      <h4 id={`${uniqueId}-metadataHeader`}>
                         {i18n.translate('xpack.enterpriseSearch.apiKey.metadata.title', {
                           defaultMessage: 'Metadata',
                         })}
