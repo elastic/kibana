@@ -16,12 +16,40 @@ const aliasMap = {
   type: ['types'],
 };
 
-export const parseSearchParams = (term: string): ParsedSearchParams => {
+// Converts multi word types to phrases by wrapping them in quotes. Example: type:canvas workpad -> type:"canvas workpad"
+const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]): string => {
+  if (multiWordTypes.length === 0) {
+    return term;
+  }
+
+  const typesPattern = multiWordTypes.join('|');
+  const canvasWorkpadRegex = new RegExp(`(type:|types:)(\\s*[^"']*?)\\b(${typesPattern})\\b`, 'gi');
+
+  const modifiedTerm = term.replace(
+    canvasWorkpadRegex,
+    (match, typePrefix, additionalTextInBetween, matchedPhrase) =>
+      `${typePrefix}${additionalTextInBetween}"${matchedPhrase}"`
+  );
+
+  return modifiedTerm;
+};
+
+export const parseSearchParams = (term: string, searchableTypes: string[]): ParsedSearchParams => {
   const recognizedFields = knownFilters.concat(...Object.values(aliasMap));
   let query: Query;
 
+  // Finds all multiword types that are separated by whitespace or hyphens
+  const multiWordSearchableTypesWhitespaceSeperated = searchableTypes
+    .filter((item) => /[ -]/.test(item))
+    .map((item) => item.replace(/-/g, ' '));
+
+  const modifiedTerm = convertMultiwordTypesToPhrases(
+    term,
+    multiWordSearchableTypesWhitespaceSeperated
+  );
+
   try {
-    query = Query.parse(term, {
+    query = Query.parse(modifiedTerm, {
       schema: { recognizedFields },
     });
   } catch (e) {
