@@ -13,7 +13,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { parseIdentityFieldValuesToKql } from '../../../common/utils/parse_identity_field_values_to_kql';
 
 export function AlertsBadge({ entity }: { entity: Entity }) {
-  const identityFieldValues = parseIdentityFieldValuesToKql({ entity });
   const {
     services: {
       http: { basePath },
@@ -22,7 +21,7 @@ export function AlertsBadge({ entity }: { entity: Entity }) {
 
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
-      kuery: identityFieldValues.join(' AND '),
+      kuery: parseIdentityFieldValuesToKql({ entity }),
       status: 'active',
     })}`
   );

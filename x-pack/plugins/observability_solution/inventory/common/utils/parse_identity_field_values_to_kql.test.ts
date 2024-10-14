@@ -33,7 +33,7 @@ describe('parseIdentityFieldValuesToKql', () => {
     };
 
     const result = parseIdentityFieldValuesToKql({ entity });
-    expect(result).toEqual(['service.name: "my-service"']);
+    expect(result).toEqual('service.name: "my-service"');
   });
 
   it('should return values when identityFields is an array of strings', () => {
@@ -47,10 +47,10 @@ describe('parseIdentityFieldValuesToKql', () => {
     };
 
     const result = parseIdentityFieldValuesToKql({ entity });
-    expect(result).toEqual(['service.name: "my-service"', 'service.environment: "staging"']);
+    expect(result).toEqual('service.name: "my-service" AND service.environment: "staging"');
   });
 
-  it('should return an empty array if identityFields is empty string', () => {
+  it('should return an empty string if identityFields is empty string', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
       'entity.identityFields': '',
@@ -60,7 +60,7 @@ describe('parseIdentityFieldValuesToKql', () => {
     };
 
     const result = parseIdentityFieldValuesToKql({ entity });
-    expect(result).toEqual([]);
+    expect(result).toEqual('');
   });
   it('should return an empty array if identityFields is empty array', () => {
     const entity: ServiceEntity = {
@@ -72,7 +72,7 @@ describe('parseIdentityFieldValuesToKql', () => {
     };
 
     const result = parseIdentityFieldValuesToKql({ entity });
-    expect(result).toEqual([]);
+    expect(result).toEqual('');
   });
 
   it('should ignore fields that are not present in the entity', () => {
@@ -85,6 +85,6 @@ describe('parseIdentityFieldValuesToKql', () => {
     };
 
     const result = parseIdentityFieldValuesToKql({ entity });
-    expect(result).toEqual(['host.name: "my-host"']);
+    expect(result).toEqual('host.name: "my-host"');
   });
 });

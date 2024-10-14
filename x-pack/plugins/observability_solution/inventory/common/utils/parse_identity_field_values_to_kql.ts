@@ -8,7 +8,14 @@
 import { ENTITY_IDENTITY_FIELDS } from '@kbn/observability-shared-plugin/common';
 import { Entity } from '../entities';
 
-export function parseIdentityFieldValuesToKql({ entity }: { entity: Entity }) {
+type Operator = 'AND';
+export function parseIdentityFieldValuesToKql({
+  entity,
+  operator = 'AND',
+}: {
+  entity: Entity;
+  operator?: Operator;
+}) {
   const mapping: string[] = [];
 
   const identityFields = entity[ENTITY_IDENTITY_FIELDS];
@@ -23,5 +30,5 @@ export function parseIdentityFieldValuesToKql({ entity }: { entity: Entity }) {
     });
   }
 
-  return mapping;
+  return mapping.join(` ${operator} `);
 }
