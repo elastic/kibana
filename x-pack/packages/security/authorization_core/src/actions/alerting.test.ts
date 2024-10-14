@@ -51,3 +51,21 @@ describe('#get', () => {
     );
   });
 });
+
+test('#isValid', () => {
+  const alertingActions = new AlertingActions();
+  expect(alertingActions.isValid('alerting:foo-ruleType/consumer/alertingType/bar-operation')).toBe(
+    true
+  );
+
+  expect(
+    alertingActions.isValid('api:alerting:foo-ruleType/consumer/alertingType/bar-operation')
+  ).toBe(false);
+  expect(alertingActions.isValid('api:foo-ruleType/consumer/alertingType/bar-operation')).toBe(
+    false
+  );
+
+  expect(alertingActions.isValid('alerting_foo-ruleType/consumer/alertingType/bar-operation')).toBe(
+    false
+  );
+});

@@ -40578,7 +40578,20 @@ paths:
   /api/security/role:
     get:
       operationId: '%2Fapi%2Fsecurity%2Frole#0'
-      parameters: []
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
       responses: {}
       summary: Get all roles
       tags:
@@ -40629,6 +40642,11 @@ paths:
           schema:
             minLength: 1
             type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
       responses: {}
       summary: Get a role
       tags:
