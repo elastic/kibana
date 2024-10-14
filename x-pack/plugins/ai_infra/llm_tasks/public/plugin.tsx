@@ -30,19 +30,13 @@ export class KnowledgeBaseRegistryPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<
-      PluginStartDependencies,
-      LlmTasksPluginStart
-    >,
+    coreSetup: CoreSetup<PluginStartDependencies, LlmTasksPluginStart>,
     pluginsSetup: PluginSetupDependencies
   ): LlmTasksPluginSetup {
     return {};
   }
 
-  start(
-    coreStart: CoreStart,
-    pluginsStart: PluginStartDependencies
-  ): LlmTasksPluginStart {
+  start(coreStart: CoreStart, pluginsStart: PluginStartDependencies): LlmTasksPluginStart {
     return {};
   }
 }
