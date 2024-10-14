@@ -5,58 +5,76 @@
  * 2.0.
  */
 
-import { encode } from 'gpt-tokenizer';
+import type { Logger } from '@kbn/logging';
 import type { OutputAPI } from '@kbn/inference-plugin/common/output';
 import type { ProductDocSearchAPI } from '@kbn/product-doc-base-plugin/server';
+import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
-import { extractRelevantChunks } from './extract_relevant_chunks';
+import { summarizeDocument } from './extract_relevant_chunks';
+
+// if content length greater, then we'll trigger the summary task
+const MIN_TOKENS_TO_SUMMARIZE = 500;
+// maximum token length of generated summaries - will truncate if greater
+const MAX_SUMMARY_TOKEN_LENGTH = 1000;
 
 export const retrieveDocumentation =
   ({
     outputAPI,
     searchDocAPI,
+    logger: log,
   }: {
     outputAPI: OutputAPI;
     searchDocAPI: ProductDocSearchAPI;
+    logger: Logger;
   }): RetrieveDocumentationAPI =>
   async ({ searchTerm, connectorId, products, functionCalling, max = 3 }) => {
-    const searchResults = await searchDocAPI({ query: searchTerm, products, max });
+    try {
+      const { results } = await searchDocAPI({ query: searchTerm, products, max });
 
-    console.log('*** retrieveDocumentation => found ' + searchResults.results.length);
+      log.debug(`searching with term=[${searchTerm}] returned ${results.length} documents`);
 
-    const processedDocuments = await Promise.all(
-      searchResults.results.map(async (document) => {
-        const tokenCount = countTokens(document.content);
+      const processedDocuments = await Promise.all(
+        results.map(async (document) => {
+          const tokenCount = countTokens(document.content);
+          const summarize = tokenCount >= MIN_TOKENS_TO_SUMMARIZE;
+          log.debug(
+            `processing doc [${document.url}] - tokens : [${tokenCount}] - summarize: [${summarize}]`
+          );
 
-        let chunks: string[];
-        if (tokenCount > 250) {
-          const extractResponse = await extractRelevantChunks({
-            searchTerm,
-            documentContent: document.content,
-            outputAPI,
-            connectorId,
-            functionCalling,
-          });
-          chunks = extractResponse.chunks;
-        } else {
-          chunks = [document.content];
-        }
+          let content: string;
+          if (summarize) {
+            const extractResponse = await summarizeDocument({
+              searchTerm,
+              documentContent: document.content,
+              outputAPI,
+              connectorId,
+              functionCalling,
+            });
+            content = truncate(extractResponse.summary, MAX_SUMMARY_TOKEN_LENGTH);
+          } else {
+            content = document.content;
+          }
 
-        return {
-          title: document.title,
-          url: document.url,
-          chunks,
-        };
-      })
-    );
+          log.debug(`done processing document [${document.url}]`);
+          return {
+            title: document.title,
+            url: document.url,
+            content,
+          };
+        })
+      );
 
-    console.log(`retrieved documents: ${processedDocuments.map((doc) => doc.title)}`);
+      log.debug(() => {
+        const docsAsJson = JSON.stringify(processedDocuments);
+        return `searching with term=[${searchTerm}] - results: ${docsAsJson}`;
+      });
 
-    return {
-      documents: processedDocuments.filter((doc) => doc.chunks.length > 0),
-    };
+      return {
+        success: true,
+        documents: processedDocuments.filter((doc) => doc.content.length > 0),
+      };
+    } catch (e) {
+      log.error(`Error retrieving documentation: ${e.message}. Returning empty results.`);
+      return { success: false, documents: [] };
+    }
   };
-
-const countTokens = (text: string): number => {
-  return encode(text).length;
-};

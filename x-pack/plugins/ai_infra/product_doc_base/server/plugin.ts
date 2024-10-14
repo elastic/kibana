@@ -102,24 +102,18 @@ export class KnowledgeBaseRegistryPlugin
       this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
     });
 
-    // TODO: remove
-    delay(10)
-      .then(async () => {
-        // this.logger.info('*** test installing packages');
-        // await this.packageInstaller.installAll({});
-        // const results = await searchService.search({
-        //  query: 'How to create a space in Kibana?',
-        //  products: ['kibana'],
-        // );
-        // console.log(JSON.stringify(results.results[0]));
-      })
-      .catch((e) => {
-        this.logger.error('*** ERROR', e);
-      });
     return {
+      isInstalled: async () => {
+        // TODO: should also check license, probably
+
+        // TODO: something less naive
+        const installStatus = await productDocClient.getInstallationStatus();
+        const installed = Object.values(installStatus).some(
+          (status) => status.status === 'installed'
+        );
+        return installed;
+      },
       search: searchService.search.bind(searchService),
     };
   }
 }
-
-const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));

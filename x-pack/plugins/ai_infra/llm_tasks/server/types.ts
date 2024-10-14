@@ -21,5 +21,6 @@ export interface PluginStartDependencies {
 export interface LlmTasksPluginSetup {}
 
 export interface LlmTasksPluginStart {
+  retrieveDocumentationAvailable: () => Promise<boolean>;
   retrieveDocumentation: RetrieveDocumentationAPI;
 }

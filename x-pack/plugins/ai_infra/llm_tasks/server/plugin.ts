@@ -27,7 +27,7 @@ export class LlmTasksPlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<LlmTasksConfig>) {
+  constructor(private readonly context: PluginInitializerContext<LlmTasksConfig>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -40,10 +40,14 @@ export class LlmTasksPlugin
   start(core: CoreStart, startDependencies: PluginStartDependencies): LlmTasksPluginStart {
     const { inference, productDocBase } = startDependencies;
     return {
+      retrieveDocumentationAvailable: async () => {
+        return await startDependencies.productDocBase.isInstalled();
+      },
       retrieveDocumentation: (options) => {
         return retrieveDocumentation({
           outputAPI: inference.getClient({ request: options.request }).output,
           searchDocAPI: productDocBase.search,
+          logger: this.context.logger.get('tasks.retrieve-documentation'),
         })(options);
       },
     };

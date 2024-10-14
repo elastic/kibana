@@ -17,4 +17,5 @@ export interface ProductDocBaseSetupContract {}
 
 export interface ProductDocBaseStartContract {
   search: SearchApi;
+  isInstalled: () => Promise<boolean>;
 }

@@ -25,7 +25,8 @@
       "alerting",
       "features",
       "inference",
-      "logsDataAccess"
+      "logsDataAccess",
+      "llmTasks"
     ],
     "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],

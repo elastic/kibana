@@ -11,29 +11,26 @@ import type { FunctionCallingMode } from '@kbn/inference-plugin/common/chat_comp
 import type { OutputAPI } from '@kbn/inference-plugin/common/output';
 import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/common/output/without_output_update_events';
 
-const extractRelevantChunksSchema = {
+const summarizeDocumentSchema = {
   type: 'object',
   properties: {
     useful: {
       type: 'boolean',
-      description: `Whether the provided document has any useful information related to the user's query`,
+      description: `Whether the provided document has any useful information related to the user's query.`,
     },
-    chunks: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      description: `The chunks of text of the document that are relevant to the user's query. Can be empty`,
+    summary: {
+      type: 'string',
+      description: `The condensed version of the document that can be used to answer the question. Can be empty.`,
     },
   },
   required: ['useful'],
 } as const satisfies ToolSchema;
 
-interface ExtractRelevantChunksResponse {
-  chunks: string[];
+interface SummarizeDocumentResponse {
+  summary: string;
 }
 
-export const extractRelevantChunks = async ({
+export const summarizeDocument = async ({
   searchTerm,
   documentContent,
   connectorId,
@@ -45,21 +42,20 @@ export const extractRelevantChunks = async ({
   outputAPI: OutputAPI;
   connectorId: string;
   functionCalling?: FunctionCallingMode;
-}): Promise<ExtractRelevantChunksResponse> => {
+}): Promise<SummarizeDocumentResponse> => {
   const result = await lastValueFrom(
     outputAPI('extract_relevant_chunks', {
       connectorId,
       functionCalling,
-      system: `You are an Elastic assistant in charge of helping answering the user question
+      system: `You are an Elastic assistant in charge of helping answering the user question.
 
-      Given a search query and a document, your current task will be to extract
-      the parts of the document that could be useful in answering the question.
-
-      - If multiple parts are useful, return them all.
-      - If you think nothing in the document could help answering the question, return an empty list.
+      Given a question and a document, please provide a condensed version of the document
+      that can be used to answer the question.
+      - All useful information should be included in the condensed version.
+      - If you think the document isn't relevant at all to answer the question, return an empty text.
       `,
       input: `
-      ## Search query
+      ## User question
 
       ${searchTerm}
 
@@ -67,11 +63,11 @@ export const extractRelevantChunks = async ({
 
       ${documentContent}
       `,
-      schema: extractRelevantChunksSchema,
+      schema: summarizeDocumentSchema,
     }).pipe(withoutOutputUpdateEvents())
   );
 
   return {
-    chunks: result.output.chunks ?? [],
+    summary: result.output.summary ?? '',
   };
 };

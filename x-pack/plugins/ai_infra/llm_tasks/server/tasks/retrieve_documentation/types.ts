@@ -18,14 +18,15 @@ export interface RetrieveDocumentationParams {
   functionCalling?: FunctionCallingMode;
 }
 
-export interface DocumentRelevantChunks {
+export interface RetrievedDocument {
   title: string;
   url: string;
-  chunks: string[];
+  content: string;
 }
 
 export interface RetrieveDocumentationResult {
-  documents: DocumentRelevantChunks[];
+  success: boolean;
+  documents: RetrievedDocument[];
 }
 
 export type RetrieveDocumentationAPI = (
