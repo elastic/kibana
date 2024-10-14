@@ -16,7 +16,7 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
-import type { EngineDataViewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
+import type { EngineDataviewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type { AppClient } from '../../..';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
@@ -385,7 +385,7 @@ export class EntityStoreDataClient {
   }
 
   public async applyDataViewIndices(): Promise<{
-    successes: EngineDataViewUpdateResult[];
+    successes: EngineDataviewUpdateResult[];
     errors: Error[];
   }> {
     const { logger } = this.options;
@@ -395,7 +395,7 @@ export class EntityStoreDataClient {
 
     const { engines } = await this.engineClient.list();
 
-    const updateDefinitionPromises: Array<Promise<EngineDataViewUpdateResult>> = await engines.map(
+    const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = await engines.map(
       async (engine) => {
         const originalStatus = engine.status;
         const id = buildEntityDefinitionId(engine.type, this.options.namespace);
@@ -455,7 +455,7 @@ export class EntityStoreDataClient {
       .map((result) => result.reason);
 
     const updateSuccesses = updatedDefinitions
-      .filter(isPromiseFulfilled<EngineDataViewUpdateResult>)
+      .filter(isPromiseFulfilled<EngineDataviewUpdateResult>)
       .map((result) => result.value);
 
     return {

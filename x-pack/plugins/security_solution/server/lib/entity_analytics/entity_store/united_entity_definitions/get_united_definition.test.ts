@@ -8,11 +8,13 @@
 import { getUnitedEntityDefinition } from './get_united_definition';
 
 describe('getUnitedEntityDefinition', () => {
+  const indexPatterns = ['test*'];
   describe('host', () => {
     const unitedDefinition = getUnitedEntityDefinition({
       entityType: 'host',
       namespace: 'test',
       fieldHistoryLength: 10,
+      indexPatterns,
     });
 
     it('mapping', () => {
@@ -151,17 +153,7 @@ describe('getUnitedEntityDefinition', () => {
             },
           ],
           "indexPatterns": Array [
-            "apm-*-transaction*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "traces-apm*",
-            "winlogbeat-*",
-            "-*elastic-cloud-logs-*",
-            ".asset-criticality.asset-criticality-test",
-            "risk-score.risk-score-latest-test",
+            "test*",
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
@@ -286,6 +278,7 @@ describe('getUnitedEntityDefinition', () => {
       entityType: 'user',
       namespace: 'test',
       fieldHistoryLength: 10,
+      indexPatterns,
     });
 
     it('mapping', () => {
@@ -416,17 +409,7 @@ describe('getUnitedEntityDefinition', () => {
             },
           ],
           "indexPatterns": Array [
-            "apm-*-transaction*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "traces-apm*",
-            "winlogbeat-*",
-            "-*elastic-cloud-logs-*",
-            ".asset-criticality.asset-criticality-test",
-            "risk-score.risk-score-latest-test",
+            "test*",
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
