@@ -408,6 +408,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
+    console.error('this.indexTemplateAndPattern.alias,', this.indexTemplateAndPattern.alias);
+    console.error('vectorSearchQuery', JSON.stringify(vectorSearchQuery, null, 2));
+
     try {
       const result = await esClient.search<EsDocumentEntry>({
         index: this.indexTemplateAndPattern.alias,
