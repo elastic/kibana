@@ -63,9 +63,14 @@ export const CreateIndexForm = ({
         return;
       }
       usageTracker.click(AnalyticsEvents.startCreateIndexClick);
+
+      if (formState.defaultIndexName !== formState.indexName) {
+        usageTracker.click(AnalyticsEvents.startCreateIndexPageModifyIndexName);
+      }
+
       createIndex({ indexName: formState.indexName });
     },
-    [usageTracker, createIndex, formState.indexName]
+    [usageTracker, createIndex, formState.indexName, formState.defaultIndexName]
   );
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIndexName = e.target.value;
