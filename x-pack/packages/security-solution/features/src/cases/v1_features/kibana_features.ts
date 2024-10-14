@@ -28,7 +28,7 @@ export const getCasesBaseKibanaFeature = ({
         'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCase.deprecationMessage',
         {
           defaultMessage:
-            'The {{currentId}} permissions are deprecated, please see {{casesFeatureIdV2}}.',
+            'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
           values: {
             currentId: CASES_FEATURE_ID,
             casesFeatureIdV2: CASES_FEATURE_ID_V2,

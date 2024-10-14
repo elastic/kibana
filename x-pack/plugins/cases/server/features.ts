@@ -32,7 +32,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
       // TODO: Add docLinks to link to documentation about the deprecation
       notice: i18n.translate('xpack.cases.features.casesFeature.deprecationMessage', {
         defaultMessage:
-          'The {{currentId}} permissions are deprecated, please see {{casesFeatureIdV2}}.',
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
         values: {
           currentId: FEATURE_ID,
           casesFeatureIdV2: FEATURE_ID_V2,

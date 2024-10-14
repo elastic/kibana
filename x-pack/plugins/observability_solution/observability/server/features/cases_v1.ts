@@ -22,11 +22,11 @@ export const getCasesFeature = (
       'xpack.observability.featureRegistry.linkObservabilityTitle.deprecationMessage',
       {
         defaultMessage:
-          'The {{currentId}} permissions are deprecated, please see {{casesFeatureIdV2}}.',
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
         values: {
           currentId: casesFeatureId,
           newId: casesFeatureIdV2,
-        }
+        },
       }
     ),
   },
