@@ -6,22 +6,27 @@
  */
 import { useMemo, useCallback } from 'react';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { CaseStatuses } from '../../../common/types/domain';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
-export const useUserPermissions = ({
-  newStatusToAuthorize,
-}: {
-  newStatusToAuthorize?: CaseStatuses;
-}) => {
+export const useUserPermissions = () => {
   const { permissions } = useCasesContext();
-  const canChangeStatus = useMemo(() => {
-    if (!permissions.update) return false;
-    if (!permissions.reopenCase && newStatusToAuthorize === CaseStatuses.closed) return false;
-    return true;
-  }, [newStatusToAuthorize, permissions.update, permissions.reopenCase]);
 
-  const canAddUserComments = useCallback(
+  /**
+   * Determines if a user has the capability to change the case status in any form.
+   */
+
+  const canUpdate = useMemo(() => permissions.update, [permissions.update]);
+
+  /**
+   * Determines if a user has the capability to change the case from closed => open or closed => in progress
+   */
+
+  const canReopenCase = useMemo(() => permissions.reopenCase, [permissions.reopenCase]);
+
+  /**
+   * Determines if a user has the capability to add comments and attachments
+   */
+  const getCanAddUserComments = useCallback(
     (userActivityQueryParams: UserActivityParams) => {
       if (userActivityQueryParams.type === 'action') return false;
       return permissions.createComment;
@@ -29,5 +34,5 @@ export const useUserPermissions = ({
     [permissions.createComment]
   );
 
-  return { canChangeStatus, canAddUserComments };
+  return { getCanAddUserComments, canReopenCase, canUpdate };
 };

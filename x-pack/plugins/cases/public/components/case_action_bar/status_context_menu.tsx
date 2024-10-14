@@ -12,6 +12,7 @@ import type { CaseStatuses } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
+import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 interface Props {
   currentStatus: CaseStatuses;
@@ -27,6 +28,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   onStatusChanged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const shouldDisableStatusFn = useShouldDisableStatus();
   const togglePopover = useCallback(
     () => setIsPopoverOpen((prevPopoverStatus) => !prevPopoverStatus),
     []
@@ -55,19 +57,24 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     [closePopover, currentStatus, onStatusChanged]
   );
 
+  // TODO: Determine if we would prefer to show the disabled options with grayed out treatment
   const panelItems = useMemo(
     () =>
-      caseStatuses.map((status: CaseStatuses) => (
-        <EuiContextMenuItem
-          data-test-subj={`case-view-status-dropdown-${status}`}
-          icon={status === currentStatus ? 'check' : 'empty'}
-          key={status}
-          onClick={() => onContextMenuItemClick(status)}
-        >
-          <Status status={status} />
-        </EuiContextMenuItem>
-      )),
-    [currentStatus, onContextMenuItemClick]
+      caseStatuses
+        .filter(
+          (status: CaseStatuses) => !shouldDisableStatusFn([{ status: currentStatus }], status)
+        )
+        .map((status: CaseStatuses) => (
+          <EuiContextMenuItem
+            data-test-subj={`case-view-status-dropdown-${status}`}
+            icon={status === currentStatus ? 'check' : 'empty'}
+            key={status}
+            onClick={() => onContextMenuItemClick(status)}
+          >
+            <Status status={status} />
+          </EuiContextMenuItem>
+        )),
+    [currentStatus, onContextMenuItemClick, shouldDisableStatusFn]
   );
 
   if (disabled) {

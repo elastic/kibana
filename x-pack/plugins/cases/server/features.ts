@@ -164,7 +164,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
       },
       {
         name: i18n.translate('xpack.cases.features.reopenCaseubFeatureName', {
-          defaultMessage: 'Reopen Closed Cases',
+          defaultMessage: 'Re-open',
         }),
         privilegeGroups: [
           {
@@ -174,7 +174,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 api: apiTags.all,
                 id: CASES_REOPEN_CAPABILITY,
                 name: i18n.translate('xpack.cases.features.reopenCaseubFeatureDetails', {
-                  defaultMessage: 'Reopen closed cases',
+                  defaultMessage: 'Re-open closed cases',
                 }),
                 includeIn: 'all',
                 savedObject: {

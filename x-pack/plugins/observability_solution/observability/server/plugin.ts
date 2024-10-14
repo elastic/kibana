@@ -242,7 +242,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         {
           name: i18n.translate('xpack.observability.featureRegistry.reopenCaseubFeatureName', {
-            defaultMessage: 'Reopen Closed Cases',
+            defaultMessage: 'Re-open',
           }),
           privilegeGroups: [
             {
@@ -253,7 +253,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.reopenCaseubFeatureDetails',
                     {
-                      defaultMessage: 'Reopen closed cases',
+                      defaultMessage: 'Re-open closed cases',
                     }
                   ),
                   includeIn: 'all',

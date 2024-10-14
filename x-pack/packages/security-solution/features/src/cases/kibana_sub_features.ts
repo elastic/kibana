@@ -135,7 +135,7 @@ export const getCasesSubFeaturesMap = ({
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureName',
       {
-        defaultMessage: 'Reopen Closed Cases',
+        defaultMessage: 'Re-open',
       }
     ),
     privilegeGroups: [
@@ -148,7 +148,7 @@ export const getCasesSubFeaturesMap = ({
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureDetails',
               {
-                defaultMessage: 'Reopen closed cases',
+                defaultMessage: 'Re-open closed cases',
               }
             ),
             includeIn: 'all',
