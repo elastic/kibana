@@ -142,7 +142,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-    userProfile
+    userProfile,
   } = useKibana().services;
   const basePath = useBasePath();
 

@@ -10,8 +10,8 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
+import type { UserProfileService } from '@kbn/core/public';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
-import { UserProfileService } from '@kbn/core/public';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;

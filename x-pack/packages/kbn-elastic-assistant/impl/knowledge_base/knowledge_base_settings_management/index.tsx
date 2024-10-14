@@ -261,8 +261,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       : i18n.NEW_INDEX_FLYOUT_TITLE;
   }, [selectedEntry]);
 
-
-
   const sorting = {
     sort: {
       field: 'name',

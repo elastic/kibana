@@ -108,9 +108,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         onClick: () => {
           onTabChange?.(t.id);
         },
-        isSelected: t.id ===       selectedSettingsTab,
+        isSelected: t.id === selectedSettingsTab,
       }));
-    }, [ selectedSettingsTab, tabsConfig]);
+    }, [selectedSettingsTab, tabsConfig]);
 
     return (
       <>
