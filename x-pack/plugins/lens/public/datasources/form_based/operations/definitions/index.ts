@@ -450,7 +450,9 @@ interface BaseOperationDefinitionProps<
     columnId: string,
     indexPattern: IndexPattern,
     layer: FormBasedLayer,
-    uiSettings: IUiSettingsClient
+    uiSettings: IUiSettingsClient,
+    dateRange: DateRange,
+    data: DataPublicPluginStart
   ) => string | undefined;
 }
 

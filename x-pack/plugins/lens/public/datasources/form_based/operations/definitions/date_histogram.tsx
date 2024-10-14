@@ -143,7 +143,7 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId, indexPattern) => {
+  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange, data) => {
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;
     let interval = column.params?.interval ?? autoInterval;
@@ -187,10 +187,14 @@ export const dateHistogramOperation: OperationDefinition<
     }
 
     if (interval === 'auto') {
-      return `BUCKET(${column.sourceField}, 50, ?_tstart, ?_tend)`;
-    } else {
-      return `BUCKET(${column.sourceField}, ${mapToEsqlInterval(interval)})`;
+      interval =
+        data.search.aggs.calculateAutoTimeExpression({
+          from: dateRange.fromDate,
+          to: dateRange.toDate,
+        }) || '1h';
     }
+
+    return `BUCKET(${column.sourceField}, ${mapToEsqlInterval(interval)})`;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const usedField = indexPattern.getFieldByName(column.sourceField);

@@ -10,6 +10,7 @@ import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import {
   AggFunctionsMapping,
+  DataPublicPluginStart,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
   UI_SETTINGS,
@@ -71,6 +72,7 @@ function getExpressionForLayer(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
+  data: DataPublicPluginStart,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -183,7 +185,9 @@ function getExpressionForLayer(
           colId,
           indexPattern,
           layer,
-          uiSettings
+          uiSettings,
+          dateRange,
+          data
         ) !== undefined
       );
     });
@@ -238,7 +242,9 @@ function getExpressionForLayer(
               wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
               indexPattern,
               layer,
-              uiSettings
+              uiSettings,
+              dateRange,
+              data
               // orderedColumnIds,
               // operationDefinitionMap
             )
@@ -292,7 +298,9 @@ function getExpressionForLayer(
               wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
               indexPattern,
               layer,
-              uiSettings
+              uiSettings,
+              dateRange,
+              data
               // orderedColumnIds,
               // operationDefinitionMap
             )
@@ -674,6 +682,7 @@ export function toExpression(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
+  data: DataPublicPluginStart,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -683,6 +692,7 @@ export function toExpression(
       uiSettings,
       dateRange,
       nowInstant,
+      data,
       searchSessionId
     );
   }
