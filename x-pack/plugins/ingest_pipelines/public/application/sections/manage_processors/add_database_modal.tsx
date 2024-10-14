@@ -165,17 +165,7 @@ export const AddDatabaseModal = ({
                 <p>
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
-                    defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore. {link}"
-                    values={{
-                      link: (
-                        <EuiLink href="#">
-                          <FormattedMessage
-                            id="xpack.ingestPipelines.manageProcessors.geoip.licenseLearnMoreLink"
-                            defaultMessage="Learn more."
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+                    defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore."
                   />
                 </p>
               </EuiCallOut>
@@ -197,17 +187,7 @@ export const AddDatabaseModal = ({
                 <p>
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
-                    defaultMessage="In order to grant access to your IP Info account, you must add the license token to the keystore. {link}"
-                    values={{
-                      link: (
-                        <EuiLink href="#">
-                          <FormattedMessage
-                            id="xpack.ingestPipelines.manageProcessors.geoip.licenseLearnMoreLink"
-                            defaultMessage="Learn more."
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+                    defaultMessage="In order to grant access to your IP Info account, you must add the license token to the keystore."
                   />
                 </p>
               </EuiCallOut>
@@ -268,9 +248,6 @@ export const AddDatabaseModal = ({
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorText"
                   defaultMessage="Database cannot be added multiple times."
-                  values={{
-                    name: databaseName,
-                  }}
                 />
               </p>
             </EuiCallOut>
