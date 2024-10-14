@@ -7,8 +7,11 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
+import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { LogEntryCategoriesPageContent } from './page_content';
+import { CategoriesPageTemplate, LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 import { logCategoriesTitle } from '../../../translations';
 import { LogMlJobIdFormatsShimProvider } from '../shared/use_log_ml_job_id_formats_shim';
@@ -19,6 +22,28 @@ export const LogEntryCategoriesPage = () => {
       text: logCategoriesTitle,
     },
   ]);
+
+  const { hasLogAnalysisReadCapabilities, hasLogAnalysisCapabilites } =
+    useLogAnalysisCapabilitiesContext();
+
+  if (!hasLogAnalysisCapabilites) {
+    return (
+      <SubscriptionSplashPage
+        data-test-subj="logsLogEntryCategoriesPage"
+        pageHeader={{
+          pageTitle: logCategoriesTitle,
+        }}
+      />
+    );
+  }
+
+  if (!hasLogAnalysisReadCapabilities) {
+    return (
+      <CategoriesPageTemplate isEmptyState={true}>
+        <MissingResultsPrivilegesPrompt />
+      </CategoriesPageTemplate>
+    );
+  }
 
   return (
     <EuiErrorBoundary>
