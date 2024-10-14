@@ -58,7 +58,7 @@
       "matchDepNames": ["@elastic/charts"],
       "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:prev-minor", "Team:Visualizations"],
       "enabled": true
     },
     {
@@ -538,6 +538,24 @@
     {
       "groupName": "@mswjs/http-middleware",
       "matchPackageNames": ["@mswjs/http-middleware"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@xyflow/react",
+      "matchPackageNames": ["@xyflow/react"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@dagrejs/dagre",
+      "matchPackageNames": ["@dagrejs/dagre"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
