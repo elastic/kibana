@@ -62,7 +62,7 @@ export function getRoutingTransform() {
           break;
 
         case 'metric':
-          const metricsetName = document?.resource?.attributes?.['metricset.name'];
+          const metricsetName = document?.attributes?.['metricset.name'];
           if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||

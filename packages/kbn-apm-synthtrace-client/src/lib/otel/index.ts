@@ -33,6 +33,7 @@ export interface OtelDocument extends Fields {
   };
   attributes?: {
     'timestamp.us'?: number;
+    'metricset.name'?: string;
     [key: string]: any;
   };
   resource?: {
