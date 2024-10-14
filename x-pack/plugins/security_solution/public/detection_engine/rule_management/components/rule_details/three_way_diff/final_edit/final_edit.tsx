@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { DiffableRuleTypes } from '../../../../../../../common/api/detection_engine';
-import { FinalEditContextProvider } from './final_edit_context';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import { CommonRuleFieldEdit } from './common_rule_field_edit';
@@ -17,7 +15,6 @@ import { ThreatMatchRuleFieldEdit } from './threat_match_rule_field_edit';
 import { ThresholdRuleFieldEdit } from './threshold_rule_field_edit';
 import { NewTermsRuleFieldEdit } from './new_terms_rule_field_edit';
 import type {
-  UpgradeableDiffableFields,
   UpgradeableCustomQueryFields,
   UpgradeableSavedQueryFields,
   UpgradeableThreatMatchFields,
@@ -25,33 +22,19 @@ import type {
   UpgradeableNewTermsFields,
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { useFinalSideContext } from '../final_side/final_side_context';
 
-interface FinalEditProps {
-  fieldName: UpgradeableDiffableFields;
-  setReadOnlyMode: () => void;
-}
-
-export function FinalEdit({ fieldName, setReadOnlyMode }: FinalEditProps) {
+export function FinalEdit() {
   const { finalDiffableRule } = useDiffableRuleContext();
+  const { type } = finalDiffableRule;
 
-  return (
-    <FinalEditContextProvider value={{ fieldName, setReadOnlyMode }}>
-      <FieldEdit fieldName={fieldName} ruleType={finalDiffableRule.type} />
-    </FinalEditContextProvider>
-  );
-}
+  const { fieldName } = useFinalSideContext();
 
-interface FinalEditFieldProps {
-  fieldName: UpgradeableDiffableFields;
-  ruleType: DiffableRuleTypes;
-}
-
-function FieldEdit({ fieldName, ruleType }: FinalEditFieldProps) {
   if (isCommonFieldName(fieldName)) {
     return <CommonRuleFieldEdit fieldName={fieldName} />;
   }
 
-  switch (ruleType) {
+  switch (type) {
     case 'query':
       return <CustomQueryRuleFieldEdit fieldName={fieldName as UpgradeableCustomQueryFields} />;
     case 'saved_query':
@@ -69,6 +52,6 @@ function FieldEdit({ fieldName, ruleType }: FinalEditFieldProps) {
     case 'new_terms':
       return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
     default:
-      return assertUnreachable(ruleType);
+      return assertUnreachable(type);
   }
 }

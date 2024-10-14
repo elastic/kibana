@@ -13,7 +13,7 @@ import type {
   DiffableAllFields,
   DiffableRule,
 } from '../../../../../../../common/api/detection_engine';
-import { useFinalEditContext } from './final_edit_context';
+import { useFinalSideContext } from '../final_side/final_side_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import * as i18n from '../translations';
 
@@ -45,8 +45,7 @@ export function FieldFormWrapper({
   deserializer,
   serializer,
 }: FieldFormWrapperProps) {
-  const { fieldName, setReadOnlyMode } = useFinalEditContext();
-
+  const { fieldName, setReadOnlyMode } = useFinalSideContext();
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
   const deserialize = useCallback(

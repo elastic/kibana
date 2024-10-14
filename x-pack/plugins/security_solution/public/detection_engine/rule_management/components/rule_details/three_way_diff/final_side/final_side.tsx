@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
@@ -14,16 +14,14 @@ import { FinalReadOnly } from '../final_readonly/final_readonly';
 import { FinalEdit } from '../final_edit/final_edit';
 import { FinalSideMode } from './constants';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { FinalSideContextProvider, useFinalSideContext } from './final_side_context';
 
 interface FinalSideProps {
   fieldName: UpgradeableDiffableFields;
 }
 
 export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
-  const [mode, setMode] = React.useState<FinalSideMode>(FinalSideMode.READONLY); // TODO: Replace with state from context
-  const setReadOnlyMode = useCallback(() => setMode(FinalSideMode.READONLY), []);
-  const setEditMode = useCallback(() => setMode(FinalSideMode.EDIT), []);
-
   return (
     <>
       <SideHeader>
@@ -34,11 +32,22 @@ export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
           </h3>
         </EuiTitle>
       </SideHeader>
-      {mode === FinalSideMode.EDIT ? (
-        <FinalEdit fieldName={fieldName} setReadOnlyMode={setReadOnlyMode} />
-      ) : (
-        <FinalReadOnly fieldName={fieldName} setEditMode={setEditMode} />
-      )}
+      <FinalSideContextProvider fieldName={fieldName}>
+        <FinalSideContent />
+      </FinalSideContextProvider>
     </>
   );
+}
+
+function FinalSideContent(): JSX.Element {
+  const { mode } = useFinalSideContext();
+
+  switch (mode) {
+    case FinalSideMode.READONLY:
+      return <FinalReadOnly />;
+    case FinalSideMode.EDIT:
+      return <FinalEdit />;
+    default:
+      return assertUnreachable(mode);
+  }
 }

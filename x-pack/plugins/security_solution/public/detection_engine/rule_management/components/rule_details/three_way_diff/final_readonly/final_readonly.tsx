@@ -9,13 +9,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { FieldReadOnly } from './field_readonly';
 import * as i18n from '../translations';
+import { useFinalSideContext } from '../final_side/final_side_context';
 
-interface FinalReadOnlyProps {
-  fieldName: string;
-  setEditMode: () => void;
-}
+export function FinalReadOnly() {
+  const { setEditMode, fieldName } = useFinalSideContext();
 
-export function FinalReadOnly({ fieldName, setEditMode }: FinalReadOnlyProps) {
   return (
     <>
       <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
