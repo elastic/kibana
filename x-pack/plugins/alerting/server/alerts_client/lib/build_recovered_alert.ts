@@ -87,7 +87,7 @@ export const buildRecoveredAlert = <
 
   const alertUpdates = {
     // Set latest rule configuration
-    ...rule,
+    // ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'close',

@@ -51,7 +51,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
 
   const alertUpdates = {
     // Set latest rule configuration
-    ...rule,
+    // ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
