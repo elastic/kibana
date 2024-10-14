@@ -8,8 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { OptionListWithFieldStats } from '@kbn/ml-field-stats-flyout';
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
@@ -62,7 +61,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
 
     return (
       <EuiFormRow fullWidth label={inline ? undefined : label}>
-        <OptionListWithFieldStats
+        <EuiComboBox
           fullWidth
           compressed
           prepend={inline ? label : undefined}
@@ -72,6 +71,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
           onChange={onChangeCallback}
           isClearable
           data-test-subj="aiopsChangePointSplitField"
+          renderOption={renderOption}
         />
       </EuiFormRow>
     );
