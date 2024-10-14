@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
-import { EuiButton, EuiCode, EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -56,16 +55,19 @@ const degradedDocButtonLabelWhenNotPresent = i18n.translate(
   { defaultMessage: 'All fields in this document were parsed correctly' }
 );
 
-const updateEsqlQuery = i18n.translate('discover.customControl.degradedDoc.updateEsqlQuery', {
-  defaultMessage: 'Update ES|QL query',
-});
-
-const formattedCTAMessage = (
+const getFormattedCTAMessage = ({ hasClickAction }: { hasClickAction: boolean }) => (
   <FormattedMessage
     id="discover.customControl.degradedDocDisabled"
-    defaultMessage="Degraded document field detection is disabled for this search. To enable it, add {directive} to your ES|QL query."
+    defaultMessage="Degraded document field detection is disabled for this search. {action} to add {directive} to your ES|QL query."
     values={{
       directive: <EuiCode css={{ display: 'inline-block' }}>METADATA _ignored</EuiCode>,
+      action: hasClickAction
+        ? i18n.translate('discover.customControl.degradedDocDisabled.click', {
+            defaultMessage: 'Click',
+          })
+        : i18n.translate('discover.customControl.degradedDocDisabled.consider', {
+            defaultMessage: 'Consider',
+          }),
     }}
   />
 );
@@ -87,17 +89,22 @@ const DegradedDocs = ({
   if (!enabled) {
     if (addIgnoredMetadataToQuery) {
       return (
-        <EnableESQLDegradedDocsControl
-          Control={Control}
-          addIgnoredMetadataToQuery={addIgnoredMetadataToQuery}
+        <Control
+          css={{ color: euiThemeVars.euiColorDisabledText }} // Give same color as disabled
+          data-test-subj="docTableDegradedDocDisabled"
+          iconType="indexClose"
+          label={actionsHeaderAriaLabelDegradedAction}
+          tooltipContent={getFormattedCTAMessage({ hasClickAction: true })}
+          onClick={addIgnoredMetadataToQuery}
         />
       );
     } else {
+      // Control without click action for saved searches in dashboards
       return (
         <Control
           disabled
           data-test-subj="docTableDegradedDocDisabled"
-          tooltipContent={formattedCTAMessage}
+          tooltipContent={getFormattedCTAMessage({ hasClickAction: false })}
           label={actionsHeaderAriaLabelDegradedAction}
           iconType="indexClose"
           onClick={undefined}
@@ -127,50 +134,5 @@ const DegradedDocs = ({
       onClick={undefined}
       {...props}
     />
-  );
-};
-
-const EnableESQLDegradedDocsControl = ({
-  addIgnoredMetadataToQuery,
-  Control,
-}: {
-  addIgnoredMetadataToQuery: DegradedDocsControlProps['addIgnoredMetadataToQuery'];
-  Control: RowControlComponent;
-}) => {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-
-  return (
-    <EuiPopover
-      anchorPosition="upCenter"
-      button={
-        <Control
-          css={{ color: euiThemeVars.euiColorDisabledText }}
-          data-test-subj="docTableDegradedDocDisabled"
-          iconType="indexClose"
-          label={actionsHeaderAriaLabelDegradedAction}
-          onClick={togglePopover}
-        />
-      }
-      closePopover={closePopover}
-      isOpen={isPopoverOpen}
-      className="unifiedDataTable__rowControl"
-    >
-      <EuiText
-        component="p"
-        size="s"
-        style={{ marginBottom: euiThemeVars.euiSizeM, width: '30ch' }}
-      >
-        {formattedCTAMessage}
-      </EuiText>
-      <EuiButton
-        fullWidth
-        iconSide="right"
-        iconType="push"
-        onClick={addIgnoredMetadataToQuery}
-        size="s"
-      >
-        {updateEsqlQuery}
-      </EuiButton>
-    </EuiPopover>
   );
 };
