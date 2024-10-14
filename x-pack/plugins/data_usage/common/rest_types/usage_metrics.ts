@@ -82,24 +82,22 @@ export type UsageMetricsRequestBody = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
-    schema.oneOf([
-      schema.object({
-        metrics: schema.recordOf(
-          metricTypesSchema,
-          schema.arrayOf(
-            schema.object({
-              name: schema.string(),
-              data: schema.arrayOf(
-                schema.object({
-                  x: schema.number(),
-                  y: schema.number(),
-                })
-              ),
-            })
-          )
-        ),
-      }),
-    ]),
+    schema.object({
+      metrics: schema.recordOf(
+        metricTypesSchema,
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            data: schema.arrayOf(
+              schema.object({
+                x: schema.number(),
+                y: schema.number(),
+              })
+            ),
+          })
+        )
+      ),
+    }),
 };
 export type UsageMetricsResponseSchemaBody = Omit<
   TypeOf<typeof UsageMetricsResponseSchema.body>,
