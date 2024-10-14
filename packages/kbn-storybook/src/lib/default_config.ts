@@ -92,8 +92,8 @@ export const defaultConfig: StorybookConfig = {
       })
     );
 
-    config.module.rules.push({
-      test: /\.tsx?$/,
+    config?.module?.rules?.push({
+      test: /\.(js|jsx|ts|tsx)$/,
       use: [
         {
           loader: require.resolve('babel-loader'),
@@ -101,7 +101,7 @@ export const defaultConfig: StorybookConfig = {
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
-              require.resolve('@babel/preset-typescript'),
+              [require.resolve('@babel/preset-typescript'), { allowDeclareFields: true }],
             ],
           },
         },
