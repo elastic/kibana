@@ -31,3 +31,4 @@ export {
   getStartEndParams,
   hasStartEndParams,
 } from './utils/run_query';
+export { isESQLColumnSortable, isESQLColumnGroupable } from './utils/esql_fields_utils';
