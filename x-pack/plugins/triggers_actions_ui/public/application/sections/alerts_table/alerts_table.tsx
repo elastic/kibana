@@ -316,6 +316,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     toolbarVisibility: toolbarVisibilityProp,
     shouldHighlightRow,
     fieldFormats,
+    height,
   } = props;
 
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -727,6 +728,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
         </Suspense>
         {alertsCount > 0 && (
           <EuiDataGrid
+            // As per EUI docs, it is not recommended to switch between undefined and defined height.
+            // If user changes height, it is better to unmount and mount the component.
+            // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+            key={height ? 'fixedHeight' : 'autoHeight'}
             aria-label="Alerts table"
             data-test-subj="alertsTable"
             columns={columnsWithCellActions}
@@ -745,6 +750,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
             ref={dataGridRef}
             renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
             renderCellPopover={handleRenderCellPopover}
+            height={height}
           />
         )}
       </section>
