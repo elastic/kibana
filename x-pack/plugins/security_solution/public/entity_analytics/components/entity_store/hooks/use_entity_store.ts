@@ -35,7 +35,7 @@ export const useEntityStoreEnablement = () => {
   const { initEntityStore } = useEntityStoreRoutes();
   const { refetch: initialize } = useQuery({
     queryKey: [ENTITY_STORE_ENABLEMENT_INIT],
-    queryFn: () => Promise.all([initEntityStore('user')]),
+    queryFn: () => Promise.all([initEntityStore('user'), initEntityStore('host')]),
     enabled: false,
   });
 

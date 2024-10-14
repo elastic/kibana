@@ -15,8 +15,15 @@ import {
   EuiSwitch,
   EuiModalFooter,
   EuiButton,
+  EuiHorizontalRule,
+  EuiText,
+  EuiButtonEmpty,
+  EuiBetaBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 
 export interface Enablements {
   riskScore: boolean;
@@ -55,35 +62,84 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   return (
     <EuiModal onClose={() => toggle(false)}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{'Enable Store'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.enablements.modal.title"
+            defaultMessage="Additional charges may apply"
+          />
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFlexGroup>
+        <EuiFlexGroup direction="column">
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.enablements.modal.description"
+              defaultMessage="Please be aware that activating these features may incur additional charges depending on your subscription plan. Review your plan details carefully to avoid unexpected costs before proceeding."
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem>
             <EuiSwitch
-              label="Risk Score"
+              label={
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.enablements.modal.risk"
+                  defaultMessage="Risk Score"
+                />
+              }
               checked={enablements.riskScore}
               disabled={riskScore.disabled || false}
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiSwitch
-              label="Entity Store"
-              checked={enablements.entityStore}
-              disabled={entityStore.disabled || false}
-              onChange={() =>
-                setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
-              }
-            />
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.enablements.modal.risk.description"
+                defaultMessage="Provides real-time visibility into user activity, helping you identify and mitigate potential security risks."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexStart">
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.enablements.modal.store"
+                    defaultMessage="Entity Store"
+                  />
+                }
+                checked={enablements.entityStore}
+                disabled={entityStore.disabled || false}
+                onChange={() =>
+                  setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
+                }
+              />
+              <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
+                <EuiBetaBadge label={TECHNICAL_PREVIEW} />
+              </EuiToolTip>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.enablements.modal.store.description"
+                defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
+              />
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
 
       <EuiModalFooter>
+        <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
         <EuiButton onClick={enableStore(enablements)} fill>
-          {'Go'}
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"
+            defaultMessage="Enable"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

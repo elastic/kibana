@@ -14,14 +14,13 @@ import {
   EuiFlexGroup,
   EuiLoadingLogo,
   EuiPanel,
+  EuiImage,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
-import { Panel } from '../../../../common/components/panel';
-import { HeaderSection } from '../../../../common/components/header_section';
-import { EntityAnalyticsLearnMoreLink } from '../../risk_score_onboarding/entity_analytics_doc_link';
 import { EntitiesList } from '../entities_list';
 
 import { useEntityStoreEnablement } from '../hooks/use_entity_store';
@@ -30,6 +29,15 @@ import { EntityStoreEnablementModal, type Enablements } from './enablement_modal
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
 import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';
 import { useEntityEngineStatus } from '../hooks/use_entity_engine_status';
+
+import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
+import {
+  ENABLEMENT_INITIALIZING_ENTITY_STORE,
+  ENABLEMENT_INITIALIZING_RISK_ENGINE,
+  ENABLE_ALL_TITLE,
+  ENABLE_ENTITY_STORE_TITLE,
+  ENABLE_RISK_SCORE_TITLE,
+} from '../translations';
 
 const EntityStoreDashboardPanelsComponent = () => {
   const [modal, setModalState] = useState({ visible: false });
@@ -64,7 +72,7 @@ const EntityStoreDashboardPanelsComponent = () => {
       <EuiPanel hasBorder>
         <EuiEmptyPrompt
           icon={<EuiLoadingSpinner size="xl" />}
-          title={<h2>{'Initializing store'}</h2>}
+          title={<h2>{ENABLEMENT_INITIALIZING_ENTITY_STORE}</h2>}
         />
       </EuiPanel>
     );
@@ -75,7 +83,15 @@ const EntityStoreDashboardPanelsComponent = () => {
       <EuiPanel hasBorder>
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
-          title={<h2>{'Initializing store'}</h2>}
+          title={<h2>{ENABLEMENT_INITIALIZING_ENTITY_STORE}</h2>}
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityStore.enablement.initializing.description"
+                defaultMessage="It can take up to 5 minutes"
+              />
+            </p>
+          }
         />
       </EuiPanel>
     );
@@ -104,9 +120,10 @@ const EntityStoreDashboardPanelsComponent = () => {
       {entityStore.status === 'enabled' && !isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
-            <EnableRiskScore
+            <EnableEntityStore
               onEnable={() => setModalState({ visible: true })}
-              loading={riskEngineInitializing}
+              loadingRiskEngine={riskEngineInitializing}
+              enablements="riskScore"
             />
           </EuiFlexItem>
 
@@ -118,13 +135,18 @@ const EntityStoreDashboardPanelsComponent = () => {
 
       {entityStore.status === 'not_installed' && !isRiskScoreAvailable && (
         // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
-        <EnableEntityStore onEnable={() => setModalState({ visible: true })} />
+        <EnableEntityStore
+          enablements="both"
+          onEnable={() => setModalState({ visible: true })}
+          loadingRiskEngine={riskEngineInitializing}
+        />
       )}
 
       {entityStore.status === 'not_installed' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
             <EnableEntityStore
+              enablements="store"
               onEnable={() =>
                 setModalState({
                   visible: true,
@@ -157,78 +179,64 @@ const EntityStoreDashboardPanelsComponent = () => {
 
 interface EnableEntityStoreProps {
   onEnable: () => void;
+  enablements: 'store' | 'riskScore' | 'both';
+  loadingRiskEngine?: boolean;
 }
 
-export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({ onEnable }) => {
-  return (
-    <Panel hasBorder data-test-subj={`entity_analytics_entity_store`}>
-      <HeaderSection title={'Entity Store'} titleSize="s" />
-      <EuiEmptyPrompt
-        title={<h2>{'Placeholder title'}</h2>}
-        body={
-          <>
-            {'Placeholder text'}
-            <EntityAnalyticsLearnMoreLink />
-          </>
-        }
-        actions={
-          <EuiToolTip content={'Enable Entity Store'}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={onEnable}
-              data-test-subj={`enable_entity_store_btn`}
-            >
-              {'Enable'}
-            </EuiButton>
-          </EuiToolTip>
-        }
-      />
-    </Panel>
-  );
-};
+export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({
+  onEnable,
+  enablements,
+  loadingRiskEngine,
+}) => {
+  const title =
+    enablements === 'store'
+      ? ENABLE_ENTITY_STORE_TITLE
+      : enablements === 'riskScore'
+      ? ENABLE_RISK_SCORE_TITLE
+      : ENABLE_ALL_TITLE;
 
-interface EnableRiskEngineProps {
-  onEnable: () => void;
-  loading: boolean;
-}
-
-export const EnableRiskScore: React.FC<EnableRiskEngineProps> = ({ onEnable, loading }) => {
-  if (loading) {
+  if (loadingRiskEngine) {
     return (
       <EuiPanel hasBorder>
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
-          title={<h2>{'Initializing risk engine'}</h2>}
+          title={<h2>{ENABLEMENT_INITIALIZING_RISK_ENGINE}</h2>}
         />
       </EuiPanel>
     );
   }
   return (
-    <Panel hasBorder data-test-subj={`entity_analytics_enable_risk_score`}>
-      <HeaderSection title={'Risk Store'} titleSize="s" />
-      <EuiEmptyPrompt
-        title={<h2>{'Placeholder title'}</h2>}
-        body={
-          <>
-            {'Placeholder text'}
-            <EntityAnalyticsLearnMoreLink />
-          </>
-        }
-        actions={
-          <EuiToolTip content={'Enable Risk Score'}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={onEnable}
-              data-test-subj={`enable_risk_score_btn`}
-            >
-              {'Enable'}
-            </EuiButton>
-          </EuiToolTip>
-        }
-      />
-    </Panel>
+    <EuiEmptyPrompt
+      css={{ minWidth: '100%' }}
+      hasBorder
+      layout="horizontal"
+      className="eui-fullWidth"
+      title={<h2>{title}</h2>}
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityStore.enablement.description"
+            defaultMessage="Your entity store is currently empty. Start by adding information about your assets directly from your logs or import them easily using a CSV file."
+          />
+        </p>
+      }
+      actions={
+        <EuiToolTip content={title}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onEnable}
+            data-test-subj={`enable_entity_store_btn`}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
+              defaultMessage="Enable"
+            />
+          </EuiButton>
+        </EuiToolTip>
+      }
+      icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}
+    />
   );
 };
 
