@@ -38,6 +38,39 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.CVSScoreBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "CVSScoreBadge",
+        "description": [],
+        "signature": [
+          "({ score, version }: CVSScoreBadgeProps) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/components/vulnerability_badges.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CVSScoreBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ score, version }",
+            "description": [],
+            "signature": [
+              "CVSScoreBadgeProps"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/components/vulnerability_badges.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.decodeQuery",
         "type": "Function",
         "tags": [],
@@ -94,6 +127,39 @@
               "any"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getCvsScoreColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getCvsScoreColor",
+        "description": [],
+        "signature": [
+          "(score: number) => string | undefined"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_colors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getCvsScoreColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "score",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_colors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +254,105 @@
               }
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getVulnerabilityStats",
+        "type": "Function",
+        "tags": [],
+        "label": "getVulnerabilityStats",
+        "description": [],
+        "signature": [
+          "(counts: VulnerabilityCounts) => VulnerabilitiesDistributionBarProps[]"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/vulnerability_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getVulnerabilityStats.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "counts",
+            "description": [],
+            "signature": [
+              "VulnerabilityCounts"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/vulnerability_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.hasVulnerabilitiesData",
+        "type": "Function",
+        "tags": [],
+        "label": "hasVulnerabilitiesData",
+        "description": [],
+        "signature": [
+          "(counts: VulnerabilityCounts) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/vulnerability_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.hasVulnerabilitiesData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "counts",
+            "description": [],
+            "signature": [
+              "VulnerabilityCounts"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/vulnerability_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.SeverityStatusBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "SeverityStatusBadge",
+        "description": [],
+        "signature": [
+          "({ severity }: SeverityStatusBadgeProps) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/components/vulnerability_badges.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.SeverityStatusBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ severity }",
+            "description": [],
+            "signature": [
+              "SeverityStatusBadgeProps"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/components/vulnerability_badges.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
