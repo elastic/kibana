@@ -196,6 +196,9 @@ export interface DeletePackageRequest {
     pkgName: string;
     pkgVersion: string;
   };
+  query: {
+    force?: boolean;
+  };
 }
 
 export interface DeletePackageResponse {

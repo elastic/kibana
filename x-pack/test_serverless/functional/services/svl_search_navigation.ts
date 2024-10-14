@@ -22,12 +22,20 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
       });
     },
-    async navigateToElasticsearchStartPage() {
+    async navigateToGettingStartedPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('elasticsearch/start', {
+        await PageObjects.common.navigateToApp('serverlessElasticsearch');
+        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
+      });
+    },
+    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('elasticsearchStart', {
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
+        if (!expectRedirect) {
+          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
+        }
       });
     },
     async navigateToIndexDetailPage(indexName: string) {

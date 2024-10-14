@@ -22,6 +22,7 @@ export const VULNERABILITIES_FLYOUT_VISITS = 'vulnerabilities-flyout-visits';
 export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
 export const GROUP_BY_CLICK = 'group-by-click';
 export const CHANGE_RULE_STATE = 'change-rule-state';
+export const ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS = 'entity-flyout-vulnerability-view-visits';
 
 type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS
@@ -32,6 +33,7 @@ type CloudSecurityUiCounters =
   | typeof CREATE_DETECTION_RULE_FROM_FLYOUT
   | typeof CREATE_DETECTION_FROM_TABLE_ROW_ACTION
   | typeof GROUP_BY_CLICK
+  | typeof ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS
   | typeof CHANGE_RULE_STATE;
 
 export class UiMetricService {

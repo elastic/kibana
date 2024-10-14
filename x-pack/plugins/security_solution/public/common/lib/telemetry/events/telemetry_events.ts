@@ -48,6 +48,7 @@ import {
   addNoteFromExpandableFlyoutClickedEvent,
   openNoteInExpandableFlyoutClickedEvent,
 } from './notes';
+import { previewRuleEvent } from './preview_rule';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -192,4 +193,5 @@ export const telemetryEvents = [
   eventLogShowSourceEventDateRangeEvent,
   openNoteInExpandableFlyoutClickedEvent,
   addNoteFromExpandableFlyoutClickedEvent,
+  previewRuleEvent,
 ];

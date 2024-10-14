@@ -45,7 +45,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       .query({ lastBackingIndex });
   }
 
-  describe('Degraded field analyze', () => {
+  describe('Degraded field analyze', function () {
+    // see details: https://github.com/elastic/kibana/issues/195466
+    this.tags(['failsOnMKI']);
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {

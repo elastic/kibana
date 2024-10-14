@@ -13,5 +13,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/features-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/config-schema",
   ]
 }

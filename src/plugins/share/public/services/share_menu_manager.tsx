@@ -11,10 +11,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
-import { ShareMenuItem, ShowShareMenuOptions } from '../types';
+import { ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
+import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
 import { ShareMenu } from '../components/share_tabs';
 
 export class ShareMenuManager {
@@ -89,7 +89,7 @@ export class ShareMenuManager {
     publicAPIEnabled,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
-    menuItems: ShareMenuItem[];
+    menuItems: ShareMenuItemV2[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
