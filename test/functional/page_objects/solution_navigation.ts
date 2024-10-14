@@ -265,6 +265,17 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await collapseNavBtn.click();
         }
       },
+      feedbackCallout: {
+        async expectExists() {
+          await testSubjects.existOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+        },
+        async expectMissing() {
+          await testSubjects.missingOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+        },
+        async dismiss() {
+          await testSubjects.click('sideNavfeedbackCallout > euiDismissCalloutButton');
+        },
+      },
     },
     breadcrumbs: {
       async expectExists() {

@@ -34,6 +34,7 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 export type Health = 'green' | 'yellow' | 'red';
 
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
+  global_max_retention?: string;
   store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
   store_size_bytes?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size_bytes'];
   maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
@@ -68,6 +69,7 @@ export interface DataStream {
     enabled?: boolean;
     effective_retention?: string;
     retention_determined_by?: string;
+    globalMaxRetention?: string;
   };
 }
 

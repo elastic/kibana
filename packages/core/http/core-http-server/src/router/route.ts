@@ -215,7 +215,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * Defines intended request origin of the route:
    * - public. The route is public, declared stable and intended for external access.
-   *           In the future, may require an incomming request to contain a specified header.
+   *           In the future, may require an incoming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
    * Defaults to 'internal' If not declared,
@@ -285,6 +285,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   deprecated?: boolean;
 
   /**
+   * Whether this route should be treated as "invisible" and excluded from router
+   * OAS introspection.
+   *
+   * @default false
+   */
+  excludeFromOAS?: boolean;
+
+  /**
    * Release version or date that this route will be removed
    * Use with `deprecated: true`
    *
@@ -292,6 +300,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @example 9.0.0
    */
   discontinued?: string;
+
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    *

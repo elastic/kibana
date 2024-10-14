@@ -35,7 +35,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
