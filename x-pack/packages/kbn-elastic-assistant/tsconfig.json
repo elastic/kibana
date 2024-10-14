@@ -31,7 +31,5 @@
     "@kbn/core",
     "@kbn/zod",
     "@kbn/data-views-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/serverless",
   ]
 }
