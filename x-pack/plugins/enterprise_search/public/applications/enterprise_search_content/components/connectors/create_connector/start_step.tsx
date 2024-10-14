@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import * as Constants from '../../../../shared/constants';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
@@ -63,6 +64,7 @@ export const StartStep: React.FC<StartStepProps> = ({
     isCreateLoading,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector, generateConnectorName } = useActions(NewConnectorLogic);
+  const { connector } = useValues(ConnectorViewLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -276,7 +278,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              {generatedConfigData ? (
+              {generatedConfigData && connector ? (
                 <>
                   <GeneratedConfigFields
                     apiKey={{
@@ -285,7 +287,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                       id: generatedConfigData.apiKey.id,
                       name: generatedConfigData.apiKey.name,
                     }}
-                    generateApiKey={() => {}} // TODO: bind
+                    connector={connector}
                     isGenerateLoading={false}
                   />
                   <EuiSpacer size="m" />

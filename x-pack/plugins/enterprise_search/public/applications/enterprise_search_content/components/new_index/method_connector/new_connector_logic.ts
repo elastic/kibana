@@ -63,7 +63,6 @@ export interface NewConnectorValues {
 }
 
 type NewConnectorActions = {
-  conncetorNameGenerated: GenerateConnectorNamesApiLogicActions['apiSuccess'];
   generateConnectorName: GenerateConnectorNamesApiLogicActions['makeRequest'];
 } & {
   configurationGenerated: GenerateConfigApiActions['apiSuccess'];
@@ -78,7 +77,11 @@ type NewConnectorActions = {
     isSelfManaged: boolean;
     shouldGenerateAfterCreate?: boolean;
     shouldNavigateToConnectorAfterCreate?: boolean;
-  }) => { isSelfManaged: boolean; shouldGenerateAfterCreate?: boolean };
+  }) => {
+    isSelfManaged: boolean;
+    shouldGenerateAfterCreate?: boolean;
+    shouldNavigateToConnectorAfterCreate?: boolean;
+  };
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
   setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
@@ -163,7 +166,10 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
           language: null,
           name: values.generatedNameData.connectorName,
           serviceType: values.selectedConnector.serviceType,
-          uiFlags: { shouldNavigateToConnectorAfterCreate, shouldGenerateAfterCreate },
+          uiFlags: {
+            shouldGenerateAfterCreate,
+            shouldNavigateToConnectorAfterCreate,
+          },
         });
       } else {
         if (values.generatedNameData && values.selectedConnector) {
@@ -174,7 +180,10 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
             language: null,
             name: values.connectorName,
             serviceType: values.selectedConnector?.serviceType,
-            uiFlags: { shouldNavigateToConnectorAfterCreate, shouldGenerateAfterCreate },
+            uiFlags: {
+              shouldGenerateAfterCreate,
+              shouldNavigateToConnectorAfterCreate,
+            },
           });
         }
       }

@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 
-import { useValues } from 'kea';
-
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -26,17 +24,19 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
-import { ConnectorViewLogic } from '../connector_view_logic';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
-  generateApiKey: () => void;
+  connector: Connector;
+  generateApiKey?: () => void;
   isGenerateLoading: boolean;
 }
 
@@ -79,11 +79,11 @@ const ConfirmModal: React.FC<{
 
 export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   apiKey,
+  connector,
   generateApiKey,
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { connector } = useValues(ConnectorViewLogic);
 
   const refreshButtonClick = () => {
     setIsModalVisible(true);
@@ -93,7 +93,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   };
 
   const onConfirm = () => {
-    generateApiKey();
+    if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
 
@@ -222,16 +222,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                         <EuiFlexItem>
                           <EuiCode>{apiKey?.encoded}</EuiCode>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                            size="xs"
-                            iconType="refresh"
-                            isLoading={isGenerateLoading}
-                            onClick={refreshButtonClick}
-                            disabled={!connector.index_name}
-                          />
-                        </EuiFlexItem>
+                        {generateApiKey && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                              size="xs"
+                              iconType="refresh"
+                              isLoading={isGenerateLoading}
+                              onClick={refreshButtonClick}
+                              disabled={!connector.index_name}
+                            />
+                          </EuiFlexItem>
+                        )}
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             size="xs"
@@ -245,16 +247,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   </EuiCopy>
                 </EuiFlexItem>
               ) : (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                    size="xs"
-                    iconType="refresh"
-                    isLoading={isGenerateLoading}
-                    onClick={refreshButtonClick}
-                    disabled={!connector.index_name}
-                  />
-                </EuiFlexItem>
+                generateApiKey && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                      size="xs"
+                      iconType="refresh"
+                      isLoading={isGenerateLoading}
+                      onClick={refreshButtonClick}
+                      disabled={!connector.index_name}
+                    />
+                  </EuiFlexItem>
+                )
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
