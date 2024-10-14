@@ -4,6 +4,7 @@ description: The type of connector. For example, `.email`, `.index`, `.jira`, `.
 enum:
   - .bedrock
   - .gemini
+  - .inference
   - .cases-webhook
   - .d3security
   - .email

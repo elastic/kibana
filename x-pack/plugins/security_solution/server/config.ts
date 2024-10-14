@@ -175,6 +175,11 @@ export const configSchema = schema.object({
         maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
     }),
+    entityStore: schema.object({
+      developer: schema.object({
+        pipelineDebugMode: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 });
 
