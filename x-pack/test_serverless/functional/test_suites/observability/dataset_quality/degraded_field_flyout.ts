@@ -41,8 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const customComponentTemplateName = 'logs-synth@mappings';
 
   describe('Degraded fields flyout', function () {
-    // see details: https://github.com/elastic/kibana/issues/195466
-    this.tags(['failsOnMKI']);
     before(async () => {
       await synthtrace.index([
         // Ingest basic logs
