@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const NEW_FEATURES_BLOG_POST_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.newFeaturesBlogPostCallout.calloutTitle',
   {
-    defaultMessage: `Discover the power of Elastic's detection capabilities and unlock its potential`,
+    defaultMessage: `Discover the power of Elastic's threat detection!`,
   }
 );
 
 export const NEW_FEATURES_BLOG_POST_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.newFeaturesBlogPostCallout.calloutDescription',
   {
-    defaultMessage: 'Discover new and existing detection capabilities of Elastic Security',
+    defaultMessage: 'Learn about new and existing detection capabilities of Elastic Security.',
   }
 );
 
