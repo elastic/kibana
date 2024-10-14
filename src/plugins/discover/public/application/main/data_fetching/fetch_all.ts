@@ -157,6 +157,8 @@ export function fetchAll(
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
+        window.currentESQLData = records;
+
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,

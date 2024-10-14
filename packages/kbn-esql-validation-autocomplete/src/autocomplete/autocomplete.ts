@@ -1114,9 +1114,18 @@ async function getExpressionSuggestionsByType(
           }),
         }
       );
-      console.log(valueLookup);
+      const localValueLookup = new Set(
+        window.currentESQLData
+          ?.filter((item) => {
+            if (!item.flattened[fieldName]) return false;
+            const val = String(item.flattened[fieldName]);
+            return val.startsWith(valuePrefix);
+          })
+          .map((item) => item.flattened[fieldName])
+      );
+      // console.log(valueLookup);
       return [
-        ...valueLookup.map((suggestion: any) => ({
+        ...[...valueLookup, ...localValueLookup.values()].map((suggestion: any) => ({
           label: suggestion,
           text: `"${suggestion}"`,
           filterText: suggestion,
