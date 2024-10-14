@@ -42,7 +42,6 @@ export interface SimplifiedProcessors {
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecsTypes: string;
   ecsCategories: string;
   exAnswer: string;
@@ -154,7 +153,6 @@ export interface UnstructuredLogState {
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecs: string;
   exAnswer: string;
   packageName: string;

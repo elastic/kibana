@@ -10,7 +10,7 @@ import { StateGraph, END, START } from '@langchain/langgraph';
 import { SamplesFormat } from '../../../common';
 import type { CategorizationState } from '../../types';
 import { handleValidatePipeline } from '../../util/graph';
-import { formatSamples, prefixSamples } from '../../util/samples';
+import { prefixSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
 import { handleErrors } from './errors';
@@ -31,10 +31,6 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   samples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  formattedSamples: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
   },
   ecsTypes: {
     value: (x: string, y?: string) => y ?? x,
@@ -110,30 +106,20 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   },
 };
 
-function modelJSONInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
-  const samples = prefixSamples(state);
-  const formattedSamples = formatSamples(samples);
+function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  let samples: string[];
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    samples = prefixSamples(state);
+  } else {
+    samples = state.rawSamples;
+  }
+
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
     exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
     ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
     ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
     samples,
-    formattedSamples,
-    initialPipeline,
-    finalized: false,
-    reviewed: false,
-    lastExecutedChain: 'modelJSONInput',
-  };
-}
-
-function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
-  const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
-  return {
-    exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
-    ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
-    ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
-    samples: state.rawSamples,
     initialPipeline,
     finalized: false,
     reviewed: false,
@@ -150,13 +136,6 @@ function modelOutput({ state }: CategorizationBaseNodeParams): Partial<Categoriz
       pipeline: state.currentPipeline,
     },
   };
-}
-
-function modelRouter({ state }: CategorizationBaseNodeParams): string {
-  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
-    return 'modelJSONInput';
-  }
-  return 'modelInput';
 }
 
 function validationRouter({ state }: CategorizationBaseNodeParams): string {
@@ -196,7 +175,6 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     channels: graphState,
   })
     .addNode('modelInput', (state: CategorizationState) => modelInput({ state }))
-    .addNode('modelJSONInput', (state: CategorizationState) => modelJSONInput({ state }))
     .addNode('modelOutput', (state: CategorizationState) => modelOutput({ state }))
     .addNode('handleCategorization', (state: CategorizationState) =>
       handleCategorization({ state, model })
@@ -212,12 +190,8 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     )
     .addNode('handleErrors', (state: CategorizationState) => handleErrors({ state, model }))
     .addNode('handleReview', (state: CategorizationState) => handleReview({ state, model }))
-    .addConditionalEdges(START, (state: CategorizationState) => modelRouter({ state }), {
-      modelJSONInput: 'modelJSONInput',
-      modelInput: 'modelInput', // For Non JSON input samples
-    })
+    .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
-    .addEdge('modelJSONInput', 'handleValidatePipeline')
     .addEdge('modelInput', 'handleValidatePipeline')
     .addEdge('handleCategorization', 'handleValidatePipeline')
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')

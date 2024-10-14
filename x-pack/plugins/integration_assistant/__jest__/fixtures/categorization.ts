@@ -162,7 +162,6 @@ export const testPipelineInvalidEcs: { pipelineResults: object[]; errors: object
 export const categorizationTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
-  formattedSamples: '{"test1": "test1"}',
   ecsTypes: 'testtypes',
   ecsCategories: 'testcategories',
   exAnswer: 'testanswer',
