@@ -52,7 +52,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
   };
 
   // Prevent flickering in the most common case of having access to manage api keys
-  const canManageOwnApiKey = !data || !data.canManageOwnApiKey;
+  const canManageOwnApiKey = !data || data.canManageOwnApiKey;
 
   useEffect(() => {
     if (apiKey) {
