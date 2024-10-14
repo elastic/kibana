@@ -35,7 +35,7 @@ interface AddDataPanelContent {
 }
 
 interface AddDataPanelButton {
-  href: string;
+  href: string | undefined;
   label?: string;
 }
 
@@ -101,17 +101,19 @@ export function AddDataPanel({
             <EuiText size="s">{content.content}</EuiText>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="AddDataPanelAddDataButton"
-                  fill
-                  href={actions.primary.href}
-                  onClick={onAddData}
-                >
-                  {actions.primary.label}
-                </EuiButton>
-              </EuiFlexItem>
-              {actions.secondary ? (
+              {actions.primary.href && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="AddDataPanelAddDataButton"
+                    fill
+                    href={actions.primary.href}
+                    onClick={onAddData}
+                  >
+                    {actions.primary.label}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {actions.secondary?.href && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     data-test-subj="AddDataPanelTryItNowButton"
@@ -124,18 +126,20 @@ export function AddDataPanel({
                     {actions.secondary.label || tryItDefaultLabel}
                   </EuiButton>
                 </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  href={actions.link.href}
-                  onClick={onLearnMore}
-                  target="_blank"
-                  data-test-subj="AddDataPanelLearnMoreButton"
-                  external
-                >
-                  {actions.link.label || learnMoreDefaultLabel}
-                </EuiLink>
-              </EuiFlexItem>
+              )}
+              {actions.link?.href && (
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    href={actions.link.href}
+                    onClick={onLearnMore}
+                    target="_blank"
+                    data-test-subj="AddDataPanelLearnMoreButton"
+                    external
+                  >
+                    {actions.link.label || learnMoreDefaultLabel}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {content.img && content.img?.position === 'inside' && (

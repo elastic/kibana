@@ -43,7 +43,7 @@ const hostDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: OnboardingFlow.Hosts }) || '',
+        href: locator?.getRedirectUrl({ category: OnboardingFlow.Hosts }),
         label: defaultPrimaryActionLabel,
       },
       secondary: {
@@ -62,7 +62,7 @@ const containerDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: OnboardingFlow.Infra }) || '',
+        href: locator?.getRedirectUrl({ category: OnboardingFlow.Infra }),
         label: defaultPrimaryActionLabel,
       },
       link: {
