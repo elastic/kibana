@@ -8,20 +8,22 @@
  */
 
 import {
+  AppMenuActionBase,
+  AppMenuActionCustom,
+  AppMenuActionSubmenuBase,
+  AppMenuActionSubmenuCustom,
+  AppMenuActionSubmenuHorizontalRule,
+  AppMenuActionSubmenuSecondary,
+  AppMenuActionType,
   AppMenuItem,
+  AppMenuItemCustom,
   AppMenuItemPrimary,
   AppMenuItemSecondary,
-  AppMenuItemCustom,
-  AppMenuActionType,
-  AppMenuActionSubmenuCustom,
-  AppMenuActionSubmenuSecondary,
-  AppMenuActionBase,
-  AppMenuActionSubmenuBase,
-  AppMenuActionCustom,
-  AppMenuActionSubmenuHorizontalRule,
 } from './types';
 
 export class AppMenuRegistry {
+  static CUSTOM_ITEMS_LIMIT = 2;
+
   private appMenuItems: AppMenuItem[];
   private customSubmenuItemsBySubmenuId: Map<
     string,
@@ -52,7 +54,10 @@ export class AppMenuRegistry {
 
   public registerCustomAction(appMenuItem: AppMenuItemCustom) {
     this.appMenuItems = [
-      ...this.appMenuItems.filter((item) => item.id !== appMenuItem.id),
+      ...this.appMenuItems.filter(
+        // avoid duplicates and other items override
+        (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
+      ),
       appMenuItem,
     ];
   }
@@ -60,14 +65,20 @@ export class AppMenuRegistry {
   public registerCustomActionUnderSubmenu(submenuId: string, appMenuItem: AppMenuActionCustom) {
     this.customSubmenuItemsBySubmenuId.set(submenuId, [
       ...(this.customSubmenuItemsBySubmenuId.get(submenuId) ?? []).filter(
-        (item) => item.id !== appMenuItem.id
+        // avoid duplicates and other items override
+        (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
       ),
       appMenuItem,
     ]);
   }
 
   private getSortedItemsForType(type: AppMenuActionType) {
-    const actions = this.appMenuItems.filter((item) => item.type === type);
+    let actions = this.appMenuItems.filter((item) => item.type === type);
+
+    if (type === AppMenuActionType.custom && actions.length > AppMenuRegistry.CUSTOM_ITEMS_LIMIT) {
+      // apply the limitation on how many custom items can be shown
+      actions = actions.slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+    }
 
     // enrich submenus with custom actions
     if (type === AppMenuActionType.secondary || type === AppMenuActionType.custom) {
