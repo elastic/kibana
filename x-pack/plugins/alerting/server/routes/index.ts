@@ -30,7 +30,7 @@ import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './rule/apis/resolve';
-import { ruleTypesRoute } from './rule_types';
+import { ruleTypesRoute } from './rule/apis/list_types/rule_types';
 import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';

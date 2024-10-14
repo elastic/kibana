@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { RulesClientContext } from '../types';
+import {
+  WriteOperations,
+  ReadOperations,
+  AlertingAuthorizationEntity,
+} from '../../../../authorization';
+import { RulesClientContext } from '../../../../rules_client/types';
 
 export async function listRuleTypes(context: RulesClientContext) {
   return await context.authorization.filterByRuleTypeAuthorization(
