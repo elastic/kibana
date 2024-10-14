@@ -121,7 +121,11 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = customField?.value ?? '';
+  const selectedOptionExists = customFieldConfiguration.options.find(
+    (option) => option.key === customField?.value
+  );
+  const initialValue = selectedOptionExists ? customField?.value ?? '' : '';
+
   const [isEdit, setIsEdit] = useState(false);
   const [formState, setFormState] = useState<FormState>({
     isValid: undefined,
@@ -155,10 +159,11 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   };
 
   const title = customFieldConfiguration.label;
+
   const isListFieldValid =
     formState.isValid ||
     (formState.value === customFieldConfiguration.defaultValue && !initialValue);
-  const isCustomFieldValueDefined = !isEmpty(customField?.value);
+  const isCustomFieldValueDefined = !isEmpty(customField?.value) && selectedOptionExists;
 
   return (
     <>
