@@ -224,6 +224,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           <EuiFlexItem>
             <EuiButton
               color={'text'}
+              data-test-subj={'refresh-entries'}
               isDisabled={isFetchingEntries}
               onClick={handleRefreshTable}
               iconType={'refresh'}
@@ -319,9 +320,10 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             {!isFetched ? (
-              <EuiLoadingSpinner size="l" />
+              <EuiLoadingSpinner data-test-subj="spinning" size="l" />
             ) : isKbSetup ? (
               <EuiInMemoryTable
+                data-test-subj="knowledge-base-entries-table"
                 columns={columns}
                 items={entries.data ?? []}
                 search={search}
@@ -396,6 +398,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </Flyout>
       {deleteKBItem && (
         <EuiConfirmModal
+          data-test-subj="delete-entry-confirmation"
           title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
           onCancel={handleCancelDeleteEntry}
           onConfirm={handleDeleteEntry}

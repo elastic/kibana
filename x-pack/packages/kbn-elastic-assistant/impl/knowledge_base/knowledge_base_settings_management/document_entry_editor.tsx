@@ -95,6 +95,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
           <EuiFieldText
             name="name"
+            data-test-subj="entryNameInput"
             placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
             fullWidth
             value={entry?.name}
@@ -116,6 +117,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         <EuiFormRow label={i18n.ENTRY_MARKDOWN_INPUT_TEXT} fullWidth>
           <EuiMarkdownEditor
             aria-label={i18n.ENTRY_MARKDOWN_INPUT_TEXT}
+            data-test-subj="entryMarkdownInput"
             placeholder="# Title"
             value={entry?.text ?? ''}
             onChange={setMarkdownValue}
