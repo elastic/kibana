@@ -100,6 +100,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...esServerArgsFromController[options.serverlessProject],
         ],
       },
@@ -109,6 +113,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['--xpack.security.roleManagementEnabled=true']
+            : []),
         ],
       },
       testFiles: options.testFiles,
