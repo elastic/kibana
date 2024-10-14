@@ -12,45 +12,82 @@ import {
   AppMenuItemPrimary,
   AppMenuItemSecondary,
   AppMenuItemCustom,
-  AppMenuActionId,
   AppMenuActionType,
   AppMenuActionSubmenuCustom,
   AppMenuActionSubmenuSecondary,
   AppMenuActionBase,
   AppMenuActionSubmenuBase,
   AppMenuActionCustom,
+  AppMenuActionSubmenuHorizontalRule,
 } from './types';
 
 export class AppMenuRegistry {
-  private readonly appMenuItems: AppMenuItem[];
+  private appMenuItems: AppMenuItem[];
+  private customSubmenuItemsBySubmenuId: Map<
+    string,
+    Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
+  >;
 
   constructor(primaryAndSecondaryActions: Array<AppMenuItemPrimary | AppMenuItemSecondary>) {
     this.appMenuItems = assignOrderToActions(primaryAndSecondaryActions);
+    this.customSubmenuItemsBySubmenuId = new Map();
+  }
+
+  public isActionRegistered(appMenuItemId: string) {
+    return (
+      this.appMenuItems.some((item) => {
+        if (item.id === appMenuItemId) {
+          return true;
+        }
+        if (isAppMenuActionSubmenu(item)) {
+          return item.actions.some((submenuItem) => submenuItem.id === appMenuItemId);
+        }
+        return false;
+      }) ||
+      [...this.customSubmenuItemsBySubmenuId.values()].some((submenuItems) =>
+        submenuItems.some((item) => item.id === appMenuItemId)
+      )
+    );
   }
 
   public registerCustomAction(appMenuItem: AppMenuItemCustom) {
-    this.appMenuItems.push(appMenuItem);
+    this.appMenuItems = [
+      ...this.appMenuItems.filter((item) => item.id !== appMenuItem.id),
+      appMenuItem,
+    ];
   }
 
-  public registerCustomActionUnderAlerts(appMenuItem: AppMenuActionCustom) {
-    const alertsMenuItem = this.appMenuItems.find((item) => item.id === AppMenuActionId.alerts);
-    if (alertsMenuItem && isAppMenuActionSubmenuSecondary(alertsMenuItem)) {
-      alertsMenuItem.actions.push(appMenuItem);
+  public registerCustomActionUnderSubmenu(submenuId: string, appMenuItem: AppMenuActionCustom) {
+    this.customSubmenuItemsBySubmenuId.set(submenuId, [
+      ...(this.customSubmenuItemsBySubmenuId.get(submenuId) ?? []).filter(
+        (item) => item.id !== appMenuItem.id
+      ),
+      appMenuItem,
+    ]);
+  }
+
+  private getSortedItemsForType(type: AppMenuActionType) {
+    const actions = this.appMenuItems.filter((item) => item.type === type);
+
+    // enrich submenus with custom actions
+    if (type === AppMenuActionType.secondary || type === AppMenuActionType.custom) {
+      [...this.customSubmenuItemsBySubmenuId.entries()].forEach(([submenuId, customActions]) => {
+        const submenuParentItem = actions.find((item) => item.id === submenuId);
+        if (submenuParentItem && isAppMenuActionSubmenu(submenuParentItem)) {
+          submenuParentItem.actions.push(...customActions);
+        }
+      });
     }
+
+    return sortAppMenuItemsByOrder(actions);
   }
 
   public getSortedItems() {
-    const primaryActions = sortAppMenuItemsByOrder(
-      this.appMenuItems.filter((item) => item.type === AppMenuActionType.primary)
-    );
-    const secondaryActions = sortAppMenuItemsByOrder(
-      this.appMenuItems.filter((item) => item.type === AppMenuActionType.secondary)
-    );
-    const customActions = sortAppMenuItemsByOrder(
-      this.appMenuItems.filter((item) => item.type === AppMenuActionType.custom)
-    );
+    const primaryItems = this.getSortedItemsForType(AppMenuActionType.primary);
+    const secondaryItems = this.getSortedItemsForType(AppMenuActionType.secondary);
+    const customItems = this.getSortedItemsForType(AppMenuActionType.custom);
 
-    return [...customActions, ...secondaryActions, ...primaryActions];
+    return [...customItems, ...secondaryItems, ...primaryItems];
   }
 }
 
@@ -58,12 +95,6 @@ function isAppMenuActionSubmenu(
   appMenuItem: AppMenuItem
 ): appMenuItem is AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom {
   return 'actions' in appMenuItem && Array.isArray(appMenuItem.actions);
-}
-
-function isAppMenuActionSubmenuSecondary(
-  appMenuItem: AppMenuItem
-): appMenuItem is AppMenuActionSubmenuSecondary {
-  return isAppMenuActionSubmenu(appMenuItem) && appMenuItem.type === AppMenuActionType.secondary;
 }
 
 const FALLBACK_ORDER = Number.MAX_SAFE_INTEGER;

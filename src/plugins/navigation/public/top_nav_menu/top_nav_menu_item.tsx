@@ -72,7 +72,10 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
       <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom">
         <EuiButtonIcon
           size="s"
-          {...commonButtonProps}
+          {...{
+            ...commonButtonProps,
+            iconSide: undefined,
+          }}
           iconType={props.iconType}
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}

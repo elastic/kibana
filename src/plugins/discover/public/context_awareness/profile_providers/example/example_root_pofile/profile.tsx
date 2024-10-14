@@ -8,7 +8,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { getFieldValue } from '@kbn/discover-utils';
+import { AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 
@@ -28,6 +28,43 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
         );
       },
     }),
+    getAppMenu: (prev) => (params) => {
+      const prevValue = prev(params);
+
+      return {
+        appMenuRegistry: (registry) => {
+          registry.registerCustomAction({
+            id: 'example-custom-root-submenu1',
+            type: AppMenuActionType.custom,
+            label: 'Root Submenu',
+            actions: [
+              {
+                id: 'example-custom-root-action11',
+                type: AppMenuActionType.custom,
+                controlProps: {
+                  label: 'Root Custom action 11',
+                  onClick: () => {
+                    alert('Example Root Custom action 11 clicked');
+                  },
+                },
+              },
+              {
+                id: 'example-custom-root-action12',
+                type: AppMenuActionType.custom,
+                controlProps: {
+                  label: 'Root Custom action 12',
+                  onClick: () => {
+                    alert('Example Root Custom action 12 clicked');
+                  },
+                },
+              },
+            ],
+          });
+
+          return prevValue.appMenuRegistry(registry);
+        },
+      };
+    },
   },
   resolve: (params) => {
     if (params.solutionNavId != null) {

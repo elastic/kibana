@@ -8,7 +8,12 @@
  */
 
 import { EuiBadge, EuiFlyout } from '@elastic/eui';
-import { AppMenuActionType, getFieldValue, RowControlColumn } from '@kbn/discover-utils';
+import {
+  AppMenuActionId,
+  AppMenuActionType,
+  getFieldValue,
+  RowControlColumn,
+} from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -82,25 +87,25 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return {
         appMenuRegistry: (registry) => {
           registry.registerCustomAction({
-            id: 'example-custom-action1',
+            id: 'example-custom-submenu1',
             type: AppMenuActionType.custom,
-            label: 'Custom 1',
+            label: 'Data source submenu',
             actions: [
               {
-                id: 'example-custom-action11',
+                id: 'example-custom-action1',
                 type: AppMenuActionType.custom,
                 controlProps: {
-                  label: 'Custom 11',
+                  label: 'Custom 1',
                   onClick: () => {
                     alert('Example custom action 11 clicked');
                   },
                 },
               },
               {
-                id: 'example-custom-action12',
+                id: 'example-custom-action2',
                 type: AppMenuActionType.custom,
                 controlProps: {
-                  label: 'Custom 12',
+                  label: 'Custom 2',
                   onClick: () => {
                     alert('Example custom action 12 clicked');
                   },
@@ -110,30 +115,44 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           });
 
           registry.registerCustomAction({
-            id: 'example-custom-action2',
+            id: 'example-custom-action3',
             type: AppMenuActionType.custom,
             controlProps: {
-              label: 'Custom 2',
+              label: 'Custom action',
               onClick: ({ onFinishAction }) => {
                 // This is an example of a custom action that opens a flyout or any other custom modal
                 // To do so, simply return a React element and call onFinishAction when you're done
                 return (
                   <EuiFlyout onClose={onFinishAction}>
-                    <div>Example custom action 2 clicked</div>
+                    <div>Example custom action clicked</div>
                   </EuiFlyout>
                 );
               },
             },
           });
 
-          registry.registerCustomActionUnderAlerts({
-            id: 'example-custom-action3',
+          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+            id: 'example-custom-action4',
             type: AppMenuActionType.custom,
             order: 101,
             controlProps: {
-              label: 'Custom 3',
+              label: 'Custom action under Alerts',
               onClick: ({ onFinishAction }) => {
-                alert('Example custom action 3 clicked');
+                alert('Example Custom action under Alerts clicked');
+                onFinishAction();
+              },
+            },
+          });
+
+          // This submenu was defined in the root profile example_root_pofile/profile.tsx
+          // and we can add actions to it from the data source profile here
+          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu1', {
+            id: 'example-custom-action5',
+            type: AppMenuActionType.custom,
+            controlProps: {
+              label: 'Data source action under root submenu',
+              onClick: ({ onFinishAction }) => {
+                alert('Example Data source action under root submenu clicked');
                 onFinishAction();
               },
             },
