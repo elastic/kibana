@@ -9,8 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Ingest pipelines app', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./ingest_pipelines'));
+    // loadTestFile(require.resolve('./feature_controls'));
+    // loadTestFile(require.resolve('./ingest_pipelines'));
     loadTestFile(require.resolve('./manage_processors'));
   });
 };

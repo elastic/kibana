@@ -130,9 +130,12 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('addGeoipDatabaseButton');
     },
 
-    async fillAddDatabaseForm(maxmind: string, databaseName: string) {
-      await testSubjects.setValue('addDatabaseMaxmind', maxmind);
-      await testSubjects.setValue('addDatabaseName', databaseName);
+    async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string, ) {
+      await testSubjects.setValue('databaseTypeSelect', databaseType);
+      if (maxmind) {
+        await testSubjects.setValue('maxmindField', maxmind);
+      }
+      await testSubjects.setValue('databaseNameSelect', databaseName);
     },
 
     async clickAddDatabaseButton() {

@@ -52,14 +52,14 @@ export const registerCreateDatabaseRoute = ({
       const normalizedDatabaseName = normalizeDatabaseName(databaseName);
 
       try {
-        // TODO: Replace this request with the one below when it's fixed
+        // TODO: Replace this request with the one below when the JS client fixed
         await clusterClient.asCurrentUser.transport.request({
           method: 'PUT',
           path: `/_ingest/ip_location/database/${normalizedDatabaseName}`,
           body: serializedDatabase,
         });
 
-        // This request fails with error "Request body is required"
+        // This request fails because there is a bug in the JS client
         // await clusterClient.asCurrentUser.ingest.putGeoipDatabase({
         //   id: normalizedDatabaseName,
         //   body: serializedDatabase,

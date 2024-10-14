@@ -11,7 +11,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines', 'savedObjects']);
   const security = getService('security');
-  const databaseName = 'GeoIP2-Anonymous-IP';
+  const maxMindDatabaseName = 'GeoIP2-Anonymous-IP';
+  const ipInfoDatabaseName = 'ASN';
 
   describe('Ingest Pipelines: Manage Processors', function () {
     this.tags('smoke');
@@ -31,14 +32,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(promptExists).to.be(true);
     });
 
-    it('Modal to create a database', async () => {
+    it('Create a MaxMind database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
-      await pageObjects.ingestPipelines.fillAddDatabaseForm('123456', databaseName);
+      await pageObjects.ingestPipelines.fillAddDatabaseForm(
+        'MaxMind',
+        maxMindDatabaseName,
+        '123456'
+      );
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
 
       const databasesList = await pageObjects.ingestPipelines.getGeoipDatabases();
       const databaseExists = Boolean(
-        databasesList.find((databaseRow) => databaseRow.includes(databaseName))
+        databasesList.find((databaseRow) => databaseRow.includes(maxMindDatabaseName))
+      );
+
+      expect(databaseExists).to.be(true);
+    });
+
+    it('Create an IPInfo database', async () => {
+      await pageObjects.ingestPipelines.openCreateDatabaseModal();
+      await pageObjects.ingestPipelines.fillAddDatabaseForm('IPInfo', ipInfoDatabaseName);
+      await pageObjects.ingestPipelines.clickAddDatabaseButton();
+
+      const databasesList = await pageObjects.ingestPipelines.getGeoipDatabases();
+      const databaseExists = Boolean(
+        databasesList.find((databaseRow) => databaseRow.includes(ipInfoDatabaseName))
       );
 
       expect(databaseExists).to.be(true);
@@ -46,12 +64,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Table contains database name and maxmind type', async () => {
       const databasesList = await pageObjects.ingestPipelines.getGeoipDatabases();
-      const databaseRow = databasesList.find((database) => database.includes(databaseName));
-      expect(databaseRow).to.contain(databaseName);
-      expect(databaseRow).to.contain('MaxMind');
+      const maxMindDatabaseRow = databasesList.find((database) =>
+        database.includes(maxMindDatabaseName)
+      );
+      expect(maxMindDatabaseRow).to.contain(maxMindDatabaseName);
+      expect(maxMindDatabaseRow).to.contain('MaxMind');
+
+      const ipInfoDatabaseRow = databasesList.find((database) =>
+        database.includes(ipInfoDatabaseName)
+      );
+      expect(ipInfoDatabaseRow).to.contain(ipInfoDatabaseName);
+      expect(ipInfoDatabaseRow).to.contain('IPInfo');
     });
 
     it('Modal to delete a database', async () => {
+      // Delete both databases
+      await pageObjects.ingestPipelines.deleteDatabase(0);
       await pageObjects.ingestPipelines.deleteDatabase(0);
       const promptExists = await pageObjects.ingestPipelines.geoipEmptyListPromptExists();
       expect(promptExists).to.be(true);
