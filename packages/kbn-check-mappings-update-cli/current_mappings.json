@@ -2837,6 +2837,26 @@
       }
     }
   },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "integer"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
