@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { ESProcessorItem } from './processor_attributes.gen';
+import { CelInput } from './cel_input_attributes.gen';
 
 /**
  * Package name for the integration to be built.
@@ -46,7 +47,7 @@ export const RawSamples = z.array(z.string());
  * mapping object to ECS Mapping Request.
  */
 export type Mapping = z.infer<typeof Mapping>;
-export const Mapping = z.object({}).passthrough();
+export const Mapping = z.object({}).catchall(z.unknown());
 
 /**
  * LLM Connector to be used in each API request.
@@ -58,7 +59,7 @@ export const Connector = z.string();
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}).passthrough());
+export const Docs = z.array(z.object({}).catchall(z.unknown()));
 
 /**
  * The name of the log samples format.
@@ -178,6 +179,10 @@ export const DataStream = z.object({
    * The format of log samples in this dataStream.
    */
   samplesFormat: SamplesFormat,
+  /**
+   * The optional CEL input configuration for the dataStream.
+   */
+  celInput: CelInput.optional(),
 });
 
 /**
