@@ -108,6 +108,7 @@ export const useAccordionState = ({ navNode }: { navNode: ChromeProjectNavigatio
       };
 
       const updated: Partial<EuiAccordionProps & { isCollapsible?: boolean }> = {
+        buttonProps: { 'data-test-subj': 'accordionToggleBtn' },
         ..._accordionProps,
         arrowProps,
         isCollapsible,
