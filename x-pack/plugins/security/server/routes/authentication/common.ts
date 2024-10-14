@@ -48,6 +48,7 @@ export function defineCommonRoutes({
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
         options: {
           access: 'public',
+          excludeFromOAS: true,
           authRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
         },
