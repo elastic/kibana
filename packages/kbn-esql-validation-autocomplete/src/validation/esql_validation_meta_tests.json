@@ -2206,7 +2206,7 @@
     {
       "query": "from index | keep ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2225,8 +2225,9 @@
       "error": [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: missing ID_PATTERN at '.'",
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '.' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "Unknown column [.]"
       ],
       "warning": []
     },
@@ -2336,7 +2337,7 @@
     {
       "query": "from index | drop ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2350,8 +2351,9 @@
       "error": [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: missing ID_PATTERN at '.'",
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '.' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "Unknown column [.]"
       ],
       "warning": []
     },
@@ -2471,7 +2473,7 @@
     {
       "query": "from a_index | mv_expand ",
       "error": [
-        "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2531,7 +2533,7 @@
     {
       "query": "from a_index | rename",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2553,14 +2555,14 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename missingField as",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
         "Unknown column [missingField]"
       ],
       "warning": []
@@ -2608,7 +2610,7 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2664,7 +2666,7 @@
     {
       "query": "from a_index | dissect textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [textField.]"
       ],
       "warning": []
@@ -2759,7 +2761,7 @@
     {
       "query": "from a_index | grok textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [textField.]"
       ],
       "warning": []
@@ -9371,7 +9373,7 @@
     {
       "query": "from a_index |enrich policy on ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -9400,7 +9402,7 @@
     {
       "query": "from a_index | enrich policy on textField with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -9414,7 +9416,7 @@
     {
       "query": "from a_index |enrich policy on doubleField with var0 = ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
         "Unknown column [var0]"
       ],
       "warning": []
@@ -9430,8 +9432,8 @@
     {
       "query": "from a_index |enrich policy on doubleField with var0 = , ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at ','",
-        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN",
+        "SyntaxError: mismatched input ',' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
         "Unknown column [var0]"
       ],
       "warning": []
@@ -9456,7 +9458,7 @@
     {
       "query": "from a_index |enrich policy on doubleField with var0 = otherField, var1 = ",
       "error": [
-        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
         "Unknown column [var1]"
       ],
       "warning": []
@@ -9474,7 +9476,7 @@
     {
       "query": "from a_index | enrich policy with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -9836,22 +9838,30 @@
     },
     {
       "query": "fRoM remote-*:indexes*",
-      "error": [],
+      "error": [
+        "Unknown index [remote-*:indexes*]"
+      ],
       "warning": []
     },
     {
       "query": "fRoM remote-*:indexes",
-      "error": [],
+      "error": [
+        "Unknown index [remote-*:indexes]"
+      ],
       "warning": []
     },
     {
       "query": "fRoM remote-ccs:indexes",
-      "error": [],
+      "error": [
+        "Unknown index [remote-ccs:indexes]"
+      ],
       "warning": []
     },
     {
       "query": "fRoM a_index, remote-ccs:indexes",
-      "error": [],
+      "error": [
+        "Unknown index [remote-ccs:indexes]"
+      ],
       "warning": []
     },
     {
@@ -9988,14 +9998,18 @@
     },
     {
       "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": [],
+      "error": [
+        "Unknown index [remote-ccs:indexes]"
+      ],
       "warning": [
         "Square brackets '[]' need to be removed from FROM METADATA declaration"
       ]
     },
     {
       "query": "from *:indexes [METADATA _id]",
-      "error": [],
+      "error": [
+        "Unknown index [*:indexes]"
+      ],
       "warning": [
         "Square brackets '[]' need to be removed from FROM METADATA declaration"
       ]
@@ -10040,12 +10054,16 @@
     },
     {
       "query": "from remote-ccs:indexes METADATA _id",
-      "error": [],
+      "error": [
+        "Unknown index [remote-ccs:indexes]"
+      ],
       "warning": []
     },
     {
       "query": "from *:indexes METADATA _id",
-      "error": [],
+      "error": [
+        "Unknown index [*:indexes]"
+      ],
       "warning": []
     },
     {

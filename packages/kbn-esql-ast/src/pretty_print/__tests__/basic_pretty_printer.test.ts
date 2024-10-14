@@ -87,15 +87,6 @@ describe('single line query', () => {
       });
     });
 
-    describe('META', () => {
-      /** @todo Enable once show command args are parsed as columns.  */
-      test.skip('functions page', () => {
-        const { text } = reprint('META functions');
-
-        expect(text).toBe('META functions');
-      });
-    });
-
     describe('STATS', () => {
       test('with aggregates assignment', () => {
         const { text } = reprint('FROM a | STATS var = agg(123, fn(true))');
