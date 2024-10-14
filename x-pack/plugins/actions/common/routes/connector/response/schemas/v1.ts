@@ -145,7 +145,7 @@ export const connectorExecuteResponseSchema = schema.object({
     schema.oneOf([schema.literal('user'), schema.literal('framework')], {
       meta: {
         description:
-          'When the status is error, determines the error is a framework error or a user error.',
+          'When the status is error, identifies whether the error is a framework error or a user error.',
       },
     })
   ),
