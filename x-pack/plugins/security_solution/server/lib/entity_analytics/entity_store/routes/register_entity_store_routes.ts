@@ -6,6 +6,7 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { applyDataViewIndicesEntityEngineRoute } from './apply_dataview_indices';
 import { deleteEntityEngineRoute } from './delete';
 import { listEntitiesRoute } from './entities/list';
 import { getEntityEngineRoute } from './get';
@@ -27,4 +28,5 @@ export const registerEntityStoreRoutes = ({
   getEntityEngineRoute(router, logger);
   listEntityEnginesRoute(router, logger);
   listEntitiesRoute(router, logger);
+  applyDataViewIndicesEntityEngineRoute(router, logger);
 };
