@@ -12,7 +12,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -80,7 +79,7 @@ export const AddDatabaseModal = ({
     setIsLoading(true);
     try {
       const { error } = await services.api.createDatabase({
-        databaseType,
+        databaseType: databaseType!,
         databaseName,
         maxmind,
       });
