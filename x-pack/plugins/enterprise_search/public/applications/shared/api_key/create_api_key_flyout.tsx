@@ -32,6 +32,7 @@ import {
   EuiSwitchEvent,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -161,6 +162,8 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
 
   const apiKeyRef = useRef<HTMLDivElement>(null);
 
+  const titleId = useGeneratedHtmlId();
+
   useEffect(() => {
     if (createdApiKey && apiKeyRef) {
       apiKeyRef.current?.scrollIntoView();
@@ -178,10 +181,11 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
       css={css`
         max-width: calc(${euiTheme.size.xxxxl} * 10);
       `}
+      aria-labelledby={titleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={titleId}>
             {i18n.translate('xpack.enterpriseSearch.apiKey.flyoutTitle', {
               defaultMessage: 'Create an API key',
             })}
