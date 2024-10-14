@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import type { Field, AggFieldPair, Aggregation } from '@kbn/ml-anomaly-utils';
+import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -67,15 +67,15 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
             const label = `${a.title}(${f.name})`;
             if (removeLabels.includes(label) === true) return;
             if (a.dslName !== null) {
-              const agg = {
+              const agg: DropDownLabel = {
                 key: label,
                 isEmpty,
                 hideTrigger: true,
                 isGroupLabel: false,
                 label,
-                agg: omit(a, 'fields') as Aggregation,
-                field: omit(f, 'aggs') as Field,
-              } as DropDownLabel;
+                agg: omit(a, 'fields'),
+                field: omit(f, 'aggs'),
+              };
               opts.push(agg);
             }
           });

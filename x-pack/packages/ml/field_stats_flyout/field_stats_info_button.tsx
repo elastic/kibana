@@ -138,11 +138,13 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
           paddingRight: themeVars.euiTheme.euiSizeXS,
         }}
       >
-        <FieldIcon
-          color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
-          type={getKbnFieldIconType(field.type)}
-          fill="none"
-        />
+        {!hideTrigger ? (
+          <FieldIcon
+            color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
+            type={getKbnFieldIconType(field.type)}
+            fill="none"
+          />
+        ) : null}
       </EuiFlexItem>
       <EuiText
         color={isEmpty ? 'subdued' : undefined}

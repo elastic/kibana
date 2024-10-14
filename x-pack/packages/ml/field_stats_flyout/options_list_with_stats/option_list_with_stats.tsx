@@ -18,6 +18,8 @@ import type { DropDownLabel } from './types';
 const MIN_POPOVER_WIDTH = 400;
 
 export const optionCss = css`
+  display: flex;
+  align-items: center;
   .euiComboBoxOption__enterBadge {
     display: none;
   }
@@ -67,7 +69,6 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
     () =>
       Array.isArray(options)
         ? options.map(({ isEmpty, hideTrigger: hideInspectButton, ...o }) => ({
-            key: o.key,
             ...o,
             css: optionCss,
             // Change data-is-empty- because EUI is passing all props to dom element
