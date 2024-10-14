@@ -24,7 +24,7 @@ export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependenci
 
       if (!canGetPipelines) {
         return response.ok({
-          body: { pipelines: {}, canGetPipelines: false },
+          body: { pipelines: {}, canManagePipelines: false },
         });
       }
       const pipelines = await client.asCurrentUser.ingest.getPipeline();
