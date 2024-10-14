@@ -76,6 +76,14 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
   },
 });
 
+export const getUniqueAlertCommentsCountQuery = (savedObjectType: string) => ({
+  uniqueAlertCommentsCount: {
+    cardinality: {
+      field: `${savedObjectType}.attributes.alertId`,
+    },
+  },
+});
+
 export const getReferencesAggregationQuery = ({
   savedObjectType,
   referenceType,
@@ -132,7 +140,11 @@ export const getCountsAndMaxData = async ({
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
-    { counts: Buckets; references: MaxBucketOnCaseAggregation['references'] }
+    {
+      counts: Buckets;
+      references: MaxBucketOnCaseAggregation['references'];
+      uniqueAlertCommentsCount: { value: number };
+    }
   >({
     page: 0,
     perPage: 0,
@@ -142,15 +154,19 @@ export const getCountsAndMaxData = async ({
     aggs: {
       ...getCountsAggregationQuery(savedObjectType),
       ...getMaxBucketOnCaseAggregationQuery(savedObjectType),
+      ...(savedObjectType === CASE_COMMENT_SAVED_OBJECT
+        ? getUniqueAlertCommentsCountQuery(savedObjectType)
+        : {}),
     },
   });
 
   const countsBuckets = res.aggregations?.counts?.buckets ?? [];
   const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
+  const alertsTotalCount = res.aggregations?.uniqueAlertCommentsCount?.value ?? 0;
 
   return {
     all: {
-      total: res.total,
+      total: savedObjectType === CASE_COMMENT_SAVED_OBJECT ? alertsTotalCount : res.total,
       ...getCountsFromBuckets(countsBuckets),
       maxOnACase,
     },
