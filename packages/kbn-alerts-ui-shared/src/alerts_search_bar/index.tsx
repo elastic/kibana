@@ -39,14 +39,14 @@ export const AlertsSearchBar = ({
   http,
   toasts,
   unifiedSearchBar,
-  dataViewsService,
+  dataService,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
     ruleTypeIds: ruleTypeId != null ? [ruleTypeId] : [],
     http,
     toasts,
-    dataViewsService,
+    dataViewsService: dataService.dataViews,
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields({
     ruleTypeId,
@@ -117,7 +117,10 @@ export const AlertsSearchBar = ({
     displayStyle: 'inPage',
     showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated,
+    onFiltersUpdated: (newFilters) => {
+      dataService.query.filterManager.setFilters(newFilters);
+      onFiltersUpdated?.(newFilters);
+    },
     onRefresh,
     showDatePicker,
     showQueryInput: true,

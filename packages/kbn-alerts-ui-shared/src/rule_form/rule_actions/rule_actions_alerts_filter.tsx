@@ -29,7 +29,7 @@ export interface RuleActionsAlertsFilterProps {
     http: RuleFormPlugins['http'];
     notifications: RuleFormPlugins['notifications'];
     unifiedSearch: RuleFormPlugins['unifiedSearch'];
-    dataViews: RuleFormPlugins['dataViews'];
+    data: RuleFormPlugins['data'];
   };
 }
 
@@ -45,7 +45,7 @@ export const RuleActionsAlertsFilter = ({
     http,
     notifications: { toasts },
     unifiedSearch,
-    dataViews,
+    data,
   } = propsPlugins || plugins;
 
   const [query, setQuery] = useState(action.alertsFilter?.query ?? DEFAULT_QUERY);
@@ -81,7 +81,19 @@ export const RuleActionsAlertsFilter = ({
   );
 
   const onFiltersUpdated = useCallback(
-    (filters: Filter[]) => updateQuery({ filters }),
+    (filters: Filter[]) => {
+      const updatedFilters = filters.map((filter) => {
+        const { $state, meta, ...rest } = filter;
+        return {
+          $state,
+          meta,
+          query: filter?.query ? { ...filter.query } : { ...rest },
+        };
+      });
+
+      // Wrapping filters in query object here to avoid schema validation failure
+      updateQuery({ filters: updatedFilters });
+    },
     [updateQuery]
   );
 
@@ -105,7 +117,7 @@ export const RuleActionsAlertsFilter = ({
             http={http}
             toasts={toasts}
             unifiedSearchBar={unifiedSearch.ui.SearchBar}
-            dataViewsService={dataViews}
+            dataService={data}
             appName={appName}
             ruleTypeId={ruleTypeId}
             disableQueryLanguageSwitcher={true}

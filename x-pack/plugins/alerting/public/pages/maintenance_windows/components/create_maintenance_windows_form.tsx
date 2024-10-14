@@ -116,6 +116,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
+  const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
+    return filtersToTransform.map((filter) => {
+      const { $state, meta, ...rest } = filter;
+      return {
+        $state,
+        meta,
+        query: filter?.query ? { ...filter.query } : { ...rest },
+      };
+    });
+  };
+
   const scopedQueryPayload = useMemo(() => {
     if (!isScopedQueryEnabled) {
       return null;
@@ -123,9 +134,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (!query && !filters.length) {
       return null;
     }
+
+    // Wrapping filters in query object here to avoid schema validation failure
+    const transformedFilters = transformQueryFilters(filters);
+
     return {
       kql: query,
-      filters,
+      filters: transformedFilters,
     };
   }, [isScopedQueryEnabled, query, filters]);
 

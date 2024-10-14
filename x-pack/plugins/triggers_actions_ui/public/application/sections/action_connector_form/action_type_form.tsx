@@ -157,7 +157,7 @@ export const ActionTypeForm = ({
     http,
     notifications,
     unifiedSearch,
-    dataViews,
+    data,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -512,7 +512,7 @@ export const ActionTypeForm = ({
                 plugins={{
                   http,
                   unifiedSearch,
-                  dataViews,
+                  data,
                   notifications,
                 }}
               />
