@@ -10,6 +10,7 @@
 import { parse } from '@kbn/esql-ast';
 import { getExpressionType, shouldBeQuotedSource } from './helpers';
 import { SupportedDataType } from '../definitions/types';
+import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {
   it('does not have to be quoted for sources with acceptable characters @-+$', () => {
@@ -173,7 +174,98 @@ describe('getExpressionType', () => {
     });
   });
 
-  describe('lists', () => {});
+  describe('functions', () => {
+    beforeAll(() => {
+      setTestFunctions([
+        {
+          type: 'eval',
+          name: 'test',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          signatures: [
+            { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
+            { params: [{ name: 'arg', type: 'double' }], returnType: 'double' },
+            {
+              params: [
+                { name: 'arg', type: 'double' },
+                { name: 'arg', type: 'keyword' },
+              ],
+              returnType: 'long',
+            },
+          ],
+        },
+        {
+          type: 'eval',
+          name: 'returns_keyword',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          signatures: [{ params: [], returnType: 'keyword' }],
+        },
+      ]);
+    });
+    afterAll(() => {
+      setTestFunctions([]);
+    });
 
-  describe('functions', () => {});
+    it('detects the return type of a function', () => {
+      expect(
+        getExpressionType(getASTForExpression('returns_keyword()'), new Map(), new Map())
+      ).toBe('keyword');
+    });
+
+    it('selects the correct signature based on the arguments', () => {
+      expect(getExpressionType(getASTForExpression('test("foo")'), new Map(), new Map())).toBe(
+        'keyword'
+      );
+      expect(getExpressionType(getASTForExpression('test(1.)'), new Map(), new Map())).toBe(
+        'double'
+      );
+      expect(getExpressionType(getASTForExpression('test(1., "foo")'), new Map(), new Map())).toBe(
+        'long'
+      );
+    });
+
+    it('supports nested functions', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('test(1., test(test(test(returns_keyword()))))'),
+          new Map(),
+          new Map()
+        )
+      ).toBe('long');
+    });
+
+    it('supports functions with casted results', () => {
+      expect(
+        getExpressionType(getASTForExpression('test(1.)::keyword'), new Map(), new Map())
+      ).toBe('keyword');
+    });
+
+    it('handles nulls and string casting', () => {
+      expect(getExpressionType(getASTForExpression('test(NULL)'), new Map(), new Map())).toBe(
+        'null'
+      );
+      expect(getExpressionType(getASTForExpression('test(NULL, NULL)'), new Map(), new Map())).toBe(
+        'null'
+      );
+    });
+
+    it('deals with functions that do not exist', () => {
+      expect(() =>
+        getExpressionType(getASTForExpression('does_not_exist()'), new Map(), new Map())
+      ).toThrow();
+    });
+
+    it('deals with bad function invocations', () => {
+      expect(() =>
+        getExpressionType(getASTForExpression('test(1., "foo", "bar")'), new Map(), new Map())
+      ).toThrow();
+
+      expect(() =>
+        getExpressionType(getASTForExpression('test()'), new Map(), new Map())
+      ).toThrow();
+    });
+  });
+
+  describe('lists', () => {});
 });

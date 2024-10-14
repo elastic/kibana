@@ -721,5 +721,7 @@ describe('function validation', () => {
       //   'No nested aggregation functions.',
       // ]);
     });
+
+    // @TODO — test function aliases
   });
 });

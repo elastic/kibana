@@ -722,6 +722,42 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
 }
 
 /**
+ * Gets the signatures of a function that match the number of arguments
+ * provided in the AST.
+ */
+export function getSignaturesWithMatchingArity(
+  fnDef: FunctionDefinition,
+  astFunction: ESQLFunction
+) {
+  return fnDef.signatures.filter((def) => {
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
+    }
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
+  });
+}
+
+/**
+ * Given a function signature, returns the parameter at the given position.
+ *
+ * Takes into account variadic functions (minParams), returning the last
+ * parameter if the position is greater than the number of parameters.
+ *
+ * @param signature
+ * @param position
+ * @returns
+ */
+export function getParamAtPosition(
+  { params, minParams }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
+}
+
+/**
  * Determines the type of the expression
  */
 export function getExpressionType(
@@ -759,8 +795,44 @@ export function getExpressionType(
   if (isColumnItem(root)) {
     const column = getColumnForASTNode(root, { fields, variables });
     if (!column) {
-      throw new Error(`Type of column ${root.name} unknown`);
+      throw new Error(`Expression type cannot be determined; column ${root.name} unknown`);
     }
     return column.type;
+  }
+
+  if (isFunctionItem(root)) {
+    const fnDefinition = getFunctionDefinition(root.name);
+    if (!fnDefinition) {
+      throw new Error(`Expression type cannot be determined; function ${root.name} unknown`);
+    }
+
+    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
+
+    if (!signaturesWithCorrectArity.length) {
+      throw new Error(
+        `Expression type cannot be determined; function ${root.name} does not accept ${root.args.length} arguments`
+      );
+    }
+
+    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, variables));
+
+    // When functions are passed null for any argument, they generally return null
+    // This is a special case that is not reflected in our function definitions
+    if (argTypes.some((argType) => argType === 'null')) return 'null';
+
+    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
+      return argTypes.every((argType, i) => {
+        const param = getParamAtPosition(signature, i);
+        return param && param.type === argType;
+      });
+    });
+
+    if (!matchingSignature) {
+      throw new Error(
+        `Expression type cannot be determined; no signature matching the provided arguments was found for function ${root.name}`
+      );
+    }
+
+    return matchingSignature.returnType;
   }
 }
