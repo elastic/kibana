@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,8 +76,17 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
+
+  useEffect(() => {
+    if (!isDisabled) return;
+
+    if (form.getIsChangingValue()) {
+      setIsDisabled(false);
+    }
+  }, [form, isDisabled]);
 
   const onClickSave = useCallback(async () => {
     if (form.isValid && onSave && !form.getIsChangingValue()) {
@@ -177,7 +186,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={isSubmitted && !form.isValid}
+                  disabled={isDisabled}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}
