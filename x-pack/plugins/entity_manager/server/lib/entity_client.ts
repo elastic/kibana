@@ -91,7 +91,7 @@ export class EntityClient {
       logger: this.options.logger,
     });
 
-    if (!shouldRestartTransforms) {
+    if (shouldRestartTransforms) {
       await startTransforms(this.options.esClient, updatedDefinition, this.options.logger);
     }
     return updatedDefinition;
