@@ -140,6 +140,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       },
       isFetched: true,
     });
+    (isKnowledgeBaseSetup as jest.Mock).mockReturnValue(false);
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
       wrapper,
     });

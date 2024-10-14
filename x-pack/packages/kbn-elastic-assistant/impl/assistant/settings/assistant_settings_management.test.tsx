@@ -16,8 +16,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  ANONYMIZATION_TAB,
   CONNECTORS_TAB,
+  ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
@@ -57,12 +57,13 @@ const mockContext = {
 const mockDataViews = {
   getIndices: jest.fn(),
 } as unknown as DataViewsContract;
-
+const onTabChange = jest.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   navigateToApp: jest.fn(),
   setBreadcrumbs: jest.fn(),
+  onTabChange,
 };
 jest.mock('../../assistant_context');
 
@@ -148,17 +149,16 @@ describe('AssistantSettingsManagement', () => {
         wrapper,
       });
       fireEvent.click(getByTestId(`settingsPageTab-${tab}`));
-      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
+      expect(onTabChange).toHaveBeenCalledWith(tab);
     });
     it('renders with the correct tab open', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab,
-      }));
-      const { getByTestId } = render(<AssistantSettingsManagement {...testProps} />, {
-        wrapper,
-      });
-      expect(getByTestId(`${tab}-tab`)).toBeInTheDocument();
+      const { getByTestId } = render(
+        <AssistantSettingsManagement {...testProps} currentTab={tab} />,
+        {
+          wrapper,
+        }
+      );
+      expect(getByTestId(`tab-${tab}`)).toBeInTheDocument();
     });
   });
 });
