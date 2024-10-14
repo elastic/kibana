@@ -1354,6 +1354,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
+/x-pack/test_serverless/**/test_suites/**/config.ts @elastic/appex-qa
 /packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 x-pack/test/api_integration/deployment_agnostic/default_configs/ @elastic/appex-qa
 x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
@@ -1512,7 +1513,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
-/x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/security-solution
