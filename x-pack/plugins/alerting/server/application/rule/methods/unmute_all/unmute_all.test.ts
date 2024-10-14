@@ -65,9 +65,10 @@ describe('validate unmuteAll parameters', () => {
 
   it('should throw Boom.badRequest for invalid params', async () => {
     const invalidParams = {
-      id: 22 as unknown as string, // type workaround to send wrong data validation
+      id: 22,
     };
 
+    // @ts-expect-error wrong type for testing purposes
     await expect(unmuteAll(context, invalidParams)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating unmute all parameters - [id]: expected value of type [string] but got [number]"`
     );
