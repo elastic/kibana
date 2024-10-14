@@ -43,7 +43,7 @@ export const ShowAllSpaces: React.FC = () => {
 };
 
 const SelectablePopover = () => {
-  const [isPopoverOpen, setPopover] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { space } = useKibanaSpace();
 
   const {
@@ -51,19 +51,12 @@ const SelectablePopover = () => {
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
 
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-  const closePopover = () => {
-    setPopover(false);
-  };
-
   const button = (
     <EuiButtonEmpty
       data-test-subj="syntheticsClickMeToLoadAContextMenuButton"
       iconType="arrowDown"
       iconSide="right"
-      onClick={onButtonClick}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       size="xs"
     >
       {showFromAllSpaces ? ALL_SPACES_LABEL : space?.name || space?.id}
@@ -74,7 +67,7 @@ const SelectablePopover = () => {
       id="contextMenuSpaces"
       button={button}
       isOpen={isPopoverOpen}
-      closePopover={closePopover}
+      closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
