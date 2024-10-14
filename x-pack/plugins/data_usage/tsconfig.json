@@ -28,6 +28,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",
+    "@kbn/index-management-shared-types",
   ],
   "exclude": ["target/**/*"]
 }
