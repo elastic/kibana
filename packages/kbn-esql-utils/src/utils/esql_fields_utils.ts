@@ -12,6 +12,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
 const SOURCE_FIELD = '_source';
 const TSDB_COUNTER_FIELDS_PREFIX = 'counter_';
+const UNKNOWN_FIELD = 'unknown';
 
 /**
  * Check if a column is sortable.
@@ -32,6 +33,26 @@ export const isESQLColumnSortable = (column: DatatableColumn): boolean => {
   }
 
   // we don't allow sorting on tsdb counter fields
+  if (column.meta?.esType && column.meta?.esType?.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Check if a column is groupable (| STATS ... BY <column>).
+ *
+ * @param column The DatatableColumn of the field.
+ * @returns True if the column is groupable, false otherwise.
+ */
+
+export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
+  // we don't allow grouping on the unknown field types
+  if (column.meta?.type === UNKNOWN_FIELD) {
+    return false;
+  }
+  // we don't allow grouping on tsdb counter fields
   if (column.meta?.esType && column.meta?.esType?.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
     return false;
   }
