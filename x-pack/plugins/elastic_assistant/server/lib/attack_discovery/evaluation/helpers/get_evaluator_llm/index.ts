@@ -16,7 +16,6 @@ import { getLlmType } from '../../../../../routes/utils';
 
 export const getEvaluatorLlm = async ({
   actionsClient,
-  connectors,
   connectorTimeout,
   evaluatorConnectorId,
   experimentConnector,
@@ -24,7 +23,6 @@ export const getEvaluatorLlm = async ({
   logger,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
-  connectors: Connector[];
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   experimentConnector: Connector;

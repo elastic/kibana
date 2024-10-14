@@ -111,7 +111,6 @@ export const evaluateAttackDiscovery = async ({
     // run the evaluations for each graph:
     await runEvaluations({
       actionsClient,
-      connectors,
       connectorTimeout,
       evaluatorConnectorId,
       datasetName,

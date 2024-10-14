@@ -27,7 +27,6 @@ import { GraphState } from '../../graphs/default_attack_discovery_graph/types';
  */
 export const runEvaluations = async ({
   actionsClient,
-  connectors,
   connectorTimeout,
   evaluatorConnectorId,
   datasetName,
@@ -36,7 +35,6 @@ export const runEvaluations = async ({
   logger,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
-  connectors: Connector[];
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   datasetName: string;
@@ -63,9 +61,7 @@ export const runEvaluations = async ({
       );
 
       const predict = async (input: unknown): Promise<GraphState> => {
-        logger.debug(
-          () => `Raw example Input for ${subject}":\n ${JSON.stringify(input, null, 2)}`
-        );
+        logger.debug(() => `Raw example Input for ${subject}":\n ${input}`);
 
         // The example `Input` may have overrides for the initial state of the graph:
         const overrides = getGraphInputOverrides(input);
@@ -84,7 +80,6 @@ export const runEvaluations = async ({
 
       const llm = await getEvaluatorLlm({
         actionsClient,
-        connectors,
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector: connector,

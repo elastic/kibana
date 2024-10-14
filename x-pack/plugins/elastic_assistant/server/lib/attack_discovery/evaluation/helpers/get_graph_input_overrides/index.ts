@@ -13,8 +13,8 @@ import { GraphState } from '../../../graphs/default_attack_discovery_graph/types
 /**
  * Parses input from an LangSmith dataset example to get the graph input overrides
  */
-export const getGraphInputOverrides = (input: unknown): Partial<GraphState> => {
-  const validatedInput = ExampleInputWithOverrides.safeParse(input).data ?? {}; // removes unknown properties
+export const getGraphInputOverrides = (outputs: unknown): Partial<GraphState> => {
+  const validatedInput = ExampleInputWithOverrides.safeParse(outputs).data ?? {}; // safeParse removes unknown properties
 
   const { overrides } = validatedInput;
 
