@@ -108,6 +108,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.inference",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.cases",
   },
   Object {
