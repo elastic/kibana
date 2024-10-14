@@ -64,6 +64,20 @@ export interface CategorizationState {
   samplesFormat: SamplesFormat;
 }
 
+export interface CelInputState {
+  dataStreamName: string;
+  apiDefinition: string;
+  lastExecutedChain: string;
+  finalized: boolean;
+  apiQuerySummary: string;
+  exampleCelPrograms: string[];
+  currentProgram: string;
+  stateVarNames: string[];
+  stateSettings: object;
+  redactVars: string[];
+  results: object;
+}
+
 export interface EcsMappingState {
   ecs: string;
   chunkSize: number;
@@ -95,6 +109,8 @@ export interface LogFormatDetectionState {
   lastExecutedChain: string;
   packageName: string;
   dataStreamName: string;
+  packageTitle: string;
+  dataStreamTitle: string;
   logSamples: string[];
   jsonSamples: string[];
   exAnswer: string;
@@ -103,7 +119,7 @@ export interface LogFormatDetectionState {
   header: boolean;
   ecsVersion: string;
   results: object;
-  additionalProcessors: ESProcessorItem[]; // # This will be generated in the sub-graphs
+  additionalProcessors: ESProcessorItem[]; // Generated in handleXXX nodes or subgraphs.
 }
 
 export interface KVState {

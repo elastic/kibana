@@ -7,6 +7,7 @@
 
 import {
   ChatConnection,
+  GeminiContent,
   GoogleAbstractedClient,
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
@@ -39,6 +40,22 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
     this.caller = caller;
     this.#model = fields.model;
     this.temperature = fields.temperature ?? 0;
+    const nativeFormatData = this.formatData.bind(this);
+    this.formatData = async (data, options) => {
+      const result = await nativeFormatData(data, options);
+      if (result?.contents != null && result?.contents.length) {
+        // ensure there are not 2 messages in a row from the same role,
+        // if there are combine them
+        result.contents = result.contents.reduce((acc: GeminiContent[], currentEntry) => {
+          if (currentEntry.role === acc[acc.length - 1]?.role) {
+            acc[acc.length - 1].parts = acc[acc.length - 1].parts.concat(currentEntry.parts);
+            return acc;
+          }
+          return [...acc, currentEntry];
+        }, []);
+      }
+      return result;
+    };
   }
 
   async _request(
