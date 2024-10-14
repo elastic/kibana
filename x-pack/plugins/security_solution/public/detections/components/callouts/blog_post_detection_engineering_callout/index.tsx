@@ -17,12 +17,12 @@ const BLOG_POST_URL = 'https://www.elastic.co/blog/elastic-security-detection-en
 
 const calloutMessage: CallOutMessage = {
   type: 'success',
-  id: 'new-features-blog-post',
+  id: 'blog-post-elastic-security-detection-engineering',
   title: i18n.NEW_FEATURES_BLOG_POST_CALLOUT_TITLE,
   description: <Description />,
 };
 
-export function NewFeaturesBlogPostCallout() {
+export function BlogPostDetectionEngineeringCallout() {
   const { euiTheme } = useEuiTheme();
 
   const { isVisible, dismiss } = useCallOutStorage([calloutMessage], 'detections');

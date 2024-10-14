@@ -22,7 +22,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { NewFeaturesBlogPostCallout } from '../../../../detections/components/callouts/new_features_blog_post_callout';
+import { BlogPostDetectionEngineeringCallout } from '../../../../detections/components/callouts/blog_post_detection_engineering_callout';
 import { AddElasticRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -174,7 +174,7 @@ const RulesPageComponent: React.FC = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
-          <NewFeaturesBlogPostCallout />
+          <BlogPostDetectionEngineeringCallout />
           <RuleFeatureTour />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
