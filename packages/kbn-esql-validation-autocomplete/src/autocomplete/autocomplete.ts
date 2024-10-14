@@ -83,7 +83,7 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
   getAddDateHistogramSnippet,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -627,7 +627,7 @@ async function getExpressionSuggestionsByType(
             literals: argDef.constantOnly,
           },
           {
-            ignoreFields: isNewExpression
+            ignoreColumns: isNewExpression
               ? command.args.filter(isColumnItem).map(({ name }) => name)
               : [],
           }
@@ -656,10 +656,15 @@ async function getExpressionSuggestionsByType(
               }));
             }
 
-            return [
-              { ...pipeCompleteItem, text: ' | ' },
-              { ...commaCompleteItem, text: ', ' },
-            ].map<SuggestionRawDefinition>((s) => ({
+            const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
+            if (fieldSuggestions.length > 1)
+              // when we fix the editor marker, this should probably be checked against 0 instead of 1
+              // this is because the last field in the AST is currently getting removed (because it contains
+              // the editor marker) so it is not included in the ignored list which is used to filter out
+              // existing fields above.
+              finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+
+            return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
               ...s,
               filterText: fragment,
               text: fragment + s.text,
@@ -1176,15 +1181,15 @@ async function getFieldsOrFunctionsSuggestions(
   },
   {
     ignoreFn = [],
-    ignoreFields = [],
+    ignoreColumns = [],
   }: {
     ignoreFn?: string[];
-    ignoreFields?: string[];
+    ignoreColumns?: string[];
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
-      ? getFieldsByType(types, ignoreFields, {
+      ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
         })
@@ -1195,7 +1200,10 @@ async function getFieldsOrFunctionsSuggestions(
   const filteredVariablesByType: string[] = [];
   if (variables) {
     for (const variable of variables.values()) {
-      if (types.includes('any') || types.includes(variable[0].type)) {
+      if (
+        (types.includes('any') || types.includes(variable[0].type)) &&
+        !ignoreColumns.includes(variable[0].name)
+      ) {
         filteredVariablesByType.push(variable[0].name);
       }
     }
@@ -1207,11 +1215,7 @@ async function getFieldsOrFunctionsSuggestions(
       filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        // remove backticks if present
-        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
-          ? variable.slice(1, variable.length - 1)
-          : variable;
-        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -1515,7 +1519,7 @@ async function getListArgsSuggestions(
               fields: true,
               variables: anyVariables,
             },
-            { ignoreFields: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))
         );
       }
@@ -1875,18 +1879,16 @@ async function getOptionArgsSuggestions(
  * for a given fragment of text in a generic way. A good example is
  * a field name.
  *
- * When typing a field name, there are three scenarios
+ * When typing a field name, there are 2 scenarios
  *
- * 1. user hasn't begun typing
+ * 1. field name is incomplete (includes the empty string)
  * KEEP /
- *
- * 2. user is typing a partial field name
  * KEEP fie/
  *
- * 3. user has typed a complete field name
+ * 2. field name is complete
  * KEEP field/
  *
- * This function provides a framework for handling all three scenarios in a clean way.
+ * This function provides a framework for detecting and handling both scenarios in a clean way.
  *
  * @param innerText - the query text before the current cursor position
  * @param isFragmentComplete — return true if the fragment is complete

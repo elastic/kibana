@@ -77,6 +77,11 @@ describe('ManagementSettings', () => {
             securitySolutionAssistant: { 'ai-assistant': false },
           },
         },
+        data: {
+          dataViews: {
+            getIndices: jest.fn(),
+          },
+        },
         security: {
           userProfiles: {
             getCurrent: jest.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),

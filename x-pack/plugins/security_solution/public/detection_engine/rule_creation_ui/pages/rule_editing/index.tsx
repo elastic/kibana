@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
@@ -38,7 +39,6 @@ import {
   getRuleDetailsUrl,
   getDetectionEngineUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
@@ -73,7 +73,7 @@ import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
-  const [, dispatchToaster] = useStateToaster();
+  const { addSuccess } = useAppToasts();
   const [
     {
       loading: userInfoLoading,
@@ -394,7 +394,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const saveChanges = useCallback(async () => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
-    await updateRule({
+    const updatedRule = await updateRule({
       ...formatRule<RuleUpdateProps>(
         defineStepData,
         aboutStepData,
@@ -406,7 +406,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       ...(ruleId ? { id: ruleId } : {}),
     });
 
-    displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
+    addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
@@ -414,11 +414,10 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
+    addSuccess,
     defineStepData,
-    dispatchToaster,
     navigateToApp,
     rule?.exceptions_list,
-    rule?.name,
     ruleId,
     scheduleStepData,
     startTransaction,

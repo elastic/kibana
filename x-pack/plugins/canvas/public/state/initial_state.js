@@ -6,18 +6,15 @@
  */
 
 import { get } from 'lodash';
-import { pluginServices } from '../services';
+import { coreServices } from '../services/kibana_services';
 import { getDefaultWorkpad, getDefaultSidebar, getDefaultFlyouts } from './defaults';
 
 export const getInitialState = (path) => {
-  const platformService = pluginServices.getServices().platform;
-  const { getHasWriteAccess } = platformService;
-
   const state = {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: getHasWriteAccess(),
+      canUserWrite: coreServices.application.capabilities.canvas.save,
       zoomScale: 1,
       elementStats: {
         total: 0,

@@ -27,6 +27,8 @@ import { TypeRegistry } from '../type_registry';
 
 export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
 
+export type { Flapping } from '@kbn/alerting-types';
+
 export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
 
 export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
