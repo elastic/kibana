@@ -24,6 +24,8 @@ const projectDefaultRoles = new Map<string, Role>([
   ['oblt', 'editor'],
 ]);
 
+const projectTypesWithCustomRolesEnabled = ['es', 'security'];
+
 const getDefaultServerlessRole = (projectType: string) => {
   if (projectDefaultRoles.has(projectType)) {
     return projectDefaultRoles.get(projectType)!;
@@ -50,18 +52,39 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
-  getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>;
+  getSupportedRoleDescriptors() {
+    const roleDescriptors = new Map<string, any>(
+      Object.entries(
+        readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
+      )
+    );
+    // Adding custom role to the map without privileges, so it can be later updated and used in the tests
+    if (this.isCustomRoleEnabled()) {
+      roleDescriptors.set(this.getCustomRole(), null);
+    }
+    return roleDescriptors;
   }
+
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);
   }
+
+  isCustomRoleEnabled() {
+    return projectTypesWithCustomRolesEnabled.includes(this.projectType);
+  }
+
+  getCustomRole() {
+    return 'customRole';
+  }
+
   getRolesDefinitionPath(): string {
     return this.rolesDefinitionPath;
   }
+
   getCommonRequestHeader() {
     return COMMON_REQUEST_HEADERS;
   }
+
   getInternalRequestHeader() {
     return getServerlessInternalRequestHeaders();
   }
