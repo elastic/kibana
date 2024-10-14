@@ -22,13 +22,13 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const hasAll = {
   securitySolutionCasesV2: allCasesCapabilities(),
-  observabilityCases: allCasesCapabilities(),
+  observabilityCasesV2: allCasesCapabilities(),
   generalCases: allCasesCapabilities(),
 };
 
 const secAllObsReadGenNone = {
   securitySolutionCasesV2: allCasesCapabilities(),
-  observabilityCases: readCasesCapabilities(),
+  observabilityCasesV2: readCasesCapabilities(),
   generalCases: noCasesCapabilities(),
 };
 

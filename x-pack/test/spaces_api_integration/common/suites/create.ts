@@ -79,7 +79,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         'inventory',
         'logs',
         'observabilityAIAssistant',
-        'observabilityCases',
+        'observabilityCasesV2',
         'securitySolutionAssistant',
         'securitySolutionAttackDiscovery',
         'securitySolutionCasesV2',

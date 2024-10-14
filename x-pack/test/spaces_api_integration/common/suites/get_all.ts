@@ -78,7 +78,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       'inventory',
       'logs',
       'observabilityAIAssistant',
-      'observabilityCases',
+      'observabilityCasesV2',
       'securitySolutionAssistant',
       'securitySolutionAttackDiscovery',
       'securitySolutionCasesV2',

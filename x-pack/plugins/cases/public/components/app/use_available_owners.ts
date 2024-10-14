@@ -46,5 +46,5 @@ const getOwnerFromFeatureID = (featureID: string) => {
     return APP_ID;
   }
 
-  return featureID.replace('Cases', '');
+  return featureID.replace('CasesV2', '');
 };
