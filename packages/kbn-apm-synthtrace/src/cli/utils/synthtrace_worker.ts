@@ -20,6 +20,7 @@ import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getAssetsEsClient } from './get_assets_es_client';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -65,6 +66,12 @@ async function start() {
     logger,
   });
 
+  const otelEsClient = getOtelSynthtraceEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -80,6 +87,7 @@ async function start() {
       infraEsClient,
       assetsEsClient,
       syntheticsEsClient,
+      otelEsClient,
     });
   }
 
@@ -88,7 +96,14 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient, syntheticsEsClient },
+      clients: {
+        logsEsClient,
+        apmEsClient,
+        infraEsClient,
+        assetsEsClient,
+        syntheticsEsClient,
+        otelEsClient,
+      },
     })
   );
 

@@ -14,11 +14,16 @@ import { listEntityEnginesRoute } from './list';
 import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
 
-export const registerEntityStoreRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
-  initEntityEngineRoute(router, logger);
+export const registerEntityStoreRoutes = ({
+  router,
+  logger,
+  getStartServices,
+  config,
+}: EntityAnalyticsRoutesDeps) => {
+  initEntityEngineRoute(router, logger, config);
   startEntityEngineRoute(router, logger);
   stopEntityEngineRoute(router, logger);
-  deleteEntityEngineRoute(router, logger);
+  deleteEntityEngineRoute(router, logger, getStartServices);
   getEntityEngineRoute(router, logger);
   listEntityEnginesRoute(router, logger);
   listEntitiesRoute(router, logger);
