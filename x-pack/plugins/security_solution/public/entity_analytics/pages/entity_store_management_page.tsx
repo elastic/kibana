@@ -23,6 +23,8 @@ import {
   EuiHealth,
   EuiButton,
   EuiLoadingSpinner,
+  EuiToolTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,6 +41,7 @@ import {
   useInitEntityEngineMutation,
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 
 const entityStoreEnabledStatuses = ['enabled'];
 const switchDisabledStatuses = ['error', 'loading', 'installing'];
@@ -255,10 +258,15 @@ export const EntityStoreManagementPage = () => {
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
         pageTitle={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
-            defaultMessage="Entity Store"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
+              defaultMessage="Entity Store"
+            />{' '}
+            <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
+              <EuiBetaBadge label={TECHNICAL_PREVIEW} />
+            </EuiToolTip>
+          </>
         }
         alignItems="center"
         rightSideItems={
