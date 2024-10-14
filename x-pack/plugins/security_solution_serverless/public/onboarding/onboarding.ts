@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import {
-  AddIntegrationsSteps,
-  CreateProjectSteps,
-  EnablePrebuiltRulesSteps,
-  OverviewSteps,
-  ViewAlertsSteps,
-  ViewDashboardSteps,
-} from '@kbn/security-solution-plugin/public';
+import { getCloudUrl } from '../navigation/util';
 import type { Services } from '../common/services';
 
 export const setOnboardingSettings = (services: Services) => {
-  const { securitySolution } = services;
+  const { securitySolution, cloud } = services;
 
-  securitySolution.setOnboardingPageSettings.setAvailableSteps([
-    CreateProjectSteps.createFirstProject,
-    OverviewSteps.getToKnowElasticSecurity,
-    AddIntegrationsSteps.connectToDataSources,
-    ViewDashboardSteps.analyzeData,
-    EnablePrebuiltRulesSteps.enablePrebuiltRules,
-    ViewAlertsSteps.viewAlerts,
-  ]);
+  securitySolution.setOnboardingSettings({
+    userUrl: getCloudUrl('usersAndRoles', cloud),
+    isAgentlessAvailable: true,
+  });
 };
