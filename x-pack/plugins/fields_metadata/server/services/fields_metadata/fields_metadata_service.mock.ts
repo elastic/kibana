@@ -11,6 +11,7 @@ import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types'
 export const createFieldsMetadataServiceSetupMock =
   (): jest.Mocked<FieldsMetadataServiceSetup> => ({
     registerIntegrationFieldsExtractor: jest.fn(),
+    registerIntegrationListExtractor: jest.fn(),
   });
 
 export const createFieldsMetadataServiceStartMock =
