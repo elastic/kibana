@@ -34,12 +34,22 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'observability-overview',
           },
           {
-            link: 'discover',
+            title: i18n.translate('xpack.observability.obltNav.discover', {
+              defaultMessage: 'Discover',
+            }),
+            // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
+            link: 'last-used-logs-viewer',
+            breadcrumbStatus: 'hidden', // avoid duplicate "Discover" breadcrumbs
             renderAs: 'item',
             children: [
               {
-                // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-                link: 'observability-logs-explorer',
+                link: 'discover',
+                children: [
+                  {
+                    // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+                    link: 'observability-logs-explorer',
+                  },
+                ],
               },
             ],
           },
@@ -86,9 +96,25 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             children: [
               {
                 children: [
-                  { link: 'apm:services' },
-                  { link: 'apm:traces' },
-                  { link: 'apm:dependencies' },
+                  {
+                    link: 'apm:services',
+                    getIsActive: ({ pathNameSerialized }) => {
+                      const regex = /app\/apm\/.*service.*/;
+                      return regex.test(pathNameSerialized);
+                    },
+                  },
+                  {
+                    link: 'apm:traces',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                    },
+                  },
+                  {
+                    link: 'apm:dependencies',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                    },
+                  },
                   {
                     link: 'ux',
                     title: i18n.translate('xpack.observability.obltNav.apm.ux', {
@@ -136,8 +162,16 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
                       defaultMessage: 'Infrastructure inventory',
                     }),
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                    },
                   },
-                  { link: 'metrics:hosts' },
+                  {
+                    link: 'metrics:hosts',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    },
+                  },
                   {
                     link: 'metrics:metrics-explorer',
                     title: i18n.translate(
