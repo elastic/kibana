@@ -15,7 +15,7 @@ interface RegistrationDeps {
   fieldsMetadata: FieldsMetadataServerSetup;
 }
 
-export const registerIntegrationFieldsExtractor = ({ core, fieldsMetadata }: RegistrationDeps) => {
+export const registerFieldsMetadataExtractors = ({ core, fieldsMetadata }: RegistrationDeps) => {
   fieldsMetadata.registerIntegrationFieldsExtractor(async ({ integration, dataset }) => {
     const [_core, _startDeps, { packageService }] = await core.getStartServices();
 
@@ -23,5 +23,17 @@ export const registerIntegrationFieldsExtractor = ({ core, fieldsMetadata }: Reg
       packageName: integration,
       datasetName: dataset,
     });
+  });
+
+  fieldsMetadata.registerIntegrationListExtractor(async () => {
+    const [_core, _startDeps, { packageService }] = await core.getStartServices();
+
+    try {
+      const packages = await packageService.asInternalUser.getPackages();
+
+      return packages.map(({ id, name, version }) => ({ id, name, version }));
+    } catch (error) {
+      return [];
+    }
   });
 };
