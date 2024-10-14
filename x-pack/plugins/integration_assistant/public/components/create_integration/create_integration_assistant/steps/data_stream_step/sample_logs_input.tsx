@@ -15,7 +15,7 @@ import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
 import { partialShuffleArray } from './utils';
 
-const MaxLogsSampleRows = 10;
+const MaxLogsSampleRows = 100;
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
