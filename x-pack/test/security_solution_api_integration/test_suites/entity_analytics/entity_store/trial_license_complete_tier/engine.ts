@@ -24,9 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   } = elasticAssetCheckerFactory(getService);
 
   const utils = EntityStoreUtils(getService);
-
-  // TODO: unskip once permissions issue is resolved
-  describe.skip('@ess Entity Store Engine APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -46,19 +44,19 @@ export default ({ getService }: FtrProviderContext) => {
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityType('user');
 
-        await expectTransformExists('entities-v1-latest-ea_default_user_entity_store');
+        await expectTransformExists('entities-v1-latest-security_user_default');
         await expectEnrichPolicyExists('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateExists(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_user_entity_store-latest@platform`);
+        await expectComponentTemplateExists(`security_user_default-latest@platform`);
+        await expectIngestPipelineExists(`security_user_default-latest@platform`);
       });
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityType('host');
 
-        await expectTransformExists('entities-v1-latest-ea_default_host_entity_store');
+        await expectTransformExists('entities-v1-latest-security_host_default');
         await expectEnrichPolicyExists('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateExists(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_host_entity_store-latest@platform`);
+        await expectComponentTemplateExists(`security_host_default-latest@platform`);
+        await expectIngestPipelineExists(`security_host_default-latest@platform`);
       });
     });
 
@@ -188,10 +186,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_host_entity_store');
+        await expectTransformNotFound('entities-v1-latest-security_host_default');
         await expectEnrichPolicyNotFound('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_host_entity_store-latest@platform`);
+        await expectComponentTemplateNotFound(`security_host_default-latest@platform`);
+        await expectIngestPipelineNotFound(`security_host_default-latest@platform`);
       });
 
       it('should delete the user entity engine', async () => {
@@ -204,10 +202,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_user_entity_store');
+        await expectTransformNotFound('entities-v1-latest-security_user_default_store');
         await expectEnrichPolicyNotFound('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_user_entity_store-latest@platform`);
+        await expectComponentTemplateNotFound(`security_user_default-latest@platform`);
+        await expectIngestPipelineNotFound(`security_user_default-latest@platform`);
       });
     });
 

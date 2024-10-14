@@ -6,7 +6,7 @@
  */
 
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 
 export const EntityStoreUtils = (
@@ -37,17 +37,24 @@ export const EntityStoreUtils = (
     }
   };
 
-  const initEntityEngineForEntityType = (entityType: EntityType) => {
-    log.info(`Initializing engine for entity type ${entityType} in namespace ${namespace}`);
-    return api
-      .initEntityEngine(
-        {
-          params: { entityType },
-          body: {},
-        },
-        namespace
-      )
-      .expect(200);
+  const initEntityEngineForEntityType = async (entityType: EntityType) => {
+    log.info(
+      `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
+    );
+    const res = await api.initEntityEngine(
+      {
+        params: { entityType },
+        body: {},
+      },
+      namespace
+    );
+
+    if (res.status !== 200) {
+      log.error(`Failed to initialize engine for entity type ${entityType}`);
+      log.error(res.body);
+    }
+
+    expect(res.status).to.eql(200);
   };
 
   const expectTransformStatus = async (
