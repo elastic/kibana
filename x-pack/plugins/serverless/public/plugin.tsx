@@ -125,7 +125,7 @@ export class ServerlessPlugin
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 
-        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.usersAndRolesUrl);
         if (extendCardNavDefinitions) {
           extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
           return extendCardNavDefinitions;
