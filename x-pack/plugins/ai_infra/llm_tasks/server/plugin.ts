@@ -25,9 +25,9 @@ export class LlmTasksPlugin
       PluginStartDependencies
     >
 {
-  logger: Logger;
+  private logger: Logger;
 
-  constructor(private readonly context: PluginInitializerContext<LlmTasksConfig>) {
+  constructor(context: PluginInitializerContext<LlmTasksConfig>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -47,7 +47,7 @@ export class LlmTasksPlugin
         return retrieveDocumentation({
           outputAPI: inference.getClient({ request: options.request }).output,
           searchDocAPI: productDocBase.search,
-          logger: this.context.logger.get('tasks.retrieve-documentation'),
+          logger: this.logger.get('tasks.retrieve-documentation'),
         })(options);
       },
     };

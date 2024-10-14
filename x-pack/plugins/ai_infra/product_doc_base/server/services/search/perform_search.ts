@@ -26,13 +26,7 @@ export const performSearch = async ({
     size,
     query: {
       bool: {
-        filter: [
-          // {
-          //   bool: {
-          //     must: [{ term: { version: '8.15' } }],
-          //   },
-          // },
-        ],
+        filter: [],
         should: [
           {
             multi_match: {

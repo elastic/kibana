@@ -10,7 +10,7 @@ import type { OutputAPI } from '@kbn/inference-plugin/common/output';
 import type { ProductDocSearchAPI } from '@kbn/product-doc-base-plugin/server';
 import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
-import { summarizeDocument } from './extract_relevant_chunks';
+import { summarizeDocument } from './summarize_document';
 
 // if content length greater, then we'll trigger the summary task
 const MIN_TOKENS_TO_SUMMARIZE = 500;

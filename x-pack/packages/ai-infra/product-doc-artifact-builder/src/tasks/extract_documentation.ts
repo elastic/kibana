@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
-import { getSourceProductName, getProductNameFromSource } from '../artifact/product_name';
+import { getSourceNamesFromProductName, getProductNameFromSource } from '../artifact/product_name';
 
 /** the list of fields to import from the source cluster */
 const fields = [
@@ -78,7 +78,7 @@ export const extractDocumentation = async ({
     query: {
       bool: {
         must: [
-          { term: { product_name: getSourceProductName(productName) } },
+          { terms: { product_name: getSourceNamesFromProductName(productName) } },
           { term: { version: stackVersion } },
           { exists: { field: 'ai_fields.ai_summary' } },
         ],

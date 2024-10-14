@@ -16,7 +16,7 @@ export const getArtifactName = ({
   productVersion,
   excludeExtension = false,
 }: {
-  productName: string;
+  productName: ProductName;
   productVersion: string;
   excludeExtension?: boolean;
 }): string => {

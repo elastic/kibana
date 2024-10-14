@@ -7,32 +7,32 @@
 
 import type { ProductName } from '@kbn/product-doc-common';
 
-export const getSourceProductName = (productName: ProductName) => {
-  switch (productName) {
-    case 'elasticsearch':
-      return 'Elasticsearch';
-    case 'observability':
-      return 'Observability';
-    case 'security':
-      return 'Security';
-    case 'kibana':
-      return 'Kibana';
-    default:
-      throw new Error(`Unknown product name: ${productName}`);
+const productNameToSourceNamesMap: Record<ProductName, string[]> = {
+  kibana: ['Kibana'],
+  elasticsearch: ['Elasticsearch'],
+  security: ['Security'],
+  observability: ['Observability'],
+};
+
+const sourceNameToProductName = Object.entries(productNameToSourceNamesMap).reduce<
+  Record<string, ProductName>
+>((map, [productName, sourceNames]) => {
+  sourceNames.forEach((sourceName) => {
+    map[sourceName] = productName as ProductName;
+  });
+  return map;
+}, {});
+
+export const getSourceNamesFromProductName = (productName: ProductName): string[] => {
+  if (!productNameToSourceNamesMap[productName]) {
+    throw new Error(`Unknown product name: ${productName}`);
   }
+  return productNameToSourceNamesMap[productName];
 };
 
 export const getProductNameFromSource = (source: string): ProductName => {
-  switch (source) {
-    case 'Elasticsearch':
-      return 'elasticsearch';
-    case 'Observability':
-      return 'observability';
-    case 'Security':
-      return 'security';
-    case 'Kibana':
-      return 'kibana';
-    default:
-      throw new Error(`Unknown source product name: ${source}`);
+  if (!sourceNameToProductName[source]) {
+    throw new Error(`Unknown source name: ${source}`);
   }
+  return sourceNameToProductName[source];
 };
