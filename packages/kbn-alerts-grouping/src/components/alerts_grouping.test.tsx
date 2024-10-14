@@ -24,6 +24,7 @@ import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   mockRuleTypeIds,
+  mockConsumers,
   mockDate,
   mockGroupingProps,
   mockGroupingId,
@@ -147,6 +148,7 @@ describe('AlertsGrouping', () => {
         params: {
           aggregations: {},
           ruleTypeIds: mockRuleTypeIds,
+          consumers: mockConsumers,
           groupByField: 'kibana.alert.rule.name',
           filters: [
             {

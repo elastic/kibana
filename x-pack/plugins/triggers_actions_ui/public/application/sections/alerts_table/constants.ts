@@ -34,9 +34,15 @@ export const observabilityFeatureIds: AlertConsumers[] = [
   AlertConsumers.LOGS,
   AlertConsumers.SLO,
   AlertConsumers.UPTIME,
+  AlertConsumers.ALERTS,
 ];
 
-export const stackFeatureIds: AlertConsumers[] = [AlertConsumers.STACK_ALERTS, AlertConsumers.ML];
+export const stackFeatureIds: AlertConsumers[] = [
+  AlertConsumers.STACK_ALERTS,
+  AlertConsumers.ML,
+  AlertConsumers.DISCOVER,
+];
+
 export const [_, ...observabilityApps] = observabilityFeatureIds;
 
 export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProducerData> = {

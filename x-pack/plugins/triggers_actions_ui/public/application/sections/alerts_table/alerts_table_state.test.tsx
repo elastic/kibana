@@ -959,6 +959,16 @@ describe('AlertsTableState', () => {
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
 
+    it('should render an empty screen when the data are undefined', async () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        data: undefined,
+        refetch: refetchMock,
+      });
+
+      const result = render(<TestComponent {...tableProps} />);
+      expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
+    });
+
     describe('inspect button', () => {
       it('should hide the inspect button by default', () => {
         render(<TestComponent {...tableProps} />);

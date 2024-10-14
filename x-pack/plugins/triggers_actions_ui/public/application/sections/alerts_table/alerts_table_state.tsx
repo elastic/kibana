@@ -583,7 +583,7 @@ const AlertsTableStateWithQueryProvider = memo(
 
     return (
       <AlertsTableContext.Provider value={alertsTableContext}>
-        {!isLoading && alertsCount === 0 && (
+        {!isLoading && alertsCount <= 0 && (
           <InspectButtonContainer>
             <EmptyState
               controls={persistentControls}

@@ -11,13 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
 import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
-import { nonNullable } from '../../../../common/utils';
 import { buildEsQuery } from './build_es_query';
 
 const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
@@ -34,16 +32,17 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
-  onRuleTypesChanged?: (ruleTypeIds: string[]) => void;
+  onFilterSelected?: (filters: Filter[]) => void;
 }
 
 /**
  * An abstraction over AlertsSearchBar that syncs the query state with the url
  */
 export const UrlSyncedAlertsSearchBar = ({
+  ruleTypeIds,
   showFilterControls = false,
   onEsQueryChange,
-  onRuleTypesChanged,
+  onFilterSelected,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -100,13 +99,25 @@ export const UrlSyncedAlertsSearchBar = ({
           filters: [...filters, ...controlFilters],
         })
       );
+
+      onFilterSelected?.(filters);
     } catch (error) {
       toasts.addError(error, {
         title: INVALID_QUERY_STRING_TOAST_TITLE,
       });
       onKueryChange('');
     }
-  }, [controlFilters, filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+  }, [
+    controlFilters,
+    filters,
+    kuery,
+    onEsQueryChange,
+    onFilterSelected,
+    onKueryChange,
+    rangeFrom,
+    rangeTo,
+    toasts,
+  ]);
 
   const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
     ({ query, dateRange }) => {
@@ -118,18 +129,6 @@ export const UrlSyncedAlertsSearchBar = ({
     },
     [onKueryChange, onRangeFromChange, onRangeToChange, setSavedQuery, timeFilterService]
   );
-
-  const onFiltersUpdated = (updatedFilters: Filter[]) => {
-    onRuleTypesChanged?.([
-      ...new Set(
-        updatedFilters
-          .flatMap((ruleTypeId) => (ruleTypeId as AlertsFeatureIdsFilter).meta.ruleTypeIds)
-          .filter(nonNullable)
-      ),
-    ]);
-
-    onFiltersChange(updatedFilters);
-  };
 
   const filterControlsStorageKey = useMemo(
     () => ['alertsSearchBar', spaceId, 'filterControls'].filter(Boolean).join('.'),
@@ -144,10 +143,11 @@ export const UrlSyncedAlertsSearchBar = ({
         query={kuery}
         onQuerySubmit={onQueryChange}
         filters={filters}
-        onFiltersUpdated={onFiltersUpdated}
+        onFiltersUpdated={onFiltersChange}
         savedQuery={savedQuery}
         onSavedQueryUpdated={setSavedQuery}
         onClearSavedQuery={clearSavedQuery}
+        ruleTypeIds={ruleTypeIds}
         {...rest}
       />
       {showFilterControls && (

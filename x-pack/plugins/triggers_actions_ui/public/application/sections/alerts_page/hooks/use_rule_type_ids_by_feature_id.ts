@@ -12,7 +12,7 @@ import { observabilityFeatureIds, stackFeatureIds } from '../../alerts_table/con
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
 import { RuleTypeIndex } from '../../../../types';
 
-type RuleTypeIdsByFeatureId<T = string[]> = Partial<
+export type RuleTypeIdsByFeatureId<T = string[]> = Partial<
   Record<
     | typeof AlertConsumers.SIEM
     | typeof AlertConsumers.OBSERVABILITY
@@ -22,13 +22,15 @@ type RuleTypeIdsByFeatureId<T = string[]> = Partial<
   >
 >;
 
+const EMPTY_OBJECT = {};
+
 /**
  * Groups all rule type ids under their respective feature id
  */
 export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
   useMemo((): RuleTypeIdsByFeatureId => {
     if (!ruleTypesIndex?.size) {
-      return {};
+      return EMPTY_OBJECT;
     }
 
     const map = Array.from(ruleTypesIndex.entries()).reduce<RuleTypeIdsByFeatureId<Set<string>>>(

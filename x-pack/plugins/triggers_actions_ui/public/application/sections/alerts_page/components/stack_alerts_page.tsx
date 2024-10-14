@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBetaBadge,
@@ -24,7 +24,7 @@ import {
   isSiemRuleType,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
@@ -41,12 +41,21 @@ import {
   Provider,
 } from '../../alerts_search_bar/use_alert_search_bar_state_container';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { createMatchPhraseFilter, createRuleTypesFilter } from '../../../lib/search_filters';
+import {
+  AlertsFeatureIdsFilter,
+  createMatchPhraseFilter,
+  createRuleTypesFilter,
+} from '../../../lib/search_filters';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../../common/utils';
-import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
+import {
+  RuleTypeIdsByFeatureId,
+  useRuleTypeIdsByFeatureId,
+} from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
+import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
+
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
@@ -56,7 +65,7 @@ export const StackAlertsPage = () => {
   return (
     <Provider value={alertSearchBarStateContainer}>
       <QueryClientProvider client={alertsTableQueryClient}>
-        <PageContent />
+        <PageContentWrapper />
       </QueryClientProvider>
     </Provider>
   );
@@ -70,15 +79,11 @@ const getFeatureFilterLabel = (featureName: string) =>
     },
   });
 
-const PageContent = () => {
+const PageContentWrapperComponent: React.FC = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    alertsTableConfigurationRegistry,
   } = useKibana().services;
-  const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>([]);
-  const ruleStats = useRuleStats({ ruleTypeIds });
 
   const {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
@@ -86,31 +91,110 @@ const PageContent = () => {
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
-  const filteringBySolution = ruleTypeIds.length > 0;
-  const browsingSiem = filteringBySolution && ruleTypeIds.every(isSiemRuleType);
+
+  useEffect(() => {
+    setBreadcrumbs([getAlertingSectionBreadcrumb('alerts')]);
+    docTitle.change(getCurrentDocTitle('alerts'));
+  }, [docTitle, setBreadcrumbs]);
+
+  return !isInitialLoadingRuleTypes ? (
+    <PageContent
+      isLoading={isInitialLoadingRuleTypes}
+      authorizedToReadAnyRules={authorizedToReadAnyRules}
+      ruleTypeIdsByFeatureId={ruleTypeIdsByFeatureId}
+    />
+  ) : null;
+};
+
+const PageContentWrapper = React.memo(PageContentWrapperComponent);
+
+interface PageContentProps {
+  isLoading: boolean;
+  authorizedToReadAnyRules: boolean;
+  ruleTypeIdsByFeatureId: RuleTypeIdsByFeatureId;
+}
+
+const PageContentComponent: React.FC<PageContentProps> = ({
+  isLoading,
+  authorizedToReadAnyRules,
+  ruleTypeIdsByFeatureId,
+}) => {
+  const { alertsTableConfigurationRegistry } = useKibana().services;
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
+
+  const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
+  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>(() =>
+    getInitialRuleTypeIds(ruleTypeIdsByFeatureId)
+  );
+
+  const [consumers, setConsumers] = useState<string[]>(NON_SIEM_CONSUMERS);
+
+  const [selectedFilters, setSelectedFilters] = useState<AlertsFeatureIdsFilter[]>([]);
+  const ruleStats = useRuleStats({ ruleTypeIds });
+  const isFilteringSecurityRules = ruleTypeIds.every(isSiemRuleType);
+
+  const onFilterSelected = useCallback(
+    (filters: Filter[]) => {
+      const newRuleTypeIds = [
+        ...new Set(
+          filters
+            .flatMap((ruleTypeId) => (ruleTypeId as AlertsFeatureIdsFilter).meta.ruleTypeIds)
+            .filter(nonNullable)
+        ),
+      ];
+
+      const newConsumers = [
+        ...new Set(
+          filters
+            .flatMap((ruleTypeId) => (ruleTypeId as AlertsFeatureIdsFilter).meta.consumers)
+            .filter(nonNullable)
+        ),
+      ];
+
+      setSelectedFilters(filters as AlertsFeatureIdsFilter[]);
+
+      if (newRuleTypeIds.length > 0) {
+        setRuleTypeIds(newRuleTypeIds);
+        setConsumers(newConsumers);
+        return;
+      }
+
+      setRuleTypeIds(getInitialRuleTypeIds(ruleTypeIdsByFeatureId));
+      setConsumers(NON_SIEM_CONSUMERS);
+    },
+    [ruleTypeIdsByFeatureId]
+  );
 
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
     if (ruleTypeIdsByFeatureIdEntries.length > 0) {
       filters.push(
         ...ruleTypeIdsByFeatureIdEntries
-          .map(([featureId, _ruleTypeIds]) => {
-            const producerData = alertProducersData[featureId as AlertsTableSupportedConsumers];
+          .map(([consumer, _ruleTypeIds]) => {
+            const producerData = alertProducersData[consumer as AlertsTableSupportedConsumers];
             if (!producerData) {
               return null;
             }
 
             const filterLabel = getFeatureFilterLabel(producerData.displayName);
-            const disabled =
-              filteringBySolution && featureId === AlertConsumers.SIEM
-                ? !browsingSiem
-                : browsingSiem;
+            const shouldDisable =
+              (isFilteringSecurityRules && consumer !== AlertConsumers.SIEM) ||
+              (!isFilteringSecurityRules && consumer === AlertConsumers.SIEM);
+
+            const isQuickFilterSelected = _ruleTypeIds.every((ruleTypeId) =>
+              ruleTypeIds.includes(ruleTypeId)
+            );
+
+            const disabled = selectedFilters.length > 0 && (shouldDisable || isQuickFilterSelected);
 
             return {
               name: filterLabel,
               icon: producerData.icon,
-              filter: createRuleTypesFilter(_ruleTypeIds, filterLabel),
+              filter: createRuleTypesFilter(
+                _ruleTypeIds,
+                producerData.subFeatureIds ?? [consumer],
+                filterLabel
+              ),
               disabled,
             };
           })
@@ -129,18 +213,12 @@ const PageContent = () => {
       })),
     });
     return filters;
-  }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureIdEntries]);
-
-  const tableConfigurationId = useMemo(
-    // TODO in preparation for using solution-specific configurations
-    () => ALERT_TABLE_GLOBAL_CONFIG_ID,
-    []
-  );
-
-  useEffect(() => {
-    setBreadcrumbs([getAlertingSectionBreadcrumb('alerts')]);
-    docTitle.change(getCurrentDocTitle('alerts'));
-  }, [docTitle, setBreadcrumbs]);
+  }, [
+    isFilteringSecurityRules,
+    ruleTypeIds,
+    ruleTypeIdsByFeatureIdEntries,
+    selectedFilters.length,
+  ]);
 
   return (
     <>
@@ -165,7 +243,7 @@ const PageContent = () => {
         rightSideItems={ruleStats}
       />
       <EuiSpacer size="l" />
-      {!isInitialLoadingRuleTypes && !authorizedToReadAnyRules ? (
+      {!isLoading && !authorizedToReadAnyRules ? (
         <NoPermissionPrompt />
       ) : (
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">
@@ -175,8 +253,8 @@ const PageContent = () => {
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
-            onRuleTypesChanged={setRuleTypeIds}
             onEsQueryChange={setEsQuery}
+            onFilterSelected={onFilterSelected}
           />
           <Suspense fallback={<EuiLoadingSpinner />}>
             <AlertsTable
@@ -184,9 +262,10 @@ const PageContent = () => {
               // columns alignment from breaking after a change in the number of columns
               key={ruleTypeIds.join()}
               id="stack-alerts-page-table"
-              configurationId={tableConfigurationId}
+              configurationId={ALERT_TABLE_GLOBAL_CONFIG_ID}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               ruleTypeIds={ruleTypeIds}
+              consumers={consumers}
               query={esQuery}
               showAlertStatusWithFlapping
               initialPageSize={20}
@@ -197,3 +276,11 @@ const PageContent = () => {
     </>
   );
 };
+
+const PageContent = React.memo(PageContentComponent);
+
+const getInitialRuleTypeIds = (ruleTypeIdsByFeatureId: RuleTypeIdsByFeatureId): string[] =>
+  Object.entries(ruleTypeIdsByFeatureId)
+    .filter(([featureId]) => featureId !== AlertConsumers.SIEM)
+    .map(([_, _ruleTypeIds]) => _ruleTypeIds)
+    .flat();

@@ -7,8 +7,7 @@
 
 import {
   AlertConsumers,
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  STACK_RULE_TYPE_IDS,
   OBSERVABILITY_RULE_TYPE_IDS,
 } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
@@ -38,6 +37,5 @@ export const EventsAsUnit = 'events';
 
 export const OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  ...STACK_RULE_TYPE_IDS,
 ];

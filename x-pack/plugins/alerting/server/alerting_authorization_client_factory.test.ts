@@ -15,7 +15,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
 
-describe('setAlertsToUntracked()', () => {
+describe('AlertingAuthorizationClientFactory', () => {
   const features = featuresPluginMock.createStart();
   const securityPluginStart = securityMock.createStart();
   const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =

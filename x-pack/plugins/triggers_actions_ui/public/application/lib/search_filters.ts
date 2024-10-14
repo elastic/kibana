@@ -18,7 +18,7 @@ const $state = {
 };
 
 export type AlertsFeatureIdsFilter = PhrasesFilter & {
-  meta: PhrasesFilter['meta'] & { ruleTypeIds: string[] };
+  meta: PhrasesFilter['meta'] & { ruleTypeIds: string[]; consumers: string[] };
 };
 
 /**
@@ -68,6 +68,7 @@ export const createMatchPhrasesFilter = (
     params: values,
     value: undefined,
     ruleTypeIds: [],
+    consumers: [],
   },
   $state,
   query: {
@@ -91,8 +92,13 @@ export const createRuleProducerFilter = (producer: AlertConsumers) =>
 /**
  * Creates a match_phrase filter targeted to filtering alerts by rule type ids
  */
-export const createRuleTypesFilter = (ruleTypeIds: string[], alias: string) => {
+export const createRuleTypesFilter = (
+  ruleTypeIds: string[],
+  consumers: string[],
+  alias: string
+) => {
   const filter = createMatchPhrasesFilter(ALERT_RULE_TYPE_ID, ruleTypeIds, alias);
   filter.meta.ruleTypeIds = ruleTypeIds;
+  filter.meta.consumers = consumers;
   return filter;
 };

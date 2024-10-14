@@ -10,3 +10,5 @@
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const ES_QUERY_ID = '.es-query';
 export const ML_ANOMALY_DETECTION_RULE_TYPE_ID = 'xpack.ml.anomaly_detection_alert';
+
+export const STACK_RULE_TYPE_IDS = [ES_QUERY_ID, ML_ANOMALY_DETECTION_RULE_TYPE_ID];
