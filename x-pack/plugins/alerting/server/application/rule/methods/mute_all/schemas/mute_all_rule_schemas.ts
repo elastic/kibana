@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// temporary type until agreed on
-export type MetricKey = 'ingestedMax' | 'retainedMax';
+import { schema } from '@kbn/config-schema';
+
+export const muteAllRuleParamsSchema = schema.object({
+  id: schema.string(),
+});
