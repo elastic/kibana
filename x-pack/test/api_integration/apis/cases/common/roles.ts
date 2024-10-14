@@ -426,7 +426,7 @@ export const obsCasesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCases: ['cases_delete'],
+          observabilityCasesV2: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -450,7 +450,7 @@ export const obsCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCases: ['read', 'cases_delete'],
+          observabilityCasesV2: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -474,7 +474,7 @@ export const obsCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCases: ['minimal_all'],
+          observabilityCasesV2: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -498,7 +498,7 @@ export const obsCasesAll: Role = {
     kibana: [
       {
         feature: {
-          observabilityCases: ['all'],
+          observabilityCasesV2: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -522,7 +522,7 @@ export const obsCasesRead: Role = {
     kibana: [
       {
         feature: {
-          observabilityCases: ['read'],
+          observabilityCasesV2: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

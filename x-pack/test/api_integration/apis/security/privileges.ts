@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
       ],
-      observabilityCases: [
+      observabilityCasesV2: [
         'all',
         'read',
         'minimal_all',

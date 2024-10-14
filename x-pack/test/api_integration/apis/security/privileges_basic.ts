@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
             graph: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
             generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
-            observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            observabilityCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
               'create_comment',
               'case_reopen',
             ],
-            observabilityCases: [
+            observabilityCasesV2: [
               'all',
               'read',
               'minimal_all',
