@@ -63,7 +63,7 @@ describe('runSaveLensVisualization', () => {
       /**
        * This function will be called when a fresh chart is saved
        * and in the modal the user chooses to add the chart into a specific dashboard. Make sure to pass the "dashboardId" prop as well to simulate this scenario.
-       *  This is used to test indirectly the redirectToDashboard call
+       * This is used to test indirectly the redirectToDashboard call
        */
       redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackage,
       /**
@@ -241,12 +241,13 @@ describe('runSaveLensVisualization', () => {
       });
       // save the current document as a new by-value copy and add it to a dashboard
       it('should save as a new by-value copy and redirect to the dashboard', async () => {
+        const dashboardId = faker.random.uuid();
         const { props, saveProps, options, redirectToDashboardFn, saveToLibraryFn, toasts } =
           getDefaultArgs(
             {
               // defaultDoc is by reference
             },
-            { newCopyOnSave: true, saveToLibrary: false, dashboardId: faker.random.uuid() }
+            { newCopyOnSave: true, saveToLibrary: false, dashboardId }
           );
         await runSaveLensVisualization(props, saveProps, options);
 
@@ -255,24 +256,42 @@ describe('runSaveLensVisualization', () => {
 
         // not called
         expect(props.redirectToOrigin).not.toHaveBeenCalled();
-        expect(redirectToDashboardFn).toHaveBeenCalled();
+        expect(redirectToDashboardFn).toHaveBeenCalledWith(
+          'dashboards',
+          // make sure the new savedObject id is removed from the new input
+          expect.objectContaining({
+            state: expect.objectContaining({
+              input: expect.objectContaining({ savedObjectId: undefined }),
+            }),
+          })
+        );
         expect(saveToLibraryFn).not.toHaveBeenCalled();
         expect(toasts.addSuccess).not.toHaveBeenCalled();
       });
+
       // save the current document as a new by-ref copy and add it to a dashboard
       it('should save as a new by-ref copy and redirect to the dashboard', async () => {
+        const dashboardId = faker.random.uuid();
         const { props, saveProps, options, redirectToDashboardFn, saveToLibraryFn, toasts } =
           getDefaultArgs(
             {
               // defaultDoc is by reference
             },
-            { newCopyOnSave: true, saveToLibrary: true, dashboardId: faker.random.uuid() }
+            { newCopyOnSave: true, saveToLibrary: true, dashboardId }
           );
         await runSaveLensVisualization(props, saveProps, options);
 
         // callback called
         expect(props.onAppLeave).toHaveBeenCalled();
-        expect(redirectToDashboardFn).toHaveBeenCalled();
+        expect(redirectToDashboardFn).toHaveBeenCalledWith(
+          'dashboards',
+          // make sure the new savedObject id is passed with the new input
+          expect.objectContaining({
+            state: expect.objectContaining({
+              input: expect.objectContaining({ savedObjectId: '1234' }),
+            }),
+          })
+        );
         expect(saveToLibraryFn).toHaveBeenCalled();
 
         // not called
