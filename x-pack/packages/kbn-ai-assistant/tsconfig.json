@@ -1,0 +1,40 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/core",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/std",
+    "@kbn/utility-types-jest",
+    "@kbn/kibana-react-plugin",
+    "@kbn/monaco",
+    "@kbn/licensing-plugin",
+    "@kbn/code-editor",
+    "@kbn/ml-plugin",
+    "@kbn/share-plugin",
+    "@kbn/ai-assistant-common",
+  ]
+}

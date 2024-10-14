@@ -8,5 +8,9 @@
  */
 
 export { SamlAuthProvider } from './saml_auth_provider';
-export type { RoleCredentials, CookieCredentials } from './saml_auth_provider';
+export type {
+  RoleCredentials,
+  CookieCredentials,
+  KibanaRoleDescriptors,
+} from './saml_auth_provider';
 export type { InternalRequestHeader } from './default_request_headers';
