@@ -14,6 +14,7 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
@@ -287,6 +288,23 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
+    const TimelineEventDetailRowRendererComp = useMemo(
+      () =>
+        function TimelineEventDetailRowRenderer(props) {
+          const { rowIndex, ...restProps } = props;
+          return (
+            <TimelineEventDetailRow
+              event={tableRows[rowIndex]}
+              rowIndex={rowIndex}
+              timelineId={timelineId}
+              enabledRowRenderers={enabledRowRenderers}
+              {...restProps}
+            />
+          );
+        },
+      [tableRows, timelineId, enabledRowRenderers]
+    );
+
     /**
      * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
      */
@@ -302,21 +320,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
           footerCellProps: { style: { display: 'none' } },
 
-          rowCellRender: React.memo(function TimelineEventDetailRowRenderer(props) {
-            const { rowIndex, ...restProps } = props;
-            return (
-              <TimelineEventDetailRow
-                event={tableRows[rowIndex]}
-                rowIndex={rowIndex}
-                timelineId={timelineId}
-                enabledRowRenderers={enabledRowRenderers}
-                {...restProps}
-              />
-            );
-          }),
+          rowCellRender: JEST_ENVIRONMENT
+            ? TimelineEventDetailRowRendererComp
+            : React.memo(TimelineEventDetailRowRendererComp),
         },
       ],
-      [enabledRowRenderers, tableRows, timelineId]
+      [TimelineEventDetailRowRendererComp]
     );
 
     /**

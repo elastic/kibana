@@ -175,7 +175,8 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
           <>
             {headerRow}
             <div
-              className="row-container"
+              className="custom__grid__rows--container"
+              data-test-subj="customGridRowsContainer"
               ref={ref}
               style={{ ...style, position: 'relative' }}
               {...rest}
