@@ -15,12 +15,13 @@ import {
   reinstallEntityDefinition,
 } from './entities/install_entity_definition';
 import { startTransforms } from './entities/start_transforms';
-import { findEntityDefinitions } from './entities/find_entity_definition';
+import { findEntityDefinitionById, findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
 import { EntityDefinitionWithState } from './entities/types';
+import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 
 export class EntityClient {
   constructor(
@@ -59,9 +60,8 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
-    const [definition] = await findEntityDefinitions({
+    const definition = await findEntityDefinitionById({
       id,
-      perPage: 1,
       soClient: this.options.soClient,
       esClient: this.options.esClient,
       includeState: true,
@@ -76,7 +76,7 @@ export class EntityClient {
     if (installationInProgress(definition)) {
       const message = `Entity definition [${definition.id}] has changes in progress`;
       this.options.logger.error(message);
-      throw new EntityDefinitionNotFound(message);
+      throw new EntityDefinitionUpdateConflict(message);
     }
 
     const shouldRestartTransforms = (
