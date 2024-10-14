@@ -196,7 +196,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [deleteEntry, entries.data, getColumns, openFlyout]
+    [entries.data, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
   );
 
   // Refresh button
@@ -260,8 +260,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       ? i18n.NEW_DOCUMENT_FLYOUT_TITLE
       : i18n.NEW_INDEX_FLYOUT_TITLE;
   }, [selectedEntry]);
-
-
 
   const sorting = {
     sort: {
