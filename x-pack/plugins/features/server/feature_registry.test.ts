@@ -200,6 +200,25 @@ describe('FeatureRegistry', () => {
       });
     });
 
+    it('requires only a valid scope registered', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: null,
+        // @ts-expect-error
+        scope: ['foo', 'bar'],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature has unknown scope entries: foo, bar"`
+      );
+    });
+
     it(`requires a value for privileges`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',

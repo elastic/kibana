@@ -1,4 +1,6 @@
-summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
+summary: Elasticsearch query rule (DSL)
+description: >
+  Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
 value:
   actions:
     - group: query matched

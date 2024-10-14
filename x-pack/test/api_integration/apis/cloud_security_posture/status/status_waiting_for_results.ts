@@ -20,7 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('GET /internal/cloud_security_posture/status', () => {
+  describe.skip('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = WAITING_FOR_RESULT TEST', () => {

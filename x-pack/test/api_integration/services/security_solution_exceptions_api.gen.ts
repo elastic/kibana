@@ -39,63 +39,75 @@ import { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-ex
 import { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
 import { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
+import { routeWithNamespace } from '../../common/utils/security_solution';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    createExceptionList(props: CreateExceptionListProps) {
+    createExceptionList(props: CreateExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/exception_lists')
+        .post(routeWithNamespace('/api/exception_lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    createExceptionListItem(props: CreateExceptionListItemProps) {
+    createExceptionListItem(props: CreateExceptionListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/exception_lists/items')
+        .post(routeWithNamespace('/api/exception_lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    createRuleExceptionListItems(props: CreateRuleExceptionListItemsProps) {
+    createRuleExceptionListItems(
+      props: CreateRuleExceptionListItemsProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .post(replaceParams('/api/detection_engine/rules/{id}/exceptions', props.params))
+        .post(
+          routeWithNamespace(
+            replaceParams('/api/detection_engine/rules/{id}/exceptions', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    createSharedExceptionList(props: CreateSharedExceptionListProps) {
+    createSharedExceptionList(
+      props: CreateSharedExceptionListProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .post('/api/exceptions/shared')
+        .post(routeWithNamespace('/api/exceptions/shared', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    deleteExceptionList(props: DeleteExceptionListProps) {
+    deleteExceptionList(props: DeleteExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete('/api/exception_lists')
+        .delete(routeWithNamespace('/api/exception_lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    deleteExceptionListItem(props: DeleteExceptionListItemProps) {
+    deleteExceptionListItem(props: DeleteExceptionListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete('/api/exception_lists/items')
+        .delete(routeWithNamespace('/api/exception_lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    duplicateExceptionList(props: DuplicateExceptionListProps) {
+    duplicateExceptionList(props: DuplicateExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/exception_lists/_duplicate')
+        .post(routeWithNamespace('/api/exception_lists/_duplicate', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -104,25 +116,25 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     /**
      * Exports an exception list and its associated items to an .ndjson file
      */
-    exportExceptionList(props: ExportExceptionListProps) {
+    exportExceptionList(props: ExportExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/exception_lists/_export')
+        .post(routeWithNamespace('/api/exception_lists/_export', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    findExceptionListItems(props: FindExceptionListItemsProps) {
+    findExceptionListItems(props: FindExceptionListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/exception_lists/items/_find')
+        .get(routeWithNamespace('/api/exception_lists/items/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    findExceptionLists(props: FindExceptionListsProps) {
+    findExceptionLists(props: FindExceptionListsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/exception_lists/_find')
+        .get(routeWithNamespace('/api/exception_lists/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -131,49 +143,52 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     /**
      * Imports an exception list and associated items
      */
-    importExceptionList(props: ImportExceptionListProps) {
+    importExceptionList(props: ImportExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/exception_lists/_import')
+        .post(routeWithNamespace('/api/exception_lists/_import', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readExceptionList(props: ReadExceptionListProps) {
+    readExceptionList(props: ReadExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/exception_lists')
+        .get(routeWithNamespace('/api/exception_lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readExceptionListItem(props: ReadExceptionListItemProps) {
+    readExceptionListItem(props: ReadExceptionListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/exception_lists/items')
+        .get(routeWithNamespace('/api/exception_lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readExceptionListSummary(props: ReadExceptionListSummaryProps) {
+    readExceptionListSummary(
+      props: ReadExceptionListSummaryProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .get('/api/exception_lists/summary')
+        .get(routeWithNamespace('/api/exception_lists/summary', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    updateExceptionList(props: UpdateExceptionListProps) {
+    updateExceptionList(props: UpdateExceptionListProps, kibanaSpace: string = 'default') {
       return supertest
-        .put('/api/exception_lists')
+        .put(routeWithNamespace('/api/exception_lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    updateExceptionListItem(props: UpdateExceptionListItemProps) {
+    updateExceptionListItem(props: UpdateExceptionListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .put('/api/exception_lists/items')
+        .put(routeWithNamespace('/api/exception_lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

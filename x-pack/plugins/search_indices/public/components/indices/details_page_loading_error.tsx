@@ -15,12 +15,15 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 interface IndexloadingErrorProps {
-  indexName: string;
+  error: {
+    title: string;
+    message: string;
+  };
   navigateToIndexListPage: () => void;
   reloadFunction: () => void;
 }
 export const IndexloadingError = ({
-  indexName,
+  error: { title, message },
   navigateToIndexListPage,
   reloadFunction,
 }: IndexloadingErrorProps) => (
@@ -31,8 +34,11 @@ export const IndexloadingError = ({
     title={
       <h2>
         <FormattedMessage
-          id="xpack.searchIndices.pageLoaError.errorTitle"
-          defaultMessage="Unable to load index details"
+          id="xpack.searchIndices.pageLoadError.errorTitle"
+          defaultMessage="{error}"
+          values={{
+            error: title,
+          }}
         />
       </h2>
     }
@@ -40,9 +46,9 @@ export const IndexloadingError = ({
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.searchIndices.pageLoadError.description"
-          defaultMessage="We encountered an error loading data for index {indexName}. Make sure that the index name in the URL is correct and try again."
+          defaultMessage="{message}"
           values={{
-            indexName,
+            message,
           }}
         />
       </EuiText>

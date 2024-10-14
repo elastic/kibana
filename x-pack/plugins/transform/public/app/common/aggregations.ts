@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { composeValidators, patternValidator } from '../../../common/shared_imports';
+import { composeValidators, patternValidator } from '@kbn/ml-validators';
 
 import type { AggName } from '../../../common/types/aggregations';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ComponentType, useMemo } from 'react';
-import { InventoryContextProvider } from '../public/components/inventory_context_provider';
+import { InventoryContextProvider } from '../public/context/inventory_context_provider';
 import { getMockInventoryContext } from './get_mock_inventory_context';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {

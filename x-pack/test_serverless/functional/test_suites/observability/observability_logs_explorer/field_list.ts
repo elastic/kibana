@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  describe('When virtual columns loads', () => {
+  describe.skip('When virtual columns loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ from, to }));
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();

@@ -130,6 +130,9 @@ import {
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
   SAVE_WITH_ERRORS_MODAL,
   SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
+  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -554,7 +557,7 @@ export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
     .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
-export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
 
@@ -575,7 +578,11 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+  fillDefineThresholdRule(rule);
+  continueFromDefineStep();
 };
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
@@ -905,6 +912,7 @@ export const enablesAndPopulatesThresholdSuppression = (
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.checked');
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -995,4 +1003,21 @@ export const uncheckLoadQueryDynamically = () => {
 
 export const openAddFilterPopover = () => {
   cy.get(QUERY_BAR_ADD_FILTER).click();
+};
+
+export const checkEnableLoggedRequests = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).click();
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('be.checked');
+};
+
+export const submitRulePreview = () => {
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON).first().click();
+};
+
+export const toggleLoggedRequestsItemAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON).should('be.visible').first().click();
 };

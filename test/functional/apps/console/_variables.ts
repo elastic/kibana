@@ -16,8 +16,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
   describe('Console variables', function testConsoleVariables() {
-    this.tags('includeFirefox');
-
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

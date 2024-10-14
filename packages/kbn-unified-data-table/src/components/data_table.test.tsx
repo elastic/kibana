@@ -160,7 +160,7 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
   // to "Can't perform a React state update on an unmounted component." warnings in tests,
   // so we need to wait for the next animation frame to avoid this
   await screen.findByTestId('discoverDocTable');
-  await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+  await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
 };
 
 async function getComponent(props: UnifiedDataTableProps = getProps()) {
@@ -1107,7 +1107,7 @@ describe('UnifiedDataTable', () => {
       // to "Can't perform a React state update on an unmounted component." warnings in tests,
       // so we need to wait for the next animation frame to avoid this
       await screen.findByTestId('unifiedDataTableCompareDocuments');
-      await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+      await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
     };
 
     const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');

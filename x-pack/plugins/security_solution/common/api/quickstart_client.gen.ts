@@ -99,6 +99,7 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
 } from './detection_engine/rule_preview/rule_preview.gen';
@@ -242,6 +243,38 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  DeleteEntityEngineRequestQueryInput,
+  DeleteEntityEngineRequestParamsInput,
+  DeleteEntityEngineResponse,
+} from './entity_analytics/entity_store/engine/delete.gen';
+import type {
+  GetEntityEngineRequestParamsInput,
+  GetEntityEngineResponse,
+} from './entity_analytics/entity_store/engine/get.gen';
+import type {
+  InitEntityEngineRequestParamsInput,
+  InitEntityEngineRequestBodyInput,
+  InitEntityEngineResponse,
+} from './entity_analytics/entity_store/engine/init.gen';
+import type { ListEntityEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
+import type {
+  StartEntityEngineRequestParamsInput,
+  StartEntityEngineResponse,
+} from './entity_analytics/entity_store/engine/start.gen';
+import type {
+  GetEntityEngineStatsRequestParamsInput,
+  GetEntityEngineStatsResponse,
+} from './entity_analytics/entity_store/engine/stats.gen';
+import type {
+  StopEntityEngineRequestParamsInput,
+  StopEntityEngineResponse,
+} from './entity_analytics/entity_store/engine/stop.gen';
+import type {
+  ListEntitiesRequestQueryInput,
+  ListEntitiesResponse,
+} from './entity_analytics/entity_store/entities/list_entities.gen';
+import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -264,6 +297,10 @@ import type {
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type {
+  CopyTimelineRequestBodyInput,
+  CopyTimelineResponse,
+} from './timeline/copy_timeline/copy_timeline_route.gen';
+import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
@@ -283,7 +320,10 @@ import type {
   GetDraftTimelinesRequestQueryInput,
   GetDraftTimelinesResponse,
 } from './timeline/get_draft_timelines/get_draft_timelines_route.gen';
-import type { GetNotesRequestQueryInput } from './timeline/get_notes/get_notes_route.gen';
+import type {
+  GetNotesRequestQueryInput,
+  GetNotesResponse,
+} from './timeline/get_notes/get_notes_route.gen';
 import type {
   GetTimelineRequestQueryInput,
   GetTimelineResponse,
@@ -500,6 +540,38 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   */
+  async cleanUpRiskEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API CleanUpRiskEngine`);
+    return this.kbnClient
+      .request<CleanUpRiskEngineResponse>({
+        path: '/api/risk_score/engine/dangerously_delete_data',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Copies and returns a timeline or timeline template.
+
+    */
+  async copyTimeline(props: CopyTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CopyTimeline`);
+    return this.kbnClient
+      .request<CopyTimelineResponse>({
+        path: '/api/timeline/_copy',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async createAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateAlertsIndex`);
     return this.kbnClient
@@ -611,6 +683,20 @@ Migrations are initiated per index. While the process is neither destructive nor
     return this.kbnClient
       .request<DeleteAssetCriticalityRecordResponse>({
         path: '/api/asset_criticality',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteEntityEngine(props: DeleteEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
+    return this.kbnClient
+      .request<DeleteEntityEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1155,13 +1241,37 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEntityEngine(props: GetEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
+    return this.kbnClient
+      .request<GetEntityEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEntityEngineStats(props: GetEntityEngineStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngineStats`);
+    return this.kbnClient
+      .request<GetEntityEngineStatsResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Gets notes
    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
     return this.kbnClient
-      .request({
+      .request<GetNotesResponse>({
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1311,6 +1421,19 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async initEntityEngine(props: InitEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
+    return this.kbnClient
+      .request<InitEntityEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
@@ -1364,6 +1487,35 @@ finalize it.
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  async listEntities(props: ListEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
+    return this.kbnClient
+      .request<ListEntitiesResponse>({
+        path: '/api/entity_store/entities/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listEntityEngines() {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
+    return this.kbnClient
+      .request<ListEntityEnginesResponse>({
+        path: '/api/entity_store/engines',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1614,6 +1766,7 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1696,6 +1849,30 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async startEntityEngine(props: StartEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
+    return this.kbnClient
+      .request<StartEntityEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async stopEntityEngine(props: StopEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
+    return this.kbnClient
+      .request<StopEntityEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1790,6 +1967,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
 }
+export interface CopyTimelineProps {
+  body: CopyTimelineRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
@@ -1808,6 +1988,10 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteEntityEngineProps {
+  query: DeleteEntityEngineRequestQueryInput;
+  params: DeleteEntityEngineRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -1902,6 +2086,12 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
+export interface GetEntityEngineProps {
+  params: GetEntityEngineRequestParamsInput;
+}
+export interface GetEntityEngineStatsProps {
+  params: GetEntityEngineStatsRequestParamsInput;
+}
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
@@ -1932,11 +2122,18 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
+export interface InitEntityEngineProps {
+  params: InitEntityEngineRequestParamsInput;
+  body: InitEntityEngineRequestBodyInput;
+}
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -1970,6 +2167,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
@@ -1983,6 +2181,12 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface StartEntityEngineProps {
+  params: StartEntityEngineRequestParamsInput;
+}
+export interface StopEntityEngineProps {
+  params: StopEntityEngineRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;

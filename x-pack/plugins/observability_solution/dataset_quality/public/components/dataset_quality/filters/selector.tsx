@@ -15,6 +15,7 @@ const selectorLoading = i18n.translate('xpack.datasetQuality.selector.loading', 
 });
 
 interface SelectorProps {
+  dataTestSubj?: string;
   isLoading?: boolean;
   options: Item[];
   loadingMessage?: string;
@@ -31,6 +32,7 @@ export interface Item {
 }
 
 export function Selector({
+  dataTestSubj = 'datasetQualitySelectable',
   isLoading,
   options,
   loadingMessage,
@@ -50,11 +52,15 @@ export function Selector({
     setIsPopoverOpen(false);
   };
 
-  const renderOption = (option: Item) => <EuiText size="s">{option.label}</EuiText>;
+  const renderOption = (option: Item) => (
+    <EuiText size="s" data-test-subj={`${dataTestSubj}Option-${option.label}`}>
+      {option.label}
+    </EuiText>
+  );
 
   const button = (
     <EuiFilterButton
-      data-test-subj="datasetQualitySelectableButton"
+      data-test-subj={`${dataTestSubj}Button`}
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
@@ -75,7 +81,7 @@ export function Selector({
       panelPaddingSize="none"
     >
       <EuiSelectable
-        data-test-subj="datasetQualitySelectableOptions"
+        data-test-subj={`${dataTestSubj}Options`}
         searchable
         searchProps={{
           placeholder: searchPlaceholder,

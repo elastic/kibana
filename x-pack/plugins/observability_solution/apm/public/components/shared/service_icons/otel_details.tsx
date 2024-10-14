@@ -15,7 +15,6 @@ type ServiceDetailsReturnType =
 
 interface Props {
   opentelemetry: ServiceDetailsReturnType['opentelemetry'];
-  agentName?: string;
 }
 
 export function OTelDetails({ opentelemetry }: Props) {

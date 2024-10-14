@@ -32,19 +32,6 @@ export function getLensAttrsForSuggestion({
     dataView,
   }) as TypedLensByValueInput['attributes'];
 
-  attrs.state.visualization = {
-    ...(attrs.state.visualization as any),
-    axisTitlesVisibilitySettings: {
-      x: false,
-      yLeft: false,
-      yRight: false,
-    },
-    legend: {
-      isVisible: false,
-      position: 'right',
-    },
-  };
-
   const lensEmbeddableInput: TypedLensByValueInput = {
     attributes: attrs,
     id: v4(),

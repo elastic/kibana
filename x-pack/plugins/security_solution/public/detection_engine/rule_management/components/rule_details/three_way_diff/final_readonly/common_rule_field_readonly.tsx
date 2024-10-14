@@ -19,6 +19,21 @@ import { NameReadOnly } from './fields/name/name';
 import { TagsReadOnly } from './fields/tags/tags';
 import { DescriptionReadOnly } from './fields/description/description';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { AuthorReadOnly } from './fields/author/author';
+import { BuildingBlockReadOnly } from './fields/building_block/building_block';
+import { InvestigationFieldsReadOnly } from './fields/investigation_fields/investigation_fields';
+import { FalsePositivesReadOnly } from './fields/false_positives/false_positives';
+import { LicenseReadOnly } from './fields/license/license';
+import { MaxSignalsReadOnly } from './fields/max_signals/max_signals';
+import { NoteReadOnly } from './fields/note/note';
+import { RuleScheduleReadOnly } from './fields/rule_schedule/rule_schedule';
+import { ReferencesReadOnly } from './fields/references/references';
+import { RiskScoreReadOnly } from './fields/risk_score/risk_score';
+import { RuleNameOverrideReadOnly } from './fields/rule_name_override/rule_name_override';
+import { SetupReadOnly } from './fields/setup/setup';
+import { SeverityReadOnly } from './fields/severity/severity';
+import { TimestampOverrideReadOnly } from './fields/timestamp_override/timestamp_override';
+import { TimelineTemplateReadOnly } from './fields/timeline_template/timeline_template';
 
 interface CommonRuleFieldReadOnlyProps {
   fieldName: keyof DiffableCommonFields;
@@ -32,25 +47,28 @@ export function CommonRuleFieldReadOnly({
 }: CommonRuleFieldReadOnlyProps) {
   switch (fieldName) {
     case 'author':
-      return null;
+      return <AuthorReadOnly author={finalDiffableRule.author} />;
     case 'building_block':
-      return null;
+      return <BuildingBlockReadOnly />;
     case 'description':
       return <DescriptionReadOnly description={finalDiffableRule.description} />;
     case 'exceptions_list':
+      /* Exceptions are not used in prebuilt rules */
       return null;
     case 'investigation_fields':
-      return null;
+      return (
+        <InvestigationFieldsReadOnly investigationFields={finalDiffableRule.investigation_fields} />
+      );
     case 'false_positives':
-      return null;
+      return <FalsePositivesReadOnly falsePositives={finalDiffableRule.false_positives} />;
     case 'license':
-      return null;
+      return <LicenseReadOnly license={finalDiffableRule.license} />;
     case 'max_signals':
-      return null;
+      return <MaxSignalsReadOnly maxSignals={finalDiffableRule.max_signals} />;
     case 'name':
       return <NameReadOnly name={finalDiffableRule.name} />;
     case 'note':
-      return null;
+      return <NoteReadOnly note={finalDiffableRule.note} />;
     case 'related_integrations':
       return (
         <RelatedIntegrationsReadOnly relatedIntegrations={finalDiffableRule.related_integrations} />
@@ -60,7 +78,7 @@ export function CommonRuleFieldReadOnly({
     case 'risk_score_mapping':
       return <RiskScoreMappingReadOnly riskScoreMapping={finalDiffableRule.risk_score_mapping} />;
     case 'rule_schedule':
-      return null;
+      return <RuleScheduleReadOnly ruleSchedule={finalDiffableRule.rule_schedule} />;
     case 'severity_mapping':
       return <SeverityMappingReadOnly severityMapping={finalDiffableRule.severity_mapping} />;
     case 'tags':
@@ -68,22 +86,24 @@ export function CommonRuleFieldReadOnly({
     case 'threat':
       return <ThreatReadOnly threat={finalDiffableRule.threat} />;
     case 'references':
-      return null;
+      return <ReferencesReadOnly references={finalDiffableRule.references} />;
     case 'risk_score':
-      return null;
+      return <RiskScoreReadOnly riskScore={finalDiffableRule.risk_score} />;
     case 'rule_id':
+      /* Rule ID is not displayed in the UI */
       return null;
     case 'rule_name_override':
-      return null;
+      return <RuleNameOverrideReadOnly ruleNameOverride={finalDiffableRule.rule_name_override} />;
     case 'setup':
-      return null;
+      return <SetupReadOnly setup={finalDiffableRule.setup} />;
     case 'severity':
-      return null;
+      return <SeverityReadOnly severity={finalDiffableRule.severity} />;
     case 'timestamp_override':
-      return null;
+      return <TimestampOverrideReadOnly timestampOverride={finalDiffableRule.timestamp_override} />;
     case 'timeline_template':
-      return null;
+      return <TimelineTemplateReadOnly timelineTemplate={finalDiffableRule.timeline_template} />;
     case 'version':
+      /* Version is not displayed in the UI */
       return null;
     default:
       return assertUnreachable(fieldName);

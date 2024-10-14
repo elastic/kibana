@@ -11,9 +11,11 @@ import { BehaviorSubject, skipWhile } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { GetAllSpacesOptions, GetSpaceResult, Space } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+import type { SpaceContentTypeSummaryItem } from '../types';
 
 interface SavedObjectTarget {
   type: string;
@@ -191,5 +193,15 @@ export class SpacesManager {
 
   private isAnonymousPath() {
     return this.http.anonymousPaths.isAnonymous(window.location.pathname);
+  }
+
+  public getContentForSpace(
+    id: string
+  ): Promise<{ summary: SpaceContentTypeSummaryItem[]; total: number }> {
+    return this.http.get(`/internal/spaces/${id}/content_summary`);
+  }
+
+  public getRolesForSpace(id: string): Promise<Role[]> {
+    return this.http.get(`/internal/security/roles/${id}`);
   }
 }

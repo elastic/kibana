@@ -51,7 +51,15 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const allSignificantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+  const allItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+
+  const allSignificantItems = useMemo(() => {
+    return allItems.map((item) => ({
+      ...item,
+      logRateChangeSort:
+        item.bg_count > 0 ? item.doc_count / item.bg_count : Number.POSITIVE_INFINITY,
+    }));
+  }, [allItems]);
 
   const significantItems = useMemo(() => {
     if (!groupFilter) {
@@ -85,7 +93,6 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   );
 
   const dispatch = useAppDispatch();
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<keyof SignificantItem>(
@@ -135,8 +142,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     ];
     const sortDirections = [sortDirection];
 
-    // Only if the table is sorted by p-value, add a secondary sort by doc count.
-    if (sortField === 'pValue') {
+    // If the table is sorted by p-value or log rate change, add a secondary sort by doc count.
+    if (sortField === 'pValue' || sortField === 'logRateChangeSort') {
       sortIteratees.push((item: SignificantItem) => item.doc_count);
       sortDirections.push(sortDirection);
     }
@@ -242,12 +249,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
-      columns={columns}
       items={pageOfItems}
-      onChange={onChange}
+      columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
-      loading={false}
       sorting={sorting as EuiTableSortingType<SignificantItem>}
+      loading={false}
+      onChange={onChange}
       rowProps={(significantItem) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantItem.fieldName}-${significantItem.fieldValue}`,

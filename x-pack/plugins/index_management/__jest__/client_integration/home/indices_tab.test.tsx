@@ -557,5 +557,35 @@ describe('<IndexManagementHome />', () => {
       expect(text).toContain('ILM column 2');
       expect(text).toContain('ILM managed');
     });
+    it('renders to search_indices index details page', async () => {
+      const indexName = 'search-index';
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+        indexName,
+        createNonDataStreamIndex(indexName)
+      );
+
+      const navigateToUrl = jest.fn();
+      const url = `/app/elasticsearch/indices/index_details/${indexName}`;
+      testBed = await setup(httpSetup, {
+        core: {
+          application: { navigateToUrl },
+        },
+        history: createMemoryHistory(),
+        services: {
+          extensionsService: {
+            _indexDetailsPageRoute: {
+              renderRoute: () => {
+                return url;
+              },
+            },
+          },
+        },
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexNameAt(0);
+      expect(navigateToUrl).toHaveBeenCalledTimes(1);
+      expect(navigateToUrl).toHaveBeenCalledWith(url);
+    });
   });
 });

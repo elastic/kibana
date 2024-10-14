@@ -13,6 +13,9 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
 import userEvent from '@testing-library/user-event';
 
+Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { value: 200 });
+
 jest.mock('@kbn/unified-search-plugin/public', () => {
   const actual = jest.requireActual('@kbn/unified-search-plugin/public');
   return {
@@ -219,9 +222,7 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  const renderLayerPanel = () => {
-    return render(<LayerPanel {...defaultProps} />);
-  };
+  const renderLayerPanel = () => render(<LayerPanel {...defaultProps} />);
 
   it('should list all index patterns', async () => {
     renderLayerPanel();

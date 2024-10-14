@@ -15,13 +15,8 @@ import {
   GetEnrollmentSettingsRequestSchema,
   GetSpaceSettingsRequestSchema,
   PutSpaceSettingsRequestSchema,
-  SpaceSettingsResponseSchema,
-  SettingsResponseSchema,
-  GetEnrollmentSettingsResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
-
-import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import { getEnrollmentSettingsHandler } from './enrollment_settings_handler';
 
@@ -50,14 +45,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
-          validate: {
-            request: GetSpaceSettingsRequestSchema,
-            response: {
-              200: {
-                body: () => SpaceSettingsResponseSchema,
-              },
-            },
-          },
+          validate: { request: GetSpaceSettingsRequestSchema },
         },
         getSpaceSettingsHandler
       );
@@ -73,14 +61,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
-          validate: {
-            request: PutSpaceSettingsRequestSchema,
-            response: {
-              200: {
-                body: () => SpaceSettingsResponseSchema,
-              },
-            },
-          },
+          validate: { request: PutSpaceSettingsRequestSchema },
         },
         putSpaceSettingsHandler
       );
@@ -93,27 +74,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleet: { readSettings: true },
       },
       description: `Get settings`,
-      options: {
-        tags: ['oas-tag:Fleet internals'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetSettingsRequestSchema,
-          response: {
-            200: {
-              body: () => SettingsResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            404: {
-              body: notFoundResponse,
-            },
-          },
-        },
+        validate: { request: GetSettingsRequestSchema },
       },
       getSettingsHandler
     );
@@ -124,27 +89,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleet: { allSettings: true },
       },
       description: `Update settings`,
-      options: {
-        tags: ['oas-tag:Fleet internals'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: PutSettingsRequestSchema,
-          response: {
-            200: {
-              body: () => SettingsResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            404: {
-              body: notFoundResponse,
-            },
-          },
-        },
+        validate: { request: PutSettingsRequestSchema },
       },
       putSettingsHandler
     );
@@ -155,24 +104,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         return authz.fleet.addAgents || authz.fleet.addFleetServers;
       },
       description: `Get enrollment settings`,
-      options: {
-        tags: ['oas-tag:Fleet internals'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetEnrollmentSettingsRequestSchema,
-          response: {
-            200: {
-              body: () => GetEnrollmentSettingsResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: GetEnrollmentSettingsRequestSchema },
       },
       getEnrollmentSettingsHandler
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
+import type { EcsDataStream, EcsEvent, EcsObserver } from '@elastic/ecs';
 import type { CspBenchmarkRuleMetadata } from '../schema/rules/latest';
 
 export interface CspFinding {
@@ -19,6 +19,7 @@ export interface CspFinding {
   host: CspFindingHost;
   event: EcsEvent;
   data_stream: EcsDataStream;
+  observer: EcsObserver;
   agent: CspFindingAgent;
   ecs: {
     version: string;
@@ -41,7 +42,7 @@ interface CspFindingCloud {
   region?: string;
 }
 
-interface CspFindingResult {
+export interface CspFindingResult {
   evaluation: 'passed' | 'failed';
   expected?: Record<string, unknown>;
   evidence: Record<string, unknown>;

@@ -81,7 +81,7 @@ export interface ElasticsearchServiceSetup {
   setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
 
   /**
-   * @deprecated
+   * @deprecated Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
    */
   legacy: {
     /**
@@ -138,6 +138,12 @@ export interface ElasticsearchServiceStart {
    * Returns the capabilities for the default cluster.
    */
   getCapabilities: () => ElasticsearchCapabilities;
+
+  /**
+   * The public base URL (if any) that should be used by end users to access the Elasticsearch cluster.
+   */
+
+  readonly publicBaseUrl?: string;
 }
 
 /**

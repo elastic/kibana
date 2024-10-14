@@ -43,7 +43,7 @@ const degradedDocButtonLabelWhenPresent = i18n.translate(
   'discover.customControl.degradedDocPresent',
   {
     defaultMessage:
-      "This document couldn't be parsed correctly. Not all fields are properly populated",
+      "This document couldn't be parsed correctly. Not all fields are properly populated.",
   }
 );
 

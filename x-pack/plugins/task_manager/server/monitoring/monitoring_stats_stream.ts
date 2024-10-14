@@ -158,42 +158,47 @@ export function summarizeMonitoringStats(
     last_update,
     stats: { runtime, workload, configuration, ephemeral, utilization },
   }: MonitoringStats,
-  config: TaskManagerConfig
+  config: TaskManagerConfig,
+  assumedKibanaInstances: number
 ): RawMonitoringStats {
-  const summarizedStats = withCapacityEstimate(logger, {
-    ...(configuration
-      ? {
-          configuration: {
-            ...configuration,
-            status: HealthStatus.OK,
-          },
-        }
-      : {}),
-    ...(runtime
-      ? {
-          runtime: {
-            timestamp: runtime.timestamp,
-            ...summarizeTaskRunStat(logger, runtime.value, config),
-          },
-        }
-      : {}),
-    ...(workload
-      ? {
-          workload: {
-            timestamp: workload.timestamp,
-            ...summarizeWorkloadStat(workload.value),
-          },
-        }
-      : {}),
-    ...(ephemeral
-      ? {
-          ephemeral: {
-            timestamp: ephemeral.timestamp,
-            ...summarizeEphemeralStat(ephemeral.value),
-          },
-        }
-      : {}),
-  });
+  const summarizedStats = withCapacityEstimate(
+    logger,
+    {
+      ...(configuration
+        ? {
+            configuration: {
+              ...configuration,
+              status: HealthStatus.OK,
+            },
+          }
+        : {}),
+      ...(runtime
+        ? {
+            runtime: {
+              timestamp: runtime.timestamp,
+              ...summarizeTaskRunStat(logger, runtime.value, config),
+            },
+          }
+        : {}),
+      ...(workload
+        ? {
+            workload: {
+              timestamp: workload.timestamp,
+              ...summarizeWorkloadStat(workload.value),
+            },
+          }
+        : {}),
+      ...(ephemeral
+        ? {
+            ephemeral: {
+              timestamp: ephemeral.timestamp,
+              ...summarizeEphemeralStat(ephemeral.value),
+            },
+          }
+        : {}),
+    },
+    assumedKibanaInstances
+  );
 
   return {
     last_update,

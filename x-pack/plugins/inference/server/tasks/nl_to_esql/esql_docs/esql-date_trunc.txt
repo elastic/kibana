@@ -16,6 +16,14 @@ This is the interval to which the date will be rounded down. It is expressed usi
 
 This is the date expression that will be rounded down.
 
+## Important notes
+
+The *interval* parameter of DATE_TRUNC is a timespan literal, NOT a string.
+  - GOOD: `DATE_TRUNC(1 year, date)`
+  - BAD: `DATE_TRUNC("year", date)`
+
+When grouping data by time interval, it is recommended to use BUCKET instead of DATE_TRUNC.
+
 ## Examples
 
 The following example rounds down the hire_date to the nearest year:

@@ -28,7 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { estypes } from '@elastic/elasticsearch';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -205,8 +205,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1:
-            dataReceivedTime.current - visualizationRenderStartTime.current - esTookTime.current,
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
           key3: 'es_took',
@@ -268,13 +267,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
-          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, { response }) => {
-            const took =
-              (response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
-                ?.rawResponse?.took ?? 0;
 
-            return Math.max(maxTime, took);
-          }, 0);
+          const timings = getSuccessfulRequestTimings(adapters);
+          esTookTime.current = timings ? timings.esTookTotal : 0;
         }
 
         if (requestWarnings.length) {

@@ -16,6 +16,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { getRequestValidation } from '@kbn/core-http-server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -55,7 +56,7 @@ describe('GET /spaces/space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

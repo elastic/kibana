@@ -1,4 +1,5 @@
-summary: Retrieve information about a rule.
+summary: Index threshold rule
+description: A response that contains information about an index threshold rule.
 value:
   page: 1
   total: 1

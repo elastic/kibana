@@ -58,6 +58,8 @@ import {
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
   waitForAlertsToPopulate,
+  fillDefineThresholdRule,
+  continueFromDefineStep,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -152,8 +154,10 @@ describe(
     it('Creates a new threshold rule with suppression enabled', () => {
       selectThresholdRuleType();
 
+      fillDefineThresholdRule(rule);
       enablesAndPopulatesThresholdSuppression(5, 'h');
-      fillDefineThresholdRuleAndContinue(rule);
+      continueFromDefineStep();
+
       // ensures duration displayed on define step in preview mode
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');

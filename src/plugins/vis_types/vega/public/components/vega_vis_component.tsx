@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
-import { throttle } from 'lodash';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { createVegaVisualization } from '../vega_visualization';
@@ -27,8 +26,6 @@ interface VegaVisComponentProps {
 }
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
-
-const THROTTLE_INTERVAL = 300;
 
 export const VegaVisComponent = ({
   visData,
@@ -64,26 +61,11 @@ export const VegaVisComponent = ({
     }
   }, [renderComplete, visData]);
 
-  const resizeChart = useMemo(
-    () =>
-      throttle(
-        (dimensions) => {
-          visController.current?.resize(dimensions);
-        },
-        THROTTLE_INTERVAL,
-        { leading: false, trailing: true }
-      ),
-    []
-  );
-
-  const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback(
-    (dimensions) => {
-      if (renderCompleted.current) {
-        resizeChart(dimensions);
-      }
-    },
-    [resizeChart]
-  );
+  const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
+    if (renderCompleted.current) {
+      visController.current?.resize(dimensions);
+    }
+  }, []);
 
   const euiTheme = useEuiTheme();
 

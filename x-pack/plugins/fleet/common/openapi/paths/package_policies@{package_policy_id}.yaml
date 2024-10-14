@@ -45,11 +45,8 @@ put:
             properties:
               item:
                 $ref: ../components/schemas/package_policy.yaml
-              sucess:
-                type: boolean
             required:
               - item
-              - sucess
     '400':
       $ref: ../components/responses/error.yaml
   parameters:

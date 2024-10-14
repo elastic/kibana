@@ -8,7 +8,7 @@
  */
 
 export type ControlWidth = 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
+export type ControlLabelPosition = 'twoLine' | 'oneLine';
 
 export type TimeSlice = [number, number];
 

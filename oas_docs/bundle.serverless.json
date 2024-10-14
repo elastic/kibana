@@ -433,6 +433,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -518,6 +568,56 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -592,6 +692,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -659,6 +809,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -742,6 +942,56 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -776,6 +1026,7 @@
             }
           },
           {
+            "description": "An identifier for the connector.",
             "in": "path",
             "name": "id",
             "required": false,
@@ -820,6 +1071,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -894,6 +1195,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -961,6 +1312,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -1092,6 +1493,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Delete a rule",
@@ -1438,6 +1848,27 @@
                       "required": [
                         "status",
                         "last_execution_date"
+                      ],
+                      "type": "object"
+                    },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
                       ],
                       "type": "object"
                     },
@@ -1998,6 +2429,15 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Get rule details",
@@ -2247,6 +2687,27 @@
                     "default": true,
                     "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
                     "type": "boolean"
+                  },
+                  "flapping": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "look_back_window": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      },
+                      "status_change_threshold": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
+                    ],
+                    "type": "object"
                   },
                   "name": {
                     "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.",
@@ -2628,6 +3089,27 @@
                       ],
                       "type": "object"
                     },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
+                      "type": "object"
+                    },
                     "id": {
                       "description": "The identifier for the rule.",
                       "type": "string"
@@ -3185,6 +3667,15 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "409": {
+            "description": "Indicates that the rule id is already in use."
           }
         },
         "summary": "Create a rule",
@@ -3422,6 +3913,27 @@
                     },
                     "required": [
                       "active"
+                    ],
+                    "type": "object"
+                  },
+                  "flapping": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "look_back_window": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      },
+                      "status_change_threshold": {
+                        "maximum": 20,
+                        "minimum": 2,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
                     ],
                     "type": "object"
                   },
@@ -3798,6 +4310,27 @@
                       ],
                       "type": "object"
                     },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
+                      "type": "object"
+                    },
                     "id": {
                       "description": "The identifier for the rule.",
                       "type": "string"
@@ -4355,6 +4888,18 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update a rule",
@@ -4420,6 +4965,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Disable a rule",
@@ -4467,6 +5021,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Enable a rule",
@@ -4608,6 +5171,18 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update the API key for a rule",
@@ -4664,6 +5239,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Mute an alert",
@@ -4720,6 +5304,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Unmute an alert",
@@ -5204,6 +5797,27 @@
                       ],
                       "type": "object"
                     },
+                    "flapping": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "look_back_window": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        },
+                        "status_change_threshold": {
+                          "maximum": 20,
+                          "minimum": 2,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
+                      "type": "object"
+                    },
                     "id": {
                       "description": "The identifier for the rule.",
                       "type": "string"
@@ -5761,6 +6375,12 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Get information about rules",

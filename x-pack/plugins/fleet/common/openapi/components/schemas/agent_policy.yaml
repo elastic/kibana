@@ -87,6 +87,38 @@ properties:
           - type: string
           - type: number
       description: User defined data tags that are added to all of the inputs. The values can be strings or numbers.
+  monitoring_pprof_enabled:
+    type: boolean
+  monitoring_http:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+      host:
+        type: string
+      port:
+        type: number
+    required:
+      - enabled
+  monitoring_diagnostics:
+    type: object
+    properties:
+      limit:
+        type: object
+        properties:
+          interval:
+            type: string
+          burst:
+            type: number
+      uploader:
+        type: object
+        properties:
+          max_retries:
+            type: number
+          init_dur:
+            type: string
+          max_dur:
+            type: string
 required:
   - id
   - status

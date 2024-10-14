@@ -18,13 +18,13 @@ export default function (providerContext: FtrProviderContext) {
       await cspSecurity.createUsers();
     });
 
-    loadTestFile(require.resolve('../telemetry/telemetry.ts'));
     loadTestFile(require.resolve('./vulnerabilities_dashboard.ts'));
     loadTestFile(require.resolve('./stats.ts'));
     loadTestFile(require.resolve('./csp_benchmark_rules_bulk_update.ts'));
     loadTestFile(require.resolve('./csp_benchmark_rules_get_states.ts'));
     loadTestFile(require.resolve('./benchmarks.ts'));
     loadTestFile(require.resolve('./status.ts'));
+    loadTestFile(require.resolve('./graph.ts'));
     loadTestFile(require.resolve('./get_detection_engine_alerts_count_by_rule_tags'));
   });
 }

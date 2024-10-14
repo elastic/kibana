@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to copy the response of a request', async () => {
       await sendRequest('GET /_search?pretty');
 
+      await PageObjects.console.focusOutputEditor();
       await PageObjects.console.clickCopyOutput();
 
       const resultToast = await toasts.getElementByIndex(1);

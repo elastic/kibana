@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: Endpoint Exceptions API allow you to manage Endpoint lists.
-  title: Security Solution Endpoint Exceptions API (Elastic Cloud Serverless)
+  title: Security Endpoint Exceptions API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -49,6 +49,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Creates an endpoint list
+      tags:
+        - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
       operationId: DeleteEndpointListItem
@@ -105,6 +107,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Deletes an endpoint list item
+      tags:
+        - Security Endpoint Exceptions API
     get:
       operationId: ReadEndpointListItem
       parameters:
@@ -162,6 +166,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Reads an endpoint list item
+      tags:
+        - Security Endpoint Exceptions API
     post:
       operationId: CreateEndpointListItem
       requestBody:
@@ -238,6 +244,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Creates an endpoint list item
+      tags:
+        - Security Endpoint Exceptions API
     put:
       operationId: UpdateEndpointListItem
       requestBody:
@@ -319,6 +327,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Updates an endpoint list item
+      tags:
+        - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
       operationId: FindEndpointListItems
@@ -423,6 +433,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Finds endpoint list items
+      tags:
+        - Security Endpoint Exceptions API
 components:
   schemas:
     EndpointList:
@@ -851,3 +863,10 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: >-
+      Endpoint Exceptions API allows you to manage detection rule endpoint
+      exceptions to prevent a rule from generating an alert from incoming events
+      even when the rule's other criteria are met.
+    name: Security Endpoint Exceptions API
+    x-displayName: Security endpoint exceptions

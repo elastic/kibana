@@ -705,6 +705,8 @@ export type WinlogEvent = Partial<{
  * Safer version of ResolverEvent. Please use this going forward.
  */
 export type SafeEndpointEvent = Partial<{
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp': ECSField<number>;
   agent: Partial<{
     id: ECSField<string>;
@@ -815,6 +817,8 @@ export type SafeEndpointEvent = Partial<{
 }>;
 
 export interface SafeLegacyEndpointEvent {
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp'?: ECSField<number>;
   /**
    * 'legacy' events must have an `endgame` key.

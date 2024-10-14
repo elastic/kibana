@@ -21,6 +21,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-moc
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 export function createCoreSetupMock({
   basePath = '',
@@ -38,6 +39,7 @@ export function createCoreSetupMock({
     docLinks: docLinksServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    featureFlags: coreFeatureFlagsMock.createSetup(),
     getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
       Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),

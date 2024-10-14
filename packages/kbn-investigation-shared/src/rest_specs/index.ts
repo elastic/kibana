@@ -25,6 +25,10 @@ export type * from './investigation_note';
 export type * from './update';
 export type * from './update_item';
 export type * from './update_note';
+export type * from './event';
+export type * from './get_events';
+export type * from './entity';
+export type * from './get_entities';
 
 export * from './create';
 export * from './create_item';
@@ -44,3 +48,7 @@ export * from './investigation_note';
 export * from './update';
 export * from './update_item';
 export * from './update_note';
+export * from './event';
+export * from './get_events';
+export * from './entity';
+export * from './get_entities';

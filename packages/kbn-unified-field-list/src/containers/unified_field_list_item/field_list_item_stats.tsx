@@ -27,10 +27,11 @@ export interface UnifiedFieldListItemStatsProps {
   dataView: DataView;
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
   onAddFilter: FieldStatsProps['onAddFilter'];
+  additionalFilters?: FieldStatsProps['filters'];
 }
 
 export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ stateService, services, field, dataView, multiFields, onAddFilter }) => {
+  ({ stateService, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
       timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
@@ -55,6 +56,11 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       [services]
     );
 
+    const filters = useMemo(
+      () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+      [querySubscriberResult.filters, additionalFilters]
+    );
+
     if (!hasQuerySubscriberData(querySubscriberResult)) {
       return null;
     }
@@ -63,7 +69,7 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       <FieldStats
         services={statsServices}
         query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
+        filters={filters}
         fromDate={querySubscriberResult.fromDate}
         toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}

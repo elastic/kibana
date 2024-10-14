@@ -17,11 +17,18 @@ export type {
   BaseCspSetupStatus,
   CspSetupStatus,
 } from './types/status';
-export type { CspFinding } from './types/findings';
+export type { CspFinding, CspFindingResult } from './types/findings';
+export type {
+  CspVulnerabilityFinding,
+  Vulnerability,
+} from './schema/vulnerabilities/csp_vulnerability_finding';
 export type { BenchmarksCisId } from './types/benchmark';
+export type { VulnSeverity } from './types/vulnerabilities';
 export * from './constants';
 export {
   extractErrorMessage,
   buildMutedRulesFilter,
   buildEntityFlyoutPreviewQuery,
 } from './utils/helpers';
+export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
+export { UiMetricService } from './utils/ui_metrics';

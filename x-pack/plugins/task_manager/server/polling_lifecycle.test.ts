@@ -87,10 +87,11 @@ describe('TaskPollingLifecycle', () => {
       },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
-      claim_strategy: 'default',
+      claim_strategy: 'update_by_query',
       request_timeouts: {
         update_by_query: 1000,
       },
+      auto_calculate_default_ech_capacity: false,
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -515,9 +516,10 @@ describe('TaskPollingLifecycle', () => {
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
       );
 
+      expect(pollingCycleEvent!.event.tag).toEqual('err');
       expect(pollingCycleEvent!.event).toEqual({
         tag: 'err',
-        error: new Error(`Failed to poll for work: Error: booo`),
+        error: new Error(`Failed to poll for work: booo`),
       });
     });
 

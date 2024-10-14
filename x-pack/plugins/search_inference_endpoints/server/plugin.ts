@@ -13,6 +13,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import {
   SearchInferenceEndpointsPluginSetup,
@@ -56,6 +57,7 @@ export class SearchInferenceEndpointsPlugin
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       catalogue: [PLUGIN_ID],
       privileges: {
         all: {

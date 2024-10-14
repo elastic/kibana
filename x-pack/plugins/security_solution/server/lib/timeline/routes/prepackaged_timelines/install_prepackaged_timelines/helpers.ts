@@ -8,7 +8,7 @@
 import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 
-import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
+import type { ImportTimelineResult } from '../../../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../../../framework';
 
@@ -22,7 +22,7 @@ export const installPrepackagedTimelines = async (
   isImmutable: boolean,
   filePath?: string,
   fileName?: string
-): Promise<ImportTimelineResultSchema | Error> => {
+): Promise<ImportTimelineResult | Error> => {
   let readStream;
   const dir = resolve(
     join(
@@ -47,7 +47,7 @@ export const installPrepackagedTimelines = async (
       ],
     };
   }
-  return loadData<null, ImportTimelineResultSchema>(readStream, <T>(docs: T) =>
+  return loadData<null, ImportTimelineResult>(readStream, <T>(docs: T) =>
     docs instanceof Readable
       ? importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)
       : Promise.reject(new Error(`read prepackaged timelines error`))

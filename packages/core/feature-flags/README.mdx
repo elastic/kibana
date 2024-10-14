@@ -1,0 +1,158 @@
+---
+id: kibFeatureFlagsService
+slug: /kibana-dev-docs/tutorials/feature-flags-service
+title: Feature Flags service
+description: The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
+date: 2024-07-26
+tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags', 'flags']
+---
+
+# Feature Flags Service
+
+The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
+
+The service is always enabled, however, it will return the fallback value if a feature flags provider hasn't been attached.
+Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless.
+
+For a code example, refer to the [Feature Flags Example plugin](../../../examples/feature_flags_example)
+
+## Registering a feature flag
+
+Kibana follows a _gitops_ approach when managing feature flags. To declare a feature flag, add your flags definitions in
+your plugin's `server/index.ts` file:
+
+```typescript
+// <plugin>/server/index.ts
+import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+
+export const featureFlags: FeatureFlagDefinitions = [
+  {
+    key: 'my-cool-feature',
+    name: 'My cool feature',
+    description: 'Enables the cool feature to auto-hide the navigation bar',
+    tags: ['my-plugin', 'my-service', 'ui'],
+    variationType: 'boolean',
+    variations: [
+      {
+        name: 'On',
+        description: 'Auto-hides the bar',
+        value: true,
+      },
+      {
+        name: 'Off',
+        description: 'Static always-on',
+        value: false,
+      },
+    ],
+  },
+  {...},
+];
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { FeatureFlagsExamplePlugin } = await import('./plugin');
+  return new FeatureFlagsExamplePlugin(initializerContext);
+}
+```
+
+After merging your PR, the CI will create/update the flags in our third-party feature flags provider.
+
+### Deprecation/removal strategy
+
+When your code doesn't use the feature flag anymore, it is recommended to clean up the feature flags when possible.
+There are a few considerations to take into account when performing this clean-up:
+
+1. Always deprecate first, remove after
+2. When to remove?
+
+#### Always deprecate first, remove after
+
+Just because the CI syncs the state of `main` to our feature flag provider, there is a high probability that the
+previous version of the code that still relied on the feature flag is still running out there.
+
+For that reason, the recommendation is to always deprecate before removing the flags. This will keep evaluating the flags,
+according to the segmentation rules configured for the flag.
+
+#### When to remove?
+
+After deprecation, we need to consider when it's safe to remove the flag. There are different scenarios that come with
+different recommendations:
+
+* The segmentation rules of my flag are set up to return the fallback value 100% of the time: it should be safe to
+remove the flag at any time.
+* My flag only made it to Serverless (it never made it to Elastic Cloud Hosted): it should be safe to remove the flag
+after 2 releases have been rolled out (roughly 2-3 weeks later). This is to ensure that all Serverless projects have 
+been upgraded and that we won't need to rollback to the previous version.
+* My flag made it to Elastic Cloud Hosted: if we want to remove the flag, we should approach the affected customers to
+fix the expected values via [config overrides](#config-overrides).
+
+In general, the recommendation is to check our telemetry to validate the usage of our flags.
+
+## Evaluating feature flags
+
+This service provides 2 ways to evaluate your feature flags, depending on the use case:
+
+1. **Single evaluation**: performs the evaluation once, and doesn't react to updates. These APIs are synchronous in the
+browser, and asynchronous in the server.
+2. **Observed evaluation**: observes the flag for any changes so that the code can adapt. These APIs return an RxJS observable.
+
+Also, the APIs are typed, so you need to use the appropriate API depending on the `variationType` you defined your flag:
+
+|  Type   | Single evaluation                                       | Observed evaluation                                      |
+|:-------:|:--------------------------------------------------------|:---------------------------------------------------------|
+| Boolean | `core.featureFlags.getBooleanValue(flagName, fallback)` | `core.featureFlags.getBooleanValue$(flagName, fallback)` |
+| String  | `core.featureFlags.getStringValue(flagName, fallback)`  | `core.featureFlags.getStringValue$(flagName, fallback)`  |
+| Number  | `core.featureFlags.getNumberValue(flagName, fallback)`  | `core.featureFlags.getNumberValue$(flagName, fallback)`  |
+
+### Request handler context
+
+Additionally, to make things easier in our HTTP handlers, the _Single evaluation_ APIs are available as part of the core
+context provided to the handlers:
+
+```typescript
+async (context, request, response) => {
+  const { featureFlags } = await context.core;
+  return response.ok({
+    body: {
+      number: await featureFlags.getNumberValue('example-number', 1),
+    },
+  });
+}
+```
+
+## Extending the evaluation context
+
+The <DocLink id="kibCloudExperimentsPlugin" section="evaluation-context" text="current evaluation context"/> should have
+enough information to declare the segmentation rules for your feature flags. However, if your use case requires additional
+context, feel free to call the API `core.featureFlags.setContext()` from your plugin.
+
+At the moment, we use 2 levels of context: `kibana` and `organization` that we can use for segmentation purposes at
+different levels. By default, the API appends the context to the `kibana` scope. If you need to extend the `organization`
+scope, make sure to add `kind: 'organization'` to the object provided to the `setContext` API.
+
+## Config overrides
+
+To help with testing, and to provide an escape hatch in cases where the flag evaluation is not behaving as intended,
+the Feature Flags Service provides a way to force the values of a feature flag without attempting to resolve it via the
+provider. In the `kibana.yml`, the following config sets the overrides:
+
+```yaml
+feature_flags.overrides:
+  my-feature-flag: 'my-forced-value'
+```
+
+> [!WARNING]  
+> There is no validation regarding the variations nor the type of the flags. Use these overrides with caution.
+
+### Dynamic config
+
+When running in our test environments, the overrides can be updated without restarting Kibana via the HTTP `PUT /internal/core/_settings`:
+
+```
+PUT /internal/core/_settings
+{
+  "feature_flags.overrides": {
+    "my-feature-flag": "my-forced-value"
+  }
+}
+```

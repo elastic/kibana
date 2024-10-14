@@ -31,6 +31,7 @@ import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_scor
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
+import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -190,6 +191,20 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
+      getEntityStoreDataClient: memoize(() => {
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const logger = options.logger;
+        const soClient = coreContext.savedObjects.client;
+        return new EntityStoreDataClient({
+          namespace: getSpaceId(),
+          esClient,
+          logger,
+          soClient,
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
+        });
+      }),
     };
   }
 }

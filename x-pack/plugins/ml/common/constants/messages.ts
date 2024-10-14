@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { DocLinksStart } from '@kbn/core/public';
 
-import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
+import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from '@kbn/ml-validators';
 
 import { renderTemplate } from '../util/string_utils';
 

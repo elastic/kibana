@@ -57,8 +57,9 @@ const pages = {
   settings: {
     settingsPage: 'aiAssistantSettingsPage',
     managementLink: 'aiAssistantManagementSelection',
-    logsIndexPatternInput:
-      'management-settings-editField-observability:aiAssistantLogsIndexPattern',
+    logsIndexPatternInput: 'management-settings-editField-observability:logSources',
+    searchConnectorIndexPatternInput:
+      'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
     saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
     aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
   },

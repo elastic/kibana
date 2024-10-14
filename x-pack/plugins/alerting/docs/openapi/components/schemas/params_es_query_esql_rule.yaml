@@ -2,10 +2,7 @@ title: Elasticsearch ES|QL query rule params
 description: > 
   An Elasticsearch query rule can run an ES|QL query and compare the number of matches to a configured threshold.
   These parameters are appropriate when `rule_type_id` is `.es-query`.
-  NOTE: This functionality is in technical pre view and may be changed or removed in a future release.
-  Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 type: object
-x-technical-preview: true
 required:
   - esqlQuery
   - searchType

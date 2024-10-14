@@ -247,6 +247,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     []
   );
 
+  // Look for tasks that have a null startedAt value, log them and manually set a startedAt field
+  for (const task of fullTasksToRun) {
+    if (task.startedAt == null) {
+      logger.warn(
+        `Task ${task.id} has a null startedAt value, setting to current time - ownerId ${task.ownerId}, status ${task.status}`
+      );
+      task.startedAt = now;
+    }
+  }
+
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
   let removedCount = 0;

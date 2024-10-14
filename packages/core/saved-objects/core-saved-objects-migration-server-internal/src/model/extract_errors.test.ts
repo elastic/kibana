@@ -29,10 +29,7 @@ describe('extractUnknownDocFailureReason', () => {
         },
       ])
     ).toMatchInlineSnapshot(`
-      "Migration failed because some documents were found which use unknown saved object types:
-      - \\"unknownType:12\\" (type: \\"unknownType\\")
-      - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
-
+      "Migration failed because some documents were found which use unknown saved object types: unknownType,anotherUnknownType
       To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
       Please refer to some-url.co for more information."
     `);

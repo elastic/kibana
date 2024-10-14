@@ -31,6 +31,7 @@ export const authorizationMock = {
       getRole: jest.fn(),
       deleteRole: jest.fn(),
       saveRole: jest.fn(),
+      bulkUpdateRoles: jest.fn(),
     },
     privileges: {
       getAll: jest.fn(),
@@ -43,6 +44,7 @@ export const authorizationMock = {
       getRole: jest.fn(),
       deleteRole: jest.fn(),
       saveRole: jest.fn(),
+      bulkUpdateRoles: jest.fn(),
     },
     privileges: {
       getAll: jest.fn(),

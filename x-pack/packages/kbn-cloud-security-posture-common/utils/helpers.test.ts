@@ -153,7 +153,7 @@ describe('test helper methods', () => {
           filter: [
             {
               bool: {
-                should: [{ term: { 'host.name': { value: 'exampleHost' } } }],
+                should: [{ term: { 'host.name': 'exampleHost' } }],
                 minimum_should_match: 1,
               },
             },
@@ -171,7 +171,7 @@ describe('test helper methods', () => {
           filter: [
             {
               bool: {
-                should: [{ term: { 'host.name': { value: '' } } }],
+                should: [{ term: { 'host.name': '' } }],
                 minimum_should_match: 1,
               },
             },

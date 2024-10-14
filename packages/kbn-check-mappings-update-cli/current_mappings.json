@@ -1057,6 +1057,27 @@
       }
     }
   },
+  "entity-engine-status": {
+    "dynamic": false,
+    "properties": {
+      "fieldHistoryLength": {
+        "index": false,
+        "type": "integer"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "indexPattern": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "epm-packages": {
     "properties": {
       "additional_spaces_installed_kibana": {
@@ -1979,12 +2000,24 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "monitoring_diagnostics": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
       },
+      "monitoring_http": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_output_id": {
         "type": "keyword"
+      },
+      "monitoring_pprof_enabled": {
+        "index": false,
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2340,6 +2373,18 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "delete_unenrolled_agents": {
+        "properties": {
+          "enabled": {
+            "index": false,
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "index": false,
+            "type": "boolean"
+          }
+        }
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },

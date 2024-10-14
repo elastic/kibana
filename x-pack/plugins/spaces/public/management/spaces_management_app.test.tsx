@@ -9,8 +9,17 @@ jest.mock('./spaces_grid', () => ({
   SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
 }));
 
+jest.mock('./create_space', () => ({
+  CreateSpacePage: (props: any) => {
+    if (props.spacesManager && props.onLoadSpace) {
+      props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+    }
+    return `Spaces Create Page: ${JSON.stringify(props)}`;
+  },
+}));
+
 jest.mock('./edit_space', () => ({
-  ManageSpacePage: (props: any) => {
+  EditSpacePage: (props: any) => {
     if (props.spacesManager && props.onLoadSpace) {
       props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
     }
@@ -18,7 +27,12 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import {
+  coreMock,
+  loggingSystemMock,
+  scopedHistoryMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
 import { spacesManagementApp } from './spaces_management_app';
@@ -37,6 +51,7 @@ const config: ConfigType = {
 };
 
 const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+const logger = loggingSystemMock.createLogger();
 
 async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const container = document.createElement('div');
@@ -59,6 +74,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       spacesManager,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
       config,
+      logger,
       getRolesAPIClient: jest.fn(),
       getPrivilegesAPIClient: jest.fn(),
       eventTracker,
@@ -82,6 +98,7 @@ describe('spacesManagementApp', () => {
         spacesManager: spacesManagerMock.create(),
         getStartServices: coreMock.createSetup().getStartServices as any,
         config,
+        logger,
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
@@ -136,7 +153,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
+          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
         </div>
       </div>
     `);
@@ -159,7 +176,7 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
-      { text: `space with id some-space` },
+      { text: `Edit "space with id some-space"` },
     ]);
     expect(docTitle.change).toHaveBeenCalledWith('Spaces');
     expect(docTitle.reset).not.toHaveBeenCalled();
@@ -169,7 +186,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"theme":{"theme$":{}},"i18n":{},"logger":{"context":[]},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
         </div>
       </div>
     `);

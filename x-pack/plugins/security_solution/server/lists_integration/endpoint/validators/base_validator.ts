@@ -140,15 +140,15 @@ export class BaseValidator {
    */
   protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const { packagePolicy, internalReadonlySoClient } =
-        this.endpointAppContext.getInternalFleetServices();
+      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
       const policyIds = getPolicyIdsFromArtifact(item);
+      const soClient = savedObjects.createInternalScopedSoClient();
 
       if (policyIds.length === 0) {
         return;
       }
 
-      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds, {
+      const policiesFromFleet = await packagePolicy.getByIDs(soClient, policyIds, {
         ignoreMissing: true,
       });
 

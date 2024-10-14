@@ -8,10 +8,17 @@
  */
 
 import { Observable } from 'rxjs';
-import { ScopedHistory, Capabilities, ThemeServiceStart } from '@kbn/core/public';
+import {
+  ScopedHistory,
+  Capabilities,
+  ThemeServiceStart,
+  CoreStart,
+  ChromeBreadcrumb,
+  CoreTheme,
+} from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -98,6 +105,8 @@ export interface AppDependencies {
   kibanaVersion: string;
   sections: ManagementSection[];
   cardsNavigationConfig?: NavigationCardsSubject;
+  chromeStyle?: ChromeStyle;
+  coreStart: CoreStart;
 }
 
 export interface ConfigSchema {

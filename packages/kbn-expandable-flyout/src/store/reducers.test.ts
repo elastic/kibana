@@ -12,6 +12,9 @@ import { panelsReducer, uiReducer } from './reducers';
 import { initialPanelsState, PanelsState, initialUiState, UiState } from './state';
 import {
   changePushVsOverlayAction,
+  changeUserCollapsedWidthAction,
+  changeUserExpandedWidthAction,
+  changeUserSectionWidthsAction,
   closeLeftPanelAction,
   closePanelsAction,
   closePreviewPanelAction,
@@ -21,6 +24,8 @@ import {
   openPreviewPanelAction,
   openRightPanelAction,
   previousPreviewPanelAction,
+  resetAllUserChangedWidthsAction,
+  setDefaultWidthsAction,
 } from './actions';
 
 const id1 = 'id1';
@@ -794,12 +799,14 @@ describe('uiReducer', () => {
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
+        ...state,
         pushVsOverlay: 'push',
       });
     });
 
     it('should override value if id already exists', () => {
       const state: UiState = {
+        ...initialUiState,
         pushVsOverlay: 'push',
       };
       const action = changePushVsOverlayAction({
@@ -809,7 +816,238 @@ describe('uiReducer', () => {
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
+        ...state,
         pushVsOverlay: 'overlay',
+      });
+    });
+  });
+
+  describe('should handle setDefaultWidthsAction action', () => {
+    it('should set value state is empty', () => {
+      const state: UiState = initialUiState;
+      const action = setDefaultWidthsAction({
+        right: 200,
+        left: 600,
+        preview: 200,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        defaultWidths: {
+          rightWidth: 200,
+          leftWidth: 600,
+          previewWidth: 200,
+          rightPercentage: 25,
+          leftPercentage: 75,
+          previewPercentage: 25,
+        },
+      });
+    });
+
+    it('should override value if state not empty', () => {
+      const state: UiState = {
+        ...initialUiState,
+        defaultWidths: {
+          rightWidth: 200,
+          leftWidth: 600,
+          previewWidth: 200,
+          rightPercentage: 25,
+          leftPercentage: 75,
+          previewPercentage: 25,
+        },
+      };
+      const action = setDefaultWidthsAction({
+        right: 500,
+        left: 500,
+        preview: 500,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        defaultWidths: {
+          rightWidth: 500,
+          leftWidth: 500,
+          previewWidth: 500,
+          rightPercentage: 50,
+          leftPercentage: 50,
+          previewPercentage: 50,
+        },
+      });
+    });
+  });
+
+  describe('should handle changeUserCollapsedWidthAction action', () => {
+    it('should set value state is empty', () => {
+      const state: UiState = initialUiState;
+      const action = changeUserCollapsedWidthAction({
+        width: 200,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userFlyoutWidths: {
+          collapsedWidth: 200,
+        },
+      });
+    });
+
+    it('should override value if state not empty', () => {
+      const state: UiState = {
+        ...initialUiState,
+        userFlyoutWidths: {
+          collapsedWidth: 200,
+          expandedWidth: 500,
+        },
+      };
+      const action = changeUserCollapsedWidthAction({
+        width: 250,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userFlyoutWidths: {
+          collapsedWidth: 250,
+          expandedWidth: 500,
+        },
+      });
+    });
+  });
+
+  describe('should handle changeUserExpandedWidthAction action', () => {
+    it('should set value state is empty', () => {
+      const state: UiState = initialUiState;
+      const action = changeUserExpandedWidthAction({
+        width: 500,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userFlyoutWidths: {
+          expandedWidth: 500,
+        },
+      });
+    });
+
+    it('should override value if state not empty', () => {
+      const state: UiState = {
+        ...initialUiState,
+        userFlyoutWidths: {
+          collapsedWidth: 200,
+          expandedWidth: 500,
+        },
+      };
+      const action = changeUserExpandedWidthAction({
+        width: 1000,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userFlyoutWidths: {
+          collapsedWidth: 200,
+          expandedWidth: 1000,
+        },
+      });
+    });
+  });
+
+  describe('should handle changeUserSectionWidthsAction action', () => {
+    it('should set value state is empty', () => {
+      const state: UiState = initialUiState;
+      const action = changeUserSectionWidthsAction({
+        right: 50,
+        left: 50,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userSectionWidths: {
+          leftPercentage: 50,
+          rightPercentage: 50,
+        },
+      });
+    });
+
+    it('should override value if state not empty', () => {
+      const state: UiState = {
+        ...initialUiState,
+        userSectionWidths: {
+          leftPercentage: 50,
+          rightPercentage: 50,
+        },
+      };
+      const action = changeUserSectionWidthsAction({
+        right: 30,
+        left: 70,
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userSectionWidths: {
+          leftPercentage: 70,
+          rightPercentage: 30,
+        },
+      });
+    });
+  });
+
+  describe('should handle resetAllUserChangedWidthsAction action', () => {
+    it('should set value state is empty', () => {
+      const state: UiState = initialUiState;
+      const action = resetAllUserChangedWidthsAction();
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userSectionWidths: {
+          leftPercentage: undefined,
+          rightPercentage: undefined,
+        },
+        userFlyoutWidths: {
+          collapsedWidth: undefined,
+          expandedWidth: undefined,
+        },
+      });
+    });
+
+    it('should override value if state not empty', () => {
+      const state: UiState = {
+        ...initialUiState,
+        userFlyoutWidths: {
+          collapsedWidth: 200,
+          expandedWidth: 500,
+        },
+        userSectionWidths: {
+          leftPercentage: 50,
+          rightPercentage: 50,
+        },
+      };
+      const action = resetAllUserChangedWidthsAction();
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        ...state,
+        userSectionWidths: {
+          leftPercentage: undefined,
+          rightPercentage: undefined,
+        },
+        userFlyoutWidths: {
+          collapsedWidth: undefined,
+          expandedWidth: undefined,
+        },
       });
     });
   });

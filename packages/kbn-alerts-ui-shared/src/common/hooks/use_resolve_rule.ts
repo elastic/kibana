@@ -41,6 +41,7 @@ export const useResolveRule = (props: UseResolveProps) => {
       };
     },
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {

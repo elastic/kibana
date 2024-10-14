@@ -50,6 +50,15 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 const panelContextValue = {
   ...mockContextValue,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,

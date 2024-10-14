@@ -5,23 +5,13 @@
  * 2.0.
  */
 
+import {
+  IndexLifecyclePhaseSelectOption,
+  indexLifeCyclePhaseToDataTier,
+} from '@kbn/observability-shared-plugin/common';
 import * as t from 'io-ts';
 
-export enum IndexLifecyclePhaseSelectOption {
-  All = 'all',
-  Hot = 'hot',
-  Warm = 'warm',
-  Cold = 'cold',
-  Frozen = 'frozen',
-}
-
-export const indexLifeCyclePhaseToDataTier = {
-  [IndexLifecyclePhaseSelectOption.Hot]: 'data_hot',
-  [IndexLifecyclePhaseSelectOption.Warm]: 'data_warm',
-  [IndexLifecyclePhaseSelectOption.Cold]: 'data_cold',
-  [IndexLifecyclePhaseSelectOption.Frozen]: 'data_frozen',
-};
-
+export { IndexLifecyclePhaseSelectOption, indexLifeCyclePhaseToDataTier };
 export const indexLifecyclePhaseRt = t.type({
   indexLifecyclePhase: t.union([
     t.literal(IndexLifecyclePhaseSelectOption.All),

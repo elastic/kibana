@@ -17,7 +17,6 @@
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiBottomShadowMedium;
-    @include euiScrollBar;
     flex-grow: 1;
     display: flex;
     align-items: stretch;
@@ -25,7 +24,7 @@
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;
-
+    @include euiScrollBar;
     &>* {
       flex: 1 1 100%;
       display: flex;

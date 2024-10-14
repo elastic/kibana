@@ -179,7 +179,7 @@ interface ThresholdProps {
   threshold: ThresholdType;
 }
 
-const Threshold = ({ threshold }: ThresholdProps) => (
+export const Threshold = ({ threshold }: ThresholdProps) => (
   <div data-test-subj="thresholdPropertyValue">
     {isEmpty(threshold.field[0])
       ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
@@ -193,7 +193,7 @@ interface AnomalyThresholdProps {
   anomalyThreshold: number;
 }
 
-const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
+export const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
   <EuiText size="s" data-test-subj="anomalyThresholdPropertyValue">
     {anomalyThreshold}
   </EuiText>
@@ -258,7 +258,7 @@ interface RuleTypeProps {
   type: Type;
 }
 
-const RuleType = ({ type }: RuleTypeProps) => (
+export const RuleType = ({ type }: RuleTypeProps) => (
   <EuiText size="s">{getRuleTypeDescription(type)}</EuiText>
 );
 
@@ -298,7 +298,7 @@ interface TimelineTitleProps {
   timelineTitle: string;
 }
 
-const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => (
+export const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => (
   <EuiText size="s" data-test-subj="timelineTemplatePropertyValue">
     {timelineTitle}
   </EuiText>
@@ -354,7 +354,7 @@ interface SuppressAlertsByFieldProps {
   fields: string[];
 }
 
-const SuppressAlertsByField = ({ fields }: SuppressAlertsByFieldProps) => (
+export const SuppressAlertsByField = ({ fields }: SuppressAlertsByFieldProps) => (
   <BadgeList badges={fields} data-test-subj="alertSuppressionGroupByPropertyValue" />
 );
 
@@ -362,7 +362,7 @@ interface SuppressAlertsDurationProps {
   duration?: Duration;
 }
 
-const SuppressAlertsDuration = ({ duration }: SuppressAlertsDurationProps) => {
+export const SuppressAlertsDuration = ({ duration }: SuppressAlertsDurationProps) => {
   const durationDescription = duration
     ? `${duration.value}${duration.unit}`
     : descriptionStepI18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
@@ -378,7 +378,7 @@ interface MissingFieldsStrategyProps {
   missingFieldsStrategy?: AlertSuppressionMissingFieldsStrategy;
 }
 
-const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
+export const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
   const missingFieldsDescription =
     missingFieldsStrategy === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? descriptionStepI18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
@@ -395,7 +395,7 @@ interface NewTermsFieldsProps {
   newTermsFields: string[];
 }
 
-const NewTermsFields = ({ newTermsFields }: NewTermsFieldsProps) => (
+export const NewTermsFields = ({ newTermsFields }: NewTermsFieldsProps) => (
   <BadgeList badges={newTermsFields} data-test-subj="newTermsFieldsPropertyValue" />
 );
 
@@ -403,7 +403,7 @@ interface HistoryWindowSizeProps {
   historyWindowStart?: string;
 }
 
-const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
+export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
   const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
 
   return (

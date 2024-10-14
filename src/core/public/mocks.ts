@@ -21,6 +21,7 @@ export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 export { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export { httpServiceMock } from '@kbn/core-http-browser-mocks';
 export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';

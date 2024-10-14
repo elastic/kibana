@@ -10,51 +10,60 @@ import { useCallback } from 'react';
 import * as i18n from './translations';
 
 interface Props<T> {
-  disabled?: boolean;
+  isEditEnabled?: (rowItem: T) => boolean;
+  isDeleteEnabled?: (rowItem: T) => boolean;
   onDelete?: (rowItem: T) => void;
   onEdit?: (rowItem: T) => void;
 }
 
 export const useInlineActions = <T extends { isDefault?: boolean | undefined }>() => {
-  const getInlineActions = useCallback(({ disabled = false, onDelete, onEdit }: Props<T>) => {
-    const handleEdit = (rowItem: T) => {
-      onEdit?.(rowItem);
-    };
+  const getInlineActions = useCallback(
+    ({
+      isEditEnabled = () => false,
+      isDeleteEnabled = () => false,
+      onDelete,
+      onEdit,
+    }: Props<T>) => {
+      const handleEdit = (rowItem: T) => {
+        onEdit?.(rowItem);
+      };
 
-    const handleDelete = (rowItem: T) => {
-      onDelete?.(rowItem);
-    };
+      const handleDelete = (rowItem: T) => {
+        onDelete?.(rowItem);
+      };
 
-    const actions: EuiTableActionsColumnType<T> = {
-      name: i18n.ACTIONS_BUTTON,
-      actions: [
-        {
-          name: i18n.EDIT_BUTTON,
-          description: i18n.EDIT_BUTTON,
-          icon: 'pencil',
-          type: 'icon',
-          onClick: (rowItem: T) => {
-            handleEdit(rowItem);
+      const actions: EuiTableActionsColumnType<T> = {
+        name: i18n.ACTIONS_BUTTON,
+        actions: [
+          {
+            name: i18n.EDIT_BUTTON,
+            description: i18n.EDIT_BUTTON,
+            icon: 'pencil',
+            type: 'icon',
+            onClick: (rowItem: T) => {
+              handleEdit(rowItem);
+            },
+            enabled: isEditEnabled,
+            available: () => onEdit != null,
           },
-          enabled: () => !disabled,
-          available: () => onEdit != null,
-        },
-        {
-          name: i18n.DELETE_BUTTON,
-          description: i18n.DELETE_BUTTON,
-          icon: 'trash',
-          type: 'icon',
-          onClick: (rowItem: T) => {
-            handleDelete(rowItem);
+          {
+            name: i18n.DELETE_BUTTON,
+            description: i18n.DELETE_BUTTON,
+            icon: 'trash',
+            type: 'icon',
+            onClick: (rowItem: T) => {
+              handleDelete(rowItem);
+            },
+            enabled: isDeleteEnabled,
+            available: () => onDelete != null,
+            color: 'danger',
           },
-          enabled: ({ isDefault }: { isDefault?: boolean }) => !isDefault && !disabled,
-          available: () => onDelete != null,
-          color: 'danger',
-        },
-      ],
-    };
-    return actions;
-  }, []);
+        ],
+      };
+      return actions;
+    },
+    []
+  );
 
   return getInlineActions;
 };

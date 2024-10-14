@@ -35,6 +35,7 @@ function toMonitorManagementListQueryArgs(
     schedules: pageState.schedules,
     monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
+    internal: true,
   };
 }
 
@@ -70,7 +71,7 @@ export const fetchUpsertMonitor = async ({
       null,
       {
         version: INITIAL_REST_VERSION,
-        ui: true,
+        internal: true,
       }
     );
   } else {

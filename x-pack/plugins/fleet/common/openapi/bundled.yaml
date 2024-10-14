@@ -128,6 +128,13 @@ paths:
                   type: boolean
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
       responses:
         '200':
           description: OK
@@ -2938,11 +2945,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
         '400':
           $ref: '#/components/responses/error'
       parameters:
@@ -3869,6 +3873,13 @@ components:
             type: string
         prerelease_integrations_enabled:
           type: boolean
+        delete_unenrolled_agents:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            is_preconfigured:
+              type: boolean
       required:
         - fleet_server_hosts
         - id
@@ -4236,6 +4247,10 @@ components:
           type: string
         type:
           type: string
+          enum:
+            - integration
+            - input
+            - content
         categories:
           type: array
           items:
@@ -4338,6 +4353,56 @@ components:
                   type: array
                   items:
                     type: string
+        owner:
+          type: object
+          properties:
+            github:
+              type: string
+            type:
+              type: string
+              enum:
+                - elastic
+                - partner
+                - community
+          required:
+            - github
+        agent:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                root:
+                  type: boolean
+        asset_tags:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              asset_types:
+                type: array
+                items:
+                  type: string
+              asset_ids:
+                type: array
+                items:
+                  type: string
+            required:
+              - text
+        discovery:
+          type: object
+          properties:
+            fields:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                  - name
       required:
         - name
         - title
@@ -4350,6 +4415,7 @@ components:
         - format_version
         - download
         - path
+        - owner
     package_usage_stats:
       title: Package usage stats
       type: object
@@ -4861,6 +4927,38 @@ components:
             description: >-
               User defined data tags that are added to all of the inputs. The
               values can be strings or numbers.
+        monitoring_pprof_enabled:
+          type: boolean
+        monitoring_http:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            host:
+              type: string
+            port:
+              type: number
+          required:
+            - enabled
+        monitoring_diagnostics:
+          type: object
+          properties:
+            limit:
+              type: object
+              properties:
+                interval:
+                  type: string
+                burst:
+                  type: number
+            uploader:
+              type: object
+              properties:
+                max_retries:
+                  type: number
+                init_dur:
+                  type: string
+                max_dur:
+                  type: string
       required:
         - id
         - status
@@ -4982,6 +5080,17 @@ components:
         force:
           type: boolean
           description: Force agent policy creation even if packages are not verified.
+        global_data_tags:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
       required:
         - name
         - namespace
@@ -5054,6 +5163,63 @@ components:
                 type: integer
               data:
                 $ref: '#/components/schemas/full_agent_policy_output_permissions'
+        monitoring:
+          type: object
+          properties:
+            namespace:
+              type: string
+            use_output:
+              type: string
+            enabled:
+              type: boolean
+            metrics:
+              type: boolean
+            logs:
+              type: boolean
+            traces:
+              type: boolean
+            pprof:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+              required:
+                - enabled
+            http:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                host:
+                  type: string
+                port:
+                  type: number
+              required:
+                - enabled
+            diagnostics:
+              type: object
+              properties:
+                limit:
+                  type: object
+                  properties:
+                    interval:
+                      type: string
+                    burst:
+                      type: number
+                uploader:
+                  type: object
+                  properties:
+                    max_retries:
+                      type: number
+                    init_dur:
+                      type: string
+                    max_dur:
+                      type: string
+          required:
+            - enabled
+            - metrics
+            - logs
+            - traces
         fleet:
           oneOf:
             - type: object

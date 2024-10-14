@@ -154,8 +154,16 @@ export class DashboardPageObject extends FtrService {
   public getDashboardIdFromUrl(url: string) {
     const urlSubstring = '#/view/';
     const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
-    const endIndex = url.indexOf('?');
-    const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
+    const endIndexOfFilters = url.indexOf('?');
+    const endIndexOfMax = url.substring(startOfIdIndex).indexOf('/');
+    if (endIndexOfMax === -1) {
+      return url.substring(startOfIdIndex, endIndexOfFilters);
+    }
+    const endIndex =
+      endIndexOfFilters + startOfIdIndex > endIndexOfMax
+        ? endIndexOfFilters + startOfIdIndex
+        : endIndexOfMax + startOfIdIndex;
+    const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex + startOfIdIndex);
     return id;
   }
 

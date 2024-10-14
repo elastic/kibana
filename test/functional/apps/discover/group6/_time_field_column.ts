@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }) {
       // check in Discover
       expect(await dataGrid.getHeaderFields()).to.eql(
-        hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
+        hideTimeFieldColumnSetting || !hasTimeField ? ['Summary'] : ['@timestamp', 'Summary']
       );
       await discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
       await discover.waitUntilSearchingHasFinished();
@@ -81,8 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Document'] // legacy behaviour
-              : ['@timestamp', 'Document'] // legacy behaviour
+              ? ['Summary'] // legacy behaviour
+              : ['@timestamp', 'Summary'] // legacy behaviour
           );
         });
 
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListItemRemove('@timestamp');
         await retry.try(async () => {
           expect(await dataGrid.getHeaderFields()).to.eql(
-            hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
+            hideTimeFieldColumnSetting || !hasTimeField ? ['Summary'] : ['@timestamp', 'Summary']
           );
         });
       }
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
+          hideTimeFieldColumnSetting || !hasTimeField ? ['Summary'] : ['@timestamp', 'Summary']
         );
       });
 
@@ -124,8 +124,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Document'] // legacy behaviour
-              : ['@timestamp', 'Document'] // legacy behaviour
+              ? ['Summary'] // legacy behaviour
+              : ['@timestamp', 'Summary'] // legacy behaviour
           );
         });
       }
@@ -337,22 +337,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
             await discover.waitUntilSearchingHasFinished();
             expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
+              hideTimeFieldColumnSetting ? ['Summary'] : ['@timestamp', 'Summary']
             );
 
             await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}-`);
             await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['Document']);
+            expect(await docTable.getHeaderFields()).to.eql(['Summary']);
 
             await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQL`);
             await discover.waitUntilSearchingHasFinished();
             expect(await dataGrid.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
+              hideTimeFieldColumnSetting ? ['Summary'] : ['@timestamp', 'Summary']
             );
 
             await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQLdrop`);
             await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
+            expect(await dataGrid.getHeaderFields()).to.eql(['Summary']);
 
             // only @timestamp is selected
             await discover.loadSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`);
@@ -368,7 +368,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.loadSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}ESQL`);
             await discover.waitUntilSearchingHasFinished();
             expect(await dataGrid.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', 'Document']
+              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', 'Summary']
             );
           });
 

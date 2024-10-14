@@ -24,6 +24,14 @@ export type SupportedLogo =
   | 'apache'
   | 'system'
   | 'opentelemetry'
+  | 'mysql'
+  | 'postgresql'
+  | 'redis'
+  | 'haproxy'
+  | 'rabbitmq'
+  | 'kafka'
+  | 'mongodb'
+  | 'apache_tomcat'
   | 'firehose';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
@@ -41,6 +49,14 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'system',
     'apache',
     'opentelemetry',
+    'mysql',
+    'postgresql',
+    'redis',
+    'haproxy',
+    'rabbitmq',
+    'kafka',
+    'mongodb',
+    'apache_tomcat',
   ].includes(logo);
 }
 

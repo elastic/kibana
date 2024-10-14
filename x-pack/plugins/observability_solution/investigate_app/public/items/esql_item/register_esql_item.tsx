@@ -10,7 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import React, { useMemo } from 'react';
 import { ErrorMessage } from '../../components/error_message';
 import { useKibana } from '../../hooks/use_kibana';
@@ -132,7 +132,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
         <lens.EmbeddableComponent
           {...previewInput.value}
           style={{ height: 128 }}
-          overrides={{ axisX: { hide: true } }}
+          overrides={{
+            axisX: { hide: true },
+            axisLeft: { style: { axisTitle: { visible: false } } },
+            settings: { showLegend: false },
+          }}
         />
       );
     } else {
@@ -147,7 +151,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
       <lens.EmbeddableComponent
         {...input}
         style={{ height: 128 }}
-        overrides={{ axisX: { hide: true } }}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </EuiFlexItem>
   );

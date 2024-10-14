@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
 
   describe('console app', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

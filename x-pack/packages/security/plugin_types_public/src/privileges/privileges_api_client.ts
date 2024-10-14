@@ -15,7 +15,7 @@ export interface PrivilegesAPIClientGetAllArgs {
    */
   respectLicenseLevel: boolean;
 }
-// TODO: Eyo include the proper return types for contract
+
 export abstract class PrivilegesAPIClientPublicContract {
   abstract getAll(args: PrivilegesAPIClientGetAllArgs): Promise<RawKibanaPrivileges>;
 }

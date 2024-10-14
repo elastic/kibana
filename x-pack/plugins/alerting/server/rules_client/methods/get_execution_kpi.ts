@@ -55,7 +55,7 @@ export async function getRuleExecutionKPI(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -65,7 +65,7 @@ export async function getRuleExecutionKPI(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 

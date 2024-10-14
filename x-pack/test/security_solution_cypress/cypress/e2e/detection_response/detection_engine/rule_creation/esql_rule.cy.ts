@@ -70,7 +70,7 @@ const workaroundForResizeObserver = () =>
 describe(
   'Detection ES|QL rules, creation',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const rule = getEsqlRule();

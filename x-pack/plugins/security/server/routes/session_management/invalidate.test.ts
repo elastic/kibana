@@ -44,6 +44,7 @@ describe('Invalidate sessions routes', () => {
 
     it('correctly defines route.', () => {
       expect(routeConfig.options).toEqual({
+        access: 'public',
         summary: 'Invalidate user sessions',
         tags: ['access:sessionManagement'],
       });

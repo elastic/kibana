@@ -26,7 +26,11 @@ export type Es = ProvidedType<typeof EsProvider>;
 import { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
 export type SupertestWithoutAuthProviderType = ProvidedType<typeof SupertestWithoutAuthProvider>;
 
-export type { InternalRequestHeader, RoleCredentials } from './services/saml_auth';
+export type {
+  InternalRequestHeader,
+  RoleCredentials,
+  CookieCredentials,
+} from './services/saml_auth';
 
 import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
 export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;

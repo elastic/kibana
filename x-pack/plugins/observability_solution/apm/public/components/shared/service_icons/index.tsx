@@ -139,9 +139,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
         defaultMessage: 'OpenTelemetry',
       }),
-      component: (
-        <OTelDetails opentelemetry={details?.opentelemetry} agentName={icons?.agentName} />
-      ),
+      component: <OTelDetails opentelemetry={details?.opentelemetry} />,
     },
     {
       key: 'container',
