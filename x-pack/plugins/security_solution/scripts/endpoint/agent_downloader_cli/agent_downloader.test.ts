@@ -9,6 +9,7 @@ import { getAgentDownloadUrl, getAgentFileName } from '../common/fleet_services'
 import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { agentDownloaderRunner } from './agent_downloader';
+import type { RunContext } from '@kbn/dev-cli-runner';
 
 jest.mock('../common/fleet_services');
 jest.mock('../common/agent_downloads_service');
@@ -38,7 +39,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version, closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(version, closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith(version);
@@ -54,7 +55,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version, closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(version, closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith(version);
@@ -81,7 +82,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version: '8.15.1', closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith('8.15.1', closestMatch, log);
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(fallbackVersion, closestMatch, log);
@@ -107,7 +108,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version: '8.15.1', closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith('8.15.1', closestMatch, log);
     expect(getAgentDownloadUrl).toHaveBeenCalledWith('8.15.0', closestMatch, log);
@@ -131,7 +132,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version: '8.15.0', closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledTimes(1); // Only one call for 8.15.0
     expect(getAgentFileName).toHaveBeenCalledTimes(1);
@@ -146,7 +147,7 @@ describe('agentDownloaderRunner', () => {
       agentDownloaderRunner({
         flags: { version: invalidVersion, closestMatch },
         log,
-      })
+      } as unknown as RunContext)
     ).rejects.toThrow('Invalid version format');
   });
 
@@ -160,7 +161,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version, closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(version, closestMatch, log);
   });
@@ -170,7 +171,7 @@ describe('agentDownloaderRunner', () => {
       agentDownloaderRunner({
         flags: { closestMatch },
         log,
-      })
+      } as unknown as RunContext)
     ).rejects.toThrow('version argument is required');
   });
 
@@ -192,7 +193,7 @@ describe('agentDownloaderRunner', () => {
     await agentDownloaderRunner({
       flags: { version: primaryVersion, closestMatch },
       log,
-    });
+    } as unknown as RunContext);
 
     expect(log.error).toHaveBeenCalledWith(
       'Failed to download or store version 8.15.1: Download failed'

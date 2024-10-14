@@ -7,7 +7,6 @@
 // Adjust path if needed
 
 import { downloadAndStoreAgent, isAgentDownloadFromDiskAvailable } from './agent_downloads_service';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
@@ -26,24 +25,20 @@ jest.mock('../../../common/endpoint/data_loaders/utils', () => ({
 }));
 
 describe('AgentDownloadStorage', () => {
-  let log;
   const url = 'http://example.com/agent.tar.gz';
   const fileName = 'elastic-agent-7.10.0.tar.gz';
-  const fullFilePath = `/path/to/${fileName}`;
-
   beforeEach(() => {
-    log = createToolingLogger();
     jest.clearAllMocks(); // Ensure no previous test state affects the current one
   });
 
   it('downloads and stores the agent if not cached', async () => {
-    fs.existsSync.mockReturnValue(false);
-    fs.createWriteStream.mockReturnValue({
+    (fs.existsSync as unknown as jest.Mock).mockReturnValue(false);
+    (fs.createWriteStream as unknown as jest.Mock).mockReturnValue({
       on: jest.fn(),
       end: jest.fn(),
     });
-    nodeFetch.mockResolvedValue({ body: { pipe: jest.fn() } });
-    finished.mockResolvedValue(undefined);
+    (nodeFetch as unknown as jest.Mock).mockResolvedValue({ body: { pipe: jest.fn() } });
+    (finished as unknown as jest.Mock).mockResolvedValue(undefined);
 
     const result = await downloadAndStoreAgent(url, fileName);
 
@@ -56,7 +51,7 @@ describe('AgentDownloadStorage', () => {
   });
 
   it('reuses cached agent if available', async () => {
-    fs.existsSync.mockReturnValue(true);
+    (fs.existsSync as unknown as jest.Mock).mockReturnValue(true);
 
     const result = await downloadAndStoreAgent(url, fileName);
 
@@ -69,7 +64,7 @@ describe('AgentDownloadStorage', () => {
   });
 
   it('checks if agent download is available from disk', () => {
-    fs.existsSync.mockReturnValue(true);
+    (fs.existsSync as unknown as jest.Mock).mockReturnValue(true);
 
     const result = isAgentDownloadFromDiskAvailable(fileName);
 

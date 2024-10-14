@@ -120,14 +120,10 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           },
           () => fs.promises.unlink(newDownloadInfo.fullFilePath) // Clean up on interruption
         );
-
         this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
-        await this.cleanupDownloads();
-        return newDownloadInfo;
       } catch (error) {
         this.log.error(`Attempt ${attempt + 1} to download agent failed: ${error.message}`);
         await unlink(newDownloadInfo.fullFilePath);
-        //
         if (attempt >= maxAttempts - 1) {
           throw new Error(`Download failed after ${maxAttempts} attempts`);
         }
@@ -136,6 +132,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
         this.log.info('Retrying download...');
       }
     }
+    await this.cleanupDownloads();
+    return newDownloadInfo;
   }
 
   /**
