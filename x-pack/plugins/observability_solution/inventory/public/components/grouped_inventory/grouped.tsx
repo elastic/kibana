@@ -4,26 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiDataGridSorting,
-  EuiAccordion,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { UngroupedInventoryPage } from './ungrouped';
 import { GroupSelector } from './group_selector';
 import { groupCountCss, groupingContainerCss } from './styles';
 import { InventoryGroupPanel } from './inventory_group_panel';
+import { useInventoryParams } from '../../hooks/use_inventory_params';
+import { GroupedGridWrapper } from './grouped_grid_wrapper';
 
 export interface GroupedInventoryPageProps {
   groupSelected: string;
@@ -38,16 +31,12 @@ export function GroupedInventoryPage({
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { query } = useInventoryParams('/');
-  const { pageIndex, kuery, entityTypes } = query;
 
   const inventoryRoute = useInventoryRouter();
+  const { query } = useInventoryParams('/');
+  const { kuery, entityTypes } = query;
 
-  const {
-    value = { groupBy: '', groups: [] },
-    loading,
-    refresh,
-  } = useInventoryAbortableAsync(
+  const { value = { groupBy: '', groups: [] }, refresh } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
         params: {
@@ -84,35 +73,6 @@ export function GroupedInventoryPage({
     };
   });
 
-  function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
-  }
-
-  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        sortField: sorting.id,
-        sortDirection: sorting.direction,
-      },
-    });
-  }
-
-  function handleTypeFilter(entityType: EntityType) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        // Override the current entity types
-        entityTypes: [entityType],
-      },
-    });
-  }
-
   const onChange = (groupSelection: string) => {
     setGroupSelected(groupSelection === groupSelected ? 'none' : groupSelection);
   };
@@ -144,14 +104,14 @@ export function GroupedInventoryPage({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {value.groups.map((group) => {
+      {value.groups.map((group, index) => {
         const field = group[value.groupBy];
 
         return (
           <>
             <EuiAccordion
               className="inventoryGroupAccordion"
-              data-test-subj="inventory-grouping-accordion"
+              data-test-subj={`inventory-grouping-accordion-${index}`}
               key={field}
               id={field}
               buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
@@ -159,11 +119,7 @@ export function GroupedInventoryPage({
               buttonProps={{ paddingSize: 'm' }}
               paddingSize="m"
             >
-              <UngroupedInventoryPage
-                entityType={field}
-                groupSelected={groupSelected}
-                setGroupSelected={setGroupSelected}
-              />
+              <GroupedGridWrapper entityType={field} />
             </EuiAccordion>
             <EuiSpacer size="s" />
           </>
