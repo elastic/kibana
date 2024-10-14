@@ -242,11 +242,11 @@ export const fetchRulesSnoozeSettings = async ({
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
       method: 'POST',
-      query: {
+      body: JSON.stringify({
         filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
-      },
+      }),
       signal,
     }
   );
