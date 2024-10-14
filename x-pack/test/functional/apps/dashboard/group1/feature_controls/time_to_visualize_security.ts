@@ -101,8 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('edits to a by value lens panel are properly applied', async () => {
         await dashboard.waitForRenderComplete();
-        await dashboardPanelActions.clickEdit();
-        await lens.openInEditor();
+        await dashboardPanelActions.navigateToEditorFromFlyout();
         await lens.switchToVisualization('pie');
         await lens.saveAndReturn();
         await dashboard.waitForRenderComplete();
@@ -113,8 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('disables save to library button without visualize save permissions', async () => {
         await dashboard.waitForRenderComplete();
-        await dashboardPanelActions.clickEdit();
-        await lens.openInEditor();
+        await dashboardPanelActions.navigateToEditorFromFlyout();
         const saveButton = await testSubjects.find('lnsApp_saveButton');
         expect(await saveButton.getAttribute('disabled')).to.equal('true');
         await lens.saveAndReturn();

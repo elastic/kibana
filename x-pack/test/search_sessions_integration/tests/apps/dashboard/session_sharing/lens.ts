@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Navigating to lens and back should create a new session
       const byRefSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(lensTitle);
       await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await lens.openInEditor();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
       const newByRefSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(lensTitle);
@@ -64,8 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigating to lens and back should keep the session
       await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await lens.openInEditor();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
       const newByValueSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(lensTitle);

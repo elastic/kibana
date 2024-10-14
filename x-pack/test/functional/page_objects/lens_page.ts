@@ -171,10 +171,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async openInEditor() {
-      await testSubjects.click('navigateToLensEditorLink');
-    },
-
     /**
      * Changes the specified dimension to the specified operation and optionally the field.
      *

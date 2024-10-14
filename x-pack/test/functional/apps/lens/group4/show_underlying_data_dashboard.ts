@@ -60,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await lens.openInEditor();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await header.waitUntilLoadingHasFinished();
       await lens.createLayer('annotations');
       await lens.waitForVisualization('xyVisChart');
@@ -92,8 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should bring both dashboard context and visualization context to discover', async () => {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await lens.openInEditor();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
