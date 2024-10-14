@@ -54,6 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when creating private and public user instructions', () => {
       before(async () => {
         await clearKnowledgeBase(es);
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         const promises = [
           {
@@ -87,6 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         await Promise.all(promises);
+        await new Promise((resolve) => setTimeout(resolve, 500));
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
