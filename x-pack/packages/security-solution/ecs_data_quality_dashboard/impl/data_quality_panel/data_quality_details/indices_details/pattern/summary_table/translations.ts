@@ -14,13 +14,6 @@ export const COLLAPSE = i18n.translate(
   }
 );
 
-export const VIEW_CHECK_DETAILS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.viewCheckDetailsLabel',
-  {
-    defaultMessage: 'View check details',
-  }
-);
-
 export const EXPAND_ROWS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.expandRowsColumn',
   {
@@ -55,9 +48,9 @@ export const ACTIONS = i18n.translate(
   }
 );
 
-export const CHECK_INDEX = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.checkIndexButton',
+export const VIEW_HISTORY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.viewHistory',
   {
-    defaultMessage: 'Check index',
+    defaultMessage: 'View history',
   }
 );
