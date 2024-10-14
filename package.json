@@ -1240,7 +1240,7 @@
     "redux-saga-testing": "^2.0.2",
     "redux-thunk": "^2.4.2",
     "redux-thunks": "^1.0.0",
-    "reflect-metadata": "^0.2.1",
+    "reflect-metadata": "^0.2.2",
     "remark-gfm": "1.0.0",
     "remark-parse-no-trim": "^8.0.4",
     "remark-stringify": "^8.0.3",
