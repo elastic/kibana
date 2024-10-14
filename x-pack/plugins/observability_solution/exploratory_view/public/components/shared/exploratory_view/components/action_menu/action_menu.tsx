@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EmbedAction } from '../../header/embed_action';
 import { AddToCaseAction } from '../../header/add_to_case_action';
 import { useKibana } from '../../hooks/use_kibana';
@@ -94,7 +94,7 @@ export function ExpViewActionMenuContent({
 
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent
-          initialInput={lensAttributes as unknown as LensEmbeddableInput}
+          initialInput={{ attributes: lensAttributes }}
           onClose={() => setIsSaveOpen(false)}
           // if we want to do anything after the viz is saved
           // right now there is no action, so an empty function

@@ -29,7 +29,6 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensEmbeddableInput,
   DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
   HeatmapVisualizationState,
@@ -661,7 +660,7 @@ export const App = (props: {
                   </EuiPanel>
                   {isSaveModalVisible && (
                     <LensSaveModalComponent
-                      initialInput={currentAttributes as unknown as LensEmbeddableInput}
+                      initialInput={{ attributes: currentAttributes }}
                       onSave={() => {}}
                       onClose={() => setIsSaveModalVisible(false)}
                     />
