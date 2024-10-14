@@ -28,7 +28,6 @@ export class DeprecationsClient {
 
   private fetchDeprecations = async (): Promise<DomainDeprecationDetails[]> => {
     const { deprecations } = await this.http.fetch<DeprecationsGetResponse>('/api/deprecations/', {
-      query: { apiVersion: '2023-10-31' },
       asSystemRequest: true,
     });
 
