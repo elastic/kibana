@@ -17,12 +17,9 @@ export const registerListDatabaseRoute = ({
     const { client: clusterClient } = (await ctx.core).elasticsearch;
 
     try {
-      // TODO: the js client doesn't work for this API yet, so we resort to
-      // using the transport layer instead
-      const data = (await clusterClient.asCurrentUser.transport.request({
-        method: 'GET',
-        path: `/_ingest/ip_location/database`,
-      })) as { databases: GeoipDatabaseFromES[] };
+      const data = (await clusterClient.asCurrentUser.ingest.getGeoipDatabase()) as {
+        databases: GeoipDatabaseFromES[];
+      };
 
       const geoipDatabases = data.databases;
 

@@ -29,12 +29,7 @@ export const registerDeleteDatabaseRoute = ({
       const { database_id: databaseID } = req.params;
 
       try {
-        // TODO: the js client doesn't work for this API yet, so we resort to
-        // using the transport layer instead
-        await clusterClient.asCurrentUser.transport.request({
-          method: 'DELETE',
-          path: `/_ingest/ip_location/database/${databaseID}`,
-        });
+        await clusterClient.asCurrentUser.ingest.deleteGeoipDatabase({ id: databaseID });
 
         return res.ok();
       } catch (error) {
