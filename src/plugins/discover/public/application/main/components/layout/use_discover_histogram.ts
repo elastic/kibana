@@ -183,22 +183,6 @@ export const useDiscoverHistogram = ({
         }
 
         const fetchStatus = status.toString() as FetchStatus;
-        if (
-          fetchStatus === FetchStatus.COMPLETE &&
-          savedSearchHits$.getValue().fetchStatus === FetchStatus.COMPLETE &&
-          result !== savedSearchHits$.getValue().result
-        ) {
-          // this is a workaround to make sure the new total hits value is displayed
-          // a different value without a loading state in between would lead to be ignored by useDataState
-          addLog(
-            '[UnifiedHistogram] send loading to totalHits$ to make sure the new value is displayed',
-            { status, result }
-          );
-          savedSearchHits$.next({
-            fetchStatus: FetchStatus.LOADING,
-          });
-        }
-
         const isSavedSearchLoading =
           savedSearchHits$.getValue().fetchStatus === FetchStatus.LOADING;
         const isUnifiedHistogramLoading = status === UnifiedHistogramFetchStatus.loading;
