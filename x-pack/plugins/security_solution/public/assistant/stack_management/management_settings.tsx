@@ -98,7 +98,7 @@ export const ManagementSettings = React.memo(() => {
       serverless.setBreadcrumbs([
         {
           text: i18n.translate(
-            'xpack.elasticAssistant.assistant.settings.breadcrumb.serverless.security',
+            'xpack.securitySolution.assistant.settings.breadcrumb.serverless.security',
             {
               defaultMessage: 'AI Assistant for Security Settings',
             }
@@ -109,7 +109,7 @@ export const ManagementSettings = React.memo(() => {
       setBreadcrumbs([
         {
           text:  i18n.translate(
-            'xpack.elasticAssistant.assistant.settings.breadcrumb.stackManagement',
+            'xpack.securitySolution.assistant.settings.breadcrumb.stackManagement',
             {
               defaultMessage: 'Stack Management'
             }
@@ -121,7 +121,7 @@ export const ManagementSettings = React.memo(() => {
         },
         {
           text: i18n.translate(
-            'xpack.elasticAssistant.assistant.settings.breadcrumb.index',
+            'xpack.securitySolution.assistant.settings.breadcrumb.index',
             {
               defaultMessage: 'AI Assistants',
             }
@@ -133,7 +133,7 @@ export const ManagementSettings = React.memo(() => {
         },
         {
           text: i18n.translate(
-            'xpack.elasticAssistant.assistant.settings.breadcrumb.security',
+            'xpack.securitySolution.assistant.settings.breadcrumb.security',
             {
               defaultMessage: 'Security',
             }
