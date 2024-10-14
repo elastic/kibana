@@ -52,7 +52,7 @@ export class EntityClient {
     return installedDefinition;
   }
 
-  async updateInEntityDefinition({
+  async updateEntityDefinition({
     id,
     definitionUpdate,
   }: {

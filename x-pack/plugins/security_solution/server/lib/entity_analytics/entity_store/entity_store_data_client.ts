@@ -426,7 +426,7 @@ export class EntityStoreDataClient {
 
         try {
           // Update entity manager definition
-          await this.entityClient.updateInEntityDefinition({
+          await this.entityClient.updateEntityDefinition({
             id,
             definitionUpdate: {
               ...definition,

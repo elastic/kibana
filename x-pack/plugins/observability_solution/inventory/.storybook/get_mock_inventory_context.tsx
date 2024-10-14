@@ -35,5 +35,10 @@ export function getMockInventoryContext(): InventoryKibanaContext {
       stream: jest.fn(),
     },
     spaces: {} as unknown as SpacesPluginStart,
+    kibanaEnvironment: {
+      isCloudEnv: false,
+      isServerlessEnv: false,
+      kibanaVersion: '9.0.0',
+    },
   };
 }
