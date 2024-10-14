@@ -27,7 +27,7 @@
         "label": "TryInConsoleButton",
         "description": [],
         "signature": [
-          "({ request, application, consolePlugin, sharePlugin, content, showIcon, type, }: ",
+          "({ request, application, consolePlugin, sharePlugin, content, showIcon, type, telemetryId, onClick: onClickProp, }: ",
           "TryInConsoleButtonProps",
           ") => React.JSX.Element | null"
         ],
@@ -40,7 +40,7 @@
             "id": "def-common.TryInConsoleButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content = RUN_IN_CONSOLE,\n  showIcon = true,\n  type = 'emptyButton',\n}",
+            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content = RUN_IN_CONSOLE,\n  showIcon = true,\n  type = 'emptyButton',\n  telemetryId,\n  onClick: onClickProp,\n}",
             "description": [],
             "signature": [
               "TryInConsoleButtonProps"
