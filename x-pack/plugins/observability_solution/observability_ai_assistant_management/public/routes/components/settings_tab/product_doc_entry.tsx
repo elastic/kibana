@@ -24,7 +24,10 @@ import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
 
 export function ProductDocEntry() {
-  const { overlays } = useKibana().services;
+  const {
+    overlays,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);
@@ -40,12 +43,20 @@ export function ProductDocEntry() {
   }, [status]);
 
   const onClickInstall = useCallback(() => {
+    toasts.addSuccess(
+      i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.productDocInstallToastText',
+        {
+          defaultMessage: 'Installing Elastic documentation, this can take a few minutes.',
+        }
+      )
+    );
     setInstalling(true);
     installProductDoc().then(() => {
       setInstalling(false);
       setInstalled(true);
     });
-  }, [installProductDoc]);
+  }, [installProductDoc, toasts]);
 
   const onClickUninstall = useCallback(() => {
     overlays
@@ -135,16 +146,22 @@ export function ProductDocEntry() {
       title={
         <h3>
           {i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.productDocLabel', {
-            defaultMessage: 'Product documentation',
+            defaultMessage: 'Elastic documentation',
           })}
         </h3>
       }
       description={
         <p>
+          <em>
+            {i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.techPreview', {
+              defaultMessage: '[technical preview] ',
+            })}
+          </em>
           {i18n.translate(
             'xpack.observabilityAiAssistantManagement.settingsPage.productDocDescription',
             {
-              defaultMessage: `Install Elastic documentation to improve the assistant's efficiency.`,
+              defaultMessage:
+                "Install Elastic documentation to improve the assistant's efficiency.",
             }
           )}
         </p>
