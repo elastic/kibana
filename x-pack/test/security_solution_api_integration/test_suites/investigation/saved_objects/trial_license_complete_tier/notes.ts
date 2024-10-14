@@ -6,7 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-
+import { v4 as uuidv4 } from 'uuid';
+import { Note } from '@kbn/security-solution-plugin/common/api/timeline';
+import {
+  createNoteAssociatedWithDocumentAndSavedObject,
+  createNoteAssociatedWithDocumentOnly,
+  createNoteAssociatedWithNothing,
+  createNoteAssociatedWithSavedObjectOnly,
+  deleteAllNotes,
+} from './helpers';
 import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -14,6 +22,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Note - Saved Objects', () => {
+    const es = getService('es');
+
     before(() => kibanaServer.savedObjects.cleanStandardList());
     after(() => kibanaServer.savedObjects.cleanStandardList());
 
@@ -69,6 +79,429 @@ export default function ({ getService }: FtrProviderContext) {
         expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
         expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
       });
+    });
+
+    describe('get notes', () => {
+      beforeEach(async () => {
+        await deleteAllNotes(es);
+      });
+
+      it('should retrieve all the notes for a document id', async () => {
+        const eventId1 = uuidv4();
+        const eventId2 = uuidv4();
+        const timelineId1 = uuidv4();
+        const timelineId2 = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId1,
+          'note associated with event-1 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId2,
+          'note associated with event-2 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId1,
+          'note associated with timeline-1 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId2,
+          'note associated with timeline-2 only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId1,
+          timelineId1,
+          'note associated with event-1 and timeline-1'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId2,
+          timelineId2,
+          'note associated with event-2 and timeline-2'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${eventId1} in the text`
+        );
+
+        const response = await supertest
+          .get(`/api/note?documentIds=${eventId1}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(2);
+        notes.forEach((note: Note) => expect(note.eventId).to.be(eventId1));
+      });
+
+      it('should retrieve all the notes for multiple document ids', async () => {
+        const eventId1 = uuidv4();
+        const eventId2 = uuidv4();
+        const eventId3 = uuidv4();
+        const timelineId1 = uuidv4();
+        const timelineId2 = uuidv4();
+        const timelineId3 = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId1,
+          'note associated with event-1 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId2,
+          'note associated with event-2 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId3,
+          'note associated with event-2 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId1,
+          'note associated with timeline-1 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId2,
+          'note associated with timeline-2 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId3,
+          'note associated with timeline-3 only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId1,
+          timelineId1,
+          'note associated with event-1 and timeline-1'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId2,
+          timelineId2,
+          'note associated with event-2 and timeline-2'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId3,
+          timelineId3,
+          'note associated with event-3 and timeline-3'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${eventId1} in the text`
+        );
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${eventId2} in the text`
+        );
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${eventId3} in the text`
+        );
+
+        const response = await supertest
+          .get(`/api/note?documentIds=${eventId1}&documentIds=${eventId2}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(4);
+        notes.forEach((note: Note) => {
+          expect(note.eventId).to.not.be(eventId3);
+          expect(note.eventId).to.not.be('');
+        });
+      });
+
+      it('should retrieve all the notes for a saved object id', async () => {
+        const eventId1 = uuidv4();
+        const eventId2 = uuidv4();
+        const timelineId1 = uuidv4();
+        const timelineId2 = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId1,
+          'note associated with event-1 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId2,
+          'note associated with event-2 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId1,
+          'note associated with timeline-1 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId2,
+          'note associated with timeline-2 only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId1,
+          timelineId1,
+          'note associated with event-1 and timeline-1'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId2,
+          timelineId2,
+          'note associated with event-2 and timeline-2'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${timelineId1} in the text`
+        );
+
+        const response = await supertest
+          .get(`/api/note?savedObjectIds=${timelineId1}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(2);
+        notes.forEach((note: Note) => expect(note.timelineId).to.be(timelineId1));
+      });
+
+      it('should retrieve all the notes for multiple saved object ids', async () => {
+        const eventId1 = uuidv4();
+        const eventId2 = uuidv4();
+        const eventId3 = uuidv4();
+        const timelineId1 = uuidv4();
+        const timelineId2 = uuidv4();
+        const timelineId3 = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId1,
+          'note associated with event-1 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId2,
+          'note associated with event-2 only'
+        );
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId3,
+          'note associated with event-3 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId1,
+          'note associated with timeline-1 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId2,
+          'note associated with timeline-2 only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId3,
+          'note associated with timeline-3 only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId1,
+          timelineId1,
+          'note associated with event-1 and timeline-1'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId2,
+          timelineId2,
+          'note associated with event-2 and timeline-2'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId3,
+          timelineId3,
+          'note associated with event-3 and timeline-3'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${timelineId1} in the text`
+        );
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${timelineId2} in the text`
+        );
+        await createNoteAssociatedWithNothing(
+          supertest,
+          `another note associated with nothing but has ${timelineId3} in the text`
+        );
+
+        const response = await supertest
+          .get(`/api/note?savedObjectIds=${timelineId1}&savedObjectIds=${timelineId2}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(4);
+        notes.forEach((note: Note) => {
+          expect(note.timelineId).to.not.be(timelineId3);
+          expect(note.timelineId).to.not.be('');
+        });
+      });
+
+      it('should retrieve all notes without any query params', async () => {
+        const eventId = uuidv4();
+        const timelineId = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId,
+          'note associated with an event only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId,
+          'note associated with a timeline only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId,
+          timelineId,
+          'note associated with an event and a timeline'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+
+        const response = await supertest
+          .get('/api/note')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount } = response.body;
+
+        expect(totalCount).to.be(4);
+      });
+
+      it('should retrieve notes considering perPage query parameter', async () => {
+        await createNoteAssociatedWithNothing(supertest, 'first note');
+        await createNoteAssociatedWithNothing(supertest, 'second note');
+        await createNoteAssociatedWithNothing(supertest, 'third note');
+
+        const response = await supertest
+          .get('/api/note?perPage=1')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(3);
+        expect(notes.length).to.be(1);
+        expect(notes[0].note).to.be('first note');
+      });
+
+      it('should retrieve considering page query parameter', async () => {
+        await createNoteAssociatedWithNothing(supertest, 'first note');
+        await createNoteAssociatedWithNothing(supertest, 'second note');
+        await createNoteAssociatedWithNothing(supertest, 'third note');
+
+        const response = await supertest
+          .get('/api/note?perPage=1&page=2')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(3);
+        expect(notes.length).to.be(1);
+        expect(notes[0].note).to.be('second note');
+      });
+
+      it('should retrieve considering search query parameter', async () => {
+        const eventId = uuidv4();
+        const timelineId = uuidv4();
+
+        await createNoteAssociatedWithDocumentOnly(
+          supertest,
+          eventId,
+          'note associated with an event only'
+        );
+        await createNoteAssociatedWithSavedObjectOnly(
+          supertest,
+          timelineId,
+          'note associated with a timeline only'
+        );
+        await createNoteAssociatedWithDocumentAndSavedObject(
+          supertest,
+          eventId,
+          timelineId,
+          'note associated with an event and a timeline'
+        );
+        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+
+        const response = await supertest
+          .get('/api/note?search=event')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount } = response.body;
+
+        expect(totalCount).to.be(2);
+      });
+
+      // TODO why can't we sort on every field? (I tested for the note field (or a random field like abc) and the endpoint crashes)
+      it('should retrieve considering sortField query parameters', async () => {
+        await createNoteAssociatedWithDocumentOnly(supertest, '1', 'note 3');
+        await createNoteAssociatedWithDocumentOnly(supertest, '2', 'note 2');
+        await createNoteAssociatedWithDocumentOnly(supertest, '3', 'note 1');
+
+        const response = await supertest
+          .get('/api/note?sortField=eventId')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(3);
+        expect(notes[0].eventId).to.be('1');
+        expect(notes[1].eventId).to.be('2');
+        expect(notes[2].eventId).to.be('3');
+      });
+
+      it('should retrieve considering sortOrder query parameters', async () => {
+        await createNoteAssociatedWithDocumentOnly(supertest, '1', 'note 3');
+        await createNoteAssociatedWithDocumentOnly(supertest, '2', 'note 2');
+        await createNoteAssociatedWithDocumentOnly(supertest, '3', 'note 1');
+
+        const response = await supertest
+          .get('/api/note?sortField=eventId&sortOrder=desc')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(3);
+        expect(notes[0].eventId).to.be('3');
+        expect(notes[1].eventId).to.be('2');
+        expect(notes[2].eventId).to.be('1');
+      });
+
+      // TODO should add more tests for the filter query parameter (I don't know how it's supposed to work)
+
+      // TODO should add more tests for the MAX_UNASSOCIATED_NOTES advanced settings values
     });
   });
 }
