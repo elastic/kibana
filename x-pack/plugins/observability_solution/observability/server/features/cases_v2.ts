@@ -18,7 +18,7 @@ export const getCasesFeatureV2 = (
 ): KibanaFeatureConfig => ({
   id: casesFeatureIdV2,
   name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-    defaultMessage: 'Cases',
+    defaultMessage: 'Cases V2',
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.observability,

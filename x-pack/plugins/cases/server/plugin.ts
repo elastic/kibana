@@ -44,6 +44,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { getCasesKibanaFeatureV2 } from './feature_v2';
 
 export class CasePlugin
   implements
@@ -93,6 +94,7 @@ export class CasePlugin
 
     if (this.caseConfig.stack.enabled) {
       plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+      plugins.features.registerKibanaFeature(getCasesKibanaFeatureV2());
     }
 
     registerSavedObjects({

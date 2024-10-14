@@ -156,7 +156,7 @@ export const securitySolutionOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionFixture: ['cases_delete'],
+          securitySolutionFixture: ['cases_delete_v2'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -180,7 +180,7 @@ export const securitySolutionOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionFixture: ['read', 'cases_delete'],
+          securitySolutionFixture: ['read', 'cases_delete_v2'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

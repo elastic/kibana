@@ -166,7 +166,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCases: CasesPermissions;
+  generalCasesV2: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -184,7 +184,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCases: {
+      generalCasesV2: {
         all: permissions.all,
         create: permissions.create,
         read: permissions.read,

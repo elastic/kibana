@@ -131,7 +131,7 @@ export const secAllCasesOnlyReadDelete: Role = {
           siem: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
-          securitySolutionCasesV2: ['cases_read', 'cases_delete'],
+          securitySolutionCasesV2: ['cases_read', 'cases_delete_v2'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

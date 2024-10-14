@@ -23,13 +23,13 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const hasAll = {
   securitySolutionCasesV2: allCasesCapabilities(),
   observabilityCasesV2: allCasesCapabilities(),
-  generalCases: allCasesCapabilities(),
+  generalCasesV2: allCasesCapabilities(),
 };
 
 const secAllObsReadGenNone = {
   securitySolutionCasesV2: allCasesCapabilities(),
   observabilityCasesV2: readCasesCapabilities(),
-  generalCases: noCasesCapabilities(),
+  generalCasesV2: noCasesCapabilities(),
 };
 
 const unrelatedFeatures = {
