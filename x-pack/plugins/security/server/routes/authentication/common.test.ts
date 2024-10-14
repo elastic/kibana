@@ -69,6 +69,7 @@ describe('Common authentication routes', () => {
         access: 'public',
         authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        excludeFromOAS: true,
       });
       expect(routeConfig.validate).toEqual({
         body: undefined,
