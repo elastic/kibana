@@ -451,25 +451,30 @@ export class SearchInterceptor {
     if (this.bFetchDisabled) {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
-        .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
-          version: '1',
-          signal: abortSignal,
-          context: executionContext,
-          body: JSON.stringify({
-            ...request,
-            ...searchOptions,
-            stream:
-              strategy === ESQL_ASYNC_SEARCH_STRATEGY || strategy === ENHANCED_ES_SEARCH_STRATEGY,
-          }),
-          asResponse: true,
-        })
+        .post<IKibanaSearchResponse>(
+          `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+          {
+            version: '1',
+            signal: abortSignal,
+            context: executionContext,
+            body: JSON.stringify({
+              ...request,
+              ...searchOptions,
+              stream:
+                strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
+                strategy === ENHANCED_ES_SEARCH_STRATEGY ||
+                strategy === undefined, // undefined strategy is treated as enhanced ES
+            }),
+            asResponse: true,
+          }
+        )
         .then((rawResponse) => {
-          const response = rawResponse.body;
+          const response = rawResponse.body!;
           const warning = rawResponse.response?.headers.get('warning');
           const requestParams =
-            (response as Record<string, unknown>).requestParams ??
+            response.requestParams ??
             JSON.parse(rawResponse.response?.headers.get('requestParams') || '{}');
-          const error = (response as Record<string, unknown>).error;
+          const error = (response as unknown as Record<string, unknown>).error;
           if (error) {
             // eslint-disable-next-line no-throw-literal
             throw {
@@ -482,7 +487,7 @@ export class SearchInterceptor {
           }
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
-              if ((response as IKibanaSearchResponse).rawResponse) return response;
+              if (response.rawResponse) return response;
               const typedResponse = response as unknown as AsyncSearchGetResponse;
               const shimmedResponse = shimHitsTotal(typedResponse.response);
               return {
