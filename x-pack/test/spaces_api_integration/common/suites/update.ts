@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+
 import { getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;

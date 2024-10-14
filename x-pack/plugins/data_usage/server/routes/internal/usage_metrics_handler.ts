@@ -9,8 +9,10 @@ import { RequestHandler } from '@kbn/core/server';
 import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MetricTypes,
+  UsageMetricsAutoOpsResponseSchema,
+  UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestSchemaQueryParams,
-  UsageMetricsResponseSchema,
+  UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
@@ -34,45 +36,26 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
 
-      // @ts-ignore
-      const { from, to, metricTypes, dataStreams: dsNames, size } = request.query;
+      const { from, to, metricTypes, dataStreams: requestDsNames } = request.query;
       logger.debug(`Retrieving usage metrics`);
 
       const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
         await esClient.indices.getDataStream({
-          name: '*',
+          name: requestDsNames,
           expand_wildcards: 'all',
         });
-
-      const hasDataStreams = dataStreamsResponse.length > 0;
-      let userDsNames: string[] = [];
-
-      if (dsNames?.length) {
-        userDsNames = typeof dsNames === 'string' ? [dsNames] : dsNames;
-      } else if (!userDsNames.length && hasDataStreams) {
-        userDsNames = dataStreamsResponse.map((ds) => ds.name);
-      }
-
-      // If no data streams are found, return an empty response
-      if (!userDsNames.length) {
-        return response.ok({
-          body: {
-            metrics: {},
-          },
-        });
-      }
 
       const metrics = await fetchMetricsFromAutoOps({
         from,
         to,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
-        dataStreams: formatStringParams(userDsNames),
+        dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });
 
+      const processedMetrics = transformMetricsData(metrics);
+
       return response.ok({
-        body: {
-          metrics,
-        },
+        body: processedMetrics,
       });
     } catch (error) {
       logger.error(`Error retrieving usage metrics: ${error.message}`);
@@ -94,7 +77,7 @@ const fetchMetricsFromAutoOps = async ({
 }) => {
   // TODO: fetch data from autoOps using userDsNames
   /*
-    const response = await axios.post('https://api.auto-ops.{region}.{csp}.cloud.elastic.co/monitoring/serverless/v1/projects/{project_id}/metrics', {
+    const response = await axios.post({AUTOOPS_URL}, {
       from: Date.parse(from),
       to: Date.parse(to),
       metric_types: metricTypes,
@@ -231,7 +214,25 @@ const fetchMetricsFromAutoOps = async ({
     },
   };
   // Make sure data is what we expect
-  const validatedData = UsageMetricsResponseSchema.body().validate(mockData);
+  const validatedData = UsageMetricsAutoOpsResponseSchema.body().validate(mockData);
 
-  return validatedData.metrics;
+  return validatedData;
 };
+function transformMetricsData(
+  data: UsageMetricsAutoOpsResponseSchemaBody
+): UsageMetricsResponseSchemaBody {
+  return {
+    metrics: Object.fromEntries(
+      Object.entries(data.metrics).map(([metricType, series]) => [
+        metricType,
+        series.map((metricSeries) => ({
+          name: metricSeries.name,
+          data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+            x: timestamp,
+            y: value,
+          })),
+        })),
+      ])
+    ),
+  };
+}
