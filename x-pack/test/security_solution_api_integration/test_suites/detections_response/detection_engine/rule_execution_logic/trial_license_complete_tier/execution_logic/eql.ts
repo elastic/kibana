@@ -18,6 +18,7 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_SUPPRESSION_DOCS_COUNT,
   EVENT_KIND,
+  ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -997,8 +998,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
-
         expect(alerts.hits.hits.length).equal(3);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1008,6 +1009,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits.length).equal(6);
+        expect(allNewAlerts.hits.hits[5]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
