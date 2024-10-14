@@ -54,28 +54,35 @@ export const updateMonitorAPI = async ({
   spaceId,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
-  spaceId: string;
+  spaceId?: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  const basePath = kibanaService.coreSetup.http.basePath;
-  const url = addSpaceIdToPath(
-    basePath.serverBasePath,
-    spaceId,
-    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
-  );
+  if (spaceId) {
+    const basePath = kibanaService.coreSetup.http.basePath;
+    const url = addSpaceIdToPath(
+      basePath.serverBasePath,
+      spaceId,
+      SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
+    );
 
-  return await apiService.put(
-    `${url}/${id}`,
-    monitor,
-    null,
-    {
+    return await apiService.put(
+      `${url}/${id}`,
+      monitor,
+      null,
+      {
+        internal: true,
+        version: INITIAL_REST_VERSION,
+      },
+      {
+        prependBasePath: false,
+      }
+    );
+  } else {
+    return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
       internal: true,
       version: INITIAL_REST_VERSION,
-    },
-    {
-      prependBasePath: false,
-    }
-  );
+    });
+  }
 };
 
 export const fetchProjectAPIKey = async (

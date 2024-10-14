@@ -58,25 +58,32 @@ export const fetchDeleteMonitor = async ({
   spaceId,
 }: {
   configIds: string[];
-  spaceId: string;
+  spaceId?: string;
 }): Promise<void> => {
-  const basePath = kibanaService.coreSetup.http.basePath;
-  const url = addSpaceIdToPath(
-    basePath.serverBasePath,
-    spaceId,
-    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
-  );
+  const baseUrl = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
+  if (spaceId) {
+    const basePath = kibanaService.coreSetup.http.basePath;
+    const url = addSpaceIdToPath(basePath.serverBasePath, spaceId, baseUrl);
 
-  return await apiService.delete(
-    url,
-    { version: INITIAL_REST_VERSION },
-    {
-      ids: configIds,
-    },
-    {
-      prependBasePath: false,
-    }
-  );
+    return await apiService.delete(
+      url,
+      { version: INITIAL_REST_VERSION },
+      {
+        ids: configIds,
+      },
+      {
+        prependBasePath: false,
+      }
+    );
+  } else {
+    return await apiService.delete(
+      baseUrl,
+      { version: INITIAL_REST_VERSION },
+      {
+        ids: configIds,
+      }
+    );
+  }
 };
 
 export const fetchUpsertMonitor = async ({
