@@ -103,6 +103,14 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            generalCases: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'cases_delete',
+              'cases_settings',
+            ],
             generalCasesV2: [
               'all',
               'read',
@@ -112,6 +120,14 @@ export default function ({ getService }: FtrProviderContext) {
               'cases_settings_v2',
               'create_comment',
               'case_reopen',
+            ],
+            observabilityCases: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'cases_delete',
+              'cases_settings',
             ],
             observabilityCasesV2: [
               'all',
@@ -171,6 +187,14 @@ export default function ({ getService }: FtrProviderContext) {
               'update_anonymization',
             ],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionCases: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'cases_delete',
+              'cases_settings',
+            ],
             securitySolutionCasesV2: [
               'all',
               'read',
