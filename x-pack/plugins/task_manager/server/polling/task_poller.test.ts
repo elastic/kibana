@@ -239,13 +239,14 @@ describe('TaskPoller', () => {
     const pollInterval = 100;
 
     const handler = jest.fn();
+    const workError = new Error('failed to work');
     const poller = createTaskPoller<string, string[]>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
       work: async (...args) => {
-        throw new Error('failed to work');
+        throw workError;
       },
       getCapacity: () => 5,
     });
@@ -256,12 +257,13 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: failed to work',
+      'Failed to poll for work: failed to work',
       PollingErrorType.WorkError,
       none
     );
     expect(handler).toHaveBeenCalledWith(asErr(expectedError));
     expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
+    expect(handler.mock.calls[0][0].error.stack).toContain(workError.stack);
   });
 
   test('continues polling after work fails', async () => {
@@ -269,10 +271,11 @@ describe('TaskPoller', () => {
 
     const handler = jest.fn();
     let callCount = 0;
+    const workError = new Error('failed to work');
     const work = jest.fn(async () => {
       callCount++;
       if (callCount === 2) {
-        throw new Error('failed to work');
+        throw workError;
       }
       return callCount;
     });
@@ -296,12 +299,13 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: failed to work',
+      'Failed to poll for work: failed to work',
       PollingErrorType.WorkError,
       none
     );
     expect(handler).toHaveBeenCalledWith(asErr(expectedError));
     expect(handler.mock.calls[1][0].error.type).toEqual(PollingErrorType.WorkError);
+    expect(handler.mock.calls[1][0].error.stack).toContain(workError.stack);
     expect(handler).not.toHaveBeenCalledWith(asOk(2));
 
     clock.tick(pollInterval);
@@ -342,7 +346,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: error getting capacity',
+      'Failed to poll for work: error getting capacity',
       PollingErrorType.WorkError,
       none
     );

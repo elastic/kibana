@@ -103,7 +103,7 @@ describe('AlertDetailsAppSection', () => {
     const result = renderComponent();
 
     expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
-    expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
+    expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
   });
 
   it('should render annotations', async () => {

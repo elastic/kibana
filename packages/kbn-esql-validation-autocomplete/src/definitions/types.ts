@@ -172,7 +172,7 @@ export interface CommandBaseDefinition {
       name: string;
       type: string;
       optional?: boolean;
-      innerTypes?: string[];
+      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;
@@ -204,6 +204,7 @@ export interface CommandDefinition extends CommandBaseDefinition {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
   modes: CommandModeDefinition[];
+  hasRecommendedQueries?: boolean;
 }
 
 export interface Literals {

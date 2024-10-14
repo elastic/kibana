@@ -32,7 +32,7 @@ import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/co
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
@@ -513,10 +513,48 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
                           // to all of the selected roles till we decide to commit the changes chosen
                           setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                            let privilege;
+                            let privilege: RoleKibanaPrivilege;
 
                             if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                              privilege.base = _privilege;
+                              // empty out base to setup customizing all features
+                              privilege.base = [];
+
+                              const securedFeatures = new KibanaPrivileges(
+                                kibanaPrivileges,
+                                features
+                              ).getSecuredFeatures();
+
+                              securedFeatures.forEach((feature) => {
+                                const nextFeaturePrivilege = feature
+                                  .getPrimaryFeaturePrivileges({
+                                    includeMinimalFeaturePrivileges: true,
+                                  })
+                                  .find((pfp) => {
+                                    if (pfp?.disabled || pfp?.requireAllSpaces) {
+                                      return false;
+                                    }
+                                    return Array.isArray(_privilege) && _privilege.includes(pfp.id);
+                                  });
+
+                                let newPrivileges: string[] = [];
+
+                                if (nextFeaturePrivilege) {
+                                  newPrivileges = [nextFeaturePrivilege.id];
+                                  feature.getSubFeaturePrivileges().forEach((psf) => {
+                                    if (Array.isArray(_privilege) && _privilege.includes(psf.id)) {
+                                      if (!psf.requireAllSpaces) {
+                                        newPrivileges.push(psf.id);
+                                      }
+                                    }
+                                  });
+                                }
+
+                                if (newPrivileges.length === 0) {
+                                  delete privilege.feature[feature.id];
+                                } else {
+                                  privilege.feature[feature.id] = newPrivileges;
+                                }
+                              });
                             }
 
                             return { value, privilegeIndex };
@@ -543,11 +581,32 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     );
   };
 
+  const canSave = useCallback(() => {
+    if (selectedRoles.length === 0) {
+      return false;
+    }
+
+    const form = roleCustomizationAnchor.value.kibana[roleCustomizationAnchor.privilegeIndex] ?? {};
+    const formBase = form.base ?? [];
+    const formFeature = form.feature ?? {};
+
+    // ensure that the form has base privileges or has selected features that are valid
+    if (
+      formBase.length === 0 &&
+      (Object.keys(formFeature).length === 0 ||
+        Object.values(formFeature).every((privileges) => privileges.length === 0))
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [selectedRoles, roleCustomizationAnchor]);
+
   const getSaveButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        disabled={!selectedRoles.length}
+        disabled={!canSave()}
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
         data-test-subj={`space-${
@@ -563,7 +622,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             })}
       </EuiButton>
     );
-  }, [assignRolesToSpace, assigningToRole, selectedRoles.length]);
+  }, [assignRolesToSpace, assigningToRole, canSave]);
 
   return (
     <React.Fragment>

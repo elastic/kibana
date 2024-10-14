@@ -17,8 +17,11 @@ import {
   DegradedFieldResponse,
   GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
-import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
-import { Dashboard, DegradedFieldValues } from '../../../common/api_types';
+import {
+  AnalyzeDegradedFieldsParams,
+  GetDataStreamIntegrationParams,
+} from '../../../common/data_stream_details/types';
+import { Dashboard, DegradedFieldAnalysis, DegradedFieldValues } from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -43,4 +46,5 @@ export interface IDataStreamDetailsClient {
   getDataStreamIntegration(
     params: GetDataStreamIntegrationParams
   ): Promise<Integration | undefined>;
+  analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
 }

@@ -626,7 +626,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -939,7 +939,8 @@ class AgentPolicyService {
    */
   public async removeFleetServerHostFromAll(
     esClient: ElasticsearchClient,
-    fleetServerHostId: string
+    fleetServerHostId: string,
+    options?: { force?: boolean }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
@@ -965,6 +966,9 @@ class AgentPolicyService {
             agentPolicy.id,
             {
               fleet_server_host_id: null,
+            },
+            {
+              force: options?.force,
             }
           ),
         {
@@ -1161,7 +1165,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {

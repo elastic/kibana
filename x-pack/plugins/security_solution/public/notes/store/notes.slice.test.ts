@@ -27,6 +27,7 @@ import {
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
+  selectDocumentNotesBySavedObjectId,
   selectNotesPagination,
   selectNotesTablePendingDeleteIds,
   selectNotesTableSearch,
@@ -39,12 +40,13 @@ import {
   userSelectedPage,
   userSelectedPerPage,
   userSelectedRow,
-  userSelectedRowForDeletion,
+  userSelectedNotesForDeletion,
   userSortedNotes,
   selectSortedNotesByDocumentId,
   fetchNotesBySavedObjectIds,
   selectNotesBySavedObjectId,
   selectSortedNotesBySavedObjectId,
+  userClosedCreateErrorToast,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -532,9 +534,28 @@ describe('notesSlice', () => {
       });
     });
 
-    describe('userSelectedRowForDeletion', () => {
-      it('should set correct id when user selects a row', () => {
-        const action = { type: userSelectedRowForDeletion.type, payload: '1' };
+    describe('userClosedCreateErrorToast', () => {
+      it('should reset create note error', () => {
+        const action = { type: userClosedCreateErrorToast.type };
+
+        expect(
+          notesReducer(
+            {
+              ...initalEmptyState,
+              error: {
+                ...initalEmptyState.error,
+                createNote: new Error(),
+              },
+            },
+            action
+          ).error.createNote
+        ).toBe(null);
+      });
+    });
+
+    describe('userSelectedNotesForDeletion', () => {
+      it('should set correct id when user selects a note to delete', () => {
+        const action = { type: userSelectedNotesForDeletion.type, payload: '1' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           ...initalEmptyState,
@@ -606,6 +627,30 @@ describe('notesSlice', () => {
 
     it('should return no notes if document id does not exist', () => {
       expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
+    });
+
+    it('should return no notes if no notes is found with specified document id and saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'wrong-savedObjectId',
+        })
+      ).toHaveLength(0);
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: 'wrong-document-id',
+          savedObjectId: 'some-timeline-id',
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should return all notes for an existing document id and existing saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'timeline-1',
+        })
+      ).toHaveLength(1);
     });
 
     it('should return all notes sorted for an existing document id', () => {

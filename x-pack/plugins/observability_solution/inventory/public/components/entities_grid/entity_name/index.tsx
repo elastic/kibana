@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import {
-  AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorParams,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_IDENTITY_FIELDS,
+  ENTITY_TYPE,
+  SERVICE_ENVIRONMENT,
   ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
+import React, { useCallback } from 'react';
+import { Entity } from '../../../../common/entities';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EntityIcon } from '../../entity_icon';
-import { ENTITY_DISPLAY_NAME, ENTITY_TYPE } from '../../../../common/es_fields/entities';
-import { Entity } from '../../../../common/entities';
-import { parseServiceParams } from '../../../utils/parse_service_params';
 
 interface EntityNameProps {
   entity: Entity;
@@ -33,34 +35,38 @@ export function EntityName({ entity }: EntityNameProps) {
 
   const getEntityRedirectUrl = useCallback(() => {
     const type = entity[ENTITY_TYPE];
+    // For service, host and container type there is only one identity field
+    const identityField = Array.isArray(entity[ENTITY_IDENTITY_FIELDS])
+      ? entity[ENTITY_IDENTITY_FIELDS][0]
+      : entity[ENTITY_IDENTITY_FIELDS];
+    const identityValue = entity[identityField];
 
-    // Any unrecognised types will always return undefined
     switch (type) {
       case 'host':
       case 'container':
         return assetDetailsLocator?.getRedirectUrl({
-          assetId: entity[ENTITY_DISPLAY_NAME],
+          assetId: identityValue,
           assetType: type,
         });
 
       case 'service':
-        // For services, the format of the display name is `service.name:service.environment`.
-        // We just want the first part of the name for the locator.
-        // TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-        return serviceOverviewLocator?.getRedirectUrl(
-          parseServiceParams(entity[ENTITY_DISPLAY_NAME])
-        );
+        return serviceOverviewLocator?.getRedirectUrl({
+          serviceName: identityValue,
+          environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
+        });
     }
   }, [entity, assetDetailsLocator, serviceOverviewLocator]);
 
   return (
-    <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl()}>
+    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={0}>
           <EntityIcon entity={entity} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
+          <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
+            {entity[ENTITY_DISPLAY_NAME]}
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiLink>

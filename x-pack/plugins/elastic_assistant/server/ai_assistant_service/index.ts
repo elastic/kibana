@@ -84,6 +84,7 @@ export class AIAssistantService {
   private isKBSetupInProgress: boolean = false;
   // Temporary 'feature flag' to determine if we should initialize the new kb mappings, toggled when accessing kbDataClient
   private v2KnowledgeBaseEnabled: boolean = false;
+  private hasInitializedV2KnowledgeBase: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -363,8 +364,13 @@ export class AIAssistantService {
     // If either v2 KB or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
     // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
     // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
-    if (opts.v2KnowledgeBaseEnabled || opts.modelIdOverride != null) {
+    // Added hasInitializedV2KnowledgeBase to prevent the console noise from re-init on each KB request
+    if (
+      !this.hasInitializedV2KnowledgeBase &&
+      (opts.v2KnowledgeBaseEnabled || opts.modelIdOverride != null)
+    ) {
       await this.initializeResources();
+      this.hasInitializedV2KnowledgeBase = true;
     }
 
     const res = await this.checkResourcesInstallation(opts);

@@ -60,7 +60,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List agent policies`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -91,7 +91,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Bulk get agent policies`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -122,7 +122,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -152,7 +152,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create an agent policy`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -182,7 +182,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Update an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -212,7 +212,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Copy an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -242,7 +242,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Delete agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -272,7 +272,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get a full agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -303,7 +303,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       enableQueryVersion: true,
       description: `Download an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -336,7 +336,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get full K8s agent manifest`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -367,7 +367,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       enableQueryVersion: true,
       description: ``,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
