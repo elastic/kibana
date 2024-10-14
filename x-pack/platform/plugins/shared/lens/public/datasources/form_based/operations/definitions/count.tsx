@@ -149,6 +149,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     ];
   },
   ...countEsqlMeta,
+  getSerializedFormat: (column, columnId, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
+    return field?.format ?? { id: 'number' };
+  },
   toESQL: toEsqlRegistry[COUNT_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
