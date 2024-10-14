@@ -52,6 +52,33 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
+  async createComponentTemplate(name: string, mappings: MappingTypeMapping) {
+    const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
+
+    if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
+
+    try {
+      await this.client.cluster.putComponentTemplate({
+        name,
+        template: {
+          mappings,
+        },
+      });
+      this.logger.info(`Component template successfully created: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async deleteComponentTemplate(name: string) {
+    try {
+      await this.client.cluster.deleteComponentTemplate({ name });
+      this.logger.info(`Component template successfully deleted: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template deletion failed: ${name} - ${err.message}`);
+    }
+  }
+
   async createIndex(index: string, mappings?: MappingTypeMapping) {
     try {
       const isIndexExisting = await this.client.indices.exists({ index });
