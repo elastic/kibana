@@ -16823,6 +16823,13 @@ paths:
               properties:
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
                 fleet_server_hosts:
                   description: Protocol and path must be the same for each URL
                   items:
@@ -29623,6 +29630,13 @@ components:
       title: Settings
       type: object
       properties:
+        delete_unenrolled_agents:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            is_preconfigured:
+              type: boolean
         fleet_server_hosts:
           deprecated: true
           items:
