@@ -27,6 +27,7 @@ import type {
   ChromeNavLink,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
@@ -354,6 +355,24 @@ export class ChromeService {
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
     };
 
+    const setClassicBreadcrumbs = (
+      newBreadcrumbs: ChromeBreadcrumb[],
+      {
+        project: { isSameAsClassic = false, value: _projectValue, absolute = false } = {},
+      }: ChromeSetBreadcrumbsParams = {}
+    ) => {
+      if (isSameAsClassic && _projectValue !== undefined) {
+        throw new Error('`isSameAsClassic` and `value` cannot be set at the same time.');
+      }
+      const type = chromeStyleSubject$.getValue();
+      const projectValue = isSameAsClassic ? newBreadcrumbs : _projectValue;
+      if (type === 'project') {
+        setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      } else {
+        breadcrumbs$.next(newBreadcrumbs);
+      }
+    };
+
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
       projectNavigation.setProjectHome(homeHref);
@@ -507,9 +526,7 @@ export class ChromeService {
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbs$.next(newBreadcrumbs);
-      },
+      setBreadcrumbs: setClassicBreadcrumbs,
 
       getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
 
