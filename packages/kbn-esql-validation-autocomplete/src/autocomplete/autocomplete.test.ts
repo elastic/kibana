@@ -1196,28 +1196,39 @@ describe('autocomplete', () => {
         );
 
         describe('escaped field names', () => {
-          // This isn't actually the behavior we want, but this test is here
-          // to make sure no weird suggestions start cropping up in this case.
-          testSuggestions(`FROM a | ${commandName} \`foo.bar\`/`, ['foo.bar'], undefined, [
-            [{ name: 'foo.bar', type: 'double' }],
-          ]);
-          // @todo re-enable these tests when we can use AST to support this case
-          testSuggestions.skip(
+          testSuggestions(
             `FROM a | ${commandName} \`foo.bar\`/`,
-            ['foo.bar, ', 'foo.bar | '],
+            ['`foo.bar`, ', '`foo.bar` | '],
             undefined,
-            [[{ name: 'foo.bar', type: 'double' }]]
+            [
+              [
+                { name: 'foo.bar', type: 'double' },
+                { name: 'baz', type: 'date' }, // added so that we get a comma suggestion
+              ],
+            ]
           );
-          testSuggestions.skip(
-            `FROM a | ${commandName} \`foo\`.\`bar\`/`,
-            ['foo.bar, ', 'foo.bar | '],
+          testSuggestions(
+            `FROM a | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
+            ['`foo````bar``baz`, ', '`foo````bar``baz` | '],
             undefined,
-            [[{ name: 'foo.bar', type: 'double' }]]
+            [
+              [
+                { name: 'foo``bar`baz', type: 'double' },
+                { name: 'baz', type: 'date' }, // added so that we get a comma suggestion
+              ],
+            ]
           );
-          testSuggestions.skip(`FROM a | ${commandName} \`any#Char$Field\`/`, [
+          testSuggestions(`FROM a | ${commandName} \`any#Char$Field\`/`, [
             '`any#Char$Field`, ',
             '`any#Char$Field` | ',
           ]);
+          // @todo enable this test when we can use AST to support this case
+          testSuggestions.skip(
+            `FROM a | ${commandName} \`foo\`.\`bar\`/`,
+            ['`foo`.`bar`, ', '`foo`.`bar` | '],
+            undefined,
+            [[{ name: 'foo.bar', type: 'double' }]]
+          );
         });
 
         // Subsequent fields

@@ -1,10 +1,6 @@
 disabled:
   # Base config files, only necessary to inform config finding script
 
-  # serverless config files that run deployment-agnostic tests
-  # Failing https://github.com/elastic/kibana/issues/195811
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/search.serverless.config.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
@@ -22,3 +18,5 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
+  # serverless config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/search.serverless.config.ts
