@@ -20,11 +20,11 @@ export const getRedirectToTransactionDetailPageUrl = ({
   waterfallItemId?: string;
 }) => {
   return format({
-    pathname: `/services/${transaction.service.name}/transactions/view`,
+    pathname: `/services/${transaction?.service.name}/transactions/view`,
     query: {
       traceId: transaction.trace.id,
       transactionId: transaction.transaction.id,
-      transactionName: transaction.transaction.name,
+      transactionName: transaction?.transaction?.name,
       transactionType: transaction.transaction.type,
       rangeFrom:
         rangeFrom ||
@@ -36,7 +36,9 @@ export const getRedirectToTransactionDetailPageUrl = ({
         rangeTo ||
         roundToNearestMinute({
           timestamp: transaction['@timestamp'],
-          diff: transaction.transaction.duration.us / 1000,
+          diff: transaction?.transaction?.duration?.us
+            ? transaction?.transaction?.duration?.us / 1000
+            : 0,
           direction: 'up',
         }),
       waterfallItemId,

@@ -27,7 +27,7 @@ interface Props extends APMLinkExtendProps {
   serviceName: string;
   traceId?: string;
   transactionId?: string;
-  transactionName: string;
+  transactionName?: string;
   transactionType?: string;
   latencyAggregationType?: string;
   environment?: string;
@@ -74,7 +74,7 @@ export function TransactionDetailLink({
     search: location.search,
   });
 
-  if (transactionName !== txGroupsDroppedBucketName) {
+  if (typeof transactionName === 'string' && transactionName !== txGroupsDroppedBucketName) {
     return (
       <TruncateWithTooltip
         text={transactionName}

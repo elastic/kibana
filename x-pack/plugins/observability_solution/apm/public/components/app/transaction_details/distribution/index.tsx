@@ -63,7 +63,7 @@ export function TransactionDistribution({
   const { serviceName } = useApmServiceContext();
 
   const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();

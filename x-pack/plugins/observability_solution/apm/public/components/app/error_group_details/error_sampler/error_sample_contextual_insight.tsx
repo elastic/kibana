@@ -34,8 +34,8 @@ export function ErrorSampleContextualInsight({
     };
   };
   transaction?: {
-    transaction: {
-      name: string;
+    transaction?: {
+      name?: string;
     };
   };
 }) {
@@ -49,7 +49,7 @@ export function ErrorSampleContextualInsight({
     const languageName = error.service.language?.name ?? '';
     const runtimeName = error.service.runtime?.name ?? '';
     const runtimeVersion = error.service.runtime?.version ?? '';
-    const transactionName = transaction?.transaction.name ?? '';
+    const transactionName = transaction?.transaction?.name ?? '';
 
     return observabilityAIAssistant?.getContextualInsightMessages({
       message: `I'm looking at an exception and trying to understand what it means`,

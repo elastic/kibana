@@ -45,7 +45,7 @@ function TransactionSummary({ transaction, totalDuration, errorCount, coldStartB
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
-      duration={transaction.transaction.duration.us}
+      duration={transaction?.transaction?.duration?.us}
       totalDuration={totalDuration}
       parentType="trace"
     />,

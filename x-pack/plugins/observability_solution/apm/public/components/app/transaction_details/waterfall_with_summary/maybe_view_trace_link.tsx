@@ -100,10 +100,10 @@ export function MaybeViewTraceLink({
     return (
       <TransactionDetailLink
         serviceName={rootTransaction.service.name}
-        transactionId={rootTransaction.transaction.id}
+        transactionId={rootTransaction?.transaction?.id}
         traceId={rootTransaction.trace.id}
-        transactionName={rootTransaction.transaction.name}
-        transactionType={rootTransaction.transaction.type}
+        transactionName={rootTransaction?.transaction?.name}
+        transactionType={rootTransaction?.transaction?.type}
         environment={nextEnvironment}
         latencyAggregationType={latencyAggregationType}
         comparisonEnabled={comparisonEnabled}

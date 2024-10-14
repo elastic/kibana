@@ -14,6 +14,7 @@ Object {
     "_source": Array [
       "span.links",
       "transaction.agent.marks",
+      "transaction.name",
     ],
     "fields": Array [
       "trace.id",
@@ -23,12 +24,12 @@ Object {
       "timestamp.us",
       "service.name",
       "transaction.id",
+      "processor.name",
+      "service.language.name",
       "transaction.duration.us",
       "transaction.name",
       "transaction.sampled",
       "transaction.type",
-      "processor.name",
-      "service.language.name",
     ],
     "query": Object {
       "bool": Object {

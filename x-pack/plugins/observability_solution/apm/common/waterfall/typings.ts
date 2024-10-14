@@ -24,7 +24,7 @@ export interface WaterfallTransaction {
   processor: { event: 'transaction' };
   transaction?: {
     duration?: { us?: number };
-    id: string;
+    id?: string;
     name?: string;
     type?: string;
     result?: string;

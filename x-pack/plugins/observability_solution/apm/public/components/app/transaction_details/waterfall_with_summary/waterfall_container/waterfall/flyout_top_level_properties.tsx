@@ -79,7 +79,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           serviceName={transaction.service.name}
           transactionId={transaction.transaction.id}
           traceId={transaction.trace.id}
-          transactionName={transaction.transaction.name}
+          transactionName={transaction?.transaction?.name}
           transactionType={transaction.transaction.type}
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
