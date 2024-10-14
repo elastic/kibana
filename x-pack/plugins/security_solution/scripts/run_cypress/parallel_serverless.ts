@@ -601,7 +601,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   // eslint-disable-next-line require-atomic-updates
                   result = error;
                   failedSpecFilePaths.push(filePath);
-                  log.error(`Something went wrong with the cypress execution: ${error}`);
+                  log.error(`Cypress runner failed: ${error}`);
                 }
               }
               return result;
