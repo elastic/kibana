@@ -17,12 +17,14 @@ import { useFinalEditContext } from './final_edit_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import * as i18n from '../translations';
 
+type FieldComponent = React.ComponentType<{
+  finalDiffableRule: DiffableRule;
+  setValidity: (isValid: boolean) => void;
+  setFieldValue: (fieldName: string, fieldValue: unknown) => void;
+}>;
+
 interface FieldFormWrapperProps {
-  component: React.ComponentType<{
-    finalDiffableRule: DiffableRule;
-    setValidity: (isValid: boolean) => void;
-    setFieldValue: (fieldName: string, fieldValue: unknown) => void;
-  }>;
+  component: FieldComponent;
   fieldFormSchema: FormSchema;
   deserializer?: (fieldValue: FormData, finalDiffableRule: DiffableRule) => FormData;
   serializer?: (formData: FormData) => FormData;
