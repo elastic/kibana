@@ -52,7 +52,7 @@ export const getApiDeprecationMessage = (
   const messages = [
     i18n.translate('core.deprecations.deprecations.apiDeprecationApiCallsDetailsMessage', {
       defaultMessage:
-        'The API {routeWithMethod} has been called {apiTotalCalls} times. The last time the API was called was on {apiLastCalledAt}.',
+        'The API {routeWithMethod} has been called {apiTotalCalls} times. The API was last called on {apiLastCalledAt}.',
       values: {
         routeWithMethod,
         apiTotalCalls,
@@ -67,7 +67,7 @@ export const getApiDeprecationMessage = (
         'core.deprecations.deprecations.apiDeprecationPreviouslyMarkedAsResolvedMessage',
         {
           defaultMessage:
-            'The api has been called {timeSinceLastResolved} times since the last time it was marked as resolved on {markedAsResolvedLastCalledAt}',
+            'This API has been marked as resolved before. It has been called {timeSinceLastResolved} times since it was marked as resolved on {markedAsResolvedLastCalledAt}.',
           values: {
             timeSinceLastResolved: diff,
             markedAsResolvedLastCalledAt: moment(markedAsResolvedLastCalledAt).format('LLLL Z'),
@@ -98,7 +98,7 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDeta
       manualSteps.push(
         i18n.translate('core.deprecations.deprecations.manualSteps.bumpTypeExplainationStep', {
           defaultMessage:
-            'A version bump deprecation means the API has a new version and the current version will be removed in the future in favor of the newer version',
+            'A version bump deprecation means the API has a new version and the current version will be removed in the future in favor of the newer version.',
         }),
         i18n.translate('core.deprecations.deprecations.manualSteps.bumpDetailsStep', {
           defaultMessage: 'This API {routePath} has a new version "{newApiVersion}".',
