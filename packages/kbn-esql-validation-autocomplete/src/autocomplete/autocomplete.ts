@@ -83,7 +83,7 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
   getAddDateHistogramSnippet,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -1215,11 +1215,7 @@ async function getFieldsOrFunctionsSuggestions(
       filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        // remove backticks if present
-        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
-          ? variable.slice(1, variable.length - 1)
-          : variable;
-        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
