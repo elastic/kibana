@@ -634,6 +634,48 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppContextValue.fieldStats",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldStats",
+            "description": [
+              "\nDeps for unified fields stats."
+            ],
+            "signature": [
+              "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
+              "EuiComboBoxOptionOption",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<React.PropsWithChildren<{ dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; fieldStatsServices: ",
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.FieldStatsServices",
+                "text": "FieldStatsServices"
+              },
+              "; timeRangeMs?: ",
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "public",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-public.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; dslQuery?: object | undefined; }>>; } | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppContextValue.embeddable",
             "type": "Object",
             "tags": [],
