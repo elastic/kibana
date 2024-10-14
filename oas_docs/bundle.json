@@ -19328,6 +19328,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19716,7 +19737,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -19793,6 +19815,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -20181,7 +20224,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -21769,6 +21813,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22197,7 +22262,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -22329,6 +22395,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22757,7 +22844,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23279,6 +23367,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -23707,7 +23816,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23827,6 +23937,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -24255,7 +24386,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -26018,7 +26150,7 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
-        "description": "Generate Logstash API keyy",
+        "description": "Generate Logstash API key",
         "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
         "parameters": [
           {
@@ -40127,6 +40259,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -40173,7 +40321,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"
@@ -40272,6 +40419,22 @@
                   "additional_yaml_config": {
                     "type": "string"
                   },
+                  "delete_unenrolled_agents": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "is_preconfigured"
+                    ],
+                    "type": "object"
+                  },
                   "fleet_server_hosts": {
                     "items": {
                       "format": "uri",
@@ -40311,6 +40474,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -40357,7 +40536,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"

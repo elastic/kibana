@@ -58,7 +58,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('POST anomaly_detectors _forecast with spaces', function () {
+  // Failing see: https://github.com/elastic/kibana/issues/195602
+  describe.skip('POST anomaly_detectors _forecast with spaces', function () {
     let forecastId: string;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

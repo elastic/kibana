@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
+import { ALERT_RULE_EXECUTION_TYPE, ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -167,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
+        'kibana.alert.rule.execution.type': 'scheduled',
       });
     });
 
@@ -1189,6 +1190,7 @@ export default ({ getService }: FtrProviderContext) => {
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
         expect(alerts.hits.hits).toHaveLength(1);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1198,6 +1200,8 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits).toHaveLength(2);
+
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1409,8 +1413,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // skipped on MKI since feature flags are not supported there
-    describe('@skipInServerlessMKI preview logged requests', () => {
+    describe('preview logged requests', () => {
       let rule: EsqlRuleCreateProps;
       let id: string;
       beforeEach(async () => {
