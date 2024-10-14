@@ -12,9 +12,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./getting_started'));
+    loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./connectors/connectors_overview'));
     loadTestFile(require.resolve('./default_dataview'));
-    loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./pipelines'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
     loadTestFile(require.resolve('./dashboards/build_dashboard'));
@@ -23,7 +23,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules/rule_details'));
     loadTestFile(require.resolve('./console_notebooks'));
     loadTestFile(require.resolve('./search_playground/playground_overview'));
-
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./custom_role_access'));
   });
 }

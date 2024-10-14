@@ -432,4 +432,5 @@ export const mockActions: Actions = {
   setIntegrationSettings: jest.fn(),
   setIsGenerating: jest.fn(),
   setResult: jest.fn(),
+  setCelInputResult: jest.fn(),
 };

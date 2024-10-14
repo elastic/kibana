@@ -25,6 +25,7 @@ import {
   useEuiTheme,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
@@ -39,6 +40,8 @@ import {
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
   ALERT_DELAY_HELP_TEXT,
+  ALERT_FLAPPING_DETECTION_TITLE,
+  ALERT_FLAPPING_DETECTION_DESCRIPTION,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
@@ -46,6 +49,9 @@ import { RuleSchedule } from './rule_schedule';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
+import { RuleSettingsFlappingTitleTooltip } from '../../rule_settings/rule_settings_flapping_title_tooltip';
+import { RuleSettingsFlappingForm } from '../../rule_settings/rule_settings_flapping_form';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
 
 export const RuleDefinition = () => {
   const {
@@ -58,16 +64,25 @@ export const RuleDefinition = () => {
     selectedRuleTypeModel,
     validConsumers,
     canShowConsumerSelection = false,
+    flappingSettings,
   } = useRuleFormState();
 
   const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
-  const { charts, data, dataViews, unifiedSearch, docLinks } = plugins;
+  const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
 
-  const { params, schedule, notifyWhen } = formData;
+  const {
+    capabilities: { rulesSettings },
+  } = application;
+
+  const { writeFlappingSettingsUI } = rulesSettings || {};
+
+  const { params, schedule, notifyWhen, flapping } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
+
+  const [isFlappingPopoverOpen, setIsFlappingPopoverOpen] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
     if (!validConsumers?.length) {
@@ -136,6 +151,19 @@ export const RuleDefinition = () => {
         type: 'setRuleProperty',
         payload: {
           property,
+          value,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const onSetFlapping = useCallback(
+    (value: RuleSpecificFlappingProperties | null) => {
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'flapping',
           value,
         },
       });
@@ -243,7 +271,10 @@ export const RuleDefinition = () => {
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
-            onToggle={setIsAdvancedOptionsVisible}
+            onToggle={(isOpen) => {
+              setIsAdvancedOptionsVisible(isOpen);
+              setIsFlappingPopoverOpen(false);
+            }}
             initialIsOpen={isAdvancedOptionsVisible}
             buttonProps={{
               'data-test-subj': 'advancedOptionsAccordionButton',
@@ -274,6 +305,31 @@ export const RuleDefinition = () => {
               >
                 <RuleAlertDelay />
               </EuiDescribedFormGroup>
+              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && (
+                <EuiDescribedFormGroup
+                  fullWidth
+                  title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
+                  description={
+                    <EuiText size="s">
+                      <p>
+                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
+                        <RuleSettingsFlappingTitleTooltip
+                          isOpen={isFlappingPopoverOpen}
+                          setIsPopoverOpen={setIsFlappingPopoverOpen}
+                          anchorPosition="downCenter"
+                        />
+                      </p>
+                    </EuiText>
+                  }
+                >
+                  <RuleSettingsFlappingForm
+                    flappingSettings={flapping}
+                    spaceFlappingSettings={flappingSettings}
+                    canWriteFlappingSettingsUI={!!writeFlappingSettingsUI}
+                    onFlappingChange={onSetFlapping}
+                  />
+                </EuiDescribedFormGroup>
+              )}
             </EuiPanel>
           </EuiAccordion>
         </EuiFlexItem>

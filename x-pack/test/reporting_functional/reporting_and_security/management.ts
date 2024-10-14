@@ -57,6 +57,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/195144
+    // FLAKY: https://github.com/elastic/kibana/issues/194731
     describe.skip('Download report', () => {
       // use archived reports to allow reporting_user to view report jobs they've created
       before('log in as reporting user', async () => {

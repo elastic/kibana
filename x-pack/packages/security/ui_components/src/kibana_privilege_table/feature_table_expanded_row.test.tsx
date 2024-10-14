@@ -8,11 +8,11 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';

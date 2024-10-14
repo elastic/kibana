@@ -14,6 +14,10 @@ import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
  */
 export const ENTITY_STORE_DEFAULT_SOURCE_INDICES = DEFAULT_INDEX_PATTERN;
 
+export const DEFAULT_LOOKBACK_PERIOD = '24h';
+
+export const DEFAULT_INTERVAL = '15s';
+
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
