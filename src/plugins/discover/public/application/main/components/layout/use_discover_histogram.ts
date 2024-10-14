@@ -62,6 +62,7 @@ export const useDiscoverHistogram = ({
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
+  const savedSearchHits$ = savedSearchData$.totalHits$;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -153,10 +154,7 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const setTotalHitsError = useMemo(
-    () => sendErrorTo(savedSearchData$.totalHits$),
-    [savedSearchData$.totalHits$]
-  );
+  const setTotalHitsError = useMemo(() => sendErrorTo(savedSearchHits$), [savedSearchHits$]);
 
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
@@ -172,7 +170,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+        const { result: totalHitsResult } = savedSearchHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -184,11 +182,34 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        // Sync the totalHits$ observable with the unified histogram state
-        savedSearchData$.totalHits$.next({
-          fetchStatus: status.toString() as FetchStatus,
-          result,
-        });
+        const fetchStatus = status.toString() as FetchStatus;
+        if (
+          fetchStatus === FetchStatus.COMPLETE &&
+          savedSearchHits$.getValue().fetchStatus === FetchStatus.COMPLETE &&
+          result !== savedSearchHits$.getValue().result
+        ) {
+          // this is a workaround to make sure the new total hits value is displayed
+          // a different value without a loading state in between would lead to be ignored by useDataState
+          addLog(
+            '[UnifiedHistogram] send loading to totalHits$ to make sure the new value is displayed',
+            { status, result }
+          );
+          savedSearchHits$.next({
+            fetchStatus: FetchStatus.LOADING,
+          });
+        }
+
+        const isSavedSearchLoading =
+          savedSearchHits$.getValue().fetchStatus === FetchStatus.LOADING;
+        const isUnifiedHistogramLoading = status === UnifiedHistogramFetchStatus.loading;
+
+        // Sync the totalHits$ observable with the unified histogram state unless both are set to loading
+        if (isSavedSearchLoading !== isUnifiedHistogramLoading) {
+          savedSearchHits$.next({
+            fetchStatus,
+            result,
+          });
+        }
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
           return;
@@ -205,7 +226,7 @@ export const useDiscoverHistogram = ({
   }, [
     isEsqlMode,
     savedSearchData$.main$,
-    savedSearchData$.totalHits$,
+    savedSearchHits$,
     setTotalHitsError,
     stateContainer.appState,
     unifiedHistogram?.state$,
