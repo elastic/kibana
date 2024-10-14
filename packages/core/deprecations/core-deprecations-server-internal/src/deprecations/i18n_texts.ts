@@ -125,7 +125,7 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDeta
         }),
         i18n.translate('core.deprecations.deprecations.manualSteps.migrateDetailsStep', {
           defaultMessage: 'This API {routePath} has been migrated to {newApiMethod} {newApiPath}',
-          values: { newApiMethod: newApiMethod.toUpperCase(), newApiPath },
+          values: { newApiMethod: newApiMethod.toUpperCase(), newApiPath, routePath },
         })
       );
       break;
