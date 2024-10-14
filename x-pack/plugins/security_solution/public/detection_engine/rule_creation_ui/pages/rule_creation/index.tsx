@@ -789,7 +789,6 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
-            ruleType={ruleType}
             form={actionsStepForm}
           />
 
