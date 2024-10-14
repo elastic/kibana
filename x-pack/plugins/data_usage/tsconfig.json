@@ -28,6 +28,10 @@
     "@kbn/core-http-browser",
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/repo-info",
+    "@kbn/cloud-plugin",
+    "@kbn/server-http-tools",
   ],
   "exclude": ["target/**/*"]
 }
