@@ -61,6 +61,8 @@ const mockDataViews = {
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
+  navigateToApp: jest.fn(),
+  setBreadcrumbs: jest.fn()
 };
 jest.mock('../../assistant_context');
 

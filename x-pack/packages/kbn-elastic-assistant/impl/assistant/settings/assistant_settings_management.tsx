@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KibanaServices } from '@kbn/kibana-react-plugin/public';
@@ -62,7 +61,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
-    const [searchParams, setSearchParams] = useSearchParams();
     const { data: connectors } = useLoadConnectors({
       http,
     });
