@@ -68,6 +68,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
       const jobIds = res.body.jobs.map((job: any) => job.jobId);
       await deleteJobs(jobIds);
     });
+
     describe('when there are no v2 jobs', () => {
       it('returns a 200/true', async () => {
         const { status, body } = await callUpdateEndpoint();

@@ -66,6 +66,10 @@ export type ApmApiClientKey =
   | 'apmAllPrivilegesWithoutWriteSettingsUser'
   | 'apmReadPrivilegesWithWriteSettingsUser';
 
+export interface UserApiClient {
+  user: ApmApiClientKey;
+}
+
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
 export interface CreateTest {

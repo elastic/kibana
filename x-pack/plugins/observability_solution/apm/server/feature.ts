@@ -90,7 +90,9 @@ export const APM_FEATURE = {
           privileges: [
             {
               id: 'settings_save',
-              name: 'Ability to modify settings',
+              name: i18n.translate('xpack.apm.subFeatureRegistry.modifySettings', {
+                defaultMessage: 'Ability to modify settings',
+              }),
               includeIn: 'all',
               savedObject: {
                 all: [],

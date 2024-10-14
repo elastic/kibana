@@ -12,7 +12,7 @@ import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { ApmApiClientKey } from '../../../common/config';
+import { UserApiClient } from '../../../common/config';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { addAgentConfigEtagMetric } from './add_agent_config_metrics';
 
@@ -54,7 +54,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function createConfiguration(
     configuration: AgentConfigurationIntake,
-    { user = 'writeUser' as ApmApiClientKey } = {}
+    { user }: UserApiClient = { user: 'writeUser' }
   ) {
     log.debug('creating configuration', configuration.service);
     const supertestClient = apmApiClient[user];
@@ -67,7 +67,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function updateConfiguration(
     config: AgentConfigurationIntake,
-    { user = 'writeUser' as ApmApiClientKey } = {}
+    { user }: UserApiClient = { user: 'writeUser' }
   ) {
     log.debug('updating configuration', config.service);
     const supertestClient = apmApiClient[user];
@@ -80,7 +80,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function deleteConfiguration(
     { service }: AgentConfigurationIntake,
-    { user = 'writeUser' as ApmApiClientKey } = {}
+    { user }: UserApiClient = { user: 'writeUser' }
   ) {
     log.debug('deleting configuration', service);
     const supertestClient = apmApiClient[user];

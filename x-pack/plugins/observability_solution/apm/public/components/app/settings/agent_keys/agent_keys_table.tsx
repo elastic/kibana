@@ -57,25 +57,26 @@ export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
     },
   ];
 
-  const actions = {
-    actions: [
-      {
-        name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
-          defaultMessage: 'Delete',
-        }),
-        description: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionDescription', {
-          defaultMessage: 'Delete this APM agent key',
-        }),
-        icon: 'trash',
-        color: 'danger',
-        type: 'icon',
-        onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
-      },
-    ],
-  };
-
   if (canManage) {
-    columns.push(actions as EuiBasicTableColumn<ApiKey>);
+    columns.push({
+      actions: [
+        {
+          name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate(
+            'xpack.apm.settings.agentKeys.table.deleteActionDescription',
+            {
+              defaultMessage: 'Delete this APM agent key',
+            }
+          ),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
+        },
+      ],
+    });
   }
 
   const search: EuiInMemoryTableProps<ApiKey>['search'] = {
