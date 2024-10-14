@@ -235,7 +235,7 @@ export class LensVisService {
     let currentSuggestion: Suggestion | undefined;
 
     // takes lens suggestions if provided
-    const availableSuggestionsWithType: Array<{
+    let availableSuggestionsWithType: Array<{
       suggestion: UnifiedHistogramSuggestionContext['suggestion'];
       type: UnifiedHistogramSuggestionType;
     }> = [];
@@ -254,6 +254,9 @@ export class LensVisService {
         breakdownField,
       });
       if (histogramSuggestionForESQL) {
+        // In case if histogram suggestion, we want to empty the array and push the new suggestion
+        // to ensure that only the histogram suggestion is available
+        availableSuggestionsWithType = [];
         availableSuggestionsWithType.push({
           suggestion: histogramSuggestionForESQL,
           type: UnifiedHistogramSuggestionType.histogramForESQL,

@@ -7,10 +7,10 @@
 
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
-import { ErrorCode } from '../../../common/constants';
+import { GenerationErrorCode } from '../../../common/constants';
 
 export class UnsupportedLogFormatError extends Error implements ErrorThatHandlesItsOwnResponse {
-  private readonly errorCode: string = ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT;
+  private readonly errorCode: string = GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(message: string) {

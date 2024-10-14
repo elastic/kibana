@@ -14,6 +14,8 @@ export const logFormatDetectionTestState = {
   exAnswer: 'testanswer',
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
+  packageTitle: 'Test Title',
+  dataStreamTitle: 'Test Datastream Title',
   finalized: false,
   samplesFormat: { name: SamplesFormatName.Values.structured },
   header: true,

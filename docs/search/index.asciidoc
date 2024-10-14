@@ -2,7 +2,7 @@
 [[search-space]]
 = Search
 
-The *Search* space in {kib} comprises the following features:
+The *Search* space in the {kib} UI contains the following GUI features:
 
 * https://www.elastic.co/guide/en/enterprise-search/current/connectors.html[Connectors]
 * https://www.elastic.co/guide/en/enterprise-search/current/crawler.html[Web crawler]
@@ -11,7 +11,7 @@ The *Search* space in {kib} comprises the following features:
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html[Behavioral Analytics]
 * <<inference-endpoints,Inference Endpoints UI>>
 * <<search-assistant,AI Assistant for Search>>
-* Persistent Dev Tools <<console-kibana, Console>>
+* Dev Tools <<console-kibana, Console>>
 
 [float]
 [[search-release-notes]]

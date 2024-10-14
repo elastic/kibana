@@ -96,6 +96,8 @@ export const getRelatedRequestMock = (): RelatedRequestBody => ({
 export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
+  packageTitle: 'Test package title',
+  dataStreamTitle: 'Test data stream title',
   connectorId: 'test-connector-id',
   logSamples: rawSamples,
 });

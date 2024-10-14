@@ -10,7 +10,15 @@ import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugi
 import type { InventoryStartDependencies } from '../types';
 import type { InventoryServices } from '../services/types';
 
-export type InventoryKibanaContext = CoreStart & InventoryStartDependencies & InventoryServices;
+export interface KibanaEnvironment {
+  kibanaVersion?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+}
+
+export type InventoryKibanaContext = CoreStart &
+  InventoryStartDependencies &
+  InventoryServices & { kibanaEnvironment: KibanaEnvironment };
 
 const useTypedKibana = useKibana as () => KibanaReactContextValue<InventoryKibanaContext>;
 

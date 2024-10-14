@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { ErrorCode } from '../../common/constants';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -97,7 +97,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (err) {
           try {
-            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

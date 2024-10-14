@@ -56,7 +56,7 @@ function ChatContent({
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
-  const { scope } = service;
+  const scope = chatService.getScope();
 
   const initialMessagesRef = useRef(initialMessages);
 

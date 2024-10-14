@@ -96,7 +96,7 @@ const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = (
     );
   }
 
-  if (!isEdit) {
+  if (!isEdit && secretFieldsLabel.length) {
     return (
       <Callout
         title={i18n.translate(
@@ -112,7 +112,7 @@ const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = (
     );
   }
 
-  if (isEdit) {
+  if (isEdit && secretFieldsLabel.length) {
     return (
       <Callout
         title={i18n.translate(

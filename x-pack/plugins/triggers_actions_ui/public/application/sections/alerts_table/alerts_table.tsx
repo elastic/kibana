@@ -683,17 +683,21 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   }, [props.gridStyle, mergedGridStyle]);
 
   const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
-    ({ visibleColumns: _visibleColumns, Cell }) => (
-      <CustomGridBody
-        visibleColumns={_visibleColumns}
-        Cell={Cell}
-        actualGridStyle={actualGridStyle}
-        alertsData={oldAlertsData}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        isLoading={isLoading}
-        stripes={props.gridStyle?.stripes}
-      />
+    ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
+      <>
+        {headerRow}
+        <CustomGridBody
+          visibleColumns={_visibleColumns}
+          Cell={Cell}
+          actualGridStyle={actualGridStyle}
+          alertsData={oldAlertsData}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          stripes={props.gridStyle?.stripes}
+        />
+        {footerRow}
+      </>
     ),
     [actualGridStyle, oldAlertsData, pageIndex, pageSize, isLoading, props.gridStyle?.stripes]
   );

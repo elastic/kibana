@@ -10,11 +10,13 @@ import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/type
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
+type DefinitionMetadata = Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>;
+
 export const getFieldRetentionEnrichPolicyName = ({
   namespace,
   entityType,
   version,
-}: Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>): string => {
+}: DefinitionMetadata): string => {
   return `entity_store_field_retention_${entityType}_${namespace}_v${version}`;
 };
 
@@ -48,7 +50,7 @@ export const executeFieldRetentionEnrichPolicy = async ({
   unitedDefinition,
   logger,
 }: {
-  unitedDefinition: UnitedEntityDefinition;
+  unitedDefinition: DefinitionMetadata;
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<{ executed: boolean }> => {
@@ -72,7 +74,7 @@ export const deleteFieldRetentionEnrichPolicy = async ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
-  unitedDefinition: UnitedEntityDefinition;
+  unitedDefinition: DefinitionMetadata;
 }) => {
   const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
   return esClient.enrich.deletePolicy({ name }, { ignore: [404] });

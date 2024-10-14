@@ -22,7 +22,7 @@ import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components
 import { i18n } from '@kbn/i18n';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/public';
 import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
-import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
+import { useFunctions } from '../hooks/use_functions';
 
 interface FunctionListOption {
   label: string;
@@ -40,8 +40,7 @@ export function FunctionListPopover({
   onSelectFunction: (func: string | undefined) => void;
   disabled: boolean;
 }) {
-  const { getFunctions } = useAIAssistantChatService();
-  const functions = getFunctions();
+  const functions = useFunctions();
 
   const [functionOptions, setFunctionOptions] = useState<
     Array<EuiSelectableOption<FunctionListOption>>
