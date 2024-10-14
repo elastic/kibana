@@ -128,6 +128,13 @@ paths:
                   type: boolean
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
       responses:
         '200':
           description: OK
@@ -3866,6 +3873,13 @@ components:
             type: string
         prerelease_integrations_enabled:
           type: boolean
+        delete_unenrolled_agents:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            is_preconfigured:
+              type: boolean
       required:
         - fleet_server_hosts
         - id
