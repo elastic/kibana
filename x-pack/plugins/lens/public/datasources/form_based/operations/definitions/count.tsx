@@ -185,6 +185,14 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
+  toESQL: (column, columnId, indexPattern, layer) => {
+    const field = indexPattern.getFieldByName(column.sourceField);
+    if (!field || field?.type === 'document') {
+      return `COUNT(*)`;
+    } else {
+      return `COUNT(${field.name})`;
+    }
+  },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {

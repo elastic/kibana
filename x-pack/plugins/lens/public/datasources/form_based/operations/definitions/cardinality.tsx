@@ -176,6 +176,9 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
+  toESQL: (column, columnId) => {
+    return `COUNT_DISTINCT(${column.sourceField})`;
+  },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
       id: columnId,

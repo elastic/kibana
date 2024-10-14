@@ -59,6 +59,15 @@ const typeToFn: Record<string, string> = {
   standard_deviation: 'aggStdDeviation',
 };
 
+const typeToESQLFn: Record<string, string> = {
+  min: 'MIN',
+  max: 'MAX',
+  average: 'AVG',
+  sum: 'SUM',
+  median: 'MEDIAN',
+  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
+};
+
 const supportedTypes = ['number', 'histogram'];
 
 function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
@@ -212,6 +221,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           ),
         },
       ];
+    },
+    toESQL: (column, columnId, _indexPattern, layer) => {
+      return `${typeToESQLFn[type]}(${column.sourceField})`;
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {

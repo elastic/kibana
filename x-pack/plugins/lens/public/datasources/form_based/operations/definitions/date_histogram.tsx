@@ -143,6 +143,34 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
+  toESQL: (column, columnId, indexPattern) => {
+    const usedField = indexPattern.getFieldByName(column.sourceField);
+    let timeZone: string | undefined;
+    let interval = column.params?.interval ?? autoInterval;
+    const dropPartials = Boolean(
+      column.params?.dropPartials &&
+        // set to false when detached from time picker
+        (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
+    );
+
+    if (
+      usedField &&
+      usedField.aggregationRestrictions &&
+      usedField.aggregationRestrictions.date_histogram
+    ) {
+      interval = restrictedInterval(usedField.aggregationRestrictions) as string;
+      timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
+    }
+
+    // todo: add auto interval calculation and conversion from dropdown values
+    interval = '50';
+
+    // todo: add drop partial support
+
+    // todo: add missing values support
+
+    return `BUCKET(${column.sourceField}, ${interval}, ?_tstart, ?_tend)`;
+  },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;

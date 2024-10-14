@@ -138,6 +138,11 @@ export const rangeOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
+  toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
+    const maxBarsDefaultValue =
+      (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
+    return `BUCKET(${column.sourceField}, ${maxBarsDefaultValue})`;
+  },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
     if (params.type === MODES.Range) {
