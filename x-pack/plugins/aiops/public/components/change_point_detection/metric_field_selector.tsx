@@ -7,7 +7,8 @@
 
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { OptionListWithFieldStats } from '@kbn/ml-field-stats-flyout';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
