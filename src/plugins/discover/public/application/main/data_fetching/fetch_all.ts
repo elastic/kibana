@@ -98,6 +98,8 @@ export function fetchAll(
       sendLoadingMsg(dataSubjects.totalHits$, {
         result: dataSubjects.totalHits$.getValue().result,
       });
+    } else {
+      sendLoadingMsg(dataSubjects.totalHits$);
     }
 
     // Start fetching all required requests
