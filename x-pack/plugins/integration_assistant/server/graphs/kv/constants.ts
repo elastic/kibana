@@ -26,16 +26,6 @@ export const KV_HEADER_ERROR_EXAMPLE_ANSWER = {
     '%{TIMESTAMP:cisco.audit.timestamp}:%{WORD:cisco.audit.value1};%{WORD:cisco.audit.key2}:%{WORD:cisco.audit.value2}:%{GREEDYDATA:message}',
 };
 
-export const onFailure = {
-  append: {
-    field: 'error.message',
-    value:
-      '{% raw %}Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.on_failure_pipeline}}} failed with message: {{{_ingest.on_failure_message}}}{% endraw %}',
-  },
-};
-
-export const removeProcessor = { remove: { field: 'message', ignore_missing: true } };
-
 export const COMMON_ERRORS = [
   {
     error: 'field [message] does not contain value_split [=]',
