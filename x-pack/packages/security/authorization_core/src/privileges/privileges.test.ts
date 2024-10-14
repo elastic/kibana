@@ -480,6 +480,7 @@ describe('features', () => {
         name: 'Feature Alpha',
         app: [],
         category: { id: 'alpha', label: 'alpha' },
+        alerting: ['rule-type-1'],
         privileges: {
           all: {
             savedObject: {
@@ -489,6 +490,7 @@ describe('features', () => {
             ui: ['all-alpha-ui'],
             app: ['all-alpha-app'],
             api: ['all-alpha-api'],
+            alerting: { rule: { all: ['rule-type-1'] } },
             replacedBy: [{ feature: 'beta', privileges: ['all'] }],
           },
           read: {
@@ -511,6 +513,7 @@ describe('features', () => {
         name: 'Feature Beta',
         app: [],
         category: { id: 'beta', label: 'beta' },
+        alerting: ['rule-type-1'],
         privileges: {
           all: {
             savedObject: {
@@ -520,6 +523,7 @@ describe('features', () => {
             ui: ['all-beta-ui'],
             app: ['all-beta-app'],
             api: ['all-beta-api'],
+            alerting: { rule: { all: ['rule-type-1'] } },
           },
           read: {
             savedObject: {
@@ -537,6 +541,41 @@ describe('features', () => {
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const alertingOperations = [
+      ...[
+        'get',
+        'getRuleState',
+        'getAlertSummary',
+        'getExecutionLog',
+        'getActionErrorLog',
+        'find',
+        'getRuleExecutionKPI',
+        'getBackfill',
+        'findBackfill',
+      ],
+      ...[
+        'create',
+        'delete',
+        'update',
+        'updateApiKey',
+        'enable',
+        'disable',
+        'muteAll',
+        'unmuteAll',
+        'muteAlert',
+        'unmuteAlert',
+        'snooze',
+        'bulkEdit',
+        'bulkDelete',
+        'bulkEnable',
+        'bulkDisable',
+        'unsnooze',
+        'runSoon',
+        'scheduleBackfill',
+        'deleteBackfill',
+      ],
+    ];
 
     const expectedAllPrivileges = [
       actions.login,
@@ -561,10 +600,16 @@ describe('features', () => {
       actions.savedObject.get('all-alpha-read-so', 'open_point_in_time'),
       actions.savedObject.get('all-alpha-read-so', 'close_point_in_time'),
       actions.ui.get('alpha', 'all-alpha-ui'),
-      // To maintain compatibility with the new UI capabilities that are feature specific:
-      // all.replacedBy: [{ feature: 'beta', privileges: ['all'] }]
+      ...alertingOperations.map((operation) =>
+        actions.alerting.get('rule-type-1', 'alpha', 'rule', operation)
+      ),
+      // To maintain compatibility with the new UI capabilities and new alerting entities that are
+      // feature specific: all.replacedBy: [{ feature: 'beta', privileges: ['all'] }]
       actions.ui.get('navLinks', 'all-beta-app'),
       actions.ui.get('beta', 'all-beta-ui'),
+      ...alertingOperations.map((operation) =>
+        actions.alerting.get('rule-type-1', 'beta', 'rule', operation)
+      ),
     ];
 
     const expectedReadPrivileges = [

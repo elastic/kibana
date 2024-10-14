@@ -223,6 +223,7 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     },
   });
 
+  // Register alerting rule types used in a deprecated feature.
   for (const [id, producer] of [
     ['alerting_rule_type_one', 'case_2_feature_a'],
     ['alerting_rule_type_two', 'case_2_feature_a'],
@@ -236,7 +237,7 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: () => ({ status: 'ok', actionId: '' }),
+      executor: () => Promise.resolve({ state: {} }),
       validate: { params: schema.any() },
     });
   }
