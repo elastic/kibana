@@ -187,14 +187,14 @@ function EmptyState() {
                     <h3>
                       <FormattedMessage
                         id="xpack.observability.pages.alertDetails.relatedAlerts.empty.title"
-                        defaultMessage="No related alerts."
+                        defaultMessage="Problem loading related alerts"
                       />
                     </h3>
                   </EuiTitle>
                   <p>
                     <FormattedMessage
                       id="xpack.observability.pages.alertDetails.relatedAlerts.empty.description"
-                      defaultMessage="No related alerts were found. This can be due to not having a criteria or related alert information."
+                      defaultMessage="Due to an unexpected error, no related alerts can be found."
                     />
                   </p>
                 </EuiText>
