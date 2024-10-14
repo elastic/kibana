@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiPageSection,
-  EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
@@ -189,19 +187,6 @@ export const SearchIndexDetailsPage = () => {
         />
       ) : (
         <>
-          <EuiPageSection>
-            <EuiButton
-              data-test-subj="backToIndicesButton"
-              color="text"
-              iconType="arrowLeft"
-              onClick={() => navigateToIndexListPage()}
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.backToIndicesButtonLabel"
-                defaultMessage="Back to indices"
-              />
-            </EuiButton>
-          </EuiPageSection>
           <EuiPageTemplate.Header
             restrictWidth
             data-test-subj="searchIndexDetailsHeader"
