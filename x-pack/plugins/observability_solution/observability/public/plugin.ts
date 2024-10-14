@@ -387,17 +387,6 @@ export class Plugin
                   ]
                 : [];
 
-              const entityManagerLink: NavigationEntry[] = [
-                {
-                  label: i18n.translate('xpack.observability.entityManagerLinkTitle', {
-                    defaultMessage: 'Entity Manager',
-                  }),
-                  app: 'entity_manager',
-                  isTechnicalPreview: true,
-                  path: '/',
-                },
-              ];
-
               // Reformat the visible links to be NavigationEntry objects instead of
               // AppDeepLink objects.
               //
@@ -435,7 +424,6 @@ export class Plugin
                     ...sloLink,
                     ...casesLink,
                     ...aiAssistantLink,
-                    ...entityManagerLink,
                   ],
                 },
               ];

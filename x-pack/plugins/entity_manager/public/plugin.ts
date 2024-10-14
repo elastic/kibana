@@ -69,7 +69,7 @@ export class Plugin implements EntityManagerPluginClass {
       appRoute: '/app/entity_manager',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount,
-      visibleIn: ['sideNav'],
+      visibleIn: [],
       keywords: ['observability', 'monitor', 'entities'],
       status: AppStatus.inaccessible,
     };
