@@ -34,7 +34,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      ui: [],
+      ui: ['show'],
     },
   },
 };
