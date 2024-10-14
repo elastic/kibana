@@ -79,7 +79,7 @@ export const getAllMarkdownCommentsFromResults = ({
       formatNumber,
       ilmPhase: item.ilmPhase,
       indexName: item.indexName,
-      incompatible: result?.incompatible,
+      incompatibleFieldsCount: result?.incompatible,
       isILMAvailable,
       patternDocsCount: patternRollup.docsCount ?? 0,
       sizeInBytes,
