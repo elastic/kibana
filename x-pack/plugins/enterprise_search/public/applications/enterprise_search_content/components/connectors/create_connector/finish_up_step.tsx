@@ -44,7 +44,7 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 import { IndexViewLogic } from '../../search_index/index_view_logic';
 import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
 
-import connectorLogo from './assets/connector-logo.svg';
+import connectorLogo from './assets/connector_logo.svg';
 
 interface FinishUpStepProps {
   title: string;
