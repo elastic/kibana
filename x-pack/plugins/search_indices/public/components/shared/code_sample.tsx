@@ -44,7 +44,7 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
         <strong>{title}</strong>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiThemeProvider colorMode="INVERSE">
+      <EuiThemeProvider colorMode="dark">
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
             <EuiCodeBlock
