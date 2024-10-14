@@ -364,13 +364,9 @@ export class ChromeService {
       if (isSameAsClassic && _projectValue !== undefined) {
         throw new Error('`isSameAsClassic` and `value` cannot be set at the same time.');
       }
-      const type = chromeStyleSubject$.getValue();
       const projectValue = isSameAsClassic ? newBreadcrumbs : _projectValue;
-      if (type === 'project') {
-        setProjectBreadcrumbs(projectValue ?? [], { absolute });
-      } else {
-        breadcrumbs$.next(newBreadcrumbs);
-      }
+      breadcrumbs$.next(newBreadcrumbs);
+      setProjectBreadcrumbs(projectValue ?? [], { absolute });
     };
 
     const setProjectHome = (homeHref: string) => {
