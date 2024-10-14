@@ -274,12 +274,7 @@ async function getTraceDocsPerPage({
     PROCESSOR_EVENT,
   ] as const);
 
-  const requiredTxFields = asMutableArray([
-    TRANSACTION_ID,
-    TRANSACTION_DURATION,
-    TRANSACTION_NAME,
-    TRANSACTION_TYPE,
-  ] as const);
+  const requiredTxFields = asMutableArray([TRANSACTION_ID] as const);
 
   const requiredSpanFields = asMutableArray([
     SPAN_ID,
@@ -301,6 +296,9 @@ async function getTraceDocsPerPage({
     SPAN_COMPOSITE_SUM,
     SPAN_SYNC,
     CHILD_ID,
+    TRANSACTION_NAME,
+    TRANSACTION_TYPE,
+    TRANSACTION_DURATION,
   ] as const);
 
   const body = {
