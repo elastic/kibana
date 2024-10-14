@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { registerDataUsageRoutes } from './routes';
 import { PLUGIN_ID } from '../common';
+import { appContextService } from './app_context';
 
 export class DataUsagePlugin
   implements
@@ -48,7 +49,6 @@ export class DataUsagePlugin
       kibanaVersion: context.env.packageInfo.version,
       kibanaBranch: context.env.packageInfo.branch,
       kibanaInstanceId: context.env.instanceUuid,
-      logger: context.logger.get(),
     };
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
@@ -71,7 +71,17 @@ export class DataUsagePlugin
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: DataUsageStartDependencies): DataUsageServerStart {
+  start(_coreStart: CoreStart, _pluginsStart: DataUsageStartDependencies): DataUsageServerStart {
+    appContextService.start({
+      logFactory: this.dataUsageContext.logFactory,
+      configInitialValue: this.dataUsageContext.configInitialValue,
+      serverConfig: this.dataUsageContext.serverConfig,
+      config$: this.dataUsageContext.config$,
+      kibanaVersion: this.dataUsageContext.kibanaVersion,
+      kibanaBranch: this.dataUsageContext.kibanaBranch,
+      kibanaInstanceId: this.dataUsageContext.kibanaInstanceId,
+      cloud: this.dataUsageContext.cloud,
+    });
     return {};
   }
 

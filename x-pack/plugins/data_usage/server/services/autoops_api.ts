@@ -20,8 +20,8 @@ import { appContextService } from '../app_context';
 import { AutoOpsConfig } from '../types';
 
 class AutoOpsAPIService {
-  public async autoOpsAPI(data: UsageMetricsRequestSchemaQueryParams) {
-    const logger = appContextService.getLogger();
+  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestSchemaQueryParams) {
+    const logger = appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -47,7 +47,7 @@ class AutoOpsAPIService {
 
     const requestConfig: AxiosRequestConfig = {
       url: autoopsConfig.api?.url,
-      data,
+      data: requestBody,
       method: 'POST',
       headers: {
         'Content-type': 'application/json',

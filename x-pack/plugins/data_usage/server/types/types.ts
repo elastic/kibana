@@ -10,7 +10,6 @@ import type {
   CustomRequestHandlerContext,
   IRouter,
   LoggerFactory,
-  Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
@@ -61,5 +60,4 @@ export interface DataUsageContext {
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
   kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
-  logger?: Logger;
 }

@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type { LoggerFactory } from '@kbn/core/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DataUsageConfigType } from './config';
@@ -21,12 +21,11 @@ class AppContextService {
   private kibanaBranch: DataUsageContext['kibanaBranch'] = kibanaPackageJson.branch;
   private kibanaInstanceId: DataUsageContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
-  private logger: Logger | undefined;
-  private httpSetup?: HttpServiceSetup;
+  private logFactory?: LoggerFactory;
 
   public start(appContext: DataUsageContext) {
     this.cloud = appContext.cloud;
-    this.logger = appContext.logger;
+    this.logFactory = appContext.logFactory;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.kibanaInstanceId = appContext.kibanaInstanceId;
@@ -45,10 +44,10 @@ class AppContextService {
   }
 
   public getLogger() {
-    if (!this.logger) {
+    if (!this.logFactory) {
       throw new Error('Logger not set.');
     }
-    return this.logger;
+    return this.logFactory;
   }
 
   public getConfig() {
