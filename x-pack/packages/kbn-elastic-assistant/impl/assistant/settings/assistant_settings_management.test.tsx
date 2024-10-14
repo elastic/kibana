@@ -25,6 +25,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { mockSystemPrompts } from '../../mock/system_prompt';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -53,8 +54,13 @@ const mockContext = {
   },
 };
 
+const mockDataViews = {
+  getIndices: jest.fn(),
+} as unknown as DataViewsContract;
+
 const testProps = {
   selectedConversation: welcomeConvo,
+  dataViews: mockDataViews,
 };
 jest.mock('../../assistant_context');
 

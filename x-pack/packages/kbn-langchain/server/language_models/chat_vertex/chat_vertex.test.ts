@@ -12,6 +12,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiContent } from '@langchain/google-common';
 
 const connectorId = 'mock-connector-id';
 
@@ -54,8 +55,10 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
   };
 });
 
+const systemInstruction = 'Answer the following questions truthfully and as best you can.';
+
 const callMessages = [
-  new SystemMessage('Answer the following questions truthfully and as best you can.'),
+  new SystemMessage(systemInstruction),
   new HumanMessage('Question: Do you know my name?\n\n'),
 ] as unknown as BaseMessage[];
 
@@ -194,6 +197,34 @@ describe('ActionsClientChatVertexAI', () => {
       expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
+    });
+  });
+
+  describe('message formatting', () => {
+    it('Properly sorts out the system role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager);
+      const params = actionsClient.execute.mock.calls[0][0].params.subActionParams as unknown as {
+        messages: GeminiContent[];
+        systemInstruction: string;
+      };
+      expect(params.messages.length).toEqual(1);
+      expect(params.messages[0].parts.length).toEqual(1);
+      expect(params.systemInstruction).toEqual(systemInstruction);
+    });
+    it('Handles 2 messages in a row from the same role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(
+        [...callMessages, new HumanMessage('Oh boy, another')],
+        callOptions,
+        callRunManager
+      );
+      const { messages } = actionsClient.execute.mock.calls[0][0].params
+        .subActionParams as unknown as { messages: GeminiContent[] };
+      expect(messages.length).toEqual(1);
+      expect(messages[0].parts.length).toEqual(2);
     });
   });
 });

@@ -8,7 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
+  CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
@@ -101,7 +102,7 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
@@ -161,3 +162,31 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
     },
   },
 });
+
+export const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
+  index: CDR_VULNERABILITIES_INDEX_PATTERN,
+  size: isPreview ? 0 : 500,
+  aggs: getFindingsCountAggQueryVulnerabilities(),
+  ignore_unavailable: true,
+  query: buildVulnerabilityFindingsQueryWithFilters(query),
+});
+
+const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  };
+};

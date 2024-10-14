@@ -24,7 +24,6 @@ import {
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
-  getPresentationUtilContext,
 } from '../../kibana_services';
 import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
@@ -210,7 +209,6 @@ export function getTopNavConfig({
             defaultMessage: 'map',
           }),
         };
-        const PresentationUtilContext = getPresentationUtilContext();
 
         let saveModal;
 
@@ -251,7 +249,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, PresentationUtilContext);
+        showSaveModal(saveModal);
       },
     });
 
