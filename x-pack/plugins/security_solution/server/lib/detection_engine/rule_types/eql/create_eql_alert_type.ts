@@ -12,13 +12,7 @@ import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type {
-  CreateRuleOptions,
-  SecurityAlertType,
-  SignalSource,
-  SignalSourceHit,
-  CreateRuleAdditionalOptions,
-} from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSource, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import {
@@ -28,7 +22,7 @@ import {
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
-  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
   const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
@@ -89,6 +83,7 @@ export const createEqlAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         state,
@@ -111,6 +106,7 @@ export const createEqlAlertType = (
           publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
       const wrapSuppressedSequences = (
         sequences: Array<EqlHitsSequence<SignalSource>>,

@@ -103,7 +103,7 @@ export const fetchNotesByDocumentIds = createAsyncThunk<
 >('notes/fetchNotesByDocumentIds', async (args) => {
   const { documentIds } = args;
   const res = await fetchNotesByDocumentIdsApi(documentIds);
-  return normalizeEntities(res.notes);
+  return normalizeEntities('notes' in res ? res.notes : []);
 });
 
 export const fetchNotesBySavedObjectIds = createAsyncThunk<
@@ -113,7 +113,7 @@ export const fetchNotesBySavedObjectIds = createAsyncThunk<
 >('notes/fetchNotesBySavedObjectIds', async (args) => {
   const { savedObjectIds } = args;
   const res = await fetchNotesBySaveObjectIdsApi(savedObjectIds);
-  return normalizeEntities(res.notes);
+  return normalizeEntities('notes' in res ? res.notes : []);
 });
 
 export const fetchNotes = createAsyncThunk<
@@ -130,7 +130,10 @@ export const fetchNotes = createAsyncThunk<
 >('notes/fetchNotes', async (args) => {
   const { page, perPage, sortField, sortOrder, filter, search } = args;
   const res = await fetchNotesApi({ page, perPage, sortField, sortOrder, filter, search });
-  return { ...normalizeEntities(res.notes), totalCount: res.totalCount };
+  return {
+    ...normalizeEntities('notes' in res ? res.notes : []),
+    totalCount: 'totalCount' in res ? res.totalCount : 0,
+  };
 });
 
 export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareNote }, {}>(
@@ -193,11 +196,14 @@ const notesSlice = createSlice({
     userClosedDeleteModal: (state) => {
       state.pendingDeleteIds = [];
     },
-    userSelectedRowForDeletion: (state, action: { payload: string }) => {
+    userSelectedNotesForDeletion: (state, action: { payload: string }) => {
       state.pendingDeleteIds = [action.payload];
     },
     userSelectedBulkDelete: (state) => {
       state.pendingDeleteIds = state.selectedIds;
+    },
+    userClosedCreateErrorToast: (state) => {
+      state.error.createNote = null;
     },
   },
   extraReducers(builder) {
@@ -308,21 +314,33 @@ export const selectFetchNotesError = (state: State) => state.notes.error.fetchNo
 export const selectFetchNotesStatus = (state: State) => state.notes.status.fetchNotes;
 
 export const selectNotesByDocumentId = createSelector(
-  [selectAllNotes, (state: State, documentId: string) => documentId],
+  [selectAllNotes, (_: State, documentId: string) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
 );
 
 export const selectNotesBySavedObjectId = createSelector(
-  [selectAllNotes, (state: State, savedObjectId: string) => savedObjectId],
+  [selectAllNotes, (_: State, savedObjectId: string) => savedObjectId],
   (notes, savedObjectId) =>
     savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
+);
+
+export const selectDocumentNotesBySavedObjectId = createSelector(
+  [
+    selectAllNotes,
+    (_: State, { documentId, savedObjectId }: { documentId: string; savedObjectId: string }) => ({
+      documentId,
+      savedObjectId,
+    }),
+  ],
+  (notes, { documentId, savedObjectId }) =>
+    notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
 );
 
 export const selectSortedNotesByDocumentId = createSelector(
   [
     selectAllNotes,
     (
-      state: State,
+      _: State,
       {
         documentId,
         sort,
@@ -347,7 +365,7 @@ export const selectSortedNotesBySavedObjectId = createSelector(
   [
     selectAllNotes,
     (
-      state: State,
+      _: State,
       {
         savedObjectId,
         sort,
@@ -379,6 +397,7 @@ export const {
   userSearchedNotes,
   userSelectedRow,
   userClosedDeleteModal,
-  userSelectedRowForDeletion,
+  userClosedCreateErrorToast,
+  userSelectedNotesForDeletion,
   userSelectedBulkDelete,
 } = notesSlice.actions;

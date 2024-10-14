@@ -259,7 +259,7 @@ export const AgentPolicyActionMenu = memo<{
               {isUpgradeAgentsModalOpen && (
                 <EuiPortal>
                   <AgentUpgradeAgentModal
-                    agents={`policy_id: ${agentPolicy.id}`}
+                    agents={`policy_id:"${agentPolicy.id}"`}
                     agentCount={agentPolicy.agents || 0}
                     onClose={() => {
                       setIsUpgradeAgentsModalOpen(false);

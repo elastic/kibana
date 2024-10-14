@@ -38,7 +38,6 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser",
     "@kbn/security-plugin-types-common",
     "@kbn/core-application-browser",
     "@kbn/unsaved-changes-prompt",
@@ -52,6 +51,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/logging",
     "@kbn/core-logging-browser-mocks",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [
     "target/**/*",

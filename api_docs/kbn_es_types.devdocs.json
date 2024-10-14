@@ -210,6 +210,20 @@
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse.took",
+            "type": "number",
+            "tags": [],
+            "label": "took",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

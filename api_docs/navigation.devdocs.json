@@ -106,7 +106,9 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => ",
+              "<object, unknown>, deps: ",
+              "NavigationPublicSetupDependencies",
+              ") => ",
               {
                 "pluginId": "navigation",
                 "scope": "public",
@@ -135,6 +137,21 @@
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
+                ],
+                "path": "src/plugins/navigation/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.NavigationPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "NavigationPublicSetupDependencies"
                 ],
                 "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,

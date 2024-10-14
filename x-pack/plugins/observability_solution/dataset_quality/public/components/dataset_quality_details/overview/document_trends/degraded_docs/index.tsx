@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -27,6 +26,9 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import {
+  discoverAriaText,
+  logsExplorerAriaText,
+  openInDiscoverText,
   openInLogsExplorerText,
   overviewDegradedDocsText,
 } from '../../../../../../common/translations';
@@ -130,14 +132,25 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
               onBreakdownFieldChange={breakdown.onChange}
             />
           </EuiSkeletonRectangle>
-          <EuiToolTip content={openInLogsExplorerText}>
+          <EuiToolTip
+            content={
+              degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+                ? openInLogsExplorerText
+                : openInDiscoverText
+            }
+          >
             <EuiButtonIcon
               display="base"
-              iconType="discoverApp"
-              aria-label={i18n.translate(
-                'xpack.datasetQuality.degradedDocs.euiButtonIcon.discoverLabel',
-                { defaultMessage: 'Discover' }
-              )}
+              iconType={
+                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+                  ? 'logoObservability'
+                  : 'discoverApp'
+              }
+              aria-label={
+                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+                  ? logsExplorerAriaText
+                  : discoverAriaText
+              }
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
               {...degradedDocLinkLogsExplorer.linkProps}

@@ -25,7 +25,6 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
@@ -57,13 +56,11 @@ const augmentAlerts = async <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
-  intendedTimestamp,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
-  intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
   const maintenanceWindowIds: string[] =
@@ -78,9 +75,6 @@ const augmentAlerts = async <T>({
         [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
         [ALERT_START]: timestampOverrideOrCurrent,
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
-        [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
-          ? intendedTimestamp
-          : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
         ...(maintenanceWindowIds.length
           ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
@@ -310,17 +304,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                let intendedTimestamp;
-                if (options.startedAtOverridden) {
-                  intendedTimestamp = options.startedAt;
-                }
-
                 const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
-                  intendedTimestamp,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -400,11 +388,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               let alertsWereTruncated = false;
-
-              let intendedTimestamp;
-              if (options.startedAtOverridden) {
-                intendedTimestamp = options.startedAt;
-              }
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -587,7 +570,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
-                  intendedTimestamp,
                 });
 
                 const matchingBuildingBlockAlerts =

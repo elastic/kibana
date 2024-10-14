@@ -136,7 +136,7 @@ _You can skip this step if you already have data in one or more {es} indices._
 There are many options for ingesting data into {es}, including:
 
 * The {enterprise-search-ref}/crawler.html[Elastic crawler] for web content (*NOTE*: Not yet available in _Serverless_)
-* {enterprise-search-ref}/connectors.html[Elastic connectors] for data synced from third-party sources
+* {ref}/es-connectors.html[Elastic connectors] for data synced from third-party sources
 * The {es} {ref}/docs-bulk.html[Bulk API] for JSON documents
 +
 .*Expand* for example

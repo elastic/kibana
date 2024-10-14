@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const find = getService('find');
   const browser = getService('browser');
+  const log = getService('log');
 
   describe('Index template wizard', function () {
     before(async () => {
@@ -161,6 +162,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('fieldType')).to.be(true);
         expect(await testSubjects.exists('fieldSubType')).to.be(true);
         expect(await testSubjects.exists('nextButton')).to.be(true);
+      });
+
+      it("advanced options tab doesn't add default values to request by default", async () => {
+        await pageObjects.indexManagement.changeMappingsEditorTab('advancedOptions');
+        await testSubjects.click('previewIndexTemplate');
+        const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
+
+        await log.debug(`Template preview text: ${templatePreview}`);
+
+        // All advanced options should not be part of the request
+        expect(templatePreview).to.not.contain('"dynamic"');
+        expect(templatePreview).to.not.contain('"subobjects"');
+        expect(templatePreview).to.not.contain('"dynamic_date_formats"');
+        expect(templatePreview).to.not.contain('"date_detection"');
+        expect(templatePreview).to.not.contain('"numeric_detection"');
+      });
+
+      it('advanced options tab adds the set values to the request', async () => {
+        await pageObjects.indexManagement.changeMappingsEditorTab('advancedOptions');
+
+        // Toggle the subobjects field to false
+        await testSubjects.click('subobjectsToggle');
+
+        await testSubjects.click('previewIndexTemplate');
+        const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
+
+        await log.debug(`Template preview text: ${templatePreview}`);
+
+        // Only the subobjects option should be part of the request
+        expect(templatePreview).to.contain('"subobjects": false');
+        expect(templatePreview).to.not.contain('"dynamic"');
+        expect(templatePreview).to.not.contain('"dynamic_date_formats"');
+        expect(templatePreview).to.not.contain('"date_detection"');
+        expect(templatePreview).to.not.contain('"numeric_detection"');
       });
     });
   });

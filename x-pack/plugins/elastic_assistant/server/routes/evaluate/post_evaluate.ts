@@ -29,16 +29,13 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { RetrievalQAChain } from 'langchain/chains';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
-import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
@@ -49,7 +46,7 @@ import {
   openAIFunctionAgentPrompt,
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
-import { getLlmClass, getLlmType } from '../utils';
+import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -88,7 +85,6 @@ export const postEvaluateRoute = (
         const assistantContext = ctx.elasticAssistant;
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
-        const telemetry = assistantContext.telemetry;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
@@ -147,9 +143,6 @@ export const postEvaluateRoute = (
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
-          // Default ELSER model
-          const elserId = await getElser();
-
           const inference = ctx.elasticAssistant.inference;
 
           // Data clients
@@ -167,17 +160,6 @@ export const postEvaluateRoute = (
             kbDataClient,
           };
 
-          // esStore
-          const esStore = new ElasticsearchStore(
-            esClient,
-            kbDataClient?.indexTemplateAndPattern?.alias ?? '',
-            logger,
-            telemetry,
-            elserId,
-            ESQL_RESOURCE,
-            kbDataClient
-          );
-
           // Actions
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({
@@ -192,11 +174,13 @@ export const postEvaluateRoute = (
             name: string;
             graph: DefaultAssistantGraph;
             llmType: string | undefined;
+            isOssModel: boolean | undefined;
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
-              const isOpenAI = llmType === 'openai';
-              const llmClass = getLlmClass(llmType, true);
+              const isOssModel = isOpenSourceModel(connector);
+              const isOpenAI = llmType === 'openai' && !isOssModel;
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = () =>
                 new llmClass({
                   actionsClient,
@@ -220,9 +204,6 @@ export const postEvaluateRoute = (
               const anonymizationFields = anonymizationFieldsRes
                 ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
                 : undefined;
-
-              // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-              const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
               // Check if KB is available
               const isEnabledKnowledgeBase =
@@ -249,13 +230,12 @@ export const postEvaluateRoute = (
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
-                chain,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
+                isOssModel,
                 logger,
-                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
@@ -296,6 +276,7 @@ export const postEvaluateRoute = (
               return {
                 name: `${runName} - ${connector.name}`,
                 llmType,
+                isOssModel,
                 graph: getDefaultAssistantGraph({
                   agentRunnable,
                   dataClients,
@@ -309,7 +290,7 @@ export const postEvaluateRoute = (
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
@@ -320,8 +301,8 @@ export const postEvaluateRoute = (
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  bedrockChatEnabled: true,
                   isStreaming: false,
+                  isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,
@@ -332,15 +313,20 @@ export const postEvaluateRoute = (
               return output;
             };
 
-            const evalOutput = await evaluate(predict, {
+            evaluate(predict, {
               data: datasetName ?? '',
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
               maxConcurrency: 5,
-            });
-            logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
+            })
+              .then((output) => {
+                logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
+              })
+              .catch((err) => {
+                logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
+              });
           });
 
           return response.ok({

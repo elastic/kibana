@@ -50,6 +50,10 @@ jest.mock('../utils/get_authorized_rule_types', () => ({
   getAvailableRuleTypes: jest.fn(),
 }));
 
+jest.mock('../../common/hooks/use_fetch_flapping_settings', () => ({
+  useFetchFlappingSettings: jest.fn(),
+}));
+
 const { useLoadUiConfig } = jest.requireMock('../../common/hooks/use_load_ui_config');
 const { useHealthCheck } = jest.requireMock('../../common/hooks/use_health_check');
 const { useResolveRule } = jest.requireMock('../../common/hooks/use_resolve_rule');
@@ -60,6 +64,9 @@ const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
 );
 const { useLoadRuleTypesQuery } = jest.requireMock('../../common/hooks/use_load_rule_types_query');
 const { getAvailableRuleTypes } = jest.requireMock('../utils/get_authorized_rule_types');
+const { useFetchFlappingSettings } = jest.requireMock(
+  '../../common/hooks/use_fetch_flapping_settings'
+);
 
 const uiConfigMock = {
   isUsingSecurity: true,
@@ -101,6 +108,15 @@ useResolveRule.mockReturnValue({
   isLoading: false,
   isInitialLoading: false,
   data: ruleMock,
+});
+
+useFetchFlappingSettings.mockReturnValue({
+  isLoading: false,
+  isInitialLoading: false,
+  data: {
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  },
 });
 
 const indexThresholdRuleType = {
@@ -260,6 +276,10 @@ describe('useLoadDependencies', () => {
       uiConfig: uiConfigMock,
       healthCheckError: null,
       fetchedFormData: ruleMock,
+      flappingSettings: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
       connectors: [mockConnector],
       connectorTypes: [mockConnectorType],
       aadTemplateFields: [mockAadTemplateField],

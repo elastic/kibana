@@ -50,6 +50,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   events: SignalSourceHit[];
   spaceId: string;
@@ -62,6 +63,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
@@ -93,6 +95,7 @@ export const wrapSuppressedAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

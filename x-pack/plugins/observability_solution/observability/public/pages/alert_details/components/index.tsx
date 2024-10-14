@@ -6,14 +6,14 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { AlertSummaryProps } from './alert_summary';
+import type { SourceBarProps } from './source_bar';
 
-const AlertSummaryLazy = lazy(() => import('./alert_summary'));
+const SourceBarLazy = lazy(() => import('./source_bar'));
 
-export function AlertSummary(props: AlertSummaryProps) {
+export function SourceBar(props: SourceBarProps) {
   return (
     <Suspense fallback={null}>
-      <AlertSummaryLazy {...props} />
+      <SourceBarLazy {...props} />
     </Suspense>
   );
 }

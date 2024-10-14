@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { LogRateChart } from '../../entities/charts/log_rate_chart';
-import { LogErrorRateChart } from '../../entities/charts/log_error_rate_chart';
 import { chartHeight } from '..';
+import { LogRateChart } from '../../../shared/charts/log_rates/log_rate_chart';
+import { LogErrorRateChart } from '../../../shared/charts/log_rates/log_error_rate_chart';
 
 export function LogsOverview() {
   return (

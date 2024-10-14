@@ -67,6 +67,13 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
 }));
 
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  }),
+}));
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -149,6 +156,9 @@ describe('rule_add', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.application.capabilities = {
       ...capabilities,
+      rulesSettings: {
+        writeFlappingSettingsUI: true,
+      },
       rules: {
         show: true,
         save: true,
