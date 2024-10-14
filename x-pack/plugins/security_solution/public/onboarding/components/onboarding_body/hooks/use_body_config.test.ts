@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useBodyConfig } from './use_body_config';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { hasCapabilities } from '../../../../common/lib/capabilities';
 
 const bodyConfig = [
