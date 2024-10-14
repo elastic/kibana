@@ -78,7 +78,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
   }) => {
     const config = useConfig();
     const isExperimentalDataStreamSettingsEnabled =
-      config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
+      config?.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
 
     const {
       params: { packagePolicyId },

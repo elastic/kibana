@@ -11,10 +11,11 @@ import type { FleetConfigType } from '../plugin';
 
 export const ConfigContext = React.createContext<FleetConfigType | null>(null);
 
-export function useConfig() {
+export function useConfig(): FleetConfigType | null {
   const config = useContext(ConfigContext);
   if (config === null) {
-    throw new Error('ConfigContext not initialized');
+    // eslint-disable-next-line no-console
+    console.error('Fleet ConfigContext not initialized');
   }
   return config;
 }

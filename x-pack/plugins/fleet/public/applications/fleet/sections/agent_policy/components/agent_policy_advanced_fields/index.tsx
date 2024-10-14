@@ -91,7 +91,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const config = useConfig();
   const authz = useAuthz();
   const maxAgentPoliciesWithInactivityTimeout =
-    config.developer?.maxAgentPoliciesWithInactivityTimeout ??
+    config?.developer?.maxAgentPoliciesWithInactivityTimeout ??
     DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 

@@ -30,7 +30,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   rightColumn,
 }) => {
   const { getHref } = useLink();
-  const { agents } = useConfig();
+  const config = useConfig();
   const authz = useAuthz();
   const { agentTamperProtectionEnabled, subfeaturePrivileges } = ExperimentalFeaturesService.get();
 
@@ -44,7 +44,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       ),
       isSelected: section === 'agents',
       href: getHref('agent_list'),
-      disabled: !agents?.enabled,
+      disabled: !config?.agents?.enabled,
       'data-test-subj': 'fleet-agents-tab',
       isHidden: !authz.fleet.readAgents,
     },

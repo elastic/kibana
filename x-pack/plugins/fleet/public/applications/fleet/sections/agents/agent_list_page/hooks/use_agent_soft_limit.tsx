@@ -26,7 +26,7 @@ async function fetchTotalOnlineAgents() {
 export function useAgentSoftLimit() {
   const config = useConfig();
 
-  const softLimit = config.internal?.activeAgentsSoftLimit;
+  const softLimit = config?.internal?.activeAgentsSoftLimit;
 
   const { data: totalAgents } = useQuery(['fetch-total-online-agents'], fetchTotalOnlineAgents, {
     enabled: softLimit !== undefined,

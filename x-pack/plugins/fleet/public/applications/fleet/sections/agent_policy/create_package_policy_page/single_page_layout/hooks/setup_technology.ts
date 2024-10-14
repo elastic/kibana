@@ -32,7 +32,7 @@ export const useAgentless = () => {
   const isServerless = !!cloud?.isServerlessEnabled;
   const isCloud = !!cloud?.isCloudEnabled;
 
-  const isAgentlessApiEnabled = (isCloud || isServerless) && config.agentless?.enabled;
+  const isAgentlessApiEnabled = (isCloud || isServerless) && config?.agentless?.enabled;
   const isDefaultAgentlessPolicyEnabled =
     !isAgentlessApiEnabled && isServerless && agentlessExperimentalFeatureEnabled;
 

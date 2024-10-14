@@ -98,9 +98,8 @@ export const EditPackagePolicyForm = memo<{
   policyId?: string;
 }>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
-  const {
-    agents: { enabled: isFleetEnabled },
-  } = useConfig();
+  const config = useConfig();
+  const isFleetEnabled = config?.agents?.enabled ?? false;
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();

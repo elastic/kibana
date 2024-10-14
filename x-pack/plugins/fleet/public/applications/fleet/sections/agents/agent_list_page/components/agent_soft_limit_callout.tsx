@@ -29,7 +29,7 @@ export const AgentSoftLimitCallout = () => {
         id="xpack.fleet.agentSoftLimitCallout.calloutDescription"
         defaultMessage="Fleet supports a maximum of {nbAgents} active agents. You need to unenroll some agents to ensure that all active agents are able to connect and new agents can be enrolled."
         values={{
-          nbAgents: <FormattedNumber value={config.internal?.activeAgentsSoftLimit ?? 25000} />,
+          nbAgents: <FormattedNumber value={config?.internal?.activeAgentsSoftLimit ?? 25000} />,
         }}
       />
     </EuiCallOut>
