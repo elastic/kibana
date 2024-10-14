@@ -16,8 +16,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  ANONYMIZATION_TAB,
   CONNECTORS_TAB,
+  ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
@@ -56,7 +56,6 @@ const mockDataViews = {
 } as unknown as DataViewsContract;
 
 const onTabChange = jest.fn();
-
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
@@ -155,7 +154,7 @@ describe('AssistantSettingsManagement', () => {
           wrapper,
         }
       );
-      expect(getByTestId(`${tab}-tab`)).toBeInTheDocument();
+      expect(getByTestId(`tab-${tab}`)).toBeInTheDocument();
     });
   });
 });

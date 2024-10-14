@@ -18,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -66,6 +67,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'security'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
     >
       {children}
     </AssistantProvider>

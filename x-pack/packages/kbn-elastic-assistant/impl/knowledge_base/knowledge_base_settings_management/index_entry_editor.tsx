@@ -49,6 +49,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
     );
     const sharingOptions = [
       {
+        'data-test-subj': 'sharing-private-option',
         value: i18n.SHARING_PRIVATE_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -62,6 +63,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         ),
       },
       {
+        'data-test-subj': 'sharing-global-option',
         value: i18n.SHARING_GLOBAL_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -76,6 +78,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         disabled: !hasManageGlobalKnowledgeBase,
       },
     ];
+
     const selectedSharingOption =
       entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
@@ -86,7 +89,11 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         isRollupIndex: () => false,
       });
 
-      return indices.map((index) => ({ label: index.name, value: index.name }));
+      return indices.map((index) => ({
+        'data-test-subj': index.name,
+        label: index.name,
+        value: index.name,
+      }));
     }, [dataViews]);
 
     const fieldOptions = useAsync(async () => {
@@ -95,9 +102,13 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         fieldTypes: ['semantic_text'],
       });
 
-      const semanticFields = fields.filter((field) => field.esTypes?.includes('semantic_text'));
-
-      return semanticFields.map((field) => ({ label: field.name, value: field.name }));
+      return fields
+        .filter((field) => field.esTypes?.includes('semantic_text'))
+        .map((field) => ({
+          'data-test-subj': field.name,
+          label: field.name,
+          value: field.name,
+        }));
     }, [entry]);
 
     const setIndex = useCallback(
@@ -176,6 +187,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           fullWidth
         >
           <EuiSuperSelect
+            data-test-subj="sharing-select"
             options={sharingOptions}
             valueOfSelected={selectedSharingOption}
             onChange={setSharingOptions}
@@ -184,6 +196,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         </EuiFormRow>
         <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
           <EuiComboBox
+            data-test-subj="index-combobox"
             aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
             isClearable={true}
             singleSelection={{ asPlainText: true }}
@@ -206,6 +219,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         <EuiFormRow label={i18n.ENTRY_FIELD_INPUT_LABEL} fullWidth>
           <EuiComboBox
             aria-label={i18n.ENTRY_FIELD_PLACEHOLDER}
+            data-test-subj="entry-combobox"
             isClearable={true}
             singleSelection={{ asPlainText: true }}
             onCreateOption={onCreateFieldOption}

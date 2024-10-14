@@ -43,6 +43,7 @@ const FlyoutComponent: React.FC<Props> = ({
 }) => {
   return flyoutVisible ? (
     <EuiFlyout
+      data-test-subj={'flyout'}
       ownFocus
       onClose={onClose}
       css={css`

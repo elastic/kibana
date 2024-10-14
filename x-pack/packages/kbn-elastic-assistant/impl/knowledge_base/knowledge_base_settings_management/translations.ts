@@ -215,7 +215,7 @@ export const DELETE_ENTRY_CONFIRMATION_TITLE = (title: string) =>
 export const DELETE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryContent',
   {
-    defaultMessage: 'You will not be able to recover this knowledge base entry once it's deleted.',
+    defaultMessage: "You will not be able to recover this knowledge base entry once it's deleted.",
   }
 );
 

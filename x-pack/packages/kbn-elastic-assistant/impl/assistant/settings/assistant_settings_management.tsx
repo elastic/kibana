@@ -143,6 +143,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             padding-top: ${euiTheme.base * 0.75}px;
             padding-bottom: ${euiTheme.base * 0.75}px;
           `}
+          data-test-subj={`tab-${selectedSettingsTab}`}
         >
           {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
