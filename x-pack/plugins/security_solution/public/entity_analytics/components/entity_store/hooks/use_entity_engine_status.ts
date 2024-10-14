@@ -11,7 +11,7 @@ import type { ListEntityEnginesResponse } from '../../../../../common/api/entity
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
-const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
+export const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
 
 interface Options {
   disabled?: boolean;

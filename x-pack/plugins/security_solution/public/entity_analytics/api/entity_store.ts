@@ -6,12 +6,14 @@
  */
 import { useMemo } from 'react';
 import type {
+  DeleteEntityEngineResponse,
+  EntityType,
   GetEntityEngineResponse,
   InitEntityEngineResponse,
   ListEntityEnginesResponse,
+  StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
-import type { EntityType } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityStoreRoutes = () => {
@@ -26,9 +28,24 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const stopEntityStore = async (entityType: EntityType) => {
+      return http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
+        method: 'POST',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({}),
+      });
+    };
+
     const getEntityEngine = async (entityType: EntityType) => {
       return http.fetch<GetEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
         method: 'GET',
+        version: API_VERSIONS.public.v1,
+      });
+    };
+
+    const deleteEntityEngine = async (entityType: EntityType) => {
+      return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
+        method: 'DELETE',
         version: API_VERSIONS.public.v1,
       });
     };
@@ -42,7 +59,9 @@ export const useEntityStoreRoutes = () => {
 
     return {
       initEntityStore,
+      stopEntityStore,
       getEntityEngine,
+      deleteEntityEngine,
       listEntityEngines,
     };
   }, [http]);

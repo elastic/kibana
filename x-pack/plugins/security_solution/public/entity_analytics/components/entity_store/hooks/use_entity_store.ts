@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
-import { useEntityEngineStatus } from './use_entity_engine_status';
+import type {
+  DeleteEntityEngineResponse,
+  InitEntityEngineResponse,
+  StopEntityEngineResponse,
+} from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
+import { ENTITY_STORE_ENGINE_STATUS, useEntityEngineStatus } from './use_entity_engine_status';
 
 const ENTITY_STORE_ENABLEMENT_INIT = 'ENTITY_STORE_ENABLEMENT_INIT';
 
@@ -44,4 +50,71 @@ export const useEntityStoreEnablement = () => {
   }, [initialize]);
 
   return { enable };
+};
+
+export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
+
+export const useInvalidateEntityEngineStatusQuery = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(() => {
+    queryClient.invalidateQueries([ENTITY_STORE_ENGINE_STATUS], {
+      refetchType: 'active',
+    });
+  }, [queryClient]);
+};
+
+export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
+  const { initEntityStore } = useEntityStoreRoutes();
+  return useMutation<[InitEntityEngineResponse]>(() => Promise.all([initEntityStore('user')]), {
+    ...options,
+    mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
+    onSettled: (...args) => {
+      invalidateEntityEngineStatusQuery();
+
+      if (options?.onSettled) {
+        options.onSettled(...args);
+      }
+    },
+  });
+};
+
+export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
+
+export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
+  const { stopEntityStore } = useEntityStoreRoutes();
+  return useMutation<[StopEntityEngineResponse]>(() => Promise.all([stopEntityStore('user')]), {
+    ...options,
+    mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
+    onSettled: (...args) => {
+      invalidateEntityEngineStatusQuery();
+
+      if (options?.onSettled) {
+        options.onSettled(...args);
+      }
+    },
+  });
+};
+
+export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
+
+export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
+  const { deleteEntityEngine } = useEntityStoreRoutes();
+  return useMutation<[DeleteEntityEngineResponse]>(
+    () => Promise.all([deleteEntityEngine('user')]),
+    {
+      ...options,
+      mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
+      onSettled: (...args) => {
+        invalidateEntityEngineStatusQuery();
+
+        if (options?.onSettled) {
+          options.onSettled(...args);
+        }
+      },
+    }
+  );
 };

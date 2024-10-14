@@ -25,6 +25,10 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
+  defaultMessage: 'Entity Store',
+});
+
 export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
