@@ -31,10 +31,11 @@ export const EngineStatusEnum = EngineStatus.enum;
 
 export type EngineDescriptor = z.infer<typeof EngineDescriptor>;
 export const EngineDescriptor = z.object({
-  type: EntityType.optional(),
-  indexPattern: IndexPattern.optional(),
-  status: EngineStatus.optional(),
+  type: EntityType,
+  indexPattern: IndexPattern,
+  status: EngineStatus,
   filter: z.string().optional(),
+  fieldHistoryLength: z.number().int(),
 });
 
 export type InspectQuery = z.infer<typeof InspectQuery>;
