@@ -80,9 +80,10 @@ const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) =>
   );
 
   const onAddOption = useCallback(() => {
+    if (maxOptions && currentOptions.length >= maxOptions) return;
     const newOption = { key: uuidv4(), label: '', isFresh: true };
     setFreshOption(newOption);
-  }, []);
+  }, [maxOptions, currentOptions]);
 
   const onRemoveOption = useCallback(
     (key: string) => {
@@ -156,6 +157,12 @@ const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) =>
                             onChangeOptionLabel({ key: option.key, label: e.target.value })
                           }
                           onBlur={() => onBlurOption(option)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              onBlurOption(option);
+                              onAddOption();
+                            }
+                          }}
                           data-test-subj={`options-field-option-label-${index}`}
                         />
                       </EuiFlexItem>
