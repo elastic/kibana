@@ -8,7 +8,13 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  useResizeObserver,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -138,6 +144,9 @@ export function WorkspacePanelWrapper({
   const maxDimensions = displayOptions?.maxDimensions;
   const minDimensions = displayOptions?.minDimensions;
 
+  const [resizeRef, setResizeRef] = React.useState<Element | null>(null);
+  const { width, height } = useResizeObserver(resizeRef, 'width');
+
   let visDimensionsCSS: Interpolation<Theme> = {};
 
   if (aspectRatio) {
@@ -162,6 +171,13 @@ export function WorkspacePanelWrapper({
       : '';
   }
 
+  if (width < height) {
+    visDimensionsCSS.width = '100%';
+    visDimensionsCSS.height = 'auto';
+  } else {
+    visDimensionsCSS.width = 'auto';
+    visDimensionsCSS.height = '100%';
+  }
   return (
     <EuiPageTemplate
       direction="column"
@@ -249,6 +265,7 @@ export function WorkspacePanelWrapper({
           alignItems="center"
           justifyContent="center"
           direction="column"
+          ref={setResizeRef}
           css={css`
             height: 100%;
           `}
