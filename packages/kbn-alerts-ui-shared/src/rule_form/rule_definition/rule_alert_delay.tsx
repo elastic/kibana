@@ -58,7 +58,7 @@ export const RuleAlertDelay = () => {
       <EuiFieldNumber
         fullWidth
         min={1}
-        value={alertDelay?.active ?? 0}
+        value={alertDelay?.active ?? 1}
         name="alertDelay"
         data-test-subj="alertDelayInput"
         prepend={[ALERT_DELAY_TITLE_PREFIX]}

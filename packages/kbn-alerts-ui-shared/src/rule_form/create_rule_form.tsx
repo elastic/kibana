@@ -12,7 +12,7 @@ import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
@@ -158,7 +158,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
-          formData: GET_DEFAULT_FORM_DATA({
+          formData: getDefaultFormData({
             ruleTypeId,
             name: `${ruleType.name} rule`,
             consumer: getInitialConsumer({

@@ -25,7 +25,7 @@ import {
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
-import { DEFAULT_VALID_CONSUMERS } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
   id: string;
@@ -160,7 +160,15 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           connectors,
           connectorTypes,
           aadTemplateFields,
-          formData: fetchedFormData,
+          formData: {
+            ...getDefaultFormData({
+              ruleTypeId: fetchedFormData.ruleTypeId,
+              name: fetchedFormData.name,
+              consumer: fetchedFormData.consumer,
+              actions: fetchedFormData.actions,
+            }),
+            ...fetchedFormData,
+          },
           id,
           plugins,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
