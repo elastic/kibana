@@ -35,6 +35,7 @@ import { getPageIndex } from './utils/get_page_index';
 import { useAbortControllerRef } from '../../../hooks/use_abort_controller_ref';
 import { useHistoricalResults } from './hooks/use_historical_results';
 import { HistoricalResultsContext } from './contexts/historical_results_context';
+import { HistoricalResultsTour } from './historical_results_tour';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 
@@ -44,6 +45,10 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   chartSelectedIndex: SelectedIndex | null;
   setChartSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
+  isTourActive: boolean;
+  isFirstOpenPattern: boolean;
+  onAccordionToggle: (patternName: string, isOpen: boolean) => void;
+  onDismissTour: () => void;
 }
 
 const PatternComponent: React.FC<Props> = ({
@@ -52,6 +57,10 @@ const PatternComponent: React.FC<Props> = ({
   patternRollup,
   chartSelectedIndex,
   setChartSelectedIndex,
+  isTourActive,
+  isFirstOpenPattern,
+  onAccordionToggle,
+  onDismissTour,
 }) => {
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
   const historicalResultsContextValue = useMemo(
@@ -124,6 +133,18 @@ const PatternComponent: React.FC<Props> = ({
     ]
   );
 
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+
+  const handleAccordionToggle = useCallback(
+    (isOpen: boolean) => {
+      setIsAccordionOpen(isOpen);
+      onAccordionToggle(pattern, isOpen);
+    },
+    [onAccordionToggle, pattern]
+  );
+
+  const firstRow = items[0];
+
   const handleFlyoutClose = useCallback(() => {
     setExpandedIndexName(null);
   }, []);
@@ -153,6 +174,9 @@ const PatternComponent: React.FC<Props> = ({
 
   const handleFlyoutViewCheckHistoryAction = useCallback(
     (indexName: string) => {
+      if (isTourActive) {
+        onDismissTour();
+      }
       fetchHistoricalResults({
         abortController: flyoutViewCheckHistoryAbortControllerRef.current,
         indexName,
@@ -160,8 +184,15 @@ const PatternComponent: React.FC<Props> = ({
       setExpandedIndexName(indexName);
       setInitialFlyoutTabId(HISTORY_TAB_ID);
     },
-    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef]
+    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef, isTourActive, onDismissTour]
   );
+
+  const handleOpenFlyoutHistoryTab = useCallback(() => {
+    const firstItemIndexName = firstRow?.indexName;
+    if (firstItemIndexName) {
+      handleFlyoutViewCheckHistoryAction(firstItemIndexName);
+    }
+  }, [firstRow?.indexName, handleFlyoutViewCheckHistoryAction]);
 
   useEffect(() => {
     const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
@@ -271,6 +302,7 @@ const PatternComponent: React.FC<Props> = ({
         <PatternAccordion
           id={patternComponentAccordionId}
           initialIsOpen={true}
+          onToggle={handleAccordionToggle}
           buttonElement="div"
           buttonContent={
             <PatternSummary
@@ -308,6 +340,12 @@ const PatternComponent: React.FC<Props> = ({
 
             {!loading && error == null && (
               <div ref={containerRef}>
+                <HistoricalResultsTour
+                  anchorSelectorValue={pattern}
+                  onTryIt={handleOpenFlyoutHistoryTab}
+                  isOpen={isTourActive && !isFlyoutVisible && isFirstOpenPattern && isAccordionOpen}
+                  onDismissTour={onDismissTour}
+                />
                 <SummaryTable
                   getTableColumns={getSummaryTableColumns}
                   items={items}
@@ -320,6 +358,7 @@ const PatternComponent: React.FC<Props> = ({
                   onCheckNowAction={handleFlyoutCheckNowAndExpandAction}
                   onViewHistoryAction={handleFlyoutViewCheckHistoryAction}
                   sorting={sorting}
+                  firstIndexName={items[0]?.indexName}
                 />
               </div>
             )}
@@ -334,6 +373,8 @@ const PatternComponent: React.FC<Props> = ({
             ilmExplain={ilmExplain}
             stats={stats}
             onClose={handleFlyoutClose}
+            onDismissTour={onDismissTour}
+            isTourActive={isTourActive}
           />
         ) : null}
       </HistoricalResultsContext.Provider>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 
 import {
   TestDataQualityProviders,
@@ -19,6 +19,7 @@ import { useStats } from './hooks/use_stats';
 import { ERROR_LOADING_METADATA_TITLE, LOADING_STATS } from './translations';
 import { useHistoricalResults } from './hooks/use_historical_results';
 import { getHistoricalResultStub } from '../../../stub/get_historical_result_stub';
+import userEvent from '@testing-library/user-event';
 
 const pattern = 'auditbeat-*';
 
@@ -81,6 +82,10 @@ describe('pattern', () => {
             setChartSelectedIndex={jest.fn()}
             indexNames={Object.keys(auditbeatWithAllResults.stats!)}
             pattern={pattern}
+            isTourActive={false}
+            onDismissTour={jest.fn()}
+            isFirstOpenPattern={false}
+            onAccordionToggle={jest.fn()}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -107,6 +112,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={undefined}
                 pattern={'remote:*'}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -127,6 +136,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={undefined}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -155,6 +168,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -182,6 +199,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -215,6 +236,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -248,6 +273,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -292,6 +321,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -306,7 +339,7 @@ describe('pattern', () => {
           name: 'Check now',
         });
 
-        await act(async () => checkNowButton.click());
+        await userEvent.click(checkNowButton);
 
         // assert
         expect(checkIndex).toHaveBeenCalledTimes(1);
@@ -370,6 +403,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -384,7 +421,7 @@ describe('pattern', () => {
           name: 'View history',
         });
 
-        await act(async () => viewHistoryButton.click());
+        await userEvent.click(viewHistoryButton);
 
         // assert
         expect(fetchHistoricalResults).toHaveBeenCalledTimes(1);
@@ -444,6 +481,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -458,11 +499,11 @@ describe('pattern', () => {
           name: 'View history',
         });
 
-        await act(async () => viewHistoryButton.click());
+        await userEvent.click(viewHistoryButton);
 
         const closeButton = screen.getByRole('button', { name: 'Close this dialog' });
 
-        await act(async () => closeButton.click());
+        await userEvent.click(closeButton);
 
         // assert
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
@@ -504,6 +545,10 @@ describe('pattern', () => {
                 setChartSelectedIndex={jest.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
           </TestExternalProviders>
@@ -530,6 +575,344 @@ describe('pattern', () => {
         );
         expect(screen.getByTestId('latestResults')).toBeInTheDocument();
         expect(screen.queryByTestId('historicalResults')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Tour', () => {
+    describe('when isTourActive and isFirstOpenPattern', () => {
+      it('renders the tour near the first row history view button', async () => {
+        (useIlmExplain as jest.Mock).mockReturnValue({
+          error: null,
+          ilmExplain: auditbeatWithAllResults.ilmExplain,
+          loading: false,
+        });
+
+        (useStats as jest.Mock).mockReturnValue({
+          stats: auditbeatWithAllResults.stats,
+          error: null,
+          loading: false,
+        });
+
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <Pattern
+                patternRollup={auditbeatWithAllResults}
+                chartSelectedIndex={null}
+                setChartSelectedIndex={jest.fn()}
+                indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                pattern={pattern}
+                isTourActive={true}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={true}
+                onAccordionToggle={jest.fn()}
+              />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        const rows = screen.getAllByRole('row');
+        // skipping the first row which is the header
+        const firstBodyRow = within(rows[1]);
+
+        const tourWrapper = await firstBodyRow.findByTestId('historicalResultsTour');
+
+        expect(
+          within(tourWrapper).getByRole('button', { name: 'View history' })
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByRole('dialog', { name: 'Introducing data quality history' })
+        ).toBeInTheDocument();
+      });
+
+      describe('when accordion is collapsed', () => {
+        it('hides the tour', async () => {
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: auditbeatWithAllResults.ilmExplain,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: auditbeatWithAllResults.stats,
+            error: null,
+            loading: false,
+          });
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={auditbeatWithAllResults}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                  pattern={pattern}
+                  isTourActive={true}
+                  onDismissTour={jest.fn()}
+                  isFirstOpenPattern={true}
+                  onAccordionToggle={jest.fn()}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          expect(await screen.findByTestId('historicalResultsTour')).toBeInTheDocument();
+
+          const accordionToggle = screen.getByRole('button', {
+            name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
+          });
+
+          await userEvent.click(accordionToggle);
+
+          expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
+        });
+      });
+
+      describe('when the tour close button is clicked', () => {
+        it('invokes onDismissTour', async () => {
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: auditbeatWithAllResults.ilmExplain,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: auditbeatWithAllResults.stats,
+            error: null,
+            loading: false,
+          });
+
+          const onDismissTour = jest.fn();
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={auditbeatWithAllResults}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                  pattern={pattern}
+                  isTourActive={true}
+                  onDismissTour={onDismissTour}
+                  isFirstOpenPattern={true}
+                  onAccordionToggle={jest.fn()}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          const tourDialog = await screen.findByRole('dialog', {
+            name: 'Introducing data quality history',
+          });
+
+          const closeButton = within(tourDialog).getByRole('button', { name: 'Close' });
+
+          await userEvent.click(closeButton);
+
+          expect(onDismissTour).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when the tour tryIt action is clicked', () => {
+        it('opens the flyout with history tab and invokes onDismissTour', async () => {
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: auditbeatWithAllResults.ilmExplain,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: auditbeatWithAllResults.stats,
+            error: null,
+            loading: false,
+          });
+
+          const onDismissTour = jest.fn();
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={auditbeatWithAllResults}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                  pattern={pattern}
+                  isTourActive={true}
+                  onDismissTour={onDismissTour}
+                  isFirstOpenPattern={true}
+                  onAccordionToggle={jest.fn()}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          const tourDialog = await screen.findByRole('dialog', {
+            name: 'Introducing data quality history',
+          });
+
+          const tryItButton = within(tourDialog).getByRole('button', { name: 'Try it' });
+
+          await userEvent.click(tryItButton);
+
+          expect(onDismissTour).toHaveBeenCalledTimes(1);
+          expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
+          expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+            'aria-selected',
+            'false'
+          );
+          expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+            'aria-selected',
+            'true'
+          );
+        });
+      });
+
+      describe('when latest latest check flyout tab is opened', () => {
+        it('hides the tour in listview and shows in flyout', async () => {
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: auditbeatWithAllResults.ilmExplain,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: auditbeatWithAllResults.stats,
+            error: null,
+            loading: false,
+          });
+
+          const onDismissTour = jest.fn();
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={auditbeatWithAllResults}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                  pattern={pattern}
+                  isTourActive={true}
+                  onDismissTour={onDismissTour}
+                  isFirstOpenPattern={true}
+                  onAccordionToggle={jest.fn()}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          const rows = screen.getAllByRole('row');
+          // skipping the first row which is the header
+          const firstBodyRow = within(rows[1]);
+
+          expect(await firstBodyRow.findByTestId('historicalResultsTour')).toBeInTheDocument();
+          expect(
+            screen.getByRole('dialog', { name: 'Introducing data quality history' })
+          ).toBeInTheDocument();
+
+          const checkNowButton = firstBodyRow.getByRole('button', {
+            name: 'Check now',
+          });
+          await userEvent.click(checkNowButton);
+
+          expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
+          expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+            'aria-selected',
+            'true'
+          );
+          expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+            'aria-selected',
+            'false'
+          );
+
+          expect(firstBodyRow.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
+
+          const tabWrapper = await screen.findByRole('tab', { name: 'History' });
+          await waitFor(() =>
+            expect(
+              tabWrapper.closest('[data-test-subj="historicalResultsTour"]')
+            ).toBeInTheDocument()
+          );
+
+          expect(onDismissTour).not.toHaveBeenCalled();
+        }, 10000);
+      });
+    });
+
+    describe('when not isFirstOpenPattern', () => {
+      it('does not render the tour', async () => {
+        (useIlmExplain as jest.Mock).mockReturnValue({
+          error: null,
+          ilmExplain: auditbeatWithAllResults.ilmExplain,
+          loading: false,
+        });
+
+        (useStats as jest.Mock).mockReturnValue({
+          stats: auditbeatWithAllResults.stats,
+          error: null,
+          loading: false,
+        });
+
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <Pattern
+                patternRollup={auditbeatWithAllResults}
+                chartSelectedIndex={null}
+                setChartSelectedIndex={jest.fn()}
+                indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                pattern={pattern}
+                isTourActive={true}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={false}
+                onAccordionToggle={jest.fn()}
+              />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('when not isTourActive', () => {
+      it('does not render the tour', async () => {
+        (useIlmExplain as jest.Mock).mockReturnValue({
+          error: null,
+          ilmExplain: auditbeatWithAllResults.ilmExplain,
+          loading: false,
+        });
+
+        (useStats as jest.Mock).mockReturnValue({
+          stats: auditbeatWithAllResults.stats,
+          error: null,
+          loading: false,
+        });
+
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <Pattern
+                patternRollup={auditbeatWithAllResults}
+                chartSelectedIndex={null}
+                setChartSelectedIndex={jest.fn()}
+                indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenPattern={true}
+                onAccordionToggle={jest.fn()}
+              />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
       });
     });
   });

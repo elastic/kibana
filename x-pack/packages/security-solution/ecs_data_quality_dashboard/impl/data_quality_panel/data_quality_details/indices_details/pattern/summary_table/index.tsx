@@ -30,6 +30,7 @@ export interface Props {
     pattern: string;
     onCheckNowAction: (indexName: string) => void;
     onViewHistoryAction: (indexName: string) => void;
+    firstIndexName?: string;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
@@ -41,6 +42,7 @@ export interface Props {
   sorting: SortConfig;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
+  firstIndexName?: string;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
@@ -55,6 +57,7 @@ const SummaryTableComponent: React.FC<Props> = ({
   sorting,
   onCheckNowAction,
   onViewHistoryAction,
+  firstIndexName,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const columns = useMemo(
@@ -66,6 +69,7 @@ const SummaryTableComponent: React.FC<Props> = ({
         pattern,
         onCheckNowAction,
         onViewHistoryAction,
+        firstIndexName,
       }),
     [
       getTableColumns,
@@ -75,6 +79,7 @@ const SummaryTableComponent: React.FC<Props> = ({
       pattern,
       onCheckNowAction,
       onViewHistoryAction,
+      firstIndexName,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);

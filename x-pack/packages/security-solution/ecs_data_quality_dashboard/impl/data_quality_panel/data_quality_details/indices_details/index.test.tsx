@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../constants';
@@ -19,6 +19,8 @@ import {
 } from '../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../types';
 import { Props, IndicesDetails } from '.';
+import userEvent from '@testing-library/user-event';
+import { HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY } from './constants';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -58,6 +60,7 @@ const defaultProps: Props = {
 describe('IndicesDetails', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    localStorage.removeItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY);
 
     render(
       <TestExternalProviders>
@@ -74,10 +77,64 @@ describe('IndicesDetails', () => {
   });
 
   describe('rendering patterns', () => {
-    patterns.forEach((pattern) => {
-      test(`it renders the ${pattern} pattern`, () => {
-        expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
+    test.each(patterns)('it renders the %s pattern', (pattern) => {
+      expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
+    });
+  });
+
+  describe('tour', () => {
+    test('it renders the tour wrapping view history button of first row of first pattern', async () => {
+      const wrapper = await screen.findByTestId('historicalResultsTour');
+      const button = within(wrapper).getByRole('button', { name: 'View history' });
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveAttribute('data-tour-element', patterns[0]);
+
+      expect(
+        screen.getByRole('dialog', { name: 'Introducing data quality history' })
+      ).toBeInTheDocument();
+    });
+
+    describe('when the tour is dismissed', () => {
+      test('it hides the tour and persists in localStorage', async () => {
+        const wrapper = await screen.findByRole('dialog', {
+          name: 'Introducing data quality history',
+        });
+
+        const button = within(wrapper).getByRole('button', { name: 'Close' });
+
+        await userEvent.click(button);
+
+        await waitFor(() => expect(screen.queryByTestId('historicalResultsTour')).toBeNull());
+
+        expect(localStorage.getItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY)).toEqual(
+          'false'
+        );
       });
+    });
+
+    describe('when the first pattern is toggled', () => {
+      test('it renders the tour wrapping view history button of first row of second pattern', async () => {
+        const firstPatternAccordionWrapper = await screen.findByTestId(
+          `${patterns[0]}PatternPanel`
+        );
+        const accordionToggle = within(firstPatternAccordionWrapper).getByRole('button', {
+          name: /Pass/,
+        });
+        await userEvent.click(accordionToggle);
+
+        const secondPatternAccordionWrapper = screen.getByTestId(`${patterns[1]}PatternPanel`);
+        const historicalResultsWrapper = await within(secondPatternAccordionWrapper).findByTestId(
+          'historicalResultsTour'
+        );
+        const button = within(historicalResultsWrapper).getByRole('button', {
+          name: 'View history',
+        });
+        expect(button).toHaveAttribute('data-tour-element', patterns[1]);
+
+        expect(
+          screen.getByRole('dialog', { name: 'Introducing data quality history' })
+        ).toBeInTheDocument();
+      }, 10000);
     });
   });
 });
