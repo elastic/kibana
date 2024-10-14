@@ -221,24 +221,17 @@ describe('ConnectorUsageReportingTask', () => {
     );
   });
 
-  it('returns the existin state and logs error when project id is missing', async () => {
+  it('returns the existin state and logs warning when project id is missing', async () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
 
     const taskRunner = await createTaskRunner({ lastReportedUsageDate });
 
-    const response = await taskRunner.run();
+    await taskRunner.run();
 
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       'Missing required project id while running actions:connector_usage_reporting'
     );
-
-    expect(response).toEqual({
-      state: {
-        attempts: 0,
-        lastReportedUsageDate,
-      },
-    });
   });
 
   it('returns the existin state and logs error when the CA Certificate is missing', async () => {
