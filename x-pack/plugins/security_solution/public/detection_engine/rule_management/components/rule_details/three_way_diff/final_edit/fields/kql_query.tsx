@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { useToggle } from 'react-use';
 import { css } from '@emotion/css';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -53,21 +54,13 @@ interface KqlQueryEditProps {
 
 export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: KqlQueryEditProps) {
   const defaultIndexPattern = useDefaultIndexPattern();
-
   const indexPatternParameters = getUseRuleIndexPatternParameters(
     finalDiffableRule,
     defaultIndexPattern
   );
-
-  const isSavedQueryRule = finalDiffableRule.type === 'saved_query';
-
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
 
-  const [isTimelineSearchOpen, setIsTimelineSearchOpen] = useState(false);
-
-  const handleOpenTimelineSearch = useCallback(() => setIsTimelineSearchOpen(true), []);
-
-  const handleCloseTimelineSearch = useCallback(() => setIsTimelineSearchOpen(false), []);
+  const [isTimelineSearchOpen, toggleIsTimelineSearchOpen] = useToggle(false);
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ queryBar: timelineQueryBar }) => {
@@ -78,6 +71,7 @@ export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: 
 
   const { onOpenTimeline } = useRuleFromTimeline(handleSetRuleFromTimeline);
 
+  const isSavedQueryRule = finalDiffableRule.type === 'saved_query';
   const savedQueryId =
     isSavedQueryRule && 'saved_query_id' in finalDiffableRule.kql_query
       ? finalDiffableRule.kql_query.saved_query_id
@@ -97,7 +91,7 @@ export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: 
           ...kqlQuerySchema.queryBar,
           label: stepDefineRuleI18n.QUERY_BAR_LABEL,
           labelAppend: isSavedQueryRule ? null : (
-            <ImportTimelineQueryButton handleOpenTimelineSearch={handleOpenTimelineSearch} />
+            <ImportTimelineQueryButton handleOpenTimelineSearch={toggleIsTimelineSearchOpen} />
           ),
         }}
         component={QueryBarDefineRule}
@@ -105,7 +99,7 @@ export function KqlQueryEdit({ finalDiffableRule, setValidity, setFieldValue }: 
           indexPattern,
           isLoading: isIndexPatternLoading,
           openTimelineSearch: isTimelineSearchOpen,
-          onCloseTimelineSearch: handleCloseTimelineSearch,
+          onCloseTimelineSearch: toggleIsTimelineSearchOpen,
           onValidityChange: setValidity,
           onOpenTimeline,
           isDisabled: isSavedQueryRule,

@@ -24,7 +24,7 @@ interface RuleUpgradeConflictsResolverProps {
 
 export function RuleUpgradeConflictsResolver({
   ruleUpgradeState,
-}: RuleUpgradeConflictsResolverProps): JSX.Element {
+}: RuleUpgradeConflictsResolverProps): React.ReactNode {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as FieldDiffEntries<
     typeof ruleUpgradeState.diff.fields
   >;
@@ -33,7 +33,7 @@ export function RuleUpgradeConflictsResolver({
     return isNonUpgradeableFieldName(fieldName) === false;
   }) as FieldDiffEntries<typeof ruleUpgradeState.diff.fields, NonUpgradeableDiffableFields>;
 
-  fields.map(([fieldName, fieldDiff]) => (
+  return fields.map(([fieldName, fieldDiff]) => (
     <FieldUpgradeConflictsResolver
       key={fieldName}
       fieldName={fieldName}
@@ -41,6 +41,4 @@ export function RuleUpgradeConflictsResolver({
       fieldThreeWayDiff={fieldDiff}
     />
   ));
-
-  return <>{fields}</>;
 }
