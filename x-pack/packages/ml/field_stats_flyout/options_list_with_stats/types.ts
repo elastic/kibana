@@ -9,19 +9,20 @@ import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui'
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 
 interface BaseOption<T> {
-  value?: string | number | string[] | undefined;
   key?: string;
   label: string | React.ReactNode;
   isEmpty?: boolean;
+  hideTrigger?: boolean;
   'data-is-empty'?: boolean;
+  'data-hide-inspect'?: boolean;
   isGroupLabelOption?: boolean;
   isGroupLabel?: boolean;
-  field?: Field | { id: string; type: string };
+  field?: Field;
   agg?: Aggregation;
   searchableLabel?: string;
 }
 export type SelectableOption<T> = EuiSelectableOption<BaseOption<T>>;
-export type DropDownLabel<T = string | number | string[] | undefined> =
+export type DropDownLabel<T = string> =
   | (EuiComboBoxOptionOption & BaseOption<Aggregation>)
   | SelectableOption<T>;
 

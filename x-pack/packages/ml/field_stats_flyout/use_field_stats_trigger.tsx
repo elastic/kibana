@@ -8,8 +8,9 @@
 import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { type EuiComboBoxOptionOption } from '@elastic/eui';
-import { EVENT_RATE_FIELD_ID, type Field } from '@kbn/ml-anomaly-utils';
+import type { Field } from '@kbn/ml-anomaly-utils';
 import { css } from '@emotion/react';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields';
 import type { DropDownLabel } from '.';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
@@ -62,15 +63,20 @@ export function useFieldStatsTrigger<T = DropDownLabel>() {
     (option: T): ReactNode => {
       if (isSelectableOption(option)) {
         const field = (option as Option).field;
-        const isEmpty = populatedFields && field ? !populatedFields.has(field?.id) : false;
+        const isInternalEventRateFieldId = field?.id === EVENT_RATE_FIELD_ID;
+        const isEmpty = isInternalEventRateFieldId
+          ? false
+          : !populatedFields?.has(field?.id ?? field?.name);
+        const shouldHideInpectButton = option.hideTrigger ?? option['data-hide-inspect'];
         return option.isGroupLabel || !field ? (
           option.label
         ) : (
           <FieldStatsInfoButton
-            isEmpty={field.id === EVENT_RATE_FIELD_ID ? false : isEmpty}
+            isEmpty={isEmpty}
             field={field}
             label={option.label}
             onButtonClick={handleFieldStatsButtonClick}
+            hideTrigger={shouldHideInpectButton ?? isInternalEventRateFieldId}
           />
         );
       }

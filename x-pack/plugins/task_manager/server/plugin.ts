@@ -286,6 +286,7 @@ export class TaskManagerPlugin
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const defaultCapacity = getDefaultCapacity({
+      autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
       claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
       isCloud: cloud?.isCloudEnabled ?? false,
@@ -300,7 +301,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity}`
+      } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
+        this.config.auto_calculate_default_ech_capacity
+      }`
     );
 
     const managedConfiguration = createManagedConfiguration({
@@ -406,6 +409,11 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    // Stop polling for tasks
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
+
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();
       try {

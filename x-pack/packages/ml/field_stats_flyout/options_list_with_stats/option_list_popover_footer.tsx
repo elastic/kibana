@@ -17,36 +17,35 @@ export const OptionsListPopoverFooter: FC<{
   isLoading?: boolean;
 }> = ({ showEmptyFields, setShowEmptyFields, isLoading }) => {
   return (
-    <>
-      <EuiPopoverFooter
-        paddingSize="none"
-        css={css({
-          height: euiThemeVars.euiButtonHeight,
-          backgroundColor: useEuiBackgroundColor('subdued'),
-          alignItems: 'center',
-          display: 'flex',
-          paddingLeft: euiThemeVars.euiSizeS,
-        })}
-      >
-        {isLoading ? (
-          <div style={{ position: 'absolute', width: '100%' }}>
-            <EuiProgress
-              data-test-subj="optionsList-control-popover-loading"
-              size="xs"
-              color="accent"
-            />
-          </div>
-        ) : null}
+    <EuiPopoverFooter
+      paddingSize="none"
+      css={css({
+        height: euiThemeVars.euiButtonHeight,
+        backgroundColor: useEuiBackgroundColor('subdued'),
+        alignItems: 'center',
+        display: 'flex',
+        paddingLeft: euiThemeVars.euiSizeS,
+      })}
+    >
+      {isLoading ? (
+        // @ts-expect-error css should be ok
+        <div css={css({ position: 'absolute', width: '100%' })}>
+          <EuiProgress
+            data-test-subj="optionsList-control-popover-loading"
+            size="xs"
+            color="accent"
+          />
+        </div>
+      ) : null}
 
-        <EuiSwitch
-          data-test-subj="optionsListIncludeEmptyFields"
-          label={i18n.translate('xpack.ml.controls.optionsList.popover.includeEmptyFieldsLabel', {
-            defaultMessage: 'Include empty fields',
-          })}
-          checked={showEmptyFields}
-          onChange={(e) => setShowEmptyFields(e.target.checked)}
-        />
-      </EuiPopoverFooter>
-    </>
+      <EuiSwitch
+        data-test-subj="optionsListIncludeEmptyFields"
+        label={i18n.translate('xpack.ml.controls.optionsList.popover.includeEmptyFieldsLabel', {
+          defaultMessage: 'Include empty fields',
+        })}
+        checked={showEmptyFields}
+        onChange={(e) => setShowEmptyFields(e.target.checked)}
+      />
+    </EuiPopoverFooter>
   );
 };

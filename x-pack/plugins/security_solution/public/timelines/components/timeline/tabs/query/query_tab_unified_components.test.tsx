@@ -901,7 +901,8 @@ describe('query tab with unified timeline', () => {
         );
       });
 
-      it(
+      // Flaky: https://github.com/elastic/kibana/issues/189794
+      it.skip(
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();

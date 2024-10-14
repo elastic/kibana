@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';
@@ -44,10 +45,10 @@ export const SplitFieldSelect: FC<Props> = ({
     selection.push({ label: selectedField.name, field: selectedField } as DropDownLabel);
   }
 
-  function onChange(selectedOptions: DropDownLabel[]) {
-    const option = selectedOptions[0];
+  function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
+    const option = selectedOptions[0] as DropDownLabel;
     if (typeof option?.field !== 'undefined') {
-      changeHandler(option.field as SplitField);
+      changeHandler(option.field);
     } else {
       changeHandler(null);
     }

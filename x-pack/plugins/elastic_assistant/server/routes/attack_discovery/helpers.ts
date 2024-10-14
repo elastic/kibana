@@ -157,7 +157,6 @@ const formatAssistantToolParams = ({
   langChainTimeout,
   llm,
   logger,
-  modelExists: false, // not required for attack discovery
   onNewReplacements,
   replacements: latestReplacements,
   request,

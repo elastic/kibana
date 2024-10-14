@@ -37,7 +37,7 @@ export function GetStartedPanel({
 }: {
   onboardingFlowType: string;
   dataset: string;
-  integration: string;
+  integration?: string;
   newTab: boolean;
   actionLinks: Array<{
     id: string;
@@ -88,7 +88,7 @@ export function GetStartedPanel({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="m">
             {actionLinks.map(({ id, title, label, href }) => (
               <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
@@ -110,30 +110,33 @@ export function GetStartedPanel({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
-
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
-          defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
-          values={{
-            viewAllAssetsLink: (
-              <EuiLink
-                target="_blank"
-                data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
-                href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
-                  {
-                    defaultMessage: 'View all assets',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
+      {integration && (
+        <>
+          <EuiSpacer />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
+              defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
+              values={{
+                viewAllAssetsLink: (
+                  <EuiLink
+                    target="_blank"
+                    data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
+                    href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
+                      {
+                        defaultMessage: 'View all assets',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
     </>
   );
 }

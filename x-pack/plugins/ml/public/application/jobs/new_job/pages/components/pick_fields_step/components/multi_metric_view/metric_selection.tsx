@@ -66,10 +66,9 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (selectedOptionsIn !== null && selectedOptionsIn.length) {
       const option = selectedOptionsIn[0] as DropDownLabel;
       if (typeof option !== 'undefined' && isPopulatedObject(option, ['agg', 'field'])) {
-        const newPair: AggFieldPair = {
+        const newPair = {
           agg: option.agg as Aggregation,
           field: option.field as Field,
-          by: { field: null, value: null },
         };
         setAggFieldPairList([...aggFieldPairList, newPair]);
         setSelectedOptions([]);

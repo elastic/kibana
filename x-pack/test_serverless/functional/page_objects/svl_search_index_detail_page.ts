@@ -180,5 +180,31 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         apiKey
       );
     },
+
+    async clickFirstDocumentDeleteAction() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      await testSubjects.click('deleteDocumentButton');
+    },
+
+    async expectDeleteDocumentActionNotVisible() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
+      const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+      await indexList[indexOfRow].click();
+      await retry.waitFor('index details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+      });
+    },
+
+    async expectSearchIndexDetailsTabsExists() {
+      await testSubjects.existOrFail('dataTab');
+      await testSubjects.existOrFail('mappingsTab');
+      await testSubjects.existOrFail('settingsTab');
+    },
   };
 }

@@ -261,6 +261,7 @@ export const cli = () => {
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
       const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
       const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
+      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
 
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
@@ -270,6 +271,7 @@ export const cli = () => {
       log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
       log.info(`PROXY_SECRET is defined : ${PROXY_SECRET !== undefined}`);
       log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
+      log.info(`USE_CHROME_BETA is defined : ${USE_CHROME_BETA !== undefined}`);
 
       let cloudHandler: ProjectHandler;
       if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
@@ -555,7 +557,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'chrome',
+                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,

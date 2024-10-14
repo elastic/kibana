@@ -83,8 +83,6 @@ export const compareTypesWithLiterals = (
     return b === 'timeInterval';
   if (b === 'time_literal' || b === 'time_duration' || b === 'date_period')
     return a === 'timeInterval';
-  if (a === 'time_literal') return b === 'time_duration';
-  if (b === 'time_literal') return a === 'time_duration';
 
   return false;
 };
