@@ -6,18 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the rule.',
-    },
-  }),
-});
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  unmuteAllRuleRequestParamsSchemaV1,
+  UnmuteAllRuleRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/unmute_all';
 
 export const unmuteAllRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -33,7 +28,7 @@ export const unmuteAllRuleRoute = (
       },
       validate: {
         request: {
-          params: paramSchema,
+          params: unmuteAllRuleRequestParamsSchemaV1,
         },
         response: {
           204: {
@@ -45,9 +40,9 @@ export const unmuteAllRuleRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
+        const params: UnmuteAllRuleRequestParamsV1 = req.params;
         try {
-          await rulesClient.unmuteAll({ id });
+          await rulesClient.unmuteAll(params);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

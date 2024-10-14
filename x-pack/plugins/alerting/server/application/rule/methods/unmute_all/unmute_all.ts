@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
-import { updateMetaAttributes } from '../lib';
-import { clearUnscheduledSnoozeAttributes } from '../common';
-import { RuleAttributes } from '../../data/rule/types';
+import Boom from '@hapi/boom';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { updateMetaAttributes } from '../../../../rules_client/lib';
+import { clearUnscheduledSnoozeAttributes } from '../../../../rules_client/common';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { UnmuteAllRuleParams } from './types';
+import { unmuteAllRuleParamsSchema } from './schemas';
 
 export async function unmuteAll(
   context: RulesClientContext,
-  { id }: { id: string }
+  { id }: UnmuteAllRuleParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
@@ -26,7 +29,14 @@ export async function unmuteAll(
   );
 }
 
-async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRuleParams) {
+  try {
+    unmuteAllRuleParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating unmute all parameters - ${error.message}`);
+  }
+
+  const { id } = params;
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
     id
