@@ -140,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:user-artifact-packager',
         'entity_store:field_retention:enrichment',
         'fleet:check-deleted-files-task',
+        'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
