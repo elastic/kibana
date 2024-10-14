@@ -136,7 +136,7 @@ export const connectorExecuteResponseSchema = schema.object({
       schema.oneOf([schema.boolean(), schema.string()], {
         meta: {
           description:
-            'When the status is error, determines whether the connector execution will retry .',
+            'When the status is error, identifies whether the connector execution will retry .',
         },
       })
     )
