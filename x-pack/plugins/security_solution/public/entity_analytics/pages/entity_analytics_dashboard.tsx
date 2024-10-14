@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
+import { RiskScoreEntity } from '../../../common/search_strategy';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -24,11 +25,14 @@ import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_panels';
+import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
+  const isEntityStoreFeatureFlagEnabled = useIsExperimentalFeatureEnabled('entityStoreEnabled');
 
   return (
     <>
@@ -55,13 +59,21 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EntityStoreDashboardPanels />
-                </EuiFlexItem>
+                {isEntityStoreFeatureFlagEnabled ? (
+                  <EuiFlexItem>
+                    <EntityStoreDashboardPanels />
+                  </EuiFlexItem>
+                ) : (
+                  <>
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+                    </EuiFlexItem>
 
-                {/* <EuiFlexItem>
-                  <EntityAnalyticsRiskScores />
-                </EuiFlexItem> */}
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+                    </EuiFlexItem>
+                  </>
+                )}
 
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />
