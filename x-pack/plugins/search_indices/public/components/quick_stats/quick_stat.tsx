@@ -89,7 +89,9 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">{secondaryTitle}</EuiText>
+              <EuiText size="s" color="subdued">
+                {secondaryTitle}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
