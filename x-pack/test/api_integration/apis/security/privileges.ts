@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         'update_anonymization',
       ],
       securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
-      securitySolutionCases: [
+      securitySolutionCasesV2: [
         'all',
         'read',
         'minimal_all',

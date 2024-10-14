@@ -6,16 +6,9 @@
  */
 
 import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import type { ProductFeatureCasesKey, CasesSubFeatureId } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
 
 export interface CasesFeatureParams {
   uiCapabilities: CasesUiCapabilities;
   apiTags: CasesApiTags;
   savedObjects: { files: string[] };
 }
-
-export type DefaultCasesProductFeaturesConfig = Record<
-  ProductFeatureCasesKey,
-  ProductFeatureKibanaConfig<CasesSubFeatureId>
->;

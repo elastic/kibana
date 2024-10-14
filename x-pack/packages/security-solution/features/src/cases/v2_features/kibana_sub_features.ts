@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../product_features_keys';
-import { APP_ID } from '../constants';
-import type { CasesFeatureParams } from './types';
+import { CasesSubFeatureId } from '../../product_features_keys';
+import { APP_ID } from '../../constants';
+import type { CasesFeatureParams } from '../types';
 
 /**
  * Sub-features that will always be available for Security Cases
  * regardless of the product type.
  */
-export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
+export const getCasesBaseKibanaSubFeatureIdsV2 = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
   CasesSubFeatureId.casesSettings,
   CasesSubFeatureId.createComment,
@@ -26,7 +26,7 @@ export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getCasesSubFeaturesMap = ({
+export const getCasesSubFeaturesMapV2 = ({
   uiCapabilities,
   apiTags,
   savedObjects,
@@ -41,7 +41,7 @@ export const getCasesSubFeaturesMap = ({
         privileges: [
           {
             api: apiTags.delete,
-            id: 'cases_delete',
+            id: 'cases_delete_v2',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
               {
@@ -75,7 +75,7 @@ export const getCasesSubFeaturesMap = ({
         groupType: 'independent',
         privileges: [
           {
-            id: 'cases_settings',
+            id: 'cases_settings_v2',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails',
               {
@@ -96,6 +96,8 @@ export const getCasesSubFeaturesMap = ({
       },
     ],
   };
+
+  /* The below sub features were newly added in v2 (8.16) */
 
   const casesAddCommentsCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate(
@@ -169,6 +171,7 @@ export const getCasesSubFeaturesMap = ({
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
     [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
+    /* The below sub features were newly added in v2 (8.16) */
     [CasesSubFeatureId.createComment, casesAddCommentsCasesSubFeature],
     [CasesSubFeatureId.reopenCase, casesreopenCaseubFeature],
   ]);
