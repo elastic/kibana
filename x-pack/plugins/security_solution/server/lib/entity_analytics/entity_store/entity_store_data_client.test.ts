@@ -17,7 +17,7 @@ import type { EntityType } from '../../../../common/api/entity_analytics/entity_
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
-  const esClientMock = clusterClientMock.asInternalUser;
+  const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClient = new EntityStoreDataClient({
     clusterClient: clusterClientMock,
