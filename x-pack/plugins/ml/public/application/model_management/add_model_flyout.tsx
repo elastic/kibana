@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -218,15 +217,12 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <p>
-                  <EuiCallOut size="s" title={models[0].disclaimer} iconType="iInCircle" />
-                </p>
-                <EuiSpacer size="s" />
-                <p>
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
                       defaultMessage="E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                     />
+                    &nbsp;{models[0].disclaimer}
                   </EuiText>
                 </p>
                 <EuiSpacer size="s" />
