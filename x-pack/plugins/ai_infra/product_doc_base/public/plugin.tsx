@@ -16,7 +16,7 @@ import type {
 } from './types';
 import { InstallationService } from './services/installation';
 
-export class KnowledgeBaseRegistryPlugin
+export class ProductDocBasePlugin
   implements
     Plugin<
       ProductDocBasePluginSetup,

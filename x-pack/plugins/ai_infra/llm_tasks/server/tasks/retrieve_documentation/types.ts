@@ -10,11 +10,22 @@ import type { FunctionCallingMode } from '@kbn/inference-plugin/common/chat_comp
 import type { ProductName } from '@kbn/product-doc-common';
 
 export interface RetrieveDocumentationParams {
-  request: KibanaRequest;
-  max?: number;
-  products?: ProductName[];
-  connectorId: string;
+  /**
+   * The search term to perform semantic text with.
+   * E.g. "What is Kibana Lens?"
+   */
   searchTerm: string;
+  /**
+   * Maximum number of documents to return
+   * Defaults to 3.
+   */
+  max?: number;
+  /**
+   * Optional list of products to restrict the search to
+   */
+  products?: ProductName[];
+  request: KibanaRequest;
+  connectorId: string;
   functionCalling?: FunctionCallingMode;
 }
 

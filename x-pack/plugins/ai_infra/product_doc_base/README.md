@@ -1,4 +1,3 @@
-# Knowledge base registry plugin
+# Product documentation base plugin
 
-This plugin contains the registry for the knowledge base.
-
+This plugin contains the product documentation base service.

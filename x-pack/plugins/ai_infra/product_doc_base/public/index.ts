@@ -6,7 +6,7 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { KnowledgeBaseRegistryPlugin } from './plugin';
+import { ProductDocBasePlugin } from './plugin';
 import type {
   ProductDocBasePluginSetup,
   ProductDocBasePluginStart,
@@ -23,4 +23,4 @@ export const plugin: PluginInitializer<
   PluginSetupDependencies,
   PluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<PublicPluginConfig>) =>
-  new KnowledgeBaseRegistryPlugin(pluginInitializerContext);
+  new ProductDocBasePlugin(pluginInitializerContext);

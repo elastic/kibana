@@ -25,7 +25,7 @@ import { ProductDocInstallClient } from './services/doc_install_status';
 import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
 
-export class KnowledgeBaseRegistryPlugin
+export class ProductDocBasePlugin
   implements
     Plugin<
       ProductDocBaseSetupContract,
@@ -34,7 +34,7 @@ export class KnowledgeBaseRegistryPlugin
       ProductDocBaseStartDependencies
     >
 {
-  logger: Logger;
+  private logger: Logger;
   private installClient?: ProductDocInstallClient;
   private packageInstaller?: PackageInstaller;
 

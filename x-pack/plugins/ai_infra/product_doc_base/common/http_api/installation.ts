@@ -9,8 +9,8 @@ import type { ProductName } from '@kbn/product-doc-common';
 import type { ProductInstallState, InstallationStatus } from '../install_status';
 
 export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
-export const PERFORM_INSTALL_API_PATH = '/internal/product_doc_base/install';
-export const UNINSTALL_API_PATH = '/internal/product_doc_base/uninstall';
+export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
+export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
 export interface InstallationStatusResponse {
   overall: InstallationStatus;

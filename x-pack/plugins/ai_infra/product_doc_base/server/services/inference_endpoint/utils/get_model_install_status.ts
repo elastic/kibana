@@ -12,7 +12,6 @@ export const getModelInstallStatus = async ({
   inferenceId,
   taskType = 'sparse_embedding',
   client,
-  log,
 }: {
   inferenceId: string;
   taskType?: InferenceTaskType;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { ProductName } from './product';
+
 export interface ArtifactManifest {
   formatVersion: string;
-  productName: string;
+  productName: ProductName;
   productVersion: string;
 }

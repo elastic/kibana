@@ -21,6 +21,16 @@ export interface PluginStartDependencies {
 export interface LlmTasksPluginSetup {}
 
 export interface LlmTasksPluginStart {
+  /**
+   * Checks if all prerequisites to use the `retrieveDocumentation` task
+   * are respected. Can be used to check if the task can be registered
+   * as LLM tool for example.
+   */
   retrieveDocumentationAvailable: () => Promise<boolean>;
+  /**
+   * Perform the `retrieveDocumentation` task.
+   *
+   * @see RetrieveDocumentationAPI
+   */
   retrieveDocumentation: RetrieveDocumentationAPI;
 }

@@ -13,7 +13,7 @@ import type {
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies,
 } from './types';
-import { KnowledgeBaseRegistryPlugin } from './plugin';
+import { ProductDocBasePlugin } from './plugin';
 
 export { config } from './config';
 
@@ -26,4 +26,4 @@ export const plugin: PluginInitializer<
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<ProductDocBaseConfig>) =>
-  new KnowledgeBaseRegistryPlugin(pluginInitializerContext);
+  new ProductDocBasePlugin(pluginInitializerContext);

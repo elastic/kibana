@@ -8,8 +8,8 @@
 import type { IRouter } from '@kbn/core/server';
 import {
   INSTALLATION_STATUS_API_PATH,
-  PERFORM_INSTALL_API_PATH,
-  UNINSTALL_API_PATH,
+  INSTALL_ALL_API_PATH,
+  UNINSTALL_ALL_API_PATH,
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,
@@ -30,7 +30,6 @@ export const registerInstallationRoutes = ({
   router.get(
     { path: INSTALLATION_STATUS_API_PATH, validate: false, options: { access: 'internal' } },
     async (ctx, req, res) => {
-      // TODO: use installer instead
       const installClient = getInstallClient();
       const installStatus = await installClient.getInstallationStatus();
       const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
@@ -46,7 +45,7 @@ export const registerInstallationRoutes = ({
 
   router.post(
     {
-      path: PERFORM_INSTALL_API_PATH,
+      path: INSTALL_ALL_API_PATH,
       validate: false,
       options: {
         access: 'internal',
@@ -69,7 +68,7 @@ export const registerInstallationRoutes = ({
 
   router.post(
     {
-      path: UNINSTALL_API_PATH,
+      path: UNINSTALL_ALL_API_PATH,
       validate: false,
       options: {
         access: 'internal',
@@ -78,7 +77,6 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const installer = getInstaller();
 
-      // TODO: use ensureUpToDate with parameter to install non-installed
       await installer.uninstallAll();
 
       return res.ok<UninstallResponse>({

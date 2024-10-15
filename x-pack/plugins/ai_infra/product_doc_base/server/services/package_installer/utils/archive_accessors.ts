@@ -13,9 +13,7 @@ const manifestEntryPath = 'manifest.json';
 const mappingsEntryPath = 'mappings.json';
 
 export const loadManifestFile = async (archive: ZipArchive): Promise<ArtifactManifest> => {
-  const manifest = await parseEntryContent<ArtifactManifest>(manifestEntryPath, archive);
-  // TODO: schema validation
-  return manifest;
+  return await parseEntryContent<ArtifactManifest>(manifestEntryPath, archive);
 };
 
 export const loadMappingFile = async (archive: ZipArchive): Promise<MappingTypeMapping> => {

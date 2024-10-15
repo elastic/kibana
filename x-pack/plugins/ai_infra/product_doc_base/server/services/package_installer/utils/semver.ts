@@ -9,16 +9,17 @@ import Semver from 'semver';
 
 export const latestVersion = (versions: string[]): string => {
   let latest: string = versions[0];
-  for (let i = 1; 1 < versions.length; i++) {
-    if (Semver.gt(versions[i], latest)) {
-      latest = versions[i];
+  for (let i = 1; i < versions.length; i++) {
+    const current = versions[i];
+    if (Semver.gt(Semver.coerce(current)!, Semver.coerce(latest)!)) {
+      latest = current;
     }
   }
   return latest;
 };
 
 export const majorMinor = (version: string): string => {
-  const parsed = Semver.parse(version);
+  const parsed = Semver.coerce(version);
   if (!parsed) {
     throw new Error(`Not a valid semver version: [${version}]`);
   }
