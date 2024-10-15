@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { ESProcessorItem } from './processor_attributes.gen';
+import { CelInput } from './cel_input_attributes.gen';
 
 /**
  * Package name for the integration to be built.
@@ -178,6 +179,10 @@ export const DataStream = z.object({
    * The format of log samples in this dataStream.
    */
   samplesFormat: SamplesFormat,
+  /**
+   * The optional CEL input configuration for the dataStream.
+   */
+  celInput: CelInput.optional(),
 });
 
 /**

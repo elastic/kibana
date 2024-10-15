@@ -11,6 +11,7 @@ x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/
 packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
+x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
 x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/packages/ml/aiops_common @elastic/ml-ui
@@ -91,6 +92,7 @@ x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud @elastic/kibana-core
 x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-cloud-security-posture-common @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
 packages/shared-ux/code_editor/mocks @elastic/appex-sharedux

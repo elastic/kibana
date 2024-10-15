@@ -41,6 +41,7 @@ export interface NavigationServices {
   eventTracker: EventTracker;
   selectedPanelNode?: PanelSelectedNode | null;
   setSelectedPanelNode?: (node: PanelSelectedNode | null) => void;
+  isFeedbackBtnVisible$: Observable<boolean>;
 }
 
 /**
@@ -60,6 +61,7 @@ export interface NavigationKibanaDependencies {
         getIsCollapsed$: () => Observable<boolean>;
         getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
         setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+        getIsFeedbackBtnVisible$: () => Observable<boolean>;
       };
     };
     http: {
