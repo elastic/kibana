@@ -12,7 +12,11 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import type {
+  EuiDataGridControlColumn,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridProps,
+} from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -288,7 +292,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const TimelineEventDetailRowRendererComp = useMemo(
+    const TimelineEventDetailRowRendererComp = useMemo<EuiDataGridControlColumn['rowCellRender']>(
       () =>
         function TimelineEventDetailRowRenderer(props) {
           const { rowIndex, ...restProps } = props;

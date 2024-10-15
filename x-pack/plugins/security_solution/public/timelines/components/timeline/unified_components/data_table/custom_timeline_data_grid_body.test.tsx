@@ -88,7 +88,7 @@ describe('CustomTimelineDataGridBody', () => {
     (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
       canShowRowRenderer: true,
     });
-    const { getByTestId, getByText, queryByText, container } = renderTestComponents();
+    const { getByTestId, getByText, queryByText } = renderTestComponents();
 
     expect(getByTestId('customGridRowsContainer')).toBeVisible();
     expect(queryByText('Cell-0-3')).toBeFalsy();

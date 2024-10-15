@@ -335,6 +335,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   }, [rowIndex, setRowHeight]);
 
   const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
+
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -357,7 +358,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       key={rowIndex}
       ref={rowRef}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={'auto'}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
             return (
