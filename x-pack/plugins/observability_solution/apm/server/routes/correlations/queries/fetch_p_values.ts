@@ -14,6 +14,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
+import {isCCSRemoteIndexName} from "@kbn/es-query";
 
 export interface PValuesResponse {
   failedTransactionsCorrelations: FailedTransactionsCorrelation[];
@@ -104,7 +105,7 @@ export const fetchPValues = async ({
 
   const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
-  const ccsWarning = rejected.length > 0 && index.includes(':');
+  const ccsWarning = rejected.length > 0 && isCCSRemoteIndexName(index);
 
   return { failedTransactionsCorrelations, ccsWarning, fallbackResult };
 };
