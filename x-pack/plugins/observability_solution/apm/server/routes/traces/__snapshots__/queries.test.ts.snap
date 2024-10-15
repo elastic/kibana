@@ -12,15 +12,26 @@ Object {
   },
   "body": Object {
     "_source": Array [
+      "error.log.message",
+      "error.exception.message",
+      "error.exception.handled",
+      "error.exception.type",
+    ],
+    "fields": Array [
       "timestamp.us",
       "trace.id",
-      "transaction.id",
-      "parent.id",
       "service.name",
       "error.id",
-      "error.log.message",
-      "error.exception",
       "error.grouping_key",
+      "processor.event",
+      "parent.id",
+      "transaction.id",
+      "span.id",
+      "error.culprit",
+      "error.log.message",
+      "error.exception.message",
+      "error.exception.handled",
+      "error.exception.type",
     ],
     "query": Object {
       "bool": Object {

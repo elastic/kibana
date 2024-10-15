@@ -71,6 +71,7 @@ export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
+export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -196,6 +197,9 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
+
+/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
+export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =

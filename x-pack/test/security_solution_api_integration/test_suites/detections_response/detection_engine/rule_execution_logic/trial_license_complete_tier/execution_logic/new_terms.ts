@@ -8,7 +8,7 @@
 import expect from 'expect';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
+import { ALERT_RULE_EXECUTION_TYPE, ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
@@ -251,6 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.original_event.origin': '/var/log/wtmp',
         'kibana.alert.original_event.outcome': 'success',
         'kibana.alert.original_event.type': 'authentication_success',
+        'kibana.alert.rule.execution.type': 'scheduled',
       });
     });
 
@@ -1175,6 +1176,7 @@ export default ({ getService }: FtrProviderContext) => {
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
         expect(alerts.hits.hits).toHaveLength(1);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1184,6 +1186,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
