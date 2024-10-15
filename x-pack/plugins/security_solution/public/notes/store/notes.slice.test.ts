@@ -46,6 +46,7 @@ import {
   fetchNotesBySavedObjectIds,
   selectNotesBySavedObjectId,
   selectSortedNotesBySavedObjectId,
+  userClosedCreateErrorToast,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -530,6 +531,25 @@ describe('notesSlice', () => {
           ...initalEmptyState,
           pendingDeleteIds: [],
         });
+      });
+    });
+
+    describe('userClosedCreateErrorToast', () => {
+      it('should reset create note error', () => {
+        const action = { type: userClosedCreateErrorToast.type };
+
+        expect(
+          notesReducer(
+            {
+              ...initalEmptyState,
+              error: {
+                ...initalEmptyState.error,
+                createNote: new Error(),
+              },
+            },
+            action
+          ).error.createNote
+        ).toBe(null);
       });
     });
 
