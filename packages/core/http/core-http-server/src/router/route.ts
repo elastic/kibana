@@ -312,6 +312,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Whether this endpoint is being used to server generated or static HTTP resources
    * like JS, CSS or HTML.
    *
+   * @note Unless you need this setting for a special case, rather use the
+   *       {@link HttpResources} service exposed to plugins directly.
+   *
    * @note This is not a security feature and may affect superficial aspects of
    *       the HTTP response like versioning. Do not use this setting for any HTTP APIs.
    *
