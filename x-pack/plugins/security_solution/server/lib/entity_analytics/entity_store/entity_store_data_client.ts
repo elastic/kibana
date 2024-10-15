@@ -289,7 +289,7 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     deleteData: boolean
   ) {
-    const { namespace, logger, esClient, appClient, dataViewsService } = this.options;
+    const { namespace, logger, appClient, dataViewsService } = this.options;
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     const unitedDefinition = getUnitedEntityDefinition({
