@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { ObservabilityOnboardingAppServices } from '../..';
-import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
+import { CustomCard } from '../packages_list/types';
 import { Category } from './types';
-
-function toFeaturedCard(name: string): FeaturedCard {
-  return { type: 'featured', name };
-}
+import { LogoIcon } from '../shared/logo_icon';
 
 export function useCustomCardsForCategory(
   createCollectionCardHandler: (query: string) => () => void,
@@ -32,35 +31,124 @@ export function useCustomCardsForCategory(
   const getUrlForApp = application?.getUrlForApp;
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
-  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
 
-  const otelCard: VirtualCard = {
-    id: 'otel-logs',
-    type: 'virtual',
-    release: 'preview',
-    title: 'OpenTelemetry',
-    description:
-      'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
-    name: 'custom-logs-virtual',
-    categories: ['observability'],
-    icons: [
-      {
-        type: 'svg',
-        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
-      },
-    ],
-    url: otelLogsUrl,
-    version: '',
-    integration: '',
-  };
-
   switch (category) {
-    case 'apm':
+    case 'host':
+      return [
+        {
+          id: 'auto-detect-logs',
+          name: 'auto-detect-logs-virtual',
+          type: 'virtual',
+          title: 'Auto-detect Integrations with Elastic Agent',
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.scanYourHostForLabel',
+            {
+              defaultMessage: 'Scan your host for log and metric files, auto-install integrations',
+            }
+          ),
+          extraLabelsBadges: [
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="apple" size="m" />
+            </EuiFlexItem>,
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="linux" size="m" />
+            </EuiFlexItem>,
+          ],
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'eui',
+              src: 'agentApp',
+            },
+          ],
+          url: autoDetectUrl,
+          version: '',
+          integration: '',
+          isQuickstart: true,
+        },
+        {
+          id: 'otel-logs',
+          name: 'custom-logs-virtual',
+          type: 'virtual',
+          title: 'Elastic Distribution for OTel Collector',
+          description: 'Collect logs and host metrics using the Elastic Distro for OTel Collector ',
+          extraLabelsBadges: [
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="apple" size="m" />
+            </EuiFlexItem>,
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="linux" size="m" />
+            </EuiFlexItem>,
+          ],
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+            },
+          ],
+          url: otelLogsUrl,
+          version: '',
+          integration: '',
+          isQuickstart: true,
+        },
+      ];
+
+    case 'kubernetes':
+      return [
+        {
+          id: 'kubernetes-quick-start',
+          name: 'kubernetes-quick-start',
+          type: 'virtual',
+          title: 'Elastic Agent',
+          description: 'Monitor your Kubernetes cluster with Elastic Agent, collect container logs',
+          extraLabelsBadges: [
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="kubernetes" size="m" />
+            </EuiFlexItem>,
+          ],
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'eui',
+              src: 'agentApp',
+            },
+          ],
+          url: kubernetesUrl,
+          version: '',
+          integration: '',
+          isQuickstart: true,
+        },
+        {
+          id: 'otel-logs',
+          name: 'custom-logs-virtual',
+          type: 'virtual',
+          title: 'Elastic Distribution for OTel Collector',
+          description: 'Collect logs, metrics and traces for Kubernetes cluster monitoring',
+          extraLabelsBadges: [
+            <EuiFlexItem grow={false}>
+              <LogoIcon logo="kubernetes" size="m" />
+            </EuiFlexItem>,
+          ],
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+            },
+          ],
+          url: otelLogsUrl,
+          version: '',
+          integration: '',
+        },
+      ];
+
+    case 'application':
       return [
         {
           id: 'apm-virtual',
@@ -114,109 +202,9 @@ export function useCustomCardsForCategory(
           integration: '',
         },
       ];
-    case 'infra':
+
+    case 'cloud':
       return [
-        {
-          id: 'kubernetes-quick-start',
-          type: 'virtual',
-          title: 'Kubernetes',
-          release: 'preview',
-          description: 'Collect logs and metrics from Kubernetes using minimal configuration',
-          name: 'kubernetes-quick-start',
-          categories: ['observability'],
-          icons: [
-            {
-              type: 'svg',
-              src: http?.staticAssets.getPluginAssetHref('kubernetes.svg') ?? '',
-            },
-          ],
-          url: kubernetesUrl,
-          version: '',
-          integration: '',
-        },
-        toFeaturedCard('docker'),
-        otelCard,
-        {
-          id: 'azure-virtual',
-          type: 'virtual',
-          title: 'Azure',
-          description: 'Collect logs and metrics from Microsoft Azure',
-          name: 'azure',
-          categories: ['observability'],
-          icons: [],
-          url: 'https://azure.com',
-          version: '',
-          integration: '',
-          isCollectionCard: true,
-          onCardClick: createCollectionCardHandler('azure'),
-        },
-        {
-          id: 'aws-virtual',
-          type: 'virtual',
-          title: 'AWS',
-          description: 'Collect logs and metrics from Amazon Web Services (AWS)',
-          name: 'aws',
-          categories: ['observability'],
-          icons: [],
-          url: 'https://aws.com',
-          version: '',
-          integration: '',
-          isCollectionCard: true,
-          onCardClick: createCollectionCardHandler('aws'),
-        },
-        {
-          id: 'gcp-virtual',
-          type: 'virtual',
-          title: 'Google Cloud Platform',
-          description: 'Collect logs and metrics from Google Cloud Platform',
-          name: 'gcp',
-          categories: ['observability'],
-          icons: [],
-          url: '',
-          version: '',
-          integration: '',
-          isCollectionCard: true,
-          onCardClick: createCollectionCardHandler('gcp'),
-        },
-      ];
-    case 'logs':
-      return [
-        {
-          id: 'auto-detect-logs',
-          type: 'virtual',
-          title: 'Auto-detect logs and metrics',
-          release: 'preview',
-          description: 'This installation scans your host and auto-detects log files and metrics',
-          name: 'auto-detect-logs-virtual',
-          categories: ['observability'],
-          icons: [
-            {
-              type: 'eui',
-              src: 'consoleApp',
-            },
-          ],
-          url: autoDetectUrl,
-          version: '',
-          integration: '',
-        },
-        {
-          id: 'custom-logs',
-          type: 'virtual',
-          title: 'Stream log files',
-          description: 'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'custom-logs-virtual',
-          categories: ['observability'],
-          icons: [
-            {
-              type: 'eui',
-              src: 'filebeatApp',
-            },
-          ],
-          url: customLogsUrl,
-          version: '',
-          integration: '',
-        },
-        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
