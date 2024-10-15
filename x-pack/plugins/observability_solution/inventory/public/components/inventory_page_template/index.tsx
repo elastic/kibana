@@ -7,7 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
+import {
+  FeatureFeedbackButton,
+  TechnicalPreviewBadge,
+} from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchBar } from '../search_bar';
 import { getEntityManagerEnablement } from './no_data_config';
@@ -29,9 +32,11 @@ const pageTitle = (
   </EuiFlexGroup>
 );
 
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/feedback-new-inventory';
+
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: { observabilityShared, inventoryAPIClient },
+    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
@@ -73,6 +78,15 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle,
+        rightSideItems: [
+          <FeatureFeedbackButton
+            data-test-subj="inventoryFeedbackButton"
+            formUrl={INVENTORY_FEEDBACK_LINK}
+            kibanaVersion={kibanaEnvironment.kibanaVersion}
+            isCloudEnv={kibanaEnvironment.isCloudEnv}
+            isServerlessEnv={kibanaEnvironment.isServerlessEnv}
+          />,
+        ],
       }}
       noDataConfig={getEntityManagerEnablement({
         enabled: isEntityManagerEnabled,
