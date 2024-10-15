@@ -9,5 +9,7 @@
 
 export interface Container {
   id?: string | null;
-  image?: string | null;
+  image?: {
+    name?: string;
+  };
 }
