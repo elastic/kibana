@@ -74,7 +74,7 @@ export function TransactionTabs({
             {transaction && (
               <LogsTabContent
                 timestamp={transaction.timestamp.us}
-                duration={transaction?.transaction?.duration?.us}
+                duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
               />
             )}
@@ -158,11 +158,11 @@ function LogsTabContent({
   traceId,
 }: {
   timestamp: number;
-  duration?: number;
+  duration: number;
   traceId: string;
 }) {
   const startTimestamp = Math.floor(timestamp / 1000);
-  const endTimestamp = Math.ceil((startTimestamp + (duration ?? 0)) / 1000);
+  const endTimestamp = Math.ceil(startTimestamp + duration / 1000);
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
   return (
     <LogStream

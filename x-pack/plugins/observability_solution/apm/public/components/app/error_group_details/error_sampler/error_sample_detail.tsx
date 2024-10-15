@@ -260,7 +260,7 @@ export function ErrorSampleDetails({
                 <TransactionDetailLink
                   traceId={transaction.trace.id}
                   transactionId={transaction.transaction.id}
-                  transactionName={transaction?.transaction?.name}
+                  transactionName={transaction.transaction.name}
                   transactionType={transaction.transaction.type}
                   serviceName={transaction.service.name}
                   offset={offset}

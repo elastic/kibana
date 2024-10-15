@@ -12,7 +12,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { PercentOfParent } from '../../app/transaction_details/waterfall_with_summary/percent_of_parent';
 
 interface Props {
-  duration?: number;
+  duration: number;
   totalDuration: number | undefined;
   parentType: 'trace' | 'transaction';
 }
@@ -29,7 +29,7 @@ function DurationSummaryItem({ duration, totalDuration, parentType }: Props) {
         <EuiText size="s">
           {asDuration(duration)} &nbsp;
           <PercentOfParent
-            duration={duration ?? 0}
+            duration={duration}
             totalDuration={calculatedTotalDuration}
             parentType={parentType}
           />

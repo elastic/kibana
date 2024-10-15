@@ -178,8 +178,8 @@ function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
 function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
-    item.docType === 'transaction' && item.doc.transaction?.type === 'request'
-      ? item.doc.transaction?.result
+    item.docType === 'transaction' && item.doc.transaction.type === 'request'
+      ? item.doc.transaction.result
       : undefined;
 
   if (!httpStatusCode) {
@@ -206,7 +206,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
     case 'transaction':
       return (
         <EuiTitle size="xxs">
-          <h5>{item.doc.transaction?.name}</h5>
+          <h5>{item.doc.transaction.name}</h5>
         </EuiTitle>
       );
   }
@@ -291,14 +291,12 @@ export function WaterfallItem({
         {item.docType === 'span' && (
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
-        {item.id && (
-          <SpanLinksBadge
-            linkedParents={item.spanLinksCount.linkedParents}
-            linkedChildren={item.spanLinksCount.linkedChildren}
-            id={item.id}
-            onClick={onClick}
-          />
-        )}
+        <SpanLinksBadge
+          linkedParents={item.spanLinksCount.linkedParents}
+          linkedChildren={item.spanLinksCount.linkedChildren}
+          id={item.id}
+          onClick={onClick}
+        />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
     </Container>

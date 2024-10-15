@@ -55,7 +55,7 @@ export interface IWaterfall {
 interface IWaterfallItemBase<TDocument, TDoctype> {
   doc: TDocument;
   docType: TDoctype;
-  id?: string;
+  id: string;
   parent?: IWaterfallSpanOrTransaction;
   parentId?: string;
   color: string;
@@ -129,9 +129,9 @@ function getTransactionItem(
   return {
     docType: 'transaction',
     doc: transaction,
-    id: transaction?.transaction?.id,
+    id: transaction.transaction.id,
     parentId: transaction.parent?.id,
-    duration: transaction?.transaction?.duration?.us ?? 0,
+    duration: transaction.transaction.duration.us,
     offset: 0,
     skew: 0,
     legendValues: getLegendValues(transaction),

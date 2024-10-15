@@ -28,12 +28,12 @@ export interface TransactionDetailRedirectInfo {
     id: string;
   };
   transaction: {
-    id?: string;
-    type?: string;
-    name?: string;
+    id: string;
+    type: string;
+    name: string;
 
-    duration?: {
-      us?: number;
+    duration: {
+      us: number;
     };
   };
   service: {
