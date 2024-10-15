@@ -21,10 +21,7 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import {
-  getHostRiskIndex,
-  getUserRiskIndex,
-} from '../../../../../../common/search_strategy/security_solution/risk_score/common';
+import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,
@@ -38,7 +35,6 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
-    const { uiSettingsClient } = services;
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
