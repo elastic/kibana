@@ -42,9 +42,7 @@ const edges: EdgeViewModel[] = [
     id: 'edge1',
     source: 'node1',
     target: 'node2',
-    label: 'Edge from Node 1 to Node 2',
     color: 'primary',
-    shape: 'label',
   },
 ];
 ```
@@ -89,9 +87,7 @@ const App: React.FC = () => {
       id: 'edge1',
       source: 'node1',
       target: 'node2',
-      label: 'Edge from Node 1 to Node 2',
       color: 'primary',
-      shape: 'label',
     },
   ];
 
