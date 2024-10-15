@@ -3682,18 +3682,6 @@
                 "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/info.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/feature_usage.ts"
-              },
-              {
-                "plugin": "features",
-                "path": "x-pack/plugins/features/server/routes/index.ts"
-              },
-              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/health.ts"
               },
@@ -3704,6 +3692,18 @@
               {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/server/routes/info.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/server/routes/feature_usage.ts"
+              },
+              {
+                "plugin": "features",
+                "path": "x-pack/plugins/features/server/routes/index.ts"
               },
               {
                 "plugin": "customIntegrations",
@@ -3935,7 +3935,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.ts"
               },
               {
                 "plugin": "alerting",
@@ -5290,18 +5290,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/plugins/features/server/routes/index.test.ts"
               },
@@ -5827,6 +5815,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
@@ -5892,6 +5892,14 @@
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-resources-server-internal",
@@ -6573,7 +6581,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
@@ -6581,7 +6589,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
@@ -7636,6 +7644,14 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
               },
@@ -7781,18 +7797,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
               },
               {
@@ -7802,14 +7806,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8321,6 +8317,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
               },
               {
@@ -8338,6 +8346,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -13172,7 +13188,7 @@
             "tags": [],
             "label": "access",
             "description": [
-              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
+              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incoming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
               {
@@ -13284,6 +13300,24 @@
             "label": "deprecated",
             "description": [
               "\nSetting this to `true` declares this route to be deprecated. Consumers SHOULD\nrefrain from usage of this route.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.excludeFromOAS",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "excludeFromOAS",
+            "description": [
+              "\nWhether this route should be treated as \"invisible\" and excluded from router\nOAS introspection.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -14892,10 +14926,6 @@
               },
               {
                 "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
-              },
-              {
-                "plugin": "dataUsage",
                 "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.ts"
               },
               {
@@ -15521,6 +15551,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/list.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16317,6 +16351,14 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/graph/route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/server/routes.ts"
               },
@@ -16729,6 +16771,10 @@
                 "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
               },
               {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/routes/cel_routes.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -17007,6 +17053,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/apply_dataview_indices.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17513,6 +17563,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/filters.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
