@@ -81,6 +81,8 @@ export const getPrebuiltThreatMatchRuleSpecificFieldsMock = (): ThreatMatchRuleC
       ],
     },
   ],
+  concurrent_searches: 2,
+  items_per_search: 10,
 });
 
 export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({

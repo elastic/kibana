@@ -6,12 +6,17 @@
  */
 
 import expect from 'expect';
+import type SuperTest from 'supertest';
 import { cloneDeep } from 'lodash';
 import {
   QueryRuleCreateFields,
   EqlRuleCreateFields,
   EsqlRuleCreateFields,
   RuleResponse,
+  ThreatMatchRuleCreateFields,
+  ThreatMatchRule,
+  FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
+  ModeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -26,6 +31,7 @@ import {
   reviewPrebuiltRulesToUpgrade,
   getInstalledRules,
   createRuleAssetSavedObject,
+  getWebHookAction,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
@@ -33,6 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless @skipInServerlessMKI Perform Prebuilt Rules Upgrades - mode: ALL_RULES', () => {
     beforeEach(async () => {
@@ -75,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their BASE versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'BASE',
         });
 
@@ -123,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their CURRENT versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'CURRENT',
         });
 
@@ -170,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their CURRENT versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'TARGET',
         });
 
@@ -221,7 +228,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their MERGED versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'MERGED',
         });
         const updatedRulesMap = createIdToRuleMap(performUpgradeResponse.results.updated);
@@ -299,7 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their BASE versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'BASE',
         });
 
@@ -343,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Perform the upgrade, all rules' fields to their MERGED versions
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
-          mode: 'ALL_RULES',
+          mode: ModeEnum.ALL_RULES,
           pick_version: 'MERGED',
         });
 
@@ -357,10 +364,127 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
       });
+
+      it('preserves FIELDS_TO_UPGRADE_TO_CURRENT_VERSION when upgrading to TARGET version with undefined fields', async () => {
+        const baseRule =
+          createRuleAssetSavedObjectOfType<ThreatMatchRuleCreateFields>('threat_match');
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [baseRule]);
+        await installPrebuiltRules(es, supertest);
+
+        const ruleId = baseRule['security-rule'].rule_id;
+
+        const installedBaseRule = (
+          await securitySolutionApi.readRule({
+            query: {
+              rule_id: ruleId,
+            },
+          })
+        ).body as ThreatMatchRule;
+
+        // Patch the installed rule to set all FIELDS_TO_UPGRADE_TO_CURRENT_VERSION to some defined value
+        const currentValues: { [key: string]: unknown } = {
+          enabled: true,
+          exceptions_list: [
+            {
+              id: 'test-list',
+              list_id: 'test-list',
+              type: 'detection',
+              namespace_type: 'single',
+            } as const,
+          ],
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: { value: 5, unit: 'm' as const },
+          },
+          actions: [await createAction(supertest)],
+          response_actions: [
+            {
+              params: {
+                command: 'isolate' as const,
+                comment: 'comment',
+              },
+              action_type_id: '.endpoint' as const,
+            },
+          ],
+          meta: { some_key: 'some_value' },
+          output_index: '.siem-signals-default',
+          namespace: 'default',
+          concurrent_searches: 5,
+          items_per_search: 100,
+        };
+
+        await securitySolutionApi.updateRule({
+          body: {
+            ...installedBaseRule,
+            ...currentValues,
+            id: undefined,
+          },
+        });
+
+        // Create a target version with undefined values for these fields
+        const targetRule = cloneDeep(baseRule);
+        targetRule['security-rule'].version += 1;
+        FIELDS_TO_UPGRADE_TO_CURRENT_VERSION.forEach((field) => {
+          // @ts-expect-error
+          targetRule['security-rule'][field] = undefined;
+        });
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [targetRule]);
+
+        // Perform the upgrade
+        const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
+          mode: ModeEnum.ALL_RULES,
+          pick_version: 'TARGET',
+        });
+
+        expect(performUpgradeResponse.summary.succeeded).toEqual(1);
+        const upgradedRule = performUpgradeResponse.results.updated[0] as ThreatMatchRule;
+
+        // Check that all FIELDS_TO_UPGRADE_TO_CURRENT_VERSION still have their "current" values
+        FIELDS_TO_UPGRADE_TO_CURRENT_VERSION.forEach((field) => {
+          expect(upgradedRule[field]).toEqual(currentValues[field]);
+        });
+
+        // Verify the installed rule
+        const installedRules = await getInstalledRules(supertest);
+        const installedRule = installedRules.data.find(
+          (rule) => rule.rule_id === baseRule['security-rule'].rule_id
+        ) as ThreatMatchRule;
+
+        FIELDS_TO_UPGRADE_TO_CURRENT_VERSION.forEach((field) => {
+          expect(installedRule[field]).toEqual(currentValues[field]);
+        });
+      });
     });
   });
 };
 
 function createIdToRuleMap(rules: Array<PrebuiltRuleAsset | RuleResponse>) {
   return new Map(rules.map((rule) => [rule.rule_id, rule]));
+}
+
+async function createAction(supertest: SuperTest.Agent) {
+  const createConnector = async (payload: Record<string, unknown>) =>
+    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
+      .body;
+
+  const createWebHookConnector = () => createConnector(getWebHookAction());
+
+  const webHookAction = await createWebHookConnector();
+
+  const defaultRuleAction = {
+    id: webHookAction.id,
+    action_type_id: '.webhook' as const,
+    group: 'default' as const,
+    params: {
+      body: '{"test":"a default action"}',
+    },
+    frequency: {
+      notifyWhen: 'onThrottleInterval' as const,
+      summary: true,
+      throttle: '1h' as const,
+    },
+    uuid: 'd487ec3d-05f2-44ad-8a68-11c97dc92202',
+  };
+
+  return defaultRuleAction;
 }
