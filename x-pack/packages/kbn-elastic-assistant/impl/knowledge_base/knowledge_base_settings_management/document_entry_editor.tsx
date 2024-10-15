@@ -92,11 +92,14 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
 
     return (
       <EuiForm>
-        <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_NAME_INPUT_LABEL}
+          helpText={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
+          fullWidth
+        >
           <EuiFieldText
             name="name"
             data-test-subj="entryNameInput"
-            placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
             fullWidth
             value={entry?.name}
             onChange={setName}

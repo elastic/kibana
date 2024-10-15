@@ -172,14 +172,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
 
     return (
       <EuiForm>
-        <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
-          <EuiFieldText
-            name="name"
-            placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
-            fullWidth
-            value={entry?.name}
-            onChange={setName}
-          />
+        <EuiFormRow
+          label={i18n.ENTRY_NAME_INPUT_LABEL}
+          helpText={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
+          fullWidth
+        >
+          <EuiFieldText name="name" fullWidth value={entry?.name} onChange={setName} />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.ENTRY_SHARING_INPUT_LABEL}
@@ -239,20 +237,26 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             isDisabled={!entry?.index}
           />
         </EuiFormRow>
-        <EuiFormRow label={i18n.ENTRY_DESCRIPTION_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_DESCRIPTION_INPUT_LABEL}
+          helpText={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
+          fullWidth
+        >
           <EuiTextArea
             name="description"
             fullWidth
-            placeholder={i18n.ENTRY_DESCRIPTION_HELP_LABEL}
             value={entry?.description}
             onChange={setDescription}
             rows={2}
           />
         </EuiFormRow>
-        <EuiFormRow label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_QUERY_DESCRIPTION_INPUT_LABEL}
+          helpText={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
+          fullWidth
+        >
           <EuiTextArea
             name="query_description"
-            placeholder={i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL}
             value={entry?.queryDescription}
             onChange={setQueryDescription}
             fullWidth
