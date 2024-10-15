@@ -309,14 +309,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   security?: RouteSecurity;
 
   /**
-   * Whether this endpoint is being used to server generated or static HTTP resources
-   * like JS, CSS or HTML.
+   * Whether this endpoint is being used to serve generated or static HTTP resources
+   * like JS, CSS or HTML. _Do not set to `true` for HTTP APIs._
    *
    * @note Unless you need this setting for a special case, rather use the
    *       {@link HttpResources} service exposed to plugins directly.
    *
-   * @note This is not a security feature and may affect superficial aspects of
-   *       the HTTP response like versioning. Do not use this setting for any HTTP APIs.
+   * @note This is not a security feature. It may affect superficial aspects of
+   *       the HTTP response like headers.
    *
    * @default false
    */
