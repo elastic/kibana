@@ -13,9 +13,11 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
+
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

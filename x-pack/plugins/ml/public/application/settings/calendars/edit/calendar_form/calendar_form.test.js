@@ -12,6 +12,10 @@ import { CalendarForm } from './calendar_form';
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),
 }));
+jest.mock('../../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+
 const testProps = {
   calendarId: '',
   canCreateCalendar: true,

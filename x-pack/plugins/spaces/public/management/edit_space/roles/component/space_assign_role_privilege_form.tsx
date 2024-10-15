@@ -31,8 +31,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type {
+  RawKibanaPrivileges,
+  Role,
+  RoleKibanaPrivilege,
+} from '@kbn/security-plugin-types-common';
 import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
@@ -513,10 +516,48 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
                           // to all of the selected roles till we decide to commit the changes chosen
                           setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                            let privilege;
+                            let privilege: RoleKibanaPrivilege;
 
                             if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                              privilege.base = _privilege;
+                              // empty out base to setup customizing all features
+                              privilege.base = [];
+
+                              const securedFeatures = new KibanaPrivileges(
+                                kibanaPrivileges,
+                                features
+                              ).getSecuredFeatures();
+
+                              securedFeatures.forEach((feature) => {
+                                const nextFeaturePrivilege = feature
+                                  .getPrimaryFeaturePrivileges({
+                                    includeMinimalFeaturePrivileges: true,
+                                  })
+                                  .find((pfp) => {
+                                    if (pfp?.disabled || pfp?.requireAllSpaces) {
+                                      return false;
+                                    }
+                                    return Array.isArray(_privilege) && _privilege.includes(pfp.id);
+                                  });
+
+                                let newPrivileges: string[] = [];
+
+                                if (nextFeaturePrivilege) {
+                                  newPrivileges = [nextFeaturePrivilege.id];
+                                  feature.getSubFeaturePrivileges().forEach((psf) => {
+                                    if (Array.isArray(_privilege) && _privilege.includes(psf.id)) {
+                                      if (!psf.requireAllSpaces) {
+                                        newPrivileges.push(psf.id);
+                                      }
+                                    }
+                                  });
+                                }
+
+                                if (newPrivileges.length === 0) {
+                                  delete privilege.feature[feature.id];
+                                } else {
+                                  privilege.feature[feature.id] = newPrivileges;
+                                }
+                              });
                             }
 
                             return { value, privilegeIndex };

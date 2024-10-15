@@ -13,6 +13,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
@@ -48,7 +50,8 @@ export const ChangePointDetectionPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          appDependencies={{
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
             ...pick(services, [
               'analytics',
               'application',
@@ -62,7 +65,6 @@ export const ChangePointDetectionPage: FC = () => {
               'i18n',
               'lens',
               'notifications',
-              'presentationUtil',
               'share',
               'storage',
               'theme',
@@ -71,6 +73,7 @@ export const ChangePointDetectionPage: FC = () => {
               'unifiedSearch',
               'usageCollection',
             ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}
         />
       ) : null}

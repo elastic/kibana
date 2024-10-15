@@ -54,6 +54,8 @@ export const cli = () => {
         )
         .boolean('inspect');
 
+      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
+
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -87,8 +89,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const specConfig = cypressConfigFile.e2e.specPattern;
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
+      const excludeSpecPattern = cypressConfigFile.e2e.excludeSpecPattern;
 
       log.info('Config spec pattern:', specConfig);
+      log.info('Exclude spec pattern:', excludeSpecPattern);
       log.info('Arguments spec pattern:', specArg);
       log.info('Resulting spec pattern:', specPattern);
 
@@ -121,7 +125,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+        : globby.sync(
+            specPattern,
+            excludeSpecPattern
+              ? {
+                  ignore: excludeSpecPattern,
+                }
+              : undefined
+          ); // convert the glob pattern to concrete file paths
 
       let files = retrieveIntegrations(concreteFilePaths);
 
@@ -438,7 +449,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                 } else {
                   result = await cypress.run({
-                    browser: 'chrome',
+                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,

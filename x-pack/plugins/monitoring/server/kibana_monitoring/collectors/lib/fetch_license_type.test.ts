@@ -41,6 +41,6 @@ describe('fetchLicenseType', () => {
       })),
     } as unknown as ElasticsearchClient;
     const result = await fetchLicenseType(customCallCluster, availableCcs, clusterUuid);
-    expect(result).toStrictEqual(null);
+    expect(result).toBeUndefined();
   });
 });

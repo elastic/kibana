@@ -341,7 +341,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           role="button"
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
-          aria-label={ariaLabel}
+          aria-label={i18n.translate('sharedUXPackages.codeEditor.codeEditorEditButton', {
+            defaultMessage: '{codeEditorAriaLabel}, activate edit mode',
+            values: {
+              codeEditorAriaLabel: ariaLabel,
+            },
+          })}
           data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
         />
       </EuiToolTip>
@@ -528,6 +533,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
+          {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
             theme={theme}
             language={languageId}
@@ -576,6 +582,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
 const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
@@ -617,12 +624,12 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
-              <div css={styles.fullscreenContainer}>{children}</div>
+              <div css={styles.fullscreenContainer(euiTheme)}>{children}</div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
       },
-    [isFullScreen]
+    [isFullScreen, euiTheme]
   );
 
   return {

@@ -25,6 +25,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  type: integer
+                  description: The number of historical values to keep for each field.
+                  default: 10
                 indexPattern:
                   $ref: '../common.schema.yaml#/components/schemas/IndexPattern'
                 filter:

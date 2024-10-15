@@ -43,6 +43,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         value={displayedApiKey}
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
+        copyValueDataTestSubj="APIKeyButtonCopy"
         actions={[
           <EuiButtonIcon
             iconType={apiKeyIsVisible ? 'eyeClosed' : 'eye'}

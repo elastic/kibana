@@ -163,6 +163,15 @@ describe('prepareRoutes', () => {
       output: [{ path: '/api/foo', options: { access: pub } }],
       filters: { excludePathsMatching: ['/api/b'], access: pub },
     },
+    {
+      input: [
+        { path: '/api/foo', options: { access: pub, excludeFromOAS: true } },
+        { path: '/api/bar', options: { access: internal } },
+        { path: '/api/baz', options: { access: pub } },
+      ],
+      output: [{ path: '/api/baz', options: { access: pub } }],
+      filters: { excludePathsMatching: ['/api/bar'], access: pub },
+    },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
   });

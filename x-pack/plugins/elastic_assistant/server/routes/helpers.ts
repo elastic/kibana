@@ -322,6 +322,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   inference: InferenceServerStart;
+  isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -348,6 +349,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  isOssModel,
   context,
   actionsClient,
   inference,
@@ -389,8 +391,6 @@ export const langChainExecute = async ({
     (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
       v2KnowledgeBaseEnabled,
     })) ?? undefined;
-  const bedrockChatEnabled =
-    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
 
   const dataClients: AssistantDataClients = {
     anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
@@ -404,7 +404,6 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,
@@ -412,6 +411,7 @@ export const langChainExecute = async ({
     inference,
     isStream,
     llmType: getLlmType(actionTypeId),
+    isOssModel,
     langChainMessages,
     logger,
     onNewReplacements,

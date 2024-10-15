@@ -266,12 +266,13 @@ describe('rule_source', () => {
     expect(result.data).toEqual(payload);
   });
 
-  test('it should validate a rule with "rule_source" set to undefined', () => {
+  test('it should not validate a rule with "rule_source" set to undefined', () => {
     const payload = getRulesSchemaMock();
-    payload.rule_source = undefined;
+    // @ts-expect-error
+    delete payload.rule_source;
 
     const result = RuleResponse.safeParse(payload);
-    expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_source: Required"`);
   });
 });

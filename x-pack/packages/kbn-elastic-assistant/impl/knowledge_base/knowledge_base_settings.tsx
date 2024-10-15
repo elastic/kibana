@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import { AlertsSettings } from '../alerts/settings/alerts_settings';
+import { AlertsSettings } from '../assistant/settings/alerts_settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
@@ -31,7 +31,6 @@ import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_know
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP } from './translations';
 
-const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
 
 interface Props {
@@ -45,20 +44,14 @@ interface Props {
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
     const { http, toasts } = useAssistantContext();
-    const {
-      data: kbStatus,
-      isLoading,
-      isFetching,
-    } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+    const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
     // Resource enabled state
     const isElserEnabled = kbStatus?.elser_exists ?? false;
-    const isESQLEnabled = kbStatus?.esql_exists ?? false;
     const isSecurityLabsEnabled = kbStatus?.security_labs_exists ?? false;
     const isKnowledgeBaseSetup =
       (isElserEnabled &&
-        isESQLEnabled &&
         isSecurityLabsEnabled &&
         kbStatus?.index_exists &&
         kbStatus?.pipeline_exists) ??
@@ -72,12 +65,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';
     const knowledgeBaseHealth = isKnowledgeBaseSetup ? 'success' : 'subdued';
-    const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Main `Knowledge Base` setup button
     const onSetupKnowledgeBaseButtonClick = useCallback(() => {
-      setupKB(ESQL_RESOURCE);
+      setupKB();
     }, [setupKB]);
 
     const toolTipContent = !isSetupAvailable ? SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP : undefined;
@@ -118,16 +110,6 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <span data-test-subj="install-kb">{i18n.KNOWLEDGE_BASE_DESCRIPTION}</span>
       );
     }, [isKnowledgeBaseSetup]);
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // ESQL Resource
-    const esqlDescription = useMemo(() => {
-      return isESQLEnabled ? (
-        <span data-test-subj="esql-installed">{i18n.ESQL_DESCRIPTION_INSTALLED}</span>
-      ) : (
-        <span data-test-subj="install-esql">{i18n.ESQL_DESCRIPTION}</span>
-      );
-    }, [isESQLEnabled]);
 
     return (
       <>
@@ -207,20 +189,6 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
                 {knowledgeBaseDescription}
               </EuiText>
             </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>
-              <EuiHealth color={esqlHealth}>{i18n.ESQL_LABEL}</EuiHealth>
-              <EuiText
-                size={'xs'}
-                color={'subdued'}
-                css={css`
-                  padding-left: 20px;
-                `}
-              >
-                {esqlDescription}
-              </EuiText>
-            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
 

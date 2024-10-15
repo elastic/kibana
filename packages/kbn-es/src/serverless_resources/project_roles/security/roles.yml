@@ -55,6 +55,7 @@ viewer:
         - feature_dashboard.all
         - feature_maps.all
         - feature_visualize.all
+        - feature_dataQuality.all
       resources: '*'
   run_as: []
 

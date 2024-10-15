@@ -16,6 +16,7 @@ import {
   type EcsMappingRequestBody,
   type RelatedRequestBody,
 } from '../../../../../../common';
+import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {
   runCategorizationGraph,
   runEcsGraph,
@@ -26,7 +27,6 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
-import type { ErrorCode } from '../../../../../../common/constants';
 import type { AIConnector, IntegrationSettings } from '../../types';
 
 export type OnComplete = (result: State['result']) => void;
@@ -44,6 +44,18 @@ interface RunGenerationProps {
   connector: AIConnector;
   deps: { http: HttpSetup; abortSignal: AbortSignal };
   setProgress: (progress: ProgressItem) => void;
+}
+
+// If the result is classified as a generation error, produce an error message
+// as defined in the i18n file. Otherwise, return undefined.
+function generationErrorMessage(body: unknown | undefined): string | undefined {
+  if (!isGenerationErrorBody(body)) {
+    return;
+  }
+
+  const errorCode = body.attributes.errorCode;
+  const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
+  return typeof translation === 'function' ? translation(body.attributes) : translation;
 }
 
 interface GenerationResults {
@@ -96,12 +108,7 @@ export const useGeneration = ({
           error: originalErrorMessage,
         });
 
-        let errorMessage = originalErrorMessage;
-        const errorCode = e.body?.attributes?.errorCode as ErrorCode | undefined;
-        if (errorCode != null) {
-          errorMessage = i18n.ERROR_TRANSLATION[errorCode];
-        }
-        setError(errorMessage);
+        setError(generationErrorMessage(e.body) ?? originalErrorMessage);
       } finally {
         setIsRequesting(false);
       }
@@ -145,6 +152,9 @@ async function runGeneration({
     const analyzeLogsRequest: AnalyzeLogsRequestBody = {
       packageName: integrationSettings.name ?? '',
       dataStreamName: integrationSettings.dataStreamName ?? '',
+      packageTitle: integrationSettings.title ?? integrationSettings.name ?? '',
+      dataStreamTitle:
+        integrationSettings.dataStreamTitle ?? integrationSettings.dataStreamName ?? '',
       logSamples: integrationSettings.logSamples ?? [],
       connectorId: connector.id,
       langSmithOptions: getLangSmithOptions(),

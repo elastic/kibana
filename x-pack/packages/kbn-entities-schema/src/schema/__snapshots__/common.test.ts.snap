@@ -78,7 +78,8 @@ exports[`schemas metadataSchema should parse successfully with a source and desi
 Object {
   "data": Object {
     "aggregation": Object {
-      "limit": 1000,
+      "limit": 10,
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "hostName",
@@ -92,7 +93,8 @@ exports[`schemas metadataSchema should parse successfully with an valid string 1
 Object {
   "data": Object {
     "aggregation": Object {
-      "limit": 1000,
+      "limit": 10,
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "host.name",
@@ -106,7 +108,8 @@ exports[`schemas metadataSchema should parse successfully with just a source 1`]
 Object {
   "data": Object {
     "aggregation": Object {
-      "limit": 1000,
+      "limit": 10,
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "host.name",
@@ -120,7 +123,8 @@ exports[`schemas metadataSchema should parse successfully with valid object 1`] 
 Object {
   "data": Object {
     "aggregation": Object {
-      "limit": 1000,
+      "limit": 10,
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "hostName",

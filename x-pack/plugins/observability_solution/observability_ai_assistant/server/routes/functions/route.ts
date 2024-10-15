@@ -61,7 +61,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
     return {
-      functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
+      functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
         applicationInstructions: functionClient.getInstructions(scope),
         userInstructions,

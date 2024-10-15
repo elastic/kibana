@@ -47,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAdminWithApiKey.destroy();
     });
     describe('route access', () => {
-      describe('disabled', () => {
+      // skipped, see https://github.com/elastic/kibana/issues/194933
+      describe.skip('disabled', () => {
         // Skipped due to change in QA environment for role management and spaces
         // TODO: revisit once the change is rolled out to all environments
         it.skip('get all privileges', async () => {
@@ -75,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('get role', async () => {
           const { body, status } = await supertestAdminWithApiKey.get(
-            '/api/security/role/superuser'
+            '/api/security/role/someRole' // mame of the role doesn't matter, we're checking the endpoint doesn't exist
           );
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('delete role', async () => {
           const { body, status } = await supertestAdminWithApiKey.delete(
-            '/api/security/role/superuser'
+            '/api/security/role/someRole' // mame of the role doesn't matter, we're checking the endpoint doesn't exist
           );
           svlCommonApi.assertApiNotFound(body, status);
         });

@@ -11,11 +11,15 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
 import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
 import { GEMINI_TITLE, GEMINI_CONNECTOR_ID } from '../../../../common/gemini/constants';
+import {
+  INFERENCE_CONNECTOR_TITLE,
+  INFERENCE_CONNECTOR_ID,
+} from '../../../../common/inference/constants';
 
 export const getDashboardTitle = (title: string) => `${title} Token Usage`;
 
 export const getDashboard = (
-  genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini',
+  genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini' | 'Inference',
   dashboardId: string
 ): SavedObject<DashboardAttributes> => {
   let attributes = {
@@ -41,6 +45,12 @@ export const getDashboard = (
       provider: GEMINI_TITLE,
       dashboardTitle: getDashboardTitle(GEMINI_TITLE),
       actionTypeId: GEMINI_CONNECTOR_ID,
+    };
+  } else if (genAIProvider === 'Inference') {
+    attributes = {
+      provider: INFERENCE_CONNECTOR_TITLE,
+      dashboardTitle: getDashboardTitle(INFERENCE_CONNECTOR_TITLE),
+      actionTypeId: INFERENCE_CONNECTOR_ID,
     };
   }
 

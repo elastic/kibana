@@ -15,8 +15,8 @@ import {
   IncompatibleFieldValueItem,
   PartitionedFieldMetadata,
   SameFamilyFieldItem,
+  StorageResult,
 } from '../../../types';
-import { StorageResult } from '../types';
 import { GET_INDEX_RESULTS_LATEST, POST_INDEX_RESULTS } from '../constants';
 import { INTERNAL_API_VERSION } from '../../../constants';
 import { GET_RESULTS_ERROR_TITLE, POST_RESULT_ERROR_TITLE } from '../../../translations';

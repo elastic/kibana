@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useMeasure } from 'react-use';
+import useMeasure from 'react-use/lib/useMeasure';
 
 import { css } from '@emotion/react';
 import {

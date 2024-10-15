@@ -30,7 +30,7 @@ import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 
 export interface UserPanelProps extends Record<string, unknown> {
@@ -83,6 +83,7 @@ export const UserPanel = ({
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -149,8 +150,15 @@ export const UserPanel = ({
       hasMisconfigurationFindings,
     ]
   );
-
-  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
+  const openPanelFirstTab = useCallback(
+    () =>
+      openPanelTab(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openPanelTab]
+  );
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||

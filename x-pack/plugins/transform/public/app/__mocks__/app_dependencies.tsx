@@ -66,6 +66,9 @@ dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
   });
 }) as ISearchGeneric;
 
+// Replace mock to support tests for `use_index_data`.
+coreSetup.http.post = jest.fn().mockResolvedValue([]);
+
 const appDependencies: AppDependencies = {
   analytics: coreStart.analytics,
   application: coreStart.application,

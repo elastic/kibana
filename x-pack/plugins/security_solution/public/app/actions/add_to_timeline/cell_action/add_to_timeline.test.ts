@@ -12,7 +12,7 @@ import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();

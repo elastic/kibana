@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { pluginServices } from '../services';
+import { coreServices } from '../services/kibana_services';
 
 export const fullscreenClass = 'canvas-isFullscreen';
 
 export function setFullscreen(fullscreen, doc = document) {
-  const platformService = pluginServices.getServices().platform;
   const enabled = Boolean(fullscreen);
   const body = doc.querySelector('body');
   const bodyClassList = body.classList;
   const isFullscreen = bodyClassList.contains(fullscreenClass);
 
   if (enabled && !isFullscreen) {
-    platformService.setFullscreen(false);
+    coreServices.chrome.setIsVisible(false);
     bodyClassList.add(fullscreenClass);
   } else if (!enabled && isFullscreen) {
     bodyClassList.remove(fullscreenClass);
-    platformService.setFullscreen(true);
+    coreServices.chrome.setIsVisible(true);
   }
 }

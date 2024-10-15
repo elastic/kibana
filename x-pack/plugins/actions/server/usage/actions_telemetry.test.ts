@@ -1025,15 +1025,17 @@ describe('actions telemetry', () => {
       '.d3security': 2,
       '.gen-ai__Azure OpenAI': 3,
       '.gen-ai__OpenAI': 1,
+      '.gen-ai__Other': 1,
     };
     const { countByType, countGenAiProviderTypes } = getCounts(aggs);
     expect(countByType).toEqual({
       __d3security: 2,
-      '__gen-ai': 4,
+      '__gen-ai': 5,
     });
     expect(countGenAiProviderTypes).toEqual({
       'Azure OpenAI': 3,
       OpenAI: 1,
+      Other: 1,
     });
   });
 });

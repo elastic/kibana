@@ -170,12 +170,12 @@ export async function fetchCpuUsageNodeStats(
       const stat = {
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
-        nodeName: get(node, 'name.buckets[0].key'),
-        cpuUsage: get(node, 'average_cpu.value'),
-        containerUsage: get(lastBucket, 'usage_deriv.normalized_value'),
-        containerPeriods: get(lastBucket, 'periods_deriv.normalized_value'),
-        containerQuota: get(node, 'average_quota.value'),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        nodeName: get(node, 'name.buckets[0].key') as unknown as string,
+        cpuUsage: get(node, 'average_cpu.value') as number,
+        containerUsage: get(lastBucket, 'usage_deriv.normalized_value') as unknown as number,
+        containerPeriods: get(lastBucket, 'periods_deriv.normalized_value') as unknown as number,
+        containerQuota: get(node, 'average_quota.value') as unknown as number,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       };
       stats.push(stat);
     }

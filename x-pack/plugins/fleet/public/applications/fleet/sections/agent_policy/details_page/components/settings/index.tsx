@@ -244,6 +244,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           Object.keys(validation).length > 0 ||
                           hasAdvancedSettingsErrors
                         }
+                        data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"
                         color="primary"
                         fill

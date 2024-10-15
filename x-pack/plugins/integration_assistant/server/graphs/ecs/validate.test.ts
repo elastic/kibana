@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { findDuplicateFields, findInvalidEcsFields, processMapping } from './validate';
+import { ECS_RESERVED } from './constants';
+
+import {
+  extractECSMapping,
+  findDuplicateFields,
+  findInvalidEcsFields,
+  removeReservedFields,
+} from './validate';
 
 describe('Testing ecs handler', () => {
-  it('processMapping()', async () => {
+  it('extractECSMapping()', async () => {
     const path: string[] = [];
     const value = {
       checkpoint: {
@@ -43,7 +50,7 @@ describe('Testing ecs handler', () => {
       },
     };
     const output: Record<string, string[][]> = {};
-    await processMapping(path, value, output);
+    await extractECSMapping(path, value, output);
     expect(output).toEqual({
       'source.address': [['checkpoint', 'firewall', 'origin']],
       'user.name': [['checkpoint', 'firewall', 'administrator']],
@@ -89,6 +96,110 @@ describe('findInvalidEcsFields', () => {
     const invalid = findInvalidEcsFields(ecsMappingReserved);
     expect(invalid.length).toBe(1);
   });
+
+  it('invalid: date_format fields (natural example)', async () => {
+    const misspelledDateFormatMapping = {
+      ai_postgres_202410050058: {
+        logs: {
+          column1: {
+            target: 'event.created',
+            confidence: 0.9,
+            type: 'date',
+            date_format: ['yyyy-MM-dd HH:mm:ss.SSS z'],
+          },
+          column12: {
+            target: 'log.level',
+            confidence: 0.95,
+            type: 'string',
+            date_format: [],
+          },
+          column11: null,
+          column4: null,
+          column9: {
+            target: 'event.start',
+            confidence: 0.8,
+            type: 'date',
+            date_format: ['yyyy-MM-dd HH:mm:ss z'],
+          },
+          column7: null,
+          column6: null,
+          column14: {
+            target: 'event.reason',
+            confidence: 0.7,
+            type: 'string',
+            date_format: [],
+          },
+          column13: null,
+          column24: {
+            target: 'process.name',
+            confidence: 0.85,
+            type: 'string',
+            date_format: [],
+          },
+          column23: null,
+          column10: null,
+          column5: {
+            target: 'source.address',
+            confidence: 0.9,
+            type: 'string',
+            date_format: [],
+          },
+          column3: {
+            target: 'user.name',
+            confidence: 0.8,
+            type: 'string',
+            date_format: [],
+          },
+          column2: {
+            target: 'destination.user.name',
+            confidence: 0.7,
+            type: 'string',
+            date_format: [],
+          },
+          column8: null,
+        },
+      },
+    };
+
+    const invalid = findInvalidEcsFields(misspelledDateFormatMapping);
+    expect(invalid.length).toBe(1);
+  });
+
+  it('invalid: date_format fields (handcrafted example)', async () => {
+    const mixedMapping = {
+      some_title: {
+        logs: {
+          column1: {
+            target: 'event.created',
+            confidence: 0.9,
+            type: 'date',
+            date_format: ['yyyy-MM-dd HH:mm:ss.SSS z'],
+          },
+          column12: {
+            target: 'log.level',
+            confidence: 0.95,
+            type: 'string',
+            date_formats: [],
+          },
+          column11: null,
+          column4: null,
+          column9: {
+            target: 'event.start',
+            confidence: 0.8,
+            type: 'date',
+            date_format: 'yyyy-MM-dd HH:mm:ss z',
+          },
+          column2: {
+            target: 'destination.user.name',
+            type: 'string',
+            date_format: [],
+          },
+        },
+      },
+    };
+    const invalid = findInvalidEcsFields(mixedMapping);
+    expect(invalid.length).toBe(1);
+  });
 });
 
 describe('findDuplicateFields', () => {
@@ -120,5 +231,58 @@ describe('findDuplicateFields', () => {
     expect(duplicates).toStrictEqual([
       "One or more samples have matching fields for ECS field 'event.action': teleport_log.audit.event, teleport_log.audit.uid",
     ]);
+  });
+});
+
+describe('removeReservedFields', () => {
+  it('should remove reserved fields from the mapping', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'event.category': 'Category',
+      'source.ip': 'IP',
+    };
+
+    const expectedMapping = {
+      'source.ip': 'IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(expectedMapping);
+  });
+
+  it('should remove all fields if all are reserved', () => {
+    const ecsMapping = Object.fromEntries(ECS_RESERVED.map((key) => [key, key]));
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
+  });
+
+  it('should return the same mapping if there are no reserved fields', () => {
+    const ecsMapping = {
+      'source.ip': 'Some IP',
+      'destination.ip': 'Another IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(ecsMapping);
+  });
+
+  it('should handle an empty mapping', () => {
+    const ecsMapping = {};
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
+  });
+
+  it('should not modify the original mapping object', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'source.ip': 'IP',
+    };
+
+    const ecsMappingCopy = { ...ecsMapping };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(ecsMapping).toEqual(ecsMappingCopy);
+    expect(ecsMapping).not.toEqual(result);
   });
 });

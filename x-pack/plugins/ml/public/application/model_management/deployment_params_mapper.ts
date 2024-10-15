@@ -6,6 +6,7 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
@@ -17,16 +18,16 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
 
 const THREADS_MAX_EXPONENT = 5;
 
-// TODO set to 0 when https://github.com/elastic/elasticsearch/pull/113455 is merged
-const MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS = 1;
-
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
   {
     min: number;
     max: number;
-    /** Static value is used for the number of vCPUs when the adaptive resources are disabled */
-    static: number;
+    /**
+     * Static value is used for the number of vCPUs when the adaptive resources are disabled.
+     * Not allowed in certain environments.
+     */
+    static?: number;
   }
 >;
 
@@ -39,26 +40,28 @@ export class DeploymentParamsMapper {
   private readonly threadingParamsValues: number[];
 
   /**
-   * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
+   * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling.
+   * TODO resolve dynamically when Control Pane exposes the vCPUs range.
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
-    medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 99999, static: 100 },
+    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
+    medium: { min: 1, max: 32, static: 32 },
+    high: { min: 1, max: 99999, static: 128 },
   };
 
   /**
-   * vCPUs level breakpoints for serverless projects
+   * Default vCPUs level breakpoints for serverless projects.
+   * Can be overridden by the project specific settings.
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
-    medium: { min: 3, max: 32, static: 32 },
-    high: { min: 33, max: 500, static: 100 },
+    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
+    medium: { min: 1, max: 32, static: 32 },
+    high: { min: 1, max: 512, static: 512 },
   };
 
   /**
    * vCPUs level breakpoints based on the ML server limits.
-   * Either on-prem or cloud with disabled ML autoscaling
+   * Either on-prem or cloud with disabled ML autoscaling.
    */
   private readonly hardwareVCPUBreakpoints: VCPUBreakpoints;
 
@@ -67,12 +70,26 @@ export class DeploymentParamsMapper {
    */
   private readonly vCpuBreakpoints: VCPUBreakpoints;
 
+  /**
+   * Gets the min allowed number of allocations.
+   * - 0 for serverless and ESS with enabled autoscaling.
+   * - 1 otherwise
+   * @private
+   */
+  private get minAllowedNumberOfAllocation(): number {
+    return !this.showNodeInfo || this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
+  }
+
   constructor(
     private readonly modelId: string,
     private readonly mlServerLimits: MlServerLimits,
     private readonly cloudInfo: CloudInfo,
-    private readonly showNodeInfo: boolean
+    private readonly showNodeInfo: boolean,
+    private readonly nlpSettings?: NLPSettings
   ) {
+    /**
+     * Initial value can be different for serverless and ESS with autoscaling.
+     */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
     this.threadingParamsValues = new Array(THREADS_MAX_EXPONENT)
@@ -83,7 +100,7 @@ export class DeploymentParamsMapper {
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
     this.hardwareVCPUBreakpoints = {
-      low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
+      low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
       medium: { min: Math.min(3, mediumValue), max: mediumValue, static: mediumValue },
       high: {
         min: mediumValue + 1,
@@ -94,6 +111,10 @@ export class DeploymentParamsMapper {
 
     if (!this.showNodeInfo) {
       this.vCpuBreakpoints = this.serverlessVCPUBreakpoints;
+      if (this.nlpSettings?.modelDeployment) {
+        // Apply project specific overrides
+        this.vCpuBreakpoints = this.nlpSettings.modelDeployment.vCPURange;
+      }
     } else if (this.cloudInfo.isMlAutoscalingEnabled) {
       this.vCpuBreakpoints = this.autoscalingVCPUBreakpoints;
     } else {
@@ -108,6 +129,11 @@ export class DeploymentParamsMapper {
     return input.vCPUUsage === 'low' ? 2 : Math.max(...this.threadingParamsValues);
   }
 
+  /**
+   * Returns allocation values accounting for the number of threads per allocation.
+   * @param params
+   * @private
+   */
   private getAllocationsParams(
     params: DeploymentParamsUI
   ): Pick<MlStartTrainedModelDeploymentRequestNew, 'number_of_allocations'> &
@@ -126,7 +152,7 @@ export class DeploymentParamsMapper {
       min_number_of_allocations:
         Math.floor(levelValues.min / threadsPerAllocation) ||
         // in any env, allow scale down to 0 only for "low" vCPU usage
-        (params.vCPUUsage === 'low' ? MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS : 1),
+        (params.vCPUUsage === 'low' ? this.minAllowedNumberOfAllocation : 1),
       max_number_of_allocations: maxValue,
     };
   }
@@ -148,7 +174,7 @@ export class DeploymentParamsMapper {
   public getVCURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
     // general purpose (c6gd) 1VCU = 1GB RAM / 0.5 vCPU
     // vector optimized (r6gd) 1VCU = 1GB RAM / 0.125 vCPU
-    const vCPUBreakpoints = this.serverlessVCPUBreakpoints[vCPUUsage];
+    const vCPUBreakpoints = this.vCpuBreakpoints[vCPUUsage];
 
     return Object.entries(vCPUBreakpoints).reduce((acc, [key, val]) => {
       // as we can't retrieve Search project configuration, we assume that the vector optimized instance is used
@@ -165,8 +191,8 @@ export class DeploymentParamsMapper {
     input: DeploymentParamsUI
   ): MlStartTrainedModelDeploymentRequestNew {
     const resultInput: DeploymentParamsUI = Object.create(input);
-    if (!this.showNodeInfo) {
-      // Enforce adaptive resources for serverless
+    if (!this.showNodeInfo && this.nlpSettings?.modelDeployment.allowStaticAllocations === false) {
+      // Enforce adaptive resources for serverless projects with prohibited static allocations
       resultInput.adaptiveResources = true;
     }
 
@@ -177,7 +203,7 @@ export class DeploymentParamsMapper {
       deployment_id: resultInput.deploymentId,
       priority: 'normal',
       threads_per_allocation: this.getNumberOfThreads(resultInput),
-      ...(resultInput.adaptiveResources || !this.showNodeInfo
+      ...(resultInput.adaptiveResources
         ? {
             adaptive_allocations: {
               enabled: true,

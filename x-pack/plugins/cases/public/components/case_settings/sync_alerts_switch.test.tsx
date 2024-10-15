@@ -13,7 +13,9 @@ import { createAppMockRenderer } from '../../common/mock';
 
 import { SyncAlertsSwitch } from './sync_alerts_switch';
 
-describe('SyncAlertsSwitch', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192997
+// Failing: See https://github.com/elastic/kibana/issues/190270
+describe.skip('SyncAlertsSwitch', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

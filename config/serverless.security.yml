@@ -100,8 +100,29 @@ xpack.fleet.packages:
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+      medium:
+        min: 1
+        max: 32
+      high:
+        min: 1
+        max: 128
 xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Enable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: true
+
+# Experimental Security Solution features
+
+# This feature is disabled in Serverless until fully performance tested within a Serverless environment
+xpack.securitySolution.enableExperimental: ['entityStoreDisabled']

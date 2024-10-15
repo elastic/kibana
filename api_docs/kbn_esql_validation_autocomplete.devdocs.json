@@ -127,15 +127,15 @@
         "label": "collectVariables",
         "description": [],
         "signature": [
-          "(commands: ",
+          "(ast: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommand",
-            "text": "ESQLCommand"
+            "section": "def-common.ESQLAst",
+            "text": "ESQLAst"
           },
-          "<string>[], fields: Map<string, ",
+          ", fields: Map<string, ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -162,17 +162,16 @@
             "id": "def-common.collectVariables.$1",
             "type": "Array",
             "tags": [],
-            "label": "commands",
+            "label": "ast",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
                 "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLCommand",
-                "text": "ESQLCommand"
-              },
-              "<string>[]"
+                "section": "def-common.ESQLAst",
+                "text": "ESQLAst"
+              }
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
             "deprecated": false,
@@ -1530,6 +1529,62 @@
       },
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.getRecommendedQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "getRecommendedQueries",
+        "description": [],
+        "signature": [
+          "({ fromCommand, timeField, }: { fromCommand: string; timeField?: string | undefined; }) => { label: string; description: string; queryString: string; }[]"
+        ],
+        "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getRecommendedQueries.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  fromCommand,\n  timeField,\n}",
+            "description": [],
+            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.getRecommendedQueries.$1.fromCommand",
+                "type": "string",
+                "tags": [],
+                "label": "fromCommand",
+                "description": [],
+                "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.getRecommendedQueries.$1.timeField",
+                "type": "string",
+                "tags": [],
+                "label": "timeField",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.getSourcesHelper",
         "type": "Function",
         "tags": [],
@@ -1702,53 +1757,6 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.isColumnItem.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "arg",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLAstItem",
-                "text": "ESQLAstItem"
-              }
-            ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-validation-autocomplete",
-        "id": "def-common.isExpression",
-        "type": "Function",
-        "tags": [],
-        "label": "isExpression",
-        "description": [],
-        "signature": [
-          "(arg: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstItem",
-            "text": "ESQLAstItem"
-          },
-          ") => boolean"
-        ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.isExpression.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "arg",
@@ -2810,6 +2818,20 @@
                 "text": "CommandModeDefinition"
               },
               "[]"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.CommandDefinition.hasRecommendedQueries",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasRecommendedQueries",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,

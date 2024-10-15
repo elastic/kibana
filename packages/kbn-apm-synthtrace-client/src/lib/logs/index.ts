@@ -68,6 +68,7 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
     severity: string;
@@ -156,6 +157,26 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
   ).dataset('synth');
 }
 
+function createMinimal({
+  dataset = 'synth',
+  namespace = 'default',
+}: {
+  dataset?: string;
+  namespace?: string;
+} = {}): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': namespace,
+      'data_stream.type': 'logs',
+      'data_stream.dataset': dataset,
+      'event.dataset': dataset,
+    },
+    { isLogsDb: false }
+  );
+}
+
 export const log = {
   create,
+  createMinimal,
 };

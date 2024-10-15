@@ -12,13 +12,12 @@ export const rawEntityDefinition = {
   name: 'Services for Admin Console',
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
-  history: {
+  latest: {
     timestampField: '@timestamp',
-    interval: '1m',
+    lookbackPeriod: '10m',
     settings: {
-      lookbackPeriod: '10m',
-      frequency: '2m',
-      syncDelay: '2m',
+      frequency: '30s',
+      syncDelay: '10s',
     },
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],

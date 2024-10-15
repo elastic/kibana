@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, estypes } from '@elastic/elasticsearch';
 import { pipeline, Readable } from 'stream';
 import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { IngestProcessorContainer, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
 import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
+
+export const LogsIndex = 'logs';
+export const LogsCustom = 'logs@custom';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -44,6 +48,33 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
+  async createComponentTemplate(name: string, mappings: MappingTypeMapping) {
+    const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
+
+    if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
+
+    try {
+      await this.client.cluster.putComponentTemplate({
+        name,
+        template: {
+          mappings,
+        },
+      });
+      this.logger.info(`Component template successfully created: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async deleteComponentTemplate(name: string) {
+    try {
+      await this.client.cluster.deleteComponentTemplate({ name });
+      this.logger.info(`Component template successfully deleted: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template deletion failed: ${name} - ${err.message}`);
+    }
+  }
+
   async createIndex(index: string, mappings?: MappingTypeMapping) {
     try {
       const isIndexExisting = await this.client.indices.exists({ index });
@@ -58,6 +89,47 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.info(`Index successfully created: ${index}`);
     } catch (err) {
       this.logger.error(`Index creation failed: ${index} - ${err.message}`);
+    }
+  }
+
+  async updateIndexTemplate(
+    indexName: string,
+    modify: (
+      template: ValuesType<
+        estypes.IndicesGetIndexTemplateResponse['index_templates']
+      >['index_template']
+    ) => estypes.IndicesPutIndexTemplateRequest
+  ) {
+    try {
+      const response = await this.client.indices.getIndexTemplate({
+        name: indexName,
+      });
+
+      await Promise.all(
+        response.index_templates.map((template) => {
+          return this.client.indices.putIndexTemplate({
+            ...modify(template.index_template),
+            name: template.name,
+          });
+        })
+      );
+
+      this.logger.info(`Updated ${indexName} index template`);
+    } catch (err) {
+      this.logger.error(`Update index template failed: ${indexName} - ${err.message}`);
+    }
+  }
+
+  async createCustomPipeline(processors: IngestProcessorContainer[]) {
+    try {
+      this.client.ingest.putPipeline({
+        id: LogsCustom,
+        processors,
+        version: 1,
+      });
+      this.logger.info(`Custom pipeline created: ${LogsCustom}`);
+    } catch (err) {
+      this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
     }
   }
 }

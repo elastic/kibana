@@ -17,7 +17,6 @@ import { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { isV2KnowledgeBaseEnabled } from '../helpers';
-import { ESQL_RESOURCE } from './constants';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
@@ -55,7 +54,6 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const assistantContext = ctx.elasticAssistant;
         const core = ctx.core;
         const soClient = core.savedObjects.getClient();
-        const kbResource = request.params.resource;
 
         // FF Check for V2 KB
         const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
@@ -73,11 +71,9 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          const installEsqlDocs = kbResource === ESQL_RESOURCE;
           await knowledgeBaseDataClient.setupKnowledgeBase({
             soClient,
-            installEsqlDocs,
-            installSecurityLabsDocs: v2KnowledgeBaseEnabled,
+            v2KnowledgeBaseEnabled,
           });
 
           return response.ok({ body: { success: true } });

@@ -36,8 +36,6 @@
   width: 100%;
   display: flex;
   flex: 0 0 auto;
-
-  // Required on IE11 to render ace editor correctly after first input.
   position: relative;
 
   &__spinner {
@@ -55,46 +53,6 @@
   height: 100%;
   display: flex;
   flex: 1 1 1px;
-
-  .ace_badge {
-    font-family: $euiFontFamily;
-    font-size: $euiFontSizeXS;
-    font-weight: $euiFontWeightMedium;
-    line-height: $euiLineHeight;
-    padding: 0 $euiSizeS;
-    display: inline-block;
-    text-decoration: none;
-    border-radius: calc($euiBorderRadius / 2);
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: default;
-    max-width: 100%;
-
-    &--success {
-      background-color: $euiColorVis0_behindText;
-      color: chooseLightOrDarkText($euiColorVis0_behindText);
-    }
-
-    &--warning {
-      background-color: $euiColorVis5_behindText;
-      color: chooseLightOrDarkText($euiColorVis5_behindText);
-    }
-
-    &--primary {
-      background-color: $euiColorVis1_behindText;
-      color: chooseLightOrDarkText($euiColorVis1_behindText);
-    }
-
-    &--default {
-      background-color: $euiColorLightShade;
-      color: chooseLightOrDarkText($euiColorLightShade);
-    }
-
-    &--danger {
-      background-color: $euiColorVis9_behindText;
-      color: chooseLightOrDarkText($euiColorVis9_behindText);
-    }
-  }
 }
 
 .conApp__editorContent,
@@ -143,17 +101,6 @@
   margin-bottom: 1px;
   // The margin ensures that the resizer doesn't cover the first Monaco editor's ruler
   margin-inline: 0;
-}
-
-// SASSTODO: This component seems to not be used anymore?
-// Possibly replaced by the Ace version
-.conApp__autoComplete {
-  position: absolute;
-  left: -1000px;
-  visibility: hidden;
-  /* by pass any other element in ace and resize bar, but not modal popups  */
-  z-index: $euiZLevel1 + 2;
-  margin-top: 22px;
 }
 
 .conApp__requestProgressBarContainer {

@@ -11,6 +11,25 @@ Object {
     ],
   },
   "body": Object {
+    "_source": Array [
+      "span.links",
+      "transaction.agent.marks",
+    ],
+    "fields": Array [
+      "trace.id",
+      "agent.name",
+      "processor.event",
+      "@timestamp",
+      "timestamp.us",
+      "service.name",
+      "transaction.id",
+      "transaction.duration.us",
+      "transaction.name",
+      "transaction.sampled",
+      "transaction.type",
+      "processor.name",
+      "service.language.name",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -311,6 +330,11 @@ Object {
     ],
   },
   "body": Object {
+    "fields": Array [
+      "transaction.id",
+      "trace.id",
+      "@timestamp",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [

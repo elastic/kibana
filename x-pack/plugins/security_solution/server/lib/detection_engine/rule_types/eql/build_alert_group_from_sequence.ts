@@ -47,7 +47,8 @@ export const buildAlertGroupFromSequence = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string
+  publicBaseUrl?: string,
+  intendedTimestamp?: Date
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
@@ -73,6 +74,7 @@ export const buildAlertGroupFromSequence = (
         ruleExecutionLogger,
         alertUuid: 'placeholder-alert-uuid', // This is overriden below
         publicBaseUrl,
+        intendedTimestamp,
       })
     );
   } catch (error) {
@@ -104,7 +106,8 @@ export const buildAlertGroupFromSequence = (
     buildReasonMessage,
     indicesToQuery,
     alertTimestampOverride,
-    publicBaseUrl
+    publicBaseUrl,
+    intendedTimestamp
   );
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
@@ -146,7 +149,8 @@ export const buildAlertRoot = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string
+  publicBaseUrl?: string,
+  intendedTimestamp?: Date
 ): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
@@ -163,6 +167,7 @@ export const buildAlertRoot = (
     alertUuid: 'placeholder-uuid', // These will be overriden below
     publicBaseUrl, // Not necessary now, but when the ID is created ahead of time this can be passed
     alertTimestampOverride,
+    intendedTimestamp,
   });
   const alertId = generateAlertId(doc);
   const alertUrl = getAlertDetailsUrl({

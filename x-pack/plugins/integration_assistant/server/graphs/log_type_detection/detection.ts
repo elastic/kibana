@@ -8,6 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 import type { LogDetectionNodeParams } from './types';
+import { SamplesFormat } from '../../../common';
 
 const MaxLogSamplesInPrompt = 5;
 
@@ -23,13 +24,23 @@ export async function handleLogFormatDetection({
       ? state.logSamples.slice(0, MaxLogSamplesInPrompt)
       : state.logSamples;
 
-  const detectedLogFormatAnswer = await logFormatDetectionNode.invoke({
+  const logFormatDetectionResult = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
-    log_samples: samples,
+    log_samples: samples.join('\n'),
+    package_title: state.packageTitle,
+    datastream_title: state.dataStreamTitle,
   });
 
-  const logFormat = detectedLogFormatAnswer.log_type;
-  const header = detectedLogFormatAnswer.header;
+  let samplesFormat: SamplesFormat = { name: 'unsupported' };
 
-  return { samplesFormat: { name: logFormat }, header, lastExecutedChain: 'logFormatDetection' };
+  try {
+    samplesFormat = SamplesFormat.parse(logFormatDetectionResult);
+    if (samplesFormat.header === undefined) {
+      samplesFormat.header = false;
+    }
+  } catch (error) {
+    // If the LLM fails to produce the output of specified format, we will default to unsupported.
+  }
+
+  return { samplesFormat, header: samplesFormat.header, lastExecutedChain: 'logFormatDetection' };
 }

@@ -139,6 +139,6 @@ export async function getKVGraph({ model, client }: KVGraphParams) {
     })
     .addEdge('modelOutput', END);
 
-  const compiledKVGraph = workflow.compile();
+  const compiledKVGraph = workflow.compile().withConfig({ runName: 'Key-Value' });
   return compiledKVGraph;
 }

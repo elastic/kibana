@@ -117,19 +117,36 @@ export const cli = () => {
       const productTypes = await parseProductTypes(log);
 
       // Creating project for the test to run
+      log.info(`${id}: Creating project ${PROJECT_NAME}...`);
       const project = await cloudHandler.createSecurityProject(PROJECT_NAME, productTypes);
-      // Check if proxy service is used to define which org executes the tests.
-      const proxyOrg = cloudHandler instanceof ProxyHandler ? project?.proxy_org_name : undefined;
-      log.info(`Proxy Organization used id : ${proxyOrg}`);
 
       if (!project) {
         log.error('Failed to create project.');
         return process.exit(1);
       }
+
+      log.info(`
+        -----------------------------------------------
+         Project created with details:
+        -----------------------------------------------
+         ID: ${project.id}
+         Name: ${project.name}
+         Region: ${project.region}
+         Elasticsearch URL: ${project.es_url}
+         Kibana URL: ${project.kb_url}
+         Product: ${project.product}
+         Organization ID: ${project.proxy_org_id}
+         Organization Name: ${project.proxy_org_name}
+        -----------------------------------------------
+       `);
+
+      // Check if proxy service is used to define which org executes the tests.
+      const proxyOrg = cloudHandler instanceof ProxyHandler ? project?.proxy_org_name : undefined;
+
       let statusCode: number = 0;
       try {
         // Reset credentials for elastic user
-        const credentials = await cloudHandler.resetCredentials(project.id, id);
+        const credentials = await cloudHandler.resetCredentials(project.id);
 
         if (!credentials) {
           log.error('Credentials could not be reset.');
@@ -144,13 +161,13 @@ export const cli = () => {
         const auth = btoa(`${credentials.username}:${credentials.password}`);
 
         // Wait for elasticsearch status to go green.
-        await waitForEsStatusGreen(project.es_url, auth, id);
+        await waitForEsStatusGreen(project.es_url, auth, project.id);
 
         // Wait until Kibana is available
-        await waitForKibanaAvailable(project.kb_url, auth, id);
+        await waitForKibanaAvailable(project.kb_url, auth, project.id);
 
         // Wait for Elasticsearch to be accessible
-        await waitForEsAccess(project.es_url, auth, id);
+        await waitForEsAccess(project.es_url, auth, project.id);
 
         const FORMATTED_ES_URL = project.es_url.replace('https://', '');
         const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
@@ -175,7 +192,7 @@ export const cli = () => {
         statusCode = 1;
       } finally {
         // Delete serverless project
-        log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+        log.info(`Deleting project ${PROJECT_NAME} and ID ${project.id} ...`);
         await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
       }
       process.exit(statusCode);

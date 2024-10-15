@@ -8,10 +8,9 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import { entityTypesRt } from '../../common/entities';
+import { defaultEntitySortField, entityTypesRt, entityColumnIdsRt } from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -27,7 +26,7 @@ const inventoryRoutes = {
     params: t.type({
       query: t.intersection([
         t.type({
-          sortField: t.string,
+          sortField: entityColumnIdsRt,
           sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           pageIndex: toNumberRt,
         }),
@@ -39,7 +38,7 @@ const inventoryRoutes = {
     }),
     defaults: {
       query: {
-        sortField: ENTITY_LAST_SEEN,
+        sortField: defaultEntitySortField,
         sortDirection: 'desc',
         pageIndex: '0',
       },

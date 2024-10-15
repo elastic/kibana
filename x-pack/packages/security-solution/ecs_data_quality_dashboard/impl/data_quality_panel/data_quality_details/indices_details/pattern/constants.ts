@@ -6,3 +6,6 @@
  */
 
 export const MIN_PAGE_SIZE = 10;
+
+export const HISTORY_TAB_ID = 'history';
+export const LATEST_CHECK_TAB_ID = 'latest_check';

@@ -230,7 +230,9 @@
                 "section": "def-public.PanelSelectedNode",
                 "text": "PanelSelectedNode"
               },
-              " | null): void; }; }; http: { basePath: ",
+              " | null): void; getIsFeedbackBtnVisible$: () => ",
+              "Observable",
+              "<boolean>; }; }; http: { basePath: ",
               "BasePathService",
               "; getLoadingCount$(): ",
               "Observable",
@@ -312,17 +314,6 @@
               },
               "[]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.navIsOpen",
-            "type": "boolean",
-            "tags": [],
-            "label": "navIsOpen",
-            "description": [],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -499,6 +490,21 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.isFeedbackBtnVisible$",
+            "type": "Object",
+            "tags": [],
+            "label": "isFeedbackBtnVisible$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -550,7 +556,7 @@
                 "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
-              ", \"id\" | \"path\" | \"children\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
+              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
