@@ -13,7 +13,7 @@ import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
   type EntityType,
-  Entity,
+  type Entity,
   type EntityColumnIds,
 } from '../../../common/entities';
 import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';

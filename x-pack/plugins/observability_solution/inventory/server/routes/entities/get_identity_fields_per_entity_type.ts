@@ -10,18 +10,11 @@ import { Entity, EntityType } from '../../../common/entities';
 
 export type IdentityFieldsPerEntityType = Map<EntityType, string[]>;
 
-export const getIdentityFieldsPerEntityType = (
-  entities: Array<Pick<Entity, typeof ENTITY_TYPE | typeof ENTITY_IDENTITY_FIELDS>>
-) => {
+export const getIdentityFieldsPerEntityType = (entities: Entity[]) => {
   const identityFieldsPerEntityType: IdentityFieldsPerEntityType = new Map();
 
   entities.map((entity) =>
-    identityFieldsPerEntityType.set(
-      entity[ENTITY_TYPE],
-      Array.isArray(entity[ENTITY_IDENTITY_FIELDS])
-        ? entity[ENTITY_IDENTITY_FIELDS]
-        : [entity[ENTITY_IDENTITY_FIELDS]]
-    )
+    identityFieldsPerEntityType.set(entity[ENTITY_TYPE], [entity[ENTITY_IDENTITY_FIELDS]].flat())
   );
 
   return identityFieldsPerEntityType;

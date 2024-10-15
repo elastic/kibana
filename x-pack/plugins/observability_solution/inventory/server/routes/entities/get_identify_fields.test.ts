@@ -5,36 +5,60 @@
  * 2.0.
  */
 
-import { EntityType } from '../../../common/entities';
-import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { ContainerEntity, HostEntity, ServiceEntity } from '../../../common/entities';
+import {
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+} from '@kbn/observability-shared-plugin/common';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
+const commonEntityFields = {
+  [ENTITY_LAST_SEEN]: '2023-10-09T00:00:00Z',
+  [ENTITY_ID]: '1',
+  [ENTITY_DISPLAY_NAME]: 'entity_name',
+  [ENTITY_DEFINITION_ID]: 'entity_definition_id',
+  alertCount: 3,
+};
 describe('getIdentityFields', () => {
   it('should return an empty Map when no entities are provided', () => {
     const result = getIdentityFieldsPerEntityType([]);
     expect(result.size).toBe(0);
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
-    const mockEntities = [
-      {
-        [ENTITY_TYPE]: 'service' as EntityType,
-        [ENTITY_IDENTITY_FIELDS]: ['service.name', 'service.environment'],
-      },
-      {
-        [ENTITY_TYPE]: 'host' as EntityType,
-        [ENTITY_IDENTITY_FIELDS]: 'host.name',
-      },
-      {
-        [ENTITY_TYPE]: 'container' as EntityType,
-        [ENTITY_IDENTITY_FIELDS]: 'contaier.id',
-      },
-    ];
+    const serviceEntity: ServiceEntity = {
+      'agent.name': 'node',
+      'entity.identityFields': ['service.name', 'service.environment'],
+      'service.name': 'my-service',
+      'entity.type': 'service',
+      ...commonEntityFields,
+    };
+
+    const hostEntity: HostEntity = {
+      'entity.identityFields': ['host.name'],
+      'host.name': 'my-host',
+      'entity.type': 'host',
+      'cloud.provider': null,
+      ...commonEntityFields,
+    };
+
+    const containerEntity: ContainerEntity = {
+      'entity.identityFields': 'container.id',
+      'host.name': 'my-host',
+      'entity.type': 'container',
+      'cloud.provider': null,
+      'container.id': '123',
+      ...commonEntityFields,
+    };
+
+    const mockEntities = [serviceEntity, hostEntity, containerEntity];
     const result = getIdentityFieldsPerEntityType(mockEntities);
 
     expect(result.size).toBe(3);
 
     expect(result.get('service')).toEqual(['service.name', 'service.environment']);
     expect(result.get('host')).toEqual(['host.name']);
-    expect(result.get('container')).toEqual(['contaier.id']);
+    expect(result.get('container')).toEqual(['container.id']);
   });
 });
