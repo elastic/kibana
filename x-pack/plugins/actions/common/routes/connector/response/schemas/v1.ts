@@ -136,7 +136,7 @@ export const connectorExecuteResponseSchema = schema.object({
       schema.oneOf([schema.boolean(), schema.string()], {
         meta: {
           description:
-            'When the status is error, determines whether the connector execution will retry .',
+            'When the status is error, identifies whether the connector execution will retry .',
         },
       })
     )
@@ -145,7 +145,7 @@ export const connectorExecuteResponseSchema = schema.object({
     schema.oneOf([schema.literal('user'), schema.literal('framework')], {
       meta: {
         description:
-          'When the status is error, determines the error is a framework error or a user error.',
+          'When the status is error, identifies whether the error is a framework error or a user error.',
       },
     })
   ),

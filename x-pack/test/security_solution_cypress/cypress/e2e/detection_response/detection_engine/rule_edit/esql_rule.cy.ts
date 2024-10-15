@@ -56,6 +56,7 @@ const expectedValidEsqlQuery =
 
 // Skipping in MKI due to flake
 // Failing: See https://github.com/elastic/kibana/issues/184557
+// Failing: See https://github.com/elastic/kibana/issues/184556
 describe.skip(
   'Detection ES|QL rules, edit',
   {

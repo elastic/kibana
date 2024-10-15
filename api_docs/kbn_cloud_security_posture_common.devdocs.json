@@ -817,7 +817,13 @@
             "label": "vulnerability",
             "description": [],
             "signature": [
-              "Vulnerability"
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.Vulnerability",
+                "text": "Vulnerability"
+              }
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
             "deprecated": false,
@@ -976,6 +982,197 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.Vulnerability",
+        "type": "Interface",
+        "tags": [],
+        "label": "Vulnerability",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.published_date",
+            "type": "string",
+            "tags": [],
+            "label": "published_date",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.score",
+            "type": "Object",
+            "tags": [],
+            "label": "score",
+            "description": [],
+            "signature": [
+              "{ version?: string | undefined; base?: number | undefined; } | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.cwe",
+            "type": "Array",
+            "tags": [],
+            "label": "cwe",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.reference",
+            "type": "string",
+            "tags": [],
+            "label": "reference",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.severity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.VulnSeverity",
+                "text": "VulnSeverity"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.cvss",
+            "type": "Object",
+            "tags": [],
+            "label": "cvss",
+            "description": [],
+            "signature": [
+              "{ nvd: ",
+              "VectorScoreBase",
+              "; redhat?: ",
+              "VectorScoreBase",
+              " | undefined; ghsa?: ",
+              "VectorScoreBase",
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.data_source",
+            "type": "Object",
+            "tags": [],
+            "label": "data_source",
+            "description": [],
+            "signature": [
+              "{ ID: string; Name: string; URL: string; } | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.enumeration",
+            "type": "string",
+            "tags": [],
+            "label": "enumeration",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.classification",
+            "type": "string",
+            "tags": [],
+            "label": "classification",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.Vulnerability.scanner",
+            "type": "Object",
+            "tags": [],
+            "label": "scanner",
+            "description": [],
+            "signature": [
+              "{ vendor: string; }"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -991,6 +1188,21 @@
           "\"cis_k8s\" | \"cis_azure\" | \"cis_aws\" | \"cis_eks\" | \"cis_gcp\""
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture-common/types/benchmark.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_3RD_PARTY_RETENTION_POLICY",
+        "type": "string",
+        "tags": [],
+        "label": "CDR_3RD_PARTY_RETENTION_POLICY",
+        "description": [],
+        "signature": [
+          "\"90d\""
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

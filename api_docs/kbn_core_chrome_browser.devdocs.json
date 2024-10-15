@@ -2758,7 +2758,9 @@
                 "section": "def-public.PanelSelectedNode",
                 "text": "PanelSelectedNode"
               },
-              " | null): void; }"
+              " | null): void; getIsFeedbackBtnVisible$: () => ",
+              "Observable",
+              "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
@@ -3768,7 +3770,7 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
+          "{ rel?: string | undefined; 'data-test-subj'?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; target?: string | (string & {}) | undefined; }"
         ],
@@ -4041,7 +4043,7 @@
             "section": "def-public.ChromeProjectNavigationNode",
             "text": "ChromeProjectNavigationNode"
           },
-          ", \"id\" | \"path\" | \"children\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
+          ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
