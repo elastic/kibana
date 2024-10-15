@@ -50,39 +50,37 @@ interface VisCardProps {
   shouldStretch?: boolean;
 }
 
-const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; ['data-test-subj']: string }> =
-  [
-    {
-      id: 'recommended',
-      label: i18n.translate('visualizations.newVisWizard.recommendedTab', {
-        defaultMessage: 'Recommended',
-      }),
-      ['data-test-subj']: 'groupModalRecommendedTab',
-    },
-    {
-      id: 'legacy',
-      ['data-test-subj']: 'groupModalLegacyTab',
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('visualizations.newVisWizard.legacyTab', {
-              defaultMessage: 'Legacy',
-            })}
-          </EuiFlexItem>
+const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj: string }> = [
+  {
+    id: 'recommended',
+    label: i18n.translate('visualizations.newVisWizard.recommendedTab', {
+      defaultMessage: 'Recommended',
+    }),
+    dataTestSubj: 'groupModalRecommendedTab',
+  },
+  {
+    id: 'legacy',
+    dataTestSubj: 'groupModalLegacyTab',
+    label: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          {i18n.translate('visualizations.newVisWizard.legacyTab', {
+            defaultMessage: 'Legacy',
+          })}
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={i18n.translate('visualizations.newVisWizard.legacyTabDescription', {
-                defaultMessage:
-                  'Legacy visualizations are scheduled for deprecation in Kibana 9.0.',
-              })}
-              position="top"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-  ];
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('visualizations.newVisWizard.legacyTabDescription', {
+              defaultMessage: 'Legacy visualizations are scheduled for deprecation in the future.',
+            })}
+            position="top"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  },
+];
 
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
@@ -92,8 +90,6 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-          // Include so TSVB still gets displayed
-          // ...props.visTypesRegistry.getByGroup(VisGroups.LEGACY),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
@@ -137,7 +133,7 @@ function GroupSelection(props: GroupSelectionProps) {
             <EuiTabs>
               {tabs.map((t) => (
                 <EuiTab
-                  data-test-subj={t['data-test-subj']}
+                  data-test-subj={t.dataTestSubj}
                   isSelected={tab === t.id}
                   onClick={() => setTab(t.id)}
                   key={t.id}
