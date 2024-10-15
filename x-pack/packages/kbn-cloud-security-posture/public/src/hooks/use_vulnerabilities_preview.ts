@@ -16,7 +16,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
+import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
 import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
 
@@ -29,34 +29,25 @@ interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
-export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
+export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
-  /**
-   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
-   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
-   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
-   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
-   */
+
   return useQuery(
-    ['csp_vulnerabilities_findings', { params: options }],
-    async ({ pageParam }) => {
+    ['csp_vulnerabilities_preview', { params: options }],
+    async () => {
       const {
-        rawResponse: { aggregations, hits },
+        rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, pageParam),
+          params: getVulnerabilitiesQuery(options, true),
         })
       );
 
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
-        rows: hits.hits.map((finding) => ({
-          vulnerability: finding._source?.vulnerability,
-          resource: finding._source?.resource,
-        })) as Array<Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>>,
       };
     },
     {
