@@ -12,7 +12,7 @@ import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
-  namespace?: string
+  namespace?: string = 'default'
 ) => {
   const api = getService('securitySolutionApi');
   const es = getService('es');
@@ -97,17 +97,17 @@ export const EntityStoreUtils = (
   };
 
   const expectEngineAssetsExist = async (entityType: EntityType) => {
-    await expectTransformExists(`entities-v1-latest-security_${entityType}_default`);
-    await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_default_v1`);
-    await expectComponentTemplateExists(`security_${entityType}_default-latest@platform`);
-    await expectIngestPipelineExists(`security_${entityType}_default-latest@platform`);
+    await expectTransformExists(`entities-v1-latest-security_${entityType}_${namespace}`);
+    await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
+    await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
   };
 
   const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
-    await expectTransformNotFound(`entities-v1-latest-security_${entityType}_default`);
-    await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_default_v1`);
-    await expectComponentTemplateNotFound(`security_${entityType}_default-latest@platform`);
-    await expectIngestPipelineNotFound(`security_${entityType}_default-latest@platform`);
+    await expectTransformNotFound(`entities-v1-latest-security_${entityType}_${namespace}`);
+    await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
+    await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
   };
 
   return {
