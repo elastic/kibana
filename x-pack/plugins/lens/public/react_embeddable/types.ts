@@ -344,8 +344,9 @@ export type LensApi = Simplify<
     PublishesDataLoading &
     // Let the container know the used data views
     PublishesDataViews &
-    // Let the container operate on panel title
+    // Let the container operate on panel title/description
     PublishesWritablePanelTitle &
+    PublishesWritablePanelDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     // Offers methods to operate from/on the linked saved object

@@ -9,8 +9,8 @@ import { noop } from 'lodash';
 import {
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
-  PublishesPanelTitle,
   PublishesWritablePanelTitle,
+  PublishesWritablePanelDescription,
   SerializedTitles,
   StateComparators,
   getUnchangingComparator,
@@ -35,8 +35,8 @@ import { StateManagementConfig } from './initialize_state_management';
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
 
 export interface DashboardServicesConfig {
-  api: PublishesPanelTitle &
-    PublishesWritablePanelTitle &
+  api: PublishesWritablePanelTitle &
+    PublishesWritablePanelDescription &
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
     Pick<IntegrationCallbacks, 'updateOverrides'>;
@@ -76,6 +76,7 @@ export function initializeDashboardServices(
   return {
     api: {
       defaultPanelTitle: defaultPanelTitle$,
+      defaultPanelDescription: defaultPanelDescription$,
       ...titlesApi,
       libraryId$: stateConfig.api.savedObjectId,
       updateOverrides: internalApi.updateOverrides,
