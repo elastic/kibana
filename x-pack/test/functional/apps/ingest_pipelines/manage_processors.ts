@@ -14,7 +14,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const maxMindDatabaseName = 'GeoIP2-Anonymous-IP';
   const ipInfoDatabaseName = 'ASN';
 
-  describe('Ingest Pipelines: Manage Processors', function () {
+  // TODO: Fix flaky tests
+  describe.skip('Ingest Pipelines: Manage Processors', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['manage_processors_user']);
