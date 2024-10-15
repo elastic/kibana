@@ -44,16 +44,7 @@ export const AssetCriticalityUploadPage = () => {
     return null;
   }
 
-  if (
-    !hasEntityAnalyticsCapability ||
-    privilegesError?.body.status_code === 403
-  ) {
-    const errorMessage = privilegesError?.body.message ?? (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-      />
-    );
-
+  if (!hasEntityAnalyticsCapability || privilegesError?.body.status_code === 403) {
     return (
       <EuiEmptyPrompt
         iconType="warning"
@@ -65,7 +56,7 @@ export const AssetCriticalityUploadPage = () => {
             />
           </h2>
         }
-        body={<p>{errorMessage}</p>}
+        body={<p>{privilegesError?.body.message}</p>}
       />
     );
   }

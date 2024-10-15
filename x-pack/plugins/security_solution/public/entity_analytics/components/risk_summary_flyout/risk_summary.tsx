@@ -81,12 +81,9 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const columns = useMemo(() => buildColumns(true), []);
+  const columns = useMemo(() => buildColumns(), []);
 
-  const rows = useMemo(
-    () => getItems(entityData),
-    [entityData]
-  );
+  const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen: boolean) => {

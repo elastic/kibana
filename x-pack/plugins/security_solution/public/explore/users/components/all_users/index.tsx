@@ -119,21 +119,6 @@ const getUsersColumns = (
             })
           : getOrEmptyTagFromValue(domain),
     },
-    {
-      field: 'criticality',
-      name: i18n.ASSET_CRITICALITY,
-      truncateText: false,
-      mobileOptions: { show: true },
-      sortable: false,
-      render: (assetCriticality: CriticalityLevelWithUnassigned) => {
-        return (
-          <AssetCriticalityBadge
-            criticalityLevel={assetCriticality}
-            css={{ verticalAlign: 'middle' }}
-          />
-        );
-      },
-    },
   ];
 
   if (showRiskColumn) {
@@ -160,6 +145,24 @@ const getUsersColumns = (
       },
     });
   }
+
+  columns.push({
+    field: 'criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
+
   return columns;
 };
 
