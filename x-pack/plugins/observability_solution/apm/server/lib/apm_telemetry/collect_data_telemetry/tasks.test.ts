@@ -879,9 +879,10 @@ describe('data telemetry collection tasks', () => {
 
     it('should return services per agent name', async () => {
       const search = jest.fn().mockImplementation((params: any) => {
-        const queryKnownAgentNames = params.body.query.bool.filter[0].term;
-        const queryOtelAgentNames = params.body.query.bool.filter[0].prefix;
-        const queryServices = params.body.query.bool.filter[0].exists;
+        const filter = params.body.query.bool.filter[0];
+        const queryKnownAgentNames = filter.term;
+        const queryOtelAgentNames = filter.prefix;
+        const queryServices = filter.exists;
 
         if (queryKnownAgentNames && queryKnownAgentNames['agent.name'] === 'java') {
           return Promise.resolve({
@@ -974,8 +975,9 @@ describe('data telemetry collection tasks', () => {
           'service.runtime.version': { buckets: [{ key: '17.0.12', doc_count: 113 }] },
         };
 
-        const queryKnownAgentNames = params.body.query.bool.filter[0].term;
-        const queryOtelAgentNames = params.body.query.bool.filter[0].prefix;
+        const filter = params.body.query.bool.filter[0];
+        const queryKnownAgentNames = filter.term;
+        const queryOtelAgentNames = filter.prefix;
 
         if (queryKnownAgentNames && queryKnownAgentNames['agent.name'] === 'java') {
           return Promise.resolve({
