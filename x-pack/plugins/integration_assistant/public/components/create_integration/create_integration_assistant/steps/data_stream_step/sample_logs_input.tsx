@@ -13,7 +13,7 @@ import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
 import { partialShuffleArray } from '../../../../../../common';
-import { MAX_SAMPLE_ROWS } from '../../../../../../common/constants';
+import { FRONTEND_SAMPLE_ROWS } from '../../../../../../common/constants';
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
@@ -81,8 +81,8 @@ export const parseJSONArray = (
  * @returns Whether the array was truncated.
  */
 function trimShuffleLogsSample<T>(array: T[]): boolean {
-  const willTruncate = array.length > MAX_SAMPLE_ROWS;
-  const numElements = willTruncate ? MAX_SAMPLE_ROWS : array.length;
+  const willTruncate = array.length > FRONTEND_SAMPLE_ROWS;
+  const numElements = willTruncate ? FRONTEND_SAMPLE_ROWS : array.length;
 
   partialShuffleArray(array, 1, numElements);
 
