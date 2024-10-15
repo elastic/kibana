@@ -44,6 +44,7 @@ run(
       fix = false,
       path,
       silent,
+      quiet,
     },
     log,
   }) => {
@@ -127,7 +128,9 @@ run(
       {
         concurrent: false,
         exitOnError: true,
-        renderer: (silent && 'silent') || (process.env.CI ? 'verbose' : ('default' as any)),
+        forceTTY: false,
+        renderer:
+          ((silent || quiet) && 'silent') || (process.env.CI ? 'verbose' : ('default' as any)),
       }
     );
 
@@ -146,6 +149,7 @@ run(
         reportTime(runStartTime, 'error', {
           success: false,
         });
+        log.error(error);
       } else {
         log.error('Unhandled exception!');
         log.error(error);
