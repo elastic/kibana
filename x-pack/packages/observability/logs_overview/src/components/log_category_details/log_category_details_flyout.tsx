@@ -93,7 +93,6 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
                 />
               </h2>
             </EuiTitle>
-            <EuiSpacer size="s" />
             <LogCategoryPattern logCategory={logCategory} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

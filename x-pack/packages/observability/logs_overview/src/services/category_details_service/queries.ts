@@ -49,9 +49,9 @@ export const createGetLogCategoryDocumentsRequestParams = ({
               },
             },
           },
+          createCategoryQuery(messageField)(categoryTerms),
           ...additionalFilters,
         ],
-        must: createCategoryQuery(messageField)(categoryTerms),
       },
     },
   };
