@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ENABLE_ENTITY_STORE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.title.store',
   {
-    defaultMessage: 'Enable Entity Store',
+    defaultMessage: 'Enable entity store',
   }
 );
 export const ENABLE_RISK_SCORE_TITLE = i18n.translate(
