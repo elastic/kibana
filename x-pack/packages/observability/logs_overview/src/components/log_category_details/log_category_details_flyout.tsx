@@ -11,7 +11,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -94,7 +93,7 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
   return (
     <EuiFlyout ownFocus onClose={() => onCloseFlyout()} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="m">
               <h2 id={flyoutTitleId}>
@@ -109,7 +108,6 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSpacer size="m" />
             <DiscoverLink
               dependencies={dependencies}
               timeRange={timeRange}
