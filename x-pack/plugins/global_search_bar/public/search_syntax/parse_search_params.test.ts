@@ -90,4 +90,32 @@ describe('parseSearchParams', () => {
       },
     });
   });
+
+  it('parses correctly when multiword types are already quoted', () => {
+    const mockSearchableMultiwordTypes = ['canvas-workpad'];
+    const searchParams = parseSearchParams(
+      `type:"canvas workpad" hello type:"dashboard"`,
+      mockSearchableMultiwordTypes
+    );
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        types: ['canvas workpad', 'dashboard'],
+      },
+    });
+  });
+
+  it('parses correctly when there is whitespace between type keyword and value', () => {
+    const mockSearchableMultiwordTypes = ['canvas-workpad'];
+    const searchParams = parseSearchParams(
+      'type:   canvas workpad hello type:  dashboard',
+      mockSearchableMultiwordTypes
+    );
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        types: ['canvas workpad', 'dashboard'],
+      },
+    });
+  });
 });

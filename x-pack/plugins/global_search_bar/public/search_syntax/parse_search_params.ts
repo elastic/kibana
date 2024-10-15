@@ -23,13 +23,22 @@ const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]):
   }
 
   const typesPattern = multiWordTypes.join('|');
-  const canvasWorkpadRegex = new RegExp(`(type:|types:)(\\s*[^"']*?)\\b(${typesPattern})\\b`, 'gi');
-
-  const modifiedTerm = term.replace(
-    canvasWorkpadRegex,
-    (match, typePrefix, additionalTextInBetween, matchedPhrase) =>
-      `${typePrefix}${additionalTextInBetween}"${matchedPhrase}"`
+  const termReplaceRegex = new RegExp(
+    `(type:|types:)\\s*([^"']*?)\\b((${typesPattern})\\b|[^\\s"']+)`,
+    'gi'
   );
+
+  const modifiedTerm = term.replace(termReplaceRegex, (_, typeKeyword, whitespace, typeValue) => {
+    const trimmedTypeKeyword = `${typeKeyword}${whitespace.trim()}`;
+
+    // Check if the term is already quoted and if so, return it as is
+    if (/['"]/.test(typeValue)) {
+      return `${trimmedTypeKeyword}${typeValue}`;
+    }
+
+    // Wrap the multiword type in quotes
+    return `${trimmedTypeKeyword}"${typeValue}"`;
+  });
 
   return modifiedTerm;
 };
