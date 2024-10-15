@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
 import { LinkCard } from '../common/link_card';
 import teammatesImage from './images/teammates_card.png';
