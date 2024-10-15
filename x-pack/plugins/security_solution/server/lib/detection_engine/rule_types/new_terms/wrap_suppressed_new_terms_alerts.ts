@@ -39,6 +39,7 @@ export const wrapSuppressedNewTermsAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -50,6 +51,7 @@ export const wrapSuppressedNewTermsAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;
@@ -83,6 +85,7 @@ export const wrapSuppressedNewTermsAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {
