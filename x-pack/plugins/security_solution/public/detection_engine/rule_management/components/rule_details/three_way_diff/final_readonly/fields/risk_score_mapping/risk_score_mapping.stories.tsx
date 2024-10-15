@@ -11,6 +11,7 @@ import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { RiskScoreMappingReadOnly } from './risk_score_mapping';
 import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RiskScoreMappingReadOnly,
@@ -24,7 +25,9 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly fieldName="risk_score_mapping" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="risk_score_mapping" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 
