@@ -1753,10 +1753,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@96.1.0":
-  version "96.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-96.1.0.tgz#cd75f2a7a2ca07df6fb8f9af985dff3f05172fb6"
-  integrity sha512-LmB92xr704Dfth9UnxCOm4b63lghb/7svXsnd0zcbSQA/BPqktUm1evZjWYIWFIek5D4JI4dmM+ygXLWdKSM+Q==
+"@elastic/eui@97.0.0-backport.0":
+  version "97.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.0.0-backport.0.tgz#cababac6e5937b14ce0e836240fc4817e2e41920"
+  integrity sha512-gefYh5ZgjFraGWOTy8f8RO5DAfOJB3S/PAlM9dvi6mNlNJ5T1CelNafBwdrD8Hdut//BxmexQD7aBZ+36GTaOg==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -3639,7 +3639,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture-common":
+"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
@@ -3651,7 +3651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture":
+"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
@@ -5147,6 +5147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
@@ -6388,6 +6392,10 @@
   uid ""
 
 "@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-authorization-core-common@link:x-pack/packages/security/authorization_core_common":
   version "0.0.0"
   uid ""
 
@@ -27531,10 +27539,10 @@ redux@^4.0.0, redux@^4.0.4, redux@^4.2.1:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
-reflect-metadata@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.2.1.tgz#8d5513c0f5ef2b4b9c3865287f3c0940c1f67f74"
-  integrity sha512-i5lLI6iw9AU3Uu4szRNPPEkomnkjRTaVt9hy/bn5g/oSzekBSMeLZblcjP74AW0vBabqERLLIrz+gR8QYR54Tw==
+reflect-metadata@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.2.2.tgz#400c845b6cba87a21f2c65c4aeb158f4fa4d9c5b"
+  integrity sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==
 
 refractor@^3.2.0, refractor@^3.6.0:
   version "3.6.0"

@@ -8,7 +8,7 @@
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import { privilegesFactory } from './privileges';
+import { getReplacedByForPrivilege, privilegesFactory } from './privileges';
 import { licenseMock } from '../__fixtures__/licensing.mock';
 import { Actions } from '../actions';
 
@@ -465,6 +465,184 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.bar', {
+      all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      minimal_read: [...expectedReadPrivileges],
+    });
+  });
+
+  test('actions should respect `replacedBy` specified by the deprecated privileges', () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        deprecated: { notice: 'It is deprecated, sorry.' },
+        id: 'alpha',
+        name: 'Feature Alpha',
+        app: [],
+        category: { id: 'alpha', label: 'alpha' },
+        alerting: ['rule-type-1'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-alpha-all-so'],
+              read: ['all-alpha-read-so'],
+            },
+            ui: ['all-alpha-ui'],
+            app: ['all-alpha-app'],
+            api: ['all-alpha-api'],
+            alerting: { rule: { all: ['rule-type-1'] } },
+            replacedBy: [{ feature: 'beta', privileges: ['all'] }],
+          },
+          read: {
+            savedObject: {
+              all: ['read-alpha-all-so'],
+              read: ['read-alpha-read-so'],
+            },
+            ui: ['read-alpha-ui'],
+            app: ['read-alpha-app'],
+            api: ['read-alpha-api'],
+            replacedBy: {
+              default: [{ feature: 'beta', privileges: ['read'] }],
+              minimal: [{ feature: 'beta', privileges: ['minimal_read'] }],
+            },
+          },
+        },
+      }),
+      new KibanaFeature({
+        id: 'beta',
+        name: 'Feature Beta',
+        app: [],
+        category: { id: 'beta', label: 'beta' },
+        alerting: ['rule-type-1'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-beta-all-so'],
+              read: ['all-beta-read-so'],
+            },
+            ui: ['all-beta-ui'],
+            app: ['all-beta-app'],
+            api: ['all-beta-api'],
+            alerting: { rule: { all: ['rule-type-1'] } },
+          },
+          read: {
+            savedObject: {
+              all: ['read-beta-all-so'],
+              read: ['read-beta-read-so'],
+            },
+            ui: ['read-beta-ui'],
+            app: ['read-beta-app'],
+            api: ['read-beta-api'],
+          },
+        },
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const alertingOperations = [
+      ...[
+        'get',
+        'getRuleState',
+        'getAlertSummary',
+        'getExecutionLog',
+        'getActionErrorLog',
+        'find',
+        'getRuleExecutionKPI',
+        'getBackfill',
+        'findBackfill',
+      ],
+      ...[
+        'create',
+        'delete',
+        'update',
+        'updateApiKey',
+        'enable',
+        'disable',
+        'muteAll',
+        'unmuteAll',
+        'muteAlert',
+        'unmuteAlert',
+        'snooze',
+        'bulkEdit',
+        'bulkDelete',
+        'bulkEnable',
+        'bulkDisable',
+        'unsnooze',
+        'runSoon',
+        'scheduleBackfill',
+        'deleteBackfill',
+      ],
+    ];
+
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.api.get('all-alpha-api'),
+      actions.app.get('all-alpha-app'),
+      actions.ui.get('navLinks', 'all-alpha-app'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-all-so', 'get'),
+      actions.savedObject.get('all-alpha-all-so', 'find'),
+      actions.savedObject.get('all-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'create'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('all-alpha-all-so', 'update'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('all-alpha-all-so', 'delete'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('all-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('all-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-read-so', 'get'),
+      actions.savedObject.get('all-alpha-read-so', 'find'),
+      actions.savedObject.get('all-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'all-alpha-ui'),
+      ...alertingOperations.map((operation) =>
+        actions.alerting.get('rule-type-1', 'alpha', 'rule', operation)
+      ),
+      // To maintain compatibility with the new UI capabilities and new alerting entities that are
+      // feature specific: all.replacedBy: [{ feature: 'beta', privileges: ['all'] }]
+      actions.ui.get('navLinks', 'all-beta-app'),
+      actions.ui.get('beta', 'all-beta-ui'),
+      ...alertingOperations.map((operation) =>
+        actions.alerting.get('rule-type-1', 'beta', 'rule', operation)
+      ),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.api.get('read-alpha-api'),
+      actions.app.get('read-alpha-app'),
+      actions.ui.get('navLinks', 'read-alpha-app'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-all-so', 'get'),
+      actions.savedObject.get('read-alpha-all-so', 'find'),
+      actions.savedObject.get('read-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'create'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('read-alpha-all-so', 'update'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('read-alpha-all-so', 'delete'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('read-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('read-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-read-so', 'get'),
+      actions.savedObject.get('read-alpha-read-so', 'find'),
+      actions.savedObject.get('read-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'read-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific
+      // read.replacedBy: [{ feature: 'beta', privileges: ['read'] }]
+      actions.ui.get('navLinks', 'read-beta-app'),
+      actions.ui.get('beta', 'read-beta-ui'),
+    ];
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.alpha', {
       all: [...expectedAllPrivileges],
       read: [...expectedReadPrivileges],
       minimal_all: [...expectedAllPrivileges],
@@ -3509,5 +3687,361 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'licensed-sub-feature-ui'),
       ]);
     });
+  });
+
+  test('actions should respect `replacedBy` specified by the deprecated sub-feature privileges', () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        deprecated: { notice: 'It is deprecated, sorry.' },
+        id: 'alpha',
+        name: 'Feature Alpha',
+        app: [],
+        category: { id: 'alpha', label: 'alpha' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-alpha-all-so'],
+              read: ['all-alpha-read-so'],
+            },
+            ui: ['all-alpha-ui'],
+            app: ['all-alpha-app'],
+            api: ['all-alpha-api'],
+            replacedBy: [{ feature: 'beta', privileges: ['all'] }],
+          },
+          read: {
+            savedObject: {
+              all: ['read-alpha-all-so'],
+              read: ['read-alpha-read-so'],
+            },
+            ui: ['read-alpha-ui'],
+            app: ['read-alpha-app'],
+            api: ['read-alpha-api'],
+            replacedBy: {
+              default: [{ feature: 'beta', privileges: ['read', 'sub_beta'] }],
+              minimal: [{ feature: 'beta', privileges: ['minimal_read'] }],
+            },
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub-feature-alpha',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub_alpha',
+                    name: 'Sub Feature Alpha',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: ['sub-alpha-all-so'],
+                      read: ['sub-alpha-read-so'],
+                    },
+                    ui: ['sub-alpha-ui'],
+                    app: ['sub-alpha-app'],
+                    api: ['sub-alpha-api'],
+                    replacedBy: [
+                      { feature: 'beta', privileges: ['minimal_read'] },
+                      { feature: 'beta', privileges: ['sub_beta'] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+      new KibanaFeature({
+        id: 'beta',
+        name: 'Feature Beta',
+        app: [],
+        category: { id: 'beta', label: 'beta' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-beta-all-so'],
+              read: ['all-beta-read-so'],
+            },
+            ui: ['all-beta-ui'],
+            app: ['all-beta-app'],
+            api: ['all-beta-api'],
+          },
+          read: {
+            savedObject: {
+              all: ['read-beta-all-so'],
+              read: ['read-beta-read-so'],
+            },
+            ui: ['read-beta-ui'],
+            app: ['read-beta-app'],
+            api: ['read-beta-api'],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub-feature-beta',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub_beta',
+                    name: 'Sub Feature Beta',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: ['sub-beta-all-so'],
+                      read: ['sub-beta-read-so'],
+                    },
+                    ui: ['sub-beta-ui'],
+                    app: ['sub-beta-app'],
+                    api: ['sub-beta-api'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.api.get('all-alpha-api'),
+      actions.api.get('sub-alpha-api'),
+      actions.app.get('all-alpha-app'),
+      actions.app.get('sub-alpha-app'),
+      actions.ui.get('navLinks', 'all-alpha-app'),
+      actions.ui.get('navLinks', 'sub-alpha-app'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-all-so', 'get'),
+      actions.savedObject.get('all-alpha-all-so', 'find'),
+      actions.savedObject.get('all-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'create'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('all-alpha-all-so', 'update'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('all-alpha-all-so', 'delete'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('all-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('sub-alpha-all-so', 'get'),
+      actions.savedObject.get('sub-alpha-all-so', 'find'),
+      actions.savedObject.get('sub-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('sub-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('sub-alpha-all-so', 'create'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('sub-alpha-all-so', 'update'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('sub-alpha-all-so', 'delete'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('sub-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('all-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-read-so', 'get'),
+      actions.savedObject.get('all-alpha-read-so', 'find'),
+      actions.savedObject.get('all-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-read-so', 'close_point_in_time'),
+      actions.savedObject.get('sub-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('sub-alpha-read-so', 'get'),
+      actions.savedObject.get('sub-alpha-read-so', 'find'),
+      actions.savedObject.get('sub-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('sub-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'all-alpha-ui'),
+      actions.ui.get('alpha', 'sub-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific:
+      // all.replacedBy: [{ feature: 'beta', privileges: ['all'] }],
+      actions.ui.get('navLinks', 'all-beta-app'),
+      actions.ui.get('navLinks', 'sub-beta-app'),
+      actions.ui.get('beta', 'all-beta-ui'),
+      actions.ui.get('beta', 'sub-beta-ui'),
+    ];
+
+    const expectedMinimalAllPrivileges = [
+      actions.login,
+      actions.api.get('all-alpha-api'),
+      actions.app.get('all-alpha-app'),
+      actions.ui.get('navLinks', 'all-alpha-app'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-all-so', 'get'),
+      actions.savedObject.get('all-alpha-all-so', 'find'),
+      actions.savedObject.get('all-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('all-alpha-all-so', 'create'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('all-alpha-all-so', 'update'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('all-alpha-all-so', 'delete'),
+      actions.savedObject.get('all-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('all-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('all-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('all-alpha-read-so', 'get'),
+      actions.savedObject.get('all-alpha-read-so', 'find'),
+      actions.savedObject.get('all-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('all-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'all-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific.
+      // Actions from the beta feature top-level and sub-feature privileges are included because
+      // used simple `replacedBy` format:
+      // all.replacedBy: [{ feature: 'beta', privileges: ['all'] }],
+      actions.ui.get('navLinks', 'all-beta-app'),
+      actions.ui.get('navLinks', 'sub-beta-app'),
+      actions.ui.get('beta', 'all-beta-ui'),
+      actions.ui.get('beta', 'sub-beta-ui'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.api.get('read-alpha-api'),
+      actions.app.get('read-alpha-app'),
+      actions.ui.get('navLinks', 'read-alpha-app'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-all-so', 'get'),
+      actions.savedObject.get('read-alpha-all-so', 'find'),
+      actions.savedObject.get('read-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'create'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('read-alpha-all-so', 'update'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('read-alpha-all-so', 'delete'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('read-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('read-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-read-so', 'get'),
+      actions.savedObject.get('read-alpha-read-so', 'find'),
+      actions.savedObject.get('read-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'read-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific:
+      // read.replacedBy: {
+      //   default: [{ feature: 'beta', privileges: ['read', 'sub_beta'] }]
+      // },
+      actions.ui.get('navLinks', 'read-beta-app'),
+      actions.ui.get('beta', 'read-beta-ui'),
+      actions.ui.get('navLinks', 'sub-beta-app'),
+      actions.ui.get('beta', 'sub-beta-ui'),
+    ];
+
+    const expectedMinimalReadPrivileges = [
+      actions.login,
+      actions.api.get('read-alpha-api'),
+      actions.app.get('read-alpha-app'),
+      actions.ui.get('navLinks', 'read-alpha-app'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-all-so', 'get'),
+      actions.savedObject.get('read-alpha-all-so', 'find'),
+      actions.savedObject.get('read-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('read-alpha-all-so', 'create'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('read-alpha-all-so', 'update'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('read-alpha-all-so', 'delete'),
+      actions.savedObject.get('read-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('read-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('read-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('read-alpha-read-so', 'get'),
+      actions.savedObject.get('read-alpha-read-so', 'find'),
+      actions.savedObject.get('read-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('read-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'read-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific:
+      // read.replacedBy: {
+      //   minimal: [{ feature: 'beta', privileges: ['minimal_read'] }],
+      // },
+      actions.ui.get('navLinks', 'read-beta-app'),
+      actions.ui.get('beta', 'read-beta-ui'),
+    ];
+
+    const expectedSubFeaturePrivileges = [
+      actions.login,
+      actions.api.get('sub-alpha-api'),
+      actions.app.get('sub-alpha-app'),
+      actions.ui.get('navLinks', 'sub-alpha-app'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_get'),
+      actions.savedObject.get('sub-alpha-all-so', 'get'),
+      actions.savedObject.get('sub-alpha-all-so', 'find'),
+      actions.savedObject.get('sub-alpha-all-so', 'open_point_in_time'),
+      actions.savedObject.get('sub-alpha-all-so', 'close_point_in_time'),
+      actions.savedObject.get('sub-alpha-all-so', 'create'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_create'),
+      actions.savedObject.get('sub-alpha-all-so', 'update'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_update'),
+      actions.savedObject.get('sub-alpha-all-so', 'delete'),
+      actions.savedObject.get('sub-alpha-all-so', 'bulk_delete'),
+      actions.savedObject.get('sub-alpha-all-so', 'share_to_space'),
+      actions.savedObject.get('sub-alpha-read-so', 'bulk_get'),
+      actions.savedObject.get('sub-alpha-read-so', 'get'),
+      actions.savedObject.get('sub-alpha-read-so', 'find'),
+      actions.savedObject.get('sub-alpha-read-so', 'open_point_in_time'),
+      actions.savedObject.get('sub-alpha-read-so', 'close_point_in_time'),
+      actions.ui.get('alpha', 'sub-alpha-ui'),
+      // To maintain compatibility with the new UI capabilities that are feature specific:
+      // sub_alpha.replacedBy: [
+      //   { feature: 'beta', privileges: ['minimal_read'] },
+      //   { feature: 'beta', privileges: ['sub_beta'] },
+      // ],
+      actions.ui.get('navLinks', 'read-beta-app'),
+      actions.ui.get('beta', 'read-beta-ui'),
+      actions.ui.get('navLinks', 'sub-beta-app'),
+      actions.ui.get('beta', 'sub-beta-ui'),
+    ];
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.alpha', {
+      all: expectedAllPrivileges,
+      read: expectedReadPrivileges,
+      minimal_all: expectedMinimalAllPrivileges,
+      minimal_read: expectedMinimalReadPrivileges,
+      sub_alpha: expectedSubFeaturePrivileges,
+    });
+  });
+});
+
+describe('#getReplacedByForPrivilege', () => {
+  test('correctly gets `replacedBy` with simple format', () => {
+    const basePrivilege = { savedObject: { all: [], read: [] }, ui: [] };
+    expect(getReplacedByForPrivilege('all', basePrivilege)).toBeUndefined();
+    expect(getReplacedByForPrivilege('minimal_all', basePrivilege)).toBeUndefined();
+
+    const privilegeWithReplacedBy = {
+      ...basePrivilege,
+      replacedBy: [{ feature: 'alpha', privileges: ['all', 'read'] }],
+    };
+    expect(getReplacedByForPrivilege('all', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['all', 'read'] },
+    ]);
+    expect(getReplacedByForPrivilege('minimal_all', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['all', 'read'] },
+    ]);
+    expect(getReplacedByForPrivilege('custom', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['all', 'read'] },
+    ]);
+  });
+
+  test('correctly gets `replacedBy` with extended format', () => {
+    const basePrivilege = { savedObject: { all: [], read: [] }, ui: [] };
+    expect(getReplacedByForPrivilege('all', basePrivilege)).toBeUndefined();
+    expect(getReplacedByForPrivilege('minimal_all', basePrivilege)).toBeUndefined();
+
+    const privilegeWithReplacedBy = {
+      ...basePrivilege,
+      replacedBy: {
+        default: [{ feature: 'alpha', privileges: ['all', 'read', 'custom'] }],
+        minimal: [{ feature: 'alpha', privileges: ['minimal_all'] }],
+      },
+    };
+    expect(getReplacedByForPrivilege('all', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['all', 'read', 'custom'] },
+    ]);
+    expect(getReplacedByForPrivilege('custom', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['all', 'read', 'custom'] },
+    ]);
+    expect(getReplacedByForPrivilege('minimal_all', privilegeWithReplacedBy)).toEqual([
+      { feature: 'alpha', privileges: ['minimal_all'] },
+    ]);
   });
 });

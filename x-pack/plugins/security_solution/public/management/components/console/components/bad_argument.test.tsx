@@ -10,7 +10,8 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
 import { getConsoleTestSetup } from '../mocks';
 
-describe('BadArgument component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/193093
+describe.skip('BadArgument component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let command: CommandDefinition;

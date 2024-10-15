@@ -189,7 +189,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: 'Generate Logstash API keyy',
+      description: 'Generate Logstash API key',
       options: {
         tags: ['oas-tag:Fleet outputs'],
       },
