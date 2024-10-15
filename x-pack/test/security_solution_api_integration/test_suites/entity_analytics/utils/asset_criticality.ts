@@ -27,14 +27,11 @@ import type {
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
-import { KbnClient } from '@kbn/test';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
-
-
 
 export const cleanAssetCriticality = async ({
   log,
@@ -90,14 +87,14 @@ export const assetCriticalityRouteHelpersFactory = (
     body: Record<string, unknown>,
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
-    console.log('Upsert called with:', body, 'Expect status code:', expectStatusCode);
     await supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
-      .expect(expectStatusCode)},
+      .expect(expectStatusCode);
+  },
   delete: async (
     idField: string,
     idValue: string,

@@ -16,7 +16,6 @@ export default ({ getService }: FtrProviderContext) => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
-    const kibanaServer = getService('kibanaServer');
     const log = getService('log');
     const expectAssetCriticalityDocMatching = async (expectedDoc: {
       id_field: string;
@@ -34,7 +33,6 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
     });
-
 
     after(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });

@@ -23,7 +23,6 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
-  isEnabled: () => Promise<boolean>;
 }
 
 const isCriticalityIdentifierValid = (identifier: CriticalityIdentifier): boolean =>
