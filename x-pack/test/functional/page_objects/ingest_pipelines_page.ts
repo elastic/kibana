@@ -135,7 +135,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.setValue('databaseTypeSelect', databaseType);
 
       // Wait for the rest of the fields to get displayed
-      await pageObjects.common.sleep(250);
+      await pageObjects.common.sleep(1000);
       expect(await testSubjects.exists('databaseNameSelect')).to.be(true);
 
       if (maxmind) {
@@ -146,7 +146,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async clickAddDatabaseButton() {
       // Wait for button to get enabled
-      await pageObjects.common.sleep(250);
+      await pageObjects.common.sleep(1000);
       await testSubjects.click('addGeoipDatabaseSubmit');
     },
 
