@@ -30050,6 +30050,7 @@ components:
         - started
         - stopped
         - updating
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
