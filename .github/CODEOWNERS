@@ -1750,6 +1750,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/cti @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/entity/risks @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/entity/host_risk @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
