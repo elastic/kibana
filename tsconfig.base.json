@@ -1366,6 +1366,8 @@
       "@kbn/presentation-publishing/*": ["packages/presentation/presentation_publishing/*"],
       "@kbn/presentation-util-plugin": ["src/plugins/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/plugins/presentation_util/*"],
+      "@kbn/product-doc-artifact-builder": ["x-pack/packages/ai-infra/product-doc-artifact-builder"],
+      "@kbn/product-doc-artifact-builder/*": ["x-pack/packages/ai-infra/product-doc-artifact-builder/*"],
       "@kbn/profiling-data-access-plugin": ["x-pack/plugins/observability_solution/profiling_data_access"],
       "@kbn/profiling-data-access-plugin/*": ["x-pack/plugins/observability_solution/profiling_data_access/*"],
       "@kbn/profiling-plugin": ["x-pack/plugins/observability_solution/profiling"],
