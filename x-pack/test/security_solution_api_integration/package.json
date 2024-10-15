@@ -67,7 +67,7 @@
     "entity_analytics:qa:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless qaPeriodicEnv",
     "entity_analytics:qa:serverless:release": "npm run run-tests:ea:trial_complete risk_engine serverless qaEnv",
     "entity_analytics:server:ess": "npm run initialize-server:ea:trial_complete risk_engine ess",
-    "entity_analytics:runner:ess": "npm run run-tests:ea:trial_complete risk_engine ess essEnv",
+    "entity_analytics:runner:ess": "npm run run-tests:ea:trial_complete risk_engine ess essEnv --",
 
     "entity_analytics:essentials:server:serverless": "npm run initialize-server:ea:basic_essentials risk_engine serverless",
     "entity_analytics:essentials:runner:serverless": "npm run run-tests:ea:basic_essentials risk_engine serverless serverlessEnv",

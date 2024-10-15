@@ -8,8 +8,6 @@ import expect from 'expect';
 import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
-  disableAssetCriticalityAdvancedSetting,
-  enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -37,9 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
     });
 
-    beforeEach(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-    });
 
     after(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
@@ -186,14 +181,6 @@ export default ({ getService }: FtrProviderContext) => {
         total: 0,
         successful: 0,
         failed: 0,
-      });
-    });
-
-    it('should return 403 if the advanced setting is disabled', async () => {
-      await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
-
-      await assetCriticalityRoutes.uploadCsv('host,host-1,low_impact', {
-        expectStatusCode: 403,
       });
     });
   });

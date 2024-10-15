@@ -16,7 +16,6 @@ import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
@@ -35,43 +34,7 @@ import { routeWithNamespace, waitFor } from '../../../../common/utils/security_s
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
 
-export const enableAssetCriticalityAdvancedSetting = async (
-  kibanaServer: KbnClient,
-  log: ToolingLog
-) => {
-  await kibanaServer.uiSettings.update({
-    [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-  });
 
-  // and wait for the setting to be applied
-  await waitFor(
-    async () => {
-      const setting = await kibanaServer.uiSettings.get(ENABLE_ASSET_CRITICALITY_SETTING);
-      return setting === true;
-    },
-    'disableAssetCriticalityAdvancedSetting',
-    log
-  );
-};
-
-export const disableAssetCriticalityAdvancedSetting = async (
-  kibanaServer: KbnClient,
-  log: ToolingLog
-) => {
-  await kibanaServer.uiSettings.update({
-    [ENABLE_ASSET_CRITICALITY_SETTING]: false,
-  });
-
-  // and wait for the setting to be applied
-  await waitFor(
-    async () => {
-      const setting = await kibanaServer.uiSettings.get(ENABLE_ASSET_CRITICALITY_SETTING);
-      return setting === false;
-    },
-    'disableAssetCriticalityAdvancedSetting',
-    log
-  );
-};
 
 export const cleanAssetCriticality = async ({
   log,
@@ -126,14 +89,15 @@ export const assetCriticalityRouteHelpersFactory = (
   upsert: async (
     body: Record<string, unknown>,
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
-  ) =>
+  ) => {
+    console.log('Upsert called with:', body, 'Expect status code:', expectStatusCode);
     await supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
-      .expect(expectStatusCode),
+      .expect(expectStatusCode)},
   delete: async (
     idField: string,
     idValue: string,

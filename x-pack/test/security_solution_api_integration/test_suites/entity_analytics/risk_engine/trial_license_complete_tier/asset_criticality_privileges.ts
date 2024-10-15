@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
 import {
   assetCriticalityRouteHelpersFactoryNoAuth,
-  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
@@ -95,7 +94,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       before(async () => {
         await createPrivilegeTestUsers();
-        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
       describe('Asset Criticality privileges API', () => {

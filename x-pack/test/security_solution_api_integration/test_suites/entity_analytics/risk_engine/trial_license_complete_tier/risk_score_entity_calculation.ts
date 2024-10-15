@@ -23,7 +23,6 @@ import {
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
   riskEngineRouteHelpersFactory,
-  enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -77,9 +76,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
-    before(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-    });
 
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
