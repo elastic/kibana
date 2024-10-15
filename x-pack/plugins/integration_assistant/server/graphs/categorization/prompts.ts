@@ -111,7 +111,7 @@ You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - You can use as many processor objects as you need to add all relevant ECS categories and types combinations.
 - If conditions should always use a ? character when accessing nested fields, in case the field might not always be available, see example processors above.
-- You can access nested dictionaries with the ctx?.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
+- You can access nested dictionaries with the ctx.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
 - When an if condition is not needed the argument should not be used for the processor object.
 - If updates are needed you respond with the initially provided array of processors.
 - If an update removes the last remaining processor object you respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
