@@ -11,9 +11,10 @@ import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import { EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { IntlProvider } from '@kbn/i18n-react';
 
 import { RolesEmptyPrompt } from './roles_empty_prompt';
 
@@ -73,5 +74,38 @@ describe('RolesEmptyPrompt', () => {
     prompt.find(EuiButton).simulate('click');
 
     expect(onEnable).toHaveBeenCalled();
+  });
+
+  describe('deprecation callout', () => {
+    it('renders the deprecation callout when user can manage engines', () => {
+      const wrapper = shallow(<RolesEmptyPrompt {...props} />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('renders the deprecation callout when user cannot manage engines', () => {
+      const wrapper = shallow(<RolesEmptyPrompt {...props} />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+    });
+
+    it('dismisses the deprecation callout', () => {
+      const wrapper = mount(
+        <IntlProvider locale="en">
+          <RolesEmptyPrompt {...props} />
+        </IntlProvider>
+      );
+
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'false');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(1);
+
+      wrapper.find('button[data-test-subj="euiDismissCalloutButton"]').simulate('click');
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+      expect(sessionStorage.getItem('appSearchHideDeprecationCallout')).toEqual('true');
+    });
+
+    it('does not render the deprecation callout if dismissed', () => {
+      sessionStorage.setItem('appSearchHideDeprecationCallout', 'true');
+      const wrapper = shallow(<RolesEmptyPrompt {...props} />);
+      expect(wrapper.find('EnterpriseSearchDeprecationCallout')).toHaveLength(0);
+    });
   });
 });
