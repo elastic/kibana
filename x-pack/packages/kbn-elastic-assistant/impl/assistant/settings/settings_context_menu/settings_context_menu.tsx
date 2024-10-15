@@ -22,6 +22,7 @@ import { AnonymizationSettingsManagement } from '../../../data_anonymization/set
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
+import { KNOWLEDGE_BASE_TAB } from '../const';
 
 interface Params {
   isDisabled?: boolean;
@@ -41,12 +42,12 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
 
     const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
-    const closeAlertSettingsModal = () => setIsAlertsSettingsModalVisible(false);
-    const showAlertSettingsModal = () => setIsAlertsSettingsModalVisible(true);
+    const closeAlertSettingsModal = useCallback(() => setIsAlertsSettingsModalVisible(false), []);
+    const showAlertSettingsModal = useCallback(() => setIsAlertsSettingsModalVisible(true), []);
 
     const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
-    const closeAnonymizationModal = () => setIsAnonymizationModalVisible(false);
-    const showAnonymizationModal = () => setIsAnonymizationModalVisible(true);
+    const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
+    const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
 
     const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
 
@@ -74,15 +75,20 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const handleNavigateToAnonymization = useCallback(() => {
       showAnonymizationModal();
       closePopover();
-    }, [navigateToApp]);
+    }, [closePopover, showAnonymizationModal]);
 
     const handleNavigateToKnowledgeBase = useCallback(
       () =>
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement?tab=knowledge_base',
+          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         }),
       [navigateToApp]
     );
+
+    const handleShowAlertsModal = useCallback(() => {
+      showAlertSettingsModal();
+      closePopover();
+    }, [closePopover, showAlertSettingsModal]);
 
     // We are migrating away from the settings modal in favor of the new Stack Management UI
     // Currently behind `assistantKnowledgeBaseByDefault` FF
@@ -114,10 +120,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
-          onClick={() => {
-            showAlertSettingsModal();
-            closePopover();
-          }}
+          onClick={handleShowAlertsModal}
           icon={'magnifyWithExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
@@ -131,7 +134,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           </EuiFlexGroup>
         </EuiContextMenuItem>,
       ],
-      [handleNavigateToKnowledgeBase, handleNavigateToSettings, knowledgeBase]
+      [
+        handleNavigateToAnonymization,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToSettings,
+        handleShowAlertsModal,
+        knowledgeBase.latestAlerts,
+      ]
     );
 
     const items = useMemo(

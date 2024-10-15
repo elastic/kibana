@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,23 +23,33 @@ import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
+import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
+  defaultConnector?: AIConnector;
   isDisabled: boolean;
   isLoading: boolean;
+  isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   showAnonymizedValues: boolean;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -49,18 +60,24 @@ type Props = OwnProps;
  */
 export const AssistantHeader: React.FC<Props> = ({
   selectedConversation,
+  defaultConnector,
   isDisabled,
   isLoading,
+  isSettingsModalVisible,
   onToggleShowAnonymizedValues,
+  setIsSettingsModalVisible,
   showAnonymizedValues,
   onChatCleared,
   chatHistoryVisible,
   setChatHistoryVisible,
   onCloseFlyout,
   onConversationSelected,
+  conversations,
+  conversationsLoaded,
   refetchCurrentUserConversations,
   onConversationCreate,
   isAssistantEnabled,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -95,6 +112,25 @@ export const AssistantHeader: React.FC<Props> = ({
         isAssistantEnabled={isAssistantEnabled}
       >
         <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AssistantSettingsButton
+              defaultConnector={defaultConnector}
+              isDisabled={isDisabled}
+              isSettingsModalVisible={isSettingsModalVisible}
+              selectedConversationId={
+                !isEmpty(selectedConversation?.id)
+                  ? selectedConversation?.id
+                  : selectedConversation?.title
+              }
+              setIsSettingsModalVisible={setIsSettingsModalVisible}
+              onConversationSelected={onConversationSelected}
+              conversations={conversations}
+              conversationsLoaded={conversationsLoaded}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
+              refetchPrompts={refetchPrompts}
+            />
+          </EuiFlexItem>
+
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon

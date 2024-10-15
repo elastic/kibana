@@ -189,12 +189,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { renderApp, services, store } = await mountDependencies();
         const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
 
-        services.chrome.docTitle.change(
-          i18n.translate('xpack.securitySolution.securityAiAssistantManagement.app.titleBar', {
-            defaultMessage: 'AI Assistant for Security Settings',
-          })
-        );
-
         return renderApp({
           ...params,
           services,

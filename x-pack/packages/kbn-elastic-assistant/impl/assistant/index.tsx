@@ -112,6 +112,7 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedPrompts,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
+    refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
   } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
@@ -457,17 +458,23 @@ const AssistantComponent: React.FC<Props> = ({
                 <AssistantHeader
                   isLoading={isInitialLoad}
                   selectedConversation={currentConversation}
+                  defaultConnector={defaultConnector}
                   isDisabled={isDisabled || isLoadingChatSend}
+                  isSettingsModalVisible={isSettingsModalVisible}
                   onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
                   showAnonymizedValues={showAnonymizedValues}
                   onCloseFlyout={onCloseFlyout}
                   onChatCleared={handleOnChatCleared}
                   chatHistoryVisible={chatHistoryVisible}
                   setChatHistoryVisible={setChatHistoryVisible}
                   onConversationSelected={handleOnConversationSelected}
+                  conversations={conversations}
+                  conversationsLoaded={isFetchedCurrentUserConversations}
                   refetchCurrentUserConversations={refetchCurrentUserConversations}
                   onConversationCreate={handleCreateConversation}
                   isAssistantEnabled={isAssistantEnabled}
+                  refetchPrompts={refetchPrompts}
                 />
 
                 {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
