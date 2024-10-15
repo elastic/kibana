@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-spec-to-console'],
+import { ESQLAstNode, ESQLCommandOption } from '../types';
+
+export const isOptionNode = (node: ESQLAstNode): node is ESQLCommandOption => {
+  return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';
 };

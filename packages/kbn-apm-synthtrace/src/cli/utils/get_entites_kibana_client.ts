@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/spec-to-console/bin/spec_to_console');
+import { EntitiesSynthtraceKibanaClient } from '../../lib/apm/client/entities_synthtrace_kibana_client';
+import { Logger } from '../../lib/utils/create_logger';
+
+export function getEntitiesKibanaClient({ target, logger }: { target: string; logger: Logger }) {
+  const kibanaClient = new EntitiesSynthtraceKibanaClient({
+    logger,
+    target,
+  });
+
+  return kibanaClient;
+}
