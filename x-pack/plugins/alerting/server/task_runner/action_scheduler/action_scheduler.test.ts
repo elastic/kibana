@@ -95,6 +95,7 @@ describe('Action Scheduler', () => {
     );
     ruleRunMetricsStore = new RuleRunMetricsStore();
     actionsClient.bulkEnqueueExecution.mockResolvedValue(defaultExecutionResponse);
+    alertsClient.getProcessedAlerts.mockReturnValue({});
   });
   beforeAll(() => {
     clock = sinon.useFakeTimers();
