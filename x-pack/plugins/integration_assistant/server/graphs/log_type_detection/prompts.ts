@@ -28,7 +28,7 @@ Follow these steps to do this:
   - if the samples have any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId in the beginning information then set "header: true".
   - if the samples have a syslog header then set "header: true"
   - else set "header: false". If you are unable to determine the syslog header presence then set "header: false".
-3. Note that a comma-separated list should be classified as 'csv' if its rows only contain values separated by commas. But it it looks like a list of key-values pairs like 'key1=value1, key2=value2' it should be classified as 'structured'.
+3. Note that a comma-separated list should be classified as 'csv' if its rows only contain values separated by commas. But if it looks like a list of key-values pairs like 'key1=value1, key2=value2' it should be classified as 'structured'.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
