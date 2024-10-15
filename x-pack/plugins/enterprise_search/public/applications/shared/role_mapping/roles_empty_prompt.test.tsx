@@ -14,7 +14,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { RolesEmptyPrompt } from './roles_empty_prompt';
 

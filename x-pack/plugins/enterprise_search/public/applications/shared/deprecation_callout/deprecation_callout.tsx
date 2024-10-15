@@ -44,7 +44,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       >
         <FormattedMessage
           id="xpack.enterpriseSearch.deprecationCallout.first_message"
-          defaultMessage="The standalone App Search and Workplace Search products remain available in maintenance mode, but are not recommended for new search experiences. Instead, we recommend using our actively developed Elasticsearch-native tools. These tools offer the flexibility and composability of working directly with Elasticsearch indices."
+          defaultMessage="The standalone Enterprise Search product, including App Search and Workplace Search, remains available in maintenance mode, but are not recommended for new search experiences. Instead, we recommend using our actively developed Elasticsearch-native tools. These tools offer the flexibility and composability of working directly with Elasticsearch indices."
         />
         <EuiSpacer size="s" />
         <FormattedMessage
