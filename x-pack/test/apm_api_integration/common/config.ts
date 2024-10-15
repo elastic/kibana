@@ -52,7 +52,7 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ApmApiClientKey =
+export type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
@@ -62,7 +62,13 @@ type ApmApiClientKey =
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
   | 'monitorClusterAndIndicesUser'
-  | 'manageServiceAccount';
+  | 'manageServiceAccount'
+  | 'apmAllPrivilegesWithoutWriteSettingsUser'
+  | 'apmReadPrivilegesWithWriteSettingsUser';
+
+export interface UserApiClient {
+  user: ApmApiClientKey;
+}
 
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
@@ -183,6 +189,14 @@ export function createTestConfig(
             manageServiceAccount: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmManageServiceAccount,
+            }),
+            apmAllPrivilegesWithoutWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
+            }),
+            apmReadPrivilegesWithWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmReadPrivilegesWithWriteSettings,
             }),
           };
         },
