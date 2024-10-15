@@ -206,11 +206,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
-        // We do not consider HTTP resource routes as APIs
         const isPublicUnversionedApi =
-          route.options?.httpResource !== true &&
+          !isVersioned &&
           route.options?.access === 'public' &&
-          !isVersioned;
+          // We do not consider HTTP resource routes as APIs
+          route.options?.httpResource !== true;
 
         this.routes.push({
           handler: async (req, responseToolkit) =>
