@@ -90,14 +90,13 @@ export namespace Builder {
     };
 
     export const source = (
-      template: Omit<AstNodeTemplate<ESQLSource>, 'name'>,
+      template: AstNodeTemplate<ESQLSource>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLSource => {
       return {
         ...template,
         ...Builder.parserFields(fromParser),
         type: 'source',
-        name: (template.cluster ? template.cluster + ':' : '') + template.index,
       };
     };
 
