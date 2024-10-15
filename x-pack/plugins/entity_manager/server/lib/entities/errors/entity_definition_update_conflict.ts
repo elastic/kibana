@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export * from './delete.gen';
-export * from './get.gen';
-export * from './init.gen';
-export * from './list.gen';
-export * from './start.gen';
-export * from './stats.gen';
-export * from './stop.gen';
-export * from './apply_dataview_indices.gen';
+export class EntityDefinitionUpdateConflict extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EntityDefinitionUpdateConflict';
+  }
+}
