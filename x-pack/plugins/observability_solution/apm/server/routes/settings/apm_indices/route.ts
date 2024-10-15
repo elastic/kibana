@@ -43,7 +43,7 @@ type SaveApmIndicesBodySchema = {
 const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/apm-indices/save',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.type({
     body: t.partial({
