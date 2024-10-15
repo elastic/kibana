@@ -37,21 +37,42 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
   expect(result.status).eql(statusCode, JSON.stringify(result.body));
 
   if (statusCode === 200) {
-    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
+    const {
+      created_at: createdAt,
+      updated_at: updatedAt,
+      id,
+      config_id: configId,
+      spaceId,
+    } = result.body;
     expect(id).not.empty();
     expect(configId).not.empty();
+    expect(spaceId).not.empty();
     expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
     return {
       rawBody: result.body,
       body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
+        ...omit(result.body, [
+          'created_at',
+          'updated_at',
+          'id',
+          'config_id',
+          'form_monitor_type',
+          'spaceId',
+        ]),
       },
     };
   }
   return result.body;
 };
 
-export const keyToOmitList = ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type'];
+export const keyToOmitList = [
+  'created_at',
+  'updated_at',
+  'id',
+  'config_id',
+  'form_monitor_type',
+  'spaceId',
+];
 
 export const omitMonitorKeys = (monitor: any) => {
   return omit(transformPublicKeys(monitor), keyToOmitList);

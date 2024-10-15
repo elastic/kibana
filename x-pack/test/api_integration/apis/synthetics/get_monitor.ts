@@ -236,7 +236,6 @@ export default function ({ getService }: FtrProviderContext) {
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             revision: 1,
-            spaceId: 'default',
             locations: [LOCAL_LOCATION],
             name: 'Test HTTP Monitor 044',
             labels: {},
@@ -255,7 +254,6 @@ export default function ({ getService }: FtrProviderContext) {
           omit(
             {
               ...monitors[0],
-              spaceId: 'default',
               form_monitor_type: 'icmp',
               revision: 1,
               locations: [LOCAL_LOCATION],

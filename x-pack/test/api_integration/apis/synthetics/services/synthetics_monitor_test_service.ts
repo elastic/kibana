@@ -89,6 +89,7 @@ export class SyntheticsMonitorTestService {
             'id',
             'config_id',
             'form_monitor_type',
+            'spaceId',
           ]),
         },
       };

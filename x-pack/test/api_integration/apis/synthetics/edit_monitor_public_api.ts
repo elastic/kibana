@@ -30,14 +30,28 @@ export const editMonitorAPIHelper = async (
   expect(result.status).eql(statusCode, JSON.stringify(result.body));
 
   if (statusCode === 200) {
-    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
+    const {
+      created_at: createdAt,
+      updated_at: updatedAt,
+      id,
+      config_id: configId,
+      spaceId,
+    } = result.body;
     expect(id).not.empty();
     expect(configId).not.empty();
+    expect(spaceId).not.empty();
     expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
     return {
       rawBody: result.body,
       body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
+        ...omit(result.body, [
+          'created_at',
+          'updated_at',
+          'id',
+          'config_id',
+          'form_monitor_type',
+          'spaceId',
+        ]),
       },
     };
   }
@@ -83,7 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          spaceId: 'default',
           locations: [localLoc],
           name: 'https://www.google.com',
         })
@@ -196,7 +209,6 @@ export default function ({ getService }: FtrProviderContext) {
           ...defaultFields,
           ...monitor,
           ...updates,
-          spaceId: 'default',
           locations: [localLoc],
           revision: 2,
           url: 'https://www.google.com',
@@ -217,7 +229,6 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          spaceId: 'default',
           locations: [localLoc],
           name: 'https://www.google.com',
         })
@@ -257,7 +268,6 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          spaceId: 'default',
           revision: 3,
           url: 'https://www.google.com',
           locations: [localLoc, pvtLoc],
@@ -272,7 +282,6 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          spaceId: 'default',
           revision: 4,
           url: 'https://www.google.com',
           locations: [localLoc, pvtLoc],
@@ -291,7 +300,6 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          spaceId: 'default',
           revision: 5,
           url: 'https://www.google.com',
           locations: [localLoc],
