@@ -61,8 +61,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
       });
     }
 
-    console.log('TEST requiredVars', requiredVars);
-
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
