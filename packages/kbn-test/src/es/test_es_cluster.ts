@@ -197,7 +197,7 @@ export function createTestEsCluster<
           `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
         ]
       : ['discovery.type=single-node']),
-    getFips() === 1 ? 'xpack.security.enabled=true' : '',
+    // 'xpack.security.enabled=true',
   ];
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
@@ -207,7 +207,7 @@ export function createTestEsCluster<
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,
-    ...(getFips() === 1 ? { license: 'trial' } : { license }),
+    ...(getFips() === 1 ? { license: 'trial' } : license ? { license } : { license: 'basic' }),
     basePath,
     esArgs,
     resources: files,

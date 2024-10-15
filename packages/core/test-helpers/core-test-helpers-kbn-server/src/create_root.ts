@@ -203,17 +203,7 @@ export function createRootWithCorePlugins(
       },
     },
     server: { restrictInternalApis: true },
-    // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
-    ...(cliArgs.oss === false
-      ? {
-          // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
-          xpack: {
-            reporting: {
-              enabled: false,
-            },
-          },
-        }
-      : {}),
+    ...xpackSettings,
   };
 
   return createRootWithSettings(
