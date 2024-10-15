@@ -10,7 +10,7 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
-import { useAppDependencies } from '../../../../app_dependencies';
+import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import type { LatestFunctionService } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
@@ -24,9 +24,6 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
   copyToClipboardDescription,
   latestFunctionService,
 }) => {
-  const {
-    ml: { useFieldStatsTrigger },
-  } = useAppDependencies();
   const { renderOption, closeFlyout } = useFieldStatsTrigger();
   return (
     <>

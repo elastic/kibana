@@ -74,7 +74,7 @@ export const PackagePolicyInputsSchema = {
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
-const ExperimentalDataStreamFeatures = schema.arrayOf(
+export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
   schema.object({
     data_stream: schema.string(),
     features: schema.object({
@@ -98,7 +98,7 @@ export const PackagePolicyPackageSchema = schema.object({
       description: 'Package version',
     },
   }),
-  experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+  experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
   requires_root: schema.maybe(schema.boolean()),
 });
 

@@ -85,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+
       describe('Service Name Cell', () => {
         it('should render service.name cell', async () => {
           const state = kbnRison.encode({
@@ -131,6 +132,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await firstCell.getVisibleText()).to.be('product');
             await testSubjects.missingOrFail('*serviceNameCell*');
           });
+        });
+      });
+
+      describe('Summary column', () => {
+        it('should render a summary of the log entry replacing the original document', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: {
+              esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `message` is not null',
+            },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+
+          await testSubjects.existOrFail('discoverDataTableMessageValue');
+        });
+
+        it('should NOT render the summary column if the source does not match logs', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: {
+              esql: 'from my-example-*',
+            },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+
+          await testSubjects.missingOrFail('discoverDataTableMessageValue');
         });
       });
     });
@@ -275,6 +310,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await firstCell.getVisibleText()).to.be('product');
             expect(await lastCell.getVisibleText()).to.be('accounting');
             await testSubjects.missingOrFail('*serviceNameCell*');
+          });
+        });
+      });
+
+      describe('Summary column', () => {
+        it('should render a summary of the log entry replacing the original document', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await dataViews.switchToAndValidate('my-example-logs,logstash*');
+
+          await retry.try(async () => {
+            await testSubjects.existOrFail('discoverDataTableMessageValue');
+          });
+        });
+
+        it('should NOT render the summary column if the source does not match logs', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await dataViews.switchToAndValidate('my-example-*');
+
+          await retry.try(async () => {
+            await testSubjects.missingOrFail('discoverDataTableMessageValue');
           });
         });
       });

@@ -237,7 +237,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.overdue).to.eql('number');
 
       expect(typeof workload.non_recurring).to.eql('number');
-      expect(typeof workload.owner_ids).to.eql('number');
 
       expect(typeof workload.capacity_requirements.per_minute).to.eql('number');
       expect(typeof workload.capacity_requirements.per_hour).to.eql('number');

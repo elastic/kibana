@@ -163,7 +163,8 @@ export const EVALUATOR_DATASET_LABEL = i18n.translate(
 export const LANGSMITH_DATASET_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.langsmithDatasetDescription',
   {
-    defaultMessage: 'Name of dataset hosted on LangSmith to evaluate.',
+    defaultMessage:
+      'Name of dataset hosted on LangSmith to evaluate. Must manually enter on cloud environments.',
   }
 );
 

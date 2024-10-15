@@ -11,12 +11,12 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
-import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { AppClient } from '../../..';
 
 describe('EntityStoreDataClient', () => {
-  const logger = loggingSystemMock.createLogger();
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const loggerMock = loggingSystemMock.createLogger();
@@ -25,11 +25,9 @@ describe('EntityStoreDataClient', () => {
     logger: loggerMock,
     namespace: 'default',
     soClient: mockSavedObjectClient,
-    entityClient: new EntityClient({
-      esClient: esClientMock,
-      soClient: mockSavedObjectClient,
-      logger,
-    }),
+    kibanaVersion: '9.0.0',
+    dataViewsService: {} as DataViewsService,
+    appClient: {} as AppClient,
   });
 
   const defaultSearchParams = {
@@ -68,8 +66,8 @@ describe('EntityStoreDataClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [
-            '.entities.v1.latest.ea_host_entity_store',
-            '.entities.v1.latest.ea_user_entity_store',
+            '.entities.v1.latest.security_host_default',
+            '.entities.v1.latest.security_user_default',
           ],
         })
       );
@@ -82,7 +80,7 @@ describe('EntityStoreDataClient', () => {
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ query: { bool: { filter: [{ match_all: {} }] } } })
+        expect.objectContaining({ query: { match_all: {} } })
       );
     });
 

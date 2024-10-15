@@ -33,9 +33,12 @@ To add interactive Options list and Range slider controls, create the controls, 
 
 . Open or create a new dashboard. 
 
-. Make sure you are in *Edit* mode, and select *Controls* > *Add control* in the dashboard toolbar.
+. In *Edit* mode, select *Controls* > *Add control* in the dashboard toolbar.
++
+[role="screenshot"]
+image::images/dashboard-add-control-8.15.0.png[Controls button in the toolbar with the Add Control option selected, width=60%]
 
-. From the *Data view* dropdown, select the data view that contains the field you want to use for the *Control*.
+. On the *Create control* flyout, from the *Data view* dropdown, select the data view that contains the field you want to use for the *Control*.
 
 . In the *Field* list, select the field you want to filter on.
 
@@ -80,7 +83,10 @@ You can add one interactive time slider control to a dashboard.
 
 . Open or create a new dashboard. 
 
-. In the dashboard toolbar, click *Controls* > *Add time slider control*.
+. In *Edit* mode, select *Controls* > *Add time slider control*.
++
+[role="screenshot"]
+image::images/dashboard-add-time-slider-control-8.15.0.png[Controls button in the toolbar with the Add a time slider option selected, width=60%]
 
 . The time slider control uses the time range from the global time filter. To change the time range in the time slider control, <<set-time-filter,change the global time filter>>. 
 
@@ -92,11 +98,14 @@ You can add one interactive time slider control to a dashboard.
 [[configure-controls-settings]]
 ==== Configure the controls settings
 
-Several settings that apply to all controls of a same dashboard are available.
+Several settings that apply to all controls of the same dashboard are available.
 
-. In the dashboard toolbar, click *Controls*, then select *Settings*.
+. In *Edit* mode, select *Controls* > *Settings*.
++
+[role="screenshot"]
+image::images/dashboard-controls-settings-8.15.0.png[Controls button in the toolbar with the Settings option selected, width=60%]
 
-. On the *Control settings* flyout, configure the settings:
+. On the *Control settings* flyout, configure the following settings:
 
 * *Label position* &mdash; Specify where the control label appears.
 
@@ -105,7 +114,7 @@ Several settings that apply to all controls of a same dashboard are available.
 ** **Apply global filters to controls** &mdash; Define whether controls should ignore or apply any filter specified in the main filter bar of the dashboard.
 ** **Apply global time range to controls** &mdash; Define whether controls should ignore or apply the main time range specified for the dashboard. Note that <<add-time-slider-controls,time slider controls>> rely on the global time range and don't work properly when this option is disabled.
 
-* *Selection* settings:
+* *Selections* settings:
 
 ** *Validate user selections* &mdash; When selected, any selected option that results in no data is ignored.
 ** *Chain controls* &mdash; When selected, controls are applied sequentially from left to right, and line by line. Any selected options in one control narrows the available options in the next control. 

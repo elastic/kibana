@@ -18,7 +18,6 @@ import { updateConversationRoute } from './user_conversations/update_route';
 import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
-import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
@@ -61,9 +60,8 @@ export const registerRoutes = (
   findUserConversationsRoute(router);
 
   // Knowledge Base Setup
-  deleteKnowledgeBaseRoute(router);
-  getKnowledgeBaseStatusRoute(router, getElserId);
-  postKnowledgeBaseRoute(router, getElserId);
+  getKnowledgeBaseStatusRoute(router);
+  postKnowledgeBaseRoute(router);
 
   // Knowledge Base Entries
   findKnowledgeBaseEntriesRoute(router);

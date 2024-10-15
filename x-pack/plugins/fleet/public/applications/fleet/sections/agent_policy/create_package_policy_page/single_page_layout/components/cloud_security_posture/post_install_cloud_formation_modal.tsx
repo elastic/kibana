@@ -39,7 +39,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
-      kuery: `policy_id:${agentPolicy.id}`,
+      kuery: `policy_id:"${agentPolicy.id}"`,
     })
   );
 

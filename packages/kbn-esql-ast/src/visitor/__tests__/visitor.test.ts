@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { parse } from '../../parser';
 import { CommandVisitorContext, WhereCommandVisitorContext } from '../contexts';
 import { Visitor } from '../visitor';
 
@@ -24,7 +24,7 @@ test('can collect all command names in type safe way', () => {
       return cmds;
     });
 
-  const { ast } = getAstAndSyntaxErrors('FROM index | LIMIT 123');
+  const { ast } = parse('FROM index | LIMIT 123');
   const res = visitor.visitQuery(ast);
 
   expect(res).toEqual(['from', 'limit']);
@@ -43,16 +43,14 @@ test('can pass inputs to visitors', () => {
       return cmds;
     });
 
-  const { ast } = getAstAndSyntaxErrors('FROM index | LIMIT 123');
+  const { ast } = parse('FROM index | LIMIT 123');
   const res = visitor.visitQuery(ast);
 
   expect(res).toEqual(['pfx:from', 'pfx:limit']);
 });
 
 test('can specify specific visitors for commands', () => {
-  const { ast } = getAstAndSyntaxErrors(
-    'FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123'
-  );
+  const { ast } = parse('FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123');
   const res = new Visitor()
     .on('visitWhereCommand', () => 'where')
     .on('visitSortCommand', () => 'sort')
@@ -65,28 +63,24 @@ test('can specify specific visitors for commands', () => {
 });
 
 test('a command can access parent query node', () => {
-  const { ast } = getAstAndSyntaxErrors(
-    'FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123'
-  );
+  const { root } = parse('FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123');
   new Visitor()
     .on('visitWhereCommand', (ctx) => {
-      if (ctx.parent!.node !== ast) {
+      if (ctx.parent!.node !== root) {
         throw new Error('Expected parent to be query node');
       }
     })
     .on('visitCommand', (ctx) => {
-      if (ctx.parent!.node !== ast) {
+      if (ctx.parent!.node !== root) {
         throw new Error('Expected parent to be query node');
       }
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
-    .visitQuery(ast);
+    .visitQuery(root);
 });
 
 test('specific commands receive specific visitor contexts', () => {
-  const { ast } = getAstAndSyntaxErrors(
-    'FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123'
-  );
+  const { root } = parse('FROM index | SORT asfd | WHERE 1 | ENRICH adsf | LIMIT 123');
 
   new Visitor()
     .on('visitWhereCommand', (ctx) => {
@@ -103,7 +97,7 @@ test('specific commands receive specific visitor contexts', () => {
       }
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
-    .visitQuery(ast);
+    .visitQuery(root);
 
   new Visitor()
     .on('visitCommand', (ctx) => {
@@ -115,5 +109,5 @@ test('specific commands receive specific visitor contexts', () => {
       }
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
-    .visitQuery(ast);
+    .visitQuery(root);
 });

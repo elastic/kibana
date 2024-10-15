@@ -9,11 +9,8 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-
-import { ControlsServiceType } from './services/controls/types';
 
 export interface CanClearSelections {
   clearSelections: () => void;
@@ -26,22 +23,11 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
 /**
  * Plugin types
  */
-export interface ControlsPluginSetup {
-  registerControlFactory: ControlsServiceType['registerControlFactory'];
-}
-
-export interface ControlsPluginStart {
-  getControlFactory: ControlsServiceType['getControlFactory'];
-  getAllControlTypes: ControlsServiceType['getAllControlTypes'];
-}
-
 export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
 }
 export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;
-  embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

@@ -302,7 +302,9 @@ describe('create()', () => {
             action: 'rule_create',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: 'mock-saved-object-id', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: {
+            saved_object: { id: 'mock-saved-object-id', type: RULE_SAVED_OBJECT_TYPE, name: 'abc' },
+          },
         })
       );
     });
@@ -328,6 +330,7 @@ describe('create()', () => {
             saved_object: {
               id: 'mock-saved-object-id',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'abc',
             },
           },
           error: {
@@ -3179,6 +3182,81 @@ describe('create()', () => {
     expect(taskManager.schedule).toHaveBeenCalled();
   });
 
+  test('should create rule with flapping', async () => {
+    const flapping = {
+      lookBackWindow: 10,
+      statusChangeThreshold: 10,
+    };
+
+    const data = getMockData({
+      name: 'my rule name',
+      flapping,
+    });
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        name: ' my rule name ',
+        alertTypeId: '123',
+        schedule: { interval: 10000 },
+        params: {
+          bar: true,
+        },
+        executionStatus: getRuleExecutionStatusPending(now),
+        running: false,
+        createdAt: now,
+        updatedAt: now,
+        actions: [],
+        flapping,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    const result = await rulesClient.create({ data, isFlappingEnabled: true });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        flapping,
+      }),
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+
+    expect(result.flapping).toEqual(flapping);
+  });
+
+  test('throws error when creating a rule with flapping if global flapping is disabled', async () => {
+    const flapping = {
+      lookBackWindow: 10,
+      statusChangeThreshold: 10,
+    };
+
+    const data = getMockData({
+      name: 'my rule name',
+      flapping,
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error creating rule: can not create rule with flapping if global flapping is disabled"`
+    );
+  });
+
   test('throws error when creating with an interval less than the minimum configured one when enforce = true', async () => {
     rulesClient = new RulesClient({
       ...rulesClientParams,
@@ -3767,7 +3845,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 152"`
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 154"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3823,7 +3901,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [153]"`
+      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [155]"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3895,7 +3973,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '154',
+            uuid: '156',
           },
         ],
         alertTypeId: '123',
@@ -4124,13 +4202,13 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
-              uuid: '156',
+              uuid: '158',
             },
             {
               actionRef: 'system_action:system_action-id',
               actionTypeId: '.test',
               params: { foo: 'test' },
-              uuid: '157',
+              uuid: '159',
             },
           ],
           alertTypeId: '123',
@@ -4202,13 +4280,13 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          uuid: '158',
+          uuid: '160',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: '.test',
           params: { foo: 'test' },
-          uuid: '159',
+          uuid: '161',
         },
       ]);
     });

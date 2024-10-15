@@ -115,7 +115,7 @@ export function sloBurnRateRuleType(
     alerts: {
       context: SLO_RULE_REGISTRATION_CONTEXT,
       mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
-      useEcs: false,
+      useEcs: true,
       useLegacyAlerts: true,
       shouldWrite: true,
     },

@@ -944,7 +944,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
@@ -6788,12 +6788,40 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-common.RawKibanaFeaturePrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaFeaturePrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RawKibanaFeaturePrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: { [privilegeId: string]: string[]; }",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  { [privilegeId: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-common.RawKibanaPrivileges",
         "type": "Interface",
         "tags": [],
         "label": "RawKibanaPrivileges",
         "description": [],
-        "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6807,7 +6835,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6820,14 +6848,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/security-authorization-core",
-                "scope": "server",
-                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
-                "section": "def-server.RawKibanaFeaturePrivileges",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaFeaturePrivileges",
                 "text": "RawKibanaFeaturePrivileges"
               }
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6841,7 +6869,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6855,7 +6883,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }

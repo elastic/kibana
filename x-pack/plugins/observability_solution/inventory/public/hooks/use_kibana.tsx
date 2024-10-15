@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InventoryStartDependencies } from '../types';
 import type { InventoryServices } from '../services/types';
 
-export interface InventoryKibanaContext {
-  core: CoreStart;
-  dependencies: { start: InventoryStartDependencies };
-  services: InventoryServices;
+export interface KibanaEnvironment {
+  kibanaVersion?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
 }
 
-const useTypedKibana = () => {
-  return useKibana<InventoryKibanaContext>().services;
-};
+export type InventoryKibanaContext = CoreStart &
+  InventoryStartDependencies &
+  InventoryServices & { kibanaEnvironment: KibanaEnvironment };
+
+const useTypedKibana = useKibana as () => KibanaReactContextValue<InventoryKibanaContext>;
 
 export { useTypedKibana as useKibana };

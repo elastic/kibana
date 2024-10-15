@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { AreaSeriesStyle, LineSeriesStyle, RecursivePartial } from '@elastic/charts';
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
 import type { JobCreatorType } from '../../../../common/job_creator';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
@@ -36,22 +37,22 @@ export const defaultChartSettings: ChartSettings = {
   intervalMs: 0,
 };
 
-export const seriesStyle = {
+export const lineSeriesStyle: RecursivePartial<LineSeriesStyle> = {
   line: {
     strokeWidth: 2,
     visible: true,
     opacity: 1,
   },
-  border: {
-    visible: false,
-    strokeWidth: 0,
-  },
   point: {
-    visible: false,
+    visible: 'never',
     radius: 2,
     strokeWidth: 4,
     opacity: 0.5,
   },
+};
+
+export const areaSeriesStyle: RecursivePartial<AreaSeriesStyle> = {
+  ...lineSeriesStyle,
   area: {
     opacity: 0.25,
     visible: false,

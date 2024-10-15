@@ -8,7 +8,7 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin/common/model';
+import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -90,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
+      dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read'],
       discover: [
         'all',
@@ -112,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
       advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
       indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
-      savedQueryManagement: ['all', 'minimal_all'],
+      savedQueryManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       osquery: [
         'all',
         'read',
@@ -140,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
+      inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

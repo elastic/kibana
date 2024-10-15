@@ -95,8 +95,6 @@ import { EnrichCommandContext } from "./esql_parser.js";
 import { EnrichWithClauseContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InlinestatsCommandContext } from "./esql_parser.js";
-import { MatchCommandContext } from "./esql_parser.js";
-import { MatchQueryContext } from "./esql_parser.js";
 
 
 /**
@@ -1002,25 +1000,5 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.matchCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterMatchCommand?: (ctx: MatchCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.matchCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitMatchCommand?: (ctx: MatchCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.matchQuery`.
-	 * @param ctx the parse tree
-	 */
-	enterMatchQuery?: (ctx: MatchQueryContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.matchQuery`.
-	 * @param ctx the parse tree
-	 */
-	exitMatchQuery?: (ctx: MatchQueryContext) => void;
 }
 

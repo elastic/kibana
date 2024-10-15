@@ -24,7 +24,7 @@ interface StatefulInventoryRouter extends InventoryRouter {
 
 export function useInventoryRouter(): StatefulInventoryRouter {
   const {
-    core: {
+    services: {
       http,
       application: { navigateToApp },
     },

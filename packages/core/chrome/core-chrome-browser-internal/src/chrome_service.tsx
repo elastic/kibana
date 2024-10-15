@@ -90,6 +90,7 @@ export class ChromeService {
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
+  private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
 
@@ -422,6 +423,7 @@ export class ChromeService {
 
             return (
               <ProjectHeader
+                isServerless={this.isServerless}
                 application={application}
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
@@ -452,6 +454,7 @@ export class ChromeService {
 
         return (
           <Header
+            isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}
             headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
@@ -566,6 +569,13 @@ export class ChromeService {
       sideNav: {
         getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
         setIsCollapsed: setIsSideNavCollapsed,
+        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
+        getIsFeedbackBtnVisible$: () =>
+          combineLatest([this.isFeedbackBtnVisible$, this.isSideNavCollapsed$]).pipe(
+            map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
+          ),
+        setIsFeedbackBtnVisible: (isVisible: boolean) => this.isFeedbackBtnVisible$.next(isVisible),
       },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {

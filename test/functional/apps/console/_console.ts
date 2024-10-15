@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
 
   describe('console app', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -140,6 +139,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Current URL: ' + currentUrl);
         expect(currentUrl).to.contain(`/shell`);
         expect(await PageObjects.console.isShellOpen()).to.be(true);
+      });
+    });
+
+    it('should send request with mixed case methods', async () => {
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('Get /');
+      await PageObjects.console.clickPlay();
+      await retry.try(async () => {
+        const status = await PageObjects.console.getResponseStatus();
+        expect(status).to.eql(200);
       });
     });
 

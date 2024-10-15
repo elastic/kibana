@@ -29,7 +29,8 @@ export const turnOffAgentPolicyFeatures = async (
     `App feature [${ProductFeatureSecurityKey.endpointAgentTamperProtection}] is disabled. Checking fleet agent policies for compliance`
   );
 
-  const { agentPolicy: agentPolicyService, internalSoClient } = fleetServices;
+  const { agentPolicy: agentPolicyService, savedObjects } = fleetServices;
+  const internalSoClient = savedObjects.createInternalScopedSoClient({ readonly: false });
   const { updatedPolicies, failedPolicies } =
     await agentPolicyService.turnOffAgentTamperProtections(internalSoClient);
 

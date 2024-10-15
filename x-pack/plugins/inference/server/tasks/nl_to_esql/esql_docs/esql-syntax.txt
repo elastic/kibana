@@ -43,7 +43,7 @@ FROM index
 
 ## Literals
 
-ES|QL currently supports numeric and string literals.
+ES|QL currently supports numeric, string and timespan literals.
 
 ### String Literals
 
@@ -93,11 +93,11 @@ These qualifiers are supported:
 - `quarter`/`quarters`/`q`
 - `year`/`years`/`yr`/`y`
 
-Timespan literals are not whitespace sensitive. These expressions are all valid:
-
-- 1day
-- 1 day
-- 1       day
+Timespan literals are not whitespace sensitive, and should not be wrapped with quotes:
+- GOOD: 1day
+- GOOD: 1 day
+- BAD: "day"
+- BAD: "2 days"
 
 ## Example Queries with Timespan Literals
 
@@ -134,6 +134,15 @@ FROM weather_data
 FROM sales
 | WHERE @timestamp > NOW() - 1 quarter
 | STATS weekly_sales = SUM(sales_amount) BY week = DATE_TRUNC(1 week, @timestamp)
+| SORT week
+```
+
+4. The same example with BUCKET instead of DATE_TRUNC:
+
+```esql
+FROM sales
+| WHERE @timestamp > NOW() - 1 quarter
+| STATS weekly_sales = SUM(sales_amount) BY week = BUCKET(@timestamp, 1 week)
 | SORT week
 ```
 

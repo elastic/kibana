@@ -127,7 +127,7 @@ export const ProcessTreeAlertsFilter = ({
                 defaultMessage="{count, plural, one {Showing <bold>#</bold> alert} other {Showing <bold>#</bold> alerts}}"
                 values={{
                   count: totalAlertsCount,
-                  bold: (str: string) => <strong>{str}</strong>,
+                  bold: (str) => <strong>{str}</strong>,
                 }}
               />
             )}

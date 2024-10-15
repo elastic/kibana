@@ -33,6 +33,7 @@ For each pipeline result you find matching values that would fit any of the rela
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
+- The \`message\` field may not be part of related fields.
 - You can use as many processor objects as needed to map all relevant pipeline result fields to any of the ECS related fields.
 - If no relevant fields or values are found that could be mapped confidently to any of the related fields, then respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the array of processors as a valid JSON objects enclosed with 3 backticks (\`), see example response below.
@@ -79,6 +80,7 @@ Follow these steps to help resolve the current ingest pipeline issues:
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
+- The \`message\` field may not be part of related fields.
 - Never use "split" in template values, only use the field name inside the triple brackets. If the error mentions "Improperly closed variable in query-template" then check each "value" field for any special characters and remove them.
 - If solving an error means removing the last processor in the list, then return an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the complete updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.

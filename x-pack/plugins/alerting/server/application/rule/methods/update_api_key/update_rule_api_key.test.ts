@@ -41,6 +41,8 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
+const ruleName = 'fakeRuleName';
+
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -83,6 +85,7 @@ describe('updateRuleApiKey()', () => {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
+      name: ruleName,
       revision: 0,
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
@@ -137,6 +140,7 @@ describe('updateRuleApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
+        name: ruleName,
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
@@ -198,6 +202,7 @@ describe('updateRuleApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
+        name: ruleName,
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
@@ -254,6 +259,7 @@ describe('updateRuleApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
+        name: ruleName,
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
@@ -324,6 +330,7 @@ describe('updateRuleApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
+        name: ruleName,
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
@@ -434,7 +441,9 @@ describe('updateRuleApiKey()', () => {
             action: 'rule_update_api_key',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: ruleName },
+          },
         })
       );
     });
@@ -453,6 +462,7 @@ describe('updateRuleApiKey()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: ruleName,
             },
           },
           error: {

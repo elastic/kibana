@@ -14,7 +14,7 @@ import { loadTestData } from './helper/load_test_data';
 import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('Update SLOs', function () {
+  describe('UpdateSLOs', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');

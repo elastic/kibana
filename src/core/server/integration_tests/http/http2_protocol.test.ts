@@ -58,6 +58,7 @@ describe('Http2 - Smoke tests', () => {
         redirectHttpFromPort: 10003,
       },
       shutdownTimeout: '5s',
+      restrictInternalApis: false,
     });
     config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PERMISSIONS_POLICY_CONFIG);
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));

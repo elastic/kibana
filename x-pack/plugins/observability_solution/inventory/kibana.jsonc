@@ -11,12 +11,15 @@
       "observabilityShared",
       "entityManager",
       "inference",
-      "dataViews"
+      "dataViews",
+      "share",
+      "features",
+      "unifiedSearch",
+      "data",
+      "share"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["spaces", "cloud"],
     "extraPublicDirs": []
   }
 }

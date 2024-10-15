@@ -127,7 +127,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
           line: {
             strokeWidth: 1,
           },
-          point: { visible: false },
+          point: { visible: 'never' },
         }}
         xAccessor="key"
         xScaleType={ScaleType.Time}

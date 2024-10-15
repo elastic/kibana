@@ -17,23 +17,15 @@ export const addTestMonitorProject = async (
   const testData = {
     ...testProjectMonitorBrowser(name, config),
   };
-  try {
-    return await axios.put(
-      kibanaUrl +
-        SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-          '{projectName}',
-          projectName
-        ),
-      testData,
-      {
-        auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
-      }
-    );
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
+  return await axios.put(
+    kibanaUrl +
+      SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', projectName),
+    testData,
+    {
+      auth: { username: 'elastic', password: 'changeme' },
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
+    }
+  );
 };
 
 const testProjectMonitorBrowser = (name: string, config?: Record<string, unknown>) => ({

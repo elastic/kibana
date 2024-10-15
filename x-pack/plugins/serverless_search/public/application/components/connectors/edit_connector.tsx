@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiPanel,
+  EuiForm,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -158,9 +159,11 @@ export const EditConnector: React.FC = () => {
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={1}>
-            <EditServiceType connector={connector} />
-            <EuiSpacer />
-            <EditDescription connector={connector} />
+            <EuiForm>
+              <EditServiceType connector={connector} />
+              <EuiSpacer />
+              <EditDescription connector={connector} />
+            </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>

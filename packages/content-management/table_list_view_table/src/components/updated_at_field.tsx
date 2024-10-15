@@ -47,7 +47,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
   }
   return (
     <EuiToolTip content={updatedAt.format('LL LT')}>
-      <span>{updatedAt.format('LL')}</span>
+      <span>{updatedAt.format('ll')}</span>
     </EuiToolTip>
   );
 };

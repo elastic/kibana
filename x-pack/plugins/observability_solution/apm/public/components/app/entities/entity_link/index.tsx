@@ -14,9 +14,9 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_values';
 import { useServiceEntitySummaryFetcher } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
-import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ApmPluginStartDeps } from '../../../../plugin';
@@ -36,8 +36,7 @@ export function EntityLink() {
     path: { serviceName },
     query: { rangeFrom = timeRange.from, rangeTo = timeRange.to },
   } = useApmParams('/link-to/entity/{serviceName}');
-  const { isEntityCentricExperienceViewEnabled, isEnablementPending } =
-    useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
     serviceName,
@@ -48,17 +47,13 @@ export function EntityLink() {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
 
-  if (
-    isEnablementPending ||
-    serviceEntitySummaryStatus === FETCH_STATUS.LOADING ||
-    isPending(hasApmDataStatus)
-  ) {
+  if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING || isPending(hasApmDataStatus)) {
     return <EuiLoadingSpinner data-test-subj="apmEntityLinkLoadingSpinner" />;
   }
 
   if (
     // When EEM is enabled and the service is not found on the EEM indices and there's no APM data, display a callout guiding on the limitations of EEM
-    isEntityCentricExperienceViewEnabled === true &&
+    isEntityCentricExperienceEnabled === true &&
     (serviceEntitySummary?.dataStreamTypes === undefined ||
       serviceEntitySummary.dataStreamTypes.length === 0) &&
     hasApmData?.hasData !== true

@@ -31,13 +31,10 @@ test('returns correct position on complete modifier matches', () => {
 
 test('returns ASC/DESC matched text', () => {
   expect(getSortPos('from a | sort col ASC').pos).toBe('order');
-  expect(getSortPos('from a | sort col asc').order).toBe('ASC');
 
   expect(getSortPos('from a | sort col as').pos).toBe('order');
-  expect(getSortPos('from a | sort col as').order).toBe('AS');
 
   expect(getSortPos('from a | sort col DE').pos).toBe('order');
-  expect(getSortPos('from a | sort col DE').order).toBe('DE');
 });
 
 test('returns NULLS FIRST/NULLS LAST matched text', () => {

@@ -24,13 +24,16 @@ export default {
 
 interface TemplateProps {
   finalDiffableRule: DiffableRule;
-  kibanaServicesMock?: Record<string, unknown>;
+  kibanaServicesOverrides?: Record<string, unknown>;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FieldReadOnly fieldName="data_source" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders
+      kibanaServicesOverrides={args.kibanaServicesOverrides}
+      finalDiffableRule={args.finalDiffableRule}
+    >
+      <FieldReadOnly fieldName="data_source" />
     </ThreeWayDiffStorybookProviders>
   );
 };
@@ -49,7 +52,7 @@ DataSourceWithDataView.args = {
   finalDiffableRule: mockCustomQueryRule({
     data_source: dataSourceWithDataView,
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),

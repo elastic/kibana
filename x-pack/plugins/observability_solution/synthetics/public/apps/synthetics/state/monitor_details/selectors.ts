@@ -27,3 +27,14 @@ export const selectMonitorPingsMetadata = createSelector(getState, (state) => st
 export const selectPingsError = createSelector(getState, (state) => state.error);
 
 export const selectStatusFilter = createSelector(getState, (state) => state.statusFilter);
+
+export const selectSyntheticsMonitor = createSelector(getState, (state) => state.syntheticsMonitor);
+export const selectSyntheticsMonitorError = createSelector(
+  getState,
+  (state) => state.syntheticsMonitorError
+);
+
+export const selectSyntheticsMonitorLoading = createSelector(
+  getState,
+  (state) => state.syntheticsMonitorLoading
+);

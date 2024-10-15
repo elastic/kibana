@@ -12,15 +12,15 @@ import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 
 import {
-  panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
+  panelHoverTrigger,
   type EmbeddableInput,
   type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
-import { pluginServices } from '../../services';
+import { uiActionsService } from '../../services/kibana_services';
 import './floating_actions.scss';
 
 export interface FloatingActionsProps {
@@ -41,9 +41,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   disabledActions,
 }) => {
-  const {
-    uiActions: { getTriggerCompatibleActions },
-  } = pluginServices.getServices();
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
   useEffect(() => {
@@ -55,8 +52,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         embeddable: api,
         trigger: panelHoverTrigger,
       };
-      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action): action is Action & { MenuItem: React.FC } => {
+      const actions = (
+        await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
+      )
+        .filter((action): action is Action & { MenuItem: React.FC<{ context: unknown }> } => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -66,7 +65,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         setFloatingActions(
           <>
             {actions.map((action) =>
-              // @ts-expect-error upgrade typescript v5.1.6
               React.createElement(action.MenuItem, {
                 key: action.id,
                 context,
@@ -83,7 +81,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     getActions();
-  }, [api, getTriggerCompatibleActions, viewMode, disabledActions]);
+  }, [api, viewMode, disabledActions]);
 
   return (
     <div className="presentationUtil__floatingActionsWrapper">

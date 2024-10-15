@@ -9,6 +9,11 @@ import React from 'react';
 import type { DiffableNewTermsFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
+import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { NewTermsFieldsReadOnly } from './fields/new_terms_fields/new_terms_fields';
+import { HistoryWindowStartReadOnly } from './fields/history_window_start/history_window_start';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface NewTermsRuleFieldReadOnlyProps {
   fieldName: keyof DiffableNewTermsFields;
@@ -20,8 +25,19 @@ export function NewTermsRuleFieldReadOnly({
   finalDiffableRule,
 }: NewTermsRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
+    case 'history_window_start':
+      return (
+        <HistoryWindowStartReadOnly historyWindowStart={finalDiffableRule.history_window_start} />
+      );
     case 'kql_query':
       return (
         <KqlQueryReadOnly
@@ -30,9 +46,11 @@ export function NewTermsRuleFieldReadOnly({
           ruleType={finalDiffableRule.type}
         />
       );
+    case 'new_terms_fields':
+      return <NewTermsFieldsReadOnly newTermsFields={finalDiffableRule.new_terms_fields} />;
     case 'type':
-      return null;
+      return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

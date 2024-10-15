@@ -1,0 +1,8 @@
+{% include "./description_readme.njk" %}
+{% for data_stream in fields %}
+### {{ data_stream.datastream }}
+
+Insert a description of the datastream here.
+
+{% raw %}{{fields {% endraw %}"{{ data_stream.datastream }}"{% raw %}}}{% endraw %}
+{% endfor %}

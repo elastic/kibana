@@ -35,7 +35,7 @@
             "section": "def-common.FileUploadProps",
             "text": "FileUploadProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
         "deprecated": false,

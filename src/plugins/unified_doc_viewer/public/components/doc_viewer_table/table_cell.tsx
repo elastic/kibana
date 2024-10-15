@@ -7,56 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { TableFieldValue } from './table_cell_value';
-import type { TableRow } from './table_cell_actions';
+import type { FieldRow } from './field_row';
+import { TermMatch, type UseTableFiltersReturn } from './table_filters';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 interface TableCellProps {
   searchTerm: string;
-  rows: TableRow[];
+  rows: FieldRow[];
   rowIndex: number;
   columnId: string;
   isDetails: boolean;
+  onFindSearchTermMatch?: UseTableFiltersReturn['onFindSearchTermMatch'];
 }
 
 export const TableCell: React.FC<TableCellProps> = React.memo(
-  ({ searchTerm, rows, rowIndex, columnId, isDetails }) => {
+  ({ searchTerm, rows, rowIndex, columnId, isDetails, onFindSearchTermMatch }) => {
     const { fieldsMetadata } = getUnifiedDocViewerServices();
 
     const row = rows[rowIndex];
+
+    const searchTermMatch = useMemo(() => {
+      if (row && onFindSearchTermMatch && searchTerm?.trim()) {
+        return onFindSearchTermMatch(row, searchTerm);
+      }
+      return null;
+    }, [onFindSearchTermMatch, row, searchTerm]);
+
+    const nameHighlight = useMemo(
+      () =>
+        row && searchTermMatch && [TermMatch.name, TermMatch.both].includes(searchTermMatch)
+          ? getFieldSearchMatchingHighlight(row.dataViewField?.displayName || row.name, searchTerm)
+          : undefined,
+      [searchTerm, searchTermMatch, row]
+    );
 
     if (!row) {
       return null;
     }
 
-    const {
-      action: { flattenedField },
-      field: { field, fieldMapping, fieldType, scripted },
-      value: { formattedValue, ignored },
-    } = row;
+    const { flattenedValue, name, dataViewField, ignoredReason, fieldType } = row;
 
     if (columnId === 'name') {
       return (
         <div>
           <FieldName
-            fieldName={field}
+            fieldName={name}
             fieldType={fieldType}
-            fieldMapping={fieldMapping}
-            scripted={scripted}
-            highlight={getFieldSearchMatchingHighlight(
-              fieldMapping?.displayName ?? field,
-              searchTerm
-            )}
+            fieldMapping={dataViewField}
+            scripted={dataViewField?.scripted}
+            highlight={nameHighlight}
           />
 
-          {isDetails && !!fieldMapping ? (
+          {isDetails && !!dataViewField ? (
             <div>
               <FieldDescription
                 fieldsMetadataService={fieldsMetadata}
-                field={fieldMapping}
+                field={dataViewField}
                 truncate={false}
               />
             </div>
@@ -68,11 +78,14 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
     if (columnId === 'value') {
       return (
         <TableFieldValue
-          field={field}
-          formattedValue={formattedValue}
-          rawValue={flattenedField}
-          ignoreReason={ignored}
+          field={name}
+          formattedValue={row.formattedAsHtml ?? ''}
+          rawValue={flattenedValue}
+          ignoreReason={ignoredReason}
           isDetails={isDetails}
+          isHighlighted={Boolean(
+            searchTermMatch && [TermMatch.value, TermMatch.both].includes(searchTermMatch)
+          )}
         />
       );
     }

@@ -90,7 +90,6 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/alerting-comparators",
     "@kbn/search-types",
-    "@kbn/reporting-server",
     "@kbn/config-schema",
     "@kbn/features-plugin",
     "@kbn/observability-ai-assistant-plugin",
@@ -100,5 +99,6 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/security-plugin-types-common",
     "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/ai-assistant-common",
   ]
 }

@@ -7,9 +7,11 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-common';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
 

@@ -47,7 +47,14 @@ describe('deleteMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
-    expect(config.options?.tags?.[0]).toEqual('access:write-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+        "tags": Array [
+          "access:write-maintenance-window",
+        ],
+      }
+    `);
 
     await handler(context, req, res);
 

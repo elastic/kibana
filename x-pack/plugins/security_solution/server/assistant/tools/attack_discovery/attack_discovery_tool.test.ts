@@ -75,7 +75,6 @@ describe('AttackDiscoveryTool', () => {
     isEnabledKnowledgeBase: false,
     llm,
     logger,
-    modelExists: false,
     onNewReplacements: jest.fn(),
     size,
   };

@@ -8,22 +8,16 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
+import { useKibana } from '../../../../../../shared_imports';
+import { i18nTexts } from '../../../i18n_texts';
 import { LearnMoreLink } from '../../learn_more_link';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
-import { useKibana } from '../../../../../../shared_imports';
 
 export const DeleteSearchableSnapshotField: React.FunctionComponent = () => {
   const { docLinks } = useKibana().services;
   return (
     <ToggleFieldWithDescribedFormRow
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deleteSearchableSnapshotTitle"
-            defaultMessage="Delete searchable snapshot"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.deleteSearchableSnapshotLabel}</h3>}
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage

@@ -38,7 +38,8 @@ import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/195463
+describe.skip('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
@@ -577,7 +578,9 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('docsLoading').should('exist');
           cy.getBySel('docsLoading').should('not.exist');
 
-          return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
+          return cy
+            .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
+            .invoke('text');
         },
         (response) => response !== '-',
         {

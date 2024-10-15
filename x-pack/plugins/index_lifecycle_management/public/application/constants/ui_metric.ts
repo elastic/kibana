@@ -19,3 +19,4 @@ export const UIM_CONFIG_WARM_PHASE: string = 'config_warm_phase';
 export const UIM_CONFIG_SET_PRIORITY: string = 'config_set_priority';
 export const UIM_INDEX_RETRY_STEP: string = 'index_retry_step';
 export const UIM_EDIT_CLICK: string = 'edit_click';
+export const UIM_VIEW_CLICK: string = 'view_click';

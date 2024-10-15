@@ -16,9 +16,11 @@ import type {
   DiffableEqlFields,
   DiffableEsqlFields,
   DiffableMachineLearningFields,
+  DiffableNewTermsFields,
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
+  DiffableThresholdFields,
   InlineKqlQuery,
   RuleEqlQuery,
   SavedKqlQuery,
@@ -157,7 +159,7 @@ const customQueryDiffableRuleFields: DiffableCustomQueryFields = {
 };
 
 export function mockCustomQueryRule(
-  overrides: Partial<DiffableCommonFields & DiffableCustomQueryFields>
+  overrides: Partial<DiffableCommonFields & DiffableCustomQueryFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
@@ -175,7 +177,7 @@ const savedQueryDiffableRuleFields: DiffableSavedQueryFields = {
 };
 
 export function mockSavedQueryRule(
-  overrides: Partial<DiffableCommonFields & DiffableSavedQueryFields>
+  overrides: Partial<DiffableCommonFields & DiffableSavedQueryFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
@@ -194,7 +196,7 @@ const eqlDiffableRuleFields: DiffableEqlFields = {
 };
 
 export function mockEqlRule(
-  overrides: Partial<DiffableCommonFields & DiffableEqlFields>
+  overrides: Partial<DiffableCommonFields & DiffableEqlFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
@@ -212,7 +214,7 @@ const esqlDiffableRuleFields: DiffableEsqlFields = {
 };
 
 export function mockEsqlRule(
-  overrides: Partial<DiffableCommonFields & DiffableEsqlFields>
+  overrides: Partial<DiffableCommonFields & DiffableEsqlFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
@@ -228,7 +230,7 @@ const machineLearningDiffableRuleFields: DiffableMachineLearningFields = {
 };
 
 export function mockMachineLearningRule(
-  overrides: Partial<DiffableCommonFields & DiffableMachineLearningFields>
+  overrides: Partial<DiffableCommonFields & DiffableMachineLearningFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
@@ -266,11 +268,57 @@ const threatMatchDiffableRuleFields: DiffableThreatMatchFields = {
 };
 
 export function mockThreatMatchRule(
-  overrides: Partial<DiffableCommonFields & DiffableThreatMatchFields>
+  overrides: Partial<DiffableCommonFields & DiffableThreatMatchFields> = {}
 ): DiffableRule {
   return {
     ...commonDiffableRuleFields,
     ...threatMatchDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const newTermsDiffableRuleFields: DiffableNewTermsFields = {
+  type: 'new_terms',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
+};
+
+export function mockNewTermsRule(
+  overrides: Partial<DiffableCommonFields & DiffableNewTermsFields> = {}
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...newTermsDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+export const thresholdDiffableRuleFields: DiffableThresholdFields = {
+  type: 'threshold',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  threshold: {
+    field: ['user.name'],
+    value: 200,
+  },
+};
+
+export function mockThresholdRule(
+  overrides: Partial<DiffableCommonFields & DiffableThresholdFields> = {}
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...thresholdDiffableRuleFields,
     ...overrides,
   };
 }

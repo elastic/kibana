@@ -6,57 +6,47 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
+import type {
+  RulesUpgradeState,
+  FieldsUpgradeState,
+  SetRuleFieldResolvedValueFn,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
-  ThreeWayDiffConflict,
+  type FieldsDiff,
   type DiffableAllFields,
   type DiffableRule,
-  type RuleObjectId,
-  type RuleSignatureId,
   type RuleUpgradeInfoForReview,
+  ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
-
-export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
-  /**
-   * Rule containing desired values users expect to see in the upgraded rule.
-   */
-  finalRule: DiffableRule;
-  /**
-   * Indicates whether there are conflicts blocking rule upgrading.
-   */
-  hasUnresolvedConflicts: boolean;
-}
-export type RulesUpgradeState = Record<RuleSignatureId, RuleUpgradeState>;
-export type SetFieldResolvedValueFn<
-  FieldName extends keyof DiffableAllFields = keyof DiffableAllFields
-> = (params: {
-  ruleId: RuleObjectId;
-  fieldName: FieldName;
-  resolvedValue: DiffableAllFields[FieldName];
-}) => void;
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
 type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
 
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
-  const setFieldResolvedValue = useCallback((...[params]: Parameters<SetFieldResolvedValueFn>) => {
-    setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
-      ...prevRulesResolvedConflicts,
-      [params.ruleId]: {
-        ...(prevRulesResolvedConflicts[params.ruleId] ?? {}),
-        [params.fieldName]: params.resolvedValue,
-      },
-    }));
-  }, []);
+
+  const setRuleFieldResolvedValue = useCallback(
+    (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
+      setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
+        ...prevRulesResolvedConflicts,
+        [params.ruleId]: {
+          ...(prevRulesResolvedConflicts[params.ruleId] ?? {}),
+          [params.fieldName]: params.resolvedValue,
+        },
+      }));
+    },
+    []
+  );
+
   const rulesUpgradeState = useMemo(() => {
     const state: RulesUpgradeState = {};
 
@@ -65,6 +55,10 @@ export function usePrebuiltRulesUpgradeState(
         ...ruleUpgradeInfo,
         finalRule: calcFinalDiffableRule(
           ruleUpgradeInfo,
+          rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+        ),
+        fieldsUpgradeState: calcFieldsState(
+          ruleUpgradeInfo.diff.fields,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
         hasUnresolvedConflicts:
@@ -80,7 +74,7 @@ export function usePrebuiltRulesUpgradeState(
 
   return {
     rulesUpgradeState,
-    setFieldResolvedValue,
+    setRuleFieldResolvedValue,
   };
 }
 
@@ -96,7 +90,7 @@ function calcFinalDiffableRule(
 }
 
 /**
- * Assembles a `DiffableRule` from rule fields diff `merge_value`s.
+ * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
  */
 function convertRuleFieldsDiffToDiffable(
   ruleFieldsDiff: FieldsDiff<Record<string, unknown>>
@@ -108,6 +102,35 @@ function convertRuleFieldsDiffToDiffable(
   }
 
   return mergeVersionRule;
+}
+
+function calcFieldsState(
+  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>,
+  ruleResolvedConflicts: RuleResolvedConflicts
+): FieldsUpgradeState {
+  const fieldsState: FieldsUpgradeState = {};
+
+  for (const fieldName of Object.keys(ruleFieldsDiff)) {
+    switch (ruleFieldsDiff[fieldName].conflict) {
+      case ThreeWayDiffConflict.NONE:
+        fieldsState[fieldName] = FieldUpgradeState.Accepted;
+        break;
+
+      case ThreeWayDiffConflict.SOLVABLE:
+        fieldsState[fieldName] = FieldUpgradeState.SolvableConflict;
+        break;
+
+      case ThreeWayDiffConflict.NON_SOLVABLE:
+        fieldsState[fieldName] = FieldUpgradeState.NonSolvableConflict;
+        break;
+    }
+  }
+
+  for (const fieldName of Object.keys(ruleResolvedConflicts)) {
+    fieldsState[fieldName] = FieldUpgradeState.Accepted;
+  }
+
+  return fieldsState;
 }
 
 function getUnacceptedConflictsCount(
