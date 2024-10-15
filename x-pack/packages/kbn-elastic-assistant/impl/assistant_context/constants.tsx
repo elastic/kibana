@@ -21,7 +21,7 @@ export const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = 'systemPromptTable';
 export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
-export const DEFAULT_LATEST_ALERTS = 20;
+export const DEFAULT_LATEST_ALERTS = 50;
 
 /** The default maximum number of alerts to be sent as context when generating Attack discoveries */
 export const DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS = 200;
