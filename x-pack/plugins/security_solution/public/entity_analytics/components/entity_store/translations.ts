@@ -29,7 +29,7 @@ export const ENABLE_ALL_TITLE = i18n.translate(
 export const ENABLEMENT_INITIALIZING_RISK_ENGINE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.initializing.risk',
   {
-    defaultMessage: 'Initializing Risk Engine',
+    defaultMessage: 'Initializing risk engine',
   }
 );
 
