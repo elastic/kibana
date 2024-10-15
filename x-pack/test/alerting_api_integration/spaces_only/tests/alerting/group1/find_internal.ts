@@ -152,6 +152,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
       await supertest
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
         .send({
           search: 'test.noop',
           search_fields: 'alertTypeId',

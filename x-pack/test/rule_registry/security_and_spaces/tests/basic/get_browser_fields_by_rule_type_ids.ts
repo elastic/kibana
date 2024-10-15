@@ -85,8 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
           'monitor',
           'observer',
           'orchestrator',
-          'slo',
           'service',
+          'slo',
           'tls',
           'url',
         ]);
