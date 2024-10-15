@@ -184,7 +184,7 @@ export const useDiscoverHistogram = ({
 
         const fetchStatus = status.toString() as FetchStatus;
 
-        // Do not sync the loading state since it's already handled by the saved search
+        // Do not sync the loading state since it's already handled by fetchAll
         if (fetchStatus !== FetchStatus.LOADING) {
           savedSearchHits$.next({
             fetchStatus,
