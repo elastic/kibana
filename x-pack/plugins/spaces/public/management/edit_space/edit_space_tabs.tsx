@@ -11,6 +11,7 @@ import React from 'react';
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
@@ -25,6 +26,7 @@ export interface EditSpaceTab {
 }
 
 export interface GetTabsProps {
+  authz: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
   space: Space;
   rolesCount: number;
   features: KibanaFeature[];
@@ -61,6 +63,7 @@ const SuspenseEditSpaceContentTab = withSuspense(
 );
 
 export const getTabs = ({
+  authz,
   space,
   features,
   history,
@@ -92,7 +95,7 @@ export const getTabs = ({
     },
   ];
 
-  if (canUserViewRoles) {
+  if (authz.isRoleManagementEnabled() && canUserViewRoles) {
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {

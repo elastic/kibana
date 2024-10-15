@@ -16,6 +16,7 @@ import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
+  AuthorizationServiceSetup,
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
 } from '@kbn/security-plugin-types-public';
@@ -30,6 +31,7 @@ import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
+  authorization: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
   spacesManager: SpacesManager;
   config: ConfigType;
   logger: Logger;
@@ -46,6 +48,7 @@ export const spacesManagementApp = Object.freeze({
     spacesManager,
     config,
     logger,
+    authorization,
     eventTracker,
     getRolesAPIClient,
     getPrivilegesAPIClient,
@@ -151,6 +154,7 @@ export const spacesManagementApp = Object.freeze({
               navigateToUrl={application.navigateToUrl}
               serverBasePath={http.basePath.serverBasePath}
               getFeatures={features.getFeatures}
+              authz={authorization}
               http={http}
               overlays={overlays}
               notifications={notifications}

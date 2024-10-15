@@ -17,6 +17,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { EditSpaceAssignedRolesTab } from './edit_space_roles_tab';
 import { EditSpaceProvider } from './provider';
@@ -30,6 +31,7 @@ const spacesManager = spacesManagerMock.create();
 const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
 
+const { authz } = securityMock.createSetup();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
@@ -52,6 +54,7 @@ describe('EditSpaceAssignedRolesTab', () => {
     return (
       <IntlProvider locale="en">
         <EditSpaceProvider
+          authz={authz}
           capabilities={{
             navLinks: {},
             management: {},

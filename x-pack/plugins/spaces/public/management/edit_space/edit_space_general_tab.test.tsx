@@ -21,6 +21,7 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
 import { EditSpaceProvider } from './provider/edit_space_provider';
@@ -39,6 +40,7 @@ const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
 const reloadWindow = jest.fn();
 
+const { authz } = securityMock.createSetup();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
@@ -65,6 +67,7 @@ describe('EditSpaceSettings', () => {
     return (
       <IntlProvider locale="en">
         <EditSpaceProvider
+          authz={authz}
           capabilities={{
             navLinks: {},
             management: {},

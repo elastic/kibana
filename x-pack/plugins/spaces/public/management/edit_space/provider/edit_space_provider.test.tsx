@@ -19,12 +19,14 @@ import {
 } from '@kbn/core/public/mocks';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './edit_space_provider';
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
 
+const { authz } = securityMock.createSetup();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
@@ -48,6 +50,7 @@ const SUTProvider = ({
       <EditSpaceProvider
         {...{
           logger,
+          authz,
           i18n,
           http,
           theme,

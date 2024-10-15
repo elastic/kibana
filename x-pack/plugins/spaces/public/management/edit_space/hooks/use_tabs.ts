@@ -9,11 +9,13 @@ import { useMemo } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/public';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import type { Space } from '../../../../common';
 import { type EditSpaceTab, getTabs, type GetTabsProps } from '../edit_space_tabs';
 
 type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
+  authz: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;
@@ -23,6 +25,7 @@ type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
 };
 
 export const useTabs = ({
+  authz,
   space,
   features,
   currentSelectedTabId,
@@ -33,9 +36,9 @@ export const useTabs = ({
       return [[]];
     }
 
-    const _tabs = space != null ? getTabs({ space, features, ...getTabsArgs }) : [];
+    const _tabs = space != null ? getTabs({ authz, space, features, ...getTabsArgs }) : [];
     return [_tabs, _tabs.find((obj) => obj.id === currentSelectedTabId)?.content];
-  }, [space, features, getTabsArgs, currentSelectedTabId]);
+  }, [authz, space, features, getTabsArgs, currentSelectedTabId]);
 
   return [tabs, selectedTabContent];
 };
