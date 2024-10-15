@@ -157,14 +157,13 @@ let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
   beforeAll(() => {
-    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
-
     jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
       closeFlyout: mockCloseFlyout,
     }));
 
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
       get() {
         return true;
