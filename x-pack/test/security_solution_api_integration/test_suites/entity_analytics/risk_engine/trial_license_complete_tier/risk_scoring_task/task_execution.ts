@@ -239,7 +239,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
           beforeEach(async () => {
-            await assetCriticalityRoutes.upsert({ // TODO: check endpoint for ac routes here 
+            await assetCriticalityRoutes.upsert({
               id_field: 'host.name',
               id_value: 'host-1',
               criticality_level: 'extreme_impact',
@@ -250,13 +250,11 @@ export default ({ getService }: FtrProviderContext): void => {
             await cleanAssetCriticality({ log, es });
           });
 
-          it.only('calculates risk scores with asset criticality data', async () => {
+          it('calculates risk scores with asset criticality data', async () => {
             await waitForAssetCriticalityToBePresent({ es, log });
             await riskEngineRoutes.init();
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
             const riskScores = await readRiskScores(es);
-            console.log(`es: ${es} log: ${log}`);
-            console.log(JSON.stringify(riskScores[0], null, 2));
             expect(riskScores.length).to.be.greaterThan(0);
             const assetCriticalityLevels = riskScores.map(
               (riskScore) => riskScore.host?.risk.criticality_level
