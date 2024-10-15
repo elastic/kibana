@@ -6,12 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type {
-  KibanaRequest,
-  RequestHandler,
-  ResponseHeaders,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
 import { dump } from 'js-yaml';
 
@@ -22,7 +17,7 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, outputService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
@@ -54,7 +49,6 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
-  IntegrationsOutput,
 } from '../../../common/types';
 import {
   defaultFleetErrorHandler,
@@ -691,65 +685,39 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
   undefined
 > = async (context, request, response) => {
   try {
-    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
-
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
 
-    let integrationsOutputs: IntegrationsOutput[] = [];
-    if (agentPolicy?.package_policies) {
-      integrationsOutputs = agentPolicy.package_policies
-        .filter((pkg) => !!pkg?.output_id)
-        .map((pkg) => {
-          return { pkgName: pkg?.name, id: pkg?.output_id };
-        });
+    if (!agentPolicy) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
     }
-    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
-
-    let dataOutput;
-    let monitoringOutput;
-    if (agentPolicy && agentPolicy?.data_output_id) {
-      dataOutput = await outputService.get(soClient, agentPolicy?.data_output_id);
-    } else {
-      if (defaultOutputId) {
-        dataOutput = await outputService.get(soClient, defaultOutputId);
-      }
-    }
-
-    if (agentPolicy && agentPolicy?.monitoring_output_id) {
-      monitoringOutput = await outputService.get(soClient, agentPolicy?.monitoring_output_id);
-    } else {
-      if (defaultOutputId) {
-        monitoringOutput = await outputService.get(soClient, defaultOutputId);
-      }
-    }
+    const { dataOutput, monitoringOutput, integrationsDataOutputs } =
+      await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
 
     const body: GetAgentPolicyOutputsResponse = {
       item: {
         monitoring: {
           output: {
-            name: monitoringOutput?.name,
-            id: monitoringOutput?.id,
+            name: monitoringOutput?.name ?? '',
+            id: monitoringOutput?.id ?? '',
           },
         },
         data: {
           output: {
-            name: dataOutput?.name,
-            id: dataOutput?.id,
+            name: dataOutput?.name ?? '',
+            id: dataOutput?.id ?? '',
           },
-          integrations: integrationsOutputs,
+          integrations: integrationsDataOutputs ?? [],
         },
       },
     };
     return response.ok({
       body,
     });
-    // } else {
-    //   return response.customError({
-    //     statusCode: 404,
-    //     body: { message: 'Agent policy not found' },
-    //   });
-    // }
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

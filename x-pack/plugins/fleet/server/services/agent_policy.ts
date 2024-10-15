@@ -74,6 +74,7 @@ import type {
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
+  IntegrationsOutput,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -1775,6 +1776,52 @@ class AgentPolicyService {
         });
       },
     });
+  }
+
+  public async getAllOutputsForPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy
+  ) {
+    let integrationsDataOutputs: IntegrationsOutput[] = [];
+    if (agentPolicy?.package_policies) {
+      const integrationsWithOutputs = agentPolicy.package_policies.filter(
+        (pkg) => !!pkg?.output_id
+      );
+      integrationsDataOutputs = await pMap(
+        integrationsWithOutputs,
+        async (pkg) => {
+          if (pkg?.output_id) {
+            const output = await outputService.get(soClient, pkg.output_id);
+            return { pkgName: pkg?.name, id: output.id, name: output.name };
+          }
+          return { pkgName: pkg?.name, id: pkg?.output_id };
+        },
+        {
+          concurrency: 20,
+        }
+      );
+    }
+    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
+
+    let dataOutput;
+    let monitoringOutput;
+    // get the data output
+    if (agentPolicy && agentPolicy?.data_output_id) {
+      dataOutput = await outputService.get(soClient, agentPolicy?.data_output_id);
+    } else {
+      if (defaultOutputId) {
+        dataOutput = await outputService.get(soClient, defaultOutputId);
+      }
+    }
+    // get the monitoring output
+    if (agentPolicy && agentPolicy?.monitoring_output_id) {
+      monitoringOutput = await outputService.get(soClient, agentPolicy?.monitoring_output_id);
+    } else {
+      if (defaultOutputId) {
+        monitoringOutput = await outputService.get(soClient, defaultOutputId);
+      }
+    }
+    return { dataOutput, monitoringOutput, integrationsDataOutputs };
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {

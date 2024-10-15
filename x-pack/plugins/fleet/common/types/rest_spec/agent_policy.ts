@@ -110,6 +110,7 @@ export interface MinimalOutput {
   id?: string;
 }
 export interface IntegrationsOutput {
-  pkgName?: string;
+  name?: string;
   id?: string | null;
+  pkgName?: string;
 }
