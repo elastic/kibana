@@ -142,7 +142,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                       'xpack.enterpriseSearch.createConnector.manualConfiguration.p.connectorNameDescription',
                       {
                         defaultMessage:
-                          'You will be redirected to connector page to configure the rest of your connector',
+                          'You will be redirected to the connector page to configure the rest of your connector',
                       }
                     )}
                   </p>

@@ -114,7 +114,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       <EuiSelectable
         aria-label={i18n.translate(
           'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
-          { defaultMessage: 'Selectable + input popover example' }
+          { defaultMessage: 'Select a data source for your connector to use.' }
         )}
         options={selectableOptions}
         onChange={(newOptions, _, changedOption) => {

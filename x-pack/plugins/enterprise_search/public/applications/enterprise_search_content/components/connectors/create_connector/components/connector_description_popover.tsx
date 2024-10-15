@@ -25,7 +25,7 @@ const nativePopoverPanels = [
   {
     description: i18n.translate(
       'xpack.enterpriseSearch.connectorDescriptionBadge.native.chooseADataSourceLabel',
-      { defaultMessage: "Choose a data source you'd like to sync" }
+      { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon type="documents" />],
     id: 'native-choose-source',
@@ -44,7 +44,7 @@ const connectorClientPopoverPanels = [
   {
     description: i18n.translate(
       'xpack.enterpriseSearch.connectorDescriptionBadge.client.chooseADataSourceLabel',
-      { defaultMessage: "Choose a data source you'd like to sync" }
+      { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon type="documents" />],
     id: 'client-choose-source',
@@ -54,7 +54,7 @@ const connectorClientPopoverPanels = [
       'xpack.enterpriseSearch.connectorDescriptionBadge.client.configureConnectorLabel',
       {
         defaultMessage:
-          'Deploy connector code on your own infrastructure by running from source, or using Docker',
+          'Deploy connector code on your own infrastructure by running from source or using Docker',
       }
     ),
     icons: [
@@ -119,7 +119,8 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                 title={i18n.translate(
                   'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.notAvailableTitle',
                   {
-                    defaultMessage: 'This connector is not available as an Elastic managed',
+                    defaultMessage:
+                      'This connector is not available as an Elastic-managed Connector',
                   }
                 )}
                 size="s"

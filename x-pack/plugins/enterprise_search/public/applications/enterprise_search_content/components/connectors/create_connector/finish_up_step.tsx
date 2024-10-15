@@ -177,7 +177,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.exploreYourDataDescription',
                       {
                         defaultMessage:
-                          'See your connector documents or make a data view to explore it',
+                          'See your connector documents or make a data view to explore them',
                       }
                     )}
                     footer={
@@ -304,7 +304,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.queryWithLanguageClientsLDescription',
                     {
                       defaultMessage:
-                        'Use your favourite language client to query your data in your app',
+                        'Use your favorite language client to query your data in your app',
                     }
                   )}
                   onClick={() => {}}
@@ -332,7 +332,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.devToolsDescription',
                     {
                       defaultMessage:
-                        'Tools for interacting with your data, such a console, profiler, Grok debugger and more',
+                        'Tools for interacting with your data, such as console, profiler, Grok debugger and more',
                     }
                   )}
                   onClick={() => {}}
