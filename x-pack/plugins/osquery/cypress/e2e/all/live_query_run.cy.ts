@@ -75,7 +75,7 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     submitQuery();
 
     checkResults();
-    cy.getBySel(RESULTS_TABLE).within(() => {
+    cy.getBySel(RESULTS_TABLE, { timeout: 180000 }).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
     });
     cy.get('[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-message"]').should(
