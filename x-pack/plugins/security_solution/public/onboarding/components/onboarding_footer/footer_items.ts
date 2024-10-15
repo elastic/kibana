@@ -13,7 +13,7 @@ import labs from './images/labs.png';
 export const footerItems = [
   {
     icon: documentation,
-    key: 'documentation',
+    id: 'documentation',
     title: i18n.translate('xpack.securitySolution.onboarding.footer.documentation.title', {
       defaultMessage: 'Browse documentation',
     }),
@@ -32,7 +32,7 @@ export const footerItems = [
   },
   {
     icon: forum,
-    key: 'forum',
+    id: 'forum',
     title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.title', {
       defaultMessage: 'Explore forum',
     }),
@@ -48,7 +48,7 @@ export const footerItems = [
   },
   {
     icon: demo,
-    key: 'demo',
+    id: 'demo',
     title: i18n.translate('xpack.securitySolution.onboarding.footer.demo.title', {
       defaultMessage: 'View demo project',
     }),
@@ -64,7 +64,7 @@ export const footerItems = [
   },
   {
     icon: labs,
-    key: 'labs',
+    id: 'labs',
     title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
       defaultMessage: 'Elastic Security Labs',
     }),
