@@ -7,12 +7,21 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export const DataStreamsRequestSchema = {
+  query: schema.object({
+    selected: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  }),
+};
+
+export type DataStreamsRequestQuery = TypeOf<typeof DataStreamsRequestSchema.query>;
+
 export const DataStreamsResponseSchema = {
   body: () =>
     schema.arrayOf(
       schema.object({
         name: schema.string(),
         storageSizeBytes: schema.number(),
+        selected: schema.boolean(),
       })
     ),
 };

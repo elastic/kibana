@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamsResponseSchema } from '../../../common/rest_types';
+import { DataStreamsRequestSchema, DataStreamsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
 import { DataUsageContext, DataUsageRouter } from '../../types';
 
@@ -25,7 +25,7 @@ export const registerDataStreamsRoute = (
         {
           version: '1',
           validate: {
-            request: {},
+            request: DataStreamsRequestSchema,
             response: {
               200: DataStreamsResponseSchema,
             },

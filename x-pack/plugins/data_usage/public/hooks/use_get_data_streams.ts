@@ -23,11 +23,11 @@ const PAGING_PARAMS = Object.freeze({
 });
 
 export const useGetDataUsageDataStreams = ({
-  searchString,
   selectedDataStreams,
-  options = {},
+  options = {
+    enabled: false,
+  },
 }: {
-  searchString: string;
   selectedDataStreams?: string[];
   options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
 }): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
@@ -53,7 +53,8 @@ export const useGetDataUsageDataStreams = ({
         (acc, ds) => {
           const item = {
             name: ds.name,
-            storageSizeBytes: ds.storageSizeBytes ?? 0,
+            storageSizeBytes: ds.storageSizeBytes,
+            selected: ds.selected,
           };
 
           if (selectedDataStreams?.includes(ds.name)) {

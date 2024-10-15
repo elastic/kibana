@@ -11,10 +11,10 @@ import {
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
 } from '../../../common/rest_types';
-import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { FILTER_NAMES } from '../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
+import { ChartsFilterProps } from '../components/filters/charts_filter';
 
 export type FilterName = keyof typeof FILTER_NAMES;
 
@@ -27,14 +27,13 @@ export type FilterItems = Array<{
 }>;
 
 export const useChartsFilter = ({
-  filterName,
+  filterOptions,
   searchString,
 }: {
-  filterName: FilterName;
+  filterOptions: ChartsFilterProps['filterOptions'];
   searchString: string;
 }): {
   areDataStreamsSelectedOnMount: boolean;
-  isLoading: boolean;
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
@@ -53,12 +52,8 @@ export const useChartsFilter = ({
     setUrlMetricTypesFilter,
     setUrlDataStreamsFilter,
   } = useDataUsageMetricsUrlParams();
-  const isMetricTypesFilter = filterName === 'metricTypes';
-  const isDataStreamsFilter = filterName === 'dataStreams';
-  const { data: dataStreams, isFetching } = useGetDataUsageDataStreams({
-    searchString,
-    selectedDataStreams: selectedDataStreamsFromUrl,
-  });
+  const isMetricTypesFilter = filterOptions.filterName === 'metricTypes';
+  const isDataStreamsFilter = filterOptions.filterName === 'dataStreams';
 
   // track the state of selected data streams via URL
   //  when the page is loaded via selected data streams on URL
@@ -81,24 +76,18 @@ export const useChartsFilter = ({
           label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
           checked: isDefaultMetricType(metricType) ? 'on' : undefined, // default metrics are selected by default
           disabled: isDefaultMetricType(metricType),
-          'data-test-subj': `${filterName}-filter-option`,
+          'data-test-subj': `${filterOptions.filterName}-filter-option`,
+        }))
+      : isDataStreamsFilter && !!filterOptions.options.length
+      ? filterOptions.options?.map((filterOption) => ({
+          key: filterOption,
+          label: filterOption,
+          append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
+          checked: 'on',
+          'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : []
   );
-
-  useEffect(() => {
-    if (isDataStreamsFilter && dataStreams) {
-      setItems(
-        dataStreams?.map((dataStream) => ({
-          key: dataStream.name,
-          label: dataStream.name,
-          append: formatBytes(dataStream.storageSizeBytes),
-          checked: dataStream.selected ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      );
-    }
-  }, [dataStreams, filterName, isDataStreamsFilter, setItems]);
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
@@ -112,7 +101,6 @@ export const useChartsFilter = ({
 
   return {
     areDataStreamsSelectedOnMount,
-    isLoading: isDataStreamsFilter && isFetching,
     items,
     setItems,
     hasActiveFilters,

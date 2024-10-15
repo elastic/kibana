@@ -7,7 +7,7 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
@@ -15,7 +15,6 @@ import {
   type MetricTypes,
 } from '../../../../common/rest_types';
 
-import { ClearAllButton } from './clear_all_button';
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
@@ -27,20 +26,27 @@ const getSearchPlaceholder = (filterName: FilterName) => {
   return UX_LABELS.filterSearchPlaceholder('metric types');
 };
 
-export const ChartsFilter = memo(
-  ({
-    filterName,
-    onChangeFilterOptions,
-    'data-test-subj': dataTestSubj,
-  }: {
+export interface ChartsFilterProps {
+  filterOptions: {
     filterName: FilterName;
-    onChangeFilterOptions?: (selectedOptions: string[]) => void;
-    'data-test-subj'?: string;
+    options: string[];
+    appendOptions?: Record<string, number>;
+    onChangeFilterOptions: (selectedOptions: string[]) => void;
+    isFilterLoading?: boolean;
+  };
+  'data-test-subj'?: string;
+}
+
+export const ChartsFilter = memo<ChartsFilterProps>(
+  ({
+    filterOptions: { filterName, options, appendOptions, onChangeFilterOptions, isFilterLoading },
+    'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const isMetricsFilter = filterName === 'metricTypes';
     const isDataStreamsFilter = filterName === 'dataStreams';
+
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const onPopoverButtonClick = useCallback(() => {
@@ -54,7 +60,6 @@ export const ChartsFilter = memo(
     const [searchString, setSearchString] = useState('');
     const {
       areDataStreamsSelectedOnMount,
-      isLoading,
       items,
       setItems,
       hasActiveFilters,
@@ -64,7 +69,7 @@ export const ChartsFilter = memo(
       setUrlDataStreamsFilter,
       setUrlMetricTypesFilter,
     } = useChartsFilter({
-      filterName,
+      filterOptions: { filterName, options, appendOptions, onChangeFilterOptions, isFilterLoading },
       searchString,
     });
 
@@ -146,36 +151,6 @@ export const ChartsFilter = memo(
       ]
     );
 
-    // clear all selected options
-    const onClearAll = useCallback(() => {
-      // update filter UI options state
-      setItems(
-        items.map((option) => {
-          option.checked = undefined;
-          return option;
-        })
-      );
-
-      // update URL params based on filter on page
-      if (isMetricsFilter) {
-        setUrlMetricTypesFilter('');
-      } else if (isDataStreamsFilter) {
-        setUrlDataStreamsFilter('');
-      }
-
-      if (typeof onChangeFilterOptions !== 'undefined') {
-        onChangeFilterOptions([]);
-      }
-    }, [
-      setItems,
-      items,
-      isMetricsFilter,
-      isDataStreamsFilter,
-      onChangeFilterOptions,
-      setUrlMetricTypesFilter,
-      setUrlDataStreamsFilter,
-    ]);
-
     return (
       <ChartsFilterPopover
         closePopover={onClosePopover}
@@ -190,7 +165,7 @@ export const ChartsFilter = memo(
         <EuiSelectable
           aria-label={`${filterName}`}
           emptyMessage={UX_LABELS.filterEmptyMessage(filterName)}
-          isLoading={isLoading}
+          isLoading={isFilterLoading}
           onChange={onOptionsChange}
           options={sortedHostsFilterOptions}
           searchable={isSearchable ? true : undefined}
@@ -215,17 +190,6 @@ export const ChartsFilter = memo(
                   </EuiPopoverTitle>
                 )}
                 {list}
-                {!isMetricsFilter && (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <ClearAllButton
-                        data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
-                        isDisabled={!hasActiveFilters}
-                        onClick={onClearAll}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
               </div>
             );
           }}

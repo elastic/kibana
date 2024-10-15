@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiCallOut } from '@elastic/eui';
 import { Charts } from './charts';
@@ -16,21 +16,23 @@ import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
-import { ChartFilters } from './filters/charts_filters';
+import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { UX_LABELS } from '../translations';
+import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 
 const EuiItemCss = css`
   width: 100%;
 `;
 
-const FlexItemWithCss = memo(({ children }: { children: React.ReactNode }) => (
+const FlexItemWithCss = ({ children }: { children: React.ReactNode }) => (
   <EuiFlexItem css={EuiItemCss}>{children}</EuiFlexItem>
-));
+);
 
 export const DataUsageMetrics = () => {
   const {
     services: { chrome, appParams },
   } = useKibanaContextForPlugin();
+  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
   const {
     metricTypes: metricTypesFromUrl,
@@ -38,8 +40,16 @@ export const DataUsageMetrics = () => {
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
     setUrlMetricTypesFilter,
+    setUrlDataStreamsFilter,
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
+
+  const { data: dataStreams, isFetching: isFetchingDataStreams } = useGetDataUsageDataStreams({
+    selectedDataStreams: dataStreamsFromUrl,
+    options: {
+      enabled: true,
+    },
+  });
 
   const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestBody>({
     metricTypes: [...DEFAULT_METRIC_TYPES],
@@ -52,15 +62,22 @@ export const DataUsageMetrics = () => {
     if (!metricTypesFromUrl) {
       setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
     }
+    if (!dataStreamsFromUrl && dataStreams) {
+      setUrlDataStreamsFilter(dataStreams.map((ds) => ds.name).join(','));
+    }
     if (!startDateFromUrl || !endDateFromUrl) {
       setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
     }
   }, [
+    dataStreams,
+    dataStreamsFromUrl,
     endDateFromUrl,
     metricTypesFromUrl,
+    metricsFilters.dataStreams,
     metricsFilters.from,
     metricsFilters.metricTypes,
     metricsFilters.to,
+    setUrlDataStreamsFilter,
     setUrlDateRangeFilter,
     setUrlMetricTypesFilter,
     startDateFromUrl,
@@ -111,7 +128,35 @@ export const DataUsageMetrics = () => {
     [setMetricsFilters]
   );
 
-  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
+  const filterOptions: ChartFiltersProps['filterOptions'] = useMemo(() => {
+    const dataStreamsOptions = dataStreams?.reduce<Record<string, number>>((acc, ds) => {
+      acc[ds.name] = ds.storageSizeBytes;
+      return acc;
+    }, {});
+
+    return {
+      dataStreams: {
+        filterName: 'dataStreams',
+        options: dataStreamsOptions ? Object.keys(dataStreamsOptions) : metricsFilters.dataStreams,
+        appendOptions: dataStreamsOptions,
+        selectedOptions: metricsFilters.dataStreams,
+        onChangeFilterOptions: onChangeDataStreamsFilter,
+        isFilterLoading: isFetchingDataStreams,
+      },
+      metricTypes: {
+        filterName: 'metricTypes',
+        options: metricsFilters.metricTypes,
+        onChangeFilterOptions: onChangeMetricTypesFilter,
+      },
+    };
+  }, [
+    dataStreams,
+    isFetchingDataStreams,
+    metricsFilters.dataStreams,
+    metricsFilters.metricTypes,
+    onChangeDataStreamsFilter,
+    onChangeMetricTypesFilter,
+  ]);
 
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
@@ -123,8 +168,7 @@ export const DataUsageMetrics = () => {
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
-          onChangeDataStreamsFilter={onChangeDataStreamsFilter}
-          onChangeMetricTypesFilter={onChangeMetricTypesFilter}
+          filterOptions={filterOptions}
           showMetricsTypesFilter={false}
         />
       </FlexItemWithCss>
