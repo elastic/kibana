@@ -1191,7 +1191,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -1705,7 +1705,7 @@
               },
               " | undefined; lifecycle?: (",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; }"
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -2097,7 +2097,7 @@
             "signature": [
               "(",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined"
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2186,6 +2186,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.global_max_retention",
+            "type": "string",
+            "tags": [],
+            "label": "global_max_retention",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.EnhancedDataStreamFromEs.store_size",
@@ -3649,7 +3663,7 @@
               },
               " | undefined; lifecycle?: (",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; } | undefined"
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,

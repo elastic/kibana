@@ -10,7 +10,6 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
-import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -33,7 +32,6 @@ import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_critica
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
-import { AssetCriticalityEcsMigrationClient } from './lib/entity_analytics/asset_criticality/asset_criticality_migration_client';
 
 export interface IRequestContextFactory {
   create(
@@ -76,6 +74,12 @@ export class RequestContextFactory implements IRequestContextFactory {
     const licensing = await context.licensing;
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
+    const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asInternalUser,
+      request
+    );
+
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
 
@@ -86,6 +90,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       kibanaBranch: options.kibanaBranch,
       buildFlavor: options.buildFlavor,
     });
+    const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
@@ -111,7 +116,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getFrameworkRequest: () => frameworkRequest,
 
-      getAppClient: () => appClientFactory.create(request),
+      getAppClient,
 
       getSpaceId,
 
@@ -199,19 +204,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
+          dataViewsService,
+          appClient: getAppClient(),
           esClient,
           logger,
           soClient,
-          entityClient: new EntityClient({
-            esClient,
-            soClient,
-            logger,
-          }),
-          assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
-            logger,
-            auditLogger: getAuditLogger(),
-            esClient,
-          }),
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
         });
       }),
     };
