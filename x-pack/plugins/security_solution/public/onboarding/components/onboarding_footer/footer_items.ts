@@ -9,11 +9,12 @@ import documentation from './images/documentation.png';
 import forum from './images/forum.png';
 import demo from './images/demo.png';
 import labs from './images/labs.png';
+import { OnboardingFooterLinkItemId } from './constants';
 
 export const footerItems = [
   {
     icon: documentation,
-    id: 'documentation',
+    id: OnboardingFooterLinkItemId.documentation,
     title: i18n.translate('xpack.securitySolution.onboarding.footer.documentation.title', {
       defaultMessage: 'Browse documentation',
     }),
@@ -32,7 +33,7 @@ export const footerItems = [
   },
   {
     icon: forum,
-    id: 'forum',
+    id: OnboardingFooterLinkItemId.forum,
     title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.title', {
       defaultMessage: 'Explore forum',
     }),
@@ -48,7 +49,7 @@ export const footerItems = [
   },
   {
     icon: demo,
-    id: 'demo',
+    id: OnboardingFooterLinkItemId.demo,
     title: i18n.translate('xpack.securitySolution.onboarding.footer.demo.title', {
       defaultMessage: 'View demo project',
     }),
@@ -64,7 +65,7 @@ export const footerItems = [
   },
   {
     icon: labs,
-    id: 'labs',
+    id: OnboardingFooterLinkItemId.labs,
     title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
       defaultMessage: 'Elastic Security Labs',
     }),

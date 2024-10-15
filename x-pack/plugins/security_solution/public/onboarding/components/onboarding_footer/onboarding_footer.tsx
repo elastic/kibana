@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 import { useFooterStyles } from './onboarding_footer.styles';
 import { footerItems } from './footer_items';
 import { trackOnboardingLinkClick } from '../../common/lib/telemetry';
+import type { OnboardingFooterLinkItemId } from './constants';
 import { TELEMETRY_FOOTER_LINK } from './constants';
 
 export const OnboardingFooter = React.memo(() => {
@@ -32,7 +33,7 @@ export const OnboardingFooter = React.memo(() => {
 OnboardingFooter.displayName = 'OnboardingFooter';
 
 interface LinkItemProps {
-  id: string;
+  id: OnboardingFooterLinkItemId;
   title: string;
   icon: string;
   description: string;

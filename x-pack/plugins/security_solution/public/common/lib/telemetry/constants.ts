@@ -80,7 +80,6 @@ export enum TelemetryEventTypes {
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
   OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
-  OnboardingHubHeaderCardClicked = 'Onboarding Hub Header Card Clicked',
   ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
   ManualRuleRunExecute = 'Manual Rule Run Execute',
   ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
