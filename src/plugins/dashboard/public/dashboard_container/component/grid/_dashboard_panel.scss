@@ -16,12 +16,6 @@
   }
 }
 
-.embPanel__hoverActionsAnchor {
-  scroll-margin-bottom: $euiSizeS;
-  scroll-snap-align: start;
-  scroll-snap-type: y;
-}
-
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {

@@ -67,24 +67,11 @@ export class DashboardPanelActionsService extends FtrService {
         window.scrollBy(0, scrollY - ${yOffset});
       `);
 
-    // const yOffset = (await wrapper.getPosition()).y - DASHBOARD_TOP_OFFSET;
+    const containerTop = await this.getContainerTopOffset();
 
-    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
-      ? '.dashboardContainer'
-      : '.canvasContainer';
-
-    const containerTop =
-      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
-      DASHBOARD_MARGIN_SIZE;
-    // await this.browser.execute(`
-    //   window.scrollTo(0, ${Math.max(yOffset - containerTopOffset, 0)});
-    // `);
-    await wrapper.scrollIntoViewIfNecessary({ topOffset: containerTop });
-
-    const { x } = await await wrapper.getPosition();
-    // await wrapper.moveMouseTo({ yOffset: DASHBOARD_TOP_OFFSET });
-
-    await this.browser.moveMouseTo({ x, y: containerTop });
+    await wrapper.moveMouseTo({
+      topOffset: containerTop,
+    });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {
@@ -131,7 +118,7 @@ export class DashboardPanelActionsService extends FtrService {
       action = await this.testSubjects.findDescendant(testSubject, wrapper);
     }
 
-    await action.click();
+    await action.click(await this.getContainerTopOffset());
   }
 
   async clickPanelActionByTitle(testSubject: string, title = '') {
