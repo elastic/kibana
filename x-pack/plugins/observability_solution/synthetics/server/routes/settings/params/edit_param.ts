@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObject } from '@kbn/core/server';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -39,34 +39,38 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    const { savedObjectsClient, request } = routeContext;
+    const { savedObjectsClient, request, response } = routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);
     if (invalidResponse) return invalidResponse;
 
     const { id } = request.params;
     const { share_across_spaces: _shareAcrossSpaces, ...data } =
-      request.body as SyntheticsParamRequest & {
-        id: string;
+      request.body as SyntheticsParamRequest;
+    try {
+      const existingParam = await savedObjectsClient.get<SyntheticsParams>(syntheticsParamType, id);
+
+      const newParam = {
+        ...existingParam.attributes,
+        ...data,
       };
 
-    const existingParam = await savedObjectsClient.get<SyntheticsParams>(syntheticsParamType, id);
+      // value from data since we aren't using encrypted client
+      const { value } = data;
+      const {
+        id: responseId,
+        attributes: { key, tags, description },
+        namespaces,
+      } = (await savedObjectsClient.update<SyntheticsParams>(
+        syntheticsParamType,
+        id,
+        newParam
+      )) as SavedObject<SyntheticsParams>;
 
-    const newParam = {
-      ...existingParam.attributes,
-      ...data,
-    };
-
-    const { value } = data;
-    const {
-      id: responseId,
-      attributes: { key, tags, description },
-      namespaces,
-    } = (await savedObjectsClient.update<SyntheticsParams>(
-      syntheticsParamType,
-      id,
-      newParam
-    )) as SavedObject<SyntheticsParams>;
-
-    return { id: responseId, key, tags, description, namespaces, value };
+      return { id: responseId, key, tags, description, namespaces, value };
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        return response.notFound({ body: { message: 'Param not found' } });
+      }
+    }
   },
 });

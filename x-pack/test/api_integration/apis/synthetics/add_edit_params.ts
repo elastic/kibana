@@ -107,6 +107,55 @@ export default function ({ getService }: FtrProviderContext) {
       assertHas(actualUpdatedParam, expectedUpdatedParam);
     });
 
+    it('handles partial editing a param', async () => {
+      const newParam = {
+        key: 'testUpdated',
+        value: 'testUpdated',
+        tags: ['a tag'],
+        description: 'test description',
+      };
+
+      const response = await supertestAPI
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send(newParam)
+        .expect(200);
+      const paramId = response.body.id;
+
+      const getResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+      assertHas(getResponse.body, newParam);
+
+      await supertestAPI
+        .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
+        .set('kbn-xsrf', 'true')
+        .send({
+          key: 'testUpdated',
+        })
+        .expect(400);
+
+      await supertestAPI
+        .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
+        .set('kbn-xsrf', 'true')
+        .send({
+          key: 'testUpdatedAgain',
+          value: 'testUpdatedAgain',
+        })
+        .expect(200);
+
+      const updatedGetResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+      assertHas(updatedGetResponse.body, {
+        ...newParam,
+        key: 'testUpdatedAgain',
+        value: 'testUpdatedAgain',
+      });
+    });
+
     it('handles spaces', async () => {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
