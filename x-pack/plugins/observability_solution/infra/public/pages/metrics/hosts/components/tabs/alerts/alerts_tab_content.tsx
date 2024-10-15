@@ -80,7 +80,7 @@ export const AlertsTabContent = () => {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
               ruleTypeIds={INFRA_RULE_TYPE_IDS}
-              consumers={[AlertConsumers.INFRASTRUCTURE]}
+              consumers={[AlertConsumers.INFRASTRUCTURE, AlertConsumers.ALERTS]}
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
@@ -136,7 +136,7 @@ const MemoAlertSummaryWidget = React.memo(
       <AlertSummaryWidget
         chartProps={chartProps}
         ruleTypeIds={INFRA_RULE_TYPE_IDS}
-        consumers={[AlertConsumers.INFRASTRUCTURE]}
+        consumers={[AlertConsumers.INFRASTRUCTURE, AlertConsumers.ALERTS]}
         filter={alertsQuery}
         fullSize
         timeRange={summaryTimeRange}

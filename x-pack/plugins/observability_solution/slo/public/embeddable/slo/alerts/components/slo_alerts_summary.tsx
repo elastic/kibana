@@ -62,7 +62,7 @@ export function SloAlertsSummary({
   return (
     <AlertSummaryWidget
       ruleTypeIds={SLO_RULE_TYPE_IDS}
-      consumers={[AlertConsumers.SLO]}
+      consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS]}
       filter={esQuery}
       timeRange={alertSummaryTimeRange}
       fullSize

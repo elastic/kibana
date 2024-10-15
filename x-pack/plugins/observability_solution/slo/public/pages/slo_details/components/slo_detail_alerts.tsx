@@ -33,7 +33,7 @@ export function SloDetailsAlerts({ slo }: Props) {
             id={SLO_ALERTS_TABLE_ID}
             data-test-subj="alertTable"
             ruleTypeIds={[SLO_BURN_RATE_RULE_TYPE_ID]}
-            consumers={[AlertConsumers.SLO]}
+            consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS]}
             query={{
               bool: {
                 filter: [
