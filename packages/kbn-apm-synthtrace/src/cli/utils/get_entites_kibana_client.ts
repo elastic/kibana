@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument } from '@kbn/apm-synthtrace-client';
-import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { EntitiesSynthtraceKibanaClient } from '../../lib/apm/client/entities_synthtrace_kibana_client';
+import { Logger } from '../../lib/utils/create_logger';
 
-export const createLogsAssetsAggregator = createAssetsAggregatorFactory<LogDocument>();
+export function getEntitiesKibanaClient({ target, logger }: { target: string; logger: Logger }) {
+  const kibanaClient = new EntitiesSynthtraceKibanaClient({
+    logger,
+    target,
+  });
+
+  return kibanaClient;
+}

@@ -9,72 +9,54 @@
 
 import {
   apm,
-  ApmFields,
   generateLongId,
   generateShortId,
-  infra,
   Instance,
   log,
-  Serializable,
+  entities,
+  EntityFields,
 } from '@kbn/apm-synthtrace-client';
-import { random } from 'lodash';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
-import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions) => {
-  const { logger, scenarioOpts } = runOptions;
-  const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
-  const { isLogsDb } = parseLogsScenarioOpts(scenarioOpts);
+const MESSAGE_LOG_LEVELS = [
+  { message: 'A simple log with something random <random> in the middle', level: 'info' },
+  { message: 'Yet another debug log', level: 'debug' },
+  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+];
+
+const SYNTH_JAVA_TRACE_ENTITY_ID = generateShortId();
+const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateShortId();
+const SYNTH_GO_LOGS_ENTITY_ID = generateShortId();
+
+const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
+  const { logger } = runOptions;
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 
   return {
-    bootstrap: async ({ logsEsClient }) => {
+    bootstrap: async ({ entitiesKibanaClient, logsEsClient }) => {
+      await entitiesKibanaClient.installEntityIndexPatterns();
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
-    generate: ({
-      range,
-      clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
-    }) => {
+    generate: ({ range, clients: { entitiesEsClient, logsEsClient, apmEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
 
+      const entityHistoryTimestamps = range.interval('1m').rate(1);
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
-      const serviceNames = [...Array(numServices).keys()].map((index) => `apm-only-${index}`);
-      serviceNames.push('multi-signal-service');
-      const HOSTS = Array(numHosts)
-        .fill(0)
-        .map((_, idx) => infra.host(`my-host-${idx}`));
 
-      const hosts = range
-        .interval('30s')
-        .rate(1)
-        .generator((timestamp) =>
-          HOSTS.flatMap((host) => [
-            host.cpu().timestamp(timestamp),
-            host.memory().timestamp(timestamp),
-            host.network().timestamp(timestamp),
-            host.load().timestamp(timestamp),
-            host.filesystem().timestamp(timestamp),
-            host.diskio().timestamp(timestamp),
-          ])
-        );
-
-      const instances = serviceNames.map((serviceName) =>
-        apm
-          .service({ name: serviceName, environment: ENVIRONMENT, agentName: 'nodejs' })
-          .instance('instance')
-      );
-      const instanceSpans = (instance: Instance, index: number) => {
+      const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(random(100, (index % 4) * 1000, false))
+            .duration(1000)
             .success()
             .children(
               instance
@@ -128,13 +110,25 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
       };
 
-      const MESSAGE_LOG_LEVELS = [
-        { message: 'A simple log with something random <random> in the middle', level: 'info' },
-        { message: 'Yet another debug log', level: 'debug' },
-        { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
-      ];
+      const SYNTH_JAVA_TRACE = 'synth-java-trace';
+      const apmOnlyInstance = apm
+        .service({ name: SYNTH_JAVA_TRACE, agentName: 'java', environment: ENVIRONMENT })
+        .instance('intance');
+      const apmOnlyEvents = instanceSpans(apmOnlyInstance);
+      const synthJavaTraces = entities.serviceEntity({
+        serviceName: SYNTH_JAVA_TRACE,
+        agentName: ['java'],
+        dataStreamType: ['traces'],
+        environment: ENVIRONMENT,
+        entityId: SYNTH_JAVA_TRACE_ENTITY_ID,
+      });
 
-      const logsWithTraces = range
+      const SYNTH_NODE_TRACE_LOGS = 'synth-node-trace-logs';
+      const apmAndLogsInstance = apm
+        .service({ name: SYNTH_NODE_TRACE_LOGS, agentName: 'nodejs', environment: ENVIRONMENT })
+        .instance('intance');
+      const apmAndLogsApmEvents = instanceSpans(apmAndLogsInstance);
+      const apmAndLogsLogsEvents = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -153,14 +147,14 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service('multi-signal-service')
+                .service(SYNTH_NODE_TRACE_LOGS)
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER.clusterName,
                   'orchestrator.cluster.id': CLUSTER.clusterId,
                   'orchestrator.namespace': CLUSTER.namespace,
-                  'container.name': `${serviceNames[0]}-${generateShortId()}`,
+                  'container.name': `${SYNTH_NODE_TRACE_LOGS}-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
@@ -173,8 +167,16 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .timestamp(timestamp);
             });
         });
+      const synthNodeTracesLogs = entities.serviceEntity({
+        serviceName: SYNTH_NODE_TRACE_LOGS,
+        agentName: ['nodejs'],
+        dataStreamType: ['traces', 'logs'],
+        environment: ENVIRONMENT,
+        entityId: SYNTH_NODE_TRACES_LOGS_ENTITY_ID,
+      });
 
-      const logsOnly = range
+      const SYNTH_GO_LOGS = 'synth-go-logs';
+      const logsEvents = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -193,57 +195,67 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service('logs-only-services')
+                .service(SYNTH_GO_LOGS)
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER.clusterName,
                   'orchestrator.cluster.id': CLUSTER.clusterId,
                   'orchestrator.namespace': CLUSTER.namespace,
-                  'container.name': `logs-only-${generateShortId()}`,
+                  'container.name': `${SYNTH_GO_LOGS}-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
                   'cloud.availability_zone': 'eu-central-1a',
+                  'log.level': 'error',
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,
-                  'log.level': 'error',
                 })
                 .timestamp(timestamp);
             });
         });
+      const synthGoTraces = entities.serviceEntity({
+        serviceName: SYNTH_GO_LOGS,
+        agentName: ['go'],
+        dataStreamType: ['logs'],
+        environment: ENVIRONMENT,
+        entityId: SYNTH_GO_LOGS_ENTITY_ID,
+      });
 
-      function* createGeneratorFromArray(arr: Array<Serializable<any>>) {
-        yield* arr;
-      }
+      const entitiesEvents = entityHistoryTimestamps.generator((timestamp) => {
+        return [
+          synthNodeTracesLogs.timestamp(timestamp),
+          synthJavaTraces.timestamp(timestamp),
+          synthGoTraces.timestamp(timestamp),
+        ];
+      });
 
-      const logsValuesArray = [...logsWithTraces, ...logsOnly];
-      const logsGen = createGeneratorFromArray(logsValuesArray);
-      const logsGenAssets = createGeneratorFromArray(logsValuesArray);
-
-      const traces = instances.flatMap((instance, index) => instanceSpans(instance, index));
-      const tracesGen = createGeneratorFromArray(traces);
-      const tracesGenAssets = createGeneratorFromArray(traces);
+      const apmPython = apm
+        .service({ name: 'synth-python', agentName: 'python', environment: ENVIRONMENT })
+        .instance('intance');
+      const apmPythonEvents = instanceSpans(apmPython);
 
       return [
         withClient(
-          assetsEsClient,
-          logger.perf('generating_assets_events', () =>
-            Readable.from(Array.from(logsGenAssets).concat(Array.from(tracesGenAssets)))
-          )
+          entitiesEsClient,
+          logger.perf('generating_entities_events', () => entitiesEvents)
         ),
         withClient(
           logsEsClient,
-          logger.perf('generating_logs', () => logsGen)
+          logger.perf('generating_logs', () =>
+            Readable.from(Array.from(apmAndLogsLogsEvents).concat(Array.from(logsEvents)))
+          )
         ),
         withClient(
           apmEsClient,
-          logger.perf('generating_apm_events', () => tracesGen)
-        ),
-        withClient(
-          infraEsClient,
-          logger.perf('generating_infra_hosts', () => hosts)
+          logger.perf('generating_apm_events', () =>
+            Readable.from(
+              Array.from(apmOnlyEvents).concat(
+                Array.from(apmAndLogsApmEvents).concat(Array.from(apmPythonEvents))
+              )
+            )
+          )
         ),
       ];
     },
