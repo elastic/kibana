@@ -63,10 +63,7 @@ export async function claimAvailableTasksUpdateByQuery(
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const initialCapacity = getCapacity();
 
-  console.log(`batches ${JSON.stringify(batches)}`);
-
   let accumulatedResult = getEmptyClaimOwnershipResult();
-  console.log(`accumulatedResult1 ${JSON.stringify(accumulatedResult)}`);
   const stopTaskTimer = startTaskTimer();
   for (const batch of batches) {
     const capacity = Math.min(
@@ -90,7 +87,6 @@ export async function claimAvailableTasksUpdateByQuery(
       excludedTaskTypes,
       taskMaxAttempts,
     });
-    console.log(`result ${JSON.stringify(result)}`);
 
     accumulatedResult = accumulateClaimOwnershipResults(accumulatedResult, result);
     accumulatedResult.stats.tasksConflicted = correctVersionConflictsForContinuation(
@@ -98,7 +94,6 @@ export async function claimAvailableTasksUpdateByQuery(
       accumulatedResult.stats.tasksConflicted,
       initialCapacity
     );
-    console.log(`accumulatedResult ${JSON.stringify(accumulatedResult)}`);
   }
 
   return { ...accumulatedResult, timing: stopTaskTimer() };

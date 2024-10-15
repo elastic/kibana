@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
-import { filter, take, toArray } from 'rxjs';
+import { filter, take } from 'rxjs';
 
 import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
@@ -22,7 +22,6 @@ import {
   TaskClaimingOpts,
   TASK_MANAGER_MARK_AS_CLAIMED,
 } from '../queries/task_claiming';
-import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -179,9 +178,6 @@ describe('TaskClaiming', () => {
         expect(resultOrErr).toBe(undefined);
       }
 
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
@@ -542,6 +538,130 @@ if (doc['task.runAt'].size()!=0) {
             limitedToTwo: maxAttempts,
           },
         },
+      });
+    });
+
+    test('it should return tasks from all batches', async () => {
+      const maxAttempts = _.random(2, 43);
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskManagerId = uuidv1();
+      definitions.registerTaskDefinitions({
+        unlimited: {
+          title: 'unlimited',
+          createTaskRunner: jest.fn(),
+        },
+        limitedToZero: {
+          title: 'limitedToZero',
+          maxConcurrency: 0,
+          createTaskRunner: jest.fn(),
+        },
+        anotherUnlimited: {
+          title: 'anotherUnlimited',
+          createTaskRunner: jest.fn(),
+        },
+        finalUnlimited: {
+          title: 'finalUnlimited',
+          createTaskRunner: jest.fn(),
+        },
+        limitedToOne: {
+          title: 'limitedToOne',
+          maxConcurrency: 1,
+          createTaskRunner: jest.fn(),
+        },
+        anotherLimitedToOne: {
+          title: 'anotherLimitedToOne',
+          maxConcurrency: 1,
+          createTaskRunner: jest.fn(),
+        },
+        limitedToTwo: {
+          title: 'limitedToTwo',
+          maxConcurrency: 2,
+          createTaskRunner: jest.fn(),
+        },
+      });
+      const store = taskStoreMock.create({ taskManagerId });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      // mock the return values for 4 batches
+      const batch1Docs = [mockInstance({ id: `task:id-1` })];
+      store.fetch.mockResolvedValueOnce({ docs: batch1Docs, versionMap: new Map() });
+      store.updateByQuery.mockResolvedValueOnce({
+        updated: batch1Docs.length,
+        version_conflicts: 0,
+        total: batch1Docs.length,
+      });
+
+      const batch2Docs = [mockInstance({ id: `task:id-2` })];
+      store.fetch.mockResolvedValueOnce({ docs: batch2Docs, versionMap: new Map() });
+      store.updateByQuery.mockResolvedValueOnce({
+        updated: batch2Docs.length,
+        version_conflicts: 1,
+        total: batch2Docs.length,
+      });
+
+      const batch3Docs = [mockInstance({ id: `task:id-3` }), mockInstance({ id: `task:id-4` })];
+      store.fetch.mockResolvedValueOnce({ docs: batch3Docs, versionMap: new Map() });
+      store.updateByQuery.mockResolvedValueOnce({
+        updated: batch3Docs.length,
+        version_conflicts: 0,
+        total: batch3Docs.length,
+      });
+
+      const batch4Docs = [
+        mockInstance({ id: `task:id-5` }),
+        mockInstance({ id: `task:id-6` }),
+        mockInstance({ id: `task:id-7` }),
+      ];
+      store.fetch.mockResolvedValueOnce({ docs: batch4Docs, versionMap: new Map() });
+      store.updateByQuery.mockResolvedValueOnce({
+        updated: batch4Docs.length,
+        version_conflicts: 2,
+        total: batch4Docs.length,
+      });
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: 'default',
+        definitions,
+        taskStore: store,
+        maxAttempts,
+        getAvailableCapacity: (type) => {
+          switch (type) {
+            case 'limitedToOne':
+            case 'anotherLimitedToOne':
+              return 1;
+            case 'limitedToTwo':
+              return 2;
+            default:
+              return 10;
+          }
+        },
+        taskPartitioner,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(store.updateByQuery).toHaveBeenCalledTimes(4);
+
+      // result should be an accumulation of all returned updateByQueryResults
+      expect(result).toEqual({
+        stats: {
+          tasksClaimed: 7,
+          tasksConflicted: 3,
+          tasksUpdated: 7,
+        },
+        timing: expect.any(Object),
+        docs: [...batch1Docs, ...batch2Docs, ...batch3Docs, ...batch4Docs],
       });
     });
 
