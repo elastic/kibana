@@ -14,6 +14,8 @@ import type { EditorError } from '../types';
 export interface ESQLVariable {
   name: string;
   // invalid expressions produce columns of type "unknown"
+  // also, there are some cases where we can't yet infer the type of
+  // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
   location: ESQLLocation;
 }
