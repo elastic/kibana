@@ -12,22 +12,24 @@ import styled from 'styled-components';
 import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../constants';
 import { CLOSE, INTRODUCING_DATA_QUALITY_HISTORY, TRY_IT, VIEW_PAST_RESULTS } from './translations';
 
-interface HistoricalResultsTourProps {
+export interface Props {
   anchorSelectorValue: string;
   isOpen: boolean;
   onTryIt: () => void;
   onDismissTour: () => void;
+  zIndex?: number;
 }
 
 const StyledText = styled(EuiText)`
   margin-block-start: -10px;
 `;
 
-export const HistoricalResultsTour: FC<HistoricalResultsTourProps> = ({
+export const HistoricalResultsTour: FC<Props> = ({
   anchorSelectorValue,
   onTryIt,
   isOpen,
   onDismissTour,
+  zIndex,
 }) => {
   const [anchorElement, setAnchorElement] = useState<HTMLElement>();
 
@@ -64,6 +66,7 @@ export const HistoricalResultsTour: FC<HistoricalResultsTourProps> = ({
       anchorPosition="rightUp"
       repositionOnScroll
       anchor={anchorElement}
+      zIndex={zIndex}
       footerAction={[
         <EuiButtonEmpty size="xs" color="text" onClick={onDismissTour}>
           {CLOSE}

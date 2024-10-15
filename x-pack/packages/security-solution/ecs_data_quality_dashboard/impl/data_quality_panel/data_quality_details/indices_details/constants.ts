@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY =
-  'securitySolution.dataQualityDashboard.historicalResultsTour.v8.16.isActive';
+export const HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY =
+  'securitySolution.dataQualityDashboard.historicalResultsTour.v8.16.isDismissed';

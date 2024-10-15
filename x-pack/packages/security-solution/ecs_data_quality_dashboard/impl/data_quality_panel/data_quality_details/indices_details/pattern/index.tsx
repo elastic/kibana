@@ -377,6 +377,15 @@ const PatternComponent: React.FC<Props> = ({
                     isAccordionOpen
                   }
                   onDismissTour={onDismissTour}
+                  // Only set zIndex when the tour is in list view (not in flyout)
+                  //
+                  // 1 less than the z-index of the left navigation
+                  // 5 less than the z-index of the timeline
+                  //
+                  //
+                  // TODO this hack should be removed when we properly set z-indexes
+                  // in the timeline and left navigation
+                  zIndex={998}
                 />
                 <SummaryTable
                   getTableColumns={getSummaryTableColumns}
@@ -390,7 +399,6 @@ const PatternComponent: React.FC<Props> = ({
                   onCheckNowAction={handleFlyoutCheckNowAndExpandAction}
                   onViewHistoryAction={handleFlyoutViewCheckHistoryAction}
                   sorting={sorting}
-                  firstIndexName={items[0]?.indexName}
                 />
               </div>
             )}

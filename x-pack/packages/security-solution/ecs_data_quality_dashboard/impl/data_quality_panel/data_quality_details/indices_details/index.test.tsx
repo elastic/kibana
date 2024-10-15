@@ -23,7 +23,7 @@ import {
 import { PatternRollup } from '../../types';
 import { Props, IndicesDetails } from '.';
 import userEvent from '@testing-library/user-event';
-import { HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY } from './constants';
+import { HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY } from './constants';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -70,7 +70,7 @@ const defaultProps: Props = {
 describe('IndicesDetails', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
-    localStorage.removeItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY);
+    localStorage.removeItem(HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY);
 
     render(
       <TestExternalProviders>
@@ -116,7 +116,7 @@ describe('IndicesDetails', () => {
 
         await waitFor(() => expect(screen.queryByTestId('historicalResultsTour')).toBeNull());
 
-        expect(localStorage.getItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY)).toEqual(
+        expect(localStorage.getItem(HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY)).toEqual(
           'false'
         );
       });

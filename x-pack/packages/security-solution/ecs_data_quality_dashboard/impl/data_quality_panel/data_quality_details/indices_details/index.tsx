@@ -6,14 +6,14 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Pattern } from './pattern';
 import { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
-import { HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY } from './constants';
+import { useIsHistoricalResultsTourActive } from './hooks/use_is_historical_results_tour_active';
 
 const StyledPatternWrapperFlexItem = styled(EuiFlexItem)`
   margin-bottom: ${({ theme }) => theme.eui.euiSize};
@@ -35,15 +35,11 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   const { patternRollups, patternIndexNames } = useResultsRollupContext();
   const { patterns } = useDataQualityContext();
 
-  const [isTourActive, setIsTourActive] = useState<boolean>(() => {
-    const isActive = localStorage.getItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY);
-    return isActive !== 'false';
-  });
+  const [isTourActive, setIsTourActive] = useIsHistoricalResultsTourActive();
 
   const handleDismissTour = useCallback(() => {
     setIsTourActive(false);
-    localStorage.setItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY, 'false');
-  }, []);
+  }, [setIsTourActive]);
 
   const [openPatterns, setOpenPatterns] = useState<
     Array<{ name: string; isOpen: boolean; isEmpty: boolean }>
@@ -62,13 +58,9 @@ const IndicesDetailsComponent: React.FC<Props> = ({
     []
   );
 
-  const firstOpenNonEmptyPattern = useMemo(
-    () =>
-      openPatterns.find((pattern) => {
-        return pattern.isOpen && !pattern.isEmpty;
-      })?.name,
-    [openPatterns]
-  );
+  const firstOpenNonEmptyPattern = openPatterns.find((pattern) => {
+    return pattern.isOpen && !pattern.isEmpty;
+  })?.name;
 
   const [openPatternsUpdatedAt, setOpenPatternsUpdatedAt] = useState<number>(Date.now());
 
@@ -80,42 +72,27 @@ const IndicesDetailsComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="indicesDetails">
-      {useMemo(
-        () =>
-          patterns.map((pattern) => (
-            <StyledPatternWrapperFlexItem grow={false} key={pattern}>
-              <Pattern
-                indexNames={patternIndexNames[pattern]}
-                pattern={pattern}
-                patternRollup={patternRollups[pattern]}
-                chartSelectedIndex={chartSelectedIndex}
-                setChartSelectedIndex={setChartSelectedIndex}
-                isTourActive={isTourActive}
-                isFirstOpenNonEmptyPattern={pattern === firstOpenNonEmptyPattern}
-                onAccordionToggle={handleAccordionToggle}
-                onDismissTour={handleDismissTour}
-                // TODO: remove this hack when EUI popover is fixed
-                // https://github.com/elastic/eui/issues/5226
-                //
-                // this information is used to force the tour guide popover to reposition
-                // when surrounding accordions get toggled and affect the layout
-                {...(pattern === firstOpenNonEmptyPattern && { openPatternsUpdatedAt })}
-              />
-            </StyledPatternWrapperFlexItem>
-          )),
-        [
-          chartSelectedIndex,
-          firstOpenNonEmptyPattern,
-          handleAccordionToggle,
-          handleDismissTour,
-          isTourActive,
-          patternIndexNames,
-          patternRollups,
-          patterns,
-          setChartSelectedIndex,
-          openPatternsUpdatedAt,
-        ]
-      )}
+      {patterns.map((pattern) => (
+        <StyledPatternWrapperFlexItem grow={false} key={pattern}>
+          <Pattern
+            indexNames={patternIndexNames[pattern]}
+            pattern={pattern}
+            patternRollup={patternRollups[pattern]}
+            chartSelectedIndex={chartSelectedIndex}
+            setChartSelectedIndex={setChartSelectedIndex}
+            isTourActive={isTourActive}
+            isFirstOpenNonEmptyPattern={pattern === firstOpenNonEmptyPattern}
+            onAccordionToggle={handleAccordionToggle}
+            onDismissTour={handleDismissTour}
+            // TODO: remove this hack when EUI popover is fixed
+            // https://github.com/elastic/eui/issues/5226
+            //
+            // this information is used to force the tour guide popover to reposition
+            // when surrounding accordions get toggled and affect the layout
+            {...(pattern === firstOpenNonEmptyPattern && { openPatternsUpdatedAt })}
+          />
+        </StyledPatternWrapperFlexItem>
+      ))}
     </div>
   );
 };

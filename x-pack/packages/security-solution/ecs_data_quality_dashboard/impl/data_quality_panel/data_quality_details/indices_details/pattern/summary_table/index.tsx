@@ -42,7 +42,6 @@ export interface Props {
   sorting: SortConfig;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
-  firstIndexName?: string;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
@@ -57,7 +56,6 @@ const SummaryTableComponent: React.FC<Props> = ({
   sorting,
   onCheckNowAction,
   onViewHistoryAction,
-  firstIndexName,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const columns = useMemo(
@@ -69,7 +67,7 @@ const SummaryTableComponent: React.FC<Props> = ({
         pattern,
         onCheckNowAction,
         onViewHistoryAction,
-        firstIndexName,
+        firstIndexName: items[0]?.indexName,
       }),
     [
       getTableColumns,
@@ -79,7 +77,7 @@ const SummaryTableComponent: React.FC<Props> = ({
       pattern,
       onCheckNowAction,
       onViewHistoryAction,
-      firstIndexName,
+      items,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
