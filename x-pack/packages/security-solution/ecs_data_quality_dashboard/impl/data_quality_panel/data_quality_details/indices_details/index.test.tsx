@@ -11,7 +11,10 @@ import React from 'react';
 
 import { EMPTY_STAT } from '../../constants';
 import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
-import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import {
+  auditbeatWithAllResults,
+  emptyAuditbeatPatternRollup,
+} from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import {
   TestDataQualityProviders,
@@ -31,15 +34,22 @@ const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
 const ilmPhases = ['hot', 'warm', 'unmanaged'];
-const patterns = ['.alerts-security.alerts-default', 'auditbeat-*', 'packetbeat-*'];
+const patterns = [
+  'test-empty-pattern-*',
+  '.alerts-security.alerts-default',
+  'auditbeat-*',
+  'packetbeat-*',
+];
 
 const patternRollups: Record<string, PatternRollup> = {
+  'test-empty-pattern-*': { ...emptyAuditbeatPatternRollup, pattern: 'test-empty-pattern-*' },
   '.alerts-security.alerts-default': alertIndexWithAllResults,
   'auditbeat-*': auditbeatWithAllResults,
   'packetbeat-*': packetbeatNoResults,
 };
 
 const patternIndexNames: Record<string, string[]> = {
+  'test-empty-pattern-*': [],
   'auditbeat-*': [
     '.ds-auditbeat-8.6.1-2023.02.07-000001',
     'auditbeat-custom-empty-index-1',
@@ -83,11 +93,11 @@ describe('IndicesDetails', () => {
   });
 
   describe('tour', () => {
-    test('it renders the tour wrapping view history button of first row of first pattern', async () => {
+    test('it renders the tour wrapping view history button of first row of first non-empty pattern', async () => {
       const wrapper = await screen.findByTestId('historicalResultsTour');
       const button = within(wrapper).getByRole('button', { name: 'View history' });
       expect(button).toBeInTheDocument();
-      expect(button).toHaveAttribute('data-tour-element', patterns[0]);
+      expect(button).toHaveAttribute('data-tour-element', patterns[1]);
 
       expect(
         screen.getByRole('dialog', { name: 'Introducing data quality history' })
@@ -113,23 +123,23 @@ describe('IndicesDetails', () => {
     });
 
     describe('when the first pattern is toggled', () => {
-      test('it renders the tour wrapping view history button of first row of second pattern', async () => {
-        const firstPatternAccordionWrapper = await screen.findByTestId(
-          `${patterns[0]}PatternPanel`
+      test('it renders the tour wrapping view history button of first row of second non-empty pattern', async () => {
+        const firstNonEmptyPatternAccordionWrapper = await screen.findByTestId(
+          `${patterns[1]}PatternPanel`
         );
-        const accordionToggle = within(firstPatternAccordionWrapper).getByRole('button', {
+        const accordionToggle = within(firstNonEmptyPatternAccordionWrapper).getByRole('button', {
           name: /Pass/,
         });
         await userEvent.click(accordionToggle);
 
-        const secondPatternAccordionWrapper = screen.getByTestId(`${patterns[1]}PatternPanel`);
+        const secondPatternAccordionWrapper = screen.getByTestId(`${patterns[2]}PatternPanel`);
         const historicalResultsWrapper = await within(secondPatternAccordionWrapper).findByTestId(
           'historicalResultsTour'
         );
         const button = within(historicalResultsWrapper).getByRole('button', {
           name: 'View history',
         });
-        expect(button).toHaveAttribute('data-tour-element', patterns[1]);
+        expect(button).toHaveAttribute('data-tour-element', patterns[2]);
 
         expect(
           screen.getByRole('dialog', { name: 'Introducing data quality history' })

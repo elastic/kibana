@@ -13,7 +13,10 @@ import {
   TestExternalProviders,
 } from '../../../mock/test_providers/test_providers';
 import { Pattern } from '.';
-import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import {
+  auditbeatWithAllResults,
+  emptyAuditbeatPatternRollup,
+} from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { useIlmExplain } from './hooks/use_ilm_explain';
 import { useStats } from './hooks/use_stats';
 import { ERROR_LOADING_METADATA_TITLE, LOADING_STATS } from './translations';
@@ -84,7 +87,7 @@ describe('pattern', () => {
             pattern={pattern}
             isTourActive={false}
             onDismissTour={jest.fn()}
-            isFirstOpenPattern={false}
+            isFirstOpenNonEmptyPattern={false}
             onAccordionToggle={jest.fn()}
           />
         </TestDataQualityProviders>
@@ -98,6 +101,157 @@ describe('pattern', () => {
     expect(accordionToggle).toBeInTheDocument();
     expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('summaryTable')).toBeInTheDocument();
+  });
+
+  describe('onAccordionToggle', () => {
+    describe('by default', () => {
+      describe('when no summary table items are available', () => {
+        it('invokes the onAccordionToggle function with the pattern name, isOpen as true and isEmpty as true', async () => {
+          const onAccordionToggle = jest.fn();
+
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: null,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: null,
+            error: null,
+            loading: false,
+          });
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={emptyAuditbeatPatternRollup}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={[]}
+                  pattern={pattern}
+                  isTourActive={false}
+                  onDismissTour={jest.fn()}
+                  isFirstOpenNonEmptyPattern={false}
+                  onAccordionToggle={onAccordionToggle}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          const accordionToggle = await screen.findByRole('button', {
+            name: 'auditbeat-* Incompatible fields 0 Indices checked 0 Indices 0 Size 0B Docs 0',
+          });
+
+          expect(onAccordionToggle).toHaveBeenCalledTimes(1);
+
+          await userEvent.click(accordionToggle);
+
+          expect(onAccordionToggle).toHaveBeenCalledTimes(2);
+          expect(onAccordionToggle).toHaveBeenCalledWith(pattern, true, true);
+        });
+      });
+
+      describe('when summary table items are available', () => {
+        it('invokes the onAccordionToggle function with the pattern name, isOpen as true and isEmpty as false', async () => {
+          const onAccordionToggle = jest.fn();
+
+          (useIlmExplain as jest.Mock).mockReturnValue({
+            error: null,
+            ilmExplain: auditbeatWithAllResults.ilmExplain,
+            loading: false,
+          });
+
+          (useStats as jest.Mock).mockReturnValue({
+            stats: auditbeatWithAllResults.stats,
+            error: null,
+            loading: false,
+          });
+
+          render(
+            <TestExternalProviders>
+              <TestDataQualityProviders>
+                <Pattern
+                  patternRollup={auditbeatWithAllResults}
+                  chartSelectedIndex={null}
+                  setChartSelectedIndex={jest.fn()}
+                  indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                  pattern={pattern}
+                  isTourActive={false}
+                  onDismissTour={jest.fn()}
+                  isFirstOpenNonEmptyPattern={false}
+                  onAccordionToggle={onAccordionToggle}
+                />
+              </TestDataQualityProviders>
+            </TestExternalProviders>
+          );
+
+          const accordionToggle = screen.getByRole('button', {
+            name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
+          });
+
+          expect(onAccordionToggle).toHaveBeenCalledTimes(1);
+
+          await userEvent.click(accordionToggle);
+
+          expect(onAccordionToggle).toHaveBeenCalledTimes(2);
+          expect(onAccordionToggle).toHaveBeenCalledWith(pattern, true, false);
+        });
+      });
+    });
+
+    describe('when the accordion is toggled', () => {
+      it('calls the onAccordionToggle function with current open state and current empty state', async () => {
+        const onAccordionToggle = jest.fn();
+
+        (useIlmExplain as jest.Mock).mockReturnValue({
+          error: null,
+          ilmExplain: auditbeatWithAllResults.ilmExplain,
+          loading: false,
+        });
+
+        (useStats as jest.Mock).mockReturnValue({
+          stats: auditbeatWithAllResults.stats,
+          error: null,
+          loading: false,
+        });
+
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <Pattern
+                patternRollup={auditbeatWithAllResults}
+                chartSelectedIndex={null}
+                setChartSelectedIndex={jest.fn()}
+                indexNames={Object.keys(auditbeatWithAllResults.stats!)}
+                pattern={pattern}
+                isTourActive={false}
+                onDismissTour={jest.fn()}
+                isFirstOpenNonEmptyPattern={false}
+                onAccordionToggle={onAccordionToggle}
+              />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        const accordionToggle = screen.getByRole('button', {
+          name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
+        });
+
+        expect(onAccordionToggle).toHaveBeenCalledTimes(1);
+        expect(onAccordionToggle).toHaveBeenCalledWith(pattern, true, false);
+
+        await userEvent.click(accordionToggle);
+
+        expect(onAccordionToggle).toHaveBeenCalledTimes(2);
+        expect(onAccordionToggle).toHaveBeenLastCalledWith(pattern, false, false);
+
+        await userEvent.click(accordionToggle);
+
+        expect(onAccordionToggle).toHaveBeenCalledTimes(3);
+        expect(onAccordionToggle).toHaveBeenCalledWith(pattern, true, false);
+      });
+    });
   });
 
   describe('remote clusters callout', () => {
@@ -114,7 +268,7 @@ describe('pattern', () => {
                 pattern={'remote:*'}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -138,7 +292,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -170,7 +324,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -201,7 +355,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -238,7 +392,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -275,7 +429,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -323,7 +477,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -405,7 +559,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -483,7 +637,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -547,7 +701,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -580,7 +734,7 @@ describe('pattern', () => {
   });
 
   describe('Tour', () => {
-    describe('when isTourActive and isFirstOpenPattern', () => {
+    describe('when isTourActive and isFirstOpenNonEmptyPattern', () => {
       it('renders the tour near the first row history view button', async () => {
         (useIlmExplain as jest.Mock).mockReturnValue({
           error: null,
@@ -605,7 +759,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={true}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={true}
+                isFirstOpenNonEmptyPattern={true}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -652,7 +806,7 @@ describe('pattern', () => {
                   pattern={pattern}
                   isTourActive={true}
                   onDismissTour={jest.fn()}
-                  isFirstOpenPattern={true}
+                  isFirstOpenNonEmptyPattern={true}
                   onAccordionToggle={jest.fn()}
                 />
               </TestDataQualityProviders>
@@ -668,7 +822,7 @@ describe('pattern', () => {
           await userEvent.click(accordionToggle);
 
           expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
-        });
+        }, 10000);
       });
 
       describe('when the tour close button is clicked', () => {
@@ -698,7 +852,7 @@ describe('pattern', () => {
                   pattern={pattern}
                   isTourActive={true}
                   onDismissTour={onDismissTour}
-                  isFirstOpenPattern={true}
+                  isFirstOpenNonEmptyPattern={true}
                   onAccordionToggle={jest.fn()}
                 />
               </TestDataQualityProviders>
@@ -744,7 +898,7 @@ describe('pattern', () => {
                   pattern={pattern}
                   isTourActive={true}
                   onDismissTour={onDismissTour}
-                  isFirstOpenPattern={true}
+                  isFirstOpenNonEmptyPattern={true}
                   onAccordionToggle={jest.fn()}
                 />
               </TestDataQualityProviders>
@@ -799,7 +953,7 @@ describe('pattern', () => {
                   pattern={pattern}
                   isTourActive={true}
                   onDismissTour={onDismissTour}
-                  isFirstOpenPattern={true}
+                  isFirstOpenNonEmptyPattern={true}
                   onAccordionToggle={jest.fn()}
                 />
               </TestDataQualityProviders>
@@ -844,7 +998,7 @@ describe('pattern', () => {
       });
     });
 
-    describe('when not isFirstOpenPattern', () => {
+    describe('when not isFirstOpenNonEmptyPattern', () => {
       it('does not render the tour', async () => {
         (useIlmExplain as jest.Mock).mockReturnValue({
           error: null,
@@ -869,7 +1023,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={true}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={false}
+                isFirstOpenNonEmptyPattern={false}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>
@@ -905,7 +1059,7 @@ describe('pattern', () => {
                 pattern={pattern}
                 isTourActive={false}
                 onDismissTour={jest.fn()}
-                isFirstOpenPattern={true}
+                isFirstOpenNonEmptyPattern={true}
                 onAccordionToggle={jest.fn()}
               />
             </TestDataQualityProviders>

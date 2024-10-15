@@ -46,9 +46,10 @@ interface Props {
   chartSelectedIndex: SelectedIndex | null;
   setChartSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   isTourActive: boolean;
-  isFirstOpenPattern: boolean;
-  onAccordionToggle: (patternName: string, isOpen: boolean) => void;
+  isFirstOpenNonEmptyPattern: boolean;
+  onAccordionToggle: (patternName: string, isOpen: boolean, isEmpty: boolean) => void;
   onDismissTour: () => void;
+  openPatternsUpdatedAt?: number;
 }
 
 const PatternComponent: React.FC<Props> = ({
@@ -58,9 +59,10 @@ const PatternComponent: React.FC<Props> = ({
   chartSelectedIndex,
   setChartSelectedIndex,
   isTourActive,
-  isFirstOpenPattern,
+  isFirstOpenNonEmptyPattern,
   onAccordionToggle,
   onDismissTour,
+  openPatternsUpdatedAt,
 }) => {
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
   const historicalResultsContextValue = useMemo(
@@ -135,12 +137,29 @@ const PatternComponent: React.FC<Props> = ({
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
+  const isAccordionOpenRef = useRef(isAccordionOpen);
+  useEffect(() => {
+    isAccordionOpenRef.current = isAccordionOpen;
+  }, [isAccordionOpen]);
+
+  useEffect(() => {
+    // this use effect syncs isEmpty state with the parent component
+    //
+    // we do not add isAccordionOpen to the dependency array because
+    // it is already handled by handleAccordionToggle
+    // so we don't want to additionally trigger this useEffect when isAccordionOpen changes
+    // because it's confusing and unnecessary
+    // that's why we use ref here to keep separation of concerns
+    onAccordionToggle(pattern, isAccordionOpenRef.current, items.length === 0);
+  }, [items.length, onAccordionToggle, pattern]);
+
   const handleAccordionToggle = useCallback(
     (isOpen: boolean) => {
+      const isEmpty = items.length === 0;
       setIsAccordionOpen(isOpen);
-      onAccordionToggle(pattern, isOpen);
+      onAccordionToggle(pattern, isOpen, isEmpty);
     },
-    [onAccordionToggle, pattern]
+    [items.length, onAccordionToggle, pattern]
   );
 
   const firstRow = items[0];
@@ -301,7 +320,7 @@ const PatternComponent: React.FC<Props> = ({
       <HistoricalResultsContext.Provider value={historicalResultsContextValue}>
         <PatternAccordion
           id={patternComponentAccordionId}
-          initialIsOpen={true}
+          forceState={isAccordionOpen ? 'open' : 'closed'}
           onToggle={handleAccordionToggle}
           buttonElement="div"
           buttonContent={
@@ -341,9 +360,22 @@ const PatternComponent: React.FC<Props> = ({
             {!loading && error == null && (
               <div ref={containerRef}>
                 <HistoricalResultsTour
+                  // this is a hack to force popover anchor position recalculation
+                  // when the first open non-empty pattern layout changes due to other
+                  // patterns being opened/closed
+                  // It's a bug on Eui side
+                  //
+                  // TODO: remove this hack when EUI popover is fixed
+                  // https://github.com/elastic/eui/issues/5226
+                  {...(isFirstOpenNonEmptyPattern && { key: openPatternsUpdatedAt })}
                   anchorSelectorValue={pattern}
                   onTryIt={handleOpenFlyoutHistoryTab}
-                  isOpen={isTourActive && !isFlyoutVisible && isFirstOpenPattern && isAccordionOpen}
+                  isOpen={
+                    isTourActive &&
+                    !isFlyoutVisible &&
+                    isFirstOpenNonEmptyPattern &&
+                    isAccordionOpen
+                  }
                   onDismissTour={onDismissTour}
                 />
                 <SummaryTable

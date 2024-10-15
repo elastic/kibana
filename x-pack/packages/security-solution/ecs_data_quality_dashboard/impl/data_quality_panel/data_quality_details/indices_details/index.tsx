@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
@@ -45,20 +45,38 @@ const IndicesDetailsComponent: React.FC<Props> = ({
     localStorage.setItem(HISTORICAL_RESULTS_TOUR_IS_ACTIVE_STORAGE_KEY, 'false');
   }, []);
 
-  const [openPatterns, setOpenPatterns] = useState<Array<{ name: string; isOpen: boolean }>>(() => {
-    return patterns.map((pattern) => ({ name: pattern, isOpen: true }));
+  const [openPatterns, setOpenPatterns] = useState<
+    Array<{ name: string; isOpen: boolean; isEmpty: boolean }>
+  >(() => {
+    return patterns.map((pattern) => ({ name: pattern, isOpen: true, isEmpty: false }));
   });
 
-  const handleAccordionToggle = useCallback((patternName: string, isOpen: boolean) => {
-    setOpenPatterns((prevOpenPatterns) => {
-      return prevOpenPatterns.map((p) => (p.name === patternName ? { ...p, isOpen } : p));
-    });
-  }, []);
+  const handleAccordionToggle = useCallback(
+    (patternName: string, isOpen: boolean, isEmpty: boolean) => {
+      setOpenPatterns((prevOpenPatterns) => {
+        return prevOpenPatterns.map((p) =>
+          p.name === patternName ? { ...p, isOpen, isEmpty } : p
+        );
+      });
+    },
+    []
+  );
 
-  const firstOpenPattern = useMemo(
-    () => openPatterns.find((pattern) => pattern.isOpen)?.name,
+  const firstOpenNonEmptyPattern = useMemo(
+    () =>
+      openPatterns.find((pattern) => {
+        return pattern.isOpen && !pattern.isEmpty;
+      })?.name,
     [openPatterns]
   );
+
+  const [openPatternsUpdatedAt, setOpenPatternsUpdatedAt] = useState<number>(Date.now());
+
+  useEffect(() => {
+    if (firstOpenNonEmptyPattern) {
+      setOpenPatternsUpdatedAt(Date.now());
+    }
+  }, [openPatterns, firstOpenNonEmptyPattern]);
 
   return (
     <div data-test-subj="indicesDetails">
@@ -73,15 +91,21 @@ const IndicesDetailsComponent: React.FC<Props> = ({
                 chartSelectedIndex={chartSelectedIndex}
                 setChartSelectedIndex={setChartSelectedIndex}
                 isTourActive={isTourActive}
-                isFirstOpenPattern={pattern === firstOpenPattern}
+                isFirstOpenNonEmptyPattern={pattern === firstOpenNonEmptyPattern}
                 onAccordionToggle={handleAccordionToggle}
                 onDismissTour={handleDismissTour}
+                // TODO: remove this hack when EUI popover is fixed
+                // https://github.com/elastic/eui/issues/5226
+                //
+                // this information is used to force the tour guide popover to reposition
+                // when surrounding accordions get toggled and affect the layout
+                {...(pattern === firstOpenNonEmptyPattern && { openPatternsUpdatedAt })}
               />
             </StyledPatternWrapperFlexItem>
           )),
         [
           chartSelectedIndex,
-          firstOpenPattern,
+          firstOpenNonEmptyPattern,
           handleAccordionToggle,
           handleDismissTour,
           isTourActive,
@@ -89,6 +113,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           patternRollups,
           patterns,
           setChartSelectedIndex,
+          openPatternsUpdatedAt,
         ]
       )}
     </div>
