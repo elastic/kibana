@@ -256,7 +256,7 @@ export function KnowledgeBaseTab() {
               >
                 {i18n.translate(
                   'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.editInstructionsButtonLabel',
-                  { defaultMessage: 'Edit AI User Profile' }
+                  { defaultMessage: 'Edit User-specific Prompt' }
                 )}
               </EuiButton>
             </EuiFlexItem>
