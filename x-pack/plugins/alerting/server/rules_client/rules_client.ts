@@ -62,7 +62,7 @@ import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { runSoon } from './methods/run_soon';
-import { listRuleTypes } from './methods/list_rule_types';
+import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import {
   bulkUntrackAlerts,
