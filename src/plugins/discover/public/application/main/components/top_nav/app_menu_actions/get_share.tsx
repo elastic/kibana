@@ -33,7 +33,7 @@ export const getShareAppMenuItem = ({
       description: i18n.translate('discover.localMenu.shareSearchDescription', {
         defaultMessage: 'Share Search',
       }),
-      iconType: 'link',
+      iconType: 'share',
       testId: 'shareTopNavButton',
       onClick: async ({ anchorElement }) => {
         const { dataView, isEsqlMode, services } = getDiscoverParams();
