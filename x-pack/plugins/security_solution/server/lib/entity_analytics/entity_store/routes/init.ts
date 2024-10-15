@@ -17,10 +17,12 @@ import {
 } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
     .post({
@@ -43,18 +45,22 @@ export const initEntityEngineRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
+        const secSol = await context.securitySolution;
+        const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
+
+        await checkAndInitAssetCriticalityResources(context, logger);
 
         try {
-          const secSol = await context.securitySolution;
-
           const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, request.body);
+            .init(request.params.entityType, request.body, {
+              pipelineDebugMode,
+            });
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in InitEntityEngine:', e);
           const error = transformError(e);
+          logger.error(`Error initialising entity engine: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
