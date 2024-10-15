@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -33,11 +33,8 @@ import {
   FEATURE_PRIVILEGES_READ,
 } from '../../../../../common/constants';
 import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
-import {
-  createPrivilegeAPIClientMock,
-  getPrivilegeAPIClientMock,
-} from '../../../privilege_api_client.mock';
-import { createRolesAPIClientMock, getRolesAPIClientMock } from '../../../roles_api_client.mock';
+import { createPrivilegeAPIClientMock } from '../../../privilege_api_client.mock';
+import { createRolesAPIClientMock } from '../../../roles_api_client.mock';
 import { EditSpaceProvider } from '../../provider';
 
 const rolesAPIClient = createRolesAPIClientMock();
@@ -96,8 +93,6 @@ const renderPrivilegeRolesForm = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: jest.fn((_) => _),
-          getRolesAPIClient: getRolesAPIClientMock,
-          getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           navigateToUrl: jest.fn(),
           license: licenseMock,
           capabilities: {
@@ -365,11 +360,11 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
       );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
@@ -414,6 +409,117 @@ describe('PrivilegesRolesForm', () => {
         'aria-pressed',
         String(true)
       );
+    });
+
+    it('prevents customization up to sub privilege level by default', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).toBeDisabled();
+    });
+
+    it('supports customization up to sub privilege level only when security license allows', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      // enable sub feature privileges
+      (licenseMock.getFeatures as jest.Mock).mockReturnValue({
+        allowSubFeaturePrivileges: true,
+      });
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).not.toBeDisabled();
     });
   });
 });
