@@ -1366,9 +1366,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           'Cannot remove integrations of hosted agent policy'
         );
         // collect agentless agent policies to delete
-        // if (agentPolicy.supports_agentless) {
-        //   agentlessAgentPolicies.push(agentPolicyId);
-        // }
+        if (agentPolicy.supports_agentless) {
+          agentlessAgentPolicies.push(agentPolicyId);
+        }
       } catch (e) {
         hostedAgentPolicies.push(agentPolicyId);
       }
