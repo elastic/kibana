@@ -36,11 +36,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number = 200
   ) => {
     const resp = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}}`)
+      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}`)
       .query({ ruleTypeIds })
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
+
     return resp.body.index_name as string[];
   };
 

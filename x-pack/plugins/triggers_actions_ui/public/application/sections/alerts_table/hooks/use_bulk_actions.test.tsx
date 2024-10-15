@@ -397,7 +397,7 @@ describe('bulk action hooks', () => {
             query: {},
             casesConfig,
             refresh,
-            ruleTypeIds: ['siem'],
+            ruleTypeIds: ['siem.esqlRule'],
           }),
         {
           wrapper: appMockRender.AppWrapper,

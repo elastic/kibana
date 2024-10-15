@@ -40,7 +40,7 @@ describe('useGetMutedAlerts', () => {
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith(
         expect.anything(),
-        { ids: ruleIds },
+        { ruleIds },
         expect.any(AbortSignal)
       );
     });
