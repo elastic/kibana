@@ -124,10 +124,9 @@ function createModifiedPrebuiltRuleAsset({
   requestBody,
   calculatedRuleDiff,
 }: CreateModifiedPrebuiltRuleAssetParams): PrebuiltRuleAsset {
-  const modifiedPrebuiltRuleAsset: Partial<PrebuiltRuleAsset> = {};
+  const modifiedPrebuiltRuleAsset = {} as Record<string, unknown>;
 
   for (const fieldName of fieldNames) {
-    // TODO: try to get the return type of getFieldPredefinedValue to be more specific, not ANY
     modifiedPrebuiltRuleAsset[fieldName] = getValueForField({
       fieldName,
       upgradeableRule,
