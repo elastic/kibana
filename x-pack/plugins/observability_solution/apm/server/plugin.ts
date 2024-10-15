@@ -10,7 +10,6 @@ import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import {
@@ -81,7 +80,7 @@ export class APMPlugin
       }).catch(() => {});
     }
 
-    plugins.features.registerKibanaFeature(APM_FEATURE as KibanaFeatureConfig);
+    plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 

@@ -15,12 +15,12 @@ import {
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const ruleTypes = Object.values(ApmRuleType);
 
-export const APM_FEATURE = {
+export const APM_FEATURE: KibanaFeatureConfig = {
   id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
