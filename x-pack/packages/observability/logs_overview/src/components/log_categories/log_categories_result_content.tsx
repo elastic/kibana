@@ -10,18 +10,18 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { StateFrom } from 'xstate5';
+import { categoryDetailsService } from '../../services/category_details_service';
 import { LogCategory } from '../../types';
 import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import {
+  LogCategoriesFlyoutDependencies,
+  LogCategoryDetailsFlyout,
+} from '../log_category_details/log_category_details_flyout';
 import {
   LogCategoriesControlBar,
   LogCategoriesControlBarDependencies,
 } from './log_categories_control_bar';
 import { LogCategoriesGrid, LogCategoriesGridDependencies } from './log_categories_grid';
-import {
-  LogCategoriesFlyoutDependencies,
-  LogCategoryDetailsFlyout,
-} from '../log_category_details/log_category_details_flyout';
-import { categoryDetailsService } from '../../services/category_details_service';
 
 export interface LogCategoriesResultContentProps {
   dependencies: LogCategoriesResultContentDependencies;
@@ -34,7 +34,7 @@ export interface LogCategoriesResultContentProps {
   };
   categoryDetailsServiceState: StateFrom<typeof categoryDetailsService>;
   onCloseFlyout: () => void;
-  onExpandCategory: (category: LogCategory, rowIndex: number) => void;
+  onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
 }
 
 export type LogCategoriesResultContentDependencies = LogCategoriesControlBarDependencies &
@@ -49,7 +49,7 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
   timeRange,
   categoryDetailsServiceState,
   onCloseFlyout,
-  onExpandCategory,
+  onOpenFlyout,
 }) => {
   if (logCategories.length === 0) {
     return <LogCategoriesEmptyResultContent />;
@@ -69,7 +69,7 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
             dependencies={dependencies}
             logCategories={logCategories}
             expandedRowIndex={categoryDetailsServiceState.context.expandedRowIndex}
-            onExpandCategory={onExpandCategory}
+            onOpenFlyout={onOpenFlyout}
             onCloseFlyout={onCloseFlyout}
           />
           {categoryDetailsServiceState.context.expandedCategory && (

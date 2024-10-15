@@ -98,7 +98,7 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
     });
   }, [sendToCategoryDetailsService]);
 
-  const expandCategory = useCallback(
+  const openFlyout = useCallback(
     (category: LogCategory | null, rowIndex: number | null) => {
       sendToCategoryDetailsService({
         type: 'setExpandedCategory',
@@ -119,7 +119,7 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
         timeRange={timeRange}
         categoryDetailsServiceState={categoryDetailsServiceState}
         onCloseFlyout={closeFlyout}
-        onExpandCategory={expandCategory}
+        onOpenFlyout={openFlyout}
       />
     );
   } else if (categorizeLogsServiceState.matches('failed')) {

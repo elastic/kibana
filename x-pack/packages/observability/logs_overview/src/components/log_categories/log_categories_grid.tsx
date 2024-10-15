@@ -32,7 +32,7 @@ export interface LogCategoriesGridProps {
   dependencies: LogCategoriesGridDependencies;
   logCategories: LogCategory[];
   expandedRowIndex: number | null;
-  onExpandCategory: (category: LogCategory, rowIndex: number) => void;
+  onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
   onCloseFlyout: () => void;
 }
 
@@ -44,7 +44,7 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
   dependencies,
   logCategories,
   expandedRowIndex,
-  onExpandCategory,
+  onOpenFlyout,
   onCloseFlyout,
 }) => {
   const [gridState, dispatchGridEvent] = useMachine(gridStateService, {
@@ -118,7 +118,7 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
           ),
           rowCellRender: createLogCategoriesGridExpandButton({
             expandedRowIndex,
-            onExpandCategory,
+            onOpenFlyout,
             onCloseFlyout,
           }),
         },

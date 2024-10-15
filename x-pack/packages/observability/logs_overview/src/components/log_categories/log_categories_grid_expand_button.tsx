@@ -6,10 +6,10 @@
  */
 
 import { EuiButtonIcon, EuiToolTip, RenderCellValue } from '@elastic/eui';
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getCellContext } from './log_categories_grid_cell';
+import React, { useCallback } from 'react';
 import { LogCategory } from '../../types';
+import { getCellContext } from './log_categories_grid_cell';
 
 const buttonLabel = i18n.translate(
   'xpack.observabilityLogsOverview.logCategoriesGrid.controlColumns.toggleFlyout',
@@ -20,14 +20,14 @@ const buttonLabel = i18n.translate(
 
 interface CreateLogCategoriesGridExpandButtonProps {
   expandedRowIndex: number | null;
-  onExpandCategory: (category: LogCategory, rowIndex: number) => void;
+  onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
   onCloseFlyout: () => void;
 }
 
 export const createLogCategoriesGridExpandButton =
   ({
     expandedRowIndex,
-    onExpandCategory,
+    onOpenFlyout,
     onCloseFlyout,
   }: CreateLogCategoriesGridExpandButtonProps): RenderCellValue =>
   (props) => {
@@ -39,7 +39,7 @@ export const createLogCategoriesGridExpandButton =
       if (isCurrentRowExpanded) {
         onCloseFlyout();
       } else {
-        onExpandCategory(logCategory, rowIndex);
+        onOpenFlyout(logCategory, rowIndex);
       }
     }, [isCurrentRowExpanded, logCategory, rowIndex]);
 
