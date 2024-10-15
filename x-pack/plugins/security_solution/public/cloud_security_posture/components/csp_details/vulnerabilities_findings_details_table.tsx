@@ -148,7 +148,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'CVSS' }
       ),
-      width: '12.5%',
+      width: '15%',
     },
     {
       field: 'vulnerability',
@@ -165,7 +165,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Severity' }
       ),
-      width: '12.5%',
+      width: '20%',
     },
     {
       field: 'vulnerability',
@@ -176,7 +176,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
       ),
-      width: '50%',
+      width: '40%',
     },
   ];
 
