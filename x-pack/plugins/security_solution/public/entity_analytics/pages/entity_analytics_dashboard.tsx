@@ -32,7 +32,7 @@ const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
-  const isEntityStoreFeatureFlagEnabled = useIsExperimentalFeatureEnabled('entityStoreEnabled');
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
 
   return (
     <>
@@ -59,7 +59,7 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
-                {isEntityStoreFeatureFlagEnabled ? (
+                {!isEntityStoreFeatureFlagDisabled ? (
                   <EuiFlexItem>
                     <EntityStoreDashboardPanels />
                   </EuiFlexItem>
