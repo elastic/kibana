@@ -744,7 +744,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
-|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability management section.
+|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
