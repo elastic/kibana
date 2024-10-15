@@ -130,6 +130,7 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
