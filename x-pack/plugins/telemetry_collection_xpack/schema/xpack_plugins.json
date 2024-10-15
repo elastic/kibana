@@ -73,6 +73,9 @@
             },
             "[OpenAI]": {
               "type": "long"
+            },
+            "[Other]": {
+              "type": "long"
             }
           }
         },

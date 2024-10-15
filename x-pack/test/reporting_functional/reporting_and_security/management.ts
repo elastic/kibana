@@ -56,7 +56,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
     });
 
-    describe('Download report', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/195144
+    // FLAKY: https://github.com/elastic/kibana/issues/194731
+    describe.skip('Download report', () => {
       // use archived reports to allow reporting_user to view report jobs they've created
       before('log in as reporting user', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
