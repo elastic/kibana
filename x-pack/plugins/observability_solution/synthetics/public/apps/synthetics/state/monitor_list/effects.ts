@@ -8,9 +8,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
-import { enableDefaultAlertingAction } from '../alert_rules';
 import {
-  ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
@@ -60,11 +58,6 @@ export function* enableMonitorAlertEffect() {
             pageState,
           })
         );
-        if (
-          (response as EncryptedSyntheticsSavedMonitor)[ConfigKey.ALERT_CONFIG]?.status?.enabled
-        ) {
-          yield put(enableDefaultAlertingAction.get());
-        }
       } catch (error) {
         sendErrorToast(action.payload.error, error);
         yield put(
