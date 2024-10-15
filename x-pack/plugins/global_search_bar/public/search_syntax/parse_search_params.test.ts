@@ -132,4 +132,18 @@ describe('parseSearchParams', () => {
       },
     });
   });
+
+  it('handles whitespace removal even if there are no multiword types', () => {
+    const mockSearchableMultiwordTypes: string[] = [];
+    const searchParams = parseSearchParams(
+      'hello type:    dashboard',
+      mockSearchableMultiwordTypes
+    );
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        types: ['dashboard'],
+      },
+    });
+  });
 });

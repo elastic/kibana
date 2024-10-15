@@ -19,7 +19,16 @@ const aliasMap = {
 // Converts multi word types to phrases by wrapping them in quotes. Example: type:canvas workpad -> type:"canvas workpad"
 const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]): string => {
   if (multiWordTypes.length === 0) {
-    return term;
+    // If there are no multiword types, only clean whitespace
+    const simpleTypeReplaceRegex = /(type:|types:)\s*([^"']*?)\b([^"'\s]+)/g;
+    const modifiedTerm = term.replace(
+      simpleTypeReplaceRegex,
+      (_, typeKeyword, whitespace, typeValue) => {
+        const trimmedTypeKeyword = `${typeKeyword}${whitespace.trim()}`;
+        return `${trimmedTypeKeyword}"${typeValue}"`;
+      }
+    );
+    return modifiedTerm;
   }
 
   const typesPattern = multiWordTypes.join('|');
