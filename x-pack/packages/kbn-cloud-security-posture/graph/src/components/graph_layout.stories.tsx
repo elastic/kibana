@@ -10,7 +10,13 @@ import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
 import { css } from '@emotion/react';
-import type { EdgeViewModel, LabelNodeViewModel, NodeViewModel } from '.';
+import type {
+  EdgeViewModel,
+  LabelNodeViewModel,
+  NodeViewModel,
+  EntityNodeViewModel,
+  GroupNodeViewModel,
+} from '.';
 import { Graph } from '.';
 
 export default {
@@ -24,8 +30,13 @@ interface GraphData {
   interactive: boolean;
 }
 
+type EnhancedNodeViewModel =
+  | EntityNodeViewModel
+  | GroupNodeViewModel
+  | (LabelNodeViewModel & { source: string; target: string });
+
 const extractEdges = (
-  graphData: NodeViewModel[]
+  graphData: EnhancedNodeViewModel[]
 ): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
   // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
   // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
@@ -42,7 +53,7 @@ const extractEdges = (
 
   graphData.forEach((node) => {
     if (node.shape === 'label') {
-      const labelNode = { ...node, id: `${node.id}label(${node.label})` };
+      const labelNode: LabelNodeViewModel = { ...node, id: `${node.id}label(${node.label})` };
       const { source, target } = node;
 
       if (labelsMetadata[node.id]) {
@@ -308,7 +319,7 @@ GroupWithWarningAPIMock.args = {
 };
 
 export const LargeGraph = Template.bind({});
-const baseGraph: NodeViewModel[] = [
+const baseGraph: EnhancedNodeViewModel[] = [
   {
     id: 'siem-windows',
     label: '',

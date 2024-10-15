@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Background,
   Controls,
@@ -67,6 +67,7 @@ const edgeTypes = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
+  const [layoutCalled, setLayoutCalled] = useState(false);
   const { initialNodes, initialEdges } = useMemo(
     () => processGraph(nodes, edges, interactive),
     [nodes, edges, interactive]
@@ -75,7 +76,10 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
   const [nodesState, _setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  layoutGraph(nodesState, edgesState);
+  if (!layoutCalled) {
+    layoutGraph(nodesState, edgesState);
+    setLayoutCalled(true);
+  }
 
   return (
     <div {...rest}>
@@ -157,7 +161,12 @@ const processGraph = (
       sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
       target: edgeData.target,
       targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
-      data: { ...edgeData },
+      focusable: false,
+      data: {
+        ...edgeData,
+        sourceShape: nodesById[edgeData.source].shape,
+        targetShape: nodesById[edgeData.target].shape,
+      },
     };
   });
 

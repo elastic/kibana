@@ -10,6 +10,7 @@ import type {
   GroupNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
+  NodeShape,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps } from '@xyflow/react';
 import type { Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
@@ -48,4 +49,11 @@ export type NodeProps = xyNodeProps<Node<NodeViewModel>>;
 
 export interface EdgeViewModel extends Record<string, unknown>, EdgeDataModel {}
 
-export type EdgeProps = xyEdgeProps<Edge<EdgeViewModel>>;
+export type EdgeProps = xyEdgeProps<
+  Edge<
+    EdgeViewModel & {
+      sourceShape: NodeShape;
+      targetShape: NodeShape;
+    }
+  >
+>;

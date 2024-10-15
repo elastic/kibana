@@ -14,7 +14,6 @@ import type {
   EntityNodeDataModel,
   LabelNodeDataModel,
   GroupNodeDataModel,
-  NodeShape,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writeable } from '@kbn/zod';
@@ -30,6 +29,11 @@ interface GraphEdge {
   targetIds: string[] | string;
   eventOutcome: string;
   isAlert: boolean;
+}
+
+interface LabelEdges {
+  source: string;
+  target: string;
 }
 
 export const getGraph = async (
@@ -64,12 +68,13 @@ export const getGraph = async (
 
 interface ParseContext {
   nodesMap: Record<string, NodeDataModel>;
-  edgeLabelsNodes: Record<string, string[]>;
   edgesMap: Record<string, EdgeDataModel>;
+  edgeLabelsNodes: Record<string, string[]>;
+  labelEdges: Record<string, LabelEdges>;
 }
 
 const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
-  const ctx: ParseContext = { nodesMap: {}, edgeLabelsNodes: {}, edgesMap: {} };
+  const ctx: ParseContext = { nodesMap: {}, edgeLabelsNodes: {}, edgesMap: {}, labelEdges: {} };
 
   logger.trace(`Parsing records [length: ${records.length}]`);
 
@@ -169,7 +174,7 @@ const createNodes = (
   records: GraphEdge[],
   context: Omit<ParseContext, 'edgesMap'>
 ) => {
-  const { nodesMap, edgeLabelsNodes } = context;
+  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
   for (const record of records) {
     const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
@@ -214,19 +219,18 @@ const createNodes = (
           edgeLabelsNodes[edgeId] = [];
         }
 
-        const labelNode = {
+        const labelNode: LabelNodeDataModel = {
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
-          source: actorId,
-          target: targetId,
           color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
           shape: 'label',
-        } as LabelNodeDataModel;
+        };
 
         logger.trace(`Creating label node [${labelNode.id}]`);
 
         nodesMap[labelNode.id] = labelNode;
         edgeLabelsNodes[edgeId].push(labelNode.id);
+        labelEdges[labelNode.id] = { source: actorId, target: targetId };
       }
     }
   }
@@ -275,7 +279,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
 };
 
 const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
-  const { edgeLabelsNodes, edgesMap, nodesMap } = context;
+  const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges } = context;
 
   Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
     // When there's more than one edge label, create a group node
@@ -286,9 +290,9 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
         logger,
         edgesMap,
         nodesMap,
-        (nodesMap[edgeLabelId] as LabelNodeDataModel).source,
+        labelEdges[edgeLabelId].source,
         edgeLabelId,
-        (nodesMap[edgeLabelId] as LabelNodeDataModel).target
+        labelEdges[edgeLabelId].target
       );
     } else {
       const groupNode: GroupNodeDataModel = {
@@ -301,9 +305,9 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
         logger,
         edgesMap,
         nodesMap,
-        (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).source,
+        labelEdges[edgeLabelsIds[0]].source,
         groupNode.id,
-        (nodesMap[edgeLabelsIds[0]] as LabelNodeDataModel).target
+        labelEdges[edgeLabelsIds[0]].target
       );
 
       edgeLabelsIds.forEach((edgeLabelId) => {
@@ -342,7 +346,7 @@ const connectNodes = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
   targetNodeId: string
-) => {
+): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
   const color =
@@ -355,9 +359,7 @@ const connectNodes = (
   return {
     id: `a(${sourceNodeId})-b(${targetNodeId})`,
     source: sourceNodeId,
-    sourceShape: nodesMap[sourceNodeId].shape as NodeShape,
     target: targetNodeId,
-    targetShape: nodesMap[targetNodeId].shape as NodeShape,
     color,
-  } as EdgeDataModel;
+  };
 };
