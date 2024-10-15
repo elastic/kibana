@@ -52,16 +52,13 @@ export async function getTransaction({
     TIMESTAMP_US,
     SERVICE_NAME,
     TRANSACTION_ID,
-  ] as const);
-
-  const optionalFields = asMutableArray([
-    PROCESSOR_NAME,
-    SERVICE_LANGUAGE_NAME,
     TRANSACTION_DURATION,
     TRANSACTION_NAME,
     TRANSACTION_SAMPLED,
     TRANSACTION_TYPE,
   ] as const);
+
+  const optionalFields = asMutableArray([PROCESSOR_NAME, SERVICE_LANGUAGE_NAME] as const);
 
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
@@ -86,7 +83,7 @@ export async function getTransaction({
         },
       },
       fields: [...requiredFields, ...optionalFields],
-      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS, TRANSACTION_NAME],
+      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
     },
   });
 

@@ -22,11 +22,11 @@ export interface WaterfallTransaction {
   event?: { outcome?: EventOutcome };
   parent?: { id?: string };
   processor: { event: 'transaction' };
-  transaction?: {
-    duration?: { us?: number };
+  transaction: {
+    duration: { us: number };
     id: string;
-    name?: string;
-    type?: string;
+    name: string;
+    type: string;
     result?: string;
   };
   faas?: {
