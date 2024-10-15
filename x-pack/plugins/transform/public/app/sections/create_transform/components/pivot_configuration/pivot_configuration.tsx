@@ -67,7 +67,6 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             ...options.map((o) => ({
               ...o,
               isEmpty,
-              label: o.label,
               isGroupLabel: false,
               searchableLabel: o.label,
             }))

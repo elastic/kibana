@@ -74,7 +74,6 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
     () =>
       Array.isArray(options)
         ? options.map(({ isEmpty, ...o }) => ({
-            key: o.key,
             ...o,
             css: optionCss,
             // Change data-is-empty- because EUI is passing all props to dom element

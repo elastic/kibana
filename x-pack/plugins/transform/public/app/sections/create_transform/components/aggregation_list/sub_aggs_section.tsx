@@ -86,7 +86,6 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
           ...aggOptions.map((o) => ({
             ...o,
             isEmpty,
-            label: o.label,
             isGroupLabel: false,
             searchableLabel: o.label,
           }))
@@ -95,7 +94,6 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
     });
     return opts;
   }, [handleFieldStatsButtonClick, populatedFields, state.aggOptions]);
-  // @TODO: remove
   const dropdown = (
     <DropDown
       changeHandler={addSubAggHandler}
