@@ -287,6 +287,24 @@ describe('getExpressionType', () => {
         'unknown'
       );
     });
+
+    it('deals with the CASE function', () => {
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, 2)'), new Map(), new Map())).toBe(
+        'integer'
+      );
+
+      expect(
+        getExpressionType(getASTForExpression('CASE(true, 1., true, 1., 2.)'), new Map(), new Map())
+      ).toBe('double');
+
+      expect(
+        getExpressionType(
+          getASTForExpression('CASE(true, "", true, "", keywordField)'),
+          new Map([[`keywordField`, { name: 'keywordField', type: 'keyword' }]]),
+          new Map()
+        )
+      ).toBe('keyword');
+    });
   });
 
   describe('lists', () => {});

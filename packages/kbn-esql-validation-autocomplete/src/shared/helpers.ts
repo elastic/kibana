@@ -812,6 +812,18 @@ export function getExpressionType(
       return 'unknown';
     }
 
+    if (fnDefinition.name === 'case') {
+      // The CASE function doesn't fit our system of function definitions
+      // and needs special handling. This is imperfect, but it's a start because
+      // at least we know that the final argument to case will never be a conditional
+      // expression, always a result expression.
+      //
+      // One problem with this is that if a false case is not provided, the return type
+      // will be null, which we aren't detecting. But this is ok because we consider
+      // variables and fields to be nullable anyways and account for that during validation.
+      return getExpressionType(root.args[root.args.length - 1], fields, variables);
+    }
+
     const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
 
     if (!signaturesWithCorrectArity.length) {
