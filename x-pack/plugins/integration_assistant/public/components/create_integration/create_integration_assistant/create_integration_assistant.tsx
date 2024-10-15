@@ -128,6 +128,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <Footer
           currentStep={state.step}
           isGenerating={state.isGenerating}
+          hasCelInput={state.hasCelInput}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate>

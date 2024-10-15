@@ -101,6 +101,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
         inputTypes: (options: EuiComboBoxOptionOption[]) => {
           setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
           setHasCelInput(
+            // the cel value here comes from the input type options defined above
             options.map((option) => option.value as InputType).includes('cel' as InputType)
           );
         },
