@@ -206,6 +206,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
             low: LOW,
             none: NONE,
           })}
+          isCursorSetToPointer={true}
         />
         <EuiSpacer size="l" />
         <EuiBasicTable

@@ -182,7 +182,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </EuiLink>
           <EuiSpacer size="xl" />
-          <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+          <DistributionBar
+            stats={getFindingsStats(passedFindings, failedFindings)}
+            isCursorSetToPointer={true}
+          />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}

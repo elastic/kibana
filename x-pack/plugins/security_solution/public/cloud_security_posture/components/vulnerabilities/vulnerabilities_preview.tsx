@@ -187,6 +187,7 @@ export const VulnerabilitiesPreview = ({
                   low: LOW,
                   none: NONE,
                 })}
+                isCursorSetToPointer={true}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

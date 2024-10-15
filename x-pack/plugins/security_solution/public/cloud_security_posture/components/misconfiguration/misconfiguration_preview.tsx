@@ -245,7 +245,10 @@ export const MisconfigurationsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+              <DistributionBar
+                stats={getFindingsStats(passedFindings, failedFindings)}
+                isCursorSetToPointer={true}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
