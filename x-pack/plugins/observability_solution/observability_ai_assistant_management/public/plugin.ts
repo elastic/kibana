@@ -49,7 +49,7 @@ export class AiAssistantManagementObservabilityPlugin
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability',
+      defaultMessage: 'AI Assistant for Observability and Search',
     });
 
     if (home) {
@@ -57,7 +57,7 @@ export class AiAssistantManagementObservabilityPlugin
         id: 'ai_assistant_observability',
         title,
         description: i18n.translate('xpack.observabilityAiAssistantManagement.app.description', {
-          defaultMessage: 'Manage your AI Assistant for Observability.',
+          defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
         path: '/app/management/kibana/ai-assistant/observability',

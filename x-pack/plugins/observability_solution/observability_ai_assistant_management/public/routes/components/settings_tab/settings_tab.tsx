@@ -85,7 +85,7 @@ export function SettingsTab() {
           'xpack.observabilityAiAssistantManagement.settingsPage.euiDescribedFormGroup.inOrderToUseLabel',
           {
             defaultMessage:
-              'In order to use the Observability AI Assistant you must set up a Generative AI connector.',
+              'In order to use the AI Assistant you must set up a Generative AI connector.',
           }
         )}
       >

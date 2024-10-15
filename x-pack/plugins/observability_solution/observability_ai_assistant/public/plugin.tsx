@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
 import { AssistantScope } from '@kbn/ai-assistant-common';
+import { AI_ASSISTANT_DEFAULT_SCOPE_KEY } from '@kbn/ai-assistant-management-plugin/public';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
@@ -60,6 +61,7 @@ export class ObservabilityAIAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPublicStart {
+    const scopeFromUiSettings = coreStart.uiSettings.get(AI_ASSISTANT_DEFAULT_SCOPE_KEY);
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
@@ -67,7 +69,7 @@ export class ObservabilityAIAssistantPlugin
         coreStart.application.capabilities.observabilityAIAssistant[
           aiAssistantCapabilities.show
         ] === true,
-      scope: this.scopeFromConfig || 'observability',
+      scope: this.scopeFromConfig || scopeFromUiSettings || 'search',
       scopeIsMutable: !!this.scopeFromConfig,
     }));
 

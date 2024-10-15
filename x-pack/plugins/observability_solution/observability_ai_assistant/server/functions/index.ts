@@ -57,7 +57,7 @@ export const registerFunctions: RegistrationCallback = async ({
 
   DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (\`service.name == "foo"\`) with "kqlFilter" (\`service.name:"foo"\`).
 
-  The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability, which can be found in the ${
+  The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the ${
     isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`,

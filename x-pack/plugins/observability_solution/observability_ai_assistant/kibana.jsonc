@@ -6,7 +6,10 @@
     "id": "observabilityAIAssistant",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observabilityAIAssistant"],
+    "configPath": [
+      "xpack",
+      "observabilityAIAssistant"
+    ],
     "requiredPlugins": [
       "actions",
       "features",
@@ -14,10 +17,19 @@
       "security",
       "taskManager",
       "dataViews",
+      "aiAssistantManagementSelection"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
-    "optionalPlugins": ["cloud", "serverless"],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
     "extraPublicDirs": [],
-    "runtimePluginDependencies": [ "ml" ]
+    "runtimePluginDependencies": [
+      "ml"
+    ]
   }
 }

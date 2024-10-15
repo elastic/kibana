@@ -17,6 +17,8 @@ import type {
 
 export { AIAssistantType } from '../common/ai_assistant_type';
 
+export { AI_ASSISTANT_DEFAULT_SCOPE_KEY } from '../common/ui_setting_keys';
+
 export type {
   AIAssistantManagementSelectionPluginPublicSetup,
   AIAssistantManagementSelectionPluginPublicStart,

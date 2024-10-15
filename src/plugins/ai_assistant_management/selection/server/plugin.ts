@@ -26,7 +26,10 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  AI_ASSISTANT_DEFAULT_SCOPE_KEY,
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -50,7 +53,7 @@ export class AIAssistantManagementSelectionPlugin
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'Observability AI Assistant scope',
+          defaultMessage: 'AI Assistant for Observability and Search visibility',
         }),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
@@ -58,7 +61,7 @@ export class AIAssistantManagementSelectionPlugin
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the Observability AI Assistant menu item in Observability, everywhere, or nowhere.',
+              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
             values: {
               em: (chunks) => `<em>${chunks}</em>`,
             },
@@ -77,7 +80,7 @@ export class AIAssistantManagementSelectionPlugin
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability only (default)' }
+            { defaultMessage: 'Observability and Search only (default)' }
           ),
           [AIAssistantType.Observability]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
@@ -87,6 +90,35 @@ export class AIAssistantManagementSelectionPlugin
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
             { defaultMessage: 'Nowhere' }
           ),
+        },
+        requiresPageReload: true,
+      },
+      [AI_ASSISTANT_DEFAULT_SCOPE_KEY]: {
+        category: ['observability'],
+        name: i18n.translate('aiAssistantManagementSelection.defaultScopeName', {
+          defaultMessage: 'AI assistant default scope',
+        }),
+        value: '',
+        description: i18n.translate(
+          'aiAssistantManagementSelection.settingsPage.defaultScopeDescription',
+          {
+            defaultMessage:
+              'Defines the default behavior of the AI assistant in pages outside Observability and Search. This determines which functions are available to the assistant, and the system prompt it uses.',
+          }
+        ),
+        schema: schema.oneOf([schema.literal('search'), schema.literal('observability')], {
+          defaultValue: 'search',
+        }),
+        options: ['search', 'observability'],
+        type: 'select',
+        optionLabels: {
+          ['observability']: i18n.translate(
+            'aiAssistantManagementSelection.defaultScopeValueObservability',
+            { defaultMessage: 'Observability' }
+          ),
+          ['search']: i18n.translate('aiAssistantManagementSelection.defaultScopeSearch', {
+            defaultMessage: 'Search',
+          }),
         },
         requiresPageReload: true,
       },
