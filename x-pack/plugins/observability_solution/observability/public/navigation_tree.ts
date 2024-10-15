@@ -96,9 +96,25 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             children: [
               {
                 children: [
-                  { link: 'apm:services' },
-                  { link: 'apm:traces' },
-                  { link: 'apm:dependencies' },
+                  {
+                    link: 'apm:services',
+                    getIsActive: ({ pathNameSerialized }) => {
+                      const regex = /app\/apm\/.*service.*/;
+                      return regex.test(pathNameSerialized);
+                    },
+                  },
+                  {
+                    link: 'apm:traces',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                    },
+                  },
+                  {
+                    link: 'apm:dependencies',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                    },
+                  },
                   {
                     link: 'ux',
                     title: i18n.translate('xpack.observability.obltNav.apm.ux', {
@@ -146,8 +162,16 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
                       defaultMessage: 'Infrastructure inventory',
                     }),
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                    },
                   },
-                  { link: 'metrics:hosts' },
+                  {
+                    link: 'metrics:hosts',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    },
+                  },
                   {
                     link: 'metrics:metrics-explorer',
                     title: i18n.translate(
@@ -356,7 +380,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               defaultMessage: 'Other tools',
             }),
             renderAs: 'panelOpener',
-            icon: 'editorCodeBlock',
             children: [
               {
                 link: 'logs:stream',
