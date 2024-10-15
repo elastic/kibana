@@ -199,10 +199,10 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000`)
           .expect(200);
         const defaultSpaceMons = firstPageResp.body.monitors.filter(
-          ({ spaceId }) => spaceId === 'default'
+          ({ spaceId }: { spaceId: string }) => spaceId === 'default'
         );
         const testSpaceMons = firstPageResp.body.monitors.filter(
-          ({ spaceId }) => spaceId === SPACE_ID
+          ({ spaceId }: { spaceId: string }) => spaceId === SPACE_ID
         );
 
         expect(defaultSpaceMons.length).to.eql(22);
@@ -214,8 +214,12 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200);
 
-        const defaultSpaceMons1 = res.body.monitors.filter(({ spaceId }) => spaceId === 'default');
-        const testSpaceMons1 = res.body.monitors.filter(({ spaceId }) => spaceId === SPACE_ID);
+        const defaultSpaceMons1 = res.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === 'default'
+        );
+        const testSpaceMons1 = res.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === SPACE_ID
+        );
 
         expect(defaultSpaceMons1.length).to.eql(22);
         expect(testSpaceMons1.length).to.eql(8);
