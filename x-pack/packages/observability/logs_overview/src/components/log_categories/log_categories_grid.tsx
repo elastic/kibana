@@ -9,7 +9,6 @@ import {
   EuiDataGrid,
   EuiDataGridColumnSortingConfig,
   EuiDataGridPaginationProps,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createConsoleInspector } from '@kbn/xstate-utils';
@@ -26,7 +25,7 @@ import {
   logCategoriesGridColumns,
   renderLogCategoriesGridCell,
 } from './log_categories_grid_cell';
-import { createLogCategoriesGridExpandButton } from './log_categories_grid_expand_button';
+import { createLogCategoriesGridControlColumns } from './log_categories_grid_control_columns';
 
 export interface LogCategoriesGridProps {
   dependencies: LogCategoriesGridDependencies;
@@ -37,8 +36,6 @@ export interface LogCategoriesGridProps {
 }
 
 export type LogCategoriesGridDependencies = LogCategoriesGridCellDependencies;
-
-const DEFAULT_CONTROL_COLUMN_WIDTH = 40;
 
 export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
   dependencies,
@@ -103,26 +100,11 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
         onSort: (sortingColumns) =>
           dispatchGridEvent({ type: 'changeSortingColumns', sortingColumns }),
       }}
-      leadingControlColumns={[
-        {
-          id: 'toggleFlyout',
-          width: DEFAULT_CONTROL_COLUMN_WIDTH,
-          headerCellRender: () => (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.observabilityLogsOverview.controlColumnHeader', {
-                  defaultMessage: 'Control column',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          rowCellRender: createLogCategoriesGridExpandButton({
-            expandedRowIndex,
-            onOpenFlyout,
-            onCloseFlyout,
-          }),
-        },
-      ]}
+      leadingControlColumns={createLogCategoriesGridControlColumns({
+        expandedRowIndex,
+        onOpenFlyout,
+        onCloseFlyout,
+      })}
     />
   );
 };
