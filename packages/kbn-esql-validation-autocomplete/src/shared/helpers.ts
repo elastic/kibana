@@ -235,8 +235,15 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
-  // date-type parameters accept string literals because of ES auto-casting
-  if ((argType === 'date' || argType === 'date_period') && item.literalType === 'keyword') {
+  // some parameters accept string literals because of ES auto-casting
+  if (
+    item.literalType === 'keyword' &&
+    (argType === 'date' ||
+      argType === 'date_period' ||
+      argType === 'version' ||
+      argType === 'ip' ||
+      argType === 'boolean')
+  ) {
     return true;
   }
 
