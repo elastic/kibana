@@ -45,6 +45,7 @@ import { SimulatedFunctionCallingCallout } from './simulated_function_calling_ca
 import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
+import { safeJsonParse } from '../utils/safe_json_parse';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -229,22 +230,22 @@ export function ChatBody({
     const deserializeMessage = (message: Message): Message => {
       const copiedMessage = cloneDeep(message);
 
-      const { function_call: functionCall, content, data } = copiedMessage.message;
-
       if (
         copiedMessage.message.function_call?.arguments &&
-        typeof copiedMessage.message.function_call.arguments === 'string'
+        typeof copiedMessage.message.function_call?.arguments === 'string'
       ) {
-        copiedMessage.message.function_call.arguments = JSON.parse(functionCall?.arguments ?? '{}');
+        copiedMessage.message.function_call.arguments = safeJsonParse(
+          copiedMessage.message.function_call.arguments ?? '{}'
+        );
       }
 
       if (copiedMessage.message.name) {
-        if (content && typeof content === 'string') {
-          copiedMessage.message.content = JSON.parse(content);
+        if (copiedMessage.message.content && typeof copiedMessage.message.content === 'string') {
+          copiedMessage.message.content = safeJsonParse(copiedMessage.message.content);
         }
 
-        if (data && typeof data === 'string') {
-          copiedMessage.message.data = JSON.parse(data);
+        if (copiedMessage.message.data && typeof copiedMessage.message.data === 'string') {
+          copiedMessage.message.data = safeJsonParse(copiedMessage.message.data);
         }
       }
 
