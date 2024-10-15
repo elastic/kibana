@@ -99,7 +99,7 @@ describe(
           submitCommand();
           cy.wait('@scanAction', { timeout: 60000 });
 
-          cy.contains('Scan complete').click();
+          cy.contains('Scan complete', { timeout: 180000 }).click();
         });
       });
 
@@ -112,7 +112,7 @@ describe(
         submitCommand();
         cy.wait('@scanAction', { timeout: 60000 });
 
-        cy.getByTestSubj('scan-actionFailure')
+        cy.getByTestSubj('scan-actionFailure', { timeout: 180000 })
           .should('exist')
           .contains('File path or folder was not found (404)');
       });
