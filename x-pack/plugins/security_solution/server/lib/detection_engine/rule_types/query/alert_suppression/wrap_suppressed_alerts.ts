@@ -56,6 +56,7 @@ export const wrapSuppressedAlerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
+  intendedTimestamp,
 }: {
   suppressionBuckets: SuppressionBucket[];
   spaceId: string;
@@ -66,6 +67,7 @@ export const wrapSuppressedAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -96,6 +98,7 @@ export const wrapSuppressedAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

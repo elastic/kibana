@@ -12,15 +12,12 @@ import apm from 'elastic-apm-node';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
-import {
-  UsageMetricsRequestSchemaQueryParams,
-  UsageMetricsResponseSchemaBody,
-} from '../../common/rest_types';
+import { UsageMetricsResponseSchemaBody } from '../../common/rest_types';
 import { appContextService } from '../app_context';
 import { AutoOpsConfig } from '../types';
 
 class AutoOpsAPIService {
-  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestSchemaQueryParams) {
+  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsResponseSchemaBody) {
     const logger = appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
