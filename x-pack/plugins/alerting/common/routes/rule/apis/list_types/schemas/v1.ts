@@ -182,6 +182,7 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
         description: 'An identifier for the application that produces this rule type.',
       },
     }),
+
     recovery_action_group: actionGroupSchema,
     rule_task_timeout: schema.maybe(schema.string()),
   })
