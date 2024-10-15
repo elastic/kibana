@@ -115,7 +115,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           id: newMonitor.id,
         };
       }
-      addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
       return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
