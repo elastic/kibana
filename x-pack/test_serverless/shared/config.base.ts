@@ -167,6 +167,10 @@ export default async () => {
         // configure security reponse header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        // controller cluster-settings
+        `--cluster.service.slow_task_logging_threshold=15s`,
+        `--cluster.service.slow_task_thread_dump_timeout=5s`,
+        `--serverless.search.enable_replicas_for_instant_failover=true`,
       ],
     },
 
