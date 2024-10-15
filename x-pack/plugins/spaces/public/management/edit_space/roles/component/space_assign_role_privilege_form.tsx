@@ -31,8 +31,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
-import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import type {
+  RawKibanaPrivileges,
+  Role,
+  RoleKibanaPrivilege,
+} from '@kbn/security-plugin-types-common';
 import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';

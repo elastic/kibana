@@ -1753,10 +1753,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@97.0.0":
-  version "97.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.0.0.tgz#b7828b8818de1328e47b4c47024d8455a5795f23"
-  integrity sha512-ha7oer/0ou0MnZMgwZzqKE97tx/IPhQtb04nNLZvwOiBAH+ANtUqohYSM/3VxLuJT13cxbsLC2CLT0Ktcibo4w==
+"@elastic/eui@97.0.0-backport.0":
+  version "97.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.0.0-backport.0.tgz#cababac6e5937b14ce0e836240fc4817e2e41920"
+  integrity sha512-gefYh5ZgjFraGWOTy8f8RO5DAfOJB3S/PAlM9dvi6mNlNJ5T1CelNafBwdrD8Hdut//BxmexQD7aBZ+36GTaOg==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -5147,6 +5147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
@@ -6388,6 +6392,10 @@
   uid ""
 
 "@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-authorization-core-common@link:x-pack/packages/security/authorization_core_common":
   version "0.0.0"
   uid ""
 
