@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import type { TimelineModel } from '../../../..';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { timelineSelectors } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types';
@@ -21,6 +22,7 @@ import { NotesList } from '../../../../notes/components/notes_list';
 import { pinEvent } from '../../../../timelines/store/actions';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import {
   fetchNotesByDocumentIds,
   ReqStatus,
@@ -63,10 +65,17 @@ export const NotesDetails = memo(() => {
   // if the flyout is open from a timeline and that timeline is saved, we automatically check the checkbox to associate the note to it
   const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
 
-  const timeline = useSelector((state: State) =>
+  const timeline: TimelineModel = useSelector((state: State) =>
     timelineSelectors.selectTimelineById(state, TimelineId.active)
   );
-  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+  const timelineSavedObjectId = useMemo(
+    () => timeline.savedObjectId ?? '',
+    [timeline.savedObjectId]
+  );
+  const isTimelineSaved: boolean = useMemo(
+    () => timeline.status === TimelineStatusEnum.active,
+    [timeline.status]
+  );
 
   // Automatically pin an associated event if it's attached to a timeline and it's not pinned yet
   const onNoteAddInTimeline = useCallback(() => {
@@ -141,7 +150,7 @@ export const NotesDetails = memo(() => {
             {isTimelineFlyout && (
               <AttachToActiveTimeline
                 setAttachToTimeline={setAttachToTimeline}
-                isCheckboxDisabled={timelineSavedObjectId.length === 0}
+                isCheckboxDisabled={!isTimelineSaved}
               />
             )}
           </AddNote>
