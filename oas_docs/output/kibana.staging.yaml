@@ -11822,6 +11822,56 @@ paths:
       summary: Stop an Entity Engine
       tags:
         - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: 'List entities records, paging, sorting and filtering as needed.'
@@ -38935,6 +38985,20 @@ components:
                 #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
           required:
             - criticality_level
+    Security_Entity_Analytics_API_EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
@@ -38958,6 +39022,7 @@ components:
         - installing
         - started
         - stopped
+        - updating
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
