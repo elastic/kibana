@@ -20,11 +20,9 @@ import { GroupSelector } from './group_selector';
 
 interface Props {
   entityType?: EntityType;
-  groupSelected: string;
-  setGroupSelected: (selected: string) => void;
 }
 
-export function UngroupedInventoryPage({ entityType, groupSelected, setGroupSelected }: Props) {
+export function UngroupedInventoryPage({ entityType }: Props) {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
@@ -104,16 +102,6 @@ export function UngroupedInventoryPage({ entityType, groupSelected, setGroupSele
 
   const totalEntities = value.entities.length;
 
-  const onChange = (groupSelection: string) => {
-    let newSelectedGroup: string = '';
-    if (groupSelection === groupSelected) {
-      newSelectedGroup = 'none';
-    } else {
-      newSelectedGroup = groupSelection;
-    }
-    setGroupSelected(newSelectedGroup);
-  };
-
   return (
     <>
       <EuiFlexGroup>
@@ -132,7 +120,7 @@ export function UngroupedInventoryPage({ entityType, groupSelected, setGroupSele
         </EuiFlexItem>
         <EuiFlexItem grow />
         <EuiFlexItem grow={false} className="">
-          <GroupSelector onGroupChange={onChange} groupSelected={groupSelected} />
+          <GroupSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EntitiesGrid
