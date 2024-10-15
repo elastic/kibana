@@ -5443,6 +5443,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/item-buffer@link:packages/kbn-item-buffer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/jest-serializers@link:packages/kbn-jest-serializers":
   version "0.0.0"
   uid ""

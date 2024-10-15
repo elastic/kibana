@@ -1074,6 +1074,8 @@
       "@kbn/io-ts-utils/*": ["packages/kbn-io-ts-utils/*"],
       "@kbn/ipynb": ["packages/kbn-ipynb"],
       "@kbn/ipynb/*": ["packages/kbn-ipynb/*"],
+      "@kbn/item-buffer": ["packages/kbn-item-buffer"],
+      "@kbn/item-buffer/*": ["packages/kbn-item-buffer/*"],
       "@kbn/jest-serializers": ["packages/kbn-jest-serializers"],
       "@kbn/jest-serializers/*": ["packages/kbn-jest-serializers/*"],
       "@kbn/journeys": ["packages/kbn-journeys"],

@@ -588,6 +588,7 @@
     "@kbn/investigation-shared": "link:packages/kbn-investigation-shared",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
     "@kbn/ipynb": "link:packages/kbn-ipynb",
+    "@kbn/item-buffer": "link:packages/kbn-item-buffer",
     "@kbn/json-schemas": "link:x-pack/packages/ml/json_schemas",
     "@kbn/kbn-health-gateway-status-plugin": "link:test/health_gateway/plugins/status",
     "@kbn/kbn-sample-panel-action-plugin": "link:test/plugin_functional/plugins/kbn_sample_panel_action",
