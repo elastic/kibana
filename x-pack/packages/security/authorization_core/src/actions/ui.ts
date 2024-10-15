@@ -40,4 +40,12 @@ export class UIActions implements UIActionsType {
 
     return `${this.prefix}${featureId}/${uiCapabilityParts.join('/')}`;
   }
+
+  /**
+   * Checks if the action is a valid UI action.
+   * @param action The action string to check.
+   */
+  public isValid(action: string) {
+    return action.startsWith(this.prefix);
+  }
 }
