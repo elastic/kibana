@@ -23,11 +23,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  getNumTransformAssets,
-  TransformInstallWithCurrentUserPermissionCallout,
-} from '../../../../../../../components/transform_install_as_current_user_callout';
-
 import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo, PackageMetadata } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
@@ -238,22 +233,6 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
 
-    const { numOfAssets, numTransformAssets } = useMemo(
-      () => ({
-        numTransformAssets: getNumTransformAssets(packageInfo.assets),
-        numOfAssets: Object.entries(packageInfo.assets).reduce(
-          (acc, [serviceName, serviceNameValue]) =>
-            acc +
-            Object.entries(serviceNameValue || {}).reduce(
-              (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
-              0
-            ),
-          0
-        ),
-      }),
-      [packageInfo.assets]
-    );
-
     return (
       <>
         <EuiFlexGroup alignItems="flexStart">
@@ -365,15 +344,6 @@ export const SettingsPage: React.FC<Props> = memo(
                         </h4>
                       </EuiTitle>
                       <EuiSpacer size="s" />
-
-                      {numTransformAssets > 0 ? (
-                        <>
-                          <TransformInstallWithCurrentUserPermissionCallout
-                            count={numTransformAssets}
-                          />
-                          <EuiSpacer size="s" />
-                        </>
-                      ) : null}
                       <p>
                         <FormattedMessage
                           id="xpack.fleet.integrations.settings.packageInstallDescription"
@@ -388,7 +358,6 @@ export const SettingsPage: React.FC<Props> = memo(
                           <p>
                             <InstallButton
                               {...packageInfo}
-                              numOfAssets={numOfAssets}
                               disabled={packageMetadata?.has_policies}
                             />
                           </p>
@@ -418,7 +387,6 @@ export const SettingsPage: React.FC<Props> = memo(
                           <div>
                             <UninstallButton
                               {...packageInfo}
-                              numOfAssets={numOfAssets}
                               latestVersion={latestVersion}
                               disabled={packageMetadata?.has_policies}
                             />
