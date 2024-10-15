@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EnterpriseSearchDeprecationCallout } from '../../../shared/deprecation_callout/deprecation_callout';
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 
@@ -57,6 +58,15 @@ export const Overview: React.FC = () => {
   const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
+  const [showDeprecationCallout, setShowDeprecationCallout] = React.useState(
+    !sessionStorage.getItem('workplaceSearchHideDeprecationCallout')
+  );
+
+  const onDismissDeprecationCallout = () => {
+    setShowDeprecationCallout(false);
+    sessionStorage.setItem('workplaceSearchHideDeprecationCallout', 'true');
+  };
+
   return kibanaUIsEnabled ? (
     <WorkplaceSearchPageTemplate
       pageChrome={[]}
@@ -66,6 +76,11 @@ export const Overview: React.FC = () => {
       pageViewTelemetry="overview"
       isLoading={dataLoading}
     >
+      {showDeprecationCallout ? (
+        <EnterpriseSearchDeprecationCallout onDismissAction={onDismissDeprecationCallout} />
+      ) : (
+        <></>
+      )}
       {!hideOnboarding && (
         <>
           <OnboardingSteps />

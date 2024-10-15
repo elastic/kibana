@@ -6,32 +6,30 @@
  */
 import { useContext, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
+import { coreServices } from '../../../services/kibana_services';
 
 const fullscreenClass = 'canvas-isFullscreen';
 
 export const useFullscreenPresentationHelper = () => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
-  const { setFullscreen } = usePlatformService();
-
   useEffect(() => {
     const body = document.querySelector('body');
     const bodyClassList = body!.classList;
     const hasFullscreenClass = bodyClassList.contains(fullscreenClass);
 
     if (isFullscreen && !hasFullscreenClass) {
-      setFullscreen(false);
+      coreServices.chrome.setIsVisible(false);
       bodyClassList.add(fullscreenClass);
     } else if (!isFullscreen && hasFullscreenClass) {
       bodyClassList.remove(fullscreenClass);
-      setFullscreen(true);
+      coreServices.chrome.setIsVisible(true);
     }
-  }, [isFullscreen, setFullscreen]);
+  }, [isFullscreen]);
 
   // Remove fullscreen when component unmounts
   useEffectOnce(() => () => {
-    setFullscreen(true);
+    coreServices.chrome.setIsVisible(true);
     document.querySelector('body')?.classList.remove(fullscreenClass);
   });
 };

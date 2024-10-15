@@ -40,6 +40,7 @@ const enabledActionTypes = [
   '.bedrock',
   '.cases-webhook',
   '.email',
+  '.gemini',
   '.index',
   '.opsgenie',
   '.pagerduty',
@@ -76,6 +77,7 @@ const enabledActionTypes = [
   'test.system-action',
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
+  'test.connector-with-hooks',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {

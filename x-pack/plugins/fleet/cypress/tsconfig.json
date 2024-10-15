@@ -28,5 +28,6 @@
       "force": true
     },
     "@kbn/rison",
+    "@kbn/actions-plugin",
   ]
 }

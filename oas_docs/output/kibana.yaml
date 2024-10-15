@@ -1650,6 +1650,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -2407,6 +2423,22 @@ paths:
                     Indicates whether you want to run the rule on an interval
                     basis after it is created.
                   type: boolean
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -2791,6 +2823,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -3527,6 +3575,22 @@ paths:
                       type: number
                   required:
                     - active
+                flapping:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    look_back_window:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                    status_change_threshold:
+                      maximum: 20
+                      minimum: 2
+                      type: number
+                  required:
+                    - look_back_window
+                    - status_change_threshold
                 name:
                   description: >-
                     The name of the rule. While this name does not have to be
@@ -3903,6 +3967,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -5113,6 +5193,22 @@ paths:
                     required:
                       - status
                       - last_execution_date
+                  flapping:
+                    additionalProperties: false
+                    nullable: true
+                    type: object
+                    properties:
+                      look_back_window:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                      status_change_threshold:
+                        maximum: 20
+                        minimum: 2
+                        type: number
+                    required:
+                      - look_back_window
+                      - status_change_threshold
                   id:
                     description: The identifier for the rule.
                     type: string
@@ -6941,7 +7037,7 @@ paths:
         - $ref: '#/components/parameters/Cases_category'
         - $ref: '#/components/parameters/Cases_defaultSearchOperator'
         - $ref: '#/components/parameters/Cases_from'
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
         - $ref: '#/components/parameters/Cases_page_index'
         - $ref: '#/components/parameters/Cases_page_size'
         - $ref: '#/components/parameters/Cases_reporters'
@@ -7389,7 +7485,7 @@ paths:
       operationId: getCasesByAlertDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_alert_id'
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
       responses:
         '200':
           content:
@@ -7430,7 +7526,7 @@ paths:
         where the cases were created.
       operationId: getCaseConfigurationDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
       responses:
         '200':
           content:
@@ -7561,7 +7657,7 @@ paths:
                             type: string
                       type: array
                     owner:
-                      $ref: '#/components/schemas/Cases_owners'
+                      $ref: '#/components/schemas/Cases_owner'
                     templates:
                       $ref: '#/components/schemas/Cases_templates'
                     updated_at:
@@ -7609,7 +7705,7 @@ paths:
     post:
       description: >
         Case settings include external connection details, custom fields, and
-        templates.  Connectors are used to interface with external systems. You
+        templates. Connectors are used to interface with external systems. You
         must create a connector before you can use it in your cases. If you set
         a default connector, it is automatically selected when you create cases
         in Kibana. If you use the create case API, however, you must still
@@ -7757,7 +7853,7 @@ paths:
                           type: string
                     type: array
                   owner:
-                    $ref: '#/components/schemas/Cases_owners'
+                    $ref: '#/components/schemas/Cases_owner'
                   templates:
                     $ref: '#/components/schemas/Cases_templates'
                   updated_at:
@@ -7953,7 +8049,7 @@ paths:
                           type: string
                     type: array
                   owner:
-                    $ref: '#/components/schemas/Cases_owners'
+                    $ref: '#/components/schemas/Cases_owner'
                   templates:
                     $ref: '#/components/schemas/Cases_templates'
                   updated_at:
@@ -8062,7 +8158,7 @@ paths:
         returned by this API is unchanged.
       operationId: getCaseReportersDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
       responses:
         '200':
           content:
@@ -8117,7 +8213,7 @@ paths:
         privileges, depending on the owner of the cases you're seeking.
       operationId: getCaseStatusDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
       responses:
         '200':
           content:
@@ -8150,7 +8246,7 @@ paths:
         privileges, depending on the owner of the cases you're seeking.
       operationId: getCaseTagsDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_owner_filter'
       responses:
         '200':
           content:
@@ -11328,6 +11424,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
@@ -11440,6 +11537,7 @@ paths:
         - Security Endpoint Management API
   '/api/endpoint/suggestions/{suggestion_type}':
     post:
+      deprecated: true
       operationId: GetEndpointSuggestions
       parameters:
         - in: path
@@ -11618,6 +11716,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -16721,6 +16823,13 @@ paths:
               properties:
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
                 fleet_server_hosts:
                   description: Protocol and path must be the same for each URL
                   items:
@@ -24210,11 +24319,8 @@ components:
       name: assignees
       schema:
         oneOf:
-          - type: string
-          - items:
-              type: string
-            maxItems: 100
-            type: array
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
     Cases_case_id:
       description: >-
         The identifier for the case. To retrieve case IDs, use the find cases
@@ -24231,12 +24337,8 @@ components:
       name: category
       schema:
         oneOf:
-          - example: my-category
-            type: string
-          - items:
-              type: string
-            maxItems: 100
-            type: array
+          - $ref: '#/components/schemas/Cases_case_category'
+          - $ref: '#/components/schemas/Cases_case_categories'
     Cases_comment_id:
       description: >
         The identifier for the comment. To retrieve comment IDs, use the get
@@ -24313,7 +24415,7 @@ components:
       required: true
       schema:
         type: string
-    Cases_owner:
+    Cases_owner_filter:
       description: >
         A filter to limit the response to a specific set of applications. If
         this parameter is omitted, the response contains information about all
@@ -24323,10 +24425,8 @@ components:
       name: owner
       schema:
         oneOf:
+          - $ref: '#/components/schemas/Cases_owner'
           - $ref: '#/components/schemas/Cases_owners'
-          - items:
-              $ref: '#/components/schemas/Cases_owners'
-            type: array
     Cases_page_index:
       description: The page number to return.
       in: query
@@ -24351,11 +24451,8 @@ components:
       name: reporters
       schema:
         oneOf:
-          - type: string
-          - items:
-              type: string
-            maxItems: 100
-            type: array
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
     Cases_search:
       description: >-
         An Elasticsearch simple_query_string query that filters the objects in
@@ -24371,9 +24468,7 @@ components:
       schema:
         oneOf:
           - $ref: '#/components/schemas/Cases_searchFieldsType'
-          - items:
-              $ref: '#/components/schemas/Cases_searchFieldsType'
-            type: array
+          - $ref: '#/components/schemas/Cases_searchFieldsTypeArray'
     Cases_severity:
       description: The severity of the case.
       in: query
@@ -24430,11 +24525,8 @@ components:
       name: tags
       schema:
         oneOf:
-          - type: string
-          - items:
-              type: string
-            maxItems: 100
-            type: array
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
     Cases_to:
       description: >
         Returns only cases that were created before a specific date. The date
@@ -24835,7 +24927,7 @@ components:
         index:
           $ref: '#/components/schemas/Cases_alert_indices'
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         rule:
           $ref: '#/components/schemas/Cases_rule'
         type:
@@ -24873,7 +24965,7 @@ components:
           maxLength: 30000
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         type:
           description: The type of comment.
           enum:
@@ -24930,7 +25022,7 @@ components:
             type: string
           type: array
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         pushed_at:
           example: null
           format: date-time
@@ -25072,6 +25164,11 @@ components:
           - uid
       maxItems: 10
       nullable: true
+      type: array
+    Cases_case_categories:
+      items:
+        $ref: '#/components/schemas/Cases_case_category'
+      maxItems: 100
       type: array
     Cases_case_category:
       description: A word or phrase that categorizes the case.
@@ -25234,7 +25331,7 @@ components:
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         settings:
           $ref: '#/components/schemas/Cases_settings'
         severity:
@@ -25766,7 +25863,7 @@ components:
         description:
           $ref: '#/components/schemas/Cases_case_description'
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         settings:
           $ref: '#/components/schemas/Cases_settings'
         severity:
@@ -25820,7 +25917,7 @@ components:
               example: elastic
               nullable: true
               type: string
-    Cases_owners:
+    Cases_owner:
       description: >
         The application that owns the cases: Stack Management, Observability, or
         Elastic Security.
@@ -25830,6 +25927,10 @@ components:
         - securitySolution
       example: cases
       type: string
+    Cases_owners:
+      items:
+        $ref: '#/components/schemas/Cases_owner'
+      type: array
     Cases_payload_alert_comment:
       type: object
       properties:
@@ -25851,7 +25952,7 @@ components:
                     type: string
                   type: array
             owner:
-              $ref: '#/components/schemas/Cases_owners'
+              $ref: '#/components/schemas/Cases_owner'
             rule:
               type: object
               properties:
@@ -26081,7 +26182,7 @@ components:
         description:
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         settings:
           $ref: '#/components/schemas/Cases_settings'
         severity:
@@ -26150,7 +26251,7 @@ components:
             comment:
               type: string
             owner:
-              $ref: '#/components/schemas/Cases_owners'
+              $ref: '#/components/schemas/Cases_owner'
             type:
               enum:
                 - user
@@ -26180,6 +26281,10 @@ components:
         - description
         - title
       type: string
+    Cases_searchFieldsTypeArray:
+      items:
+        $ref: '#/components/schemas/Cases_searchFieldsType'
+      type: array
     Cases_set_case_configuration_request:
       description: >-
         External connection details, such as the closure type and default
@@ -26266,7 +26371,7 @@ components:
           minItems: 0
           type: array
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         templates:
           $ref: '#/components/schemas/Cases_templates'
       required:
@@ -26285,6 +26390,13 @@ components:
           type: boolean
       required:
         - syncAlerts
+    Cases_string:
+      type: string
+    Cases_string_array:
+      items:
+        $ref: '#/components/schemas/Cases_string'
+      maxItems: 100
+      type: array
     Cases_template_tags:
       description: >
         The words and phrases that help categorize templates. It can be an empty
@@ -26397,7 +26509,7 @@ components:
         index:
           $ref: '#/components/schemas/Cases_alert_indices'
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         rule:
           $ref: '#/components/schemas/Cases_rule'
         type:
@@ -26641,7 +26753,7 @@ components:
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         type:
           description: The type of comment.
           enum:
@@ -26701,7 +26813,7 @@ components:
           example: 22fd3e30-03b1-11ed-920c-974bfa104448
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         payload:
           oneOf:
             - $ref: '#/components/schemas/Cases_payload_alert_comment'
@@ -26788,7 +26900,7 @@ components:
             - full_name
             - username
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         payload:
           oneOf:
             - $ref: '#/components/schemas/Cases_payload_alert_comment'
@@ -26833,7 +26945,7 @@ components:
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owners'
+          $ref: '#/components/schemas/Cases_owner'
         pushed_at:
           example: null
           format: date-time
@@ -29083,6 +29195,31 @@ components:
       title: Package information
       type: object
       properties:
+        agent:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                root:
+                  type: boolean
+        asset_tags:
+          items:
+            type: object
+            properties:
+              asset_ids:
+                items:
+                  type: string
+                type: array
+              asset_types:
+                items:
+                  type: string
+                type: array
+              text:
+                type: string
+            required:
+              - text
+          type: array
         assets:
           items:
             type: string
@@ -29147,6 +29284,18 @@ components:
           type: array
         description:
           type: string
+        discovery:
+          type: object
+          properties:
+            fields:
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                  - name
+              type: array
         download:
           type: string
         elasticsearch:
@@ -29169,6 +29318,19 @@ components:
           type: boolean
         name:
           type: string
+        owner:
+          type: object
+          properties:
+            github:
+              type: string
+            type:
+              enum:
+                - elastic
+                - partner
+                - community
+              type: string
+          required:
+            - github
         path:
           type: string
         readme:
@@ -29212,6 +29374,10 @@ components:
         title:
           type: string
         type:
+          enum:
+            - integration
+            - input
+            - content
           type: string
         version:
           type: string
@@ -29227,6 +29393,7 @@ components:
         - format_version
         - download
         - path
+        - owner
     Fleet_package_policy:
       allOf:
         - type: object
@@ -29463,6 +29630,13 @@ components:
       title: Settings
       type: object
       properties:
+        delete_unenrolled_agents:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            is_preconfigured:
+              type: boolean
         fleet_server_hosts:
           deprecated: true
           items:
@@ -30630,6 +30804,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
       type: string
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
@@ -31275,10 +31450,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/Security_Detections_API_TiebreakerField'
         timestamp_field:
@@ -31367,6 +31538,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -31492,6 +31667,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -31613,6 +31792,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -31716,6 +31899,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -31851,6 +32038,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -31975,6 +32166,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -32020,10 +32215,6 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_EsqlRulePatchProps:
       allOf:
         - type: object
@@ -32093,6 +32284,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -32219,6 +32414,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -32482,6 +32681,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -32608,6 +32811,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -32736,6 +32943,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -32858,6 +33069,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -33070,6 +33285,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -33199,6 +33418,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -33256,10 +33479,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_NewTermsRulePatchFields:
       allOf:
         - type: object
@@ -33343,6 +33562,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -33474,6 +33697,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -33709,6 +33936,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -33835,6 +34066,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -33893,10 +34128,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleFilterArray'
         index:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/Security_Detections_API_SavedQueryId'
     Security_Detections_API_QueryRulePatchFields:
@@ -33975,6 +34206,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -34098,6 +34333,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -34808,6 +35047,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -34937,6 +35180,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -34996,10 +35243,6 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_IndexPatternArray'
         query:
           $ref: '#/components/schemas/Security_Detections_API_RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
-          type: array
     Security_Detections_API_SavedQueryRulePatchFields:
       allOf:
         - type: object
@@ -35079,6 +35322,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -35205,6 +35452,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -35463,6 +35714,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -35591,6 +35846,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -35747,6 +36006,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -35881,6 +36144,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -36082,6 +36349,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -36210,6 +36481,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -36353,6 +36628,10 @@ components:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
             risk_score_mapping:
@@ -36481,6 +36760,10 @@ components:
               items:
                 $ref: >-
                   #/components/schemas/Security_Detections_API_RequiredFieldInput
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/Security_Detections_API_ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/Security_Detections_API_RiskScore'
@@ -37694,6 +37977,8 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -37702,6 +37987,11 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -37810,6 +38100,9 @@ components:
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -37821,42 +38114,15 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -37895,6 +38161,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -37984,6 +38254,9 @@ components:
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -37995,42 +38268,14 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
             - source
         user:
           type: object
@@ -38066,6 +38311,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:

@@ -107,6 +107,7 @@ export interface DocLinks {
     readonly precisionTuning: string;
     readonly relevanceTuning: string;
     readonly resultSettings: string;
+    readonly searchLabsEvolutionBlog: string;
     readonly searchUI: string;
     readonly security: string;
     readonly synonyms: string;
@@ -222,6 +223,7 @@ export interface DocLinks {
     readonly permissions: string;
     readonly privateSourcePermissions: string;
     readonly salesforce: string;
+    readonly searchLabsEvolutionBlog: string;
     readonly security: string;
     readonly serviceNow: string;
     readonly sharePoint: string;
@@ -344,6 +346,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {

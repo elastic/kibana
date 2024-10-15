@@ -300,6 +300,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.ad.enabled (boolean)',
         'xpack.ml.dfa.enabled (boolean)',
         'xpack.ml.nlp.enabled (boolean)',
+        'xpack.ml.nlp.modelDeployment.allowStaticAllocations (boolean)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
         /**
@@ -314,6 +324,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean?)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
+
+        'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
@@ -346,6 +358,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
+        'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

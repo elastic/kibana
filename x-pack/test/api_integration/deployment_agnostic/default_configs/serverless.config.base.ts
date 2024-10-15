@@ -30,11 +30,7 @@ const esServerArgsFromController = {
     // for ML, data frame analytics are not part of this project type
     'xpack.ml.dfa.enabled=false',
   ],
-  security: [
-    'xpack.security.authc.api_key.cache.max_keys=70000',
-    'data_streams.lifecycle.retention.factory_default=365d',
-    'data_streams.lifecycle.retention.factory_max=365d',
-  ],
+  security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
 };
 
 // include settings from kibana controller

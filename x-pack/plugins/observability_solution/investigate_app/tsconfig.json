@@ -66,6 +66,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/calculate-auto",
     "@kbn/ml-random-sampler-utils",
+    "@kbn/charts-plugin",
     "@kbn/observability-utils",
   ],
 }

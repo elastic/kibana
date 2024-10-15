@@ -93,7 +93,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
 
   useDebounce(
     async () => {
-      setDebouncedCount(binsAvailableByWidth);
+      setDebouncedCount(binsAvailableByWidth === 0 ? null : binsAvailableByWidth);
     },
     500,
     [binsAvailableByWidth]

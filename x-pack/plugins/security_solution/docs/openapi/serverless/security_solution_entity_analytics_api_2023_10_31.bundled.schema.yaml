@@ -340,6 +340,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -704,6 +708,8 @@ components:
     EngineDescriptor:
       type: object
       properties:
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -712,6 +718,11 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         type:
           $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     EngineStatus:
       enum:
         - installing
@@ -819,6 +830,9 @@ components:
     HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -829,42 +843,15 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -902,6 +889,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     IdField:
       enum:
         - host.name
@@ -991,6 +982,9 @@ components:
     UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -1001,42 +995,14 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
+            source:
               items:
                 type: string
               type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            source:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
             - source
         user:
           type: object
@@ -1071,6 +1037,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
   securitySchemes:
     BasicAuth:
       scheme: basic
