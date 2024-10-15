@@ -127,7 +127,7 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
         {i18n.translate(
           'xpack.observabilityLogsOverview.logCategoryDocumentExamplesTable.documentCountText',
           {
-            defaultMessage: 'Displaying the last {documentsCount} documents.',
+            defaultMessage: 'Displaying the latest {documentsCount} documents.',
             values: {
               documentsCount: categoryDocuments.length,
             },
