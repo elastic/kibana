@@ -133,7 +133,7 @@ export class AlertingAuthorization {
     try {
       maybeSpace = await getSpace(request);
     } catch (error) {
-      if (Boom.isBoom(error) && error.output.statusCode === 403) {
+      if (Boom.isBoom(error) && [403, 404].includes(error.output.statusCode)) {
         return new AlertingAuthorization({
           request,
           authorization,

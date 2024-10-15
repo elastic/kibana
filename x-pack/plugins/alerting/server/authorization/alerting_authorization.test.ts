@@ -391,25 +391,31 @@ describe('AlertingAuthorization', () => {
       await expect(authPromise).rejects.toThrow();
     });
 
-    it('construct the AlertingAuthorization with empty features if the error is boom and 403', async () => {
-      getSpace.mockRejectedValue(
-        new Boom.Boom('Server error', { statusCode: 403, message: 'my error message' })
-      );
+    it.each([403, 404])(
+      `construct the AlertingAuthorization with empty features if the error is boom and %s`,
+      async (errorStatusCode: number) => {
+        getSpace.mockRejectedValue(
+          new Boom.Boom('Server error', {
+            statusCode: errorStatusCode,
+            message: 'my error message',
+          })
+        );
 
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-        authorization: securityStart.authz,
-      });
+        const auth = await AlertingAuthorization.create({
+          request,
+          ruleTypeRegistry,
+          getSpaceId,
+          features,
+          getSpace,
+          authorization: securityStart.authz,
+        });
 
-      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
-      expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`Map {}`);
-      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
-      expect(auth.allRegisteredConsumers).toMatchInlineSnapshot(`Set {}`);
-    });
+        // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+        expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`Map {}`);
+        // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+        expect(auth.allRegisteredConsumers).toMatchInlineSnapshot(`Set {}`);
+      }
+    );
 
     it('throws an error if the error is boom but not 403', async () => {
       expect.assertions(1);

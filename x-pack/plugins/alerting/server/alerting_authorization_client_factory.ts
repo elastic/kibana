@@ -38,7 +38,7 @@ export class AlertingAuthorizationClientFactory {
   public async create(request: KibanaRequest): Promise<AlertingAuthorization> {
     this.validateInitialization();
 
-    return await AlertingAuthorization.create({
+    return AlertingAuthorization.create({
       authorization: this.options.securityPluginStart?.authz,
       request,
       getSpace: this.options.getSpace,

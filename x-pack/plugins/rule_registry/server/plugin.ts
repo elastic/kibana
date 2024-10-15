@@ -165,7 +165,7 @@ export class RuleRegistryPlugin
       logger,
       esClient: core.elasticsearch.client.asInternalUser,
       // NOTE: Alerts share the authorization client with the alerting plugin
-      getAlertingAuthorization(request: KibanaRequest) {
+      async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
@@ -175,7 +175,7 @@ export class RuleRegistryPlugin
       getAlertIndicesAlias: plugins.alerting.getAlertIndicesAlias,
     });
 
-    const getRacClientWithRequest = (request: KibanaRequest) => {
+    const getRacClientWithRequest = async (request: KibanaRequest) => {
       return alertsClientFactory.create(request);
     };
 
