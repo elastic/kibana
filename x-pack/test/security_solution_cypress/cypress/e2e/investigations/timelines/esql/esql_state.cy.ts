@@ -39,8 +39,6 @@ const esqlQuery = 'from auditbeat-* | limit 5';
 
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
-const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
-  'response.body.data.persistTimeline.timeline.savedObjectId';
 
 const handleIntercepts = () => {
   cy.intercept('PATCH', '/api/timeline', (req) => {
@@ -55,7 +53,8 @@ const handleIntercepts = () => {
   });
 };
 
-describe(
+// Flaky: https://github.com/elastic/kibana/issues/180755
+describe.skip(
   'Timeline Discover ESQL State',
   {
     tags: ['@ess'],
