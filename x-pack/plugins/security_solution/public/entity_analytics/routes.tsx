@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
@@ -34,14 +33,14 @@ const EntityAnalyticsManagementTelemetry = () => (
 
 const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={ENTITY_ANALYTICS_MANAGEMENT_PATH}
         exact
         component={EntityAnalyticsManagementTelemetry}
       />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
@@ -57,14 +56,14 @@ const EntityAnalyticsAssetClassificationTelemetry = () => (
 
 const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH}
         exact
         component={EntityAnalyticsAssetClassificationTelemetry}
       />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 
