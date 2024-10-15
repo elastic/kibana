@@ -112,5 +112,5 @@ export interface MinimalOutput {
 export interface IntegrationsOutput {
   name?: string;
   id?: string | null;
-  pkgName?: string;
+  integrationPolicyName?: string;
 }

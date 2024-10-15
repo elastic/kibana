@@ -1785,16 +1785,16 @@ class AgentPolicyService {
     let integrationsDataOutputs: IntegrationsOutput[] = [];
     if (agentPolicy?.package_policies) {
       const integrationsWithOutputs = agentPolicy.package_policies.filter(
-        (pkg) => !!pkg?.output_id
+        (pkgPolicy) => !!pkgPolicy?.output_id
       );
       integrationsDataOutputs = await pMap(
         integrationsWithOutputs,
-        async (pkg) => {
-          if (pkg?.output_id) {
-            const output = await outputService.get(soClient, pkg.output_id);
-            return { pkgName: pkg?.name, id: output.id, name: output.name };
+        async (pkgPolicy) => {
+          if (pkgPolicy?.output_id) {
+            const output = await outputService.get(soClient, pkgPolicy.output_id);
+            return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
           }
-          return { pkgName: pkg?.name, id: pkg?.output_id };
+          return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id };
         },
         {
           concurrency: 20,

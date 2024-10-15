@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import styled from 'styled-components';
+import React, { useMemo, useState } from 'react';
+
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiBadge,
@@ -17,61 +20,40 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { CSSProperties } from 'react';
-import React, { memo, useMemo, useState } from 'react';
+import { useGetInfoOutputsForPolicy, useLink } from '../../../../hooks';
 
-import type { AgentPolicy, Output } from '../../../../types';
-import { useLink } from '../../../../hooks';
+const TruncatedEuiLink = styled(EuiLink)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 120px;
+`;
 
-const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
-
-export const AgentPolicyOutputsSummary = memo<{
-  outputs: Output[];
-  agentPolicy?: AgentPolicy;
-  monitoring?: boolean;
-}>(({ outputs, agentPolicy, monitoring }) => {
+export const AgentPolicyOutputsSummary: React.FC<{
+  agentPolicyId: string;
+  isMonitoring?: boolean;
+}> = ({ agentPolicyId, isMonitoring }) => {
   const { getHref } = useLink();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const defaultOutput = useMemo(() => {
-    return outputs.find((item) => item.is_default);
-  }, [outputs]);
+  const outputRes = useGetInfoOutputsForPolicy(agentPolicyId);
 
-  const policyId = agentPolicy?.id;
-
-  const outputToDisplay = useMemo(() => {
-    if (!agentPolicy || !policyId) return defaultOutput;
-
-    if (monitoring) {
-      return !!agentPolicy?.monitoring_output_id
-        ? outputs.find((item) => item.id === agentPolicy.monitoring_output_id)
-        : defaultOutput;
-    } else {
-      return !!agentPolicy?.data_output_id
-        ? outputs.find((item) => item.id === agentPolicy.data_output_id)
-        : defaultOutput;
-    }
-  }, [agentPolicy, defaultOutput, monitoring, outputs, policyId]);
+  const monitoring = outputRes?.data?.item.monitoring;
+  const data = outputRes?.data?.item.data;
 
   const listItems: EuiListGroupItemProps[] = useMemo(() => {
-    if (!outputToDisplay) return [];
+    if (!data?.integrations) return [];
 
-    const { hosts } = outputToDisplay;
-    return (hosts || []).map((host, index) => {
+    return (data?.integrations || []).map((integration, index) => {
       return {
-        'data-test-subj': `output-host-${index}`,
-        label: host,
-        href: getHref('settings_edit_outputs', { outputId: outputToDisplay.id }),
+        'data-test-subj': `output-integration-${index}`,
+        label: `${integration.integrationPolicyName}: ${integration.name}`,
+        href: getHref('settings_edit_outputs', { outputId: integration?.id ?? '' }),
         iconType: 'dot',
       };
     });
-  }, [getHref, outputToDisplay]);
-
-  if (!outputToDisplay) return null;
-
-  const { name, id, hosts } = outputToDisplay;
-  const outputHost = hosts?.[0];
+  }, [getHref, data?.integrations]);
 
   return (
     <EuiFlexGroup
@@ -80,19 +62,29 @@ export const AgentPolicyOutputsSummary = memo<{
       responsive={false}
       justifyContent="flexStart"
     >
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          className={`eui-textTruncate`}
-          style={WRAP_WHITE_SPACE}
-          href={getHref('settings_edit_outputs', { outputId: id })}
-          title={outputHost || name}
-          data-test-subj="outputNameLink"
-        >
-          {outputHost || name}
-        </EuiLink>
-      </EuiFlexItem>
+      {isMonitoring ? (
+        <EuiFlexItem grow={false}>
+          <TruncatedEuiLink
+            href={getHref('settings_edit_outputs', { outputId: monitoring?.output?.id ?? '' })}
+            title={monitoring?.output.name}
+            data-test-subj="outputNameLink"
+          >
+            {monitoring?.output.name}
+          </TruncatedEuiLink>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <TruncatedEuiLink
+            href={getHref('settings_edit_outputs', { outputId: data?.output?.id ?? '' })}
+            title={data?.output.name}
+            data-test-subj="outputNameLink"
+          >
+            {data?.output.name}
+          </TruncatedEuiLink>
+        </EuiFlexItem>
+      )}
 
-      {hosts && hosts.length > 1 && !monitoring && (
+      {data?.integrations && data?.integrations.length > 1 && !isMonitoring && (
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="hollow"
@@ -100,7 +92,7 @@ export const AgentPolicyOutputsSummary = memo<{
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             onClickAriaLabel="Open output hosts popover"
           >
-            +{hosts.length - 1}
+            +{data?.integrations.length - 1}
           </EuiBadge>
           <EuiPopover
             data-test-subj="outputHostsPopover"
@@ -121,4 +113,4 @@ export const AgentPolicyOutputsSummary = memo<{
       )}
     </EuiFlexGroup>
   );
-});
+};

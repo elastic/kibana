@@ -400,7 +400,7 @@ const MinimalOutputSchema = schema.object({
 
 const IntegrationsOutputSchema = schema.arrayOf(
   schema.object({
-    pkgName: schema.maybe(schema.string()),
+    integrationPolicyName: schema.maybe(schema.string()),
     id: schema.maybe(schema.string()),
     name: schema.maybe(schema.string()),
   })

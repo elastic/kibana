@@ -147,6 +147,7 @@ export type {
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
+  GetAgentPolicyOutputsResponse,
 } from '../../common/types';
 export {
   entries,

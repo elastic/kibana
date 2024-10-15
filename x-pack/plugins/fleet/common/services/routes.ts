@@ -197,6 +197,10 @@ export const agentPolicyRouteService = {
   getResetAllPreconfiguredAgentPolicyPath: () => {
     return PRECONFIGURATION_API_ROUTES.RESET_PATTERN;
   },
+
+  getInfoOutputsPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.INFO_OUTPUTS_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
 };
 
 export const dataStreamRouteService = {

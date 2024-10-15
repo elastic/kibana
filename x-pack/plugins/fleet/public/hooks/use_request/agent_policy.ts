@@ -23,6 +23,7 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPolicyOutputsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
@@ -199,5 +200,13 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
     method: 'post',
     body: JSON.stringify({}),
     version: API_VERSIONS.internal.v1,
+  });
+};
+
+export const useGetInfoOutputsForPolicy = (agentPolicyId: string) => {
+  return useRequest<GetAgentPolicyOutputsResponse>({
+    path: agentPolicyRouteService.getInfoOutputsPath(agentPolicyId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useAgentVersion, useGetOutputs } from '../../../../../hooks';
+import { useAgentVersion } from '../../../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -43,8 +43,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
 }> = memo(({ agent, agentPolicy }) => {
   const latestAgentVersion = useAgentVersion();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
-  const outputsRequest = useGetOutputs();
-  const allOutputs = outputsRequest?.data?.items ?? [];
 
   return (
     <EuiPanel>
@@ -218,7 +216,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Output for integrations',
               }),
               description: agentPolicy ? (
-                <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />
+                <AgentPolicyOutputsSummary agentPolicyId={agentPolicy?.id} />
               ) : (
                 '-'
               ),
@@ -228,11 +226,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Output for monitoring',
               }),
               description: agentPolicy ? (
-                <AgentPolicyOutputsSummary
-                  outputs={allOutputs}
-                  agentPolicy={agentPolicy}
-                  monitoring={true}
-                />
+                <AgentPolicyOutputsSummary agentPolicyId={agentPolicy?.id} isMonitoring={true} />
               ) : (
                 '-'
               ),

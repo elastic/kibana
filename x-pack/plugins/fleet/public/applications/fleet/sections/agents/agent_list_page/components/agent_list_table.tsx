@@ -24,12 +24,12 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion, useGetOutputs } from '../../../../hooks';
+import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics, Output } from '../../../../../../../common/types';
+import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
@@ -107,8 +107,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
-  const outputsRequest = useGetOutputs();
-  const allOutputs = outputsRequest?.data?.items ?? [];
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
@@ -291,35 +289,29 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: AGENTS_TABLE_FIELDS.OUTPUT_INTEGRATION,
       sortable: true,
+      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.integrationsOutputTitle', {
         defaultMessage: 'Output for integrations',
       }),
       width: '180px',
-      render: (outputs: Output[], agent: Agent) => {
-        const agentPolicy = agent?.policy_id
-          ? agentPoliciesIndexedById[agent.policy_id]
-          : undefined;
-        return <AgentPolicyOutputsSummary outputs={allOutputs} agentPolicy={agentPolicy} />;
+      render: (policyId: string, agent: Agent) => {
+        return agent?.policy_id ? (
+          <AgentPolicyOutputsSummary agentPolicyId={agent.policy_id} />
+        ) : null;
       },
     },
     {
       field: AGENTS_TABLE_FIELDS.OUTPUT_MONITORING,
       sortable: true,
+      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.monitoringOutputTitle', {
         defaultMessage: 'Output for monitoring',
       }),
       width: '180px',
-      render: (outputs: Output[], agent: Agent) => {
-        const agentPolicy = agent?.policy_id
-          ? agentPoliciesIndexedById[agent.policy_id]
-          : undefined;
-        return (
-          <AgentPolicyOutputsSummary
-            outputs={allOutputs}
-            agentPolicy={agentPolicy}
-            monitoring={true}
-          />
-        );
+      render: (policyId: string, agent: Agent) => {
+        return agent?.policy_id ? (
+          <AgentPolicyOutputsSummary agentPolicyId={agent.policy_id} isMonitoring={true} />
+        ) : null;
       },
     },
     {
