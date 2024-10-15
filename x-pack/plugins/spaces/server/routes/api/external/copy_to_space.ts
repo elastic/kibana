@@ -196,83 +196,75 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           'Overwrite saved objects that are returned as errors from the copy saved objects to space API.',
       },
       validate: {
-        request: {
-          body: schema.object(
-            {
-              retries: schema.recordOf(
-                schema.string({
-                  meta: {
-                    description:
-                      'The retry operations to attempt, which can specify how to resolve different types of errors. Object keys represent the target space identifiers.',
-                  },
-                  validate: (spaceId) => {
-                    if (!SPACE_ID_REGEX.test(spaceId)) {
-                      return `Invalid space id: ${spaceId}`;
-                    }
-                  },
-                }),
-                schema.arrayOf(
-                  schema.object({
-                    type: schema.string({ meta: { description: 'The saved object type.' } }),
-                    id: schema.string({ meta: { description: 'The saved object identifier.' } }),
-                    overwrite: schema.boolean({
-                      defaultValue: false,
+        body: schema.object(
+          {
+            retries: schema.recordOf(
+              schema.string({
+                meta: {
+                  description:
+                    'The retry operations to attempt, which can specify how to resolve different types of errors. Object keys represent the target space identifiers.',
+                },
+                validate: (spaceId) => {
+                  if (!SPACE_ID_REGEX.test(spaceId)) {
+                    return `Invalid space id: ${spaceId}`;
+                  }
+                },
+              }),
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string({ meta: { description: 'The saved object type.' } }),
+                  id: schema.string({ meta: { description: 'The saved object identifier.' } }),
+                  overwrite: schema.boolean({
+                    defaultValue: false,
+                    meta: {
+                      description:
+                        'When set to true, the saved object from the source space overwrites the conflicting object in the destination space.',
+                    },
+                  }),
+                  destinationId: schema.maybe(
+                    schema.string({
                       meta: {
                         description:
-                          'When set to true, the saved object from the source space overwrites the conflicting object in the destination space.',
+                          'Specifies the destination identifier that the copied object should have, if different from the current identifier.',
                       },
-                    }),
-                    destinationId: schema.maybe(
-                      schema.string({
-                        meta: {
-                          description:
-                            'Specifies the destination identifier that the copied object should have, if different from the current identifier.',
-                        },
-                      })
-                    ),
-                    createNewCopy: schema.maybe(schema.boolean()),
-                    ignoreMissingReferences: schema.maybe(
-                      schema.boolean({
-                        meta: {
-                          description:
-                            'When set to true, any missing references errors are ignored.',
-                        },
-                      })
-                    ),
-                  })
-                )
-              ),
-              objects: schema.arrayOf(
-                schema.object({
-                  type: schema.string(),
-                  id: schema.string(),
-                }),
-                {
-                  validate: (objects) => {
-                    if (!areObjectsUnique(objects)) {
-                      return 'duplicate objects are not allowed';
-                    }
-                  },
-                }
-              ),
-              includeReferences: schema.boolean({ defaultValue: false }),
-              createNewCopies: schema.boolean({ defaultValue: true }),
-              compatibilityMode: schema.boolean({ defaultValue: false }),
-            },
-            {
-              validate: (object) => {
-                if (object.createNewCopies && object.compatibilityMode) {
-                  return 'cannot use [createNewCopies] with [compatibilityMode]';
-                }
-              },
-            }
-          ),
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
+                    })
+                  ),
+                  createNewCopy: schema.maybe(schema.boolean()),
+                  ignoreMissingReferences: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description: 'When set to true, any missing references errors are ignored.',
+                      },
+                    })
+                  ),
+                })
+              )
+            ),
+            objects: schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                id: schema.string(),
+              }),
+              {
+                validate: (objects) => {
+                  if (!areObjectsUnique(objects)) {
+                    return 'duplicate objects are not allowed';
+                  }
+                },
+              }
+            ),
+            includeReferences: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: true }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
           },
-        },
+          {
+            validate: (object) => {
+              if (object.createNewCopies && object.compatibilityMode) {
+                return 'cannot use [createNewCopies] with [compatibilityMode]';
+              }
+            },
+          }
+        ),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
