@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`useTimelineColumns augmentedColumnHeaders should return the default columns 1`] = `Array []`;
-
 exports[`useTimelineColumns augmentedColumnHeaders should return the default unified data table (udt) columns 1`] = `Array []`;
 
 exports[`useTimelineColumns augmentedColumnHeaders should return the provided columns 1`] = `

@@ -6,12 +6,11 @@
  */
 
 import React, { useMemo, useCallback, memo } from 'react';
-import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import type { HeaderActionProps, SortDirection } from '../../../../common/types';
+import type { HeaderActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
@@ -52,17 +51,13 @@ const ActionsContainer = styled.div`
 
 const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
   ({
-    width,
     browserFields,
     columnHeaders,
-    isEventViewer = false,
     isSelectAllChecked,
     onSelectAll,
     showEventsSelect,
     showSelectAllCheckbox,
     showFullScreenToggle = true,
-    sort,
-    tabType,
     timelineId,
     fieldBrowserOptions,
   }) => {
@@ -103,28 +98,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
         onSelectAll({ isSelected: event.currentTarget.checked });
       },
       [onSelectAll]
-    );
-
-    const onSortColumns = useCallback(
-      (cols: EuiDataGridSorting['columns']) =>
-        dispatch(
-          timelineActions.updateSort({
-            id: timelineId,
-            sort: cols.map(({ id, direction }) => {
-              const columnHeader = columnHeaders.find((ch) => ch.id === id);
-              const columnType = columnHeader?.type ?? '';
-              const esTypes = columnHeader?.esTypes ?? [];
-
-              return {
-                columnId: id,
-                columnType,
-                esTypes,
-                sortDirection: direction as SortDirection,
-              };
-            }),
-          })
-        ),
-      [columnHeaders, dispatch, timelineId]
     );
 
     const onResetColumns = useCallback(() => {

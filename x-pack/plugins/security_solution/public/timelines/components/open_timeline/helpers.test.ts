@@ -36,10 +36,8 @@ import {
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -68,7 +66,6 @@ jest.mock('uuid', () => {
 });
 
 const mockUpdateTimeline = jest.fn();
-mockUpdateTimeline.x = 'test';
 jest.mock('./use_update_timeline', () => {
   const actual = jest.requireActual('./use_update_timeline');
   return {
@@ -491,8 +488,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineTypeEnum.template,
-        false
+        TimelineTypeEnum.template
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
@@ -514,12 +510,7 @@ describe('helpers', () => {
         timelineType: TimelineTypeEnum.default,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(
-        timeline,
-        false,
-        TimelineTypeEnum.default,
-        false
-      );
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
@@ -538,12 +529,7 @@ describe('helpers', () => {
         timelineType: TimelineTypeEnum.default,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(
-        timeline,
-        false,
-        TimelineTypeEnum.default,
-        false
-      );
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
@@ -566,12 +552,7 @@ describe('helpers', () => {
         columns: customColumns as ColumnHeaderResult[],
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(
-        timeline,
-        false,
-        TimelineTypeEnum.default,
-        false
-      );
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
@@ -594,12 +575,7 @@ describe('helpers', () => {
         excludedRowRendererIds,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(
-        timeline,
-        false,
-        TimelineTypeEnum.default,
-        false
-      );
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },

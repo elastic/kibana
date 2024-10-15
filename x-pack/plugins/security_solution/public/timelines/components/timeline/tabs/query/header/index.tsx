@@ -13,7 +13,6 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
-import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import {
   type TimelineStatus,
   TimelineStatusEnum,
@@ -69,7 +68,6 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   totalCount,
 }) => {
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const getIsDataProviderVisible = useMemo(

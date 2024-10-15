@@ -7,19 +7,16 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, memo } from 'react';
-import styled from 'styled-components';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import type { ControlColumnProps } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -30,7 +27,6 @@ import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -42,10 +38,6 @@ import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
 
-const ExitFullScreenContainer = styled.div`
-  width: 180px;
-`;
-
 interface PinnedFilter {
   bool: {
     should: Array<{ match_phrase: { _id: string } }>;
@@ -54,8 +46,6 @@ interface PinnedFilter {
 }
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
-
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 const rowDetailColumn = [
   {
@@ -73,20 +63,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   pinnedEventIds,
-  renderCellValue,
   rowRenderers,
   sort,
   eventIdToNoteIds,
 }) => {
   const { telemetry } = useKibana().services;
-  const {
-    browserFields,
-    dataViewId,
-    loading: loadingSourcerer,
-    sourcererDataView,
-    selectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
+  const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -243,11 +227,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onToggleShowNotes,
   });
 
-  const isQueryLoading = useMemo(
-    () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
-    [queryLoadingState]
-  );
-
   const NotesFlyoutMemo = useMemo(() => {
     return (
       <NotesFlyout
@@ -276,7 +255,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         events={events}
         refetch={refetch}
         dataLoadingState={queryLoadingState}
-        totalCount={events.length}
+        totalCount={totalCount}
         onChangePage={loadPage}
         activeTab={TimelineTabs.pinned}
         updatedAt={refreshedAt}
