@@ -73,7 +73,7 @@ export function RuleComponent({
     useKibana().services;
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const lastReloadRequestTime = useMemo(() => +new Date(), [refreshToken]);
+  const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
