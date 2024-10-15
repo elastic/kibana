@@ -27,7 +27,7 @@
     "dataViews": "src/plugins/data_views",
     "defaultNavigation": "packages/default-nav",
     "devTools": "src/plugins/dev_tools",
-    "discover": ["src/plugins/discover", "packages/kbn-discover-utils"],
+    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
