@@ -15,7 +15,7 @@ import type { Space } from '../../../../common';
 import { type EditSpaceTab, getTabs, type GetTabsProps } from '../edit_space_tabs';
 
 type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
-  authz: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
+  authz: AuthorizationServiceSetup | false;
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;

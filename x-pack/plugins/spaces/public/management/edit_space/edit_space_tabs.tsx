@@ -26,7 +26,7 @@ export interface EditSpaceTab {
 }
 
 export interface GetTabsProps {
-  authz: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
+  authz: AuthorizationServiceSetup | false;
   space: Space;
   rolesCount: number;
   features: KibanaFeature[];
@@ -71,8 +71,6 @@ export const getTabs = ({
   rolesCount,
   ...props
 }: GetTabsProps): EditSpaceTab[] => {
-  const canUserViewRoles = Boolean(capabilities?.roles?.view);
-  const canUserModifyRoles = Boolean(capabilities?.roles?.save);
   const reloadWindow = () => {
     window.location.reload();
   };
@@ -95,7 +93,11 @@ export const getTabs = ({
     },
   ];
 
-  if (authz.isRoleManagementEnabled() && canUserViewRoles) {
+  const canUserViewRoles = Boolean(capabilities?.roles?.view);
+  const isRoleManagementEnabled = authz && authz.isRoleManagementEnabled() !== false;
+  const canUserModifyRoles = Boolean(capabilities?.roles?.save);
+
+  if (canUserViewRoles && isRoleManagementEnabled) {
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {

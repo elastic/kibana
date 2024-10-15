@@ -36,7 +36,7 @@ import type { SpacesManager } from '../../../spaces_manager';
 export interface EditSpaceProviderProps
   extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
   logger: Logger;
-  authz: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
+  authz: AuthorizationServiceSetup | false;
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];

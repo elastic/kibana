@@ -16,9 +16,9 @@ import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
-  AuthorizationServiceSetup,
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
+  SecurityPluginStart,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -31,7 +31,6 @@ import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
-  authorization: Pick<AuthorizationServiceSetup, 'isRoleManagementEnabled'>;
   spacesManager: SpacesManager;
   config: ConfigType;
   logger: Logger;
@@ -48,7 +47,6 @@ export const spacesManagementApp = Object.freeze({
     spacesManager,
     config,
     logger,
-    authorization,
     eventTracker,
     getRolesAPIClient,
     getPrivilegesAPIClient,
@@ -75,6 +73,10 @@ export const spacesManagementApp = Object.freeze({
           import('./create_space'),
           import('./edit_space'),
         ]);
+
+        const { security } = await coreStart.plugins.onStart<{ security: SecurityPluginStart }>(
+          'security'
+        );
 
         const spacesFirstBreadcrumb = {
           text: title,
@@ -154,7 +156,7 @@ export const spacesManagementApp = Object.freeze({
               navigateToUrl={application.navigateToUrl}
               serverBasePath={http.basePath.serverBasePath}
               getFeatures={features.getFeatures}
-              authz={authorization}
+              authz={security.found && security.contract.authz}
               http={http}
               overlays={overlays}
               notifications={notifications}
