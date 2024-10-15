@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { ConfigType } from '../config';

@@ -361,7 +361,6 @@ describe('query tab with unified timeline', () => {
         );
 
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-        screen.debug(undefined, 1000000);
         expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
         expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(

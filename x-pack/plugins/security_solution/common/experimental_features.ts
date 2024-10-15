@@ -139,11 +139,6 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * enables logging requests during rule preview
-   */
-  loggingRequestsEnabled: false,
-
-  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
@@ -241,9 +236,10 @@ export const allowedExperimentalValues = Object.freeze({
   dataIngestionHubEnabled: false,
 
   /**
-   * Enables the new Entity Store engine routes
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
    */
-  entityStoreEnabled: false,
+  entityStoreDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

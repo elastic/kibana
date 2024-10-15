@@ -92,6 +92,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     connectors,
     connectorTypes,
     aadTemplateFields,
+    flappingSettings,
   } = useLoadDependencies({
     http,
     toasts: notifications.toasts,
@@ -117,6 +118,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
         },
       });
     },
@@ -173,6 +175,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
           validConsumers,
+          flappingSettings,
           canShowConsumerSelection,
           showMustacheAutocompleteSwitch,
           multiConsumerSelection: getInitialMultiConsumer({

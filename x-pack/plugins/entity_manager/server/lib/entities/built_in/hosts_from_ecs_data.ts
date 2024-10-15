@@ -19,9 +19,9 @@ export const builtInHostsFromEcsEntityDefinition: EntityDefinition = entityDefin
   indexPatterns: ['filebeat-*', 'logs-*', 'metrics-*', 'metricbeat-*'],
   identityFields: ['host.name'],
   displayNameTemplate: '{{host.name}}',
-  history: {
+  latest: {
     timestampField: '@timestamp',
-    interval: '5m',
+    lookbackPeriod: '10m',
     settings: {
       frequency: '5m',
     },
