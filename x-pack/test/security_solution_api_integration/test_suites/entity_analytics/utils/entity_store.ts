@@ -8,6 +8,7 @@
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
+import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
@@ -16,6 +17,16 @@ export const EntityStoreUtils = (
   const api = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
+  const {
+    expectTransformExists,
+    expectTransformNotFound,
+    expectEnrichPolicyExists,
+    expectEnrichPolicyNotFound,
+    expectComponentTemplateExists,
+    expectComponentTemplateNotFound,
+    expectIngestPipelineExists,
+    expectIngestPipelineNotFound,
+  } = elasticAssetCheckerFactory(getService);
 
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
@@ -51,7 +62,7 @@ export const EntityStoreUtils = (
 
     if (res.status !== 200) {
       log.error(`Failed to initialize engine for entity type ${entityType}`);
-      log.error(res.body);
+      log.error(JSON.stringify(res.body));
     }
 
     expect(res.status).to.eql(200);
@@ -85,22 +96,25 @@ export const EntityStoreUtils = (
     }
   };
 
-  const expectTransformNotFound = async (transformId: string, attempts: number = 5) => {
-    return expectTransformStatus(transformId, false);
-  };
-  const expectTransformExists = async (transformId: string) => {
-    return expectTransformStatus(transformId, true);
+  const expectEngineAssetsExist = async (entityType: EntityType) => {
+    await expectTransformExists(`entities-v1-latest-security_${entityType}_default`);
+    await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_default_v1`);
+    await expectComponentTemplateExists(`security_${entityType}_default-latest@platform`);
+    await expectIngestPipelineExists(`security_${entityType}_default-latest@platform`);
   };
 
-  const expectTransformsExist = async (transformIds: string[]) =>
-    Promise.all(transformIds.map((id) => expectTransformExists(id)));
+  const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
+    await expectTransformNotFound(`entities-v1-latest-security_${entityType}_default`);
+    await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_default_v1`);
+    await expectComponentTemplateNotFound(`security_${entityType}_default-latest@platform`);
+    await expectIngestPipelineNotFound(`security_${entityType}_default-latest@platform`);
+  };
 
   return {
     cleanEngines,
     initEntityEngineForEntityType,
     expectTransformStatus,
-    expectTransformNotFound,
-    expectTransformExists,
-    expectTransformsExist,
+    expectEngineAssetsExist,
+    expectEngineAssetsDoNotExist,
   };
 };
