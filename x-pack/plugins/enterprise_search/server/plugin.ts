@@ -154,7 +154,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       features,
       globalSearch,
       logsShared,
-      customIntegrations,
       ml,
       licensing,
       guidedOnboarding,
