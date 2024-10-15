@@ -143,7 +143,6 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
           }
         )}
         items={categoryDocuments}
-        rowHeader="Timestamp"
         columns={columns}
       />
     </>
