@@ -694,6 +694,10 @@ function useReportingState(errors: UserMessage[]): {
   return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
 }
 
+const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+  defaultMessage: `An error occurred when loading data`,
+});
+
 export const VisualizationWrapper = ({
   expression,
   lensInspector,
@@ -734,9 +738,10 @@ export const VisualizationWrapper = ({
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
+    setDynamicError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [setIsRenderComplete, onRender$]);
+  }, [onRender$, setDynamicError, setIsRenderComplete]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -758,10 +763,6 @@ export const VisualizationWrapper = ({
       </div>
     );
   }
-
-  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
-    defaultMessage: `An error occurred when loading data`,
-  });
 
   return (
     <div
@@ -795,11 +796,13 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          if (!hasDynamicError) {
-            setDynamicError(true);
-          }
-
-          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
+          return (
+            <WorkspaceErrors
+              errors={visibleErrorMessages}
+              title={dataLoadingErrorTitle}
+              onRender={() => setDynamicError(true)}
+            />
+          );
         }}
       />
     </div>
