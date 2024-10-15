@@ -430,9 +430,9 @@ export class WebElementWrapper {
    * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
-  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
+  public async moveMouseTo(options = { xOffset: 0, yOffset: 0, topOffsetOrOptions: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(options.topOffsetOrOptions);
       await wrapper.getActions().move({ x: 0, y: 0 }).perform();
       await wrapper
         .getActions()

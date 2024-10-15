@@ -26,6 +26,7 @@ const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlink
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
+const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_TOP_OFFSET = 96 + 137; // 96 for Kibana navigation bar + 137 for dashboard top nav bar (in edit mode)
 
 export class DashboardPanelActionsService extends FtrService {
@@ -39,6 +40,16 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
+
+  async getContainerTopOffset() {
+    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
+      ? '.dashboardContainer'
+      : '.canvasContainer';
+    return (
+      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
+      DASHBOARD_MARGIN_SIZE
+    );
+  }
 
   async findContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug('findContextMenu');
@@ -55,7 +66,25 @@ export class DashboardPanelActionsService extends FtrService {
         const scrollY = window.scrollY;
         window.scrollBy(0, scrollY - ${yOffset});
       `);
-    await wrapper.moveMouseTo();
+
+    // const yOffset = (await wrapper.getPosition()).y - DASHBOARD_TOP_OFFSET;
+
+    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
+      ? '.dashboardContainer'
+      : '.canvasContainer';
+
+    const containerTop =
+      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
+      DASHBOARD_MARGIN_SIZE;
+    // await this.browser.execute(`
+    //   window.scrollTo(0, ${Math.max(yOffset - containerTopOffset, 0)});
+    // `);
+    await wrapper.scrollIntoViewIfNecessary({ topOffset: containerTop });
+
+    const { x } = await await wrapper.getPosition();
+    // await wrapper.moveMouseTo({ yOffset: DASHBOARD_TOP_OFFSET });
+
+    await this.browser.moveMouseTo({ x, y: containerTop });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {
@@ -94,9 +123,15 @@ export class DashboardPanelActionsService extends FtrService {
     wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
     const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
-    if (!exists) await this.openContextMenu(wrapper);
-    await this.testSubjects.existOrFail(testSubject);
-    await this.testSubjects.click(testSubject);
+    let action;
+    if (!exists) {
+      await this.openContextMenu(wrapper);
+      action = await this.testSubjects.find(testSubject);
+    } else {
+      action = await this.testSubjects.findDescendant(testSubject, wrapper);
+    }
+
+    await action.click();
   }
 
   async clickPanelActionByTitle(testSubject: string, title = '') {
