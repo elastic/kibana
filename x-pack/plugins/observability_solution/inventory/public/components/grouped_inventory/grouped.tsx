@@ -19,14 +19,10 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { GroupedGridWrapper } from './grouped_grid_wrapper';
 
 export interface GroupedInventoryPageProps {
-  groupSelected: string;
   setGroupSelected: (selected: string) => void;
 }
 
-export function GroupedInventoryPage({
-  groupSelected = 'none',
-  setGroupSelected,
-}: GroupedInventoryPageProps) {
+export function GroupedInventoryPage() {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
@@ -73,10 +69,6 @@ export function GroupedInventoryPage({
     };
   });
 
-  const onChange = (groupSelection: string) => {
-    setGroupSelected(groupSelection === groupSelected ? 'none' : groupSelection);
-  };
-
   return (
     <div css={groupingContainerCss}>
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
@@ -100,7 +92,7 @@ export function GroupedInventoryPage({
         </EuiFlexItem>
         <EuiFlexItem grow />
         <EuiFlexItem grow={false} className="">
-          <GroupSelector onGroupChange={onChange} groupSelected={groupSelected} />
+          <GroupSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
