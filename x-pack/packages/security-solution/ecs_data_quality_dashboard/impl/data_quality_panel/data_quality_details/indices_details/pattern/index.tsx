@@ -27,11 +27,14 @@ import { useResultsRollupContext } from '../../../contexts/results_rollup_contex
 import { useIndicesCheckContext } from '../../../contexts/indices_check_context';
 import { getSummaryTableItems } from '../../../utils/get_summary_table_items';
 import { defaultSort } from '../../../constants';
-import { MIN_PAGE_SIZE } from './constants';
+import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID, MIN_PAGE_SIZE } from './constants';
 import { getIlmExplainPhaseCounts } from './utils/ilm_explain';
 import { shouldCreateIndexNames } from './utils/should_create_index_names';
 import { shouldCreatePatternRollup } from './utils/should_create_pattern_rollup';
 import { getPageIndex } from './utils/get_page_index';
+import { useAbortControllerRef } from '../../../hooks/use_abort_controller_ref';
+import { useHistoricalResults } from './hooks/use_historical_results';
+import { HistoricalResultsContext } from './contexts/historical_results_context';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 
@@ -50,9 +53,17 @@ const PatternComponent: React.FC<Props> = ({
   chartSelectedIndex,
   setChartSelectedIndex,
 }) => {
+  const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
+  const historicalResultsContextValue = useMemo(
+    () => ({
+      fetchHistoricalResults,
+      historicalResultsState,
+    }),
+    [fetchHistoricalResults, historicalResultsState]
+  );
   const { httpFetch, isILMAvailable, ilmPhases, startDate, endDate, formatBytes, formatNumber } =
     useDataQualityContext();
-  const { checkIndex, checkState } = useIndicesCheckContext();
+  const { checkIndex } = useIndicesCheckContext();
   const { updatePatternIndexNames, updatePatternRollup } = useResultsRollupContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);
@@ -60,9 +71,12 @@ const PatternComponent: React.FC<Props> = ({
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
   const patternComponentAccordionId = useGeneratedHtmlId({ prefix: 'patternComponentAccordion' });
   const [expandedIndexName, setExpandedIndexName] = useState<string | null>(null);
-  const flyoutIndexExpandActionAbortControllerRef = useRef(new AbortController());
-  const tableRowIndexCheckNowActionAbortControllerRef = useRef(new AbortController());
-  const flyoutIndexChartSelectedActionAbortControllerRef = useRef(new AbortController());
+  const [initialFlyoutTabId, setInitialFlyoutTabId] = useState<
+    typeof LATEST_CHECK_TAB_ID | typeof HISTORY_TAB_ID
+  >(LATEST_CHECK_TAB_ID);
+  const flyoutCheckNowAndExpandAbortControllerRef = useAbortControllerRef();
+  const flyoutViewCheckHistoryAbortControllerRef = useAbortControllerRef();
+  const flyoutChartSelectedActionAbortControllerRef = useAbortControllerRef();
 
   const {
     error: statsError,
@@ -114,10 +128,10 @@ const PatternComponent: React.FC<Props> = ({
     setExpandedIndexName(null);
   }, []);
 
-  const handleFlyoutIndexExpandAction = useCallback(
+  const handleFlyoutCheckNowAndExpandAction = useCallback(
     (indexName: string) => {
       checkIndex({
-        abortController: flyoutIndexExpandActionAbortControllerRef.current,
+        abortController: flyoutCheckNowAndExpandAbortControllerRef.current,
         indexName,
         pattern,
         httpFetch,
@@ -125,22 +139,28 @@ const PatternComponent: React.FC<Props> = ({
         formatNumber,
       });
       setExpandedIndexName(indexName);
+      setInitialFlyoutTabId(LATEST_CHECK_TAB_ID);
     },
-    [checkIndex, formatBytes, formatNumber, httpFetch, pattern]
+    [
+      checkIndex,
+      flyoutCheckNowAndExpandAbortControllerRef,
+      formatBytes,
+      formatNumber,
+      httpFetch,
+      pattern,
+    ]
   );
 
-  const handleTableRowIndexCheckNowAction = useCallback(
+  const handleFlyoutViewCheckHistoryAction = useCallback(
     (indexName: string) => {
-      checkIndex({
-        abortController: tableRowIndexCheckNowActionAbortControllerRef.current,
+      fetchHistoricalResults({
+        abortController: flyoutViewCheckHistoryAbortControllerRef.current,
         indexName,
-        pattern,
-        httpFetch,
-        formatBytes,
-        formatNumber,
       });
+      setExpandedIndexName(indexName);
+      setInitialFlyoutTabId(HISTORY_TAB_ID);
     },
-    [checkIndex, formatBytes, formatNumber, httpFetch, pattern]
+    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef]
   );
 
   useEffect(() => {
@@ -217,7 +237,7 @@ const PatternComponent: React.FC<Props> = ({
 
       if (chartSelectedIndex.indexName !== expandedIndexName && !isFlyoutVisible) {
         checkIndex({
-          abortController: flyoutIndexChartSelectedActionAbortControllerRef.current,
+          abortController: flyoutChartSelectedActionAbortControllerRef.current,
           indexName: chartSelectedIndex.indexName,
           pattern: chartSelectedIndex.pattern,
           httpFetch,
@@ -242,92 +262,81 @@ const PatternComponent: React.FC<Props> = ({
     httpFetch,
     formatBytes,
     formatNumber,
+    flyoutChartSelectedActionAbortControllerRef,
   ]);
-
-  useEffect(() => {
-    const flyoutIndexExpandActionAbortController =
-      flyoutIndexExpandActionAbortControllerRef.current;
-    const tableRowIndexCheckNowActionAbortController =
-      tableRowIndexCheckNowActionAbortControllerRef.current;
-    const flyoutIndexChartSelectedActionAbortController =
-      flyoutIndexChartSelectedActionAbortControllerRef.current;
-    return () => {
-      flyoutIndexExpandActionAbortController.abort();
-      tableRowIndexCheckNowActionAbortController.abort();
-      flyoutIndexChartSelectedActionAbortController.abort();
-    };
-  }, []);
 
   return (
     <div data-test-subj={`${pattern}PatternPanel`}>
-      <PatternAccordion
-        id={patternComponentAccordionId}
-        initialIsOpen={true}
-        buttonElement="div"
-        buttonContent={
-          <PatternSummary
-            incompatible={getTotalPatternIncompatible(patternRollup?.results)}
-            indices={indexNames?.length}
-            indicesChecked={getTotalPatternIndicesChecked(patternRollup)}
-            ilmExplainPhaseCounts={ilmExplainPhaseCounts}
+      <HistoricalResultsContext.Provider value={historicalResultsContextValue}>
+        <PatternAccordion
+          id={patternComponentAccordionId}
+          initialIsOpen={true}
+          buttonElement="div"
+          buttonContent={
+            <PatternSummary
+              incompatible={getTotalPatternIncompatible(patternRollup?.results)}
+              indices={indexNames?.length}
+              indicesChecked={getTotalPatternIndicesChecked(patternRollup)}
+              ilmExplainPhaseCounts={ilmExplainPhaseCounts}
+              pattern={pattern}
+              patternDocsCount={patternRollup?.docsCount ?? 0}
+              patternSizeInBytes={patternRollup?.sizeInBytes}
+            />
+          }
+        >
+          <PatternAccordionChildren>
+            {!loading && pattern.includes(':') && (
+              <>
+                <RemoteClustersCallout />
+                <EuiSpacer size="s" />
+              </>
+            )}
+
+            {!loading && error != null && (
+              <>
+                <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {loading && (
+              <>
+                <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {!loading && error == null && (
+              <div ref={containerRef}>
+                <SummaryTable
+                  getTableColumns={getSummaryTableColumns}
+                  items={items}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  pattern={pattern}
+                  setPageIndex={setPageIndex}
+                  setPageSize={setPageSize}
+                  setSorting={setSorting}
+                  onCheckNowAction={handleFlyoutCheckNowAndExpandAction}
+                  onViewHistoryAction={handleFlyoutViewCheckHistoryAction}
+                  sorting={sorting}
+                />
+              </div>
+            )}
+          </PatternAccordionChildren>
+        </PatternAccordion>
+        {isFlyoutVisible ? (
+          <IndexCheckFlyout
             pattern={pattern}
-            patternDocsCount={patternRollup?.docsCount ?? 0}
-            patternSizeInBytes={patternRollup?.sizeInBytes}
+            indexName={expandedIndexName}
+            initialSelectedTabId={initialFlyoutTabId}
+            patternRollup={patternRollup}
+            ilmExplain={ilmExplain}
+            stats={stats}
+            onClose={handleFlyoutClose}
           />
-        }
-      >
-        <PatternAccordionChildren>
-          {!loading && pattern.includes(':') && (
-            <>
-              <RemoteClustersCallout />
-              <EuiSpacer size="s" />
-            </>
-          )}
-
-          {!loading && error != null && (
-            <>
-              <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />
-              <EuiSpacer size="m" />
-            </>
-          )}
-
-          {loading && (
-            <>
-              <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />
-              <EuiSpacer size="m" />
-            </>
-          )}
-
-          {!loading && error == null && (
-            <div ref={containerRef}>
-              <SummaryTable
-                getTableColumns={getSummaryTableColumns}
-                checkState={checkState}
-                items={items}
-                pageIndex={pageIndex}
-                pageSize={pageSize}
-                pattern={pattern}
-                setPageIndex={setPageIndex}
-                setPageSize={setPageSize}
-                setSorting={setSorting}
-                onExpandAction={handleFlyoutIndexExpandAction}
-                onCheckNowAction={handleTableRowIndexCheckNowAction}
-                sorting={sorting}
-              />
-            </div>
-          )}
-        </PatternAccordionChildren>
-      </PatternAccordion>
-      {isFlyoutVisible ? (
-        <IndexCheckFlyout
-          pattern={pattern}
-          indexName={expandedIndexName}
-          patternRollup={patternRollup}
-          ilmExplain={ilmExplain}
-          stats={stats}
-          onClose={handleFlyoutClose}
-        />
-      ) : null}
+        ) : null}
+      </HistoricalResultsContext.Provider>
     </div>
   );
 };
