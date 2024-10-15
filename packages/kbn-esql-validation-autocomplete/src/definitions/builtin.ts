@@ -425,6 +425,20 @@ const likeFunctions: FunctionDefinition[] = [
       },
       {
         params: [
+          { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'keyword' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const },
+          { name: 'right', type: 'text' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
           { name: 'left', type: 'keyword' as const },
           { name: 'right', type: 'keyword' as const },
         ],

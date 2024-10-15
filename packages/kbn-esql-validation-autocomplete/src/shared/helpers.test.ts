@@ -201,6 +201,21 @@ describe('getExpressionType', () => {
           supportedCommands: ['eval'],
           signatures: [{ params: [], returnType: 'keyword' }],
         },
+        {
+          type: 'eval',
+          name: 'accepts_dates',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [
+                { name: 'arg1', type: 'date' },
+                { name: 'arg2', type: 'date_period' },
+              ],
+              returnType: 'keyword',
+            },
+          ],
+        },
       ]);
     });
     afterAll(() => {
@@ -241,13 +256,16 @@ describe('getExpressionType', () => {
       ).toBe('keyword');
     });
 
-    it('handles nulls and string casting', () => {
+    it('handles nulls and string-date casting', () => {
       expect(getExpressionType(getASTForExpression('test(NULL)'), new Map(), new Map())).toBe(
         'null'
       );
       expect(getExpressionType(getASTForExpression('test(NULL, NULL)'), new Map(), new Map())).toBe(
         'null'
       );
+      expect(
+        getExpressionType(getASTForExpression('accepts_dates("", "")'), new Map(), new Map())
+      ).toBe('keyword');
     });
 
     it('deals with functions that do not exist', () => {

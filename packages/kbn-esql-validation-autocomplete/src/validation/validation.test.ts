@@ -1123,13 +1123,13 @@ describe('validation logic', () => {
           `from a_index | eval 1 ${op} "1"`,
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
-            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "1" ${op} 1`,
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
-            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
         // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
@@ -1469,7 +1469,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         'from a_index | eval doubleField = "5"',
         [],
-        ['Column [doubleField] of type double has been overwritten as new type: string']
+        ['Column [doubleField] of type double has been overwritten as new type: keyword']
       );
     });
 
@@ -1667,7 +1667,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval true AND "false"::bool', []);
       testErrorsAndWarnings('from a_index | eval true AND "false"', [
         // just a counter-case to make sure the previous tests are meaningful
-        'Argument of [and] must be [boolean], found value ["false"] type [string]',
+        'Argument of [and] must be [boolean], found value ["false"] type [keyword]',
       ]);
 
       // enforces strings for cartesian_point conversion

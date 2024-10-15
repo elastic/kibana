@@ -225,18 +225,18 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
+  if (item.literalType === argType) {
+    return true;
+  }
+
   if (item.literalType === 'null') {
     // all parameters accept null, but this is not yet reflected
     // in our function definitions so we let it through here
     return true;
   }
 
-  if (item.literalType !== 'keyword') {
-    return argType === item.literalType;
-  }
-
   // date-type parameters accept string literals because of ES auto-casting
-  if (argType === 'date' || argType === 'date_period') {
+  if ((argType === 'date' || argType === 'date_period') && item.literalType === 'keyword') {
     return true;
   }
 
@@ -766,6 +766,9 @@ export function getExpressionType(
   variables: Map<string, ESQLVariable[]>
 ): SupportedDataType | 'unknown' {
   if (!isSingleItem(root)) {
+    if (root.length === 0) {
+      return 'unknown';
+    }
     return getExpressionType(root[0], fields, variables);
   }
 
@@ -821,7 +824,11 @@ export function getExpressionType(
     const matchingSignature = signaturesWithCorrectArity.find((signature) => {
       return argTypes.every((argType, i) => {
         const param = getParamAtPosition(signature, i);
-        return param && param.type === argType;
+        return (
+          param &&
+          (param.type === argType ||
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+        );
       });
     });
 

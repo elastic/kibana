@@ -6652,14 +6652,14 @@
     {
       "query": "from a_index | eval 1 * \"1\"",
       "error": [
-        "Argument of [*] must be [double], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" * 1",
       "error": [
-        "Argument of [*] must be [double], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -6689,14 +6689,14 @@
     {
       "query": "from a_index | eval 1 / \"1\"",
       "error": [
-        "Argument of [/] must be [double], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" / 1",
       "error": [
-        "Argument of [/] must be [double], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -6726,14 +6726,14 @@
     {
       "query": "from a_index | eval 1 % \"1\"",
       "error": [
-        "Argument of [%] must be [double], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" % 1",
       "error": [
-        "Argument of [%] must be [double], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -9511,7 +9511,7 @@
       "query": "from a_index | eval doubleField = \"5\"",
       "error": [],
       "warning": [
-        "Column [doubleField] of type double has been overwritten as new type: string"
+        "Column [doubleField] of type double has been overwritten as new type: keyword"
       ]
     },
     {
@@ -9660,7 +9660,7 @@
     {
       "query": "from a_index | eval true AND \"false\"",
       "error": [
-        "Argument of [and] must be [boolean], found value [\"false\"] type [string]"
+        "Argument of [and] must be [boolean], found value [\"false\"] type [keyword]"
       ],
       "warning": []
     },
