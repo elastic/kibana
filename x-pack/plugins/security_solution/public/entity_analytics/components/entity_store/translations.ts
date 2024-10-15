@@ -39,3 +39,26 @@ export const ENABLEMENT_INITIALIZING_ENTITY_STORE = i18n.translate(
     defaultMessage: 'Initializing entity store',
   }
 );
+
+export const ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.risk',
+  {
+    defaultMessage:
+      'Provides real-time visibility into user activity, helping you identify and mitigate potential security risks.',
+  }
+);
+
+export const ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.store',
+  {
+    defaultMessage: "Allows comprehensive monitoring of your system's hosts and users.",
+  }
+);
+
+export const ENABLEMENT_DESCRIPTION_BOTH = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.both',
+  {
+    defaultMessage:
+      'Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file.',
+  }
+);

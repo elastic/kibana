@@ -24,6 +24,10 @@ import {
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
+import {
+  ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
+  ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
+} from '../translations';
 
 export interface Enablements {
   riskScore: boolean;
@@ -93,12 +97,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.enablements.modal.risk.description"
-                defaultMessage="Provides real-time visibility into user activity, helping you identify and mitigate potential security risks."
-              />
-            </EuiText>
+            <EuiText>{ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY}</EuiText>
           </EuiFlexItem>
           <EuiHorizontalRule margin="none" />
 
@@ -123,12 +122,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.enablements.modal.store.description"
-                defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
-              />
-            </EuiText>
+            <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>

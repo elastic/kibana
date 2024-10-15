@@ -32,6 +32,9 @@ import { useEntityEngineStatus } from '../hooks/use_entity_engine_status';
 
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
 import {
+  ENABLEMENT_DESCRIPTION_BOTH,
+  ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
+  ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_INITIALIZING_ENTITY_STORE,
   ENABLEMENT_INITIALIZING_RISK_ENGINE,
   ENABLE_ALL_TITLE,
@@ -197,6 +200,13 @@ export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({
       ? ENABLE_RISK_SCORE_TITLE
       : ENABLE_ALL_TITLE;
 
+  const body =
+    enablements === 'store'
+      ? ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY
+      : enablements === 'riskScore'
+      ? ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY
+      : ENABLEMENT_DESCRIPTION_BOTH;
+
   if (loadingRiskEngine) {
     return (
       <EuiPanel hasBorder>
@@ -214,14 +224,7 @@ export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({
       layout="horizontal"
       className="eui-fullWidth"
       title={<h2>{title}</h2>}
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityStore.enablement.description"
-            defaultMessage="Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file."
-          />
-        </p>
-      }
+      body={<p>{body}</p>}
       actions={
         <EuiToolTip content={title}>
           <EuiButton
