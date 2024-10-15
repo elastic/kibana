@@ -121,3 +121,8 @@ console.ui.embeddedEnabled: false
 
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
+
+# Experimental Security Solution features
+
+# This feature is disabled in Serverless until fully performance tested within a Serverless environment
+xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
