@@ -57,7 +57,8 @@ function generator({
         echo "Docker pull successful."
         break
       else
-        echo "Docker pull unsuccessful, attempt '$attempt'."
+        echo "Docker pull unsuccessful, attempt '$attempt'. Retrying in 15s"
+        sleep 15
       fi
 
     done
