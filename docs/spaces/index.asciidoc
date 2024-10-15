@@ -2,7 +2,7 @@
 [[xpack-spaces]]
 == Spaces
 
-You can define multiple spaces in a single {kib} instance from the **Spaces** menu. Each space has its own navigation and objects, and users can only access the spaces that they have been granted access to. This access is based on user roles, and a given role can have different permissions per space.
+You can define multiple spaces in a single {kib} instance from the **Spaces** menu. Each space has its own navigation and saved objects, and users can only access the spaces that they have been granted access to. This access is based on user roles, and a given role can have different permissions per space.
 
 {kib} creates a default space for you.
 When you create more spaces, users are asked to choose a space when they log in to {kib}, and can change their
