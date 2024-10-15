@@ -15668,70 +15668,6 @@ paths:
         applied to all anonymization fields that match the filter or to the list
         of anonymization fields by their IDs.
       operationId: PerformAnonymizationFieldsBulkAction
-  /api/spaces/space:
-    get:
-      description: Get all spaces
-      operationId: '%2Fapi%2Fspaces%2Fspace#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: query
-          name: purpose
-          required: false
-          schema:
-            enum:
-              - any
-              - copySavedObjectsIntoSpace
-              - shareSavedObjectsIntoSpace
-            type: string
-        - in: query
-          name: include_authorized_purposes
-          required: true
-          schema:
-            anyOf:
-              - items: {}
-                type: array
-              - type: boolean
-              - type: number
-              - type: object
-              - type: string
-            nullable: true
-            oneOf:
-              - enum:
-                  - false
-                type: boolean
-                x-oas-optional: true
-              - type: boolean
-                x-oas-optional: true
-      responses: {}
-      summary: ''
-      tags:
-        - spaces
-    post:
-      description: Create a space
-      operationId: '%2Fapi%2Fspaces%2Fspace#1'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -16293,6 +16229,74 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
+  /api/spaces/space:
+    get:
+      description: Get all spaces
+      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: purpose
+          required: false
+          schema:
+            enum:
+              - any
+              - copySavedObjectsIntoSpace
+              - shareSavedObjectsIntoSpace
+            type: string
+        - in: query
+          name: include_authorized_purposes
+          required: true
+          schema:
+            anyOf:
+              - items: {}
+                type: array
+              - type: boolean
+              - type: number
+              - type: object
+              - type: string
+            nullable: true
+            oneOf:
+              - enum:
+                  - false
+                type: boolean
+                x-oas-optional: true
+              - type: boolean
+                x-oas-optional: true
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    post:
+      description: Create a space
+      operationId: '%2Fapi%2Fspaces%2Fspace#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
               additionalProperties: false
               type: object
               properties:
@@ -16324,7 +16328,7 @@ paths:
       summary: ''
       tags:
         - spaces
-  /api/spaces/space/{id}:
+  '/api/spaces/space/{id}':
     delete:
       description: Delete a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'

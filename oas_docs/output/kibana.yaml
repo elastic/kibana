@@ -20177,95 +20177,6 @@ paths:
         all prompts that match the filter or to the list of prompts by their
         IDs.
       operationId: PerformPromptsBulkAction
-  /api/security/role:
-    get:
-      operationId: '%2Fapi%2Fsecurity%2Frole#0'
-      parameters: []
-      responses: {}
-      summary: Get all roles
-      tags:
-        - roles
-  /api/security/role/{name}:
-    delete:
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: name
-          required: true
-          schema:
-            minLength: 1
-            type: string
-      responses: {}
-      summary: Delete a role
-      tags:
-        - roles
-    get:
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: path
-          name: name
-          required: true
-          schema:
-            minLength: 1
-            type: string
-      responses: {}
-      summary: Get a role
-      tags:
-        - roles
-    put:
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 1024
-            minLength: 1
-            type: string
-        - in: query
-          name: createOnly
-          required: false
-          schema:
-            default: false
-            type: boolean
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -20407,6 +20318,117 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
+  /api/security/role:
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses: {}
+      summary: Get all roles
+      tags:
+        - roles
+  '/api/security/role/{name}':
+    delete:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Delete a role
+      tags:
+        - roles
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses: {}
+      summary: Get a role
+      tags:
+        - roles
+    put:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+        - in: query
+          name: createOnly
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
               additionalProperties: false
               type: object
               properties:
@@ -21141,7 +21163,7 @@ paths:
       summary: ''
       tags:
         - spaces
-  /api/spaces/space/{id}:
+  '/api/spaces/space/{id}':
     delete:
       description: Delete a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'

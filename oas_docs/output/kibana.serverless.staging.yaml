@@ -16328,7 +16328,7 @@ paths:
       summary: ''
       tags:
         - spaces
-  /api/spaces/space/{id}:
+  '/api/spaces/space/{id}':
     delete:
       description: Delete a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
