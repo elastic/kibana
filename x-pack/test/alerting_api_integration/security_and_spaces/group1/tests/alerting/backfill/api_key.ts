@@ -184,7 +184,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
 
       // check that the ad hoc run SO was created
       const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
       expect(typeof adHocRun1.apiKeyId).to.be('string');
       expect(typeof adHocRun1.apiKeyToUse).to.be('string');
       expect(typeof adHocRun1.createdAt).to.be('string');

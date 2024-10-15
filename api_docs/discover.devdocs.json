@@ -1072,7 +1072,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined>; }"
+              " | undefined>; updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void; }"
             ],
             "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,

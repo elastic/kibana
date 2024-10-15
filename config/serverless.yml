@@ -110,6 +110,8 @@ xpack.index_management.editableIndexSettings: limited
 xpack.index_management.enableMappingsSourceFieldSection: false
 # Disable toggle for enabling data retention in DSL form from Index Management UI
 xpack.index_management.enableTogglingDataRetention: false
+# Disable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -202,6 +204,7 @@ uiSettings:
     labs:dashboard:deferBelowFold: false
 
 # Task Manager
+xpack.task_manager.claim_strategy: mget
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.request_timeouts.update_by_query: 60000
 xpack.task_manager.metrics_reset_interval: 120000

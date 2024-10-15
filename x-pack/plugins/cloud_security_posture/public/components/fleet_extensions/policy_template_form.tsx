@@ -674,6 +674,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+    const isParentSecurityPosture = !integration;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud } = useKibana().services;
@@ -798,6 +799,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+
+      // When the integration is the parent Security Posture (!integration) we need to
+      // reset the setup technology when the integration option changes if it was set to agentless for CSPM
+      if (isParentSecurityPosture && input.policy_template !== 'cspm') {
+        updateSetupTechnology(SetupTechnology.AGENT_BASED);
+      }
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
