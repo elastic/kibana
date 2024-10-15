@@ -16,16 +16,42 @@ import { isOfQueryType } from '@kbn/es-query';
 import { LensRuntimeState, LensSerializedState } from './types';
 import type { LensAttributesService } from '../lens_attribute_service';
 
+export function createEmptyLensState(
+  title: LensSerializedState['title'],
+  query: LensSerializedState['query'],
+  filters: LensSerializedState['filters']
+) {
+  return {
+    attributes: {
+      title: title ?? '',
+      description: '',
+      visualizationType: null,
+      references: [],
+      state: {
+        query: query || { query: '', language: 'kuery' },
+        filters: filters || [],
+        internalReferences: [],
+        datasourceStates: {},
+        visualization: {},
+      },
+    },
+  };
+}
+
 // Shared logic to ensure the attributes are correctly loaded
 export async function deserializeState(
   attributeService: LensAttributesService,
   rawState: LensSerializedState
 ) {
   if (rawState.savedObjectId) {
-    const { attributes, managed, sharingSavedObjectProps } = await attributeService.loadFromLibrary(
-      rawState.savedObjectId
-    );
-    return { ...rawState, attributes, managed, sharingSavedObjectProps };
+    try {
+      const { attributes, managed, sharingSavedObjectProps } =
+        await attributeService.loadFromLibrary(rawState.savedObjectId);
+      return { ...rawState, attributes, managed, sharingSavedObjectProps };
+    } catch (e) {
+      // return an empty Lens document if no saved object is found
+      return { ...rawState, attributes: createEmptyLensState().attributes };
+    }
   }
   return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
 }

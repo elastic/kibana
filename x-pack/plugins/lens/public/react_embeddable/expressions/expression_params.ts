@@ -197,7 +197,6 @@ export async function getExpressionRendererParams(
       ExpressionRenderer: expressionRenderer,
       addUserMessages,
       onRuntimeError: (error: Error) => {
-        // throw new Error('Function not implemented.');
         logError('runtime');
       },
       abortController,

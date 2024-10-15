@@ -97,9 +97,6 @@ export function buildUserMessagesHelper(
         mergedSearchContext,
         activeData,
       } = getUpdatedState(getVisualizationContext, visualizationMap, datasourceMap);
-      if (!activeVisualizationState || !activeDatasourceState) {
-        return [];
-      }
       const userMessages: UserMessage[] = [];
       userMessages.push(
         ...getApplicationUserMessages({
@@ -119,7 +116,7 @@ export function buildUserMessagesHelper(
         })
       );
 
-      if (!doc) {
+      if (!doc || !activeDatasourceState || !activeVisualizationState) {
         return userMessages;
       }
 

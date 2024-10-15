@@ -462,7 +462,7 @@ export async function persistedStateToExpression(
       nowInstant: services.nowProvider.get(),
     }),
     activeVisualizationState,
-    activeDatasourceState: datasourceStates[datasourceId].state,
+    activeDatasourceState: datasourceStates[datasourceId]?.state,
     indexPatterns,
     indexPatternRefs,
   };

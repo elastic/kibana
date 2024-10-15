@@ -67,15 +67,27 @@ export function loadEmbeddableData(
     metaInfo
   );
 
+  function updateBlockingErrors(blockingMessages: UserMessage[]) {
+    api.blockingError.next(
+      blockingMessages.length
+        ? new Error(
+            typeof blockingMessages[0].longMessage === 'string'
+              ? blockingMessages[0].longMessage
+              : blockingMessages[0].shortMessage
+          )
+        : undefined
+    );
+  }
+
   const onRenderComplete = () => {
     internalApi.dispatchRenderComplete();
 
     internalApi.updateMessages(getUserMessages('embeddableBadge'));
-    internalApi.updateBlockingMessages(
-      getUserMessages(blockingMessageDisplayLocations, {
-        severity: 'error',
-      })
-    );
+    const blockingMessages = getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
+    internalApi.updateBlockingMessages(blockingMessages);
+    updateBlockingErrors(blockingMessages);
   };
 
   const unifiedSearch$ = new BehaviorSubject<
@@ -174,6 +186,14 @@ export function loadEmbeddableData(
       ),
     ]);
 
+    // update the visualization context before anything else
+    // as it will be used to compute blocking errors also in case of issues
+    updateVisualizationContext({
+      doc: currentState.attributes,
+      mergedSearchContext: params?.searchContext || {},
+      ...rest,
+    });
+
     // Publish the used dataViews on the Lens API
     internalApi.updateDataViews(dataViews);
 
@@ -186,11 +206,6 @@ export function loadEmbeddableData(
     internalApi.updateAbortController(abortController);
 
     internalApi.updateRenderCount();
-    updateVisualizationContext({
-      doc: currentState.attributes,
-      mergedSearchContext: params?.searchContext || {},
-      ...rest,
-    });
   }
 
   const subscriptions: Subscription[] = [

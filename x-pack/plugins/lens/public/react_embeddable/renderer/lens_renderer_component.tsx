@@ -11,28 +11,8 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { createEmptyLensState } from '../helper';
 
-function createEmptyLensState(
-  title: LensSerializedState['title'],
-  query: LensSerializedState['query'],
-  filters: LensSerializedState['filters']
-) {
-  return {
-    attributes: {
-      title: title ?? '',
-      description: '',
-      visualizationType: null,
-      references: [],
-      state: {
-        query: query || { query: '', language: 'kuery' },
-        filters: filters || [],
-        internalReferences: [],
-        datasourceStates: {},
-        visualization: {},
-      },
-    },
-  };
-}
 /**
  * The aim of this component is to provide a wrapper for other plugins who want to
  * use a Lens component into their own page. This hides the embeddable parts of it
