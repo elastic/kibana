@@ -14,6 +14,7 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 import { RequestHandler } from '@kbn/core-http-server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
 import { UsageStatsBody, v2 } from '../../common/types';
@@ -50,7 +51,7 @@ export function registerTelemetryUsageStatsRoutes(
       // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
       // granted to users that have "Global All" or "Global Read" privileges in Kibana.
       const { checkPrivilegesWithRequest, actions } = security.authz;
-      const privileges = { kibana: actions.api.get('decryptedTelemetry') };
+      const privileges = { kibana: actions.api.get(ApiOperation.Read, 'decryptedTelemetry') };
       const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
       if (!hasAllRequested) {
         return res.forbidden();

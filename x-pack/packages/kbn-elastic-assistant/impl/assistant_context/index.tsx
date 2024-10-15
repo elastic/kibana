@@ -276,7 +276,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
+      knowledgeBase: {
+        ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+        ...localStorageKnowledgeBase,
+      },
       promptContexts,
       navigateToApp,
       nameSpace,
