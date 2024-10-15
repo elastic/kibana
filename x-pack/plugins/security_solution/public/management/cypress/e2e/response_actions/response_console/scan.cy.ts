@@ -97,7 +97,7 @@ describe(
           openResponseConsoleFromEndpointList();
           inputConsoleCommand(`scan --path ${path}`);
           submitCommand();
-          cy.wait('@scanAction', { timeout: 60000 });
+          cy.wait('@scanAction');
 
           cy.contains('Scan complete', { timeout: 180000 }).click();
         });
@@ -110,9 +110,9 @@ describe(
         openResponseConsoleFromEndpointList();
         inputConsoleCommand(`scan --path ${homeFilePath}/non_existent_folder`);
         submitCommand();
-        cy.wait('@scanAction', { timeout: 60000 });
+        cy.wait('@scanAction');
 
-        cy.getByTestSubj('scan-actionFailure', { timeout: 180000 })
+        cy.getByTestSubj('scan-actionFailure')
           .should('exist')
           .contains('File path or folder was not found (404)');
       });
