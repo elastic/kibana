@@ -507,6 +507,7 @@ describe('utils', () => {
         'cases:my-owner/updateComment',
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
+        'cases:my-owner/reopenCase',
       ]);
     });
   });

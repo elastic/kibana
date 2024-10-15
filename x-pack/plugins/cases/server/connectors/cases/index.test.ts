@@ -399,6 +399,7 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/updateComment',
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
+          'cases:securitySolution/reopenCase',
         ]);
       });
     });

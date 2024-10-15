@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusContextMenu } from './status_context_menu';
+import { TestProviders } from '../../common/mock';
 
 describe('SyncAlertsSwitch', () => {
   const onStatusChanged = jest.fn();
@@ -20,7 +21,9 @@ describe('SyncAlertsSwitch', () => {
 
   it('renders', async () => {
     const wrapper = mount(
-      <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
@@ -28,11 +31,13 @@ describe('SyncAlertsSwitch', () => {
 
   it('renders a simple status badge when disabled', async () => {
     const wrapper = mount(
-      <StatusContextMenu
-        disabled={true}
-        currentStatus={CaseStatuses.open}
-        onStatusChanged={onStatusChanged}
-      />
+      <TestProviders>
+        <StatusContextMenu
+          disabled={true}
+          currentStatus={CaseStatuses.open}
+          onStatusChanged={onStatusChanged}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeFalsy();
@@ -41,7 +46,9 @@ describe('SyncAlertsSwitch', () => {
 
   it('renders the current status correctly', async () => {
     const wrapper = mount(
-      <StatusContextMenu currentStatus={CaseStatuses.closed} onStatusChanged={onStatusChanged} />
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.closed} onStatusChanged={onStatusChanged} />
+      </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
@@ -51,7 +58,9 @@ describe('SyncAlertsSwitch', () => {
 
   it('changes the status', async () => {
     const wrapper = mount(
-      <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
     );
 
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
@@ -64,7 +73,9 @@ describe('SyncAlertsSwitch', () => {
 
   it('does not call onStatusChanged if selection is same as current status', async () => {
     const wrapper = mount(
-      <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
     );
 
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');

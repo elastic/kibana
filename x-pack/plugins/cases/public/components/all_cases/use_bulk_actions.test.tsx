@@ -578,7 +578,7 @@ describe('useBulkActions', () => {
 
       await waitForHook(() => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
-        res.queryByTestId('case-bulk-action-status').click();
+        res.queryByTestId('case-bulk-action-status')?.click();
       });
 
       await waitForHook(() => {
