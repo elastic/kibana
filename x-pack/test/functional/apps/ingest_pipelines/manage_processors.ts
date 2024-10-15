@@ -36,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
       await pageObjects.ingestPipelines.fillAddDatabaseForm(
         'MaxMind',
-        maxMindDatabaseName,
+        'GeoIP2 Anonymous IP',
         '123456'
       );
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
@@ -53,6 +53,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
       await pageObjects.ingestPipelines.fillAddDatabaseForm('IPInfo', ipInfoDatabaseName);
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
+
+      // Wait for new row to gets displayed
+      await pageObjects.common.sleep(250);
 
       const databasesList = await pageObjects.ingestPipelines.getGeoipDatabases();
       const databaseExists = Boolean(

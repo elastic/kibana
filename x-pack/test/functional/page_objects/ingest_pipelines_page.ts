@@ -7,6 +7,7 @@
 
 import path from 'path';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -132,6 +133,11 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string) {
       await testSubjects.setValue('databaseTypeSelect', databaseType);
+
+      // Wait for the rest of the fields to get displayed
+      await pageObjects.common.sleep(250);
+      expect(await testSubjects.exists('databaseNameSelect')).to.be(true);
+
       if (maxmind) {
         await testSubjects.setValue('maxmindField', maxmind);
       }
@@ -139,6 +145,8 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async clickAddDatabaseButton() {
+      // Wait for button to get enabled
+      await pageObjects.common.sleep(250);
       await testSubjects.click('addGeoipDatabaseSubmit');
     },
 
