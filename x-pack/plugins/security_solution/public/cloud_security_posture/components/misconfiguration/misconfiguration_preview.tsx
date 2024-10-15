@@ -121,7 +121,6 @@ export const MisconfigurationsPreview = ({
     pageSize: 1,
     ignore_unavailable: true,
   });
-
   const isUsingHostName = fieldName === 'host.name';
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
