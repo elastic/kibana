@@ -13,6 +13,9 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useEntityManager } from '../../../../hooks/use_entity_manager';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { isLogsSignal } from '../../../../utils/get_signal_type';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../../context/kibana_environment_context/kibana_environment_context';
@@ -76,8 +79,9 @@ export function ApmMainTemplate({
     entityCentricExperience,
     true
   );
-
+  const { serviceEntitySummary } = useApmServiceContext();
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
+  const { isEntityManagerEnabled } = useEntityManager();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -101,6 +105,8 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
+  const isEntityExperienceFullyEnabled = isEntityCentricExperienceEnabled && isEntityManagerEnabled;
+
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
     (callApmApi) => {
       if (!data?.hasData && !shouldBypassNoDataScreen) {
@@ -114,6 +120,10 @@ export function ApmMainTemplate({
     status === FETCH_STATUS.LOADING || fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
 
   const hasApmData = !!data?.hasData;
+  const hasLogsData =
+    serviceEntitySummary?.dataStreamTypes &&
+    serviceEntitySummary?.dataStreamTypes?.length > 0 &&
+    isLogsSignal(serviceEntitySummary.dataStreamTypes);
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
 
   const noDataConfig = getNoDataConfig({
@@ -164,7 +174,11 @@ export function ApmMainTemplate({
   return (
     <EnvironmentsContextProvider>
       <ObservabilityPageTemplate
-        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+        noDataConfig={
+          shouldBypassNoDataScreen || (isEntityExperienceFullyEnabled && hasLogsData)
+            ? undefined
+            : noDataConfig
+        }
         isPageDataLoaded={isLoading === false}
         pageHeader={{
           rightSideItems,
