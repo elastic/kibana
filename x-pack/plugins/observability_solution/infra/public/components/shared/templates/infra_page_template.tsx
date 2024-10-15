@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
+import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
 import { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import { NoRemoteCluster } from '../../empty_states';
 import { SourceErrorPage } from '../../source_error_page';
@@ -16,6 +17,9 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { OnboardingFlow, getNoDataConfig } from './no_data_config';
+import { useAssetDetailsRenderPropsContext } from '../../asset_details/hooks/use_asset_details_render_props';
+import { useEntitySummary } from '../../asset_details/hooks/use_entity_summary';
+import { isLogsSignal } from '../../asset_details/utils/get_data_stream_types';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
@@ -50,7 +54,15 @@ export const InfraPageTemplate = ({
     });
   });
 
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
+  const { asset } = useAssetDetailsRenderPropsContext();
+  const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
+    entityType: asset?.type,
+    entityId: asset?.id,
+  });
+
   const hasData = !!data?.hasData;
+  const hasLogsData = isLogsSignal(dataStreams);
   const noDataConfig = getNoDataConfig({
     hasData,
     loading: isPending(status),
@@ -118,10 +130,22 @@ export const InfraPageTemplate = ({
     />;
   }
 
+  const evaluateNoDataConfig = () => {
+    if (entitySummaryStatus === 'failure') {
+      return noDataConfig;
+    }
+
+    if (entitySummaryStatus !== 'success') {
+      return undefined;
+    }
+
+    return isEntityCentricExperienceEnabled && hasLogsData ? undefined : noDataConfig;
+  };
+
   return (
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
-      noDataConfig={noDataConfig}
+      noDataConfig={evaluateNoDataConfig()}
       {...pageTemplateProps}
     />
   );
