@@ -47,7 +47,6 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
           <AlertsRange
             knowledgeBase={knowledgeBase}
             setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-            value={knowledgeBase.latestAlerts}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
