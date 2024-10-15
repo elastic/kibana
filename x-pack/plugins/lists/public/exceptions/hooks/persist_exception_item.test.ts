@@ -29,8 +29,8 @@ describe('usePersistExceptionItem', () => {
   const onError = jest.fn();
 
   beforeEach(() => {
-    jest.spyOn(api, 'addExceptionListItem').mockResolvedValue(getExceptionListItemSchemaMock());
-    jest.spyOn(api, 'updateExceptionListItem').mockResolvedValue(getExceptionListItemSchemaMock());
+    (api.addEndpointExceptionList as jest.Mock).mockResolvedValue(getExceptionListItemSchemaMock());
+    (api.updateExceptionListItem as jest.Mock).mockResolvedValue(getExceptionListItemSchemaMock());
   });
 
   afterEach(() => {
@@ -46,20 +46,44 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
-    const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const defaultImplementation = (api.addExceptionListItem as jest.Mock).getMockImplementation();
+
+    (api.addExceptionListItem as jest.Mock).mockImplementation(function () {
+      // delay response to ensure that isLoading is set to true for a while
+      return new Promise((resolve) =>
+        setTimeout(() => resolve(getExceptionListItemSchemaMock()), 1000)
+      );
+    });
+
+    // setup fake timers before rendering
+    jest.useFakeTimers();
+
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]])
     );
 
     await act(async () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
     });
 
-    rerender();
-
     await waitFor(() => {
-      expect(result.current[0].isLoading).toBe(true);
+      expect(api.addExceptionListItem).toHaveBeenCalled();
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
+
+    await jest.advanceTimersByTimeAsync(500);
+
+    await waitFor(() => {
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+    });
+
+    // restore real timers
+    jest.useRealTimers();
+    (api.addExceptionListItem as jest.Mock).mockImplementation(defaultImplementation);
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
