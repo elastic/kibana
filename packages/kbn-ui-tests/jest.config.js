@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch } from './run_elasticsearch';
-export * from './run_ftr';
-export {
-  parseRawFlags,
-  getArgValue,
-  remapPluginPaths,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-} from './kibana_cli_args';
-export { initLogsDir } from './logs_dir';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ui-tests'],
+};

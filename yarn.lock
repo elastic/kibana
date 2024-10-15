@@ -7087,6 +7087,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-tests@link:packages/kbn-ui-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-theme@link:packages/kbn-ui-theme":
   version "0.0.0"
   uid ""

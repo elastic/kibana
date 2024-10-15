@@ -1902,6 +1902,8 @@
       "@kbn/ui-shared-deps-npm/*": ["packages/kbn-ui-shared-deps-npm/*"],
       "@kbn/ui-shared-deps-src": ["packages/kbn-ui-shared-deps-src"],
       "@kbn/ui-shared-deps-src/*": ["packages/kbn-ui-shared-deps-src/*"],
+      "@kbn/ui-tests": ["packages/kbn-ui-tests"],
+      "@kbn/ui-tests/*": ["packages/kbn-ui-tests/*"],
       "@kbn/ui-theme": ["packages/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["packages/kbn-ui-theme/*"],
       "@kbn/unified-data-table": ["packages/kbn-unified-data-table"],
