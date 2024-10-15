@@ -9,6 +9,7 @@ import { UngroupedInventoryPage } from '../../components/grouped_inventory/ungro
 import { GroupedInventoryPage } from '../../components/grouped_inventory/grouped';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { InventoryPageViewContextProvider } from '../../context/inventory_page_view_provider';
 
 export function InventoryPage() {
   const { query } = useInventoryParams('/');
@@ -27,9 +28,9 @@ export function InventoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grouping]);
 
-  return grouping === 'none' ? (
-    <UngroupedInventoryPage groupSelected={grouping} setGroupSelected={setGrouping} />
-  ) : (
-    <GroupedInventoryPage groupSelected={grouping} setGroupSelected={setGrouping} />
+  return (
+    <InventoryPageViewContextProvider grouping={grouping} setGrouping={setGrouping}>
+      {grouping === 'none' ? <UngroupedInventoryPage /> : <GroupedInventoryPage />}
+    </InventoryPageViewContextProvider>
   );
 }

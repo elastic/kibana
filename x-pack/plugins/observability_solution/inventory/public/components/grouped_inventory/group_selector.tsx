@@ -9,16 +9,21 @@ import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { StyledContextMenu, StyledEuiButtonEmpty } from './styles';
+import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 
 export interface GroupedSelectorProps {
   groupSelected: string;
   onGroupChange: (groupSelection: string) => void;
 }
 
-export function GroupSelector({ groupSelected = 'none', onGroupChange }: GroupedSelectorProps) {
+export function GroupSelector() {
+  const { grouping, setGrouping } = useInventoryPageViewContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onGroupChange = (selected: string) => {
+    setGrouping((current) => (current === selected ? 'none' : selected));
+  };
   const isGroupSelected = (groupKey: string) => {
-    return groupSelected === groupKey;
+    return grouping === groupKey;
   };
   const panels = [
     {
@@ -58,7 +63,7 @@ export function GroupSelector({ groupSelected = 'none', onGroupChange }: Grouped
       })}
       size="s"
     >
-      {`Group entities by: ${groupSelected}`}
+      {`Group entities by: ${grouping}`}
     </StyledEuiButtonEmpty>
   );
 
