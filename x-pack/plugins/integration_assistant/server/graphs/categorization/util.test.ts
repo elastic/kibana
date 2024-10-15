@@ -72,7 +72,7 @@ describe('selectResults', () => {
 
     selectResults(pipelineResults, 2, new Set());
 
-    expect(mockPartialShuffleArray).toHaveBeenCalledWith([0, 1], 2);
+    expect(mockPartialShuffleArray).toHaveBeenCalledWith([0, 1], 0, 2);
   });
 
   it('should handle avoiding indices', () => {
@@ -154,7 +154,7 @@ describe('selectResults', () => {
 
       selectResults(pipelineResults, 2, new Set());
 
-      expect(mockPartialShuffleArray).toHaveBeenCalledWith([0, 1], 2);
+      expect(mockPartialShuffleArray).toHaveBeenCalledWith([0, 1], 0, 2);
     });
 
     it('should handle avoiding indices', () => {
@@ -170,11 +170,11 @@ describe('selectResults', () => {
         return array;
       });
 
-      const [selectedResults, indices] = selectResults(pipelineResults, maxSamples, new Set());
+      const [selectedResults, indices] = selectResults(pipelineResults, maxSamples, new Set([1]));
       expect(selectedResults).toHaveLength(maxSamples);
       expect(indices).toHaveLength(maxSamples);
-      expect(indices).toEqual([0, 1]);
-      expect(selectedResults).toEqual([pipelineResults[0], pipelineResults[1]]);
+      expect(indices).toEqual([0, 2]);
+      expect(selectedResults).toEqual([pipelineResults[0], pipelineResults[2]]);
     });
   });
 
