@@ -218,7 +218,7 @@ export const EnableEntityStore: React.FC<EnableEntityStoreProps> = ({
         <p>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityStore.enablement.description"
-            defaultMessage="Your entity store is currently empty. Start by adding information about your assets directly from your logs or import them easily using a CSV file."
+            defaultMessage="Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file."
           />
         </p>
       }
