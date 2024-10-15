@@ -8,6 +8,7 @@
 import React from 'react';
 import { FieldFormWrapper } from './field_form_wrapper';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { DescriptionEdit, descriptionSchema } from './fields/description';
 import { NameEdit, nameSchema } from './fields/name';
 import { TagsEdit, tagsSchema } from './fields/tags';
 
@@ -17,6 +18,8 @@ interface CommonRuleFieldEditProps {
 
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
+    case 'description':
+      return <FieldFormWrapper component={DescriptionEdit} fieldFormSchema={descriptionSchema} />;
     case 'name':
       return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
     case 'tags':
