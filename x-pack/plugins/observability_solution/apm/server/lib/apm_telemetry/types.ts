@@ -6,7 +6,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {

@@ -7,7 +7,7 @@
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { AggregatedTransactionsCounts, APMUsage, APMPerService, DataStreamCombined } from './types';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts, true> = {
   expected_metric_document_count: {
