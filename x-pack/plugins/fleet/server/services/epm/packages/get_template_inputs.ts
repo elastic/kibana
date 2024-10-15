@@ -264,8 +264,8 @@ function addCommentsToYaml(
       const inputId = inputIdNode.value as string;
       const pkgInput = packageIndexInputAndStreams[inputId];
       if (pkgInput) {
-        inputItem.commentBefore = ` ${pkgInput.title} ${
-          pkgInput.description ? ` ${pkgInput.description}` : ''
+        inputItem.commentBefore = ` ${pkgInput.title}${
+          pkgInput.description ? `: ${pkgInput.description}` : ''
         }`;
 
         yamlDoc.visit(inputItem, {
@@ -276,7 +276,7 @@ function addCommentsToYaml(
                 const placeholder = getPlaceholder(varDef);
                 if (val.includes(placeholder)) {
                   node.comment = ` ${varDef.title}${
-                    varDef.description ? ` ${varDef.description}` : ''
+                    varDef.description ? `: ${varDef.description}` : ''
                   }`;
                 }
               }
@@ -297,8 +297,8 @@ function addCommentsToYaml(
             const streamId = streamIdNode.value as string;
             const pkgStream = pkgInput.streams[streamId];
             if (pkgStream) {
-              streamItem.commentBefore = ` ${pkgStream.title} ${
-                pkgStream.description ? ` ${pkgStream.description}` : ''
+              streamItem.commentBefore = ` ${pkgStream.title}${
+                pkgStream.description ? `: ${pkgStream.description}` : ''
               }`;
               yamlDoc.visit(streamItem, {
                 Scalar(key, node) {
@@ -308,7 +308,7 @@ function addCommentsToYaml(
                       const placeholder = getPlaceholder(varDef);
                       if (val.includes(placeholder)) {
                         node.comment = ` ${varDef.title}${
-                          varDef.description ? ` ${varDef.description}` : ''
+                          varDef.description ? `: ${varDef.description}` : ''
                         }`;
                       }
                     }
