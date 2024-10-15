@@ -35,7 +35,9 @@ export const useAssetCriticalityPrivileges = (
 
   return useQuery({
     queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
-    queryFn: hasEntityAnalyticsCapability ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
+    queryFn: hasEntityAnalyticsCapability
+      ? fetchAssetCriticalityPrivileges
+      : () => nonAuthorizedResponse,
   });
 };
 

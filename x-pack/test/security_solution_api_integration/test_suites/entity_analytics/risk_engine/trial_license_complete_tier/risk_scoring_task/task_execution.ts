@@ -255,6 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await riskEngineRoutes.init();
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
             const riskScores = await readRiskScores(es);
+
             expect(riskScores.length).to.be.greaterThan(0);
             const assetCriticalityLevels = riskScores.map(
               (riskScore) => riskScore.host?.risk.criticality_level

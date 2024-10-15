@@ -138,22 +138,6 @@ export const getHostsColumns = (
         return getEmptyTagValue();
       },
     },
-    {
-      field: 'node.criticality',
-      name: i18n.ASSET_CRITICALITY,
-      truncateText: false,
-      mobileOptions: { show: true },
-      sortable: false,
-      render: (assetCriticality: CriticalityLevelWithUnassigned) => {
-        if (!assetCriticality) return getEmptyTagValue();
-        return (
-          <AssetCriticalityBadge
-            criticalityLevel={assetCriticality}
-            css={{ verticalAlign: 'middle' }}
-          />
-        );
-      },
-    },
   ];
 
   if (showRiskColumn) {
@@ -180,6 +164,23 @@ export const getHostsColumns = (
       },
     });
   }
+
+  columns.push({
+    field: 'node.criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
 
   return columns;
 };

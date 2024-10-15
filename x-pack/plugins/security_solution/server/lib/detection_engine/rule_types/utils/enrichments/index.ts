@@ -39,7 +39,6 @@ export const enrichEvents: EnrichEventsFunction = async ({
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
     const { uiSettingsClient } = services;
-    const isAssetCriticalityEnabled = true;
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
@@ -84,29 +83,27 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
     }
 
-    if (isAssetCriticalityEnabled) {
-      const assetCriticalityIndexExist = await isIndexExist({
-        services,
-        index: getAssetCriticalityIndex(spaceId),
-      });
-      if (assetCriticalityIndexExist) {
-        enrichments.push(
-          createUserAssetCriticalityEnrichments({
-            services,
-            logger,
-            events,
-            spaceId,
-          })
-        );
-        enrichments.push(
-          createHostAssetCriticalityEnrichments({
-            services,
-            logger,
-            events,
-            spaceId,
-          })
-        );
-      }
+    const assetCriticalityIndexExist = await isIndexExist({
+      services,
+      index: getAssetCriticalityIndex(spaceId),
+    });
+    if (assetCriticalityIndexExist) {
+      enrichments.push(
+        createUserAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+      enrichments.push(
+        createHostAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
     }
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
