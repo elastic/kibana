@@ -12,6 +12,7 @@ import {
   LOGS_APP_ID,
   METRICS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+  LAST_USED_LOGS_VIEWER_APP_ID,
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
@@ -24,6 +25,7 @@ import {
 
 type LogsApp = typeof LOGS_APP_ID;
 type ObservabilityLogsExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
+type LastUsedLogsViewerApp = typeof LAST_USED_LOGS_VIEWER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
@@ -38,6 +40,7 @@ type InventoryApp = typeof INVENTORY_APP_ID;
 export type AppId =
   | LogsApp
   | ObservabilityLogsExplorerApp
+  | LastUsedLogsViewerApp
   | ObservabilityOverviewApp
   | ObservabilityOnboardingApp
   | ApmApp

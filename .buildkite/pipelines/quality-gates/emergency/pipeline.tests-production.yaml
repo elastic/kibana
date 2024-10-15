@@ -10,7 +10,7 @@ steps:
       env:
         TARGET_ENV: production
         CHECK_SLO: true
-        CHECK_SLO_TAG: kibana
+        CHECK_SLO_TAG: kbn-quality-gate
         CHECK_SLO_WAITING_PERIOD: 15m
         CHECK_SLO_BURN_RATE_THRESHOLD: 0.1
         DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
