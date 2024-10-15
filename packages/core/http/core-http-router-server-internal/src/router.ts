@@ -334,6 +334,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
         };
       }
+
+      // Emit onPostValidation even if validation fails.
+      const req = CoreKibanaRequest.from(request);
+      emit?.onPostValidation(req, req.route.options);
       return response;
     }
 

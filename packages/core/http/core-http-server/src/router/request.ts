@@ -60,6 +60,7 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+  routePath?: string;
 }
 
 /**

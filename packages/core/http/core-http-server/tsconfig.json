@@ -16,7 +16,6 @@
     "@kbn/core-base-common",
     "@kbn/core-http-common",
     "@kbn/zod",
-    "@kbn/core-http-router-server-internal"
   ],
   "exclude": [
     "target/**/*",

@@ -10,10 +10,9 @@
 import {
   type CoreVersionedRouter,
   versionHandlerResolvers,
-  VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
-import type { RouteMethod } from '@kbn/core-http-server';
+import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';

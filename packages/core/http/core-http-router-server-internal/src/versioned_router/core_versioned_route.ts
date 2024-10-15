@@ -178,6 +178,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const req = originalReq as Mutable<KibanaRequest>;
     const version = this.getVersion(req);
+    req.apiVersion = version;
 
     if (!version) {
       return res.badRequest({
@@ -218,6 +219,8 @@ export class CoreVersionedRoute implements VersionedRoute {
         req.params = params;
         req.query = query;
       } catch (e) {
+        // Emit onPostValidation even if validation fails.
+        this.router.emitPostValidate(req, handler.options.options);
         return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
       }
     } else {
@@ -227,7 +230,6 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.query = {};
     }
 
-    req.apiVersion = version;
     this.router.emitPostValidate(req, handler.options.options);
 
     const response = await handler.fn(ctx, req, res);

@@ -36,10 +36,10 @@ export function createRouteDeprecationsHandler({
   coreUsageData: InternalCoreUsageDataSetup;
 }) {
   return (req: CoreKibanaRequest, { deprecated }: { deprecated?: RouteDeprecationInfo }) => {
-    if (deprecated && isObject(deprecated)) {
+    if (deprecated && isObject(deprecated) && req.route.routePath) {
       const counterName = buildApiDeprecationId({
         routeMethod: req.route.method,
-        routePath: req.route.path,
+        routePath: req.route.routePath,
         routeVersion: req.apiVersion,
       });
 

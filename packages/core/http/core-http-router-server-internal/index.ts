@@ -13,7 +13,6 @@ export {
   CoreVersionedRouter,
   ALLOWED_PUBLIC_VERSION,
   unwrapVersionedResponseBodyValidation,
-  type VersionedRouterRoute,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
 export { Router } from './src/router';

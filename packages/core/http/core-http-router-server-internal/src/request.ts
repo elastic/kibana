@@ -256,7 +256,14 @@ export class CoreKibanaRequest<
     } = request.route?.settings?.payload || {};
 
     // the socket is undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = isRealRawRequest(request) ? request.raw.req.socket?.timeout : undefined;
+    let socketTimeout: undefined | number;
+    let routePath: undefined | string;
+
+    if (isRealRawRequest(request)) {
+      socketTimeout = request.raw.req.socket?.timeout;
+      routePath = request.route.path;
+    }
+
     const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
@@ -291,6 +298,7 @@ export class CoreKibanaRequest<
 
     return {
       path: request.path ?? '/',
+      routePath,
       method,
       options,
     };

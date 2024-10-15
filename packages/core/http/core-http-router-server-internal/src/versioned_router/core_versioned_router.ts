@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
+import type {
+  VersionedRouter,
+  VersionedRoute,
+  VersionedRouteConfig,
+  VersionedRouterRoute,
+} from '@kbn/core-http-server';
 import { omit } from 'lodash';
 import { CoreVersionedRoute } from './core_versioned_route';
-import type { HandlerResolutionStrategy, Method, Options, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method } from './types';
 import { getRouteFullPath, type Router } from '../router';
 
 /** @internal */
@@ -101,10 +106,6 @@ export class CoreVersionedRouter implements VersionedRouter {
         path: getRouteFullPath(this.router.routerPath, route.path),
         method: route.method,
         options: omit(route.options, 'path'),
-        versionsOptions: [...route.handlers.entries()].reduce((acc, [version, { options }]) => {
-          acc[version] = options;
-          return acc;
-        }, {} as Record<string, Options>),
         handlers: route.getHandlers(),
         isVersioned: true,
       };

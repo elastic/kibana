@@ -9,7 +9,6 @@
 
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
-import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal';
 import type {
   RouteConfig,
   RouteMethod,
@@ -231,7 +230,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   /**
    * @public
    */
-  getRoutes: () => VersionedRouterRoute[];
+  getRoutes: () => Array<VersionedRouterRoute<unknown, unknown, unknown, Ctx>>;
 }
 
 /** @public */
@@ -364,4 +363,17 @@ export interface VersionedRoute<
     options: AddVersionOpts<P, Q, B>,
     handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
   ): VersionedRoute<Method, Ctx>;
+}
+
+export interface VersionedRouterRoute<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Ctx extends RqCtx = RqCtx
+> {
+  method: string;
+  path: string;
+  options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
+  handlers: Array<{ fn: RequestHandler<P, Q, B, Ctx>; options: AddVersionOpts<P, Q, B> }>;
+  isVersioned: true;
 }

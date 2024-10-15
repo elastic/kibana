@@ -31,7 +31,7 @@ export const registerMarkAsResolvedRoute = (
             schema.literal('get'),
             schema.literal('options'),
           ]),
-          routeVersion: schema.string(),
+          routeVersion: schema.maybe(schema.string()),
           incrementBy: schema.number(),
         }),
       },

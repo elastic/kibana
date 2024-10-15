@@ -405,8 +405,9 @@ export class HttpServer {
           .flat()
           .map((route) => {
             if (route.isVersioned === true) {
-              return Object.entries(route.versionsOptions).map(([version, handlerOptions]) => {
-                return { route, version, deprecated: handlerOptions.options?.deprecated };
+              return [...route.handlers.entries()].map(([version, { options }]) => {
+                const deprecated = options.options?.deprecated;
+                return { route, version: `${version}`, deprecated };
               });
             }
             return { route, version: undefined, deprecated: route.options.deprecated };
