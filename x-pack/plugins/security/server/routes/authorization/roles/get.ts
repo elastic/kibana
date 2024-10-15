@@ -54,20 +54,20 @@ export function defineGetRolesRoutes({
 
           const elasticsearchRole = elasticsearchRoles[request.params.name];
 
-        if (elasticsearchRole) {
-          return response.ok({
-            body: transformElasticsearchRoleToRole({
-              features,
-              subFeaturePrivilegeIterator, // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
-              elasticsearchRole,
-              name: request.params.name,
-              application: authz.applicationName,
-              logger,
-              replaceDeprecatedKibanaPrivileges:
-                request.query?.replaceDeprecatedPrivileges ?? false,
-            }),
-          });
-        }
+          if (elasticsearchRole) {
+            return response.ok({
+              body: transformElasticsearchRoleToRole({
+                features,
+                subFeaturePrivilegeIterator, // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
+                elasticsearchRole,
+                name: request.params.name,
+                application: authz.applicationName,
+                logger,
+                replaceDeprecatedKibanaPrivileges:
+                  request.query?.replaceDeprecatedPrivileges ?? false,
+              }),
+            });
+          }
 
           return response.notFound();
         } catch (error) {
