@@ -13,8 +13,10 @@ import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_pa
 import { BenchmarkPagePageProvider } from './benchmark_page';
 import { CspSecurityCommonProvider } from './security_common';
 import { RulePagePageProvider } from './rule_page';
+import { AlertsPageObject } from './alerts_page';
 
 export const cloudSecurityPosturePageObjects = {
+  alerts: AlertsPageObject,
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,
