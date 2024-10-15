@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
+import { BareNote, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { Client } from '@elastic/elasticsearch';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -53,82 +53,26 @@ export const deleteAllNotes = async (es: Client): Promise<void> => {
   });
 };
 
-export const createNoteAssociatedWithDocumentOnly = async (
+export const createNote = async (
   supertest: SuperTest.Agent,
-  documentId: string,
-  noteText: string
+  note: {
+    documentId?: string;
+    savedObjectId?: string;
+    user?: string;
+    text: string;
+  }
 ) =>
   await supertest
     .patch(NOTE_URL)
     .set('kbn-xsrf', 'true')
     .send({
       note: {
-        eventId: documentId,
-        timelineId: '',
+        eventId: note.documentId || '',
+        timelineId: note.savedObjectId || '',
         created: Date.now(),
-        createdBy: 'elastic',
+        createdBy: note.user || 'elastic',
         updated: Date.now(),
-        updatedBy: 'elastic',
-        note: noteText,
-      },
-    });
-
-export const createNoteAssociatedWithSavedObjectOnly = async (
-  supertest: SuperTest.Agent,
-  savedObjectId: string,
-  noteText: string
-) =>
-  await supertest
-    .patch(NOTE_URL)
-    .set('kbn-xsrf', 'true')
-    .send({
-      note: {
-        eventId: '',
-        timelineId: savedObjectId,
-        created: Date.now(),
-        createdBy: 'elastic',
-        updated: Date.now(),
-        updatedBy: 'elastic',
-        note: noteText,
-      },
-    });
-
-export const createNoteAssociatedWithDocumentAndSavedObject = async (
-  supertest: SuperTest.Agent,
-  documentId: string,
-  savedObjectId: string,
-  noteText: string
-) =>
-  await supertest
-    .patch(NOTE_URL)
-    .set('kbn-xsrf', 'true')
-    .send({
-      note: {
-        eventId: documentId,
-        timelineId: savedObjectId,
-        created: Date.now(),
-        createdBy: 'elastic',
-        updated: Date.now(),
-        updatedBy: 'elastic',
-        note: noteText,
-      },
-    });
-
-export const createNoteAssociatedWithNothing = async (
-  supertest: SuperTest.Agent,
-  noteText: string
-) =>
-  await supertest
-    .patch(NOTE_URL)
-    .set('kbn-xsrf', 'true')
-    .send({
-      note: {
-        eventId: '',
-        timelineId: '',
-        created: Date.now(),
-        createdBy: 'elastic',
-        updated: Date.now(),
-        updatedBy: 'elastic',
-        note: noteText,
-      },
+        updatedBy: note.user || 'elastic',
+        note: note.text,
+      } as BareNote,
     });

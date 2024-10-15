@@ -96,7 +96,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
               return response.ok({ body });
             }
 
-            // searching for all the notes associated with a specific for saved object id
+            // searching for all the notes associated with a specific saved object id
             const options: SavedObjectsFindOptions = {
               type: noteSavedObjectType,
               hasReference: {

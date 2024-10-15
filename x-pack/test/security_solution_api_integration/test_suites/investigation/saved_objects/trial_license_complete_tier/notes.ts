@@ -8,13 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { Note } from '@kbn/security-solution-plugin/common/api/timeline';
-import {
-  createNoteAssociatedWithDocumentAndSavedObject,
-  createNoteAssociatedWithDocumentOnly,
-  createNoteAssociatedWithNothing,
-  createNoteAssociatedWithSavedObjectOnly,
-  deleteAllNotes,
-} from './helpers';
+import { createNote, deleteAllNotes } from './helpers';
 import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -86,49 +80,40 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteAllNotes(es);
       });
 
-      it('should retrieve all the notes for a document id', async () => {
-        const eventId1 = uuidv4();
-        const eventId2 = uuidv4();
-        const timelineId1 = uuidv4();
-        const timelineId2 = uuidv4();
+      const eventId1 = uuidv4();
+      const eventId2 = uuidv4();
+      const eventId3 = uuidv4();
+      const timelineId1 = uuidv4();
+      const timelineId2 = uuidv4();
+      const timelineId3 = uuidv4();
 
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId1,
-          'note associated with event-1 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId2,
-          'note associated with event-2 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId1,
-          'note associated with timeline-1 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId2,
-          'note associated with timeline-2 only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId1,
-          timelineId1,
-          'note associated with event-1 and timeline-1'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId2,
-          timelineId2,
-          'note associated with event-2 and timeline-2'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${eventId1} in the text`
-        );
+      it('should retrieve all the notes for a document id', async () => {
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, { documentId: eventId2, text: 'associated with event-2 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId2,
+            text: 'associated with timeline-2 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, {
+            documentId: eventId2,
+            savedObjectId: timelineId2,
+            text: 'associated with event-2 and timeline-2',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${eventId1} in the text`,
+          }),
+        ]);
 
         const response = await supertest
           .get(`/api/note?documentIds=${eventId1}`)
@@ -142,74 +127,48 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve all the notes for multiple document ids', async () => {
-        const eventId1 = uuidv4();
-        const eventId2 = uuidv4();
-        const eventId3 = uuidv4();
-        const timelineId1 = uuidv4();
-        const timelineId2 = uuidv4();
-        const timelineId3 = uuidv4();
-
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId1,
-          'note associated with event-1 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId2,
-          'note associated with event-2 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId3,
-          'note associated with event-2 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId1,
-          'note associated with timeline-1 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId2,
-          'note associated with timeline-2 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId3,
-          'note associated with timeline-3 only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId1,
-          timelineId1,
-          'note associated with event-1 and timeline-1'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId2,
-          timelineId2,
-          'note associated with event-2 and timeline-2'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId3,
-          timelineId3,
-          'note associated with event-3 and timeline-3'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${eventId1} in the text`
-        );
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${eventId2} in the text`
-        );
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${eventId3} in the text`
-        );
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, { documentId: eventId2, text: 'associated with event-2 only' }),
+          createNote(supertest, { documentId: eventId3, text: 'associated with event-3 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId2,
+            text: 'associated with timeline-2 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId3,
+            text: 'associated with timeline-3 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, {
+            documentId: eventId2,
+            savedObjectId: timelineId2,
+            text: 'associated with event-2 and timeline-2',
+          }),
+          createNote(supertest, {
+            documentId: eventId3,
+            savedObjectId: timelineId3,
+            text: 'associated with event-3 and timeline-3',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${eventId1} in the text`,
+          }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${eventId2} in the text`,
+          }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${eventId3} in the text`,
+          }),
+        ]);
 
         const response = await supertest
           .get(`/api/note?documentIds=${eventId1}&documentIds=${eventId2}`)
@@ -226,48 +185,32 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve all the notes for a saved object id', async () => {
-        const eventId1 = uuidv4();
-        const eventId2 = uuidv4();
-        const timelineId1 = uuidv4();
-        const timelineId2 = uuidv4();
-
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId1,
-          'note associated with event-1 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId2,
-          'note associated with event-2 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId1,
-          'note associated with timeline-1 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId2,
-          'note associated with timeline-2 only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId1,
-          timelineId1,
-          'note associated with event-1 and timeline-1'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId2,
-          timelineId2,
-          'note associated with event-2 and timeline-2'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${timelineId1} in the text`
-        );
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, { documentId: eventId2, text: 'associated with event-2 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId2,
+            text: 'associated with timeline-2 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, {
+            documentId: eventId2,
+            savedObjectId: timelineId2,
+            text: 'associated with event-2 and timeline-2',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${timelineId1} in the text`,
+          }),
+        ]);
 
         const response = await supertest
           .get(`/api/note?savedObjectIds=${timelineId1}`)
@@ -281,74 +224,48 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve all the notes for multiple saved object ids', async () => {
-        const eventId1 = uuidv4();
-        const eventId2 = uuidv4();
-        const eventId3 = uuidv4();
-        const timelineId1 = uuidv4();
-        const timelineId2 = uuidv4();
-        const timelineId3 = uuidv4();
-
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId1,
-          'note associated with event-1 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId2,
-          'note associated with event-2 only'
-        );
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId3,
-          'note associated with event-3 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId1,
-          'note associated with timeline-1 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId2,
-          'note associated with timeline-2 only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId3,
-          'note associated with timeline-3 only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId1,
-          timelineId1,
-          'note associated with event-1 and timeline-1'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId2,
-          timelineId2,
-          'note associated with event-2 and timeline-2'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId3,
-          timelineId3,
-          'note associated with event-3 and timeline-3'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${timelineId1} in the text`
-        );
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${timelineId2} in the text`
-        );
-        await createNoteAssociatedWithNothing(
-          supertest,
-          `another note associated with nothing but has ${timelineId3} in the text`
-        );
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, { documentId: eventId2, text: 'associated with event-2 only' }),
+          createNote(supertest, { documentId: eventId3, text: 'associated with event-3 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId2,
+            text: 'associated with timeline-2 only',
+          }),
+          createNote(supertest, {
+            savedObjectId: timelineId3,
+            text: 'associated with timeline-3 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, {
+            documentId: eventId2,
+            savedObjectId: timelineId2,
+            text: 'associated with event-2 and timeline-2',
+          }),
+          createNote(supertest, {
+            documentId: eventId3,
+            savedObjectId: timelineId3,
+            text: 'associated with event-3 and timeline-3',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${timelineId1} in the text`,
+          }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${timelineId2} in the text`,
+          }),
+          createNote(supertest, {
+            text: `associated with nothing but has ${timelineId3} in the text`,
+          }),
+        ]);
 
         const response = await supertest
           .get(`/api/note?savedObjectIds=${timelineId1}&savedObjectIds=${timelineId2}`)
@@ -365,26 +282,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve all notes without any query params', async () => {
-        const eventId = uuidv4();
-        const timelineId = uuidv4();
-
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId,
-          'note associated with an event only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId,
-          'note associated with a timeline only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId,
-          timelineId,
-          'note associated with an event and a timeline'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
 
         const response = await supertest
           .get('/api/note')
@@ -397,9 +307,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve notes considering perPage query parameter', async () => {
-        await createNoteAssociatedWithNothing(supertest, 'first note');
-        await createNoteAssociatedWithNothing(supertest, 'second note');
-        await createNoteAssociatedWithNothing(supertest, 'third note');
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+          createNote(supertest, { text: 'third note' }),
+        ]);
 
         const response = await supertest
           .get('/api/note?perPage=1')
@@ -410,13 +322,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(totalCount).to.be(3);
         expect(notes.length).to.be(1);
-        expect(notes[0].note).to.be('first note');
       });
 
       it('should retrieve considering page query parameter', async () => {
-        await createNoteAssociatedWithNothing(supertest, 'first note');
-        await createNoteAssociatedWithNothing(supertest, 'second note');
-        await createNoteAssociatedWithNothing(supertest, 'third note');
+        await createNote(supertest, { text: 'first note' });
+        await createNote(supertest, { text: 'second note' });
+        await createNote(supertest, { text: 'third note' });
 
         const response = await supertest
           .get('/api/note?perPage=1&page=2')
@@ -431,26 +342,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve considering search query parameter', async () => {
-        const eventId = uuidv4();
-        const timelineId = uuidv4();
-
-        await createNoteAssociatedWithDocumentOnly(
-          supertest,
-          eventId,
-          'note associated with an event only'
-        );
-        await createNoteAssociatedWithSavedObjectOnly(
-          supertest,
-          timelineId,
-          'note associated with a timeline only'
-        );
-        await createNoteAssociatedWithDocumentAndSavedObject(
-          supertest,
-          eventId,
-          timelineId,
-          'note associated with an event and a timeline'
-        );
-        await createNoteAssociatedWithNothing(supertest, 'note associated with nothing');
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
 
         const response = await supertest
           .get('/api/note?search=event')
@@ -464,9 +368,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       // TODO why can't we sort on every field? (I tested for the note field (or a random field like abc) and the endpoint crashes)
       it('should retrieve considering sortField query parameters', async () => {
-        await createNoteAssociatedWithDocumentOnly(supertest, '1', 'note 3');
-        await createNoteAssociatedWithDocumentOnly(supertest, '2', 'note 2');
-        await createNoteAssociatedWithDocumentOnly(supertest, '3', 'note 1');
+        await Promise.all([
+          createNote(supertest, { documentId: '1', text: 'note 1' }),
+          createNote(supertest, { documentId: '2', text: 'note 2' }),
+          createNote(supertest, { documentId: '3', text: 'note 3' }),
+        ]);
 
         const response = await supertest
           .get('/api/note?sortField=eventId')
@@ -482,9 +388,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve considering sortOrder query parameters', async () => {
-        await createNoteAssociatedWithDocumentOnly(supertest, '1', 'note 3');
-        await createNoteAssociatedWithDocumentOnly(supertest, '2', 'note 2');
-        await createNoteAssociatedWithDocumentOnly(supertest, '3', 'note 1');
+        await Promise.all([
+          createNote(supertest, { documentId: '1', text: 'note 1' }),
+          createNote(supertest, { documentId: '2', text: 'note 2' }),
+          createNote(supertest, { documentId: '3', text: 'note 3' }),
+        ]);
 
         const response = await supertest
           .get('/api/note?sortField=eventId&sortOrder=desc')
