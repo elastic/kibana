@@ -23,11 +23,7 @@ type SchemaInput = z.output<Schema>;
 
 const toolParams = {
   name: TOOL_NAME,
-  description: `You MUST use the "${TOOL_NAME}" function to convert queries from SPL language to ES|QL.
-The output will contain the ES|QL equivalent inside a \`\`\`esql code block and a markdown summary of the translation process inside a \`\`\`markdown code block.
-
-IMPORTANT: The SPL query must be passed directly without any wrapping or modification.
-`,
+  description: `ALWAYS use the "${TOOL_NAME}" tool to convert the Splunk detection rule (SPL) to an Elastic ES|QL query.`,
   schema,
   tags: ['esql', 'query-translation', 'knowledge-base'],
 };
@@ -36,50 +32,35 @@ const createInputPrompt = ({
   splQuery,
   title,
   description,
-}: SchemaInput) => `Translate the following SPL (Search Processing Language) query to ES|QL in order to be used in a Security detection rule:
+}: SchemaInput) => `Translate the following Splunk SPL (Search Processing Language) query rule to an ES|QL query, in order to be used as an Elastic Security detection rule:
 
+Splunk rule title: ${title}
+
+Splunk rule description: ${description}
+
+Splunk rule SPL query:
 \`\`\`spl
 ${splQuery}
 \`\`\`
 
-This SPL query is part of a Splunk rule with the following title and description:
-
-<SPLUNK_RULE_TITLE>
-${title}
-</SPLUNK_RULE_TITLE>
-
-<SPLUNK_RULE_DESCRIPTION>
-${description}
-</SPLUNK_RULE_DESCRIPTION>
-
 Along with the translated ES|QL query, you should also provide a summary of the translation process you followed, in markdown format.
-The output will be parsed using a regular expression, please format the output using the following guidelines:
-
-The summary of the translation process must be placed in a "markdown" code block, example:
-
-\`\`\`markdown
-[the summary goes here]
-\`\`\`
-
-The ES|QL translated query must be placed in a "esql" code block, example:
-
-\`\`\`esql
-[the translated query goes here]
-\`\`\`
+The output should contain:
+- First, the ES|QL query inside an \`\`\`esql code block.
+- At the end, the summary of the translation process followed in markdown, starting with "## Translation Summary".
 `;
 
-export type ESQLKnowledgeBaseTool = StructuredTool<Schema>;
+export type EsqlTranslatorTool = StructuredTool<Schema>;
 
-interface GetESQLKnowledgeBaseToolParams {
+interface GetEsqlTranslatorToolParams {
   inferenceClient: InferenceClient;
   connectorId: string;
   logger: Logger;
 }
-export const getESQLKnowledgeBaseTool = ({
+export const getEsqlTranslatorTool = ({
   inferenceClient: client,
   connectorId,
   logger,
-}: GetESQLKnowledgeBaseToolParams): ESQLKnowledgeBaseTool => {
+}: GetEsqlTranslatorToolParams): EsqlTranslatorTool => {
   const callNaturalLanguageToEsql = async (input: SchemaInput) => {
     return lastValueFrom(
       naturalLanguageToEsql({
@@ -95,7 +76,7 @@ export const getESQLKnowledgeBaseTool = ({
     );
   };
 
-  const esqlKBTool = tool<Schema>(async (input) => {
+  const esqlTool = tool<Schema>(async (input) => {
     const generateEvent = await callNaturalLanguageToEsql(input);
     const answer = generateEvent.content ?? 'An error occurred in the tool';
 
@@ -103,5 +84,5 @@ export const getESQLKnowledgeBaseTool = ({
     return answer;
   }, toolParams);
 
-  return esqlKBTool;
+  return esqlTool;
 };

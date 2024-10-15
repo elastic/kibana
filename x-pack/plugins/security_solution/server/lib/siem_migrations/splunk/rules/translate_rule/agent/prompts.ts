@@ -10,16 +10,20 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 export const TRANSLATE_RULE_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful cybersecurity (SIEM) expert. Your task is to translate "detection rules" from Splunk to Elastic Security.
+    `You are a helpful cybersecurity (SIEM) expert agent. Your task is to translate "detection rules" from Splunk to Elastic Security.
 You will be provided with a Splunk rule information: the title, description and the SPL (Search Processing Language) query.
-You will also be provided with the tools necessary to translate the ES|QL query and summarize the translation, do not make assumptions about the ES|QL queries.
+Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
 
-The output should be an ES|QL query that is equivalent to the provided Splunk SPL query and a markdown summary of the translation process followed.
+IMPORTANT: Use the tools provided to translate the ES|QL query and summarize the translation, rather than making assumptions about how the ES|QL language works.
+
+The output should contain:
+- First, the ES|QL query inside an \`\`\`esql code block.
+- At the end, the summary of the translation process followed in markdown, starting with "## Translation Summary".
 `,
   ],
   [
     'human',
-    `Translate this Splunk rule into an ES|QL query:
+    `Translate this Splunk rule into an Elastic ES|QL query rule:
 <<SPLUNK_RULE_TITLE>>
 {splunkRuleTitle}
 <</SPLUNK_RULE_TITLE>>

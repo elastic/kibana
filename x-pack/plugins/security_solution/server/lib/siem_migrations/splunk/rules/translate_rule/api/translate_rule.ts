@@ -17,7 +17,7 @@ import { SPLUNK_TRANSLATE_RULE_PATH } from '../../../../../../../common/api/siem
 import { getTranslateRuleGraph } from '../agent/graph';
 import type { TranslateRuleState } from '../agent/types';
 import { ActionsClientChat } from '../../../../actions_client_chat';
-import { getESQLKnowledgeBaseTool } from '../agent/tools/esql_knowledge_base_tool';
+import { getEsqlTranslatorTool } from '../agent/tools/esql_translator_tool';
 
 type SplunkTranslateRuleRouteResponse = IKibanaResponse<SplunkRuleMigrationTranslateRuleResponse>;
 
@@ -48,7 +48,7 @@ export const registerSplunkTranslateRuleRoute = (
           const ctx = await context.resolve(['core', 'actions', 'securitySolution']);
 
           const inferenceClient = ctx.securitySolution.getInferenceClient({ request: req });
-          const esqlKnowledgeBaseTool = getESQLKnowledgeBaseTool({
+          const esqlTranslatorTool = getEsqlTranslatorTool({
             inferenceClient,
             connectorId,
             logger,
@@ -73,7 +73,7 @@ export const registerSplunkTranslateRuleRoute = (
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
-          const graph = getTranslateRuleGraph({ model, esqlKnowledgeBaseTool });
+          const graph = getTranslateRuleGraph({ model, tools: [esqlTranslatorTool] });
           const translateRuleState = await graph.invoke(parameters, options);
 
           // const { response, messages } = translateRuleState as TranslateRuleState;

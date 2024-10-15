@@ -5,38 +5,44 @@
  * 2.0.
  */
 
+import type { ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
-  ActionsClientSimpleChatModel,
+  ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
 import type { CustomChatModelInput as ActionsClientBedrockChatModelParams } from '@kbn/langchain/server/language_models/bedrock_chat';
-import type { CustomChatModelInput as ActionsClientGeminiChatModelParams } from '@kbn/langchain/server/language_models/gemini_chat';
+import type { CustomChatModelInput as ActionsClientChatVertexAIParams } from '@kbn/langchain/server/language_models/gemini_chat';
 import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
 
 export type ChatModel =
   | ActionsClientSimpleChatModel
   | ActionsClientChatOpenAI
   | ActionsClientBedrockChatModel
-  | ActionsClientGeminiChatModel;
+  | ActionsClientChatVertexAI;
 
 export type ActionsClientChatModelClass =
   | typeof ActionsClientSimpleChatModel
   | typeof ActionsClientChatOpenAI
   | typeof ActionsClientBedrockChatModel
-  | typeof ActionsClientGeminiChatModel;
+  | typeof ActionsClientChatVertexAI;
 
 export type ChatModelParams = Partial<ActionsClientSimpleChatModelParams> &
   Partial<ActionsClientChatOpenAIParams> &
   Partial<ActionsClientBedrockChatModelParams> &
-  Partial<ActionsClientGeminiChatModelParams> & {
+  Partial<ActionsClientChatVertexAIParams> & {
     /** Enables the streaming mode of the response, disabled by default */
     streaming?: boolean;
   };
+
+const llmTypeDictionary: Record<string, string> = {
+  [`.gen-ai`]: `openai`,
+  [`.bedrock`]: `bedrock`,
+  [`.gemini`]: `gemini`,
+};
 
 export class ActionsClientChat {
   constructor(
@@ -67,21 +73,21 @@ export class ActionsClientChat {
   }
 
   private getLLMType(actionTypeId: string): string | undefined {
-    const llmTypeDictionary: Record<string, string> = {
-      [`.gen-ai`]: `openai`,
-      [`.bedrock`]: `bedrock`,
-      [`.gemini`]: `gemini`,
-    };
-    return llmTypeDictionary[actionTypeId];
+    if (llmTypeDictionary[actionTypeId]) {
+      return llmTypeDictionary[actionTypeId];
+    }
+    throw new Error(`Unknown LLM type for action type ID: ${actionTypeId}`);
   }
 
   private getLLMClass(llmType?: string): ActionsClientChatModelClass {
-    return llmType === 'openai'
-      ? ActionsClientChatOpenAI
-      : llmType === 'bedrock'
-      ? ActionsClientBedrockChatModel
-      : llmType === 'gemini'
-      ? ActionsClientGeminiChatModel
-      : ActionsClientSimpleChatModel;
+    switch (llmType) {
+      case 'bedrock':
+        return ActionsClientBedrockChatModel;
+      case 'gemini':
+        return ActionsClientChatVertexAI;
+      case 'openai':
+      default:
+        return ActionsClientChatOpenAI;
+    }
   }
 }

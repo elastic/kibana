@@ -8,7 +8,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 // import { StringOutputParser } from '@langchain/core/output_parsers';
-import type { StructuredTool } from '@langchain/core/tools';
 import type { AIMessage } from '@langchain/core/messages';
 import { translateRuleState } from './state';
 import type {
@@ -23,15 +22,6 @@ const callModel = async ({
   model,
 }: TranslateRuleNodeParams): Promise<Partial<TranslateRuleState>> => {
   const response = await model.invoke(state.messages);
-  // const translateCall = TRANSLATE_RULE_MAIN_PROMPT.pipe((initialMessages) =>
-  //   model.invoke([...initialMessages.toChatMessages(), ...state.messages])
-  // );
-
-  // const response = await translateCall.invoke({
-  //   splunkRuleTitle: state.splunkRuleTitle,
-  //   splunkRuleDescription: state.splunkRuleDescription,
-  //   splunkRuleQuery: state.splunkRuleQuery,
-  // });
   return { messages: [response] };
 };
 
@@ -47,31 +37,10 @@ function toolConditionalEdge(state: TranslateRuleState) {
   return END;
 }
 
-// export async function getTranslateRuleGraph({
-//   model,
-//   esqlKnowledgeBaseTool,
-// }: TranslateRuleGraphParams) {
-//   if (model.bindTools === undefined) {
-//     throw new Error(`The ${model.name} model does not support tools`);
-//   }
-//   const tools: StructuredTool[] = [esqlKnowledgeBaseTool];
-//   model.bindTools(tools);
-
-//   const translateRuleGraph = new StateGraph(translateRuleState)
-//     .addNode('callModel', (state: TranslateRuleState) => callModel({ state, model }))
-//     .addNode('tools', new ToolNode<TranslateRuleState>(tools))
-//     .addEdge(START, 'callModel')
-//     .addConditionalEdges('callModel', toolConditionalEdge)
-//     .addEdge('tools', 'callModel');
-
-//   return translateRuleGraph.compile();
-// }
-
-export function getTranslateRuleGraph({ model, esqlKnowledgeBaseTool }: TranslateRuleGraphParams) {
+export function getTranslateRuleGraph({ model, tools }: TranslateRuleGraphParams) {
   if (model.bindTools === undefined) {
     throw new Error(`The ${model.name} model does not support tools`);
   }
-  const tools: StructuredTool[] = [esqlKnowledgeBaseTool];
   model.bindTools(tools);
 
   const translateRuleGraph = new StateGraph(translateRuleState)
