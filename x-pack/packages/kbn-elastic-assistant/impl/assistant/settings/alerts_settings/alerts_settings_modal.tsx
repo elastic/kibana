@@ -39,7 +39,7 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
   const handleSave = useCallback(() => {
     saveSettings();
     onClose();
-  }, []);
+  }, [onClose, saveSettings]);
 
   return (
     <EuiModal onClose={onClose}>
