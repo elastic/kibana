@@ -15,6 +15,10 @@ import type {
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isEqual } from 'lodash/fp';
+import type { EngineDataviewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
+import type { AppClient } from '../../..';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityEngineRequestBody,
@@ -25,7 +29,6 @@ import type {
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { buildEntityDefinitionId, getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
@@ -45,6 +48,13 @@ import {
   deleteFieldRetentionEnrichPolicy,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
+import {
+  buildEntityDefinitionId,
+  buildIndexPatterns,
+  getEntitiesIndexName,
+  isPromiseFulfilled,
+  isPromiseRejected,
+} from './utils';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -54,6 +64,8 @@ interface EntityStoreClientOpts {
   taskManager?: TaskManagerStartContract;
   auditLogger?: AuditLogger;
   kibanaVersion: string;
+  dataViewsService: DataViewsService;
+  appClient: AppClient;
 }
 
 interface SearchEntitiesParams {
@@ -111,7 +123,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger, namespace, taskManager } = this.options;
+    const { logger, namespace, taskManager, appClient, dataViewsService } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -135,9 +147,11 @@ export class EntityStoreDataClient {
       indexPattern,
     });
     logger.debug(`Initialized engine for ${entityType}`);
+    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
     const unitedDefinition = getUnitedEntityDefinition({
+      indexPatterns,
       entityType,
       namespace,
       fieldHistoryLength,
@@ -224,7 +238,6 @@ export class EntityStoreDataClient {
 
   public async start(entityType: EntityType, options?: { force: boolean }) {
     const descriptor = await this.engineClient.get(entityType);
-
     if (!options?.force && descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
         `In namespace ${this.options.namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
@@ -276,9 +289,11 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     deleteData: boolean
   ) {
-    const { namespace, logger } = this.options;
+    const { namespace, logger, esClient, appClient, dataViewsService } = this.options;
     const descriptor = await this.engineClient.maybeGet(entityType);
+    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     const unitedDefinition = getUnitedEntityDefinition({
+      indexPatterns,
       entityType,
       namespace: this.options.namespace,
       fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
@@ -370,5 +385,84 @@ export class EntityStoreDataClient {
     };
 
     return { records, total, inspect };
+  }
+
+  public async applyDataViewIndices(): Promise<{
+    successes: EngineDataviewUpdateResult[];
+    errors: Error[];
+  }> {
+    const { logger } = this.options;
+    logger.info(
+      `In namespace ${this.options.namespace}: Applying data view indices to the entity store`
+    );
+
+    const { engines } = await this.engineClient.list();
+
+    const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = await engines.map(
+      async (engine) => {
+        const originalStatus = engine.status;
+        const id = buildEntityDefinitionId(engine.type, this.options.namespace);
+        const definition = await this.getExistingEntityDefinition(engine.type);
+
+        if (
+          originalStatus === ENGINE_STATUS.INSTALLING ||
+          originalStatus === ENGINE_STATUS.UPDATING
+        ) {
+          throw new Error(
+            `Error updating entity store: There is an changes already in progress for engine ${id}`
+          );
+        }
+
+        const indexPatterns = await buildIndexPatterns(
+          this.options.namespace,
+          this.options.appClient,
+          this.options.dataViewsService
+        );
+
+        // Skip update if index patterns are the same
+        if (isEqual(definition.indexPatterns, indexPatterns)) {
+          return { type: engine.type, changes: {} };
+        }
+
+        // Update savedObject status
+        await this.engineClient.update(engine.type, ENGINE_STATUS.UPDATING);
+
+        try {
+          // Update entity manager definition
+          await this.entityClient.updateEntityDefinition({
+            id,
+            definitionUpdate: {
+              ...definition,
+              indexPatterns,
+            },
+          });
+
+          // Restore the savedObject status and set the new index pattern
+          await this.engineClient.update(engine.type, originalStatus);
+
+          return { type: engine.type, changes: { indexPatterns } };
+        } catch (error) {
+          // Rollback the engine initial status when the update fails
+          await this.engineClient.update(engine.type, originalStatus);
+
+          throw error;
+        }
+      }
+    );
+
+    const updatedDefinitions = await Promise.allSettled(updateDefinitionPromises);
+
+    const updateErrors = updatedDefinitions
+      .filter(isPromiseRejected)
+      .map((result) => result.reason);
+
+    const updateSuccesses = updatedDefinitions
+      .filter(isPromiseFulfilled<EngineDataviewUpdateResult>)
+      .map((result) => result.value);
+
+    return {
+      successes: updateSuccesses,
+      errors: updateErrors,
+    };
   }
 }
