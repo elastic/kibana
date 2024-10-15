@@ -186,7 +186,7 @@ export default function (providerContext: FtrProviderContext) {
       const res = await supertest
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=yaml`)
         .expect(200);
-      console.log(res.text);
+
       expect(res.text).to.eql(expectedYml);
     });
 
