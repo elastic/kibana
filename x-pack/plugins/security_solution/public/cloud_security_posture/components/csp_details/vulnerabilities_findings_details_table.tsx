@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiIcon, EuiPanel, EuiLink, EuiText, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +42,13 @@ interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryName: string }) => {
-  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS);
+  useEffect(() => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.COUNT,
+      ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS
+    );
+  }, []);
+
   const { data } = useVulnerabilitiesFindings({
     query: buildEntityFlyoutPreviewQuery('host.name', queryName),
     sort: [],
