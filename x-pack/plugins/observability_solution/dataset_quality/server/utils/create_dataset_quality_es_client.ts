@@ -28,12 +28,12 @@ export type DatasetQualityESClient = ReturnType<typeof createDatasetQualityESCli
 
 export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
   return {
-    async search<TDocument, TParams extends DatasetQualityESSearchParams>(
+    search<TDocument, TParams extends DatasetQualityESSearchParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return esClient.search<TDocument>(searchParams) as Promise<any>;
     },
-    async msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
+    msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
       index = {} as { index?: Indices },
       searches: TParams[]
     ): Promise<{
@@ -43,24 +43,24 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
         searches: searches.map((search) => [index, search]).flat(),
       }) as Promise<any>;
     },
-    async fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
-      return esClient.fieldCaps(params) as Promise<any>;
+    fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
+      return esClient.fieldCaps(params);
     },
-    async mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
+    mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
       return esClient.indices.getMapping(params);
     },
-    async settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
+    settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
       return esClient.indices.getSettings(params);
     },
-    async updateComponentTemplate(
+    updateComponentTemplate(
       params: ClusterPutComponentTemplateRequest
     ): Promise<ClusterPutComponentTemplateResponse> {
       return esClient.cluster.putComponentTemplate(params);
     },
-    async updateSettings(params: IndicesPutSettingsRequest): Promise<IndicesPutSettingsResponse> {
+    updateSettings(params: IndicesPutSettingsRequest): Promise<IndicesPutSettingsResponse> {
       return esClient.indices.putSettings(params);
     },
-    async rollover(params: { alias: string }): Promise<IndicesRolloverResponse> {
+    rollover(params: { alias: string }): Promise<IndicesRolloverResponse> {
       return esClient.indices.rollover(params);
     },
   };

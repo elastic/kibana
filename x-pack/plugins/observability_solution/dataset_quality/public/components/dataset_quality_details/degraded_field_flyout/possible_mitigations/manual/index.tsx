@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -65,16 +64,13 @@ function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
         data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
         onClick={onClickHandler}
         target="_blank"
+        css={{ width: '100%' }}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <p>{otherMitigationsCustomComponentTemplate}</p>
-            </EuiTitle>
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiIcon type="popout" />
+          <EuiTitle size="xxs">
+            <p>{otherMitigationsCustomComponentTemplate}</p>
+          </EuiTitle>
         </EuiFlexGroup>
       </EuiLink>
     </EuiPanel>
@@ -103,16 +99,13 @@ function EditPipeline({ isIntegration }: { isIntegration: boolean }) {
         data-test-subj="datasetQualityManualMitigationsPipelineLink"
         onClick={onClickHandler}
         target="_blank"
+        css={{ width: '100%' }}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <p>{otherMitigationsCustomIngestPipeline}</p>
-            </EuiTitle>
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiIcon type="popout" />
+          <EuiTitle size="xxs">
+            <p>{otherMitigationsCustomIngestPipeline}</p>
+          </EuiTitle>
         </EuiFlexGroup>
       </EuiLink>
       <EuiSpacer size="s" />

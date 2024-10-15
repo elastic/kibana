@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 import { fieldLimitMitigationOfficialDocumentation } from '../../../../../../common/translations';
 
@@ -16,15 +16,14 @@ export function FieldLimitDocLink() {
   } = useKibanaContextForPlugin();
 
   return (
-    <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="xs">
-      <EuiLink
-        data-test-subj="datasetQualityManualMitigationsPipelineLink"
-        href={docLinks.links.elasticsearch.mappingSettingsLimit}
-        external
-        target="_blank"
-      >
-        {fieldLimitMitigationOfficialDocumentation}
-      </EuiLink>
-    </EuiFlexGroup>
+    <EuiLink
+      data-test-subj="datasetQualityManualMitigationsPipelineLink"
+      href={docLinks.links.elasticsearch.mappingSettingsLimit}
+      external
+      target="_blank"
+      className="eui-displayBlock eui-textRight"
+    >
+      {fieldLimitMitigationOfficialDocumentation}
+    </EuiLink>
   );
 }

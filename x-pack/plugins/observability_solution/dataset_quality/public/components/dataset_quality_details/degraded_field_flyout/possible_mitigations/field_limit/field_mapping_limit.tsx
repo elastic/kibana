@@ -54,8 +54,8 @@ export function FieldMappingLimit({ isIntegration }: { isIntegration: boolean })
         data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion"
         paddingSize="s"
       >
-        <EuiText size="xs">
-          <p>{fieldLimitMitigationDescriptionText}</p>
+        <EuiText size="xs" component="p">
+          {fieldLimitMitigationDescriptionText}
         </EuiText>
         <EuiHorizontalRule margin="s" />
         {degradedFieldAnalysis?.isFieldLimitIssue && (

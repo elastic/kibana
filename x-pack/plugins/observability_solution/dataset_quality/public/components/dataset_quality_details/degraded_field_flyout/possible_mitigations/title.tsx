@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiIcon, EuiTitle } from '@elastic/eui';
 
 import {
   overviewQualityIssuesAccordionTechPreviewBadge,
@@ -15,23 +15,18 @@ import {
 
 export function PossibleMitigationTitle() {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="wrench" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <p>{possibleMitigationTitle}</p>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          label={overviewQualityIssuesAccordionTechPreviewBadge}
-          color="hollow"
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge"
-          size="m"
-        />
-      </EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiIcon type="wrench" />
+      <EuiTitle size="xs">
+        <p>{possibleMitigationTitle}</p>
+      </EuiTitle>
+      <EuiBetaBadge
+        alignment="middle"
+        color="hollow"
+        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge"
+        label={overviewQualityIssuesAccordionTechPreviewBadge}
+        size="s"
+      />
     </EuiFlexGroup>
   );
 }
