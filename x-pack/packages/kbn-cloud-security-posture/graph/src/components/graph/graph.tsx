@@ -134,6 +134,7 @@ const processGraph = (
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
+      node.focusable = false;
     } else if (nodeData.shape === 'label' && nodeData.parentId) {
       node.parentId = nodeData.parentId;
       node.extent = 'parent';
@@ -162,6 +163,7 @@ const processGraph = (
       target: edgeData.target,
       targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
       focusable: false,
+      selectable: false,
       data: {
         ...edgeData,
         sourceShape: nodesById[edgeData.source].shape,

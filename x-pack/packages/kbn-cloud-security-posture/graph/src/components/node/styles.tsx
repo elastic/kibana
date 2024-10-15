@@ -80,6 +80,10 @@ export const LabelShapeOnHover = styled.div`
   ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
+
+  .react-flow__node:focus:focus-visible & {
+    opacity: 1; /* Show on hover */
+  }
 `;
 
 export const NodeShapeContainer = styled.div`
@@ -101,6 +105,10 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   transition: opacity 0.2s ease; /* Smooth transition */
 
   ${NodeShapeContainer}:hover & {
+    opacity: 1; /* Show on hover */
+  }
+
+  .react-flow__node:focus:focus-visible & {
     opacity: 1; /* Show on hover */
   }
 `;
@@ -167,6 +175,14 @@ export const StyledNodeButton = styled.div<NodeButtonProps>`
 
   ${NodeShapeContainer}:hover & {
     opacity: 1; /* Show on hover */
+  }
+
+  &:has(button:focus) {
+    opacity: 1; /* Show when button is active */
+  }
+
+  .react-flow__node:focus:focus-visible & {
+    opacity: 1; /* Show on node focus */
   }
 `;
 

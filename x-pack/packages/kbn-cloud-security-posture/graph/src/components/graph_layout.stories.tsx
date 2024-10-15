@@ -22,6 +22,9 @@ import { Graph } from '.';
 export default {
   title: 'Components/Graph Components/Graph Layout',
   description: 'CDR - Graph visualization',
+  argTypes: {
+    interactive: { control: 'boolean', defaultValue: true },
+  },
 };
 
 interface GraphData {
