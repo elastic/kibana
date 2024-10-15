@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
