@@ -27,7 +27,6 @@ const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
 const DASHBOARD_MARGIN_SIZE = 8;
-const DASHBOARD_TOP_OFFSET = 96 + 137; // 96 for Kibana navigation bar + 137 for dashboard top nav bar (in edit mode)
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -78,7 +77,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`toggleContextMenu`);
     await this.scrollPanelIntoView(wrapper);
     const toggleMenuItem = await this.findContextMenu(wrapper);
-    await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
+    await toggleMenuItem.click(await this.getContainerTopOffset());
   }
 
   async toggleContextMenuByTitle(title = '') {
