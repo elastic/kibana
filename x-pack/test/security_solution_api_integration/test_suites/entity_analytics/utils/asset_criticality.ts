@@ -86,15 +86,14 @@ export const assetCriticalityRouteHelpersFactory = (
   upsert: async (
     body: Record<string, unknown>,
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
-  ) => {
+  ) =>
     await supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
-      .expect(expectStatusCode);
-  },
+      .expect(expectStatusCode),
   delete: async (
     idField: string,
     idValue: string,
