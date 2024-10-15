@@ -710,6 +710,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
 
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
       // Wait for the rule to run once
       let run = 1;
       let runWhichItFlapped = 0;
