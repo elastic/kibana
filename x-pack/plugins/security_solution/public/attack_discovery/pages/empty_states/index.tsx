@@ -9,55 +9,51 @@ import React from 'react';
 
 import { Failure } from '../failure';
 import { EmptyPrompt } from '../empty_prompt';
-import { showFailurePrompt, showNoAlertsPrompt, showWelcomePrompt } from '../helpers';
+import { showEmptyPrompt, showNoAlertsPrompt, showWelcomePrompt } from '../helpers';
 import { NoAlerts } from '../no_alerts';
 import { Welcome } from '../welcome';
 
 interface Props {
-  aiConnectorsCount: number | null; // null when connectors are not configured
-  alertsContextCount: number | null; // null when unavailable for the current connector
+  aiConnectorsCount: number | null;
+  alertsContextCount: number | null;
+  alertsCount: number;
   attackDiscoveriesCount: number;
   connectorId: string | undefined;
   failureReason: string | null;
   isLoading: boolean;
   onGenerate: () => Promise<void>;
-  upToAlertsCount: number;
 }
 
 const EmptyStatesComponent: React.FC<Props> = ({
   aiConnectorsCount,
   alertsContextCount,
+  alertsCount,
   attackDiscoveriesCount,
   connectorId,
   failureReason,
   isLoading,
   onGenerate,
-  upToAlertsCount,
 }) => {
-  const isDisabled = connectorId == null;
-
   if (showWelcomePrompt({ aiConnectorsCount, isLoading })) {
     return <Welcome />;
-  }
-
-  if (showFailurePrompt({ connectorId, failureReason, isLoading })) {
+  } else if (!isLoading && failureReason != null) {
     return <Failure failureReason={failureReason} />;
+  } else if (showNoAlertsPrompt({ alertsContextCount, isLoading })) {
+    return <NoAlerts />;
+  } else if (showEmptyPrompt({ aiConnectorsCount, attackDiscoveriesCount, isLoading })) {
+    return (
+      <EmptyPrompt
+        alertsCount={alertsCount}
+        isDisabled={connectorId == null}
+        isLoading={isLoading}
+        onGenerate={onGenerate}
+      />
+    );
   }
 
-  if (showNoAlertsPrompt({ alertsContextCount, connectorId, isLoading })) {
-    return <NoAlerts isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
-  }
-
-  return (
-    <EmptyPrompt
-      aiConnectorsCount={aiConnectorsCount}
-      alertsCount={upToAlertsCount}
-      attackDiscoveriesCount={attackDiscoveriesCount}
-      isDisabled={isDisabled}
-      isLoading={isLoading}
-      onGenerate={onGenerate}
-    />
-  );
+  return null;
 };
+
+EmptyStatesComponent.displayName = 'EmptyStates';
 
 export const EmptyStates = React.memo(EmptyStatesComponent);

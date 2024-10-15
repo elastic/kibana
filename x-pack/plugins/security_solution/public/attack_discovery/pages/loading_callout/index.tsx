@@ -20,15 +20,13 @@ const BACKGROUND_COLOR_DARK = '#0B2030';
 const BORDER_COLOR_DARK = '#0B2030';
 
 interface Props {
-  alertsContextCount: number | null;
+  alertsCount: number;
   approximateFutureTime: Date | null;
   connectorIntervals: GenerationInterval[];
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
 }
 
 const LoadingCalloutComponent: React.FC<Props> = ({
-  alertsContextCount,
-  localStorageAttackDiscoveryMaxAlerts,
+  alertsCount,
   approximateFutureTime,
   connectorIntervals,
 }) => {
@@ -48,14 +46,11 @@ const LoadingCalloutComponent: React.FC<Props> = ({
           `}
           grow={false}
         >
-          <LoadingMessages
-            alertsContextCount={alertsContextCount}
-            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-          />
+          <LoadingMessages alertsCount={alertsCount} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsContextCount, euiTheme.size.m, localStorageAttackDiscoveryMaxAlerts]
+    [alertsCount, euiTheme.size.m]
   );
 
   const isDarkMode = theme.getTheme().darkMode === true;

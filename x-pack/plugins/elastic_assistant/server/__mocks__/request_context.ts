@@ -26,7 +26,7 @@ import {
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
