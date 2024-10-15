@@ -85,7 +85,7 @@ export const resetConversation = () => {
 export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
   cy.get(CONVERSATION_SELECT(conversationName)).click();
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', conversationName);
+  assertConversationTitle(conversationName);
   cy.get(FLYOUT_NAV_TOGGLE).click();
 };
 
@@ -94,7 +94,7 @@ export const updateConversationTitle = (newTitle: string) => {
   cy.get(CONVERSATION_TITLE + ' input').clear();
   cy.get(CONVERSATION_TITLE + ' input').type(newTitle);
   cy.get(CONVERSATION_TITLE + ' input').type('{enter}');
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
+  assertConversationTitle(newTitle);
 };
 
 export const typeAndSendMessage = (message: string) => {
@@ -170,8 +170,11 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
   } else {
     cy.get(EMPTY_CONVO).should('be.visible');
   }
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
+  assertConversationTitle(title);
 };
+
+export const assertConversationTitle = (title: string) =>
+  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 
 export const assertSystemPromptSent = (message: string) => {
   cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
