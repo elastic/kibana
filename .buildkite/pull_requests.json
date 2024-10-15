@@ -20,12 +20,10 @@
       "skip_target_branches": ["6.8", "7.11", "7.12"],
       "enable_skippable_commits": true,
       "skip_ci_on_only_changed": [
-        "^dev_docs/",
         "^docs/",
         "^rfcs/",
         "^\\.github/",
         "\\.md$",
-        "\\.mdx$",
         "^api_docs/.+\\.devdocs\\.json$",
         "^\\.backportrc\\.json$",
         "^nav-kibana-dev\\.docnav\\.json$",
