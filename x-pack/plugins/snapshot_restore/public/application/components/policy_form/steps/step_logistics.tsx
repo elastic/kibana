@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiCode,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -53,6 +54,19 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
 
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
+
+  const disableToolTip = (component: ReactElement): ReactElement => {
+    return policy?.isManagedPolicy ? (
+      <EuiToolTip
+        content="This field is disabled because you are editing a managed policy."
+        display="block"
+      >
+        {component}
+      </EuiToolTip>
+    ) : (
+      component
+    );
+  };
 
   const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] =
     useState<boolean>(false);
@@ -257,7 +271,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       setShowRepositoryNotFoundWarning(!doesRepositoryExist);
     }
 
-    return (
+    return disableToolTip(
       <EuiSelect
         options={repositories.map(({ name }: Repository) => ({
           value: name,
@@ -325,26 +339,28 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }
         fullWidth
       >
-        <EuiFieldText
-          defaultValue={policy.snapshotName}
-          fullWidth
-          onChange={(e) => {
-            updatePolicy({
-              snapshotName: e.target.value,
-            });
-          }}
-          onBlur={() => setTouched({ ...touched, snapshotName: true })}
-          placeholder={i18n.translate(
-            'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
-            {
-              defaultMessage: `'<daily-snap-{now/d}>'`,
-              description:
-                'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
-            }
-          )}
-          data-test-subj="snapshotNameInput"
-          disabled={policy?.isManagedPolicy && isEditing}
-        />
+        {disableToolTip(
+          <EuiFieldText
+            defaultValue={policy.snapshotName}
+            fullWidth
+            onChange={(e) => {
+              updatePolicy({
+                snapshotName: e.target.value,
+              });
+            }}
+            onBlur={() => setTouched({ ...touched, snapshotName: true })}
+            placeholder={i18n.translate(
+              'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
+              {
+                defaultMessage: `'<daily-snap-{now/d}>'`,
+                description:
+                  'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
+              }
+            )}
+            data-test-subj="snapshotNameInput"
+            disabled={policy?.isManagedPolicy && isEditing}
+          />
+        )}
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
