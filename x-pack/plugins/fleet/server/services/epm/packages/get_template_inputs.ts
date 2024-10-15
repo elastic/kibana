@@ -7,12 +7,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-<<<<<<< HEAD
 import { safeDump } from 'js-yaml';
-=======
-import { dump } from 'js-yaml';
 import yamlDoc from 'yaml';
->>>>>>> a63b93976c3 ([Fleet] Add placeholder and comments to integration config (#195735))
 
 import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
 
