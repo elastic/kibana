@@ -20,7 +20,7 @@ const RequestParamsSchema = schema.object({
 type RequestParams = TypeOf<typeof RequestParamsSchema>;
 
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsParams,
+  SyntheticsParams | undefined,
   RequestParams
 > = () => ({
   method: 'PUT',
@@ -44,8 +44,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     if (invalidResponse) return invalidResponse;
 
     const { id } = request.params;
-    const { share_across_spaces: _shareAcrossSpaces, ...data } =
-      request.body as SyntheticsParamRequest;
+    const data = request.body as SyntheticsParamRequest;
     try {
       const existingParam = await savedObjectsClient.get<SyntheticsParams>(syntheticsParamType, id);
 
