@@ -138,7 +138,7 @@ export interface Columns<T, U = T> {
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
-  truncateText?: boolean;
+  truncateText?: boolean | { lines: number };
   width?: string;
 }
 
