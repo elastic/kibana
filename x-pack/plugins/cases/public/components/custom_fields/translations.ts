@@ -51,6 +51,10 @@ export const TOGGLE_LABEL = i18n.translate('xpack.cases.customFields.toggleLabel
   defaultMessage: 'Toggle',
 });
 
+export const DATE_LABEL = i18n.translate('xpack.cases.customFields.dateLabel', {
+  defaultMessage: 'Date',
+});
+
 export const FIELD_TYPE = i18n.translate('xpack.cases.customFields.fieldType', {
   defaultMessage: 'Field type',
 });
