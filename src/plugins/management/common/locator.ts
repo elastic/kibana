@@ -12,10 +12,22 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { MANAGEMENT_APP_ID } from './contants';
 
-export interface ManagementAppLocatorParams extends SerializableRecord {
-  sectionId: string;
-  appId?: string;
-}
+export type ManagementAppLocatorParams = SerializableRecord &
+  (
+    | {
+        sectionId: string;
+        appId?: string;
+      }
+    | {
+        componentTemplate: string;
+      }
+    | {
+        indexTemplate: string;
+      }
+    | {
+        pipeline: string;
+      }
+  );
 
 export type ManagementAppLocator = LocatorPublic<ManagementAppLocatorParams>;
 
@@ -25,7 +37,7 @@ export class ManagementAppLocatorDefinition
   public readonly id = MANAGEMENT_APP_LOCATOR;
 
   public readonly getLocation = async (params: ManagementAppLocatorParams) => {
-    const path = `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
+    const path = buildPathFromParams(params);
 
     return {
       app: MANAGEMENT_APP_ID,
@@ -34,3 +46,23 @@ export class ManagementAppLocatorDefinition
     };
   };
 }
+
+const buildPathFromParams = (params: ManagementAppLocatorParams) => {
+  if (params.sectionId) {
+    return `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
+  }
+
+  if (params.indexTemplate) {
+    return `/data/index_management/templates/${params.indexTemplate}`;
+  }
+
+  if (params.componentTemplate) {
+    return `/data/index_management/component_templates/${params.componentTemplate}`;
+  }
+
+  if (params.pipeline) {
+    return `/ingest/ingest_pipelines/?pipeline=${params.pipeline}`;
+  }
+
+  return '/';
+};

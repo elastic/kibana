@@ -5,19 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiCopy,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import React from 'react';
+import { EuiLink, EuiPanel, EuiSpacer, EuiText, EuiCopy, EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 import {
   manualMitigationCustomPipelineText,
@@ -41,37 +30,36 @@ export function ManualMitigations() {
 
 function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
   const {
-    services: { application },
+    services: {
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibanaContextForPlugin();
 
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
 
-  const onClickHandler = useCallback(async () => {
-    await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: isIntegration
-        ? `/data/index_management/component_templates/${getComponentTemplatePrefixFromIndexTemplate(
+  const componentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl(
+    isIntegration
+      ? {
+          componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
             dataStreamSettings?.indexTemplate ?? name
-          )}@custom`
-        : `/data/index_management/templates/${dataStreamSettings?.indexTemplate}`,
-      openInNewTab: true,
-    });
-  }, [application, dataStreamSettings?.indexTemplate, isIntegration, name]);
+          )}@custom`,
+        }
+      : { indexTemplate: dataStreamSettings?.indexTemplate }
+  );
 
   return (
     <EuiPanel hasBorder grow={false}>
       <EuiLink
         data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
-        onClick={onClickHandler}
-        target="_blank"
+        href={componentTemplateUrl}
         css={{ width: '100%' }}
+        target="_blank"
+        external
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="popout" />
-          <EuiTitle size="xxs">
-            <p>{otherMitigationsCustomComponentTemplate}</p>
-          </EuiTitle>
-        </EuiFlexGroup>
+        {otherMitigationsCustomComponentTemplate}
       </EuiLink>
     </EuiPanel>
   );
@@ -79,34 +67,30 @@ function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
 
 function EditPipeline({ isIntegration }: { isIntegration: boolean }) {
   const {
-    services: { application },
+    services: {
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibanaContextForPlugin();
+
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
 
   const copyText = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
 
-  const onClickHandler = async () => {
-    await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: '/ingest/ingest_pipelines/?pipeline',
-      openInNewTab: true,
-    });
-  };
+  const pipelineUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({ pipeline: '' });
 
   return (
     <EuiPanel hasBorder grow={false}>
       <EuiLink
         data-test-subj="datasetQualityManualMitigationsPipelineLink"
-        onClick={onClickHandler}
+        href={pipelineUrl}
         target="_blank"
+        external
         css={{ width: '100%' }}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="popout" />
-          <EuiTitle size="xxs">
-            <p>{otherMitigationsCustomIngestPipeline}</p>
-          </EuiTitle>
-        </EuiFlexGroup>
+        {otherMitigationsCustomIngestPipeline}
       </EuiLink>
       <EuiSpacer size="s" />
       <EuiText data-test-subj="datasetQualityManualMitigationsPipelineLinkText" size="xs">
