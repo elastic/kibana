@@ -29,7 +29,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { findLastIndex, cloneDeep } from 'lodash';
+import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
@@ -45,7 +45,7 @@ import { SimulatedFunctionCallingCallout } from './simulated_function_calling_ca
 import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
-import { safeJsonParse } from '../utils/safe_json_parse';
+import { deserializeMessage } from '../utils/deserialize_message';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -227,31 +227,6 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const deserializeMessage = (message: Message): Message => {
-      const copiedMessage = cloneDeep(message);
-
-      if (
-        copiedMessage.message.function_call?.arguments &&
-        typeof copiedMessage.message.function_call?.arguments === 'string'
-      ) {
-        copiedMessage.message.function_call.arguments = safeJsonParse(
-          copiedMessage.message.function_call.arguments ?? '{}'
-        );
-      }
-
-      if (copiedMessage.message.name) {
-        if (copiedMessage.message.content && typeof copiedMessage.message.content === 'string') {
-          copiedMessage.message.content = safeJsonParse(copiedMessage.message.content);
-        }
-
-        if (copiedMessage.message.data && typeof copiedMessage.message.data === 'string') {
-          copiedMessage.message.data = safeJsonParse(copiedMessage.message.data);
-        }
-      }
-
-      return copiedMessage;
-    };
-
     const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
 
     const content = JSON.stringify({
