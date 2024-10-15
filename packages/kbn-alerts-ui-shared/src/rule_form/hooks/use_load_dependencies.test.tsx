@@ -333,6 +333,7 @@ describe('useLoadDependencies', () => {
     expect(useResolveRule).toBeCalledWith({
       http: httpMock,
       id: 'test-rule-id',
+      cacheTime: 0,
     });
   });
 
