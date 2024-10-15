@@ -253,6 +253,11 @@ export const EntityStoreManagementPage = () => {
     entityStoreStatus.status
   );
 
+  const isMutationLoading =
+    initEntityEngineMutation.isLoading ||
+    stopEntityEngineMutation.isLoading ||
+    deleteEntityEngineMutation.isLoading;
+
   return (
     <>
       <EuiPageHeader
@@ -274,16 +279,11 @@ export const EntityStoreManagementPage = () => {
             ? [
                 <EnablementButton
                   isLoading={
-                    initEntityEngineMutation.isLoading ||
-                    stopEntityEngineMutation.isLoading ||
-                    deleteEntityEngineMutation.isLoading ||
+                    isMutationLoading ||
                     entityStoreInstallingStatuses.includes(entityStoreStatus.status)
                   }
                   isDisabled={
-                    initEntityEngineMutation.isLoading ||
-                    stopEntityEngineMutation.isLoading ||
-                    deleteEntityEngineMutation.isLoading ||
-                    switchDisabledStatuses.includes(entityStoreStatus.status)
+                    isMutationLoading || switchDisabledStatuses.includes(entityStoreStatus.status)
                   }
                   onSwitch={onSwitchClick}
                   status={entityStoreStatus.status}
