@@ -43,11 +43,9 @@ export interface UseAttackDiscovery {
 
 export const useAttackDiscovery = ({
   connectorId,
-  size,
   setLoadingConnectorId,
 }: {
   connectorId: string | undefined;
-  size: number;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
   // get Kibana services and connectors
@@ -77,7 +75,7 @@ export const useAttackDiscovery = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // get alerts index pattern and allow lists from the assistant context:
-  const { alertsIndexPattern, traceOptions } = useAssistantContext();
+  const { alertsIndexPattern, knowledgeBase, traceOptions } = useAssistantContext();
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
@@ -97,11 +95,18 @@ export const useAttackDiscovery = ({
       alertsIndexPattern,
       anonymizationFields,
       genAiConfig,
-      size,
+      knowledgeBase,
       selectedConnector,
       traceOptions,
     });
-  }, [aiConnectors, alertsIndexPattern, anonymizationFields, connectorId, size, traceOptions]);
+  }, [
+    aiConnectors,
+    alertsIndexPattern,
+    anonymizationFields,
+    connectorId,
+    knowledgeBase,
+    traceOptions,
+  ]);
 
   useEffect(() => {
     if (
@@ -135,7 +140,7 @@ export const useAttackDiscovery = ({
   useEffect(() => {
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
-      if (pollData.attackDiscoveries.length && pollData.attackDiscoveries[0].timestamp != null) {
+      if (pollData.attackDiscoveries.length) {
         // get last updated from timestamp, not from updatedAt since this can indicate the last time the status was updated
         setLastUpdated(new Date(pollData.attackDiscoveries[0].timestamp));
       }
