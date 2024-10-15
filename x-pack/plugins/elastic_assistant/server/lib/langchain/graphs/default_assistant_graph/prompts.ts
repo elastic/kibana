@@ -17,6 +17,7 @@ import {
 export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
     ['placeholder', '{agent_scratchpad}'],
@@ -39,6 +40,7 @@ export const geminiToolCallingAgentPrompt = formatPrompt(systemPrompts.gemini);
 export const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     [
       'human',

@@ -6,5 +6,12 @@
  */
 
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
+import { addDecorator } from '@storybook/react';
+import { KibanaReactStorybookDecorator } from './storybook_decorator';
+import * as jest from 'jest-mock';
 
 export const decorators = [EuiThemeProviderDecorator];
+
+window.jest = jest;
+
+addDecorator(KibanaReactStorybookDecorator);

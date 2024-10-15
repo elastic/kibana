@@ -70,6 +70,7 @@ describe('AttachToActiveTimeline', () => {
           [TimelineId.active]: {
             ...mockGlobalState.timeline.timelineById[TimelineId.test],
             savedObjectId: 'savedObjectId',
+            status: 'active',
           },
         },
       },
@@ -104,6 +105,7 @@ describe('AttachToActiveTimeline', () => {
           [TimelineId.active]: {
             ...mockGlobalState.timeline.timelineById[TimelineId.test],
             savedObjectId: 'savedObjectId',
+            status: 'active',
           },
         },
       },

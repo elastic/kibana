@@ -136,6 +136,7 @@ export {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
   SOURCE_DATA_STREAM_TYPE,
+  ENTITY_IDENTITY_FIELDS,
 } from './field_names/elasticsearch';
 
 export {
@@ -216,3 +217,5 @@ export {
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
+
+export { EntityType, EntityDataStreamType } from './entity';
