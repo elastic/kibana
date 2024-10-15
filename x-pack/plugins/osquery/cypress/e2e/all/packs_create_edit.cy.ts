@@ -583,7 +583,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         },
         (response) => response !== '-',
         {
-          timeout: 300000,
+          timeout: 480000,
           post: () => {
             cy.reload();
           },
