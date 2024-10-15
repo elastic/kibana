@@ -13,6 +13,7 @@ export interface State {
   connector?: AIConnector;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
+  hasCelInput: boolean;
   result?: {
     pipeline: Pipeline;
     docs: Docs;
@@ -26,6 +27,7 @@ export const initialState: State = {
   connector: undefined,
   integrationSettings: undefined,
   isGenerating: false,
+  hasCelInput: false,
   result: undefined,
 };
 
@@ -34,6 +36,7 @@ type Action =
   | { type: 'SET_CONNECTOR'; payload: State['connector'] }
   | { type: 'SET_INTEGRATION_SETTINGS'; payload: State['integrationSettings'] }
   | { type: 'SET_IS_GENERATING'; payload: State['isGenerating'] }
+  | { type: 'SET_HAS_CEL_INPUT'; payload: State['hasCelInput'] }
   | { type: 'SET_GENERATED_RESULT'; payload: State['result'] }
   | { type: 'SET_CEL_INPUT_RESULT'; payload: State['celInputResult'] };
 
@@ -51,6 +54,8 @@ export const reducer = (state: State, action: Action): State => {
     case 'SET_INTEGRATION_SETTINGS':
       return { ...state, integrationSettings: action.payload };
     case 'SET_IS_GENERATING':
+      return { ...state, isGenerating: action.payload };
+    case 'SET_HAS_CEL_INPUT':
       return { ...state, isGenerating: action.payload };
     case 'SET_GENERATED_RESULT':
       return {
@@ -70,6 +75,7 @@ export interface Actions {
   setConnector: (payload: State['connector']) => void;
   setIntegrationSettings: (payload: State['integrationSettings']) => void;
   setIsGenerating: (payload: State['isGenerating']) => void;
+  setHasCelInput: (payload: State['hasCelInput']) => void;
   setResult: (payload: State['result']) => void;
   setCelInputResult: (payload: State['celInputResult']) => void;
 }
