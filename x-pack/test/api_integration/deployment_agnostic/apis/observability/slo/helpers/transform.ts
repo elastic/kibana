@@ -26,6 +26,7 @@ export function createTransformHelper(
           await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
             .set(cookieHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)
@@ -44,6 +45,7 @@ export function createTransformHelper(
           const response = await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
             .set(cookieHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
             .timeout(10000)
