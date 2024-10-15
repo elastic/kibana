@@ -16,10 +16,12 @@ import { EndpointCallout } from './endpoint_callout';
 
 export const IntegrationCardTopCallout = React.memo(
   ({
+    errorFetchAgentsData,
     installedIntegrationsCount,
     isAgentRequired,
     selectedTabId,
   }: {
+    errorFetchAgentsData: Error | undefined;
     installedIntegrationsCount: number;
     isAgentRequired: boolean;
     selectedTabId: IntegrationTabId;
@@ -41,6 +43,7 @@ export const IntegrationCardTopCallout = React.memo(
         {showAgentlessCallout && <AgentlessAvailableCallout />}
         {showInstalledCallout && (
           <InstalledIntegrationsCallout
+            errorFetchAgentsData={errorFetchAgentsData}
             isAgentRequired={isAgentRequired}
             installedIntegrationsCount={installedIntegrationsCount}
           />

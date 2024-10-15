@@ -17,6 +17,7 @@ import type { IntegrationCardMetadata } from './types';
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
+  // Card wouldn't even render if the user doesn't have access to package data
   const packageData = await services.http.get<GetPackagesResponse>(
     EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
     {
@@ -24,11 +25,17 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     }
   );
 
-  const agentsData = await lastValueFrom(
-    services.data.search.search({
-      params: { index: AGENT_INDEX, body: { size: 1 } },
-    })
-  );
+  let agentsData;
+  let errorFetchAgentsData;
+  try {
+    agentsData = await lastValueFrom(
+      services.data.search.search({
+        params: { index: AGENT_INDEX, body: { size: 1 } },
+      })
+    );
+  } catch (e) {
+    errorFetchAgentsData = e;
+  }
 
   const installed = packageData?.items?.filter(
     (pkg) =>
@@ -63,6 +70,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     metadata: {
       installedIntegrationsCount: installed.length,
       isAgentRequired,
+      errorFetchAgentsData,
     },
   };
 };

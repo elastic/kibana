@@ -29,4 +29,5 @@ export enum IntegrationTabId {
 export interface IntegrationCardMetadata {
   installedIntegrationsCount: number;
   isAgentRequired: boolean;
+  errorFetchAgentsData?: Error;
 }

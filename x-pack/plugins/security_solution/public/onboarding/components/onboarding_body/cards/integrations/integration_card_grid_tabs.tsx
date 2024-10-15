@@ -30,6 +30,7 @@ import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
 
 export interface IntegrationsCardGridTabsProps {
+  errorFetchAgentsData?: Error;
   installedIntegrationsCount: number;
   isAgentRequired: boolean;
   useAvailablePackages: AvailablePackagesHookType;
@@ -44,9 +45,10 @@ export const PackageListGrid = lazy(async () => ({
 }));
 
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
-  ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
+  ({ errorFetchAgentsData, installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
+
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id
@@ -164,6 +166,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
             <PackageListGrid
               callout={
                 <IntegrationCardTopCallout
+                  errorFetchAgentsData={errorFetchAgentsData}
                   isAgentRequired={isAgentRequired}
                   installedIntegrationsCount={installedIntegrationsCount}
                   selectedTabId={toggleIdSelected}

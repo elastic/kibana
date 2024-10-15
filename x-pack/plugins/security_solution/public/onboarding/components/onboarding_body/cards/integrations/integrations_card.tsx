@@ -17,19 +17,20 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
     if (!checkCompleteMetadata) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
     }
-    const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
+    const { installedIntegrationsCount, isAgentRequired, errorFetchAgentsData } =
+      checkCompleteMetadata;
 
     return (
       <OnboardingCardContentPanel>
         <IntegrationsCardGridTabs
           isAgentRequired={isAgentRequired}
           installedIntegrationsCount={installedIntegrationsCount}
+          errorFetchAgentsData={errorFetchAgentsData}
         />
       </OnboardingCardContentPanel>
     );
   }
 );
 IntegrationsCard.displayName = 'IntegrationsCard';
-
 // eslint-disable-next-line import/no-default-export
 export default IntegrationsCard;
