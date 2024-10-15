@@ -307,6 +307,17 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   security?: RouteSecurity;
+
+  /**
+   * Whether this endpoint is being used to server generated or static HTTP resources
+   * like JS, CSS or HTML.
+   *
+   * @note This is not a security feature and may affect superficial aspects of
+   *       the HTTP response like versioning. Do not use this setting for any HTTP APIs.
+   *
+   * @default false
+   */
+  httpResource?: boolean;
 }
 
 /**

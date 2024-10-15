@@ -148,11 +148,6 @@ export interface RouterOptions {
 /** @internal */
 export interface InternalRegistrarOptions {
   isVersioned: boolean;
-  /**
-   * @default false
-   * @remark cannot be set to `true` if `isVersioned` is true
-   */
-  isHTTPResource?: boolean;
 }
 
 /** @internal */
@@ -207,16 +202,15 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        { isVersioned, isHTTPResource }: InternalRegistrarOptions = { isVersioned: false }
+        { isVersioned }: InternalRegistrarOptions = { isVersioned: false }
       ) => {
-        if (isVersioned === true && isHTTPResource === true) {
-          throw new Error('A versioned route as an HTTP resource is not supported');
-        }
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
         // We do not consider HTTP resource routes as APIs
         const isPublicUnversionedApi =
-          !isHTTPResource && route.options?.access === 'public' && !isVersioned;
+          route.options?.httpResource !== true &&
+          route.options?.access === 'public' &&
+          !isVersioned;
 
         this.routes.push({
           handler: async (req, responseToolkit) =>

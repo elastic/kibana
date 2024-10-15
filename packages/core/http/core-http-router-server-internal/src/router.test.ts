@@ -181,19 +181,18 @@ describe('Router', () => {
           },
           validate: false,
         },
-        (context, req, res) => res.ok(),
-        { isVersioned: false, isHTTPResource: false }
+        (context, req, res) => res.ok()
       );
       router.post(
         {
           path: '/public-resource',
           options: {
             access: 'public',
+            httpResource: true,
           },
           validate: false,
         },
-        (context, req, res) => res.ok(),
-        { isVersioned: false, isHTTPResource: true }
+        (context, req, res) => res.ok()
       );
       const [{ handler: publicHandler }, { handler: resourceHandler }] = router.getRoutes();
 
@@ -370,18 +369,6 @@ describe('Router', () => {
       router.get({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});
-    });
-  });
-
-  describe('Internal options', () => {
-    it('does not allow registering a router as versioned and an HTTP resource', () => {
-      const router = new Router('', logger, enhanceWithContext, routerOptions);
-      expect(() => {
-        router.get({ path: '/', validate: false }, async (ctx, req, res) => res.notFound(), {
-          isVersioned: true,
-          isHTTPResource: true,
-        });
-      }).toThrowError(/not supported/);
     });
   });
 });

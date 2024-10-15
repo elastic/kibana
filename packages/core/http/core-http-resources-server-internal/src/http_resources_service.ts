@@ -32,7 +32,6 @@ import type {
   HttpResourcesServiceToolkit,
 } from '@kbn/core-http-resources-server';
 
-import type { Router } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpResourcesSetup } from './types';
 
 /**
@@ -85,13 +84,14 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B, Context>
       ) => {
-        return (router as unknown as Router<RequestHandlerContext>).get<P, Q, B>(
+        return router.get<P, Q, B>(
           {
             ...route,
             options: {
               access: 'public',
               excludeFromOAS: true,
               ...route.options,
+              httpResource: true,
             },
           },
           (context, request, response) => {
@@ -99,8 +99,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
               ...response,
               ...this.createResponseToolkit(deps, context, request, response),
             });
-          },
-          { isVersioned: false, isHTTPResource: true }
+          }
         );
       },
     };
