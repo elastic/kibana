@@ -49,7 +49,7 @@ const entityStoreInstallingStatuses = ['installing', 'loading'];
 
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const isEntityStoreFeatureFlagEnabled = useIsExperimentalFeatureEnabled('entityStoreEnabled');
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const {
     data: assetCriticalityPrivileges,
@@ -270,7 +270,7 @@ export const EntityStoreManagementPage = () => {
         }
         alignItems="center"
         rightSideItems={
-          isEntityStoreFeatureFlagEnabled
+          !isEntityStoreFeatureFlagDisabled
             ? [
                 <EnablementButton
                   isLoading={
@@ -299,7 +299,7 @@ export const EntityStoreManagementPage = () => {
           defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
         />
       </EuiText>
-      {!isEntityStoreFeatureFlagEnabled && <EntityStoreFeatureFlagNotAvailableCallout />}
+      {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
@@ -307,7 +307,7 @@ export const EntityStoreManagementPage = () => {
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
             <WhatIsAssetCriticalityPanel />
-            {isEntityStoreFeatureFlagEnabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
+            {!isEntityStoreFeatureFlagDisabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
