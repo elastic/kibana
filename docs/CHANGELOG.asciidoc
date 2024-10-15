@@ -88,7 +88,7 @@ The 8.15.3 release includes the following bug fixes.
 Alerting::
 * Fixes a storage configuration error that could prevent the Stack Management > Alerts page from loading correctly ({kibana-pull}194785[#194785]).
 * Fixes a bug preventing certain alerts with Role visibility set to "Stack Rules" from being shown on the Stack Management page ({kibana-pull}194615[#194615]).
-* Fixes an issue where rules created from Discover before version 8.11.0 could no longer be accessed after upgrading. ({kibana-pull}192321[#192321]).
+* Fixes an issue where rules created from Discover before version 8.11.0 could no longer be accessed after upgrading ({kibana-pull}192321[#192321]).
 Dashboards::
 * Fixes an issue where the `embed=true` parameter was missing when sharing a dashboard with the Embed code option ({kibana-pull}194366[#194366]).
 Discover::
