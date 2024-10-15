@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
@@ -74,11 +73,7 @@ export function ApmMainTemplate({
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
-  const { config, core } = useApmPluginContext();
-  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
-    entityCentricExperience,
-    true
-  );
+  const { config } = useApmPluginContext();
   const { serviceEntitySummary } = useApmServiceContext();
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { isEntityManagerEnabled } = useEntityManager();
@@ -168,7 +163,7 @@ export function ApmMainTemplate({
 
   const showEntitiesInventoryCallout =
     !dismissedEntitiesInventoryCallout &&
-    isEntityCentricExperienceSettingEnabled &&
+    isEntityCentricExperienceEnabled &&
     selectedNavButton !== undefined;
 
   return (
