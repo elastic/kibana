@@ -7,33 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { getLoadingCalloutAlertsCount } from './get_loading_callout_alerts_count';
 import * as i18n from '../translations';
 
 const TEXT_COLOR = '#343741';
 
 interface Props {
-  alertsContextCount: number | null;
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  alertsCount: number;
 }
 
-const LoadingMessagesComponent: React.FC<Props> = ({
-  alertsContextCount,
-  localStorageAttackDiscoveryMaxAlerts,
-}) => {
+const LoadingMessagesComponent: React.FC<Props> = ({ alertsCount }) => {
   const { theme } = useKibana().services;
 
   const isDarkMode = theme.getTheme().darkMode === true;
-
-  const alertsCount = getLoadingCalloutAlertsCount({
-    alertsContextCount,
-    defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-    localStorageAttackDiscoveryMaxAlerts,
-  });
 
   return (
     <EuiFlexGroup data-test-subj="loadingMessages" direction="column" gutterSize="none">

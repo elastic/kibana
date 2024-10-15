@@ -12,7 +12,6 @@ describe('helpers', () => {
     it('returns true when isLoading is false and alertsContextCount is 0', () => {
       const result = showNoAlertsPrompt({
         alertsContextCount: 0,
-        connectorId: 'test',
         isLoading: false,
       });
 
@@ -22,7 +21,6 @@ describe('helpers', () => {
     it('returns false when isLoading is true', () => {
       const result = showNoAlertsPrompt({
         alertsContextCount: 0,
-        connectorId: 'test',
         isLoading: true,
       });
 
@@ -32,7 +30,6 @@ describe('helpers', () => {
     it('returns false when alertsContextCount is null', () => {
       const result = showNoAlertsPrompt({
         alertsContextCount: null,
-        connectorId: 'test',
         isLoading: false,
       });
 
@@ -42,7 +39,6 @@ describe('helpers', () => {
     it('returns false when alertsContextCount greater than 0', () => {
       const result = showNoAlertsPrompt({
         alertsContextCount: 20,
-        connectorId: 'test',
         isLoading: false,
       });
 
