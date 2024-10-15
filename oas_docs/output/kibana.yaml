@@ -41371,9 +41371,7 @@ paths:
               required:
                 - retries
                 - objects
-      responses:
-        '200':
-          description: Indicates a successful call.
+      responses: {}
       summary: Resolve conflicts copying saved objects
       tags: []
   /api/spaces/_update_objects_spaces:

@@ -42042,11 +42042,7 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          }
-        },
+        "responses": {},
         "summary": "Resolve conflicts copying saved objects",
         "tags": []
       }
