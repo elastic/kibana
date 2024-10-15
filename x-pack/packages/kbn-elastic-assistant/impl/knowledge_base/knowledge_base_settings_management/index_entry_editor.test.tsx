@@ -55,10 +55,10 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the name field on change', () => {
-    const { getByPlaceholderText } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
 
     waitFor(() => {
-      const nameInput = getByPlaceholderText(i18n.ENTRY_NAME_INPUT_PLACEHOLDER);
+      const nameInput = getByTestId('entry-name');
       fireEvent.change(nameInput, { target: { value: 'New Entry Name' } });
     });
 
@@ -66,9 +66,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the description field on change', () => {
-    const { getByPlaceholderText } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
     waitFor(() => {
-      const descriptionInput = getByPlaceholderText(i18n.ENTRY_DESCRIPTION_HELP_LABEL);
+      const descriptionInput = getByTestId('entry-description');
       fireEvent.change(descriptionInput, { target: { value: 'New Description' } });
     });
 
@@ -76,9 +76,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the query description field on change', () => {
-    const { getByPlaceholderText } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
     waitFor(() => {
-      const queryDescriptionInput = getByPlaceholderText(i18n.ENTRY_QUERY_DESCRIPTION_HELP_LABEL);
+      const queryDescriptionInput = getByTestId('query-description');
       fireEvent.change(queryDescriptionInput, { target: { value: 'New Query Description' } });
     });
 

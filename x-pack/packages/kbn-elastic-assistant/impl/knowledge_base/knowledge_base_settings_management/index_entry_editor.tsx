@@ -177,7 +177,13 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           helpText={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
           fullWidth
         >
-          <EuiFieldText name="name" fullWidth value={entry?.name} onChange={setName} />
+          <EuiFieldText
+            data-test-subj="entry-name"
+            name="name"
+            fullWidth
+            value={entry?.name}
+            onChange={setName}
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.ENTRY_SHARING_INPUT_LABEL}
@@ -246,6 +252,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             name="description"
             fullWidth
             placeholder={i18n.ENTRY_DESCRIPTION_PLACEHOLDER}
+            data-test-subj="entry-description"
             value={entry?.description}
             onChange={setDescription}
             rows={2}
@@ -259,6 +266,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           <EuiTextArea
             name="query_description"
             placeholder={i18n.ENTRY_QUERY_DESCRIPTION_PLACEHOLDER}
+            data-test-subj="query-description"
             value={entry?.queryDescription}
             onChange={setQueryDescription}
             fullWidth
