@@ -36,6 +36,7 @@ interface ConnectorConfigurationForm {
   isLoading: boolean;
   isNative: boolean;
   saveConfig: (config: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (config: Record<string, string | number | boolean | null>) => void;
   stackManagementHref?: string;
   subscriptionLink?: string;
 }
@@ -60,6 +61,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
   isLoading,
   isNative,
   saveConfig,
+  saveAndSync,
 }) => {
   const [localConfig, setLocalConfig] = useState<ConnectorConfiguration>(configuration);
   const [configView, setConfigView] = useState<ConfigView>(
@@ -109,6 +111,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
             setConfigEntry={(key, value) => {
+              const entry = localConfig[key];
+              if (entry && !isCategoryEntry(entry)) {
+                const newConfiguration: ConnectorConfiguration = {
+                  ...localConfig,
+                  [key]: { ...entry, value },
+                };
+                setLocalConfig(newConfiguration);
+              }
+
               const categories = configView.categories;
               categories[index] = { ...categories[index], [key]: value };
               setConfigView({
@@ -136,6 +147,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
               setConfigEntry={(key, value) => {
+                const entry = localConfig[key];
+                if (entry && !isCategoryEntry(entry)) {
+                  const newConfiguration: ConnectorConfiguration = {
+                    ...localConfig,
+                    [key]: { ...entry, value },
+                  };
+                  setLocalConfig(newConfiguration);
+                }
+
                 setConfigView({
                   ...configView,
                   advancedConfigurations: configView.advancedConfigurations.map((config) =>
@@ -149,19 +169,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
       )}
       <EuiSpacer />
       <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
-              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
-              type="submit"
-              isLoading={isLoading}
-            >
-              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
-                defaultMessage: 'Save configuration',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
@@ -178,6 +186,38 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={isLoading}
+            >
+              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          {saveAndSync && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+                data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+                isLoading={isLoading}
+                fill
+                onClick={() => {
+                  saveAndSync(configViewToConfigValues(configView));
+                }}
+              >
+                {i18n.translate(
+                  'searchConnectors.configurationConnector.config.submitButton.title',
+                  {
+                    defaultMessage: 'Save and sync',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFormRow>
     </EuiForm>
