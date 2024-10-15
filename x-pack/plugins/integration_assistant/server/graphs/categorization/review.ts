@@ -13,7 +13,7 @@ import type { SimplifiedProcessors, SimplifiedProcessor, CategorizationState } f
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { selectResults } from './util';
-import { MAX_SAMPLES_TO_REVIEW_CATEGORIZATION } from '../../../common/constants';
+import { CATEROGIZATION_REVIEW_BATCH_SIZE } from '../../../common/constants';
 
 export async function handleReview({
   state,
@@ -25,7 +25,7 @@ export async function handleReview({
 
   const [pipelineResults, selectedIndices] = selectResults(
     state.pipelineResults,
-    MAX_SAMPLES_TO_REVIEW_CATEGORIZATION,
+    CATEROGIZATION_REVIEW_BATCH_SIZE,
     new Set(state.stableSamples)
   );
 

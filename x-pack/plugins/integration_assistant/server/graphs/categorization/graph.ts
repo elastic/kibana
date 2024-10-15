@@ -19,7 +19,7 @@ import { handleReview } from './review';
 import type { CategorizationBaseNodeParams, CategorizationGraphParams } from './types';
 import { handleCategorizationValidation } from './validate';
 import { handleUpdateStableSamples } from './stable';
-import { MAX_CATEGORIZATION_REVIEW_CYCLES } from '../../../common/constants';
+import { CATEGORIZATION_REVIEW_MAX_CYCLES } from '../../../common/constants';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -174,7 +174,7 @@ function chainRouter({ state }: CategorizationBaseNodeParams): string {
 
   if (
     state.stableSamples.length < state.pipelineResults.length &&
-    state.reviewCount < MAX_CATEGORIZATION_REVIEW_CYCLES
+    state.reviewCount < CATEGORIZATION_REVIEW_MAX_CYCLES
   ) {
     return 'review';
   }

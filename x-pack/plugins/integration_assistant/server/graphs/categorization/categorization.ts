@@ -12,7 +12,7 @@ import { CATEGORIZATION_EXAMPLE_PROCESSORS } from './constants';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 import type { CategorizationNodeParams } from './types';
 import { selectResults } from './util';
-import { MAX_SAMPLES_TO_CATEGORIZE } from '../../../common/constants';
+import { CATEGORIZATION_INITIAL_BATCH_SIZE } from '../../../common/constants';
 
 export async function handleCategorization({
   state,
@@ -24,7 +24,7 @@ export async function handleCategorization({
 
   const [pipelineResults, _] = selectResults(
     state.pipelineResults,
-    MAX_SAMPLES_TO_CATEGORIZE,
+    CATEGORIZATION_INITIAL_BATCH_SIZE,
     new Set(state.stableSamples)
   );
 
