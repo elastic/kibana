@@ -10,19 +10,18 @@ import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.4.0',
+    version: '0.5.0',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    indexPatterns: ['logs-*', 'filebeat*', 'traces-apm*'],
-    history: {
+    indexPatterns: ['logs-*', 'filebeat*', 'traces-*'],
+    latest: {
       timestampField: '@timestamp',
-      interval: '1m',
+      lookbackPeriod: '10m',
       settings: {
-        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },

@@ -55,3 +55,4 @@ spec:
           branch: main
       tags:
         - kibana
+        - kibana-serverless-release
