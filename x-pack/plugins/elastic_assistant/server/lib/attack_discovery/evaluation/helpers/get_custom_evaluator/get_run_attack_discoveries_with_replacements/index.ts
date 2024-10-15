@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  AttackDiscoveries,
-  Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
+import { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import type { Run } from 'langsmith/schemas';
+
+import { getDiscoveriesWithOriginalValues } from '../../get_discoveries_with_original_values';
 
 export const getRunAttackDiscoveriesWithReplacements = (run: Run): AttackDiscoveries => {
   const runAttackDiscoveries = run.outputs?.attackDiscoveries;
@@ -20,25 +18,10 @@ export const getRunAttackDiscoveriesWithReplacements = (run: Run): AttackDiscove
   const validatedAttackDiscoveries = AttackDiscoveries.parse(runAttackDiscoveries);
   const validatedReplacements = Replacements.parse(runReplacements);
 
-  const withReplacements = validatedAttackDiscoveries.map((attackDiscovery) => ({
-    ...attackDiscovery,
-    detailsMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.detailsMarkdown,
-      replacements: validatedReplacements,
-    }),
-    entitySummaryMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.entitySummaryMarkdown ?? '',
-      replacements: validatedReplacements,
-    }),
-    summaryMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.summaryMarkdown,
-      replacements: validatedReplacements,
-    }),
-    title: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.title,
-      replacements: validatedReplacements,
-    }),
-  }));
+  const withReplacements = getDiscoveriesWithOriginalValues({
+    attackDiscoveries: validatedAttackDiscoveries,
+    replacements: validatedReplacements,
+  });
 
   return withReplacements;
 };

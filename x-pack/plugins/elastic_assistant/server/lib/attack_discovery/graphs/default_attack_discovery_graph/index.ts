@@ -8,13 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import type { ActionsClientLlm, AssistantToolLlm } from '@kbn/langchain/server';
+import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { CompiledStateGraph } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
 import { NodeType } from './constants';
-import { getGeneratOrEndEdge } from './edges/generate_or_end';
-import { getGeneratOrRefineOrEndEdge } from './edges/generate_or_refine_or_end';
+import { getGenerateOrEndEdge } from './edges/generate_or_end';
+import { getGenerateOrRefineOrEndEdge } from './edges/generate_or_refine_or_end';
 import { getRefineOrEndEdge } from './edges/refine_or_end';
 import { getRetrieveAnonymizedAlertsOrGenerateEdge } from './edges/retrieve_anonymized_alerts_or_generate';
 import { getDefaultGraphState } from './state';
@@ -27,7 +27,7 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   alertsIndexPattern?: string;
   anonymizationFields: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
-  llm: ActionsClientLlm | AssistantToolLlm;
+  llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
@@ -82,9 +82,9 @@ export const getDefaultAttackDiscoveryGraph = ({
     });
 
     // get edges:
-    const generateOrEndEdge = getGeneratOrEndEdge(logger);
+    const generateOrEndEdge = getGenerateOrEndEdge(logger);
 
-    const generatOrRefineOrEndEdge = getGeneratOrRefineOrEndEdge(logger);
+    const generatOrRefineOrEndEdge = getGenerateOrRefineOrEndEdge(logger);
 
     const refineOrEndEdge = getRefineOrEndEdge(logger);
 

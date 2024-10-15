@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { getGeneratOrRefineOrEndEdge } from '.';
+import { getGenerateOrRefineOrEndEdge } from '.';
 import type { GraphState } from '../../types';
 
 const logger = loggerMock.create();
@@ -48,7 +48,7 @@ const graphState: GraphState = {
   unrefinedResults: null,
 };
 
-describe('getGeneratOrRefineOrEndEdge', () => {
+describe('getGenerateOrRefineOrEndEdge', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns "end" when there are zero alerts', () => {
@@ -57,7 +57,7 @@ describe('getGeneratOrRefineOrEndEdge', () => {
       anonymizedAlerts: [], // <-- zero alerts
     };
 
-    const edge = getGeneratOrRefineOrEndEdge(logger);
+    const edge = getGenerateOrRefineOrEndEdge(logger);
     const result = edge(withZeroAlerts);
 
     expect(result).toEqual('end');
@@ -69,7 +69,7 @@ describe('getGeneratOrRefineOrEndEdge', () => {
       hallucinationFailures: 5,
     };
 
-    const edge = getGeneratOrRefineOrEndEdge(logger);
+    const edge = getGenerateOrRefineOrEndEdge(logger);
     const result = edge(withMaxHallucinationFailures);
 
     expect(result).toEqual('end');
@@ -81,7 +81,7 @@ describe('getGeneratOrRefineOrEndEdge', () => {
       generationAttempts: 10,
     };
 
-    const edge = getGeneratOrRefineOrEndEdge(logger);
+    const edge = getGenerateOrRefineOrEndEdge(logger);
     const result = edge(withMaxRetries);
 
     expect(result).toEqual('end');
@@ -103,14 +103,14 @@ describe('getGeneratOrRefineOrEndEdge', () => {
       ],
     };
 
-    const edge = getGeneratOrRefineOrEndEdge(logger);
+    const edge = getGenerateOrRefineOrEndEdge(logger);
     const result = edge(withUnrefinedResults);
 
     expect(result).toEqual('refine');
   });
 
   it('return generate when there are no unrefined results', () => {
-    const edge = getGeneratOrRefineOrEndEdge(logger);
+    const edge = getGenerateOrRefineOrEndEdge(logger);
     const result = edge(graphState);
 
     expect(result).toEqual('generate');

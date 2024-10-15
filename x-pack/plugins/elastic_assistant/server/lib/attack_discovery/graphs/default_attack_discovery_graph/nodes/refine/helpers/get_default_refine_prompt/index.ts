@@ -8,4 +8,4 @@
 export const getDefaultRefinePrompt =
   (): string => `You previously generated the following insights, but sometimes they represent the same attack.
 
-Combine the insights below, but only if they represent the same attack; (don't modify any insights that are not combined):`;
+Combine the insights below, when they represent the same attack; leave any insights that are not combined unchanged:`;

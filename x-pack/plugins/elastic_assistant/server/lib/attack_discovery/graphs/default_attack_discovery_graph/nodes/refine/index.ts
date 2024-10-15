@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm, AssistantToolLlm } from '@kbn/langchain/server';
+import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
@@ -25,7 +25,7 @@ export const getRefineNode = ({
   llm,
   logger,
 }: {
-  llm: ActionsClientLlm | AssistantToolLlm;
+  llm: ActionsClientLlm;
   logger?: Logger;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const refine = async (state: GraphState): Promise<GraphState> => {

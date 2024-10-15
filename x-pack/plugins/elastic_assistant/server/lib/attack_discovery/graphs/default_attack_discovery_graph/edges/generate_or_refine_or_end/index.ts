@@ -14,7 +14,7 @@ import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_halluc
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import type { GraphState } from '../../types';
 
-export const getGeneratOrRefineOrEndEdge = (logger?: Logger) => {
+export const getGenerateOrRefineOrEndEdge = (logger?: Logger) => {
   const edge = (state: GraphState): 'end' | 'generate' | 'refine' => {
     logger?.debug(() => '---GENERATE OR REFINE OR END---');
     const {
@@ -34,9 +34,16 @@ export const getGeneratOrRefineOrEndEdge = (logger?: Logger) => {
       maxHallucinationFailures,
     });
 
+    const decision = getGenerateOrRefineOrEndDecision({
+      hasUnrefinedResults,
+      hasZeroAlerts,
+      maxHallucinationFailuresReached,
+      maxRetriesReached,
+    });
+
     logger?.debug(
       () =>
-        `generatOrRefineOrEndEdge is evaluating the following (derived) state:\n${JSON.stringify(
+        `generatOrRefineOrEndEdge evaluated the following (derived) state:\n${JSON.stringify(
           {
             anonymizedAlerts: anonymizedAlerts.length,
             generationAttempts,
@@ -49,17 +56,9 @@ export const getGeneratOrRefineOrEndEdge = (logger?: Logger) => {
           },
           null,
           2
-        )}`
+        )}
+        \n---GENERATE OR REFINE OR END: ${decision}---`
     );
-
-    const decision = getGenerateOrRefineOrEndDecision({
-      hasUnrefinedResults,
-      hasZeroAlerts,
-      maxHallucinationFailuresReached,
-      maxRetriesReached,
-    });
-
-    logger?.debug(() => `---GENERATE OR REFINE OR END: ${decision}---`);
     return decision;
   };
 

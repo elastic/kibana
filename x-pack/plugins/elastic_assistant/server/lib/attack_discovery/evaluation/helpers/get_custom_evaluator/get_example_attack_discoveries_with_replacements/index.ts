@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  AttackDiscoveries,
-  Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
+import { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import type { Example } from 'langsmith/schemas';
+
+import { getDiscoveriesWithOriginalValues } from '../../get_discoveries_with_original_values';
 
 export const getExampleAttackDiscoveriesWithReplacements = (
   example: Example | undefined
@@ -22,25 +20,10 @@ export const getExampleAttackDiscoveriesWithReplacements = (
   const validatedAttackDiscoveries = AttackDiscoveries.parse(exampleAttackDiscoveries);
   const validatedReplacements = Replacements.parse(exampleReplacements);
 
-  const withReplacements = validatedAttackDiscoveries.map((attackDiscovery) => ({
-    ...attackDiscovery,
-    detailsMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.detailsMarkdown,
-      replacements: validatedReplacements,
-    }),
-    entitySummaryMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.entitySummaryMarkdown ?? '',
-      replacements: validatedReplacements,
-    }),
-    summaryMarkdown: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.summaryMarkdown,
-      replacements: validatedReplacements,
-    }),
-    title: replaceAnonymizedValuesWithOriginalValues({
-      messageContent: attackDiscovery.title,
-      replacements: validatedReplacements,
-    }),
-  }));
+  const withReplacements = getDiscoveriesWithOriginalValues({
+    attackDiscoveries: validatedAttackDiscoveries,
+    replacements: validatedReplacements,
+  });
 
   return withReplacements;
 };

@@ -31,9 +31,15 @@ export const getRefineOrEndEdge = (logger?: Logger) => {
       maxHallucinationFailures,
     });
 
+    const decision = getRefineOrEndDecision({
+      hasFinalResults,
+      maxHallucinationFailuresReached,
+      maxRetriesReached,
+    });
+
     logger?.debug(
       () =>
-        `refineOrEndEdge is evaluating the following (derived) state:\n${JSON.stringify(
+        `refineOrEndEdge evaluated the following (derived) state:\n${JSON.stringify(
           {
             attackDiscoveries: attackDiscoveries?.length ?? 0,
             generationAttempts,
@@ -44,16 +50,10 @@ export const getRefineOrEndEdge = (logger?: Logger) => {
           },
           null,
           2
-        )}`
+        )}
+        \n---REFINE OR END: ${decision}---`
     );
 
-    const decision = getRefineOrEndDecision({
-      hasFinalResults,
-      maxHallucinationFailuresReached,
-      maxRetriesReached,
-    });
-
-    logger?.debug(() => `---REFINE OR END: ${decision}---`);
     return decision;
   };
 

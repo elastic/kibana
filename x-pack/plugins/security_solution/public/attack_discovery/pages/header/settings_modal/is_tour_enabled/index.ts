@@ -8,15 +8,11 @@
 export const getIsTourEnabled = ({
   connectorId,
   isLoading,
-  localStorageAttackDiscoveryMaxAlerts,
-  setLocalStorageAttackDiscoveryMaxAlerts,
   tourDelayElapsed,
   showSettingsTour,
 }: {
   connectorId: string | undefined;
   isLoading: boolean;
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
   tourDelayElapsed: boolean;
-  setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
   showSettingsTour: boolean | undefined;
 }): boolean => !isLoading && connectorId != null && tourDelayElapsed && !!showSettingsTour;

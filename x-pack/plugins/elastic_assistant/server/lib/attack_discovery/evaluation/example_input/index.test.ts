@@ -7,27 +7,27 @@
 
 import { ExampleInput, ExampleInputWithOverrides } from '.';
 
+const validInput = {
+  attackDiscoveries: null,
+  attackDiscoveryPrompt: 'prompt',
+  anonymizedAlerts: [{ pageContent: 'content', metadata: { key: 'value' } }],
+  combinedGenerations: 'gen1gen2',
+  combinedRefinements: 'ref1ref2',
+  errors: ['error1', 'error2'],
+  generationAttempts: 1,
+  generations: ['gen1', 'gen2'],
+  hallucinationFailures: 0,
+  maxGenerationAttempts: 5,
+  maxHallucinationFailures: 2,
+  maxRepeatedGenerations: 3,
+  refinements: ['ref1', 'ref2'],
+  refinePrompt: 'refine prompt',
+  replacements: { key: 'replacement' },
+  unrefinedResults: null,
+};
+
 describe('ExampleInput Schema', () => {
   it('validates a correct ExampleInput object', () => {
-    const validInput = {
-      attackDiscoveries: null,
-      attackDiscoveryPrompt: 'prompt',
-      anonymizedAlerts: [{ pageContent: 'content', metadata: { key: 'value' } }],
-      combinedGenerations: 'gen1gen2',
-      combinedRefinements: 'ref1ref2',
-      errors: ['error1', 'error2'],
-      generationAttempts: 1,
-      generations: ['gen1', 'gen2'],
-      hallucinationFailures: 0,
-      maxGenerationAttempts: 5,
-      maxHallucinationFailures: 2,
-      maxRepeatedGenerations: 3,
-      refinements: ['ref1', 'ref2'],
-      refinePrompt: 'refine prompt',
-      replacements: { key: 'replacement' },
-      unrefinedResults: null,
-    };
-
     expect(() => ExampleInput.parse(validInput)).not.toThrow();
   });
 
@@ -41,22 +41,7 @@ describe('ExampleInput Schema', () => {
 
   it('removes unknown properties', () => {
     const hasUnknownProperties = {
-      attackDiscoveries: null,
-      attackDiscoveryPrompt: 'prompt',
-      anonymizedAlerts: [{ pageContent: 'content', metadata: { key: 'value' } }],
-      combinedGenerations: 'gen1gen2',
-      combinedRefinements: 'ref1ref2',
-      errors: ['error1', 'error2'],
-      generationAttempts: 1,
-      generations: ['gen1', 'gen2'],
-      hallucinationFailures: 0,
-      maxGenerationAttempts: 5,
-      maxHallucinationFailures: 2,
-      maxRepeatedGenerations: 3,
-      refinements: ['ref1', 'ref2'],
-      refinePrompt: 'refine prompt',
-      replacements: { key: 'replacement' },
-      unrefinedResults: null,
+      ...validInput,
       unknownProperty: 'unknown', // <-- should be removed
     };
 
@@ -69,26 +54,11 @@ describe('ExampleInput Schema', () => {
 describe('ExampleInputWithOverrides Schema', () => {
   it('validates a correct ExampleInputWithOverrides object', () => {
     const validInputWithOverrides = {
-      attackDiscoveries: null,
-      attackDiscoveryPrompt: 'prompt',
-      anonymizedAlerts: [{ pageContent: 'content', metadata: { key: 'value' } }],
-      combinedGenerations: 'gen1gen2',
-      combinedRefinements: 'ref1ref2',
-      errors: ['error1', 'error2'],
-      generationAttempts: 1,
-      generations: ['gen1', 'gen2'],
-      hallucinationFailures: 0,
-      maxGenerationAttempts: 5,
-      maxHallucinationFailures: 2,
-      maxRepeatedGenerations: 3,
+      ...validInput,
       overrides: {
         attackDiscoveryPrompt: 'ad prompt override',
         refinePrompt: 'refine prompt override',
       },
-      refinements: ['ref1', 'ref2'],
-      refinePrompt: 'refine prompt',
-      replacements: { key: 'replacement' },
-      unrefinedResults: null,
     };
 
     expect(() => ExampleInputWithOverrides.parse(validInputWithOverrides)).not.toThrow();

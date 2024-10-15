@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import {
   ActionsClientChatOpenAI,
+  type ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -63,7 +64,7 @@ async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
   const graph = getDefaultAttackDiscoveryGraph({
     anonymizationFields: [],
     esClient: mockEsClient,
-    llm: mockLlm,
+    llm: mockLlm as unknown as ActionsClientLlm,
     logger,
     replacements: {},
     size: 20,

@@ -102,8 +102,6 @@ const SettingsModalComponent: React.FC<Props> = ({
   const isTourEnabled = getIsTourEnabled({
     connectorId,
     isLoading,
-    localStorageAttackDiscoveryMaxAlerts,
-    setLocalStorageAttackDiscoveryMaxAlerts,
     tourDelayElapsed,
     showSettingsTour,
   });

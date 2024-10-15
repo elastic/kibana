@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { getGeneratOrEndEdge } from '.';
+import { getGenerateOrEndEdge } from '.';
 import type { GraphState } from '../../types';
 
 const logger = loggerMock.create();
@@ -48,7 +48,7 @@ const graphState: GraphState = {
   unrefinedResults: null,
 };
 
-describe('getGeneratOrEndEdge', () => {
+describe('getGenerateOrEndEdge', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 'end' when there are zero alerts", () => {
@@ -57,14 +57,14 @@ describe('getGeneratOrEndEdge', () => {
       anonymizedAlerts: [], // <-- zero alerts
     };
 
-    const edge = getGeneratOrEndEdge(logger);
+    const edge = getGenerateOrEndEdge(logger);
     const result = edge(state);
 
     expect(result).toEqual('end');
   });
 
   it("returns 'generate' when there are alerts", () => {
-    const edge = getGeneratOrEndEdge(logger);
+    const edge = getGenerateOrEndEdge(logger);
     const result = edge(graphState);
 
     expect(result).toEqual('generate');

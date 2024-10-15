@@ -15,20 +15,20 @@ export const getRetrieveAnonymizedAlertsOrGenerateEdge = (logger?: Logger) => {
     logger?.debug(() => '---RETRIEVE ANONYMIZED ALERTS OR GENERATE---');
     const { anonymizedAlerts } = state;
 
+    const decision = getRetrieveOrGenerate(anonymizedAlerts);
+
     logger?.debug(
       () =>
-        `retrieveAnonymizedAlertsOrGenerateEdge is evaluating the following (derived) state:\n${JSON.stringify(
+        `retrieveAnonymizedAlertsOrGenerateEdge evaluated the following (derived) state:\n${JSON.stringify(
           {
             anonymizedAlerts: anonymizedAlerts.length,
           },
           null,
           2
-        )}`
+        )}
+        \n---RETRIEVE ANONYMIZED ALERTS OR GENERATE: ${decision}---`
     );
 
-    const decision = getRetrieveOrGenerate(anonymizedAlerts);
-
-    logger?.debug(() => `---RETRIEVE ANONYMIZED ALERTS OR GENERATE: ${decision}---`);
     return decision;
   };
 

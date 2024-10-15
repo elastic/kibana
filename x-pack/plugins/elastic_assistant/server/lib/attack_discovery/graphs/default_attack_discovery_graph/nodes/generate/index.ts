@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm, AssistantToolLlm } from '@kbn/langchain/server';
+import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 
 import { discardPreviousGenerations } from './helpers/discard_previous_generations';
@@ -24,7 +24,7 @@ export const getGenerateNode = ({
   llm,
   logger,
 }: {
-  llm: ActionsClientLlm | AssistantToolLlm;
+  llm: ActionsClientLlm;
   logger?: Logger;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const generate = async (state: GraphState): Promise<GraphState> => {

@@ -26,5 +26,3 @@ export {
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 };
-
-export type { AssistantToolLlm } from './language_models/types';

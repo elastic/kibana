@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm, AssistantToolLlm } from '@kbn/langchain/server';
-import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable } from '@langchain/core/runnables';
 
@@ -19,7 +18,7 @@ interface GetChainWithFormatInstructions {
 }
 
 export const getChainWithFormatInstructions = (
-  llm: ActionsClientLlm | AssistantToolLlm
+  llm: ActionsClientLlm
 ): GetChainWithFormatInstructions => {
   const outputParser = getOutputParser();
   const formatInstructions = outputParser.getFormatInstructions();
@@ -28,7 +27,7 @@ export const getChainWithFormatInstructions = (
     `Answer the user's question as best you can:\n{format_instructions}\n{query}`
   );
 
-  const chain = prompt.pipe(llm as BaseChatModel);
+  const chain = prompt.pipe(llm);
   const llmType = llm._llmType();
 
   return { chain, formatInstructions, llmType };
