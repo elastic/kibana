@@ -36,6 +36,6 @@ export const ENABLEMENT_INITIALIZING_RISK_ENGINE = i18n.translate(
 export const ENABLEMENT_INITIALIZING_ENTITY_STORE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.initializing.store',
   {
-    defaultMessage: 'Initializing Entity Store',
+    defaultMessage: 'Initializing entity store',
   }
 );
