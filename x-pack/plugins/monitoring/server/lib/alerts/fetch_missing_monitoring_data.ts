@@ -163,7 +163,7 @@ export async function fetchMissingMonitoringData(
         nodeName,
         clusterUuid,
         gapDuration: differenceInMs,
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       };
     }
   }
