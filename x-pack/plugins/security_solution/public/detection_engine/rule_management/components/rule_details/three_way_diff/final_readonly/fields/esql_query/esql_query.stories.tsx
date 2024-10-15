@@ -10,6 +10,7 @@ import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockEsqlRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: FieldReadOnly,
@@ -21,7 +22,11 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return <FieldReadOnly fieldName="esql_query" finalDiffableRule={args.finalDiffableRule} />;
+  return (
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="esql_query" />
+    </ThreeWayDiffStorybookProviders>
+  );
 };
 
 export const Default = Template.bind({});
