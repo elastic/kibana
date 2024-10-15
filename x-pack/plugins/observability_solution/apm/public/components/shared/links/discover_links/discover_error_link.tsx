@@ -7,10 +7,18 @@
 
 import React, { ReactNode } from 'react';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../../common/es_fields/apm';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './discover_link';
 
-function getDiscoverQuery(error: APMError, kuery?: string) {
+interface ErrorForDiscoverQuery {
+  service: {
+    name: string;
+  };
+  error: {
+    grouping_key: string;
+  };
+}
+
+function getDiscoverQuery(error: ErrorForDiscoverQuery, kuery?: string) {
   const serviceName = error.service.name;
   const groupId = error.error.grouping_key;
   let query = `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"`;
@@ -36,7 +44,7 @@ function DiscoverErrorLink({
   children,
 }: {
   children?: ReactNode;
-  readonly error: APMError;
+  readonly error: ErrorForDiscoverQuery;
   readonly kuery?: string;
 }) {
   return <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />;

@@ -32,6 +32,18 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
+ * Package title for the integration to be built.
+ */
+export type PackageTitle = z.infer<typeof PackageTitle>;
+export const PackageTitle = z.string().min(1);
+
+/**
+ * DataStream title for the integration to be built.
+ */
+export type DataStreamTitle = z.infer<typeof DataStreamTitle>;
+export const DataStreamTitle = z.string().min(1);
+
+/**
  * String form of the input logsamples.
  */
 export type LogSamples = z.infer<typeof LogSamples>;
@@ -86,6 +98,14 @@ export const SamplesFormat = z.object({
    * For some formats, specifies whether the samples can be multiline.
    */
   multiline: z.boolean().optional(),
+  /**
+   * For CSV format, specifies whether the samples have a header row. For other formats, specifies the presence of header in each row.
+   */
+  header: z.boolean().optional(),
+  /**
+   * For CSV format, specifies the column names proposed by the LLM.
+   */
+  columns: z.array(z.string()).optional(),
   /**
    * For a JSON format, describes how to get to the sample array from the root of the JSON.
    */

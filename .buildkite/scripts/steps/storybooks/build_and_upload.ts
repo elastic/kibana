@@ -45,6 +45,7 @@ const STORYBOOKS = [
   'logs_explorer',
   'management',
   'observability_ai_assistant',
+  'observability_shared',
   'observability',
   'presentation',
   'random_sampling',
