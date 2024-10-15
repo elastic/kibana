@@ -95,7 +95,7 @@ export class AlertsPageObject extends FtrService {
     assertGraphNodesNumber: async (expected: number) => {
       await this.flyout.waitGraphIsLoaded();
       const graph = await this.testSubjects.find(GRAPH_PREVIEW_TEST_ID);
-      graph.scrollIntoView();
+      await graph.scrollIntoView();
       const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
       expect(nodes.length).to.be(expected);
     },

@@ -43,7 +43,7 @@ export const GraphPreviewContainer: React.FC = () => {
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
-  const displayGraphPreview = isEnabled && !isPreview && !isPreviewMode;
+  // const displayGraphPreview = isEnabled && !isPreview && !isPreviewMode;
 
   const eventIds = getFieldArray(getFieldsData('kibana.alert.original_event.id'));
 
