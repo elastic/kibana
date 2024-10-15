@@ -94,11 +94,19 @@ const ErrorBody: React.FC = () => {
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.errorConnectingState.description1"
-          defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
+          defaultMessage="We can’t establish a connection to Enterprise Search at the host {url} due to the following error:"
           values={{
-            enterpriseSearchUrl: (
-              <EuiLink target="_blank" href={config.host} css={{ overflowWrap: 'break-word' }}>
-                {config.host}
+            url: (
+              <EuiLink
+                data-test-subj="enterpriseSearchErrorBodyUrlLink"
+                target="_blank"
+                href={config.host}
+                css={{ overflowWrap: 'break-word' }}
+              >
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.errorConnectingState.descriptionURL"
+                  defaultMessage="URL"
+                />
               </EuiLink>
             ),
           }}
@@ -119,7 +127,11 @@ const cloudError = (cloud: Partial<CloudSetup>) => {
         defaultMessage="Does your Cloud deployment have Enterprise Search nodes running? {deploymentSettingsLink}"
         values={{
           deploymentSettingsLink: (
-            <EuiLink target="_blank" href={`${deploymentUrl}/edit`}>
+            <EuiLink
+              data-test-subj="enterpriseSearchCloudErrorCheckYourDeploymentSettingsLink"
+              target="_blank"
+              href={`${deploymentUrl}/edit`}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.errorConnectingState.cloudErrorMessageLinkText',
                 {
