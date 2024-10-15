@@ -10,11 +10,23 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import moment from 'moment';
-import { LogCategoryDocument } from '../../services/category_details_service/types';
+import { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { LogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
+import type { LogCategoryDocument } from '../../services/category_details_service/types';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import type { LogCategoriesFlyoutDependencies } from './log_category_details_flyout';
 
-export type LogCategoryDocumentExamplesTableDependencies = LogCategoriesFlyoutDependencies;
+export interface LogCategoryDocumentExamplesTableDependencies {
+  uiSettings: SettingsStart;
+  fieldFormats: FieldFormatsStart;
+  share: SharePluginStart;
+  columns: {
+    SummaryColumn: React.ComponentType<Omit<AllSummaryColumnProps, 'share' | 'core'>>;
+    LogLevelCell: LogLevelBadgeCell;
+  };
+}
 
 export interface LogCategoryDocumentExamplesTableProps {
   dependencies: LogCategoryDocumentExamplesTableDependencies;
