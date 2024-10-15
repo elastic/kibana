@@ -102,7 +102,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
               color="warning"
               data-test-subj="dismiss-ent-search-deprecation-callout"
             >
-              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
+              {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dismissLink', {
                 defaultMessage: 'Dismiss',
               })}
             </EuiLink>
