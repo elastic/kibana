@@ -204,7 +204,7 @@ export const securitySolutionOnlyNoDelete: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionFixture: ['minimal_all'],
+          securitySolutionFixture: ['minimal_all', 'create_comment', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

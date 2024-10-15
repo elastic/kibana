@@ -37,9 +37,29 @@ export const noCreateCasesPermissions = () => buildCasesPermissions({ create: fa
 export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
+export const noReopenCasesPermissions = () => buildCasesPermissions({ reopenCase: false });
 export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
 export const onlyDeleteCasesPermission = () =>
-  buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: true,
+    push: false,
+    createComment: false,
+    reopenCase: false,
+  });
+// In practice, a real life user should never have this configuration, but testing for thoroughness
+export const onlyReopenCasesPermission = () =>
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: false,
+    push: false,
+    createComment: false,
+    reopenCase: true,
+  });
 export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
 export const noCasesSettingsPermission = () => buildCasesPermissions({ settings: false });
 export const disabledReopenCasePermission = () => buildCasesPermissions({ reopenCase: false });

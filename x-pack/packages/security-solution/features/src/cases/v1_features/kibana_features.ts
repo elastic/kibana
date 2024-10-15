@@ -64,7 +64,12 @@ export const getCasesBaseKibanaFeature = ({
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.all,
-        replacedBy: [{ feature: CASES_FEATURE_ID_V2, privileges: ['all'] }],
+        replacedBy: [
+          {
+            feature: CASES_FEATURE_ID_V2,
+            privileges: ['minimal_all', 'create_comment', 'case_reopen'],
+          },
+        ],
       },
       read: {
         api: apiTags.read,

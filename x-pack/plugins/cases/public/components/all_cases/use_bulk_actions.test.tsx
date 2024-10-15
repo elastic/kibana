@@ -17,10 +17,12 @@ import {
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
+  noReopenCasesPermissions,
+  onlyReopenCasesPermission,
 } from '../../common/mock';
 import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../containers/api';
-import { basicCase } from '../../containers/mock';
+import { basicCase, basicCaseClosed } from '../../containers/mock';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
@@ -521,6 +523,68 @@ describe('useBulkActions', () => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeFalsy();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
+      });
+    });
+
+    it('shows the correct actions with no reopen permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noReopenCasesPermissions() });
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitForHook(() => {
+        expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
+        res.queryByTestId('case-bulk-action-status').click();
+      });
+
+      await waitForHook(() => {
+        expect(res.queryByTestId('cases-bulk-action-status-open')).toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-in-progress')).toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
+      });
+    });
+
+    it('shows the correct actions with reopen permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: onlyReopenCasesPermission() });
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitForHook(() => {
+        expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
+        res.queryByTestId('case-bulk-action-status').click();
+      });
+
+      await waitForHook(() => {
+        expect(res.queryByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-in-progress')).not.toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
       });
     });
   });

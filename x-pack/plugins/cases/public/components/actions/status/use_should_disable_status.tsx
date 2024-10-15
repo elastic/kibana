@@ -18,14 +18,14 @@ export const useShouldDisableStatus = () => {
   const shouldDisableStatusFn = useCallback(
     (selectedCases: Array<Pick<CasesUI[number], 'status'>>, nextStatusOption: CaseStatuses) => {
       // Read Only + Disabled => Cannot do anything
-      const noChangePermissions = !canUpdate && !canReopenCase;
-      if (noChangePermissions) return true;
-
-      // All + Enabled reopen => can change status at any point in any way
-      if (canUpdate && canReopenCase) return false;
+      const missingAllUpdatePermissions = !canUpdate && !canReopenCase;
+      if (missingAllUpdatePermissions) return true;
 
       const noop = selectedCases.every((theCase) => theCase.status === nextStatusOption);
       if (noop) return true;
+
+      // All + Enabled reopen => can change status at any point in any way
+      if (canUpdate && canReopenCase) return false;
 
       // If any of the selected cases match, disable the option based on user permissions
       return selectedCases.some((theCase) => {

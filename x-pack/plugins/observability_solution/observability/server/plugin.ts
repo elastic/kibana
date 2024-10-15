@@ -21,7 +21,6 @@ import {
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +38,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
-import { casesFeatureId, observabilityFeatureId } from '../common';
+import { observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,

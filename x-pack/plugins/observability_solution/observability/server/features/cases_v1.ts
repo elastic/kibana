@@ -56,7 +56,9 @@ export const getCasesFeature = (
         read: [...filesSavedObjectTypes],
       },
       ui: casesCapabilities.all,
-      replacedBy: [{ feature: casesFeatureIdV2, privileges: ['all'] }],
+      replacedBy: [
+        { feature: casesFeatureIdV2, privileges: ['minimal_all', 'create_comment', 'case_reopen'] },
+      ],
     },
     read: {
       api: casesApiTags.read,
