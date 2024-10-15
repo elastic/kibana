@@ -28,5 +28,6 @@
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ui-theme",
+    "@kbn/i18n-react"
   ]
 }

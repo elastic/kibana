@@ -98,7 +98,8 @@
     "@kbn/security-solution-common",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/discover-contextual-components"
+    "@kbn/discover-contextual-components",
+    "@kbn/esql-ast"
   ],
   "exclude": [
     "target/**/*"
