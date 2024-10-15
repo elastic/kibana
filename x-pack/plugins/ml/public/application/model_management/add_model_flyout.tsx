@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -215,6 +216,10 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                     />
                   </h3>
                 </EuiTitle>
+                <EuiSpacer size="s" />
+                <p>
+                  <EuiCallOut size="s" title={models[0].disclaimer} iconType="iInCircle" />
+                </p>
                 <EuiSpacer size="s" />
                 <p>
                   <EuiText color={'subdued'} size={'s'}>
