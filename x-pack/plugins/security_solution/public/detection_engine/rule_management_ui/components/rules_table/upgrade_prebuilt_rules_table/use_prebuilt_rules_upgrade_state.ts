@@ -12,12 +12,12 @@ import type {
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
 import {
-  ThreeWayDiffConflict,
+  type FieldsDiff,
   type DiffableAllFields,
   type DiffableRule,
   type RuleUpgradeInfoForReview,
+  ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
@@ -33,6 +33,7 @@ export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
+
   const setRuleFieldResolvedValue = useCallback(
     (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
       setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
@@ -45,6 +46,7 @@ export function usePrebuiltRulesUpgradeState(
     },
     []
   );
+
   const rulesUpgradeState = useMemo(() => {
     const state: RulesUpgradeState = {};
 
@@ -88,7 +90,7 @@ function calcFinalDiffableRule(
 }
 
 /**
- * Assembles a `DiffableRule` from rule fields diff `merge_value`s.
+ * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
  */
 function convertRuleFieldsDiffToDiffable(
   ruleFieldsDiff: FieldsDiff<Record<string, unknown>>

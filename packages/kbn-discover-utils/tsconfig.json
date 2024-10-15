@@ -28,6 +28,7 @@
     "@kbn/ui-theme",
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
-    "@kbn/navigation-plugin",
+    "@kbn/i18n-react",
+    "@kbn/navigation-plugin"
   ]
 }

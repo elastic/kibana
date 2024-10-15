@@ -24,6 +24,7 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverServices } from '../build_services';
+import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 
 /**
  * Supports extending the Discover app menu
@@ -157,6 +158,10 @@ export interface RowControlsExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current query
+   */
+  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
   /**
    * The current query
    */
