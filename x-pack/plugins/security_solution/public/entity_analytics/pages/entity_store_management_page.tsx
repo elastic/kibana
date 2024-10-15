@@ -232,7 +232,7 @@ export const EntityStoreManagementPage = () => {
           <h2>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.subTitle"
-              defaultMessage="Upload entities using CSV file upload"
+              defaultMessage="Import entities using a text file"
             />
           </h2>
         </EuiTitle>
