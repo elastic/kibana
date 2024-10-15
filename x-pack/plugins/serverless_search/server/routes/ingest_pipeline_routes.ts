@@ -20,9 +20,9 @@ export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependenci
         cluster: ['manage_pipeline'],
       });
 
-      const canGetPipelines = privileges?.cluster.manage_pipeline;
+      const canManagePipelines = privileges?.cluster.manage_pipeline;
 
-      if (!canGetPipelines) {
+      if (!canManagePipelines) {
         return response.ok({
           body: { pipelines: {}, canManagePipelines: false },
         });
@@ -32,7 +32,7 @@ export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependenci
       return response.ok({
         body: {
           pipelines,
-          canGetPipelines,
+          canManagePipelines,
         },
         headers: { 'content-type': 'application/json' },
       });
