@@ -222,6 +222,7 @@
     "@kbn/cloud-security-posture-common": "link:x-pack/packages/kbn-cloud-security-posture/common",
     "@kbn/cloud-security-posture-graph": "link:x-pack/packages/kbn-cloud-security-posture/graph",
     "@kbn/cloud-security-posture-plugin": "link:x-pack/plugins/cloud_security_posture",
+    "@kbn/cloud-security-posture-storybook-config": "link:x-pack/packages/kbn-cloud-security-posture/storybook/config",
     "@kbn/code-editor": "link:packages/shared-ux/code_editor/impl",
     "@kbn/code-editor-mock": "link:packages/shared-ux/code_editor/mocks",
     "@kbn/coloring": "link:packages/kbn-coloring",
