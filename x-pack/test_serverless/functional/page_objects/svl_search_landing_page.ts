@@ -75,7 +75,7 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
     },
     pipeline: {
       async createPipeline() {
-        await testSubjects.click('create-a-pipeline-button');
+        await testSubjects.clickWhenNotDisabled('create-a-pipeline-button');
       },
       async expectNavigateToCreatePipelinePage() {
         expect(await browser.getCurrentUrl()).contain(
