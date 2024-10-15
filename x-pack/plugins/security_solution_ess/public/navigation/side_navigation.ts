@@ -83,7 +83,7 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:watcher' },
       { link: 'management:maintenanceWindows' },
       { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsManagement}` },
-      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsAssetClassification}` },
+      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsEntityStoreManagement}` },
     ],
   },
   {

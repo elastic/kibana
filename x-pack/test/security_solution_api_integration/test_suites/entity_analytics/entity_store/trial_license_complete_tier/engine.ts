@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils, elasticAssetCheckerFactory } from '../../utils';
+import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
+  const supertest = getService('supertest');
   const {
     expectTransformExists,
     expectTransformNotFound,
@@ -22,10 +24,18 @@ export default ({ getService }: FtrProviderContext) => {
   } = elasticAssetCheckerFactory(getService);
 
   const utils = EntityStoreUtils(getService);
+
   // TODO: unskip once permissions issue is resolved
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe.skip('@ess Entity Store Engine APIs', () => {
+    const dataView = dataViewRouteHelpersFactory(supertest);
+
     before(async () => {
       await utils.cleanEngines();
+      await dataView.create('security-solution');
+    });
+
+    after(async () => {
+      await dataView.delete('security-solution');
     });
 
     describe('init', () => {
@@ -75,9 +85,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'host',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
 
@@ -91,9 +101,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'user',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
       });
@@ -109,16 +119,16 @@ export default ({ getService }: FtrProviderContext) => {
             {
               status: 'started',
               type: 'host',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
             {
               status: 'started',
               type: 'user',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
           ]);
         });
@@ -198,6 +208,48 @@ export default ({ getService }: FtrProviderContext) => {
         await expectEnrichPolicyNotFound('entity_store_field_retention_user_default_v1');
         await expectComponentTemplateNotFound(`ea_default_user_entity_store-latest@platform`);
         await expectIngestPipelineNotFound(`ea_default_user_entity_store-latest@platform`);
+      });
+    });
+
+    describe('apply_dataview_indices', () => {
+      before(async () => {
+        await utils.initEntityEngineForEntityType('host');
+      });
+
+      after(async () => {
+        await utils.cleanEngines();
+      });
+
+      afterEach(async () => {
+        await dataView.delete('security-solution');
+        await dataView.create('security-solution');
+      });
+
+      it("should not update the index patten when it didn't change", async () => {
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({ success: true, result: [{ type: 'host', changes: {} }] });
+      });
+
+      it('should update the index pattern when the data view changes', async () => {
+        await dataView.updateIndexPattern('security-solution', 'test-*');
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({
+          success: true,
+          result: [
+            {
+              type: 'host',
+              changes: {
+                indexPatterns: [
+                  'test-*',
+                  '.asset-criticality.asset-criticality-default',
+                  'risk-score.risk-score-latest-default',
+                ],
+              },
+            },
+          ],
+        });
       });
     });
   });

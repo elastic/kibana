@@ -61,7 +61,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       },
       sortable: true,
       truncateText: true,
-      width: '400px',
+      width: '300px',
     },
     {
       field: 'provider',
@@ -74,7 +74,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         return null;
       },
       sortable: false,
-      width: '592px',
+      width: '285px',
     },
     {
       field: 'type',
@@ -87,7 +87,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         return null;
       },
       sortable: false,
-      width: '185px',
+      width: '100px',
     },
     {
       actions: [

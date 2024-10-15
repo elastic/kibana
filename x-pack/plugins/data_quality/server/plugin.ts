@@ -6,48 +6,14 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
-import { PLUGIN_ID } from '../common';
 
 import { Dependencies } from './types';
+import { ELASTICSEARCH_FEATURE, KIBANA_FEATURE } from './features';
 
 export class DataQualityPlugin implements Plugin<void, void, any, any> {
-  public setup(coreSetup: CoreSetup, { features }: Dependencies) {
-    features.registerElasticsearchFeature({
-      id: PLUGIN_ID,
-      management: {
-        data: [PLUGIN_ID],
-      },
-      privileges: [
-        {
-          ui: [],
-          requiredClusterPrivileges: [],
-          requiredIndexPrivileges: {
-            ['logs-*-*']: ['read'],
-          },
-        },
-        {
-          ui: [],
-          requiredClusterPrivileges: [],
-          requiredIndexPrivileges: {
-            ['traces-*-*']: ['read'],
-          },
-        },
-        {
-          ui: [],
-          requiredClusterPrivileges: [],
-          requiredIndexPrivileges: {
-            ['metrics-*-*']: ['read'],
-          },
-        },
-        {
-          ui: [],
-          requiredClusterPrivileges: [],
-          requiredIndexPrivileges: {
-            ['synthetics-*-*']: ['read'],
-          },
-        },
-      ],
-    });
+  public setup(_coreSetup: CoreSetup, { features }: Dependencies) {
+    features.registerKibanaFeature(KIBANA_FEATURE);
+    features.registerElasticsearchFeature(ELASTICSEARCH_FEATURE);
   }
 
   public start() {}

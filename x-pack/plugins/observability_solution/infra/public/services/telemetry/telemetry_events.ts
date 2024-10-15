@@ -216,6 +216,54 @@ const assetDashboardLoaded: InfraTelemetryEvent = {
   },
 };
 
+const addMetricsCalloutAddMetricsClicked: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED,
+  schema: {
+    view: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the action was initiated (add_metrics_cta)',
+      },
+    },
+  },
+};
+
+const addMetricsCalloutTryItClicked: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED,
+  schema: {
+    view: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the action was initiated (add_metrics_cta)',
+      },
+    },
+  },
+};
+
+const addMetricsCalloutLearnMoreClicked: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED,
+  schema: {
+    view: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the action was initiated (add_metrics_cta)',
+      },
+    },
+  },
+};
+
+const addMetricsCalloutDismissed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED,
+  schema: {
+    view: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the action was initiated (add_metrics_cta)',
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
   assetDetailsPageViewed,
@@ -225,4 +273,8 @@ export const infraTelemetryEvents = [
   hostFlyoutAddFilter,
   hostViewTotalHostCountRetrieved,
   assetDashboardLoaded,
+  addMetricsCalloutAddMetricsClicked,
+  addMetricsCalloutTryItClicked,
+  addMetricsCalloutLearnMoreClicked,
+  addMetricsCalloutDismissed,
 ];

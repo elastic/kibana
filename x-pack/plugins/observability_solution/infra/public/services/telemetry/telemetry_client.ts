@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
+  AddMetricsCalloutEventParams,
   AssetDashboardLoadedParams,
   AssetDetailsFlyoutViewedParams,
   AssetDetailsPageViewedParams,
@@ -90,5 +91,27 @@ export class TelemetryClient implements ITelemetryClient {
       meta,
       ...innerEvents,
     });
+  };
+
+  public reportAddMetricsCalloutAddMetricsClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED,
+      params
+    );
+  };
+
+  public reportAddMetricsCalloutTryItClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED, params);
+  };
+
+  public reportAddMetricsCalloutLearnMoreClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED,
+      params
+    );
+  };
+
+  public reportAddMetricsCalloutDismissed = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED, params);
   };
 }

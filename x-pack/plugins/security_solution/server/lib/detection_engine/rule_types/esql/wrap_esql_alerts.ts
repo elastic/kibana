@@ -30,6 +30,7 @@ export const wrapEsqlAlerts = ({
   publicBaseUrl,
   tuple,
   isRuleAggregating,
+  intendedTimestamp,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -44,6 +45,7 @@ export const wrapEsqlAlerts = ({
     from: Moment;
     maxSignals: number;
   };
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
     const id = generateAlertId({
@@ -69,6 +71,7 @@ export const wrapEsqlAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

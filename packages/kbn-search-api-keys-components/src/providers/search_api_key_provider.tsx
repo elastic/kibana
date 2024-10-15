@@ -169,7 +169,7 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
   }, [state.status, createApiKey, validateApiKey]);
 
   const value: APIKeyContext = {
-    displayedApiKey: state.status === Status.showHiddenKey ? API_KEY_MASK : state.apiKey,
+    displayedApiKey: state.status === Status.showPreviewKey ? state.apiKey : API_KEY_MASK,
     apiKey: state.apiKey,
     toggleApiKeyVisibility: handleShowKeyVisibility,
     updateApiKey,

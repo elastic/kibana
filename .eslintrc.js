@@ -1014,6 +1014,7 @@ module.exports = {
           'error',
           {
             patterns: ['**/legacy_uptime/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1055,6 +1056,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1113,6 +1115,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1184,13 +1187,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
-            paths: [
-              {
-                name: 'react-router-dom',
-                importNames: ['Route'],
-                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1348,6 +1345,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1525,6 +1523,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },

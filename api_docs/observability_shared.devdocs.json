@@ -287,6 +287,53 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.AddDataPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "AddDataPanel",
+        "description": [],
+        "signature": [
+          "({\n  content,\n  actions,\n  onDissmiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.AddDataPanelProps",
+            "text": "AddDataPanelProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  content,\n  actions,\n  onDissmiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.AddDataPanelProps",
+                "text": "AddDataPanelProps"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.allCasesPermissions",
         "type": "Function",
         "tags": [],
@@ -2307,6 +2354,126 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.AddDataPanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddDataPanelProps",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.content",
+            "type": "Object",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "AddDataPanelContent"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.onDissmiss",
+            "type": "Function",
+            "tags": [],
+            "label": "onDissmiss",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.onAddData",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddData",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.onTryIt",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryIt",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.onLearnMore",
+            "type": "Function",
+            "tags": [],
+            "label": "onLearnMore",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ primary: Required<AddDataPanelButton>; secondary?: AddDataPanelButton | undefined; link: AddDataPanelButton; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AddDataPanelProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/add_data_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityShared",
         "id": "def-public.ApmIndicesConfig",
@@ -6269,6 +6436,30 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EntityDataStreamType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EntityDataStreamType",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/entity/entity_data_stream_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EntityType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/entity/entity_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityShared",
         "id": "def-common.IndexLifecyclePhaseSelectOption",

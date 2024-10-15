@@ -11,9 +11,11 @@ import { EuiSpacer, EuiText, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useKibanaServices } from '../hooks/use_kibana';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 
 export const PipelineOverviewButton: React.FC = () => {
   const { http } = useKibanaServices();
+  const { data } = useIngestPipelines();
 
   return (
     <>
@@ -21,6 +23,7 @@ export const PipelineOverviewButton: React.FC = () => {
       <EuiButton
         iconType="plusInCircle"
         size="m"
+        isDisabled={!data?.canManagePipelines}
         href={http.basePath.prepend('/app/management/ingest/ingest_pipelines/create')}
         data-test-subj="create-a-pipeline-button"
       >

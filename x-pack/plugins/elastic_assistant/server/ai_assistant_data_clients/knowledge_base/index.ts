@@ -205,10 +205,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public setupKnowledgeBase = async ({
     soClient,
-    installSecurityLabsDocs = true,
+    v2KnowledgeBaseEnabled = true,
   }: {
     soClient: SavedObjectsClientContract;
-    installSecurityLabsDocs?: boolean;
+    v2KnowledgeBaseEnabled?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -218,6 +218,28 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug('Starting Knowledge Base setup...');
     this.options.setIsKBSetupInProgress(true);
     const elserId = await this.options.getElserId();
+
+    if (v2KnowledgeBaseEnabled) {
+      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+      try {
+        const esClient = await this.options.elasticsearchClientPromise;
+        const legacyESQL = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
+            },
+          },
+        });
+        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+          this.options.logger.info(
+            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+      } catch (e) {
+        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
+      }
+    }
 
     try {
       const isInstalled = await this.isModelInstalled();
@@ -252,7 +274,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (installSecurityLabsDocs) {
+      if (v2KnowledgeBaseEnabled) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);

@@ -10,7 +10,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { defineGetPrivilegesRoutes } from './get';
-import type { RawKibanaPrivileges } from '../../../../common/model';
+import type { RawKibanaPrivileges } from '../../../../common';
 import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
 

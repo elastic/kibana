@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
 import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../state';

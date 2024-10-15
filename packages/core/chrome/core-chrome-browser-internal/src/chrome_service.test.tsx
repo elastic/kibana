@@ -392,7 +392,7 @@ describe('start', () => {
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getBreadcrumbs$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getBreadcrumbs$().pipe(toArray()));
 
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
       chrome.setBreadcrumbs([{ text: 'foo' }]);
@@ -424,6 +424,35 @@ describe('start', () => {
                         Array [],
                       ]
                   `);
+    });
+
+    it('allows the project breadcrumb to also be set', async () => {
+      const { chrome } = await start();
+
+      chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]); // only setting the classic breadcrumbs
+
+      {
+        const breadcrumbs = await firstValueFrom(chrome.project.getBreadcrumbs$());
+        expect(breadcrumbs.length).toBe(1);
+        expect(breadcrumbs[0]).toMatchObject({
+          'data-test-subj': 'deploymentCrumb',
+        });
+      }
+
+      chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }], {
+        project: { value: [{ text: 'baz' }] }, // also setting the project breadcrumb
+      });
+
+      {
+        const breadcrumbs = await firstValueFrom(chrome.project.getBreadcrumbs$());
+        expect(breadcrumbs.length).toBe(2);
+        expect(breadcrumbs[0]).toMatchObject({
+          'data-test-subj': 'deploymentCrumb',
+        });
+        expect(breadcrumbs[1]).toEqual({
+          text: 'baz', // the project breadcrumb
+        });
+      }
     });
   });
 

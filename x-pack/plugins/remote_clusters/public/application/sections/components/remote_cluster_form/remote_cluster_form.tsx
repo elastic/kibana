@@ -423,7 +423,7 @@ export class RemoteClusterForm extends Component<Props, State> {
 
       return (
         <Fragment>
-          <EuiCallOut title={message} iconType="cross" color="warning">
+          <EuiCallOut title={message} color="danger" iconType="error">
             {errorBody}
           </EuiCallOut>
 

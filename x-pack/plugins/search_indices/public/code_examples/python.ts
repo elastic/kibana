@@ -23,7 +23,7 @@ export const PYTHON_INFO: CodeLanguage = {
   codeBlockLanguage: 'python',
 };
 
-const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch-serverless';
+const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch';
 
 export const PythonServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
@@ -32,7 +32,7 @@ export const PythonServerlessCreateIndexExamples: CreateIndexLanguageExamples = 
       elasticsearchURL,
       apiKey,
       indexName,
-    }: CodeSnippetParameters) => `from elasticsearch-serverless import Elasticsearch
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
   "${elasticsearchURL}",
@@ -49,21 +49,21 @@ client.indices.create(
       elasticsearchURL,
       apiKey,
       indexName,
-    }: CodeSnippetParameters) => `from elasticsearch-serverless import Elasticsearch
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
-  "${elasticsearchURL}",
-  api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
 )
 
 client.indices.create(
-  index="${indexName ?? INDEX_PLACEHOLDER}"
-  mappings={
-      "properties": {
-          "vector": {"type": "dense_vector", "dims": 3 },
-          "text": {"type": "text"}
-      }
-  }
+    index="${indexName ?? INDEX_PLACEHOLDER}",
+    mappings={
+        "properties": {
+            "vector": {"type": "dense_vector", "dims": 3 },
+            "text": {"type": "text"}
+        }
+    }
 )`,
   },
 };
@@ -72,7 +72,7 @@ const serverlessIngestionCommand: IngestCodeSnippetFunction = ({
   apiKey,
   indexName,
   sampleDocument,
-}) => `from elasticsearch-serverless import Elasticsearch, helpers
+}) => `from elasticsearch import Elasticsearch, helpers
 
 client = Elasticsearch(
     "${elasticsearchURL}",
@@ -93,25 +93,20 @@ const serverlessUpdateMappingsCommand: IngestCodeSnippetFunction = ({
   apiKey,
   indexName,
   mappingProperties,
-}) => `from elasticsearch-serverless import Elasticsearch
+}) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
-"${elasticsearchURL}",
-api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
 )
 
 index_name = "${indexName}"
 
 mappings = ${JSON.stringify({ properties: mappingProperties }, null, 4)}
 
-update_mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
-
-# Print the response
-print(update_mapping_response)
-
-# Verify the mapping
-mapping = client.indices.get_mapping(index=index_name)
-print(mapping)`;
+mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
+print(mapping_response)
+`;
 
 export const PythonServerlessVectorsIngestDataExample: IngestDataCodeDefinition = {
   installCommand: SERVERLESS_PYTHON_INSTALL_CMD,

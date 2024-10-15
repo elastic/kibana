@@ -405,7 +405,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 }
                 const currentVis = vis$.getValue();
                 if (!disableTriggers) {
-                  const triggerId = get(
+                  const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,
                     event.name,
                     VIS_EVENT_TO_TRIGGER.filter

@@ -37,7 +37,7 @@ export const EntityStoreUtils = (
     }
   };
 
-  const initEntityEngineForEntityType = async (entityType: EntityType) => {
+  const initEntityEngineForEntityType = (entityType: EntityType) => {
     log.info(`Initializing engine for entity type ${entityType} in namespace ${namespace}`);
     return api
       .initEntityEngine(

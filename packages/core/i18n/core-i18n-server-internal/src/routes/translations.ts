@@ -45,6 +45,7 @@ export const registerTranslationsRoute = ({
           },
           options: {
             access: 'public',
+            httpResource: true,
             authRequired: false,
           },
         },

@@ -10,7 +10,8 @@ import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { NavigateToAppOptions } from '@kbn/core/public';
@@ -261,7 +262,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
+      knowledgeBase: {
+        ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+        ...localStorageKnowledgeBase,
+      },
       promptContexts,
       navigateToApp,
       nameSpace,

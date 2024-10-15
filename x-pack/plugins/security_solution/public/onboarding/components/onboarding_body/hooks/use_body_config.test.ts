@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useBodyConfig } from './use_body_config';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { hasCapabilities } from '../../../../common/lib/capabilities';
 
 const bodyConfig = [
@@ -43,7 +43,7 @@ const bodyConfig = [
 ];
 
 // Mock dependencies
-jest.mock('react-use');
+jest.mock('react-use/lib/useObservable');
 jest.mock('../../../../common/lib/kibana/kibana_react');
 jest.mock('../../../../common/lib/capabilities');
 jest.mock('../body_config', () => ({ bodyConfig }));

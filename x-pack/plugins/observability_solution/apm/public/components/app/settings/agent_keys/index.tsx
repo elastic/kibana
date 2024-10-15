@@ -16,6 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -33,19 +34,22 @@ const INITIAL_DATA = {
 };
 
 export function AgentKeys() {
-  const { toasts } = useApmPluginContext().core.notifications;
-
+  const { core } = useApmPluginContext();
+  const { toasts } = core.notifications;
+  const canSave = core.application.capabilities.apm['settings:save'] as boolean;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [createdAgentKey, setCreatedAgentKey] = useState<CreateApiKeyResponse>();
 
-  const { data: { areApiKeysEnabled, canManage } = INITIAL_DATA, status: privilegesStatus } =
-    useFetcher(
-      (callApmApi) => {
-        return callApmApi('GET /internal/apm/agent_keys/privileges');
-      },
-      [],
-      { showToastOnError: false }
-    );
+  const {
+    data: { areApiKeysEnabled, canManage: canManageAgentKeys } = INITIAL_DATA,
+    status: privilegesStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/agent_keys/privileges');
+    },
+    [],
+    { showToastOnError: false }
+  );
 
   const {
     data,
@@ -53,14 +57,15 @@ export function AgentKeys() {
     refetch: refetchAgentKeys,
   } = useFetcher(
     (callApmApi) => {
-      if (areApiKeysEnabled && canManage) {
+      if (areApiKeysEnabled && canManageAgentKeys) {
         return callApmApi('GET /internal/apm/agent_keys');
       }
     },
-    [areApiKeysEnabled, canManage],
+    [areApiKeysEnabled, canManageAgentKeys],
     { showToastOnError: false }
   );
 
+  const canManage = canManageAgentKeys && canSave;
   const agentKeys = data?.agentKeys;
 
   return (
@@ -220,23 +225,38 @@ function AgentKeysContent({
           </p>
         }
         actions={
-          <EuiButton
-            data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
-            onClick={onCreateAgentClick}
-            fill={true}
-            iconType="plusInCircle"
+          <EuiToolTip
+            content={
+              !canManage &&
+              i18n.translate(
+                'xpack.apm.settings.agentKeys.noPermissionCreateAgentKeyTooltipLabel',
+                {
+                  defaultMessage: "Your user role doesn't have permissions to create agent keys.",
+                }
+              )
+            }
           >
-            {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
-              defaultMessage: 'Create APM agent key',
-            })}
-          </EuiButton>
+            <EuiButton
+              data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
+              onClick={onCreateAgentClick}
+              fill={true}
+              iconType="plusInCircle"
+              isDisabled={!canManage}
+            >
+              {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
+                defaultMessage: 'Create APM agent key',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         }
       />
     );
   }
 
   if (agentKeys && !isEmpty(agentKeys)) {
-    return <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />;
+    return (
+      <AgentKeysTable agentKeys={agentKeys ?? []} canManage={canManage} onKeyDelete={onKeyDelete} />
+    );
   }
 
   return null;

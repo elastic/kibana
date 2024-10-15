@@ -22,7 +22,6 @@ import type { Criteria } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { SeverityFilter } from '../severity/severity_filter';
 import type { EntitySource } from './components/entity_source_filter';
-import { EntitySourceFilter } from './components/entity_source_filter';
 import { useEntitiesListFilters } from './hooks/use_entities_list_filters';
 import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_filter';
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
@@ -41,7 +40,7 @@ export const EntitiesList: React.FC = () => {
 
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
-  const [selectedSources, setSelectedSources] = useState<EntitySource[]>([]);
+  const [selectedSources, _] = useState<EntitySource[]>([]);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,
@@ -148,7 +147,6 @@ export const EntitiesList: React.FC = () => {
                 selectedItems={selectedCriticalities}
                 onChange={setSelectedCriticalities}
               />
-              <EntitySourceFilter selectedItems={selectedSources} onChange={setSelectedSources} />
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -48,11 +48,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async clean() {
-    this.logger.info(
-      `Cleaning data streams "${this.dataStreams.join(',')}" and indices "${this.indices.join(
-        ','
-      )}"`
-    );
+    this.logger.info(`Cleaning data streams: "${this.dataStreams.join(',')}"`);
 
     const resolvedIndices = this.indices.length
       ? (
@@ -64,6 +60,10 @@ export class SynthtraceEsClient<TFields extends Fields> {
           })
         ).indices.map((index: { name: string }) => index.name)
       : [];
+
+    if (resolvedIndices.length) {
+      this.logger.info(`Cleaning indices: "${resolvedIndices.join(',')}"`);
+    }
 
     await Promise.all([
       ...(this.dataStreams.length

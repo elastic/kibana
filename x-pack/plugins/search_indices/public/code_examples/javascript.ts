@@ -19,7 +19,7 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
   codeBlockLanguage: 'javascript',
 };
 
-const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch-serverless`;
+const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch`;
 
 export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
@@ -28,7 +28,7 @@ export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExample
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch-serverless"
+    }) => `import { Client } from "@elastic/elasticsearch"
 
 const client = new Client({
   node: '${elasticsearchURL}',
@@ -47,7 +47,7 @@ client.indices.create({
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch-serverless"
+    }) => `import { Client } from "@elastic/elasticsearch"
 
 const client = new Client({
   node: '${elasticsearchURL}',

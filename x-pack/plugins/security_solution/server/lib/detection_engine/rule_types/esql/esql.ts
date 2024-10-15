@@ -59,6 +59,7 @@ export const esqlExecutor = async ({
     alertTimestampOverride,
     publicBaseUrl,
     alertWithSuppression,
+    intendedTimestamp,
   },
   services,
   state,
@@ -167,6 +168,7 @@ export const esqlExecutor = async ({
             ruleExecutionLogger,
             publicBaseUrl,
             tuple,
+            intendedTimestamp,
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
@@ -194,6 +196,7 @@ export const esqlExecutor = async ({
               primaryTimestamp,
               secondaryTimestamp,
               tuple,
+              intendedTimestamp,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({

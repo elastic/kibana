@@ -100,6 +100,23 @@ export namespace Builder {
       };
     };
 
+    export const indexSource = (
+      index: string,
+      cluster?: string,
+      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        index,
+        cluster,
+        name: (cluster ? cluster + ':' : '') + index,
+        sourceType: 'index',
+        type: 'source',
+      };
+    };
+
     export const column = (
       template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
       fromParser?: Partial<AstNodeParserFields>

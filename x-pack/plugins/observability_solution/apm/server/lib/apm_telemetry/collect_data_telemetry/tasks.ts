@@ -11,11 +11,13 @@ import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
   AGENT_VERSION,
+  AT_TIMESTAMP,
   CLIENT_GEO_COUNTRY_ISO_CODE,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_PROVIDER,
@@ -29,6 +31,7 @@ import {
   METRICSET_INTERVAL,
   METRICSET_NAME,
   OBSERVER_HOSTNAME,
+  OBSERVER_VERSION,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -54,10 +57,7 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   APMDataTelemetry,
   APMPerService,
@@ -193,17 +193,19 @@ export const tasks: TelemetryTask[] = [
             size: 1,
             track_total_hits: false,
             sort: {
-              '@timestamp': 'desc' as const,
+              [AT_TIMESTAMP]: 'desc' as const,
             },
+            fields: [AT_TIMESTAMP],
           },
         })
-      ).hits.hits[0] as { _source: { '@timestamp': string } };
+      ).hits.hits[0];
 
       if (!lastTransaction) {
         return {};
       }
 
-      const end = new Date(lastTransaction._source['@timestamp']).getTime() - 5 * 60 * 1000;
+      const end =
+        new Date(lastTransaction.fields[AT_TIMESTAMP]![0] as string).getTime() - 5 * 60 * 1000;
 
       const start = end - 60 * 1000;
 
@@ -512,16 +514,16 @@ export const tasks: TelemetryTask[] = [
                       },
                     },
                     sort: {
-                      '@timestamp': 'asc',
+                      [AT_TIMESTAMP]: 'asc',
                     },
-                    _source: ['@timestamp'],
+                    fields: [AT_TIMESTAMP],
                   },
                 })
               : null;
 
-          const event = retainmentResponse?.hits.hits[0]?._source as
+          const event = retainmentResponse?.hits.hits[0]?.fields as
             | {
-                '@timestamp': number;
+                [AT_TIMESTAMP]: number[];
               }
             | undefined;
 
@@ -535,7 +537,7 @@ export const tasks: TelemetryTask[] = [
               ? {
                   retainment: {
                     [processorEvent]: {
-                      ms: new Date().getTime() - new Date(event['@timestamp']).getTime(),
+                      ms: new Date().getTime() - new Date(event[AT_TIMESTAMP][0]).getTime(),
                     },
                   },
                 }
@@ -690,16 +692,16 @@ export const tasks: TelemetryTask[] = [
           sort: {
             '@timestamp': 'desc',
           },
+          fields: asMutableArray([OBSERVER_VERSION] as const),
         },
       });
 
-      const hit = response.hits.hits[0]?._source as Pick<Transaction | Span | APMError, 'observer'>;
-
-      if (!hit || !hit.observer?.version) {
+      const event = unflattenKnownApmEventFields(response.hits.hits[0]?.fields);
+      if (!event || !event.observer?.version) {
         return {};
       }
 
-      const [major, minor, patch] = hit.observer.version.split('.').map((part) => Number(part));
+      const [major, minor, patch] = event.observer.version.split('.').map((part) => Number(part));
 
       return {
         version: {

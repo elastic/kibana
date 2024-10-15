@@ -54,11 +54,14 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.wait([
-      '@transactionLatencyRequest',
-      '@transactionThroughputRequest',
-      '@transactionFailureRateRequest',
-    ]).spread((latencyInterception, throughputInterception, failureRateInterception) => {
+    cy.wait(
+      [
+        '@transactionLatencyRequest',
+        '@transactionThroughputRequest',
+        '@transactionFailureRateRequest',
+      ],
+      { timeout: 60000 }
+    ).spread((latencyInterception, throughputInterception, failureRateInterception) => {
       expect(latencyInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
       expect(

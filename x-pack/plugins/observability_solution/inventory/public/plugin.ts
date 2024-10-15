@@ -117,7 +117,7 @@ export class InventoryPlugin
         defaultMessage: 'Inventory',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/observability/inventory',
+      appRoute: '/app/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav', 'globalSearch'],
       order: 8200,

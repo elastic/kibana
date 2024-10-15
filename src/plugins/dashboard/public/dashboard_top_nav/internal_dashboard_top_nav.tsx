@@ -189,7 +189,10 @@ export function InternalDashboardTopNav({
             },
           },
           ...dashboardTitleBreadcrumbs,
-        ])
+        ]),
+        {
+          project: { value: dashboardTitleBreadcrumbs },
+        }
       );
     }
   }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);

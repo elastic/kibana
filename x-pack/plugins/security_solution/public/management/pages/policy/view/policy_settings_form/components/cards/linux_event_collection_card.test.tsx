@@ -12,7 +12,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endp
 import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 describe('Policy Linux Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
