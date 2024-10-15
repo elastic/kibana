@@ -21,6 +21,7 @@ import {
   LOADING_SKELETON_TEXT_LINES,
   SCROLL_ELEMENT_ID,
   SEARCH_FILTER_CATEGORIES,
+  TELEMETRY_INTEGRATION_TAB,
   WITHOUT_SEARCH_BOX_HEIGHT,
   WITH_SEARCH_BOX_HEIGHT,
 } from './constants';
@@ -56,7 +57,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     const onTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
-        const trackId = `tab_${id}`;
+        const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
         trackOnboardingLinkClick(trackId);

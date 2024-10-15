@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { LinkAnchor } from '../../../../../../common/components/links';
+import { trackOnboardingLinkClick } from '../../../../../common/lib/telemetry';
 import { CardCallOut } from '../../common/card_callout';
+import { TELEMETRY_AGENTLESS_LEARN_MORE } from '../constants';
 
 export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
+
+  const onClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      trackOnboardingLinkClick(TELEMETRY_AGENTLESS_LEARN_MORE);
+      /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
+      window.open(docLinks.links.fleet.agentlessBlog, '_blank');
+    },
+    /* @ts-expect-error */
+    [docLinks.links.fleet.agentlessBlog]
+  );
 
   /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
   if (!docLinks.links.fleet.agentlessBlog) {
@@ -54,6 +67,7 @@ export const AgentlessAvailableCallout = React.memo(() => {
               <LinkAnchor
                 /* @ts-expect-error-next-line */
                 href={docLinks.links.fleet.agentlessBlog}
+                onClick={onClick}
                 data-test-subj="agentlessLearnMoreLink"
                 external={true}
                 target="_blank"
