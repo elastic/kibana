@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
+import {
+  getESQLAdHocDataview,
+  getESQLQueryColumns,
+  getIndexForESQLQuery,
+  getInitialESQLQuery,
+} from '@kbn/esql-utils';
 
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import {
   coreServices,
@@ -52,9 +59,38 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
+  const onTryESQL = useCallback(async () => {
+    const { dataViews } = dataService;
+    const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
+    const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+    const esqlQuery = getInitialESQLQuery(dataView);
+    const abortController = new AbortController();
+    const columns = await getESQLQueryColumns({
+      esqlQuery,
+      search: dataService.search.search,
+      signal: abortController.signal,
+      timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
+    });
+
+    await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
+      state: {
+        type: 'lens',
+        input: {
+          attributes: getLensAttributesFromSuggestion({
+            filters: [],
+            query: esqlQuery,
+            dataView,
+            columns,
+          }),
+        },
+      },
+      path: '#/create',
+    });
+  }, []);
+
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
