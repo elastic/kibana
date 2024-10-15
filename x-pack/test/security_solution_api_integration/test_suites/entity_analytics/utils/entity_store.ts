@@ -12,7 +12,7 @@ import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
-  namespace?: string = 'default'
+  namespace: string = 'default'
 ) => {
   const api = getService('securitySolutionApi');
   const es = getService('es');
