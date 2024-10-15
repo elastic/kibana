@@ -29,6 +29,7 @@ import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { getTimestamp } from '../../../../utils/get_timestamp';
 import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -175,6 +176,8 @@ export function ErrorSampleDetails({
     },
   });
 
+  const timestamp = getTimestamp(errorData?.error?.['@timestamp'], errorData?.error?.timestamp?.us);
+
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center">
@@ -245,7 +248,7 @@ export function ErrorSampleDetails({
       ) : (
         <Summary
           items={[
-            <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
+            <TimestampTooltip time={errorData ? timestamp / 1000 : 0} />,
             errorUrl && method ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,

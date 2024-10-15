@@ -12,6 +12,7 @@ import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
 import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export interface WaterfallTransaction {
+  '@timestamp': string;
   timestamp: TimestampUs;
   trace: { id: string };
   service: {
@@ -38,6 +39,7 @@ export interface WaterfallTransaction {
 }
 
 export interface WaterfallSpan {
+  '@timestamp': string;
   timestamp: TimestampUs;
   trace: { id: string };
   service: {
@@ -70,6 +72,7 @@ export interface WaterfallSpan {
 }
 
 export interface WaterfallError {
+  '@timestamp': string;
   timestamp: TimestampUs;
   trace?: { id: string };
   transaction?: { id: string };

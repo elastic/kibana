@@ -9,6 +9,7 @@ import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
+import { getTimestamp } from '../../../../utils/get_timestamp';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
@@ -43,6 +44,7 @@ export function TransactionTabs({
   showCriticalPath,
   onShowCriticalPathChange,
 }: Props) {
+  const timestamp = getTimestamp(transaction?.['@timestamp'], transaction?.timestamp?.us);
   const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
     () => ({
       [TransactionTab.timeline]: {
@@ -73,7 +75,7 @@ export function TransactionTabs({
           <>
             {transaction && (
               <LogsTabContent
-                timestamp={transaction.timestamp.us}
+                timestamp={timestamp}
                 duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
               />
@@ -89,6 +91,7 @@ export function TransactionTabs({
       transaction,
       waterfall,
       waterfallItemId,
+      timestamp,
     ]
   );
 
