@@ -25,27 +25,30 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const metadata = archives_metadata[archiveName];
 
   registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
-    it('is only be available to users with Platinum license (or higher)', async () => {
-      try {
-        await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map`,
-          params: {
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
+    describe('basic license', function () {
+      this.tags('skipFIPS');
+      it('is only be available to users with Platinum license (or higher)', async () => {
+        try {
+          await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map`,
+            params: {
+              query: {
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+              },
             },
-          },
-        });
+          });
 
-        expect(true).to.be(false);
-      } catch (e) {
-        const err = e as ApmApiError;
-        expect(err.res.status).to.be(403);
-        expectSnapshot(err.res.body.message).toMatchInline(
-          `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
-        );
-      }
+          expect(true).to.be(false);
+        } catch (e) {
+          const err = e as ApmApiError;
+          expect(err.res.status).to.be(403);
+          expectSnapshot(err.res.body.message).toMatchInline(
+            `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+          );
+        }
+      });
     });
   });
 

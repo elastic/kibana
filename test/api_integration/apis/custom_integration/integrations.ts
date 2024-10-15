@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -19,11 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/appendCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(56);
+        expect(resp.body.length).to.be(55);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(
@@ -37,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/replacementCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');

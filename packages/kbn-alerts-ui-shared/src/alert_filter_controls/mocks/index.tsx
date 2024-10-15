@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
@@ -67,7 +67,7 @@ export const mockAlertFilterControls = (outputFilters?: Filter[]) => {
   const Component: FC<AlertFilterControlsProps> = ({ onInit, onFiltersChange }) => {
     useEffect(() => {
       if (onInit) {
-        onInit(getControlGroupMock() as unknown as ControlGroupContainer);
+        onInit(getControlGroupMock() as unknown as ControlGroupRendererApi);
       }
 
       if (onFiltersChange) {

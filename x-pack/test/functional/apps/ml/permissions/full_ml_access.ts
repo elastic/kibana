@@ -176,9 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       for (const testUser of testUsers) {
-        // FLAKY: https://github.com/elastic/kibana/issues/189565
-        // FLAKY: https://github.com/elastic/kibana/issues/189537
-        describe.skip(`(${testUser.user})`, function () {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
             await ml.securityUI.loginAs(testUser.user);
           });

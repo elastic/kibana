@@ -5,116 +5,107 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import type { trustedAppsAllHttpMocks } from '../../../../mocks';
-import type { ArtifactListPageRenderingSetup } from '../../mocks';
 import { getArtifactListPageRenderingSetup } from '../../mocks';
-import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { getDeferred } from '../../../../mocks/utils';
+import { waitFor } from '@testing-library/react';
 
-describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
-  let renderResult: ReturnType<AppContextTestRender['render']>;
-  let history: AppContextTestRender['history'];
-  let coreStart: AppContextTestRender['coreStart'];
-  let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
-  let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
-  let cancelButton: HTMLButtonElement;
-  let submitButton: HTMLButtonElement;
+const setupTest = async () => {
+  const renderSetup = getArtifactListPageRenderingSetup();
+
+  const { history, coreStart, mockedApi, getFirstCard, user } = renderSetup;
+
+  history.push('somepage?show=create');
+
+  const renderResult = renderSetup.renderArtifactListPage();
+
+  await waitFor(() => {
+    expect(renderResult.getByTestId('testPage-list')).toBeInTheDocument();
+  });
 
   const clickCardAction = async (action: 'edit' | 'delete') => {
     await getFirstCard({ showActions: true });
-    act(() => {
-      switch (action) {
-        case 'delete':
-          userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
-          break;
+    switch (action) {
+      case 'delete':
+        await user.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+        break;
 
-        case 'edit':
-          userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
-          break;
-      }
-    });
+      case 'edit':
+        await user.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+        break;
+    }
   };
 
-  beforeEach(
-    async () => {
-      const renderSetup = getArtifactListPageRenderingSetup();
+  await clickCardAction('delete');
 
-      ({ history, coreStart, mockedApi, getFirstCard } = renderSetup);
+  // Wait for the dialog to be present
+  await waitFor(() => {
+    expect(renderResult.getByTestId('testPage-deleteModal')).toBeInTheDocument();
+  });
 
-      history.push('somepage?show=create');
+  const cancelButton = renderResult.getByTestId(
+    'testPage-deleteModal-cancelButton'
+  ) as HTMLButtonElement;
 
-      renderResult = renderSetup.renderArtifactListPage();
+  const submitButton = renderResult.getByTestId(
+    'testPage-deleteModal-submitButton'
+  ) as HTMLButtonElement;
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
-        });
-      });
+  return { cancelButton, submitButton, user, coreStart, mockedApi, renderResult };
+};
 
-      await clickCardAction('delete');
+describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
-      // Wait for the dialog to be present
-      await act(async () => {
-        await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-deleteModal')).not.toBeNull();
-        });
-      });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
-      cancelButton = renderResult.getByTestId(
-        'testPage-deleteModal-cancelButton'
-      ) as HTMLButtonElement;
-
-      submitButton = renderResult.getByTestId(
-        'testPage-deleteModal-submitButton'
-      ) as HTMLButtonElement;
-    },
-    // Timeout set to 10s
-    // In some cases, whose causes are unknown, a test will timeout and will point
-    // to this setup as the culprid. It rarely happens, but in order to avoid it,
-    // the timeout below is being set to 10s
-    10000
-  );
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should show Cancel and Delete buttons enabled', async () => {
+    const { cancelButton, submitButton } = await setupTest();
+
     expect(cancelButton).toBeEnabled();
     expect(submitButton).toBeEnabled();
   });
 
   it('should close modal if Cancel/Close buttons are clicked', async () => {
-    userEvent.click(cancelButton);
+    const { cancelButton, user, renderResult } = await setupTest();
 
-    expect(renderResult.queryByTestId('testPage-deleteModal')).toBeNull();
+    await user.click(cancelButton);
+
+    expect(renderResult.queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
   });
 
   it('should prevent modal from being closed while deletion is in flight', async () => {
-    const deferred = getDeferred();
-    mockedApi.responseProvider.trustedAppDelete.mockDelay.mockReturnValue(deferred.promise);
+    const { submitButton, mockedApi, user, renderResult } = await setupTest();
 
-    act(() => {
-      userEvent.click(submitButton);
-    });
+    mockedApi.responseProvider.trustedAppDelete.mockImplementation(
+      // @ts-expect-error This satisfies the test, but the type is incorrect
+      () => new Promise((resolve) => setTimeout(() => resolve({ name: 'the-name' }), 500))
+    );
+
+    await user.click(submitButton);
+
+    expect(renderResult.queryByTestId('testPage-deleteModal')).toBeInTheDocument();
+
+    jest.advanceTimersByTime(510);
 
     await waitFor(() => {
-      expect(cancelButton).toBeEnabled();
-      expect(submitButton).toBeEnabled();
-    });
-
-    await act(async () => {
-      deferred.resolve(); // cleanup
+      expect(renderResult.queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
     });
   });
 
   it('should show success toast if deleted successfully', async () => {
-    act(() => {
-      userEvent.click(submitButton);
-    });
+    const { submitButton, coreStart, mockedApi, user } = await setupTest();
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
-      });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
     });
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
@@ -125,18 +116,17 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
   // FIXME:PT investigate test failure
   // (I don't understand why its failing... All assertions are successful -- HELP!)
   it.skip('should show error toast if deletion failed', async () => {
+    const { cancelButton, submitButton, mockedApi, user, coreStart, renderResult } =
+      await setupTest();
+
     mockedApi.responseProvider.trustedAppDelete.mockImplementation(() => {
       throw new Error('oh oh');
     });
 
-    act(() => {
-      userEvent.click(submitButton);
-    });
+    await user.click(submitButton);
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
-      });
+    await waitFor(() => {
+      expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
     });
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(

@@ -9,8 +9,11 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { DataTableRecord, IgnoredReason } from '@kbn/discover-utils/types';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type {
+  DataTableRecord,
+  DataTableColumnsMeta,
+  IgnoredReason,
+} from '@kbn/discover-utils/types';
 import { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -36,13 +39,7 @@ export interface DocViewRenderProps {
    * If not provided, types will be derived by default from the dataView field types.
    * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
    */
-  columnsMeta?: Record<
-    string,
-    {
-      type: DatatableColumnMeta['type'];
-      esType?: DatatableColumnMeta['esType'];
-    }
-  >;
+  columnsMeta?: DataTableColumnsMeta;
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;

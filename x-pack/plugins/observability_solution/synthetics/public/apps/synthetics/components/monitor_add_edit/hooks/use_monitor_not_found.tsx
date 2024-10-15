@@ -6,10 +6,10 @@
  */
 
 import { useEffect } from 'react';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
+import { IHttpSerializedFetchError } from '../../../state';
 
-export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>, id?: string) => {
+export const useMonitorNotFound = (error?: IHttpSerializedFetchError | null, id?: string) => {
   const { packagePolicyId } = useGetUrlParams();
   const updateUrlParams = useUrlParams()[1];
 

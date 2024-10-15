@@ -26,10 +26,10 @@ export function useChartTheme() {
         color: 'transparent',
       },
       lineSeriesStyle: {
-        point: { visible: false },
+        point: { visible: 'never' },
       },
       areaSeriesStyle: {
-        point: { visible: false },
+        point: { visible: 'never' },
       },
     };
 

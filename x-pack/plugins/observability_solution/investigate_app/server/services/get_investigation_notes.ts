@@ -17,5 +17,5 @@ export async function getInvestigationNotes(
 ): Promise<GetInvestigationNotesResponse> {
   const investigation = await repository.findById(investigationId);
 
-  return getInvestigationNotesResponseSchema.encode(investigation.notes);
+  return getInvestigationNotesResponseSchema.parse(investigation.notes);
 }

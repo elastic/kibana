@@ -297,7 +297,7 @@ export const getSearchEmbeddableFactory = ({
                     }
                   >
                     <SearchEmbeddableGridComponent
-                      api={{ ...api, fetchWarnings$ }}
+                      api={{ ...api, fetchWarnings$, fetchContext$ }}
                       dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddable.stateManager}

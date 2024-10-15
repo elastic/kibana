@@ -85,7 +85,20 @@ describe('telemetry tasks', () => {
   beforeAll(async () => {
     await removeFile(logFilePath);
 
-    const servers = await setupTestServers(logFilePath);
+    const servers = await setupTestServers(logFilePath, {
+      xpack: {
+        fleet: {
+          internal: {
+            registry: {
+              // Since `endpoint` is not available in EPR yet for
+              // kibana 9 (e.g., https://epr.elastic.co/search?package=endpoint&kibana.version=9.0.0)
+              // we need to ignore version checks
+              kibanaVersionCheckEnabled: false,
+            },
+          },
+        },
+      },
+    });
     esServer = servers.esServer;
     kibanaServer = servers.kibanaServer;
 

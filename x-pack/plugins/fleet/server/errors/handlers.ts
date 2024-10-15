@@ -44,6 +44,8 @@ import {
   FleetNotFoundError,
   PackageSavedObjectConflictError,
   FleetTooManyRequestsError,
+  AgentlessPolicyExistsRequestError,
+  PackagePolicyContentPackageError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -83,6 +85,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof PackagePolicyRequestError) {
     return 400;
   }
+  if (error instanceof PackagePolicyContentPackageError) {
+    return 400;
+  }
   // Unauthorized
   if (error instanceof FleetUnauthorizedError) {
     return 403;
@@ -109,6 +114,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 409;
   }
   if (error instanceof PackageAlreadyInstalledError) {
+    return 409;
+  }
+  if (error instanceof AgentlessPolicyExistsRequestError) {
     return 409;
   }
   // Unsupported Media Type

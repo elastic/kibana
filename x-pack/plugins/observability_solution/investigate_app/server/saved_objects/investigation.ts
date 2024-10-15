@@ -27,6 +27,7 @@ export const investigation: SavedObjectsType = {
         },
       },
       status: { type: 'keyword' },
+      tags: { type: 'keyword' },
     },
   },
   management: {

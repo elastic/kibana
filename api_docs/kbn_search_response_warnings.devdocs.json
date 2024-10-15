@@ -118,7 +118,7 @@
         "label": "SearchResponseWarningsBadge",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
         "deprecated": false,
@@ -151,7 +151,7 @@
         "label": "SearchResponseWarningsBadgePopoverContent",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
         "deprecated": false,
@@ -184,7 +184,7 @@
         "label": "SearchResponseWarningsCallout",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
         "deprecated": false,
@@ -217,7 +217,7 @@
         "label": "SearchResponseWarningsEmptyPrompt",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
         "deprecated": false,
@@ -250,7 +250,7 @@
         "label": "ViewDetailsPopover",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
         "deprecated": false,

@@ -19,43 +19,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'header',
-    'settings',
-    'timePicker',
-    'tagCloud',
-  ]);
+  const { common, visualize, visEditor, visChart, header, settings, timePicker, tagCloud } =
+    getPageObjects([
+      'common',
+      'visualize',
+      'visEditor',
+      'visChart',
+      'header',
+      'settings',
+      'timePicker',
+      'tagCloud',
+    ]);
 
   describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
     const termsField = 'machine.ram';
 
     before(async function () {
-      await PageObjects.visualize.initTests();
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await visualize.initTests();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickTagCloud');
-      await PageObjects.visualize.clickTagCloud();
-      await PageObjects.visualize.clickNewSearch();
+      await visualize.clickTagCloud();
+      await visualize.clickNewSearch();
       log.debug('select Tags');
-      await PageObjects.visEditor.clickBucket('Tags');
+      await visEditor.clickBucket('Tags');
       log.debug('Click aggregation Terms');
-      await PageObjects.visEditor.selectAggregation('Terms');
+      await visEditor.selectAggregation('Terms');
       log.debug('Click field machine.ram');
       await retry.try(async function tryingForTime() {
-        await PageObjects.visEditor.selectField(termsField);
+        await visEditor.selectField(termsField);
       });
-      await PageObjects.visEditor.selectOrderByMetric(2, '_key');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectOrderByMetric(2, '_key');
+      await visEditor.clickGo();
     });
 
     after(async () => {
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     it('should have inspector enabled', async function () {
@@ -63,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct tag cloud data', async function () {
-      await PageObjects.visChart.waitForVisualization();
-      const data = await PageObjects.tagCloud.getTextTag();
+      await visChart.waitForVisualization();
+      const data = await tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
         '32,212,254,720',
@@ -77,23 +78,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should collapse the sidebar', async function () {
       const editorSidebar = await find.byCssSelector('.visEditorSidebar');
-      await PageObjects.visEditor.clickEditorSidebarCollapse();
+      await visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
-      await PageObjects.common.sleep(1000);
+      await common.sleep(1000);
       const isDisplayed = await editorSidebar.isDisplayed();
       expect(isDisplayed).to.be(false);
-      await PageObjects.visEditor.clickEditorSidebarCollapse();
+      await visEditor.clickEditorSidebarCollapse();
     });
 
     it('should still show all tags after sidebar has been collapsed', async function () {
-      await PageObjects.visEditor.clickEditorSidebarCollapse();
+      await visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
-      await PageObjects.common.sleep(1000);
-      await PageObjects.visEditor.clickEditorSidebarCollapse();
+      await common.sleep(1000);
+      await visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
-      await PageObjects.common.sleep(1000);
-      await PageObjects.visChart.waitForVisualization();
-      const data = await PageObjects.tagCloud.getTextTag();
+      await common.sleep(1000);
+      await visChart.waitForVisualization();
+      const data = await tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
         '32,212,254,720',
@@ -106,11 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should still show all tags after browser was resized very small', async function () {
       await browser.setWindowSize(200, 200);
-      await PageObjects.common.sleep(1000);
+      await common.sleep(1000);
       await browser.setWindowSize(1200, 800);
-      await PageObjects.common.sleep(1000);
-      await PageObjects.visChart.waitForVisualization();
-      const data = await PageObjects.tagCloud.getTextTag();
+      await common.sleep(1000);
+      await visChart.waitForVisualization();
+      const data = await tagCloud.getTextTag();
       expect(data).to.eql([
         '32,212,254,720',
         '21,474,836,480',
@@ -121,14 +122,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visChart.waitForVisualization();
+      await visualize.loadSavedVisualization(vizName1);
+      await visChart.waitForVisualization();
     });
 
     it('should show the tags and relative size', function () {
-      return PageObjects.tagCloud.getTextSizes().then(function (results) {
+      return tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
         expect(results).to.eql(['72px', '63px', '32px', '25px', '18px']);
       });
@@ -150,47 +151,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('formatted field', function () {
       before(async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.openControlsByName(termsField);
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
+        await settings.clickIndexPatternLogstash();
+        await settings.openControlsByName(termsField);
         await (
           await (
             await testSubjects.find('formatRow')
           ).findAllByCssSelector('[data-test-subj="toggle"]')
         )[0].click();
-        await PageObjects.settings.setFieldFormat('bytes');
-        await PageObjects.settings.controlChangeSave();
-        await PageObjects.common.navigateToApp('visualize');
-        await PageObjects.visualize.loadSavedVisualization(vizName1, {
+        await settings.setFieldFormat('bytes');
+        await settings.controlChangeSave();
+        await common.navigateToApp('visualize');
+        await visualize.loadSavedVisualization(vizName1, {
           navigateToVisualize: false,
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visChart.waitForVisualization();
+        await header.waitUntilLoadingHasFinished();
+        await visChart.waitForVisualization();
       });
 
       after(async function () {
         await filterBar.removeFilter(termsField);
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('');
-        await PageObjects.settings.controlChangeSave();
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
+        await settings.clickIndexPatternLogstash();
+        await settings.openControlsByName(termsField);
+        await settings.setFieldFormat('');
+        await settings.controlChangeSave();
       });
 
       it('should format tags with field formatter', async function () {
-        await PageObjects.visChart.waitForVisualization();
-        const data = await PageObjects.tagCloud.getTextTag();
+        await visChart.waitForVisualization();
+        const data = await tagCloud.getTextTag();
         log.debug(data);
         expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
       });
 
       it('should apply filter with unformatted value', async function () {
-        await PageObjects.tagCloud.selectTagCloudTag('30GB');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visChart.waitForVisualization();
-        const data = await PageObjects.tagCloud.getTextTag();
+        await tagCloud.selectTagCloudTag('30GB');
+        await header.waitUntilLoadingHasFinished();
+        await visChart.waitForVisualization();
+        const data = await tagCloud.getTextTag();
         expect(data).to.eql(['30GB']);
       });
     });

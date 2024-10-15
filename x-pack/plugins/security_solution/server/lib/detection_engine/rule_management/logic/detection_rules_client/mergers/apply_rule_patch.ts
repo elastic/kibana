@@ -7,6 +7,7 @@
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   EqlRule,
   EqlRuleResponseFields,
@@ -44,7 +45,6 @@ import {
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';
 
 interface ApplyRulePatchProps {
@@ -111,6 +111,7 @@ export const applyRulePatch = async ({
     interval: rulePatch.interval ?? existingRule.interval,
     throttle: rulePatch.throttle ?? existingRule.throttle,
     actions: rulePatch.actions ?? existingRule.actions,
+    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     ...typeSpecificParams,
   };
 
@@ -189,7 +190,6 @@ const patchQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };
@@ -206,7 +206,6 @@ const patchSavedQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };

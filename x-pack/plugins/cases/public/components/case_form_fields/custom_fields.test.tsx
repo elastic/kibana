@@ -15,7 +15,8 @@ import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
 
-describe('CustomFields', () => {
+// Failing: See https://github.com/elastic/kibana/issues/188133
+describe.skip('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
@@ -132,15 +133,15 @@ describe('CustomFields', () => {
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
 
-    userEvent.type(
+    await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

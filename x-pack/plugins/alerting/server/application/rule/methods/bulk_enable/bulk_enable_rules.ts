@@ -153,8 +153,6 @@ const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
-  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
-
   const rulesFinder = await withSpan(
     {
       name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
@@ -163,7 +161,7 @@ const bulkEnableRulesWithOCC = async (
     async () =>
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
-          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          filter,
           type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
@@ -187,9 +185,7 @@ const bulkEnableRulesWithOCC = async (
       }
       await rulesFinder.close();
 
-      const updatedInterval = rulesFinderRules
-        .filter((rule) => !rule.attributes.enabled)
-        .map((rule) => rule.attributes.schedule?.interval);
+      const updatedInterval = rulesFinderRules.map((rule) => rule.attributes.schedule?.interval);
 
       const validationPayload = await validateScheduleLimit({
         context,
@@ -208,6 +204,8 @@ const bulkEnableRulesWithOCC = async (
       await pMap(
         rulesFinderRules,
         async (rule) => {
+          const ruleName = rule.attributes.name;
+
           try {
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
@@ -219,8 +217,8 @@ const bulkEnableRulesWithOCC = async (
                 throw Error(`Rule not authorized for bulk enable - ${error.message}`);
               }
             }
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            if (ruleName) {
+              ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
             // TODO (http-versioning) Remove RawRuleAction and RawRule casts
@@ -236,7 +234,7 @@ const bulkEnableRulesWithOCC = async (
               ...(!rule.attributes.apiKey &&
                 (await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
-                  ruleName: rule.attributes.name,
+                  ruleName,
                   username,
                   shouldUpdateApiKey: true,
                 }))),
@@ -297,7 +295,11 @@ const bulkEnableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
                 outcome: 'unknown',
-                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
               })
             );
           } catch (error) {
@@ -311,6 +313,11 @@ const bulkEnableRulesWithOCC = async (
             context.auditLogger?.log(
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
                 error,
               })
             );

@@ -71,6 +71,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('When user has read permissions for cases', () => {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({

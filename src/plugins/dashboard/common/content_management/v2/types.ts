@@ -12,12 +12,12 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import { DashboardContentType } from '../types';
 import { DashboardAttributes as DashboardAttributesV1 } from '../v1/types';
 
 type ControlGroupAttributesV2 = Pick<
-  RawControlGroupAttributes,
+  ControlGroupSerializedState,
   | 'panelsJSON'
   | 'chainingSystem'
   | 'controlStyle'

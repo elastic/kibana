@@ -59,7 +59,7 @@ const FormView: React.FC<FormViewProps> = ({
       <EuiFormRow
         data-test-subj="opsgenie-message-row"
         fullWidth
-        error={errors['subActionParams.message']}
+        error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
         labelAppend={

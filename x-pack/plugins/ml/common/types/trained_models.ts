@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
+import type { TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
@@ -141,48 +141,46 @@ export interface InferenceConfigResponse {
   trained_model_configs: TrainedModelConfigResponse[];
 }
 
-export interface TrainedModelDeploymentStatsResponse {
-  model_id: string;
-  deployment_id: string;
-  inference_threads: number;
-  model_threads: number;
-  state: DeploymentState;
+type NodesDeploymentStats = Array<{
+  node: Record<
+    string,
+    {
+      transport_address: string;
+      roles: string[];
+      name: string;
+      attributes: {
+        'ml.machine_memory': string;
+        'xpack.installed': string;
+        'ml.max_open_jobs': string;
+        'ml.max_jvm_size': string;
+      };
+      ephemeral_id: string;
+    }
+  >;
+  inference_count: number;
+  routing_state: { routing_state: string };
+  average_inference_time_ms: number;
+  last_access: number;
+  number_of_pending_requests: number;
+  start_time: number;
+  throughput_last_minute: number;
   threads_per_allocation: number;
   number_of_allocations: number;
-  allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
-  nodes: Array<{
-    node: Record<
-      string,
-      {
-        transport_address: string;
-        roles: string[];
-        name: string;
-        attributes: {
-          'ml.machine_memory': string;
-          'xpack.installed': string;
-          'ml.max_open_jobs': string;
-          'ml.max_jvm_size': string;
-        };
-        ephemeral_id: string;
-      }
-    >;
-    inference_count: number;
-    routing_state: { routing_state: string };
-    average_inference_time_ms: number;
-    last_access: number;
-    number_of_pending_requests: number;
-    start_time: number;
-    throughput_last_minute: number;
-    threads_per_allocation: number;
-    number_of_allocations: number;
-  }>;
-  reason?: string;
-}
+}>;
+
+export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeploymentStats & {
+  nodes: NodesDeploymentStats;
+  // TODO update types in elasticsearch-specification
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
+};
 
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
-  inference_threads: number;
   allocation_status: {
     target_allocation_count: number;
     state: string;
@@ -195,7 +193,6 @@ export interface AllocatedModel {
    */
   model_id?: string;
   state: string;
-  model_threads: number;
   model_size_bytes: number;
   required_native_memory_bytes: number;
   node: {
@@ -216,6 +213,11 @@ export interface AllocatedModel {
     number_of_allocations?: number;
     threads_per_allocation?: number;
     error_count?: number;
+  };
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
   };
 }
 

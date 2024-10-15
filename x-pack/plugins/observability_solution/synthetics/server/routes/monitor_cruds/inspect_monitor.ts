@@ -8,7 +8,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { unzipFile } from '../../common/unzipt_project_code';
+import { unzipFile } from '../../common/unzip_project_code';
 import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';

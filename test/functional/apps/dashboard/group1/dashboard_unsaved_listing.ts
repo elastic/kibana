@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -27,9 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add an area chart by value
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAggBasedVisualizations();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualizationAndReturn();
+      await visualize.clickAreaChart();
+      await visualize.clickNewSearch();
+      await visualize.saveVisualizationAndReturn();
 
       // add a metric by reference
       await dashboardAddPanel.addVisualization('Rendering-Test: metric');
@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
     });
 
     after(async () => {
@@ -52,126 +52,126 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lists unsaved changes to existing dashboards', async () => {
-      await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.loadSavedDashboard(dashboardTitle);
+      await dashboard.switchToEditMode();
       await addSomePanels();
-      existingDashboardPanelCount = await PageObjects.dashboard.getPanelCount();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.expectUnsavedChangesListingExists(dashboardTitle);
+      existingDashboardPanelCount = await dashboard.getPanelCount();
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.expectUnsavedChangesListingExists(dashboardTitle);
     });
 
     it('restores unsaved changes to existing dashboards', async () => {
-      await PageObjects.dashboard.clickUnsavedChangesContinueEditing(dashboardTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+      await dashboard.clickUnsavedChangesContinueEditing(dashboardTitle);
+      await header.waitUntilLoadingHasFinished();
+      const currentPanelCount = await dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(existingDashboardPanelCount);
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('lists unsaved changes to new dashboards', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.clickNewDashboard();
       await addSomePanels();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.expectUnsavedChangesListingExists(unsavedDashboardTitle);
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.expectUnsavedChangesListingExists(unsavedDashboardTitle);
     });
 
     it('restores unsaved changes to new dashboards', async () => {
-      await PageObjects.dashboard.clickUnsavedChangesContinueEditing(unsavedDashboardTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.dashboard.getPanelCount()).to.eql(2);
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.clickUnsavedChangesContinueEditing(unsavedDashboardTitle);
+      await header.waitUntilLoadingHasFinished();
+      expect(await dashboard.getPanelCount()).to.eql(2);
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('shows a warning on create new, and restores panels if continue is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboard({ continueEditing: true, expectWarning: true });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.dashboard.getPanelCount()).to.eql(2);
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.clickNewDashboard({ continueEditing: true, expectWarning: true });
+      await header.waitUntilLoadingHasFinished();
+      expect(await dashboard.getPanelCount()).to.eql(2);
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('shows a warning on create new, and clears unsaved panels if discard is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboard({
+      await dashboard.clickNewDashboard({
         continueEditing: false,
         expectWarning: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.dashboard.getPanelCount()).to.eql(0);
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      expect(await dashboard.getPanelCount()).to.eql(0);
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('does not show unsaved changes on new dashboard when no panels have been added', async () => {
-      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
+      await dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
     });
 
     it('can discard unsaved changes using the discard link', async () => {
-      await PageObjects.dashboard.clickUnsavedChangesDiscard(
+      await dashboard.clickUnsavedChangesDiscard(
         `discard-unsaved-${dashboardTitle.split(' ').join('-')}`
       );
-      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(dashboardTitle);
-      await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
-      await PageObjects.dashboard.switchToEditMode();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+      await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardTitle);
+      await dashboard.loadSavedDashboard(dashboardTitle);
+      await dashboard.switchToEditMode();
+      const currentPanelCount = await dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(existingDashboardPanelCount - 2);
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('loses unsaved changes to new dashboard upon saving', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.clickNewDashboard();
       await addSomePanels();
 
       // ensure that the unsaved listing exists first
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.clickUnsavedChangesContinueEditing(unsavedDashboardTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.clickUnsavedChangesContinueEditing(unsavedDashboardTitle);
+      await header.waitUntilLoadingHasFinished();
 
       // Save the dashboard, and check that it now does not exist
-      await PageObjects.dashboard.saveDashboard(newDashboartTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
+      await dashboard.saveDashboard(newDashboartTitle);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
     });
 
     it('does not list unsaved changes when unsaved version of the dashboard is the same', async () => {
-      await PageObjects.dashboard.loadSavedDashboard(newDashboartTitle);
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.loadSavedDashboard(newDashboartTitle);
+      await dashboard.switchToEditMode();
 
       // add another panel so we can delete it later
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAggBasedVisualizations();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualizationExpectSuccess('Wildvis', {
+      await visualize.clickAreaChart();
+      await visualize.clickNewSearch();
+      await visualize.saveVisualizationExpectSuccess('Wildvis', {
         redirectToOrigin: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
       // wait for the unsaved changes badge to appear.
-      await PageObjects.dashboard.expectUnsavedChangesBadge();
+      await dashboard.expectUnsavedChangesBadge();
 
       // ensure that the unsaved listing exists
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.expectUnsavedChangesListingExists(newDashboartTitle);
-      await PageObjects.dashboard.clickUnsavedChangesContinueEditing(newDashboartTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.expectUnsavedChangesListingExists(newDashboartTitle);
+      await dashboard.clickUnsavedChangesContinueEditing(newDashboartTitle);
+      await header.waitUntilLoadingHasFinished();
 
       // Remove the panel that was just added
       await dashboardPanelActions.removePanelByTitle('Wildvis');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       // Check that it now does not exist
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(newDashboartTitle);
+      await dashboard.gotoDashboardLandingPage();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.expectUnsavedChangesListingDoesNotExist(newDashboartTitle);
     });
   });
 }

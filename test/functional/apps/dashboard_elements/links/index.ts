@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
-  const { dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
+  const { dashboard } = getPageObjects(['dashboard']);
 
   async function setup() {
     await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');

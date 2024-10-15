@@ -12,6 +12,7 @@ import type {
 
 import {
   FLEET_APM_PACKAGE,
+  FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
 } from '../../../common/constants';
@@ -38,6 +39,16 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'create',
   'write',
   'index',
+  'view_index_metadata',
+];
+
+export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
+  'read',
+  'write',
+  'monitor',
+  'create_index',
+  'auto_configure',
+  'maintenance',
   'view_index_metadata',
 ];
 
@@ -77,6 +88,10 @@ export function storedPackagePoliciesToAgentPermissions(
 
     if (pkg.name === FLEET_APM_PACKAGE) {
       return apmPermissions(packagePolicy.id);
+    }
+
+    if (pkg.name === FLEET_CONNECTORS_PACKAGE) {
+      return connectorServicePermissions(packagePolicy.id);
     }
 
     const dataStreams = getNormalizedDataStreams(pkg);
@@ -242,6 +257,29 @@ function apmPermissions(packagePolicyId: string): [string, SecurityRoleDescripto
         {
           names: ['traces-apm.sampled-*'],
           privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
+        },
+      ],
+    },
+  ];
+}
+
+function connectorServicePermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
+  return [
+    packagePolicyId,
+    {
+      cluster: ['manage_connector'],
+      indices: [
+        {
+          names: ['.elastic-connectors*'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+        },
+        {
+          names: ['content-*', '.search-acl-filter-*'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+        },
+        {
+          names: ['logs-elastic_agent*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },

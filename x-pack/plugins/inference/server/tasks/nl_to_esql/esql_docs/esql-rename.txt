@@ -1,37 +1,35 @@
-## RENAME
+# RENAME
 
-The `RENAME` processing command in ES|QL is used to rename one or more columns in a dataset. This command is particularly useful when you need to standardize column names, make them more readable, or avoid conflicts with existing column names. If a column with the new name already exists, it will be replaced by the new column. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
+The RENAME command is used to change the names of one or more columns in a table.
 
-### Examples
-
-Here are some example ES|QL queries using the `RENAME` command:
-
-1. **Renaming a single column:**
-
-    ```esql
-FROM employees
-| KEEP first_name, last_name, still_hired
-| RENAME still_hired AS employed
-```
-
-2. **Renaming multiple columns in a single command:**
-
-    ```esql
-FROM employees
-| KEEP first_name, last_name
-| RENAME first_name AS fn, last_name AS ln
-```
-
-### Syntax
+## Syntax
 
 `RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]`
 
 ### Parameters
 
-- **old_nameX**: The name of a column you want to rename.
-- **new_nameX**: The new name of the column. If it conflicts with an existing column name, the existing column is dropped. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
+#### old_nameX
 
-### Limitations
+This is the current name of the column that you want to rename.
 
-- If a column with the new name already exists, it will be replaced by the new column.
-- If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
+#### new_nameX
+
+This is the new name that you want to assign to the column. If a column with the new name already exists, the existing column will be replaced. If multiple columns are renamed to the same name, all but the rightmost column with the same new name will be dropped.
+
+## Examples
+
+The following example renames the column "still_hired" to "employed":
+
+```esql
+FROM employees
+| KEEP first_name, last_name, still_hired
+| RENAME  still_hired AS employed
+```
+
+You can rename multiple columns with a single RENAME command:
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| RENAME first_name AS fn, last_name AS ln
+```

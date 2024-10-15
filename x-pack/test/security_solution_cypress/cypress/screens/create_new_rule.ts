@@ -296,3 +296,19 @@ export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
+
+export const PREVIEW_SUBMIT_BUTTON = '[data-test-subj="previewSubmitButton"]';
+
+export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticsearch-requests"]';
+
+export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-item-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUEST_DESCRIPTION =
+  '[data-test-subj="preview-logged-request-description"]';
+
+export const PREVIEW_LOGGED_REQUEST_CODE_BLOCK =
+  '[data-test-subj="preview-logged-request-code-block"]';

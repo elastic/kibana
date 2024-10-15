@@ -16,7 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
+  const { common, discover, share, timePicker } = getPageObjects([
+    'common',
+    'discover',
+    'share',
+    'timePicker',
+  ]);
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
@@ -41,10 +46,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'state:storeInSessionStorage': storeStateInSessionStorage,
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.share.clickShareTopNavButton();
+      await common.navigateToApp('discover');
+      await share.clickShareTopNavButton();
 
       return async () => {
         await kibanaServer.uiSettings.unset('state:storeInSessionStorage');
@@ -65,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should allow for copying the snapshot URL', async function () {
           const re = new RegExp(baseUrl + '/app/r.+$');
           await retry.try(async () => {
-            const actualUrl = await PageObjects.share.getSharedUrl();
+            const actualUrl = await share.getSharedUrl();
             expect(actualUrl).match(re);
           });
         });
@@ -80,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             "*',interval:auto,query:(language:kuery,query:'')" +
             ',sort:!())';
           await browser.navigateTo(expectedUrl);
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           await retry.waitFor('url to contain default sorting', async () => {
             // url fallback default sort should have been pushed to URL
             const url = await browser.getCurrentUrl();
@@ -88,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.waitFor('document table to contain the right timestamp', async () => {
-            const firstRowText = await PageObjects.discover.getDocTableIndex(1);
+            const firstRowText = await discover.getDocTableIndex(1);
             return firstRowText.includes('Sep 22, 2015 @ 23:50:13.253');
           });
         });
@@ -109,18 +114,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const re = new RegExp(baseUrl + '/app/r.*$');
         let actualUrl: string = '';
         await retry.try(async () => {
-          actualUrl = await PageObjects.share.getSharedUrl();
+          actualUrl = await share.getSharedUrl();
           expect(actualUrl).match(re);
         });
 
-        const actualTime = await PageObjects.timePicker.getTimeConfig();
+        const actualTime = await timePicker.getTimeConfig();
 
         await browser.clearSessionStorage();
         await browser.get(actualUrl, false);
         await retry.try(async () => {
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const resolvedTime = await PageObjects.timePicker.getTimeConfig();
+          const resolvedTime = await timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
         });

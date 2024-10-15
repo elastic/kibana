@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { investigationItemResponseSchema } from './investigation_item';
 
-const getInvestigationItemsParamsSchema = t.type({
-  path: t.type({
-    investigationId: t.string,
+const getInvestigationItemsParamsSchema = z.object({
+  path: z.object({
+    investigationId: z.string(),
   }),
 });
 
-const getInvestigationItemsResponseSchema = t.array(investigationItemResponseSchema);
+const getInvestigationItemsResponseSchema = z.array(investigationItemResponseSchema);
 
-type GetInvestigationItemsResponse = t.OutputOf<typeof getInvestigationItemsResponseSchema>;
+type GetInvestigationItemsResponse = z.output<typeof getInvestigationItemsResponseSchema>;
 
 export { getInvestigationItemsParamsSchema, getInvestigationItemsResponseSchema };
 export type { GetInvestigationItemsResponse };

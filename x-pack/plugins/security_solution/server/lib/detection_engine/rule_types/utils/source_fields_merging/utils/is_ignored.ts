@@ -12,12 +12,13 @@
  * If you have an object structure to ignore such as "{ a: { b: c: {} } } ", then you need to ignore it as the string "a.b.c"
  * @returns true if it is a field to ignore, otherwise false
  */
-export const isIgnored = (fieldsKey: string, ignoreFields: string[]): boolean => {
-  return ignoreFields.some((ignoreField) => {
-    if (ignoreField.startsWith('/') && ignoreField.endsWith('/')) {
-      return new RegExp(ignoreField.slice(1, -1)).test(fieldsKey);
-    } else {
-      return fieldsKey === ignoreField;
-    }
-  });
+export const isIgnored = (
+  fieldsKey: string,
+  ignoreFields: Record<string, boolean>,
+  ignoreFieldRegexes: string[]
+): boolean => {
+  return (
+    (ignoreFields[fieldsKey] ? true : false) ||
+    ignoreFieldRegexes.some((regex) => new RegExp(regex.slice(1, -1)).test(fieldsKey))
+  );
 };

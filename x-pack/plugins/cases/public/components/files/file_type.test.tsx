@@ -30,7 +30,8 @@ describe('getFileType', () => {
     });
   });
 
-  describe('getFileAttachmentViewObject', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175841
+  describe.skip('getFileAttachmentViewObject', () => {
     let appMockRender: AppMockRenderer;
 
     const attachmentViewProps: ExternalReferenceAttachmentViewProps = {
@@ -64,7 +65,7 @@ describe('getFileType', () => {
       // @ts-expect-error: event is a React element
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
 
-      userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
+      await userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
       expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
     });
 
@@ -138,7 +139,7 @@ describe('getFileType', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });

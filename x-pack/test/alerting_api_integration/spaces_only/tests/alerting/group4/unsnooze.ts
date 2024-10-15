@@ -22,7 +22,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('unsnooze', () => {
+  describe('unsnooze', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

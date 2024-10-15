@@ -13,8 +13,6 @@ import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 
-import { mlJobServiceFactory } from '../../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import { detectorToString } from '../../../../../util/string_utils';
 
 export class Detectors extends Component {
@@ -22,13 +20,6 @@ export class Detectors extends Component {
 
   constructor(props, constructorContext) {
     super(props, constructorContext);
-
-    const mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(constructorContext.services.notifications.toasts),
-      constructorContext.services.mlServices.mlApi
-    );
-
-    this.detectors = mlJobService.getJobGroups().map((g) => ({ label: g.id }));
 
     this.state = {
       detectors: [],

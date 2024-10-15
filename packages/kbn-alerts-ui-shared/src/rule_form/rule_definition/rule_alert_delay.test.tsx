@@ -74,17 +74,14 @@ describe('RuleAlertDelay', () => {
     expect(mockOnChange).not.toHaveBeenCalled();
   });
 
-  test('Should call onChange with null if empty string is typed', () => {
+  test('Should not call onChange if empty string is typed', () => {
     render(<RuleAlertDelay />);
     fireEvent.change(screen.getByTestId('alertDelayInput'), {
       target: {
         value: '',
       },
     });
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setAlertDelay',
-      payload: null,
-    });
+    expect(mockOnChange).not.toHaveBeenCalled();
   });
 
   test('Should display error when input is invalid', () => {

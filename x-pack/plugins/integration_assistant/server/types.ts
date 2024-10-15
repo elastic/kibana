@@ -12,7 +12,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SamplesFormat } from '../common';
+import { ESProcessorItem, SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -42,7 +42,6 @@ export interface SimplifiedProcessors {
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecsTypes: string;
   ecsCategories: string;
   exAnswer: string;
@@ -52,14 +51,31 @@ export interface CategorizationState {
   errors: object;
   previousError: string;
   pipelineResults: object[];
+  previousPipelineResults: object[];
+  lastReviewedSamples: number[]; // Filled when reviewing.
+  stableSamples: number[]; // Samples that did not change due to a review.
+  reviewCount: number;
   finalized: boolean;
-  reviewed: boolean;
-  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
   previousInvalidCategorization: string;
   initialPipeline: object;
+  results: object;
+  samplesFormat: SamplesFormat;
+}
+
+export interface CelInputState {
+  dataStreamName: string;
+  apiDefinition: string;
+  lastExecutedChain: string;
+  finalized: boolean;
+  apiQuerySummary: string;
+  exampleCelPrograms: string[];
+  currentProgram: string;
+  stateVarNames: string[];
+  stateSettings: object;
+  redactVars: string[];
   results: object;
 }
 
@@ -68,6 +84,7 @@ export interface EcsMappingState {
   chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
+  additionalProcessors: ESProcessorItem[];
   prefixedSamples: string[];
   combinedSamples: string;
   sampleChunks: string[];
@@ -85,24 +102,59 @@ export interface EcsMappingState {
   missingKeys: string[];
   invalidEcsFields: string[];
   results: object;
-  samplesFormat: string;
+  samplesFormat: SamplesFormat;
   ecsVersion: string;
 }
 
 export interface LogFormatDetectionState {
   lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  packageTitle: string;
+  dataStreamTitle: string;
   logSamples: string[];
+  jsonSamples: string[];
   exAnswer: string;
   finalized: boolean;
   samplesFormat: SamplesFormat;
+  header: boolean;
   ecsVersion: string;
   results: object;
+  additionalProcessors: ESProcessorItem[]; // Generated in handleXXX nodes or subgraphs.
+}
+
+export interface KVState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  kvProcessor: ESProcessorItem;
+  grokPattern: string;
+  logSamples: string[];
+  kvLogMessages: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  header: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
+}
+
+export interface UnstructuredLogState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  grokPatterns: string[];
+  logSamples: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
 }
 
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecs: string;
   exAnswer: string;
   packageName: string;
@@ -118,6 +170,7 @@ export interface RelatedState {
   initialPipeline: object;
   results: object;
   lastExecutedChain: string;
+  samplesFormat: SamplesFormat;
 }
 
 export type ChatModels =

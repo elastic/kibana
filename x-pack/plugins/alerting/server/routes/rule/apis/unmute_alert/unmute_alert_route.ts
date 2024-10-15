@@ -6,13 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  unmuteAlertParamsSchemaV1,
   UnmuteAlertRequestParamsV1,
+  unmuteAlertParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/unmute_alert';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformRequestParamsToApplicationV1 } from './transforms';
 
 export const unmuteAlertRoute = (
@@ -34,6 +34,15 @@ export const unmuteAlertRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule or alert with the given ID does not exist.',
           },
         },
       },

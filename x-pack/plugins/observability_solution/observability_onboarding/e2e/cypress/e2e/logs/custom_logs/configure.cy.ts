@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// Failing: See https://github.com/elastic/kibana/issues/186215
-describe.skip('[Logs onboarding] Custom logs - configure step', () => {
+describe('[Logs onboarding] Custom logs - configure step', () => {
   describe('logFilePaths', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();

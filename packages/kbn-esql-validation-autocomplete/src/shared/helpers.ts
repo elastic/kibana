@@ -19,11 +19,12 @@ import type {
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -47,6 +48,8 @@ import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/t
 import { removeMarkerArgFromArgsList } from './context';
 import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
+import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
+import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -96,10 +99,6 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
   return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
 
-export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name !== '=';
-}
-
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
@@ -136,12 +135,14 @@ let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionDefinitions,
-        statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        scalarFunctionDefinitions,
+        aggregationFunctionDefinitions,
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -223,7 +224,7 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argType: string, item: ESQLLiteral) {
+function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === 'null') {
     return true;
   }
@@ -244,7 +245,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date', 'date', 'date_period'].includes(argType);
+  return ['string', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -254,13 +255,7 @@ export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  const columnName = getQuotedColumnName(column);
-  return (
-    getColumnByName(columnName, { fields, variables }) ||
-    // It's possible columnName has backticks "`fieldName`"
-    // so we need to access the original name as well
-    getColumnByName(column.name, { fields, variables })
-  );
+  return getColumnByName(column.parts.join('.'), { fields, variables });
 }
 
 /**
@@ -270,6 +265,11 @@ export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    columnName = columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
@@ -418,8 +418,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -440,7 +440,7 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = compareLiteralType(argType as string, arg);
+    const matched = doesLiteralMatchParameterType(argType, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -543,19 +543,6 @@ export function isVariable(
 ): column is ESQLVariable {
   return Boolean(column && 'location' in column);
 }
-export function hasCCSSource(name: string) {
-  return name.includes(':');
-}
-
-/**
- * This will return the name without any quotes.
- *
- * E.g. "`bytes`" will become "bytes"
- *
- * @param column
- * @returns
- */
-export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
 
 /**
  * This returns the name with any quotes that were present.
@@ -575,17 +562,16 @@ export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+  const columnName = column.parts.join('.');
+  if (fields.has(columnName) || variables.has(columnName)) {
+    return true;
+  }
 
-  for (const name of namesToCheck) {
-    if (fields.has(name) || variables.has(name)) {
-      return true;
-    }
-
-    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
-      return true;
-    }
+  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+  if (
+    Boolean(fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, variables.keys()))
+  ) {
+    return true;
   }
 
   return false;
@@ -635,6 +621,16 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+/**
+ * Returns the word at the end of the text if there is one.
+ * @param text
+ * @returns
+ */
+export function findFinalWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 1];
+}
+
 export function shouldBeQuotedSource(text: string) {
   // Based on lexer `fragment UNQUOTED_SOURCE_PART`
   return /[:"=|,[\]\/ \t\r\n]/.test(text);
@@ -659,3 +655,73 @@ export const isParam = (x: unknown): x is ESQLParamLiteral =>
  * Compares two strings in a case-insensitive manner
  */
 export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+/**
+ * This function count the number of unclosed brackets in order to
+ * locally fix the queryString to generate a valid AST
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
+ * @param bracketType
+ * @param text
+ * @returns
+ */
+export function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
+  const stack = [];
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
+      stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
+    }
+  }
+  return stack.length;
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+export function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
+  const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
+  // if it's a comma by the user or a forced trigger by a function argument suggestion
+  // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
+    isComma(query.trimEnd()[query.trimEnd().length - 1])
+  ) {
+    query += EDITOR_MARKER;
+  }
+
+  // if there are unclosed brackets, close them
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+    for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
+      ['"', unclosedQuotes],
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        query += Array(count).fill(char).join('');
+      }
+    }
+  }
+
+  return query;
+}

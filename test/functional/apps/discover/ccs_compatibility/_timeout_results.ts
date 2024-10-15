@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const dataViews = getService('dataViews');
 
   const esArchiver = getService('esArchiver');
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('bfetch enabled', () => {
       it('timeout on single shard shows warning and results with bfetch enabled', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Ensure documents are still returned for the successful shards
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be('14,004');
         });
       });
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('timeout on single shard shows warning and results', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Ensure documents are still returned for the successful shards
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be('14,004');
         });
       });

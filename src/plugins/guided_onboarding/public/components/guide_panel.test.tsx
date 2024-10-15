@@ -457,7 +457,7 @@ describe('Guided setup', () => {
         expect(
           find('guidePanelStepDescription')
             .first()
-            .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
+            .containsMatchingElement(<p>{testGuideConfig.steps[2].description as string}</p>)
         ).toBe(true);
       });
 
@@ -475,7 +475,7 @@ describe('Guided setup', () => {
             .containsMatchingElement(
               <ul>
                 {testGuideConfig.steps[0].descriptionList?.map((description, i) => (
-                  <li key={i}>{description}</li>
+                  <li key={i}>{description as string}</li>
                 ))}
               </ul>
             )

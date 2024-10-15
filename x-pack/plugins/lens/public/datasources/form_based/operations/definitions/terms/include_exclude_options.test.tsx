@@ -46,26 +46,26 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getAllByRole('combobox').length).toEqual(2);
   });
 
-  it('should run updateParams function on update', () => {
+  it('should run updateParams function on update', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     fireEvent.click(screen.getByRole('option', { name: 'ABC' }));
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should run updateParams function onCreateOption', () => {
+  it('should run updateParams function onCreateOption', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
@@ -89,13 +89,13 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
   });
 
-  it('should initialize the options correctly', () => {
+  it('should initialize the options correctly', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
       'ABC',
       'FEF',
@@ -114,18 +114,18 @@ describe('IncludeExcludeComponent', () => {
     ).toBeInTheDocument();
   });
 
-  it('should run updateParams on the input text if pattern is selected', () => {
+  it('should run updateParams on the input text if pattern is selected', async () => {
     renderIncludeExcludeRow({
       include: ['test.*'],
       exclude: undefined,
       includeIsRegex: false,
       tableRows,
     });
-    userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
+    await userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
     expect(onUpdateSpy).toHaveBeenCalledWith('include', [], 'includeIsRegex', true);
   });
 
-  it('should run as multi selection if normal string is given', () => {
+  it('should run as multi selection if normal string is given', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
@@ -133,14 +133,14 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
     const typedValues = ['test.*', 'ABC'];
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[0]}{Enter}`
     );
 
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[1]}{Enter}`
     );

@@ -66,7 +66,7 @@ describe('FilesTable', () => {
 
     expect(addFileButton).toBeInTheDocument();
 
-    userEvent.click(addFileButton);
+    await userEvent.click(addFileButton);
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
   });
@@ -85,7 +85,7 @@ describe('FilesTable', () => {
 
     appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
 
-    userEvent.click(
+    await userEvent.click(
       await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
         'No preview available'
       )
@@ -97,7 +97,7 @@ describe('FilesTable', () => {
   it('image rows open file preview', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByRole('button', {
         name: `${basicFileMock.name}.${basicFileMock.extension}`,
       })
@@ -133,7 +133,7 @@ describe('FilesTable', () => {
   it('download button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
@@ -154,7 +154,7 @@ describe('FilesTable', () => {
   it('delete button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
@@ -164,11 +164,11 @@ describe('FilesTable', () => {
   it('clicking delete button opens deletion modal', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
-    userEvent.click(await screen.findByTestId('cases-files-delete-button'));
+    await userEvent.click(await screen.findByTestId('cases-files-delete-button'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
@@ -181,7 +181,7 @@ describe('FilesTable', () => {
     );
 
     expect(popoverButton).toBeInTheDocument();
-    userEvent.click(popoverButton);
+    await userEvent.click(popoverButton);
 
     expect(
       await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
@@ -191,7 +191,7 @@ describe('FilesTable', () => {
 
     expect(copyFileHashButton).toBeInTheDocument();
 
-    userEvent.click(copyFileHashButton);
+    await userEvent.click(copyFileHashButton);
 
     expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+    await userEvent.click(await screen.findByTestId('pagination-button-next'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -229,7 +229,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-previous'));
+    await userEvent.click(await screen.findByTestId('pagination-button-previous'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -243,13 +243,13 @@ describe('FilesTable', () => {
       <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
     );
 
-    userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
+    await userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = await screen.findByTestId('tablePagination-50-rows');
 
     pageSizeOption.style.pointerEvents = 'all';
 
-    userEvent.click(pageSizeOption);
+    await userEvent.click(pageSizeOption);
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({

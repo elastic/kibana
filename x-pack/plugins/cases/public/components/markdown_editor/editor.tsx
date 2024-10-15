@@ -34,11 +34,14 @@ export interface MarkdownEditorRef {
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
-    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-      astRef.current = ast;
-    }, []);
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState<Array<string | Error>>([]);
+    const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
+      (err, { messages, ast }) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+        astRef.current = ast;
+      },
+      []
+    );
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);

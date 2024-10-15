@@ -394,7 +394,7 @@ describe('<IndexManagementHome />', () => {
       component.update();
     });
 
-    test('renders the table column with index stats by default', () => {
+    test('renders the table column with all index stats when enableIndexStats is true', () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('indexTable');
 
@@ -403,7 +403,7 @@ describe('<IndexManagementHome />', () => {
       ]);
     });
 
-    describe('Disabled', () => {
+    describe('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', () => {
       beforeEach(async () => {
         await act(async () => {
           testBed = await setup(httpSetup, {
@@ -411,6 +411,7 @@ describe('<IndexManagementHome />', () => {
               enableLegacyTemplates: true,
               enableIndexActions: true,
               enableIndexStats: false,
+              enableSizeAndDocCount: true,
             },
           });
         });
@@ -420,7 +421,33 @@ describe('<IndexManagementHome />', () => {
         component.update();
       });
 
-      test('hides index stats information from table', async () => {
+      test('hides some index stats information from table', async () => {
+        const { table } = testBed;
+        const { tableCellsValues } = table.getMetaData('indexTable');
+
+        expect(tableCellsValues).toEqual([['', 'test', '10,000', '156kb', '']]);
+      });
+    });
+
+    describe('renders no index stats when enableIndexStats is false, enableSizeAndDocCount is false', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            config: {
+              enableLegacyTemplates: true,
+              enableIndexActions: true,
+              enableIndexStats: false,
+              enableSizeAndDocCount: false,
+            },
+          });
+        });
+
+        const { component } = testBed;
+
+        component.update();
+      });
+
+      test('hides all index stats information from table', async () => {
         const { table } = testBed;
         const { tableCellsValues } = table.getMetaData('indexTable');
 
@@ -556,6 +583,36 @@ describe('<IndexManagementHome />', () => {
       expect(text).toContain('hot phase');
       expect(text).toContain('ILM column 2');
       expect(text).toContain('ILM managed');
+    });
+    it('renders to search_indices index details page', async () => {
+      const indexName = 'search-index';
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+        indexName,
+        createNonDataStreamIndex(indexName)
+      );
+
+      const navigateToUrl = jest.fn();
+      const url = `/app/elasticsearch/indices/index_details/${indexName}`;
+      testBed = await setup(httpSetup, {
+        core: {
+          application: { navigateToUrl },
+        },
+        history: createMemoryHistory(),
+        services: {
+          extensionsService: {
+            _indexDetailsPageRoute: {
+              renderRoute: () => {
+                return url;
+              },
+            },
+          },
+        },
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexNameAt(0);
+      expect(navigateToUrl).toHaveBeenCalledTimes(1);
+      expect(navigateToUrl).toHaveBeenCalledWith(url);
     });
   });
 });

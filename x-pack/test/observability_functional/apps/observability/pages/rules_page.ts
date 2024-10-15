@@ -137,42 +137,49 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('Allows ES query rules to be created by users with only infrastructure feature enabled', async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            infrastructure: ['all'],
-          })
-        );
-        await navigateAndOpenCreateRuleFlyout();
-        await selectAndFillInEsQueryRule(ruleName);
+      describe('only infrastructure feature enabled', function () {
+        this.tags('skipFIPS');
+        it('Allows ES query rules to be created by users with only infrastructure feature enabled', async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              infrastructure: ['all'],
+            })
+          );
+          await navigateAndOpenCreateRuleFlyout();
+          await selectAndFillInEsQueryRule(ruleName);
 
-        await testSubjects.click('saveRuleButton');
+          await testSubjects.click('saveRuleButton');
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(1);
-        expect(rows[0].name).to.contain(ruleName);
+          const tableRows = await find.allByCssSelector('.euiTableRow');
+          const rows = await getRulesList(tableRows);
+          expect(rows.length).to.be(1);
+          expect(rows[0].name).to.contain(ruleName);
+        });
       });
 
-      it('allows ES query rules to be created by users with only logs feature enabled', async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            logs: ['all'],
-          })
-        );
-        await navigateAndOpenCreateRuleFlyout();
-        await selectAndFillInEsQueryRule(ruleName);
+      describe('only logs feature enabled', function () {
+        this.tags('skipFIPS');
 
-        await testSubjects.click('saveRuleButton');
+        it('allows ES query rules to be created by users with only logs feature enabled', async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              logs: ['all'],
+            })
+          );
+          await navigateAndOpenCreateRuleFlyout();
+          await selectAndFillInEsQueryRule(ruleName);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.click('saveRuleButton');
 
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(1);
-        expect(rows[0].name).to.contain(ruleName);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          const tableRows = await find.allByCssSelector('.euiTableRow');
+          const rows = await getRulesList(tableRows);
+          expect(rows.length).to.be(1);
+          expect(rows[0].name).to.contain(ruleName);
+        });
       });
 
       it('Should allow the user to select consumers when creating ES query rules', async () => {
@@ -313,51 +320,57 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
       });
 
-      it(`shows the no permission prompt when the user has no permissions`, async () => {
-        // We kept this test to make sure that the stack management rule page
-        // is showing the right prompt corresponding to the right privileges.
-        // Knowing that o11y alert page won't come up if you do not have any
-        // kind of privileges to o11y
-        await observability.users.setTestUserRole({
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-            run_as: [],
-          },
-          kibana: [
-            {
-              base: [],
-              feature: {
-                discover: ['read'],
-              },
-              spaces: ['*'],
+      describe('permission prompt', function () {
+        this.tags('skipFIPS');
+        it(`shows the no permission prompt when the user has no permissions`, async () => {
+          // We kept this test to make sure that the stack management rule page
+          // is showing the right prompt corresponding to the right privileges.
+          // Knowing that o11y alert page won't come up if you do not have any
+          // kind of privileges to o11y
+          await observability.users.setTestUserRole({
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
             },
-          ],
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  discover: ['read'],
+                },
+                spaces: ['*'],
+              },
+            ],
+          });
+          await observability.alerts.common.navigateToRulesPage();
+          await retry.waitFor(
+            'No permissions prompt',
+            async () => await testSubjects.exists('noPermissionPrompt')
+          );
+          await observability.users.restoreDefaultTestUserRole();
         });
-        await observability.alerts.common.navigateToRulesPage();
-        await retry.waitFor(
-          'No permissions prompt',
-          async () => await testSubjects.exists('noPermissionPrompt')
-        );
-        await observability.users.restoreDefaultTestUserRole();
       });
 
-      it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            logs: ['read'],
-          })
-        );
-        await observability.alerts.common.navigateToRulesPage();
-        await retry.waitFor(
-          'Read-only rules list is visible',
-          async () => await testSubjects.exists('rulesList')
-        );
-        await retry.waitFor(
-          'Create rule button is disabled',
-          async () => !(await testSubjects.isEnabled('createRuleButton'))
-        );
-        await observability.users.restoreDefaultTestUserRole();
+      describe('rules list', function () {
+        this.tags('skipFIPS');
+        it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              logs: ['read'],
+            })
+          );
+          await observability.alerts.common.navigateToRulesPage();
+          await retry.waitFor(
+            'Read-only rules list is visible',
+            async () => await testSubjects.exists('rulesList')
+          );
+          await retry.waitFor(
+            'Create rule button is disabled',
+            async () => !(await testSubjects.isEnabled('createRuleButton'))
+          );
+          await observability.users.restoreDefaultTestUserRole();
+        });
       });
     });
   });

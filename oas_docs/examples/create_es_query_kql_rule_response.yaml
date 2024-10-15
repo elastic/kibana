@@ -1,4 +1,5 @@
-summary: The create rule API returns a JSON object that contains details about the rule.
+summary: Elasticsearch query rule (KQL)
+description: The response for successfully creating an Elasticsearch query rule that uses Kibana query language (KQL).
 value:
   id: 7bd506d0-2284-11ee-8fad-6101956ced88
   enabled: true

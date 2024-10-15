@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
-  EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -51,37 +50,21 @@ const StyledLabelAppend = styled(EuiFlexItem)`
 const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
-  .euiFormControlLayout {
-    max-width: auto;
-    width: auto;
-  }
-
-  .euiFormControlLayout__childrenWrapper > *:first-child {
-    box-shadow: none;
-    height: 38px;
-    width: 100%;
-  }
-
-  .euiFormControlLayout__childrenWrapper > select {
-    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-
-  .euiFormControlLayout--group .euiFormControlLayout {
-    min-width: 100px;
+  .euiFormControlLayout__append {
+    padding-inline: 0 !important;
   }
 
   .euiFormControlLayoutIcons {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
-
-  .euiFormControlLayout:not(:first-child) {
-    border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  }
 `;
 
 const MyEuiSelect = styled(EuiSelect)`
-  width: auto;
+  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+  background: ${({ theme }) =>
+    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
+  color: ${({ theme }) => theme.eui.euiColorPrimary};
+  box-shadow: none;
 `;
 
 const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
@@ -173,10 +156,10 @@ export const ScheduleItem = ({
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiFormControlLayout
+      <EuiFieldNumber
         append={
           <MyEuiSelect
-            fullWidth={false}
+            fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
             value={timeType}
@@ -185,17 +168,14 @@ export const ScheduleItem = ({
             {...rest}
           />
         }
-      >
-        <EuiFieldNumber
-          fullWidth
-          min={minimumValue}
-          max={Number.MAX_SAFE_INTEGER}
-          onChange={onChangeTimeVal}
-          value={timeVal}
-          data-test-subj="interval"
-          {...rest}
-        />
-      </EuiFormControlLayout>
+        fullWidth
+        min={minimumValue}
+        max={Number.MAX_SAFE_INTEGER}
+        onChange={onChangeTimeVal}
+        value={timeVal}
+        data-test-subj="interval"
+        {...rest}
+      />
     </StyledEuiFormRow>
   );
 };

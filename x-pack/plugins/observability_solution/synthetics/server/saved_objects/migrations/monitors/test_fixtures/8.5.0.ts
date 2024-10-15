@@ -27,7 +27,7 @@ export const httpUI = {
     tags: [],
     timeout: '16',
     name: 'Test monitor',
-    locations: [{ id: 'us_central', isServiceManaged: true }],
+    locations: [{ id: 'us_central', isServiceManaged: true }] as any,
     namespace: 'default',
     origin: 'ui',
     journey_id: '',

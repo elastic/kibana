@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'common']);
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('expanding a panel', () => {
     before(async () => {
@@ -26,9 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('few panels');
     });
 
     after(async () => {
@@ -38,13 +38,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('hides other panels', async () => {
       await dashboardPanelActions.clickExpandPanelToggle();
       await retry.try(async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
     });
 
     it('shows other panels after being minimized', async () => {
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
       await dashboardPanelActions.clickExpandPanelToggle();
       await dashboardPanelActions.clickExpandPanelToggle();
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?
       await retry.try(async () => {
-        const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
+        const panelCountAfterMaxThenMinimize = await dashboard.getPanelCount();
         expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
       });
     });

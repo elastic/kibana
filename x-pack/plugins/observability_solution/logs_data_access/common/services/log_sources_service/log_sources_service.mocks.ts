@@ -6,6 +6,7 @@
  */
 
 import { LogSource, LogSourcesService } from './types';
+import { flattenLogSources } from './utils';
 
 const LOG_SOURCES: LogSource[] = [{ indexPattern: 'logs-*-*' }];
 export const createLogSourcesServiceMock = (
@@ -15,6 +16,9 @@ export const createLogSourcesServiceMock = (
   return {
     async getLogSources() {
       return Promise.resolve(sources);
+    },
+    async getFlattenedLogSources() {
+      return Promise.resolve(flattenLogSources(sources));
     },
     async setLogSources(nextLogSources: LogSource[]) {
       sources = nextLogSources;

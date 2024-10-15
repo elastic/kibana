@@ -16,7 +16,7 @@ import {
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';
 import { Reference } from '../../../common/content_management';
-import { VisualizeSavedVisInputState } from '../../react_embeddable/types';
+import { VisualizeSavedVisInputState } from '../../embeddable/types';
 import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';

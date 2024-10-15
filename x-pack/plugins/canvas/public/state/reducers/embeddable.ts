@@ -9,10 +9,7 @@ import { fromExpression, toExpression } from '@kbn/interpreter';
 import { handleActions } from 'redux-actions';
 import { State } from '../../../types';
 
-import {
-  UpdateEmbeddableExpressionActionType,
-  UpdateEmbeddableExpressionPayload,
-} from '../actions/embeddable';
+import { UpdateEmbeddableExpressionPayload } from '../actions/embeddable';
 
 // @ts-expect-error untyped local
 import { assignNodeProperties } from './elements';
@@ -22,7 +19,7 @@ export const embeddableReducer = handleActions<
   UpdateEmbeddableExpressionPayload
 >(
   {
-    [UpdateEmbeddableExpressionActionType]: (workpadState, { payload }) => {
+    ['updateEmbeddableExpression']: (workpadState, { payload }) => {
       if (!payload) {
         return workpadState;
       }

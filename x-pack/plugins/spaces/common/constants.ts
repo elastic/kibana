@@ -31,3 +31,29 @@ export const MAX_SPACE_INITIALS = 2;
  * The path to enter a space.
  */
 export const ENTER_SPACE_PATH = '/spaces/enter';
+
+/**
+ * The 'classic' solution view is the default, non-project type of solution view
+ */
+export const SOLUTION_VIEW_CLASSIC = 'classic' as const;
+
+/**
+ * The feature privileges constants are used to identify the granularity of the configured feature visibility
+ */
+export const FEATURE_PRIVILEGES_ALL = 'all' as const;
+export const FEATURE_PRIVILEGES_READ = 'read' as const;
+export const FEATURE_PRIVILEGES_CUSTOM = 'custom' as const;
+
+/**
+ * The API version numbers used with the versioned router.
+ */
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+};
+
+/**
+ * The setting to control whether the Space Solution Tour is shown.
+ */
+export const SHOW_SPACE_SOLUTION_TOUR_SETTING = 'showSpaceSolutionTour';

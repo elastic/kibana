@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const blankOriginSchema = t.type({ type: t.literal('blank') });
-const alertOriginSchema = t.type({ type: t.literal('alert'), id: t.string });
+const blankOriginSchema = z.object({ type: z.literal('blank') });
+const alertOriginSchema = z.object({ type: z.literal('alert'), id: z.string() });
 
 export { alertOriginSchema, blankOriginSchema };

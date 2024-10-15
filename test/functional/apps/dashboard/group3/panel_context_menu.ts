@@ -17,10 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects([
+  const { dashboard, header, discover, timePicker } = getPageObjects([
     'dashboard',
     'header',
-    'visualize',
     'discover',
     'timePicker',
   ]);
@@ -28,26 +27,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard panel context menu', function viewEditModeTests() {
     before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setHistoricalDataRange();
+      await dashboard.initTests();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
+      await timePicker.setHistoricalDataRange();
       await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
     });
 
     after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
     });
 
     it('are hidden in view mode', async function () {
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await dashboard.saveDashboard(dashboardName);
 
       await dashboardPanelActions.expectMissingEditPanelAction();
       await dashboardPanelActions.expectMissingRemovePanelAction();
     });
 
     it('are shown in edit mode', async function () {
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
 
       const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
       expect(isContextMenuIconVisible).to.equal(true);
@@ -65,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // The second parameter of true will include the timestamp in the url and
       // trigger a hard refresh.
       await browser.get(currentUrl.toString(), true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
@@ -78,17 +77,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('visualization object edit menu', () => {
       it('opens a visualization when edit link is clicked', async () => {
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
 
       it('deletes the visualization when delete link is clicked', async () => {
-        await PageObjects.header.clickDashboard();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.clickDashboard();
+        await header.waitUntilLoadingHasFinished();
         await dashboardPanelActions.removePanel();
 
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.be(0);
       });
     });
@@ -97,39 +96,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchName = 'my search';
 
       before(async () => {
-        await PageObjects.header.clickDiscover(true);
-        await PageObjects.discover.clickNewSearchButton();
+        await header.clickDiscover(true);
+        await discover.clickNewSearchButton();
         await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.header.clickDashboard();
+        await header.waitUntilLoadingHasFinished();
+        await header.clickDashboard();
 
         // The following tests require a fresh dashboard.
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
 
-        const inViewMode = await PageObjects.dashboard.getIsInViewMode();
-        if (inViewMode) await PageObjects.dashboard.switchToEditMode();
+        const inViewMode = await dashboard.getIsInViewMode();
+        if (inViewMode) await dashboard.switchToEditMode();
         await dashboardAddPanel.addSavedSearch(searchName);
       });
 
       it('should be one panel on dashboard', async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.be(1);
       });
 
       it('opens a saved search when edit link is clicked', async () => {
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const queryName = await PageObjects.discover.getCurrentQueryName();
+        await header.waitUntilLoadingHasFinished();
+        const queryName = await discover.getCurrentQueryName();
         expect(queryName).to.be(searchName);
       });
 
       it('deletes the saved search when delete link is clicked', async () => {
-        await PageObjects.header.clickDashboard();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.clickDashboard();
+        await header.waitUntilLoadingHasFinished();
         await dashboardPanelActions.removePanel();
 
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.be(0);
       });
     });
@@ -139,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-        await PageObjects.dashboard.saveDashboard(dashboardName + '2');
+        await dashboard.saveDashboard(dashboardName + '2');
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 
@@ -151,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in edit mode', () => {
         it('switch to edit mode', async function () {
-          await PageObjects.dashboard.switchToEditMode();
+          await dashboard.switchToEditMode();
         });
 
         it('some context menu actions should be present', async function () {

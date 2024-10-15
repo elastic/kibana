@@ -39,7 +39,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
-
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,

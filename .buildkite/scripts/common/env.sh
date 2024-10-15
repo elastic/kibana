@@ -135,6 +135,8 @@ export GH_REPO=github.com/elastic/kibana
 FTR_ENABLE_FIPS_AGENT=false
 if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
   FTR_ENABLE_FIPS_AGENT=true
+  ES_SECURITY_ENABLED=true
+  export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
 

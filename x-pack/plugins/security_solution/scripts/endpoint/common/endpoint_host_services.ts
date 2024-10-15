@@ -8,6 +8,7 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { fetchActiveSpace } from './spaces';
 import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
@@ -66,8 +67,10 @@ export const createAndEnrollEndpointHost = async ({
       agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
     }
   }
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
   const isRunningInCI = Boolean(process.env.CI);
-  const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
+  const vmName =
+    hostname ?? `test-host-${activeSpaceId}-${Math.random().toString().substring(2, 6)}`;
   const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
   const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 

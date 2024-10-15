@@ -19,7 +19,7 @@ export const FirehosePage = () => (
         headlineCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.firehose.text',
           {
-            defaultMessage: 'Setting up Amazon Data Firehose',
+            defaultMessage: 'Set up Amazon Data Firehose',
           }
         )}
         captionCopy={i18n.translate(
@@ -29,6 +29,7 @@ export const FirehosePage = () => (
               'This installation is tailored for setting up Firehose in your Observability project with minimal configuration.',
           }
         )}
+        isTechnicalPreview={true}
       />
     }
   >

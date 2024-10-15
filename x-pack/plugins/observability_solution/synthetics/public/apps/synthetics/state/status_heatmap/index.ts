@@ -18,7 +18,7 @@ import {
 } from './actions';
 
 export interface MonitorStatusHeatmap {
-  heatmap: MonitorStatusHeatmapBucket[];
+  heatmap?: MonitorStatusHeatmapBucket[];
   loading: boolean;
   error: IHttpSerializedFetchError | null;
 }

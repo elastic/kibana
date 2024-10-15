@@ -349,6 +349,9 @@ export class SavedObjectFinderUi extends React.Component<
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',
+        schema: {
+          recognizedFields: ['type', 'tag'],
+        },
       },
       filters: this.props.showFilter
         ? [

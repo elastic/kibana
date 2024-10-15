@@ -1,8 +1,18 @@
-## TO_LOWER
+# TO_LOWER
 
-The `TO_LOWER` function returns a new string representing the input string converted to lower case.
+The TO_LOWER function converts the input string to lowercase.
 
-### Examples
+## Syntax
+
+`TO_LOWER(str)`
+
+### Parameters
+
+#### str
+
+The string expression that you want to convert to lowercase.
+
+## Examples
 
 ```esql
 ROW message = "Some Text"

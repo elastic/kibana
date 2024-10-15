@@ -78,6 +78,13 @@ export const useCreateKnowledgeBaseEntry = ({
       onSettled: () => {
         invalidateKnowledgeBaseEntries();
       },
+      onSuccess: () => {
+        toasts?.addSuccess({
+          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.entries.createSuccessTitle', {
+            defaultMessage: 'Knowledge Base Entry created',
+          }),
+        });
+      },
     }
   );
 };

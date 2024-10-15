@@ -8,8 +8,10 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatMappingReadOnly } from './threat_mapping';
+import { mockThreatMatchRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThreatMappingReadOnly,
@@ -17,22 +19,21 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly
-      fieldName="threat_mapping"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="threat_mapping" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockThreatMatchRule({
     threat_mapping: [
       {
         entries: [
@@ -44,5 +45,5 @@ Default.args = {
         ],
       },
     ],
-  },
+  }),
 };

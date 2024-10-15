@@ -445,7 +445,7 @@ export const mockGlobalState: State = {
     [TableId.test]: EMPTY_RESOLVER,
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
-    flyout: EMPTY_RESOLVER,
+    [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,
@@ -527,12 +527,14 @@ export const mockGlobalState: State = {
     ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
       deleteNotes: ReqStatus.Idle,
       fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
       createNote: null,
       deleteNotes: null,
       fetchNotes: null,

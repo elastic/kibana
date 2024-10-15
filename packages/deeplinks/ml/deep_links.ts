@@ -36,6 +36,7 @@ export type LinkId =
   | 'calendarSettings'
   | 'calendarSettings'
   | 'filterListsSettings'
-  | 'notifications';
+  | 'notifications'
+  | 'suppliedConfigurations';
 
 export type DeepLinkId = AppId | `${AppId}:${LinkId}`;

@@ -96,6 +96,8 @@ export const findAnnotationRt = t.partial({
   sloId: t.string,
   sloInstanceId: t.string,
   serviceName: t.string,
+  filter: t.string,
+  size: t.number,
 });
 
 export const updateAnnotationRt = t.intersection([

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ChromeBreadcrumbsAppendExtension, ChromeBreadcrumb } from './breadcrumb';
+export type {
+  ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
+} from './breadcrumb';
 export type { ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -31,6 +35,7 @@ export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
+  PanelSelectedNode,
   AppDeepLinkId,
   AppId,
   CloudLinkId,
@@ -41,7 +46,6 @@ export type {
   SideNavComponent,
   SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
-  ChromeProjectBreadcrumb,
   NodeDefinition,
   NodeDefinitionWithChildren,
   RenderAs as NodeRenderAs,

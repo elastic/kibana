@@ -14,7 +14,7 @@ import {
   createControlGroupExtract,
   createControlGroupInject,
   migrations,
-} from '../../common/control_group/control_group_persistable_state';
+} from './control_group_persistable_state';
 import { controlGroupTelemetry } from './control_group_telemetry';
 
 export const controlGroupContainerPersistableStateServiceFactory = (

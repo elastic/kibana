@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
@@ -41,11 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('exception on single shard shows warning and results', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount();
         expect(hitCount).to.be('14,004');
       });
       await filterBar.addDslFilter(`
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Ensure documents are still returned for the successful shards
       await retry.try(async function tryingForTime() {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount();
         expect(hitCount).to.be('9,247');
       });
 
@@ -74,11 +74,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('exception on all shards shows error', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount();
         expect(hitCount).to.be('14,004');
       });
       await filterBar.addDslFilter(`

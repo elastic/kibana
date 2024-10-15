@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useLocation } from 'react-router-dom';
 
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
@@ -59,7 +59,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   }, [binsAvailableByWidth, initialSizeRef]);
 
   useEffect(() => {
-    if (monitor?.id && location?.label && debouncedBinsCount !== null && minsPerBin !== null) {
+    if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
       dispatch(
         quietGetMonitorStatusHeatmapAction.get({
           monitorId: monitor.id,
@@ -93,7 +93,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
 
   useDebounce(
     async () => {
-      setDebouncedCount(binsAvailableByWidth);
+      setDebouncedCount(binsAvailableByWidth === 0 ? null : binsAvailableByWidth);
     },
     500,
     [binsAvailableByWidth]

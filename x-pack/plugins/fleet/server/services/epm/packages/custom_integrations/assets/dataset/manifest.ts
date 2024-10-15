@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 import { convertStringToTitle } from '../../utils';
 import type { AssetOptions } from '../generate';
@@ -17,5 +17,5 @@ export const createDatasetManifest = (dataset: string, assetOptions: AssetOption
     title: convertStringToTitle(dataset),
     type,
   };
-  return safeDump(manifest);
+  return dump(manifest);
 };

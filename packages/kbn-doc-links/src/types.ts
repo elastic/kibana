@@ -25,6 +25,7 @@ export interface DocLinksMeta {
 export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
+  readonly apiReference: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -182,6 +183,7 @@ export interface DocLinks {
     readonly searchApplicationsSearch: string;
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
+    readonly semanticSearch: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
     readonly start: string;
@@ -342,6 +344,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {
@@ -562,6 +565,7 @@ export interface DocLinks {
     roleAndPrivileges: string;
     proxiesSettings: string;
     unprivilegedMode: string;
+    httpMonitoring: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

@@ -137,7 +137,7 @@ describe(`UserActions`, () => {
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await within(
         await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
       ).findByTestId('property-actions-user-action-ellipses')
@@ -145,9 +145,9 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
-    userEvent.click(
+    await userEvent.click(
       await within(
         await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
       ).findByTestId('editable-cancel-markdown')
@@ -163,7 +163,7 @@ describe(`UserActions`, () => {
   it('calls update comment when comment markdown is saved', async () => {
     appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await within(
         await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
       ).findByTestId('property-actions-user-action-ellipses')
@@ -171,7 +171,7 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
     await waitForComponentToUpdate();
 
@@ -179,7 +179,7 @@ describe(`UserActions`, () => {
       target: { value: sampleData.content },
     });
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
       ).getByTestId('editable-save-markdown')
@@ -211,7 +211,7 @@ describe(`UserActions`, () => {
       quoteableText
     );
 
-    userEvent.click(
+    await userEvent.click(
       await within(
         await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
       ).findByTestId('property-actions-user-action-ellipses')
@@ -219,7 +219,7 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
 
     expect((await screen.findAllByTestId('add-comment'))[0].textContent).toContain(quoteableText);
   });

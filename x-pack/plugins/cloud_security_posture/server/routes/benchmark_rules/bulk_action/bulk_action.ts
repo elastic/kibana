@@ -58,9 +58,6 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
         const cspContext = await context.csp;
 
         try {

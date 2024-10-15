@@ -309,7 +309,6 @@ export const getMetricVisualization = ({
       id: LENS_METRIC_ID,
       icon: IconChartMetric,
       label: metricLabel,
-      showExperimentalBadge: true,
       sortPriority: 4,
       description: i18n.translate('xpack.lens.metric.visualizationDescription', {
         defaultMessage: 'Present individual key metrics or KPIs.',

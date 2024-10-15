@@ -35,7 +35,7 @@ function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | und
         return ret;
       }
     } else {
-      if (node.location.min <= offset && node.location.max >= offset) {
+      if (node && node.location && node.location.min <= offset && node.location.max >= offset) {
         if ('args' in node) {
           const ret = findNode(node.args, offset);
           // if the found node is the marker, then return its parent

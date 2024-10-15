@@ -82,7 +82,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -136,7 +136,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -156,7 +156,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -186,7 +186,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
@@ -200,7 +200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
     });
 
@@ -223,7 +223,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > -1',
       });
 
-      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       const docs = await waitForDocs(2);
       for (let i = 0; i < docs.length; i++) {

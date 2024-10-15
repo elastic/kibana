@@ -165,10 +165,12 @@ describe('KibanaConfigWriter', () => {
           serviceAccountToken: { name: 'some-token', value: 'some-value' },
         })
       ).rejects.toMatchInlineSnapshot(`
-              [YAMLException: duplicated mapping key at line 2, column 1:
-                  foo: baz
-                  ^]
-            `);
+        [YAMLException: duplicated mapping key (2:1)
+
+         1 | foo: bar
+         2 | foo: baz
+        -----^]
+      `);
 
       expect(mockWriteFile).not.toHaveBeenCalled();
     });

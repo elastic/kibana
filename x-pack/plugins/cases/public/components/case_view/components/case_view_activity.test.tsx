@@ -376,7 +376,7 @@ describe('Case View Page activity tab', () => {
       />
     );
 
-    userEvent.click(await screen.findByRole('switch'));
+    await userEvent.click(await screen.findByRole('switch'));
 
     await waitFor(() => {
       expect(replaceCustomField).toHaveBeenCalledWith({
@@ -406,7 +406,7 @@ describe('Case View Page activity tab', () => {
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
+      await userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -430,7 +430,9 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalComments / userActivityQueryParams.perPage
       );
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
+      await userEvent.click(
+        await screen.findByTestId('user-actions-filter-activity-button-comments')
+      );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -452,7 +454,9 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
       );
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
+      await userEvent.click(
+        await screen.findByTestId('user-actions-filter-activity-button-history')
+      );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(

@@ -14,6 +14,7 @@ import {
   getXsrfHeaderForMethod,
   mergeResponseContent,
   prepareRoutes,
+  getPathParameters,
 } from './util';
 import { assignToPaths, extractTags } from './util';
 
@@ -162,6 +163,15 @@ describe('prepareRoutes', () => {
       output: [{ path: '/api/foo', options: { access: pub } }],
       filters: { excludePathsMatching: ['/api/b'], access: pub },
     },
+    {
+      input: [
+        { path: '/api/foo', options: { access: pub, excludeFromOAS: true } },
+        { path: '/api/bar', options: { access: internal } },
+        { path: '/api/baz', options: { access: pub } },
+      ],
+      output: [{ path: '/api/baz', options: { access: pub } }],
+      filters: { excludePathsMatching: ['/api/bar'], access: pub },
+    },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
   });
@@ -228,5 +238,25 @@ describe('getXsrfHeaderForMethod', () => {
     },
   ])('$method', ({ method, options, expected }) => {
     expect(getXsrfHeaderForMethod(method as RouteMethod, options)).toEqual(expected);
+  });
+});
+
+describe('getPathParameters', () => {
+  test.each([
+    ['', {}],
+    ['/', {}],
+    ['{}', {}],
+    ['{{}', {}],
+    ['{badinput', {}],
+    ['{ok}', { ok: { optional: false } }],
+    ['{ok?}', { ok: { optional: true } }],
+    ['{ok??}', {}],
+    ['/api/{path}/is/{cool}', { path: { optional: false }, cool: { optional: false } }],
+    [
+      '/{required}/and/{optional?}',
+      { required: { optional: false }, optional: { optional: true } },
+    ],
+  ])('%s', (input, output) => {
+    expect(getPathParameters(input)).toEqual(output);
   });
 });

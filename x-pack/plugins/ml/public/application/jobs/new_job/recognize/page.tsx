@@ -24,6 +24,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { Module } from '../../../../../common/types/modules';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import type {
@@ -108,7 +109,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
    */
   const loadModule = useCallback(async () => {
     try {
-      const response = await getDataRecognizerModule({ moduleId });
+      const response = (await getDataRecognizerModule({ moduleId })) as Module;
       setJobs(response.jobs);
       setKibanaObjects(response.kibana);
 

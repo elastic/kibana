@@ -118,14 +118,14 @@ export class KibanaConfigWriter {
       );
 
       const existingCommentedConfig = KibanaConfigWriter.commentOutKibanaConfig(existingConfig.raw);
-      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.safeDump(
+      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.dump(
         { ...existingConfig.parsed, ...config },
         { flowLevel: 1 }
       )}\n`;
     } else {
       configToWrite = `${
         existingConfig.raw
-      }\n\n# This section was automatically generated during setup.\n${yaml.safeDump(config, {
+      }\n\n# This section was automatically generated during setup.\n${yaml.dump(config, {
         flowLevel: 1,
       })}\n`;
     }
@@ -172,7 +172,7 @@ export class KibanaConfigWriter {
 
     let parsedConfig: Record<string, unknown>;
     try {
-      parsedConfig = getFlattenedObject(yaml.safeLoad(rawConfig) ?? {});
+      parsedConfig = getFlattenedObject(yaml.load(rawConfig) ?? {});
     } catch (err) {
       this.logger.error(`Failed to parse configuration file: ${getDetailedErrorMessage(err)}.`);
       throw err;

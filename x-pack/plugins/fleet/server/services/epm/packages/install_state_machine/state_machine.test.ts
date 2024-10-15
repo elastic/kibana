@@ -382,10 +382,6 @@ describe('handleState', () => {
 
     expect(mockPreTransition).toHaveBeenCalled();
     expect(mockOnTransition1).toHaveBeenCalled();
-
-    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'Executing pre transition function: mockConstructor'
-    );
   });
 
   it('should execute preTransition function before the transition gets executed passing the updated context', async () => {
@@ -462,9 +458,6 @@ describe('handleState', () => {
     expect(mockPostTransition).toHaveBeenCalled();
     expect(mockOnTransition3).toHaveBeenCalled();
     expect(mockPostTransition).toHaveBeenCalled();
-    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'Executing post transition function: mockConstructor'
-    );
   });
 
   it('should execute postTransition function after the transition passing the updated context', async () => {
@@ -500,9 +493,6 @@ describe('handleState', () => {
       })
     );
     expect(mockPostTransition).toHaveBeenCalledWith(updatedContext);
-    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'Executing post transition function: mockConstructor'
-    );
   });
 
   it('should execute postTransition correctly also when a transition throws', async () => {

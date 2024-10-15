@@ -47,7 +47,7 @@ describe('generateLinedRulesMenuItems', () => {
 
     result.map((link) => {
       const wrapper = render(link);
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.container).toMatchSnapshot();
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem1a2b3c'));
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestLeftIcon'));
     });
@@ -56,7 +56,7 @@ describe('generateLinedRulesMenuItems', () => {
     const result: ReactElement[] = getSecurityLinkAction(dataTestSubj);
 
     const wrapper = render(result[1]);
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem2a2b3c'));
   });
 });

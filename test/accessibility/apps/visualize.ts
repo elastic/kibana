@@ -10,24 +10,24 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const { visualize } = getPageObjects(['visualize']);
   const a11y = getService('a11y');
 
   describe('Visualize', () => {
     it('visualize', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await a11y.testAppSnapshot();
     });
 
     it('click on create visualize wizard', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await visualize.navigateToNewVisualization();
       await a11y.testAppSnapshot();
     });
 
     it('create visualize button', async () => {
-      await PageObjects.visualize.clickAggBasedVisualizations();
-      await PageObjects.visualize.waitForVisualizationSelectPage();
-      await PageObjects.visualize.clickAreaChart();
+      await visualize.clickAggBasedVisualizations();
+      await visualize.waitForVisualizationSelectPage();
+      await visualize.clickAreaChart();
       await a11y.testAppSnapshot();
     });
   });

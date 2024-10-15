@@ -230,7 +230,7 @@
         "label": "NavigationProvider",
         "description": [],
         "signature": [
-          "({ core, children, }: React.PropsWithChildren<React.PropsWithChildren<{ core: ",
+          "({ core, children, }: React.PropsWithChildren<{ core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "public",
@@ -238,7 +238,7 @@
             "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
-          "; }>>) => JSX.Element"
+          "; }>) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
         "deprecated": false,
@@ -252,7 +252,7 @@
             "label": "{\n  core,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<{ core: ",
+              "React.PropsWithChildren<{ core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
@@ -260,7 +260,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              "; }>>"
+              "; }>"
             ],
             "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
             "deprecated": false,

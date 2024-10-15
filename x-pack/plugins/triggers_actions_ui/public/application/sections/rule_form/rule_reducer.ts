@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectAttribute } from '@kbn/core/public';
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import { Reducer } from 'react';
 import {
   RuleActionParam,
@@ -262,7 +262,7 @@ export const getRuleReducer =
             return state;
 
           const { alertsFilter, ...rest } = oldSanitizedAction;
-          const updatedAlertsFilter = { ...alertsFilter, [key]: value };
+          const updatedAlertsFilter = omitBy({ ...alertsFilter, [key]: value }, isUndefined);
 
           const updatedAction = {
             ...rest,

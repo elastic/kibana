@@ -42,7 +42,7 @@ const customTheme = (): PartialTheme => {
         strokeWidth: 3,
       },
       point: {
-        visible: false,
+        visible: 'never',
       },
     },
   };

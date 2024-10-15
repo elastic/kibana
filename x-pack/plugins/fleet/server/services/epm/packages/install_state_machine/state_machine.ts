@@ -142,7 +142,6 @@ async function executePostTransition(
   if (typeof currentState.onPostTransition === 'function') {
     try {
       await currentState.onPostTransition.call(undefined, updatedContext);
-      logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
     } catch (error) {
       logger.warn(`Error during execution of post transition function: ${error.message}`);
     }
@@ -160,7 +159,6 @@ async function executePreTransition(
   if (typeof currentState.onPreTransition === 'function') {
     try {
       await currentState.onPreTransition.call(undefined, updatedContext);
-      logger.debug(`Executing pre transition function: ${currentState.onPreTransition.name}`);
     } catch (error) {
       logger.warn(`Error during execution of pre transition function: ${error.message}`);
 

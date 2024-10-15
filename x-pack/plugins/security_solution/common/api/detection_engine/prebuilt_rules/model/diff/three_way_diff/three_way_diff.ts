@@ -131,6 +131,7 @@ export interface ThreeWayDiff<TValue> {
    * True if:
    *   - base=A, current=A, target=B
    *   - base=A, current=B, target=C
+   *   - base=<missing>, current=A, target=B
    */
   has_update: boolean;
 

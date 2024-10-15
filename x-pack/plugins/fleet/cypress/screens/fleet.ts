@@ -46,6 +46,8 @@ export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNam
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
 
+export const AGENT_POLICIES_TABLE = 'agentPoliciesTable';
+
 export const ENROLLMENT_TOKENS = {
   CREATE_TOKEN_BUTTON: 'createEnrollmentTokenButton',
   CREATE_TOKEN_MODAL_NAME_FIELD: 'createEnrollmentTokenNameField',
@@ -95,6 +97,7 @@ export const AGENT_FLYOUT = {
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
   TITLE: 'createAgentPolicyFlyoutTitle',
   CREATE_BUTTON: 'createAgentPolicyButton',
+  ADVANCED_OPTIONS_TOGGLE: 'advancedOptionsButton',
   COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
   COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
 };
@@ -163,7 +166,8 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   PARTITIONING_EVENTS_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeRandomInput',
   PARTITIONING_HASH_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeHashInput',
   TOPICS_PANEL: 'settingsOutputsFlyout.kafkaTopicsPanel',
-  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDefaultTopicInput',
+  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaStaticTopicInput',
+  TOPICS_DYNAMIC_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDynamicTopicInput',
   HEADERS_PANEL: 'settingsOutputsFlyout.kafkaHeadersPanel',
   HEADERS_KEY_INPUT: 'settingsOutputsFlyout.kafkaHeadersKeyInput0',
   HEADERS_VALUE_INPUT: 'settingsOutputsFlyout.kafkaHeadersValueInput0',
@@ -239,4 +243,7 @@ export const API_KEYS = {
 
 export const AGENT_POLICY_DETAILS_PAGE = {
   ADD_AGENT_LINK: 'addAgentLink',
+  SETTINGS_TAB: 'agentPolicySettingsTab',
+  SPACE_SELECTOR_COMBOBOX: 'spaceSelectorComboBox',
+  SAVE_BUTTON: 'agentPolicyDetailsSaveButton',
 };

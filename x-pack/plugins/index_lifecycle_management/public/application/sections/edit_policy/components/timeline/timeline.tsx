@@ -114,6 +114,7 @@ interface Props {
   coldPhaseMinAge?: string;
   frozenPhaseMinAge?: string;
   deletePhaseMinAge?: string;
+  showTitle?: boolean;
 }
 
 /**
@@ -121,7 +122,7 @@ interface Props {
  * and should not rely directly on any application-specific context.
  */
 export const Timeline: FunctionComponent<Props> = memo(
-  ({ hasDeletePhase, isUsingRollover, ...phasesMinAge }) => {
+  ({ hasDeletePhase, isUsingRollover, showTitle = true, ...phasesMinAge }) => {
     const absoluteTimings: AbsoluteTimings = {
       hot: { min_age: phasesMinAge.hotPhaseMinAge },
       warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
@@ -147,24 +148,26 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     return (
       <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{i18nTexts.title}</h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            {i18nTexts.description}
-            &nbsp;
-            <LearnMoreLink
-              docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
-              text={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
-                  defaultMessage="Learn about timing"
-                />
-              }
-            />
-          </EuiText>
-        </EuiFlexItem>
+        {showTitle && (
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2>{i18nTexts.title}</h2>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              {i18nTexts.description}
+              &nbsp;
+              <LearnMoreLink
+                docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                    defaultMessage="Learn about timing"
+                  />
+                }
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <div
             className="ilmTimeline"

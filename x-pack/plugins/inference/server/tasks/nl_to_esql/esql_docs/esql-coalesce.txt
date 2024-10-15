@@ -1,13 +1,35 @@
-## COALESCE
+# COALESCE
 
-The `COALESCE` function returns the first of its arguments that is not null. If all arguments are null, it returns null.
+The COALESCE function returns the first non-null argument from the list of provided arguments.
 
-### Examples
+## Syntax
+
+`COALESCE(first, rest)`
+
+### Parameters
+
+#### first
+
+The first expression to evaluate.
+
+#### rest
+
+The subsequent expressions to evaluate.
+
+### Description
+
+The COALESCE function evaluates the provided expressions in order and returns the first non-null value it encounters. If all the expressions evaluate to null, the function returns null.
+
+## Examples
+
+In the following example, the COALESCE function evaluates the expressions 'a' and 'b'. Since 'a' is null, the function returns the value of 'b'.
 
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 ```
+
+COALESCE supports any number of rest parameters:
 
 ```esql
 ROW x=null, y=null, z="z"

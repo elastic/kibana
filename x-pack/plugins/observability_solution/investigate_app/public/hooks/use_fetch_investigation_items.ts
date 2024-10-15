@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  GetInvestigationItemsResponse,
-  InvestigationItemResponse,
-} from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
+import { GetInvestigationItemsResponse } from '@kbn/investigation-shared';
 import {
   QueryObserverResult,
   RefetchOptions,
@@ -20,7 +18,6 @@ import { useKibana } from './use_kibana';
 
 export interface Params {
   investigationId: string;
-  initialItems?: InvestigationItemResponse[];
 }
 
 export interface Response {
@@ -35,7 +32,7 @@ export interface Response {
   data: GetInvestigationItemsResponse | undefined;
 }
 
-export function useFetchInvestigationItems({ investigationId, initialItems }: Params): Response {
+export function useFetchInvestigationItems({ investigationId }: Params): Response {
   const {
     core: {
       http,
@@ -45,20 +42,21 @@ export function useFetchInvestigationItems({ investigationId, initialItems }: Pa
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetchItems({ investigationId }),
+      queryKey: investigationKeys.detailItems(investigationId),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationItemsResponse>(
           `/api/observability/investigations/${investigationId}/items`,
           { version: '2023-10-31', signal }
         );
       },
-      initialData: initialItems,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
       refetchIntervalInBackground: true,
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: 'Something went wrong while fetching investigation items',
+          title: i18n.translate('xpack.investigateApp.useFetchInvestigationItems.errorTitle', {
+            defaultMessage: 'Something went wrong while fetching investigation items',
+          }),
         });
       },
     }

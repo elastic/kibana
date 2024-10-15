@@ -16,6 +16,9 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -38,7 +41,15 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const { packageName, dataStreamName, rawSamples, mapping, langSmithOptions } = req.body;
+        const {
+          packageName,
+          dataStreamName,
+          samplesFormat,
+          rawSamples,
+          additionalProcessors,
+          mapping,
+          langSmithOptions,
+        } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
@@ -68,6 +79,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             packageName,
             dataStreamName,
             rawSamples,
+            samplesFormat,
+            additionalProcessors,
             ...(mapping && { mapping }),
           };
 
@@ -82,8 +95,15 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           const results = await graph.invoke(parameters, options);
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
-        } catch (e) {
-          return res.badRequest({ body: e });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
+          }
+          return res.badRequest({ body: err });
         }
       })
     );

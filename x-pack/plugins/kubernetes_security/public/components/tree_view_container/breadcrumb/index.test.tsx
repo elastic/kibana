@@ -44,7 +44,7 @@ describe('Tree view Breadcrumb component', () => {
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.node!)).toBeFalsy();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.pod!)).toBeNull();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.containerImage!)).toBeVisible();
-      expect(renderResult).toMatchSnapshot();
+      expect(renderResult.container).toMatchSnapshot();
     });
 
     it('should render breadcrumb icons', async () => {
@@ -60,7 +60,7 @@ describe('Tree view Breadcrumb component', () => {
       expect(
         renderResult.queryByTestId('kubernetesSecurityBreadcrumbIcon-containerImage')
       ).toBeVisible();
-      expect(renderResult).toMatchSnapshot();
+      expect(renderResult.container).toMatchSnapshot();
     });
     it('returns null when no selected collection', async () => {
       renderResult = mockedContext.render(<Breadcrumb treeNavSelection={{}} onSelect={onSelect} />);
@@ -84,7 +84,7 @@ describe('Tree view Breadcrumb component', () => {
       ).toBeVisible();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.clusterId!)).toBeNull();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.containerImage!)).toBeVisible();
-      expect(renderResult).toMatchSnapshot();
+      expect(renderResult.container).toMatchSnapshot();
     });
 
     it('should return null when no cluster in selection', async () => {
@@ -132,7 +132,7 @@ describe('Tree view Breadcrumb component', () => {
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.node!)).toBeNull();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.pod!)).toBeNull();
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.containerImage!)).toBeVisible();
-      expect(renderResult).toMatchSnapshot();
+      expect(renderResult.container).toMatchSnapshot();
     });
   });
 });

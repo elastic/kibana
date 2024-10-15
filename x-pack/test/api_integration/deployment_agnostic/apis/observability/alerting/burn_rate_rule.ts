@@ -23,7 +23,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'slo';
 
-  describe('Burn rate rule', () => {
+  describe('Burn rate rule', function () {
+    // see details: https://github.com/elastic/kibana/issues/196252
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = 'slo.rules.burnRate';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
@@ -306,7 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(ruleId, adminRoleAuthc);
+        const match = await alertingApi.findInRules(adminRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });

@@ -24,13 +24,21 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService, usageStatsServicePromise, getStartServices, log } = deps;
+  const {
+    router,
+    getSpacesService,
+    usageStatsServicePromise,
+    getStartServices,
+    log,
+    isServerless,
+  } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   router.post(
     {
       path: '/api/spaces/_copy_saved_objects',
       options: {
+        access: isServerless ? 'internal' : 'public',
         tags: ['access:copySavedObjectsToSpaces'],
         description: `Copy saved objects to spaces`,
       },
@@ -148,6 +156,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
       options: {
+        access: isServerless ? 'internal' : 'public',
         tags: ['access:copySavedObjectsToSpaces'],
         description: `Resolve conflicts copying saved objects`,
       },

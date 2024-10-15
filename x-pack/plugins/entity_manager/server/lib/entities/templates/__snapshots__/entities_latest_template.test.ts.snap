@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateEntitiesLatestIndexTemplateConfig(definition) should generate a valid index template for builtin definition 1`] = `
+Object {
+  "_meta": Object {
+    "description": "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
+    "ecs_version": "8.0.0",
+    "managed": true,
+    "managed_by": "elastic_entity_model",
+  },
+  "composed_of": Array [
+    "entities_v1_latest_base",
+    "entities_v1_entity",
+    "entities_v1_event",
+  ],
+  "ignore_missing_component_templates": Array [],
+  "index_patterns": Array [
+    ".entities.v1.latest.builtin_mock_entity_definition",
+  ],
+  "name": "entities_v1_latest_builtin_mock_entity_definition_index_template",
+  "priority": 200,
+  "template": Object {
+    "aliases": Object {
+      "entities-service-latest": Object {},
+    },
+    "mappings": Object {
+      "_meta": Object {
+        "version": "1.6.0",
+      },
+      "date_detection": false,
+      "dynamic_templates": Array [
+        Object {
+          "strings_as_keyword": Object {
+            "mapping": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "text",
+                },
+              },
+              "ignore_above": 1024,
+              "type": "keyword",
+            },
+            "match_mapping_type": "string",
+          },
+        },
+        Object {
+          "entity_metrics": Object {
+            "mapping": Object {
+              "type": "{dynamic_type}",
+            },
+            "match_mapping_type": Array [
+              "long",
+              "double",
+            ],
+            "path_match": "entity.metrics.*",
+          },
+        },
+      ],
+    },
+    "settings": Object {
+      "index": Object {
+        "codec": "best_compression",
+        "mapping": Object {
+          "total_fields": Object {
+            "limit": 2000,
+          },
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`generateEntitiesLatestIndexTemplateConfig(definition) should generate a valid index template for custom definition 1`] = `
+Object {
+  "_meta": Object {
+    "description": "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
+    "ecs_version": "8.0.0",
+    "managed": true,
+    "managed_by": "elastic_entity_model",
+  },
+  "composed_of": Array [
+    "entities_v1_latest_base",
+    "entities_v1_entity",
+    "entities_v1_event",
+    "admin-console-services@platform",
+    "admin-console-services-latest@platform",
+    "admin-console-services@custom",
+    "admin-console-services-latest@custom",
+  ],
+  "ignore_missing_component_templates": Array [
+    "admin-console-services@platform",
+    "admin-console-services-latest@platform",
+    "admin-console-services@custom",
+    "admin-console-services-latest@custom",
+  ],
+  "index_patterns": Array [
+    ".entities.v1.latest.admin-console-services",
+  ],
+  "name": "entities_v1_latest_admin-console-services_index_template",
+  "priority": 200,
+  "template": Object {
+    "aliases": Object {
+      "entities-service-latest": Object {},
+    },
+    "mappings": Object {
+      "_meta": Object {
+        "version": "1.6.0",
+      },
+      "date_detection": false,
+      "dynamic_templates": Array [
+        Object {
+          "strings_as_keyword": Object {
+            "mapping": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "text",
+                },
+              },
+              "ignore_above": 1024,
+              "type": "keyword",
+            },
+            "match_mapping_type": "string",
+          },
+        },
+        Object {
+          "entity_metrics": Object {
+            "mapping": Object {
+              "type": "{dynamic_type}",
+            },
+            "match_mapping_type": Array [
+              "long",
+              "double",
+            ],
+            "path_match": "entity.metrics.*",
+          },
+        },
+      ],
+    },
+    "settings": Object {
+      "index": Object {
+        "codec": "best_compression",
+        "mapping": Object {
+          "total_fields": Object {
+            "limit": 2000,
+          },
+        },
+      },
+    },
+  },
+}
+`;

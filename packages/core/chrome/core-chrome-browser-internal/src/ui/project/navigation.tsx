@@ -7,39 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import { css } from '@emotion/css';
 
-const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
+interface Props {
+  toggleSideNav: (isVisible: boolean) => void;
+  isSideNavCollapsed$: Observable<boolean>;
+}
 
-export const ProjectNavigation: FC<
-  PropsWithChildren<{ toggleSideNav: (isVisible: boolean) => void }>
-> = ({ children, toggleSideNav }) => {
-  const isMounted = useRef(false);
-  const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
-  const onCollapseToggle = (nextIsCollapsed: boolean) => {
-    setIsCollapsed(nextIsCollapsed);
-    toggleSideNav(nextIsCollapsed);
-  };
+const PANEL_WIDTH = 290;
 
-  useEffect(() => {
-    if (!isMounted.current && isCollapsed !== undefined) {
-      toggleSideNav(isCollapsed);
-    }
-    isMounted.current = true;
-  }, [isCollapsed, toggleSideNav]);
+export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
+  children,
+  isSideNavCollapsed$,
+  toggleSideNav,
+}) => {
+  const isCollapsed = useObservable(isSideNavCollapsed$, false);
 
   return (
     <EuiCollapsibleNavBeta
       data-test-subj="projectLayoutSideNav"
-      initialIsCollapsed={isCollapsed}
-      onCollapseToggle={onCollapseToggle}
-      css={
-        isCollapsed
-          ? undefined
-          : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
-      }
+      isCollapsed={isCollapsed}
+      onCollapseToggle={toggleSideNav}
+      css={{
+        overflow: 'visible',
+        clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
+      }}
+      className={css`
+        .euiFlyoutBody__overflowContent {
+          height: 100%;
+        }
+      `}
     >
       {children}
     </EuiCollapsibleNavBeta>

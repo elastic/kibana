@@ -13,15 +13,15 @@ import {
   RULE_SUMMARY_BUTTON_TEST_ID,
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
-import { AlertDescription, RULE_OVERVIEW_BANNER } from './alert_description';
+import { AlertDescription } from './alert_description';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
 import { TestProviders } from '../../../../common/mock';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -150,13 +150,11 @@ describe('<AlertDescription />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsRuleOverviewPanelKey,
+        id: RulePreviewPanelKey,
         params: {
-          id: panelContext.eventId,
-          indexName: panelContext.indexName,
-          scopeId: panelContext.scopeId,
-          banner: RULE_OVERVIEW_BANNER,
+          banner: RULE_PREVIEW_BANNER,
           ruleId: ruleUuid.values[0],
+          isPreviewMode: true,
         },
       });
     });

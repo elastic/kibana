@@ -1,10 +1,24 @@
-## VALUES
+# VALUES
 
-`VALUES` returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order, use `MV_SORT`.
+The VALUES function returns all values in a group as a multivalued field.
 
-**Note:** Do not use `VALUES` in production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+## Syntax
 
-### Examples
+`VALUES (field)`
+
+### Parameters
+
+#### field
+
+The field for which all values are to be returned.
+
+## Description
+
+The VALUES function is used to return all values in a group as a multivalued field. It's important to note that the order of the returned values is not guaranteed. If you need the values returned in a specific order, you should use the `MV_SORT` function.
+
+## Examples
+
+The following example demonstrates how to use the VALUES function:
 
 ```esql
 FROM employees
@@ -13,4 +27,7 @@ FROM employees
 | SORT first_letter
 ```
 
-This can use a significant amount of memory and ES|QL doesn’t yet grow aggregations beyond memory. So this aggregation will work until it is used to collect more values than can fit into memory. Once it collects too many values it will fail the query with a Circuit Breaker Error.
+## Limitations
+
+- This functionality is in technical preview and may be changed or removed in a future release
+- The VALUES function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond memory. Therefore, if the function collects more values than can fit into memory, it will fail the query with a Circuit Breaker Error.

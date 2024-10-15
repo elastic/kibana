@@ -18,11 +18,9 @@ const STORYBOOKS = [
   'canvas',
   'cases',
   'cell_actions',
-  'cloud_chat',
   'coloring',
   'chart_icons',
   'content_management_examples',
-  'controls',
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',
@@ -45,6 +43,7 @@ const STORYBOOKS = [
   'lists',
   'observability',
   'observability_ai_assistant',
+  'observability_shared',
   'presentation',
   'security_solution',
   'security_solution_packages',
@@ -55,7 +54,7 @@ const STORYBOOKS = [
   'language_documentation_popover',
   'unified_search',
   'random_sampling',
-  'text_based_editor',
+  'esql_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

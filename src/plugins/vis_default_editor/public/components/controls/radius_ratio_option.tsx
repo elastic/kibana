@@ -41,7 +41,7 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
     }
   });
 
-  const onChange: EuiRangeProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
     [setStateParamValue]
   );

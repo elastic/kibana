@@ -12,6 +12,7 @@ import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { MetricsServiceStart } from '@kbn/core-metrics-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -40,6 +41,8 @@ export interface CoreStart {
   elasticsearch: ElasticsearchServiceStart;
   /** {@link ExecutionContextStart} */
   executionContext: ExecutionContextStart;
+  /** {@link FeatureFlagsStart} */
+  featureFlags: FeatureFlagsStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */

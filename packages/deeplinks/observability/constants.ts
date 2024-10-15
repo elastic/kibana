@@ -11,6 +11,9 @@ export const LOGS_APP_ID = 'logs';
 
 export const OBSERVABILITY_LOGS_EXPLORER_APP_ID = 'observability-logs-explorer';
 
+// TODO: Remove the app once context-aware switching between discover and observability logs explorer is implemented
+export const LAST_USED_LOGS_VIEWER_APP_ID = 'last-used-logs-viewer';
+
 export const OBSERVABILITY_OVERVIEW_APP_ID = 'observability-overview';
 
 export const METRICS_APP_ID = 'metrics';
@@ -30,3 +33,5 @@ export const INVESTIGATE_APP_ID = 'investigate';
 export const OBLT_UX_APP_ID = 'ux';
 
 export const OBLT_PROFILING_APP_ID = 'profiling';
+
+export const INVENTORY_APP_ID = 'inventory';

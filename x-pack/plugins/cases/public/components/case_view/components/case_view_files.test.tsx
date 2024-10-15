@@ -61,7 +61,7 @@ describe('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+    await userEvent.click(await screen.findByTestId('pagination-button-next'));
 
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({
@@ -79,13 +79,13 @@ describe('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+    await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
 
     pageSizeOption.style.pointerEvents = 'all';
 
-    userEvent.click(pageSizeOption);
+    await userEvent.click(pageSizeOption);
 
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({

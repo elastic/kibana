@@ -9,19 +9,19 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
-import { useDashboardAPI } from '../../dashboard_app';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 
 interface Props {
   closePopover: () => void;
-  controlGroup: ControlGroupContainer;
+  controlGroupApi?: ControlGroupApi;
 }
 
-export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
-  const dashboard = useDashboardAPI();
+export const AddDataControlButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
+  const dashboardApi = useDashboardApi();
   const onSave = () => {
-    dashboard.scrollToTop();
+    dashboardApi.scrollToTop();
   };
 
   return (
@@ -29,9 +29,10 @@ export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Pr
       {...rest}
       icon="plusInCircle"
       data-test-subj="controls-create-button"
+      disabled={!controlGroupApi}
       aria-label={getAddControlButtonTitle()}
       onClick={() => {
-        controlGroup.openAddDataControlFlyout({ onSave });
+        controlGroupApi?.openAddDataControlFlyout({ onSave });
         closePopover();
       }}
     >

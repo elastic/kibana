@@ -35,12 +35,12 @@ describe('Data table view button ', function () {
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
     await button.simulate('click');
-    expect(contextMock.setExpanded).toHaveBeenCalledWith(dataTableContextMock.rows[0]);
+    expect(contextMock.setExpanded).toHaveBeenCalledWith(dataTableContextMock.getRowByIndex(0));
   });
   it('when the current document is expanded, setExpanded is called with undefined', async () => {
     const contextMock = {
       ...dataTableContextMock,
-      expanded: dataTableContextMock.rows[0],
+      expanded: dataTableContextMock.getRowByIndex(0),
     };
 
     const component = mountWithIntl(
@@ -63,7 +63,7 @@ describe('Data table view button ', function () {
   it('when another document is expanded, setExpanded is called with the current document', async () => {
     const contextMock = {
       ...dataTableContextMock,
-      expanded: dataTableContextMock.rows[0],
+      expanded: dataTableContextMock.getRowByIndex(0),
     };
 
     const component = mountWithIntl(
@@ -81,6 +81,6 @@ describe('Data table view button ', function () {
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
     await button.simulate('click');
-    expect(contextMock.setExpanded).toHaveBeenCalledWith(dataTableContextMock.rows[1]);
+    expect(contextMock.setExpanded).toHaveBeenCalledWith(dataTableContextMock.getRowByIndex(1));
   });
 });

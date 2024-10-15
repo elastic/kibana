@@ -1317,6 +1317,8 @@ export default function (providerContext: FtrProviderContext) {
         for (let i = 0; i < POLICY_COUNT; i++) {
           await createPackagePolicy(i.toString());
         }
+
+        expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
       });
 
       afterEach(async function () {

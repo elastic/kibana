@@ -260,6 +260,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
+        isDeleteEnabled: (rowItem: ConversationTableItem) => rowItem.isDefault !== true,
+        isEditEnabled: () => true,
         onDeleteActionClicked,
         onEditActionClicked,
       }),
@@ -321,11 +323,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             conversationsSettingsBulkActions={conversationsSettingsBulkActions}
             http={http}
             isDisabled={isDisabled}
-            refetchConversations={refetchConversations}
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-            onSelectedConversationChange={onSelectedConversationChange}
           />
         </Flyout>
       )}

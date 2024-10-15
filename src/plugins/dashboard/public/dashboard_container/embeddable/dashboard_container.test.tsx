@@ -9,24 +9,27 @@
 
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import type { TimeRange } from '@kbn/es-query';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
-import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
-import { pluginServices } from '../../services/plugin_services';
+import {
+  buildMockDashboard,
+  getSampleDashboardInput,
+  getSampleDashboardPanel,
+  mockControlGroupApi,
+} from '../../mocks';
+import { embeddableService } from '../../services/kibana_services';
 import { DashboardContainer } from './dashboard_container';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(embeddableFactory);
+embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
@@ -169,8 +172,15 @@ test('searchSessionId propagates to children', async () => {
     0,
     undefined,
     undefined,
-    { lastSavedInput: sampleInput }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: sampleInput,
+      lastSavedId: undefined,
+      managed: false,
+    }
   );
+  container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -190,11 +200,10 @@ describe('getInheritedInput', () => {
   const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
       CONTACT_CARD_EMBEDDABLE,
@@ -215,11 +224,10 @@ describe('getInheritedInput', () => {
   });
 
   test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddableTimeRange = {
       to: 'now',

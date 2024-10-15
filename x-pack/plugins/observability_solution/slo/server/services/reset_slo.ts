@@ -104,7 +104,7 @@ export class ResetSLO {
       throw err;
     }
 
-    const updatedSlo = await this.repository.save({
+    const updatedSlo = await this.repository.update({
       ...slo,
       version: SLO_MODEL_VERSION,
       updatedAt: new Date(),

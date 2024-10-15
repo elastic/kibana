@@ -11,7 +11,7 @@
         "label": "AVCResultsBanner2024",
         "description": [],
         "signature": [
-          "({ onDismiss }: React.PropsWithChildren<{ onDismiss: () => void; }>) => JSX.Element"
+          "({ onDismiss }: { onDismiss: () => void; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-avc-banner/src/index.tsx",
         "deprecated": false,
@@ -20,12 +20,12 @@
           {
             "parentPluginId": "@kbn/avc-banner",
             "id": "def-public.AVCResultsBanner2024.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ onDismiss }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ onDismiss: () => void; }>"
+              "{ onDismiss: () => void; }"
             ],
             "path": "packages/kbn-avc-banner/src/index.tsx",
             "deprecated": false,

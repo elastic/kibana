@@ -146,6 +146,23 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.createOutputParser",
+        "type": "Function",
+        "tags": [],
+        "label": "createOutputParser",
+        "description": [],
+        "signature": [
+          "() => (source: any, reviver: any) => any"
+        ],
+        "path": "packages/kbn-monaco/src/console/output_parser.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.getParsedRequestsProvider",
         "type": "Function",
         "tags": [],
@@ -482,7 +499,9 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }> | undefined"
+              "CallbackFn<{}, ",
+              "ESQLSourceResult",
+              "> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
@@ -539,6 +558,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCallbacks.getFieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "getFieldsMetadata",
+            "description": [],
+            "signature": [
+              "Promise<",
+              "PartialFieldsMetadataClient",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

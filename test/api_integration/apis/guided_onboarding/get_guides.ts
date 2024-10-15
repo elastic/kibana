@@ -15,6 +15,7 @@ import {
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides } from './helpers';
 
@@ -32,7 +33,10 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
     });
 
     it('returns an empty array if no guides', async () => {
-      const response = await supertest.get(getGuidesPath).expect(200);
+      const response = await supertest
+        .get(getGuidesPath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body).not.to.be.empty();
       expect(response.body.state).to.be.empty();
     });
@@ -42,7 +46,10 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
         testGuideStep1ActiveState,
         { ...testGuideStep1ActiveState, guideId: appSearchGuideId },
       ]);
-      const response = await supertest.get(getGuidesPath).expect(200);
+      const response = await supertest
+        .get(getGuidesPath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body).not.to.be.empty();
       expect(response.body.state).to.eql([
         testGuideStep1ActiveState,

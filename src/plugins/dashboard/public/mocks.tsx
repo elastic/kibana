@@ -10,15 +10,11 @@
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 import { DashboardStart } from './plugin';
-import { pluginServices } from './services/plugin_services';
-export { setStubDashboardServices } from './services/mocks';
-
-export const getMockedDashboardServices = () => {
-  return pluginServices.getServices();
-};
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -73,6 +69,15 @@ export function setupIntersectionObserverMock({
   });
 }
 
+export const mockControlGroupApi = {
+  untilInitialized: async () => {},
+  filters$: new BehaviorSubject(undefined),
+  query$: new BehaviorSubject(undefined),
+  timeslice$: new BehaviorSubject(undefined),
+  dataViews: new BehaviorSubject(undefined),
+  unsavedChanges: new BehaviorSubject(undefined),
+} as unknown as ControlGroupApi;
+
 export function buildMockDashboard({
   overrides,
   savedObjectId,
@@ -88,8 +93,15 @@ export function buildMockDashboard({
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: initialInput,
+      lastSavedId: savedObjectId,
+      managed: false,
+    }
   );
+  dashboardContainer?.setControlGroupApi(mockControlGroupApi);
   return dashboardContainer;
 }
 
@@ -107,7 +119,6 @@ export function getSampleDashboardInput(
     id: '123',
     tags: [],
     filters: [],
-    isEmbeddedExternally: false,
     title: 'My Dashboard',
     query: {
       language: 'kuery',

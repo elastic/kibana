@@ -51,7 +51,7 @@ describe('EditAssigneesFlyout', () => {
   it('calls onClose when pressing the cancel button', async () => {
     appMock.render(<EditAssigneesFlyout {...props} />);
 
-    userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
+    await userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
 
     await waitFor(() => {
       expect(props.onClose).toHaveBeenCalled();
@@ -63,8 +63,8 @@ describe('EditAssigneesFlyout', () => {
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText('Damaged Raccoon'));
-    userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
+    await userEvent.click(await screen.findByText('Damaged Raccoon'));
+    await userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
 
     await waitFor(() => {
       expect(props.onSaveAssignees).toHaveBeenCalledWith({

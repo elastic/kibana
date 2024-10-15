@@ -15,7 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'visEditor', 'visChart']);
+  const { common, visualize, header, visEditor, visChart } = getPageObjects([
+    'common',
+    'visualize',
+    'header',
+    'visEditor',
+    'visChart',
+  ]);
 
   const xyChartSelector = 'xyVisChart';
 
@@ -24,34 +30,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickVerticalBarChart');
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch(
-        PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
-      );
-      await PageObjects.common.sleep(500);
+      await visualize.clickVerticalBarChart();
+      await visualize.clickNewSearch(visualize.index.LOGSTASH_NON_TIME_BASED);
+      await common.sleep(500);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visEditor.clickBucket('X-axis');
+      await visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await visEditor.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
-      await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('3h', { type: 'custom' });
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      await PageObjects.visEditor.clickGo(true);
+      await visEditor.selectField('@timestamp');
+      await visEditor.setInterval('3h', { type: 'custom' });
+      await visChart.waitForVisualizationRenderingStabilized();
+      await visEditor.clickGo(true);
     };
 
     before(async () => {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
       await initBarChart();
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visChart.waitForVisualization();
+      await visualize.loadSavedVisualization(vizName1);
+      await visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
@@ -68,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
       // try sleeping a bit before getting that data
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData(xyChartSelector);
+        const data = await visChart.getBarChartData(xyChartSelector);
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
@@ -109,12 +113,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const axisId = 'ValueAxis-1';
 
       it('should show ticks on selecting log scale', async () => {
-        await PageObjects.visEditor.clickMetricsAndAxes();
-        await PageObjects.visEditor.clickYAxisOptions(axisId);
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
+        await visEditor.clickMetricsAndAxes();
+        await visEditor.clickYAxisOptions(axisId);
+        await visEditor.selectYAxisScaleType(axisId, 'log');
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
         const numberOfLabels = 10;
@@ -124,9 +128,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
         const numberOfLabels = 10;
@@ -136,36 +140,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show ticks on selecting square root scale', async () => {
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        await visEditor.selectYAxisScaleType(axisId, 'square root');
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        await visEditor.selectYAxisScaleType(axisId, 'linear');
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo(true);
-        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await visEditor.clickGo(true);
+        const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
@@ -175,19 +179,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(initBarChart);
 
       it('should show correct series', async function () {
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.clickBucket('Split series');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.clickBucket('Split series');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('response.raw');
+        await header.waitUntilLoadingHasFinished();
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await common.sleep(1003);
+        await visEditor.clickGo(true);
+        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503']; // sorting order aligned with reading direction top-bottom
 
-        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
+        const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
     });
@@ -196,21 +200,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(initBarChart);
 
       it('should show correct series', async function () {
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.clickBucket('Split series');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.clickBucket('Split series');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('response.raw');
+        await header.waitUntilLoadingHasFinished();
 
-        await PageObjects.visEditor.toggleOpenEditor(3, 'false');
-        await PageObjects.visEditor.clickBucket('Split series');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('machine.os');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await visEditor.toggleOpenEditor(3, 'false');
+        await visEditor.clickBucket('Split series');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('machine.os');
+        await header.waitUntilLoadingHasFinished();
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await common.sleep(1003);
+        await visEditor.clickGo(true);
+        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           '200 - win 8',
@@ -229,17 +233,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '404 - win 8',
           '404 - win xp',
         ];
-        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
+        const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
 
       it('should show correct series when disabling first agg', async function () {
-        await PageObjects.visEditor.toggleDisabledAgg(3);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await visEditor.toggleDisabledAgg(3);
+        await visEditor.clickGo(true);
+        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
-        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
+        const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
     });
@@ -248,17 +252,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(initBarChart);
 
       it('should show correct series', async function () {
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.toggleOpenEditor(1);
-        await PageObjects.visEditor.selectAggregation('Derivative', 'metrics');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.toggleOpenEditor(1);
+        await visEditor.selectAggregation('Derivative', 'metrics');
+        await header.waitUntilLoadingHasFinished();
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await common.sleep(1003);
+        await visEditor.clickGo(true);
+        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['Derivative of Count'];
-        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
+        const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
     });

@@ -120,7 +120,6 @@ export interface FunctionDefinition {
       name: string;
       type: FunctionParameterType;
       optional?: boolean;
-      noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
       /**
        * If set, this parameter does not accept a field. It only accepts a constant,
@@ -137,7 +136,7 @@ export interface FunctionDefinition {
        * we can't check the return value of a function to see if it
        * matches one of the options prior to runtime.
        */
-      literalOptions?: string[];
+      acceptedValues?: string[];
       /**
        * Must only be included _in addition to_ literalOptions.
        *
@@ -173,7 +172,7 @@ export interface CommandBaseDefinition {
       name: string;
       type: string;
       optional?: boolean;
-      innerTypes?: string[];
+      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;
@@ -205,6 +204,7 @@ export interface CommandDefinition extends CommandBaseDefinition {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
   modes: CommandModeDefinition[];
+  hasRecommendedQueries?: boolean;
 }
 
 export interface Literals {

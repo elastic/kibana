@@ -66,7 +66,7 @@ describe('ReportMetricOptions', function () {
       />
     );
 
-    userEvent.hover(getByText('Page load time'));
+    await userEvent.hover(getByText('Page load time'));
 
     // The tooltip from EUI takes 250ms to appear, so we must
     // use a `find*` query to asynchronously poll for it.

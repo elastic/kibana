@@ -1,8 +1,18 @@
-## TRIM
+# TRIM
 
-Removes leading and trailing whitespaces from a string.
+The TRIM function removes leading and trailing whitespaces from a string.
 
-### Examples
+## Syntax
+
+`TRIM(string)`
+
+### Parameters
+
+#### string
+
+This is the string expression that you want to trim.
+
+## Examples
 
 ```esql
 ROW message = "   some text  ",  color = " red "

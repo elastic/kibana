@@ -21,6 +21,13 @@ export const TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NOTE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.navLinks.investigations.note.title',
+  {
+    defaultMessage: 'Oversee, revise and revisit the annotations within each document and timeline',
+  }
+);
+
 export const OSQUERY_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.investigations.osquery.title',
   {

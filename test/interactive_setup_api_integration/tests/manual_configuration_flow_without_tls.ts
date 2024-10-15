@@ -19,7 +19,7 @@ export default function (context: FtrProviderContext) {
   const config = context.getService('config');
 
   describe('Interactive setup APIs - Manual configuration flow without TLS', function () {
-    this.tags('skipCloud');
+    this.tags(['skipCloud', 'skipFIPS']);
 
     let kibanaVerificationCode: string;
     before(async () => {

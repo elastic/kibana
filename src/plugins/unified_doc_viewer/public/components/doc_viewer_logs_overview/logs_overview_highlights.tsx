@@ -15,6 +15,8 @@ import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/disco
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { ServiceNameHighlightField } from './sub_components/service_name_highlight_field';
+import { TraceIdHighlightField } from './sub_components/trace_id_highlight_field';
 
 export function LogsOverviewHighlights({
   formattedDoc,
@@ -65,7 +67,7 @@ export function LogsOverviewHighlights({
         data-test-subj="unifiedDocViewLogsOverviewHighlightSectionServiceInfra"
       >
         {shouldRenderHighlight(fieldConstants.SERVICE_NAME_FIELD) && (
-          <HighlightField
+          <ServiceNameHighlightField
             data-test-subj="unifiedDocViewLogsOverviewService"
             label={serviceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.SERVICE_NAME_FIELD]}
@@ -81,7 +83,7 @@ export function LogsOverviewHighlights({
           />
         )}
         {shouldRenderHighlight(fieldConstants.TRACE_ID_FIELD) && (
-          <HighlightField
+          <TraceIdHighlightField
             data-test-subj="unifiedDocViewLogsOverviewTrace"
             label={traceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.TRACE_ID_FIELD]}

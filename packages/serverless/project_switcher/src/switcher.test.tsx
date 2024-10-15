@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, RenderResult, screen, within, waitFor, cleanup } from '@testing-library/react';
+import { render, RenderResult, screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ProjectType } from '@kbn/serverless-types';
@@ -91,7 +91,7 @@ describe('ProjectSwitcher', () => {
         expect(group).toBeNull();
 
         const button = screen.getByTestId(TEST_ID_BUTTON);
-        await waitFor(() => userEvent.click(button));
+        await userEvent.click(button);
 
         group = screen.queryByTestId(TEST_ID_ITEM_GROUP);
         expect(group).not.toBeNull();
@@ -101,11 +101,11 @@ describe('ProjectSwitcher', () => {
         const [_, mock] = renderProjectSwitcher();
 
         const button = screen.getByTestId(TEST_ID_BUTTON);
-        await waitFor(() => userEvent.click(button));
+        await userEvent.click(button);
 
         const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
         const project = await within(group).findByLabelText('Security');
-        await waitFor(() => userEvent.click(project));
+        await userEvent.click(project);
 
         expect(mock.setProjectType).toHaveBeenCalled();
       });
@@ -130,7 +130,7 @@ describe('ProjectSwitcher', () => {
       expect(group).toBeNull();
 
       const button = screen.getByTestId(TEST_ID_BUTTON);
-      userEvent.click(button);
+      await userEvent.click(button);
 
       group = screen.queryByTestId(TEST_ID_ITEM_GROUP);
       expect(group).not.toBeNull();
@@ -140,11 +140,11 @@ describe('ProjectSwitcher', () => {
       const [_, mock] = renderKibanaProjectSwitcher();
 
       const button = screen.getByTestId(TEST_ID_BUTTON);
-      await waitFor(() => userEvent.click(button));
+      await userEvent.click(button);
 
       const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
       const project = await within(group).findByLabelText('Security');
-      await waitFor(() => userEvent.click(project));
+      await userEvent.click(project);
 
       expect(mock.coreStart.http.post).toHaveBeenCalled();
     });

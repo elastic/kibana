@@ -140,7 +140,7 @@ describe('XY Toolbar', () => {
       expect(getRightAxisButton()).toBeEnabled();
     });
 
-    it('should pass in endzone visibility setter and current sate for time chart', () => {
+    it('should pass in endzone visibility setter and current sate for time chart', async () => {
       const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
       (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         dataType: 'date',
@@ -160,16 +160,16 @@ describe('XY Toolbar', () => {
         },
       });
 
-      userEvent.click(getRightAxisButton());
+      await userEvent.click(getRightAxisButton());
       expect(
         within(screen.getByRole('dialog', { name: 'Right axis' })).queryByTestId('lnsshowEndzones')
       ).not.toBeInTheDocument();
 
-      userEvent.click(getBottomAxisButton());
+      await userEvent.click(getBottomAxisButton());
       expect(
         within(screen.getByRole('dialog', { name: 'Bottom axis' })).queryByTestId('lnsshowEndzones')
       ).toBeInTheDocument();
-      userEvent.click(getLeftAxisButton());
+      await userEvent.click(getLeftAxisButton());
       expect(
         within(screen.getByRole('dialog', { name: 'Left axis' })).queryByTestId('lnsshowEndzones')
       ).not.toBeInTheDocument();
@@ -206,7 +206,7 @@ describe('XY Toolbar', () => {
       ).toBeFalsy();
     });
 
-    it('should pass in information about current data bounds', () => {
+    it('should pass in information about current data bounds', async () => {
       const state = testState();
       frame.activeData = {
         first: {
@@ -237,13 +237,13 @@ describe('XY Toolbar', () => {
           }}
         />
       );
-      userEvent.click(getLeftAxisButton());
+      await userEvent.click(getLeftAxisButton());
       fireEvent.click(screen.getByTestId('lnsXY_axisExtent_groups_custom'));
       expect(screen.getByTestId('lnsXY_axisExtent_lowerBound')).toHaveValue(-5);
       expect(screen.getByTestId('lnsXY_axisExtent_upperBound')).toHaveValue(50);
     });
 
-    it('should pass in extent information', () => {
+    it('should pass in extent information', async () => {
       const state = testState();
       render(
         <XyToolbar
@@ -270,10 +270,10 @@ describe('XY Toolbar', () => {
           }}
         />
       );
-      userEvent.click(getLeftAxisButton());
+      await userEvent.click(getLeftAxisButton());
       expect(screen.getByTestId('lnsXY_axisExtent_lowerBound')).toHaveValue(123);
       expect(screen.getByTestId('lnsXY_axisExtent_upperBound')).toHaveValue(456);
-      userEvent.click(getRightAxisButton());
+      await userEvent.click(getRightAxisButton());
       const selectedButton = getSelectedButtonInGroup(
         'lnsXY_axisBounds_groups',
         within(screen.getByRole('dialog', { name: 'Right axis' }))

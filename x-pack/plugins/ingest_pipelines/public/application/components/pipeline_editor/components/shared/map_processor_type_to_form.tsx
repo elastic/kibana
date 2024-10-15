@@ -10,6 +10,7 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
+import { stringifyValueDescription } from './stringify_value_description';
 import { LicenseType } from '../../../../../types';
 
 import {
@@ -127,7 +128,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Appends "{value}" to the "{field}" field',
         values: {
           field,
-          value,
+          value: stringifyValueDescription(value),
         },
       }),
   },
@@ -810,7 +811,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Sets value of "{field}" to "{value}"',
         values: {
           field,
-          value,
+          value: stringifyValueDescription(value),
         },
       });
     },
