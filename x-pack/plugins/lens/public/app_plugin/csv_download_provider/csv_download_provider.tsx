@@ -8,10 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ShareMenuItemV2, ShareMenuProviderV2 } from '@kbn/share-plugin/public/types';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
@@ -75,22 +76,25 @@ async function downloadCSVs({
 }
 
 function getWarnings(activeData: TableInspectorAdapter) {
-  const messages: string[] = [];
+  const warnings: Array<{ title: string; message: string }> = [];
   if (activeData) {
     const datatables = Object.values(activeData);
     const formulaDetected = datatables.some((datatable) => {
       return tableHasFormulas(datatable.columns, datatable.rows);
     });
     if (formulaDetected) {
-      messages.push(
-        i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+      warnings.push({
+        title: i18n.translate('xpack.lens.app.downloadButtonFormulasWarningTitle', {
+          defaultMessage: 'Formulas detected',
+        }),
+        message: i18n.translate('xpack.lens.app.downloadButtonFormulasWarningMessage', {
           defaultMessage:
             'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
-        })
-      );
+        }),
+      });
     }
   }
-  return messages;
+  return warnings;
 }
 
 interface DownloadPanelShareOpts {
@@ -103,8 +107,11 @@ export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-}: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
+}: DownloadPanelShareOpts): ShareMenuProviderV2 => {
+  const getShareMenuItems: ShareMenuProviderV2['getShareMenuItems'] = ({
+    objectType,
+    sharingData,
+  }) => {
     if ('lens' !== objectType) {
       return [];
     }
@@ -123,15 +130,6 @@ export const downloadCsvShareProvider = ({
       }
     );
 
-    const menuItemMetadata = {
-      shareMenuItem: {
-        name: panelTitle,
-        icon: 'document',
-        disabled: !csvEnabled,
-        sortOrder: 1,
-      },
-    };
-
     const downloadCSVHandler = () =>
       downloadCSVs({
         title,
@@ -143,28 +141,23 @@ export const downloadCsvShareProvider = ({
 
     return [
       {
-        ...menuItemMetadata,
+        shareMenuItem: {
+          name: panelTitle,
+          icon: 'document',
+          disabled: !csvEnabled,
+          sortOrder: 1,
+        },
         label: 'CSV' as const,
         reportType: 'lens_csv' as const,
         generateExport: downloadCSVHandler,
+        warnings: getWarnings(activeData),
         ...(atLeastGold()
           ? {
-              helpText: (
-                <FormattedMessage
-                  id="xpack.lens.share.helpText"
-                  defaultMessage="Export a CSV of this visualization."
-                />
-              ),
-              generateExportButton: (
-                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Export file" />
-              ),
+              disabled: !csvEnabled,
               renderLayoutOptionSwitch: false,
               getJobParams: undefined,
-              showRadios: true,
             }
           : {
-              isDisabled: !csvEnabled,
-              warnings: getWarnings(activeData),
               helpText: (
                 <FormattedMessage
                   id="xpack.lens.application.csvPanelContent.generationDescription"
@@ -174,9 +167,8 @@ export const downloadCsvShareProvider = ({
               generateExportButton: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
-              showRadios: false,
             }),
-      },
+      } satisfies ShareMenuItemV2,
     ];
   };
 
