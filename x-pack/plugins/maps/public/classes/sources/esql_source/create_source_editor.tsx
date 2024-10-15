@@ -22,9 +22,9 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
-import { ESQLEditor } from './esql_editor';
+import { ESQLEditor } from '../../../components/esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from '../../../components/esql_utils';
 
 interface Props {
   mostCommonDataViewId?: string;

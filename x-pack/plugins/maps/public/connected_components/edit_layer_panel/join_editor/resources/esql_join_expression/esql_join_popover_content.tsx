@@ -24,10 +24,7 @@ import type {
   ESESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import {
-  ESQLEditor,
-  IOnEsqlChangeParams,
-} from '../../../../../classes/sources/esql_source/esql_editor';
+import { ESQLEditor, IOnEsqlChangeParams } from '../../../../../components/esql_editor';
 
 // import { getIndexPatternService } from '../../../../../kibana_services';
 // import { getGeoFields } from '../../../../../index_pattern_util';
@@ -53,6 +50,7 @@ interface Props {
 
 export function ESQLJoinPopoverContent(props: Props) {
   function onEsqlChange(params: IOnEsqlChangeParams) {
+    console.log('on ESQL change');
     console.log(params);
   }
 
@@ -64,8 +62,9 @@ export function ESQLJoinPopoverContent(props: Props) {
     return <ESQLEditor onESQLChange={onEsqlChange} esql={props.sourceDescriptor.esql || ''} />;
   }
 
+  console.log('render opopuver!');
   return (
-    <div style={{ width: 300 }}>
+    <div style={{ width: '800px' }}>
       <EuiPopoverTitle>
         {i18n.translate('xpack.maps.spatialJoinExpression.popoverTitle', {
           defaultMessage: 'Configure ES|QL join',

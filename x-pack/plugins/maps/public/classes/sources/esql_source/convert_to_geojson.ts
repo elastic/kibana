@@ -10,7 +10,7 @@ import { parse } from 'wellknown';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
-import { isGeometryColumn } from './esql_utils';
+import { isGeometryColumn } from '../../../components/esql_utils';
 
 export function convertToGeoJson(resp: ESQLSearchResponse): FeatureCollection {
   const geometryColumnIndex = resp.columns.findIndex(isGeometryColumn);

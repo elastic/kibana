@@ -20,9 +20,9 @@ import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { getIndexPatternService } from '../../../kibana_services';
-import { ESQLEditor } from './esql_editor';
+import { ESQLEditor } from '../../../components/esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { getFields } from './esql_utils';
+import { getFields } from '../../../components/esql_utils';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;

@@ -61,6 +61,7 @@ export function ESQLEditor(props: Props) {
             if (!isMounted()) {
               return;
             }
+            console.log('VERIFY GEOMETRY COLUMN', esqlMeta);
             verifyGeometryColumn(esqlMeta.columns);
             if (esqlMeta.columns.length >= 6) {
               setWarning(

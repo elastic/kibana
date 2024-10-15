@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
 import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
-import { getData, getIndexPatternService } from '../../../kibana_services';
+import { ES_GEO_FIELD_TYPE } from '../../common/constants';
+import { getData, getIndexPatternService } from '../kibana_services';
 
 // ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
 // ES_GEO_FIELD_TYPE.GEO_POINT is a field type from an Elasticsearch index mapping
