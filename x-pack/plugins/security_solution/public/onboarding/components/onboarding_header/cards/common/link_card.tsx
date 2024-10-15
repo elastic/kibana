@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
+import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
 import { useCardStyles } from './link_card.styles';
+import type { OnboardingHeaderCardId } from '../../../constants';
+import { TELEMETRY_HEADER_CARD } from '../../../constants';
 
 interface LinkCardProps {
+  id: OnboardingHeaderCardId;
   icon: string;
   title: string;
   description: string;
@@ -21,13 +25,19 @@ interface LinkCardProps {
 }
 
 export const LinkCard: React.FC<LinkCardProps> = React.memo(
-  ({ icon, title, description, onClick, href, target, linkText }) => {
+  ({ id, icon, title, description, onClick, href, target, linkText }) => {
     const cardStyles = useCardStyles();
     const cardClassName = classNames(cardStyles, 'headerCard');
+
+    const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
+      trackOnboardingLinkClick(`${TELEMETRY_HEADER_CARD}_${id}`);
+      onClick?.();
+    }, [id, onClick]);
+
     return (
       <EuiCard
         className={cardClassName}
-        onClick={onClick}
+        onClick={onClickWithReport}
         href={href}
         target={target}
         data-test-subj="data-ingestion-header-card"

@@ -34,6 +34,7 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
+  ONBOARDING = 'onboarding_',
 
   // value list
   OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
@@ -79,6 +80,7 @@ export enum TelemetryEventTypes {
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
   OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+  OnboardingHubHeaderCardClicked = 'Onboarding Hub Header Card Clicked',
   ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
   ManualRuleRunExecute = 'Manual Rule Run Execute',
   ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
