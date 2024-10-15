@@ -81,14 +81,14 @@ const EntityAnalyticsEntityStoreTelemetry = () => (
 
 const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH}
         exact
         component={EntityAnalyticsEntityStoreTelemetry}
       />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 
