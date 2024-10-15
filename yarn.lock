@@ -5147,6 +5147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
@@ -6388,6 +6392,10 @@
   uid ""
 
 "@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-authorization-core-common@link:x-pack/packages/security/authorization_core_common":
   version "0.0.0"
   uid ""
 
