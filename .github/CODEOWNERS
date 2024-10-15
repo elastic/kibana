@@ -1327,6 +1327,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 /.devcontainer/ @elastic/kibana-operations
+/.eslintrc.js @elastic/kibana-operations
+/.eslintignore @elastic/kibana-operations
 
 # Appex QA
 /x-pack/test_serverless/tsconfig.json @elastic/appex-qa
@@ -1394,9 +1396,9 @@ x-pack/test_serverless/api_integration/test_suites/common/security_response_head
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
-/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
-x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @elastic/kibana-telemetry @shahinakmal
+/src/plugins/telemetry/schema/ @elastic/kibana-core
+/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core
+x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useToggle } from 'react-use';
+import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/css';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
