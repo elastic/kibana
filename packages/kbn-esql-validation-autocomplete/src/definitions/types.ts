@@ -101,7 +101,7 @@ export const isParameterType = (str: string | undefined): str is FunctionParamet
 /**
  * This is the return type of a function definition.
  */
-export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'>;
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown';
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
   str !== 'unsupported' &&

@@ -78,7 +78,7 @@ export const getBuiltinCompatibleFunctionDefinition = (
   return compatibleFunctions
     .filter((mathDefinition) =>
       mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+        (signature) => returnTypes[0] === 'unknown' || returnTypes.includes(signature.returnType)
       )
     )
     .map(getSuggestionBuiltinDefinition);

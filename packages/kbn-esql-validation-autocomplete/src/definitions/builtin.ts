@@ -623,25 +623,12 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'left', type: 'any' },
           { name: 'right', type: 'any' },
         ],
-        returnType: 'void',
+        returnType: 'unknown',
       },
     ],
   },
   {
-    name: 'functions',
-    type: 'builtin',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.functionsDoc', {
-      defaultMessage: 'Show ES|QL avaialble functions with signatures',
-    }),
-    supportedCommands: ['meta'],
-    signatures: [
-      {
-        params: [],
-        returnType: 'void',
-      },
-    ],
-  },
-  {
+    // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: 'builtin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
@@ -651,21 +638,7 @@ const otherDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'void',
-      },
-    ],
-  },
-  {
-    name: 'order-expression',
-    type: 'builtin',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
-      defaultMessage: 'Specify column sorting modifiers',
-    }),
-    supportedCommands: ['sort'],
-    signatures: [
-      {
-        params: [{ name: 'column', type: 'any' }],
-        returnType: 'void',
+        returnType: 'unknown', // meaningless
       },
     ],
   },

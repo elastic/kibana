@@ -449,7 +449,7 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'any' || argType === signature.returnType
+        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
       );
     }
   }
@@ -462,14 +462,10 @@ export function checkFunctionArgMatchesDefinition(
     if (!validHit) {
       return false;
     }
-    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    // if final type is of type any make it pass for now
-    return wrappedTypes.some(
-      (ct) =>
-        ['any', 'null'].includes(ct) ||
-        argType === ct ||
-        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
-    );
+    const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
+      ? validHit.type
+      : [validHit.type];
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
