@@ -29,7 +29,7 @@ export async function removeYarnIntegrityFileIfExists() {
   }
 }
 
-// yarn and bazel integration checkers
+// yarn integration checkers
 async function areNodeModulesPresent() {
   return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
 }

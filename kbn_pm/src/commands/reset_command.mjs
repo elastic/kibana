@@ -17,8 +17,7 @@ import { findPluginCleanPaths, readCleanPatterns } from '../lib/find_clean_paths
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'reset',
-  description:
-    'Deletes node_modules and output directories, resets internal and disk caches, and stops Bazel server',
+  description: 'Deletes node_modules and output directories, resets internal and disk caches',
   reportTimings: {
     group: 'scripts/kbn reset',
     id: 'total',

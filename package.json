@@ -39,7 +39,6 @@
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "bazel": "bazel",
     "build": "node scripts/build --all-platforms",
     "build:apidocs": "node scripts/build_api_docs",
     "checkLicenses": "node scripts/check_licenses --dev",
@@ -1315,8 +1314,6 @@
     "@babel/register": "^7.24.6",
     "@babel/traverse": "^7.24.7",
     "@babel/types": "7.21.2",
-    "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "4.6.2",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.1",
