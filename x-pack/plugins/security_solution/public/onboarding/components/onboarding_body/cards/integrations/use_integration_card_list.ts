@@ -22,6 +22,7 @@ import {
   ONBOARDING_LINK,
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
+import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
@@ -97,6 +98,8 @@ const addSecuritySpecificProps = ({
     showInstallationStatus: true,
     url,
     onCardClick: () => {
+      const trackId = `card_${card.id}`;
+      trackOnboardingLinkClick(trackId);
       if (url.startsWith(APP_INTEGRATIONS_PATH)) {
         navigateTo({
           appId: INTEGRATION_APP_ID,

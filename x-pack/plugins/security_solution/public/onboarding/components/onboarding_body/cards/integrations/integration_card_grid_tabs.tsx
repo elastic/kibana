@@ -28,6 +28,7 @@ import { INTEGRATION_TABS, INTEGRATION_TABS_BY_ID } from './integration_tabs_con
 import { useIntegrationCardList } from './use_integration_card_list';
 import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
+import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
@@ -55,8 +56,10 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     const onTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
+        const trackId = `tab_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
+        trackOnboardingLinkClick(trackId);
       },
       [setSelectedTabIdToStorage]
     );
