@@ -73,8 +73,21 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
 
   const linkFilters = useMemo(() => {
     return [
-      ...(documentFilters ? documentFilters : []),
-      createCategoryQuery(logsSource.messageField)(logCategory.terms),
+      ...(documentFilters ? documentFilters.map((filter) => ({ filter })) : []),
+      {
+        filter: createCategoryQuery(logsSource.messageField)(logCategory.terms),
+        meta: {
+          name: i18n.translate(
+            'xpack.observabilityLogsOverview.logCategoryDetailsFlyout.discoverLinkFilterName',
+            {
+              defaultMessage: 'Category: {terms}',
+              values: {
+                terms: logCategory.terms,
+              },
+            }
+          ),
+        },
+      },
     ];
   }, [documentFilters, logCategory.terms, logsSource.messageField]);
 
