@@ -4,7 +4,9 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
