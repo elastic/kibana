@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -19,6 +19,11 @@ import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-commo
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
@@ -116,10 +121,14 @@ export const MisconfigurationsPreview = ({
     pageSize: 1,
     ignore_unavailable: true,
   });
+
   const isUsingHostName = fieldName === 'host.name';
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
 
+  useEffect(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
+  }, []);
   const { euiTheme } = useEuiTheme();
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 

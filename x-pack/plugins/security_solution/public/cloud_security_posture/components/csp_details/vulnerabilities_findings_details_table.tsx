@@ -24,7 +24,7 @@ import {
   SeverityStatusBadge,
 } from '@kbn/cloud-security-posture';
 import {
-  ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS,
+  ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
@@ -42,7 +42,7 @@ interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryName: string }) => {
-  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS);
+  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS);
   const { data } = useVulnerabilitiesFindings({
     query: buildEntityFlyoutPreviewQuery('host.name', queryName),
     sort: [],
