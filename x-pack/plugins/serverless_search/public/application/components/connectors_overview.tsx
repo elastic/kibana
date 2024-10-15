@@ -26,6 +26,8 @@ import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
 
+import { CONNECTORS } from '../constants';
+
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
   const { http, console: consolePlugin } = useKibanaServices();
@@ -44,7 +46,7 @@ export const ConnectorsOverview = () => {
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
         rightSideItems={[
-          <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="center">
+          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
             <EuiFlexItem>
               <EuiFlexGroup
                 alignItems="center"
@@ -63,7 +65,7 @@ export const ConnectorsOverview = () => {
                     <EuiLink
                       data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
                       target="_blank"
-                      href="https://github.com/elastic/connectors"
+                      href={CONNECTORS.github_repo}
                     >
                       {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
                         defaultMessage: 'elastic/connectors',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,17 +16,40 @@ import {
   EuiLink,
   EuiButton,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
+import { CONNECTORS } from '../../constants';
+
 export const EmptyConnectorsPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
+  const allConnectors = connectorTypes ? connectorTypes.map((connectorType) => connectorType) : [];
+
+  const getRandomConnectors = (connectors: typeof allConnectors, count: number) => {
+    const shuffled = connectors.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  const [randomConnectors, setRandomConnectors] = useState(() =>
+    getRandomConnectors(allConnectors, 4)
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRandomConnectors(getRandomConnectors(allConnectors, 4));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  });
+
+  const [connectorExample1, connectorExample2, connectorExample3, connectorExample4] =
+    randomConnectors;
   const { createConnector, isLoading } = useCreateConnector();
 
   const assetBasePath = useAssetBasePath();
@@ -34,7 +58,12 @@ export const EmptyConnectorsPrompt: React.FC = () => {
     <EuiFlexGroup alignItems="center" direction="column">
       <EuiFlexItem>
         <EuiPanel paddingSize="l" hasShadow={false} hasBorder>
-          <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            gutterSize="l"
+          >
             <EuiFlexItem>
               <EuiIcon size="xxl" type={connectorsPath} />
             </EuiFlexItem>
@@ -42,13 +71,13 @@ export const EmptyConnectorsPrompt: React.FC = () => {
               <EuiTitle>
                 <h2>
                   {i18n.translate('xpack.serverlessSearch.connectorsEmpty.title', {
-                    defaultMessage: 'Create a connector',
+                    defaultMessage: 'Set up a new connector',
                   })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText textAlign="center" color="subdued">
                 <p>
                   {i18n.translate('xpack.serverlessSearch.connectorsEmpty.description', {
                     defaultMessage:
@@ -61,17 +90,75 @@ export const EmptyConnectorsPrompt: React.FC = () => {
               <EuiPanel color="subdued">
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
+                    <EuiFlexGroup justifyContent="flexStart" alignItems="center" direction="column">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type="documents" />
+                        <EuiFlexGroup
+                          justifyContent="center"
+                          alignItems="center"
+                          direction="row"
+                          gutterSize="s"
+                        >
+                          <EuiFlexItem grow={false}>
+                            {connectorExample1 && (
+                              <EuiToolTip content={connectorExample1.name}>
+                                <EuiIcon
+                                  size="l"
+                                  title={connectorExample1?.name}
+                                  id={connectorExample1?.serviceType}
+                                  type={connectorExample1?.iconPath || 'defaultIcon'}
+                                />
+                              </EuiToolTip>
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {connectorExample2 && (
+                              <EuiToolTip content={connectorExample2.name}>
+                                <EuiIcon
+                                  size="l"
+                                  title={connectorExample2?.name}
+                                  id={connectorExample2?.serviceType}
+                                  type={connectorExample2?.iconPath || 'defaultIcon'}
+                                />
+                              </EuiToolTip>
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon color="primary" size="l" type="documents" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {connectorExample3 && (
+                              <EuiToolTip content={connectorExample3.name}>
+                                <EuiIcon
+                                  size="l"
+                                  title={connectorExample3?.name}
+                                  id={connectorExample3?.serviceType}
+                                  type={connectorExample3?.iconPath || 'defaultIcon'}
+                                />
+                              </EuiToolTip>
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {connectorExample4 && (
+                              <EuiToolTip content={connectorExample4.name}>
+                                <EuiIcon
+                                  size="l"
+                                  title={connectorExample4?.name}
+                                  id={connectorExample4?.serviceType}
+                                  type={connectorExample4?.iconPath || 'defaultIcon'}
+                                />
+                              </EuiToolTip>
+                            )}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <EuiText>
                           <p>
                             {i18n.translate(
                               'xpack.serverlessSearch.connectorsEmpty.guideOneDescription',
                               {
-                                defaultMessage: "Choose a data source you'd like to sync",
+                                defaultMessage:
+                                  "Choose a third-party data source you'd like to sync",
                               }
                             )}
                           </p>
@@ -80,10 +167,23 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type={connectorsPath} />
-                      </EuiFlexItem>
+                    <EuiFlexGroup justifyContent="flexStart" alignItems="center" direction="column">
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon color="primary" size="l" type={connectorsPath} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiIcon size="m" type="sortRight" />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiIcon color="primary" size="l" type="launch" />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                       <EuiFlexItem>
                         <EuiText>
                           <p>
@@ -93,8 +193,9 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                               values={{
                                 source: (
                                   <EuiLink
+                                    target="_blank"
                                     data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                    href="TODO TODO TODO"
+                                    href={CONNECTORS.github_repo}
                                   >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
@@ -104,8 +205,9 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                 ),
                                 docker: (
                                   <EuiLink
+                                    target="_blank"
                                     data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                    href="TODO TODO TODO"
+                                    href="https://github.com/elastic/connectors/blob/main/scripts/stack/README.md"
                                   >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
@@ -121,7 +223,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
+                    <EuiFlexGroup justifyContent="flexStart" alignItems="center" direction="column">
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup
                           gutterSize="s"
@@ -164,46 +266,45 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
-                fill
-                iconType="plusInCircleFilled"
-                onClick={() => createConnector()}
-                isLoading={isLoading}
-              >
-                {i18n.translate('xpack.serverlessSearch.connectorsEmpty.createConnector', {
-                  defaultMessage: 'Create connector',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {/* <EuiSpacer size="xs" /> */}
+            <EuiFlexGroup direction="row" gutterSize="m">
+              <EuiFlexItem>
+                <EuiButton
+                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
+                  fill
+                  iconType="plusInCircle"
+                  onClick={() => createConnector()}
+                  isLoading={isLoading}
+                >
+                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.selfManagedButton', {
+                    defaultMessage: 'Self-managed connector',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
+                      isLoading={isLoading}
+                    >
+                      {i18n.translate(
+                        'xpack.serverlessSearch.connectorsEmpty.elasticManagedButton',
+                        {
+                          defaultMessage: 'Elastic managed connector',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="accent">Coming soon</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {/* <EuiSpacer size="m" /> */}
           </EuiFlexGroup>
         </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle>
-          <h3>
-            {i18n.translate('xpack.serverlessSearch.connectorsEmpty.availableConnectors', {
-              defaultMessage: 'Available connectors',
-            })}
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s">
-          {connectorTypes.map((connectorType) => (
-            <EuiFlexItem key={connectorType.name}>
-              <EuiToolTip content={connectorType.name}>
-                <EuiIcon
-                  size="l"
-                  title={connectorType.name}
-                  id={connectorType.serviceType}
-                  type={connectorType.iconPath}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
