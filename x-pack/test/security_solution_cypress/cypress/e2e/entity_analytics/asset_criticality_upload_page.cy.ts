@@ -29,7 +29,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Asset criticality');
+      cy.get(PAGE_TITLE).should('include.text', 'Entity Store');
     });
 
     it('uploads a file', () => {
