@@ -8,14 +8,10 @@
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
-import type {
-  EdgeDataModel,
-  LabelNodeDataModel,
-  NodeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { Writable } from '@kbn/utility-types';
 import { css } from '@emotion/react';
-import { Graph } from './graph/graph';
+import type { EdgeViewModel, LabelNodeViewModel, NodeViewModel } from '.';
+import { Graph } from '.';
 
 export default {
   title: 'Components/Graph Components/Dagree Layout Graph',
@@ -23,14 +19,14 @@ export default {
 };
 
 interface GraphData {
-  nodes: NodeDataModel[];
-  edges: EdgeDataModel[];
+  nodes: NodeViewModel[];
+  edges: EdgeViewModel[];
   interactive: boolean;
 }
 
 const extractEdges = (
-  graphData: NodeDataModel[]
-): { nodes: NodeDataModel[]; edges: EdgeDataModel[] } => {
+  graphData: NodeViewModel[]
+): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
   // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
   // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
   // Connect from a to the group node and from the group node to all the labels. and from the labels to the group again and from the group to b.
@@ -39,10 +35,10 @@ const extractEdges = (
     [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
   } = {};
   const labelsMetadata: {
-    [key: string]: { source: string; target: string; labelsNodes: LabelNodeDataModel[] };
+    [key: string]: { source: string; target: string; labelsNodes: LabelNodeViewModel[] };
   } = {};
-  const nodes: { [key: string]: NodeDataModel } = {};
-  const edges: EdgeDataModel[] = [];
+  const nodes: { [key: string]: NodeViewModel } = {};
+  const edges: EdgeViewModel[] = [];
 
   graphData.forEach((node) => {
     if (node.shape === 'label') {
@@ -81,7 +77,7 @@ const extractEdges = (
 
   Object.values(labelsMetadata).forEach((edge) => {
     if (edge.labelsNodes.length > 1) {
-      const groupNode: NodeDataModel = {
+      const groupNode: NodeViewModel = {
         id: `grp(a(${edge.source})-b(${edge.target}))`,
         shape: 'group',
       };
@@ -105,7 +101,7 @@ const extractEdges = (
         color: edge.labelsNodes[0].color,
       });
 
-      edge.labelsNodes.forEach((labelNode: Writable<LabelNodeDataModel>) => {
+      edge.labelsNodes.forEach((labelNode: Writable<LabelNodeViewModel>) => {
         labelNode.parentId = groupNode.id;
 
         edges.push({
@@ -312,7 +308,7 @@ GroupWithWarningAPIMock.args = {
 };
 
 export const LargeGraph = Template.bind({});
-const baseGraph: NodeDataModel[] = [
+const baseGraph: NodeViewModel[] = [
   {
     id: 'siem-windows',
     label: '',

@@ -15,10 +15,6 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';
-import type {
-  NodeDataModel,
-  EdgeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/styles';
 import {
@@ -36,9 +32,9 @@ import type { EdgeViewModel, NodeViewModel } from '../types';
 
 import '@xyflow/react/dist/style.css';
 
-interface GraphProps extends CommonProps {
-  nodes: NodeDataModel[];
-  edges: EdgeDataModel[];
+export interface GraphProps extends CommonProps {
+  nodes: NodeViewModel[];
+  edges: EdgeViewModel[];
   interactive: boolean;
 }
 
@@ -56,6 +52,20 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
+/**
+ * Graph component renders a graph visualization using ReactFlow.
+ * It takes nodes and edges as input and provides interactive controls
+ * for panning, zooming, and manipulating the graph.
+ *
+ * @component
+ * @param {GraphProps} props - The properties for the Graph component.
+ * @param {NodeViewModel[]} props.nodes - Array of node view models to be rendered in the graph.
+ * @param {EdgeViewModel[]} props.edges - Array of edge view models to be rendered in the graph.
+ * @param {boolean} props.interactive - Flag to enable or disable interactivity (panning, zooming, etc.).
+ * @param {CommonProps} [props.rest] - Additional common properties.
+ *
+ * @returns {JSX.Element} The rendered Graph component.
+ */
 export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
   const { initialNodes, initialEdges } = useMemo(
     () => processGraph(nodes, edges, interactive),
@@ -96,8 +106,8 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
 };
 
 const processGraph = (
-  nodesModel: NodeDataModel[],
-  edgesModel: EdgeDataModel[],
+  nodesModel: NodeViewModel[],
+  edgesModel: EdgeViewModel[],
   interactive: boolean
 ): {
   initialNodes: Array<Node<NodeViewModel>>;

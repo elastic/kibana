@@ -6,3 +6,11 @@
  */
 
 export { Graph } from './graph/graph';
+export type { GraphProps } from './graph/graph';
+export type {
+  NodeViewModel,
+  EdgeViewModel,
+  GroupNodeViewModel,
+  LabelNodeViewModel,
+  EntityNodeViewModel,
+} from './types';
