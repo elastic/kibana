@@ -17,6 +17,7 @@ export function defineGetRolesRoutes({
   router,
   authz,
   getFeatures,
+  subFeaturePrivilegeIterator,
   logger,
 }: RouteDefinitionParams) {
   router.versioned
@@ -34,6 +35,9 @@ export function defineGetRolesRoutes({
         validate: {
           request: {
             params: schema.object({ name: schema.string({ minLength: 1 }) }),
+            query: schema.maybe(
+              schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
+            ),
           },
         },
       },
@@ -50,18 +54,20 @@ export function defineGetRolesRoutes({
 
           const elasticsearchRole = elasticsearchRoles[request.params.name];
 
-          if (elasticsearchRole) {
-            return response.ok({
-              body: transformElasticsearchRoleToRole(
-                features,
-                // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
-                elasticsearchRole,
-                request.params.name,
-                authz.applicationName,
-                logger
-              ),
-            });
-          }
+        if (elasticsearchRole) {
+          return response.ok({
+            body: transformElasticsearchRoleToRole({
+              features,
+              subFeaturePrivilegeIterator, // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
+              elasticsearchRole,
+              name: request.params.name,
+              application: authz.applicationName,
+              logger,
+              replaceDeprecatedKibanaPrivileges:
+                request.query?.replaceDeprecatedPrivileges ?? false,
+            }),
+          });
+        }
 
           return response.notFound();
         } catch (error) {
