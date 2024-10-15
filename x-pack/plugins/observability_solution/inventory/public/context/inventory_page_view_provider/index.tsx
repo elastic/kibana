@@ -9,7 +9,9 @@ import React, { PropsWithChildren, createContext, useContext } from 'react';
 
 interface InventoryPageViewContext {
   grouping: string;
-  setGrouping: React.Dispatch<React.SetStateAction<string>>;
+  setGrouping: (value: string) => void;
+  pagination: Record<string, number>;
+  setPagination: (key: string, value: number) => void;
 }
 
 export const InventoryPageViewContext = createContext<InventoryPageViewContext | null>(null);
@@ -18,12 +20,11 @@ export function InventoryPageViewContextProvider({
   children,
   grouping,
   setGrouping,
-}: PropsWithChildren<{
-  grouping: string;
-  setGrouping: React.Dispatch<React.SetStateAction<string>>;
-}>) {
+  pagination,
+  setPagination,
+}: PropsWithChildren<InventoryPageViewContext>) {
   return (
-    <InventoryPageViewContext.Provider value={{ grouping, setGrouping }}>
+    <InventoryPageViewContext.Provider value={{ grouping, setGrouping, pagination, setPagination }}>
       {children}
     </InventoryPageViewContext.Provider>
   );
