@@ -191,7 +191,7 @@ export const AddComment = React.memo(
               size="xl"
             />
           )}
-          {(permissions.create || permissions.createComment) && (
+          {permissions.createComment && (
             <Form form={form}>
               <UseField
                 path={fieldName}

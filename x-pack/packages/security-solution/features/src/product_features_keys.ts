@@ -149,7 +149,7 @@ export enum CasesSubFeatureId {
   deleteCases = 'deleteCasesSubFeature',
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
-  reopenCase = 'reopenCaseubFeature',
+  reopenCase = 'reopenCaseSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

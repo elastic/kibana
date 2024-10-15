@@ -34,11 +34,23 @@ export const readCasesPermissions = () =>
     reopenCase: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
+export const noCreateCommentCasesPermissions = () =>
+  buildCasesPermissions({ createComment: false });
 export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
 export const noReopenCasesPermissions = () => buildCasesPermissions({ reopenCase: false });
 export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
+export const onlyCreateCommentPermissions = () =>
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: true,
+    push: false,
+    createComment: true,
+    reopenCase: false,
+  });
 export const onlyDeleteCasesPermission = () =>
   buildCasesPermissions({
     read: false,

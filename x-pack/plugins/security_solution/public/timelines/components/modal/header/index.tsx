@@ -163,7 +163,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
                   isDisabled={isInspectDisabled}
                 />
               </EuiFlexItem>
-              {userCasesPermissions.create && userCasesPermissions.read ? (
+              {userCasesPermissions.createComment && userCasesPermissions.read ? (
                 <>
                   <EuiFlexItem>
                     <VerticalDivider />

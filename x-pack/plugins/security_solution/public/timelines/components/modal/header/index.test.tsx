@@ -87,7 +87,7 @@ describe('TimelineModalHeader', () => {
         cases: {
           helpers: {
             canUseCases: jest.fn().mockReturnValue({
-              create: true,
+              createComment: true,
               read: true,
             }),
           },
