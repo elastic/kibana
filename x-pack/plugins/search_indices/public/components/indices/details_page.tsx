@@ -246,10 +246,10 @@ export const SearchIndexDetailsPage = () => {
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
                   <EuiFlexGroup css={{ overflow: 'auto' }} wrap>
-                    <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
                       <ConnectionDetails />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
                       <ApiKeyForm />
                     </EuiFlexItem>
                   </EuiFlexGroup>
