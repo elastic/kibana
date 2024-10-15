@@ -8,9 +8,10 @@
 import {
   AlertingAuthorizationEntity,
   ReadOperations,
+  RegistryAlertTypeWithAuth,
   WriteOperations,
 } from '../../../../authorization';
-import { RegistryAlertTypeWithAuth, RulesClientContext } from '../../../../rules_client/types';
+import { RulesClientContext } from '../../../../rules_client/types';
 
 export async function listRuleTypes(
   context: RulesClientContext
