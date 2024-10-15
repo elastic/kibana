@@ -54,7 +54,6 @@ import {
   HookServices,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
@@ -98,6 +97,7 @@ import { ConnectorUpdateParams } from '../application/connector/methods/update/t
 import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
+import { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 
 interface Action extends ConnectorUpdate {
   actionTypeId: string;
@@ -651,15 +651,10 @@ export class ActionsClient {
     return result;
   }
 
-  public async execute({
-    actionId,
-    params,
-    source,
-    relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
-    ActionTypeExecutorResult<unknown>
-  > {
-    return execute({ context: this.context, actionId, params, source, relatedSavedObjects });
+  public async execute(
+    connectorExecuteParams: ConnectorExecuteParams
+  ): Promise<ActionTypeExecutorResult<unknown>> {
+    return execute(this.context, connectorExecuteParams);
   }
 
   public async bulkEnqueueExecution(

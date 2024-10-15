@@ -16,15 +16,15 @@ import {
 } from '../../../../authorization/get_authorization_mode_by_source';
 import { trackLegacyRBACExemption } from '../../../../lib/track_legacy_rbac_exemption';
 import { ConnectorExecuteParams } from './types';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
+import { ActionsClientContext } from '../../../../actions_client';
 
-export async function execute({
-  context,
-  actionId,
-  params,
-  source,
-  relatedSavedObjects,
-}: ConnectorExecuteParams): Promise<ActionTypeExecutorResult<unknown>> {
+export async function execute(
+  context: ActionsClientContext,
+  connectorExecuteParams: ConnectorExecuteParams
+): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
+  const { actionId, params, source, relatedSavedObjects } = connectorExecuteParams;
 
   if (
     (await getAuthorizationModeBySource(context.unsecuredSavedObjectsClient, source)) ===
@@ -43,7 +43,7 @@ export async function execute({
       } else {
         // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
         const { attributes } = await context.unsecuredSavedObjectsClient.get<RawAction>(
-          'action',
+          ACTION_SAVED_OBJECT_TYPE,
           actionId
         );
 

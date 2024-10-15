@@ -16,6 +16,6 @@ export const transformExecuteConnectorResponse = ({
 }: ActionTypeExecutorResult<unknown>): ConnectorExecuteResponseV1 => ({
   ...res,
   connector_id: actionId,
-  ...(retry && typeof retry === 'object' ? { retry: retry.toISOString() } : { retry }),
+  ...(retry && retry instanceof Date ? { retry: retry.toISOString() } : { retry }),
   ...(serviceMessage ? { service_message: serviceMessage } : {}),
 });

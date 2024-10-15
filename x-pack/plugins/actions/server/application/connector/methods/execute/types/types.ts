@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { ActionExecutionSource, RelatedSavedObjects } from '../../../../../lib';
-import { ActionsClientContext } from '../../../../../actions_client';
+import { ExecuteOptions } from '../../../../../lib/action_executor';
 
-export interface ConnectorExecuteParams<Source = unknown> {
-  context: ActionsClientContext;
-  actionId: string;
-  params: Record<string, unknown>;
-  source?: ActionExecutionSource<Source>;
-  relatedSavedObjects?: RelatedSavedObjects;
-}
+export type ConnectorExecuteParams = Omit<ExecuteOptions, 'request' | 'actionExecutionId'>;
