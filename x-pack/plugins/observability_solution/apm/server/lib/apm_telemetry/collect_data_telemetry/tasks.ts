@@ -646,10 +646,8 @@ export const tasks: TelemetryTask[] = [
               },
             });
 
-            return {
-              ...data,
-              [agentName]: response.aggregations?.services.value || 0,
-            };
+            data[agentName] = response.aggregations?.services.value || 0;
+            return data;
           });
         },
         Promise.resolve({} as Record<AgentName, number>)
@@ -694,10 +692,8 @@ export const tasks: TelemetryTask[] = [
 
             const aggregatedServicesPerAgents = response.aggregations?.agent_name.buckets.reduce(
               (acc, agent) => {
-                return {
-                  ...acc,
-                  [agent.key as OpenTelemetryAgentName]: agent.services.value || 0,
-                };
+                acc[agent.key as OpenTelemetryAgentName] = agent.services.value || 0;
+                return acc;
               },
               initOtelAgents
             );
@@ -1076,87 +1072,85 @@ export const tasks: TelemetryTask[] = [
             return data;
           }
 
-          return {
-            ...data,
-            [agentName]: {
-              agent: {
-                activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+          data[agentName] = {
+            agent: {
+              activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+                .map((bucket) => bucket.key as string)
+                .slice(0, size),
+              version: aggregations[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
+            },
+            service: {
+              framework: {
+                name: aggregations[SERVICE_FRAMEWORK_NAME].buckets
                   .map((bucket) => bucket.key as string)
                   .slice(0, size),
-                version: aggregations[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
+                version: aggregations[SERVICE_FRAMEWORK_VERSION].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                composite: sortBy(
+                  flatten(
+                    aggregations[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
+                      bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
+                    )
+                  ),
+                  'doc_count'
+                )
+                  .reverse()
+                  .slice(0, size)
+                  .map((composite) => composite.name),
               },
-              service: {
-                framework: {
-                  name: aggregations[SERVICE_FRAMEWORK_NAME].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  version: aggregations[SERVICE_FRAMEWORK_VERSION].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  composite: sortBy(
-                    flatten(
-                      aggregations[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
-                      )
-                    ),
-                    'doc_count'
-                  )
-                    .reverse()
-                    .slice(0, size)
-                    .map((composite) => composite.name),
-                },
-                language: {
-                  name: aggregations[SERVICE_LANGUAGE_NAME].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  version: aggregations[SERVICE_LANGUAGE_VERSION].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  composite: sortBy(
-                    flatten(
-                      aggregations[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
-                      )
-                    ),
-                    'doc_count'
-                  )
-                    .reverse()
-                    .slice(0, size)
-                    .map((composite) => composite.name),
-                },
-                runtime: {
-                  name: aggregations[SERVICE_RUNTIME_NAME].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  version: aggregations[SERVICE_RUNTIME_VERSION].buckets
-                    .map((bucket) => bucket.key as string)
-                    .slice(0, size),
-                  composite: sortBy(
-                    flatten(
-                      aggregations[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
-                      )
-                    ),
-                    'doc_count'
-                  )
-                    .reverse()
-                    .slice(0, size)
-                    .map((composite) => composite.name),
-                },
+              language: {
+                name: aggregations[SERVICE_LANGUAGE_NAME].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                version: aggregations[SERVICE_LANGUAGE_VERSION].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                composite: sortBy(
+                  flatten(
+                    aggregations[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
+                      bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
+                    )
+                  ),
+                  'doc_count'
+                )
+                  .reverse()
+                  .slice(0, size)
+                  .map((composite) => composite.name),
+              },
+              runtime: {
+                name: aggregations[SERVICE_RUNTIME_NAME].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                version: aggregations[SERVICE_RUNTIME_VERSION].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                composite: sortBy(
+                  flatten(
+                    aggregations[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
+                      bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
+                    )
+                  ),
+                  'doc_count'
+                )
+                  .reverse()
+                  .slice(0, size)
+                  .map((composite) => composite.name),
               },
             },
           };
+          return data;
         },
-        Promise.resolve({} as APMTelemetry['agents'])
+        Promise.resolve({} as NonNullable<APMTelemetry['agents']>)
       );
 
       const agentDataWithOtel = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
@@ -1196,116 +1190,112 @@ export const tasks: TelemetryTask[] = [
           }
 
           const initAgentData = OPEN_TELEMETRY_AGENT_NAMES.reduce((acc, agent) => {
-            return {
-              ...acc,
-              [agent]: {
-                agent: {
-                  activation_method: [],
+            acc[agent] = {
+              agent: {
+                activation_method: [],
+                version: [],
+              },
+              service: {
+                framework: {
+                  name: [],
                   version: [],
+                  composite: [],
                 },
-                service: {
-                  framework: {
-                    name: [],
-                    version: [],
-                    composite: [],
-                  },
-                  language: {
-                    name: [],
-                    version: [],
-                    composite: [],
-                  },
-                  runtime: {
-                    name: [],
-                    version: [],
-                    composite: [],
-                  },
+                language: {
+                  name: [],
+                  version: [],
+                  composite: [],
+                },
+                runtime: {
+                  name: [],
+                  version: [],
+                  composite: [],
                 },
               },
             };
+            return acc;
           }, {} as NonNullable<APMTelemetry['agents']>);
 
           const agentData = aggregations?.agent_name.buckets.reduce((acc, agentNamesAggs) => {
-            return {
-              ...acc,
-              [agentNamesAggs.key as OpenTelemetryAgentName]: {
-                agent: {
-                  activation_method: agentNamesAggs[AGENT_ACTIVATION_METHOD].buckets
+            acc[agentNamesAggs.key as OpenTelemetryAgentName] = {
+              agent: {
+                activation_method: agentNamesAggs[AGENT_ACTIVATION_METHOD].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                version: agentNamesAggs[AGENT_VERSION].buckets.map(
+                  (bucket) => bucket.key as string
+                ),
+              },
+              service: {
+                framework: {
+                  name: agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
-                  version: agentNamesAggs[AGENT_VERSION].buckets.map(
-                    (bucket) => bucket.key as string
-                  ),
+                  version: agentNamesAggs[SERVICE_FRAMEWORK_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
                 },
-                service: {
-                  framework: {
-                    name: agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    version: agentNamesAggs[SERVICE_FRAMEWORK_VERSION].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    composite: sortBy(
-                      flatten(
-                        agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
-                          bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
-                            doc_count: versionBucket.doc_count,
-                            name: toComposite(bucket.key, versionBucket.key),
-                          }))
-                        )
-                      ),
-                      'doc_count'
-                    )
-                      .reverse()
-                      .slice(0, size)
-                      .map((composite) => composite.name),
-                  },
-                  language: {
-                    name: agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    version: agentNamesAggs[SERVICE_LANGUAGE_VERSION].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    composite: sortBy(
-                      flatten(
-                        agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
-                          bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
-                            doc_count: versionBucket.doc_count,
-                            name: toComposite(bucket.key, versionBucket.key),
-                          }))
-                        )
-                      ),
-                      'doc_count'
-                    )
-                      .reverse()
-                      .slice(0, size)
-                      .map((composite) => composite.name),
-                  },
-                  runtime: {
-                    name: agentNamesAggs[SERVICE_RUNTIME_NAME].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    version: agentNamesAggs[SERVICE_RUNTIME_VERSION].buckets
-                      .map((bucket) => bucket.key as string)
-                      .slice(0, size),
-                    composite: sortBy(
-                      flatten(
-                        agentNamesAggs[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
-                          bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
-                            doc_count: versionBucket.doc_count,
-                            name: toComposite(bucket.key, versionBucket.key),
-                          }))
-                        )
-                      ),
-                      'doc_count'
-                    )
-                      .reverse()
-                      .slice(0, size)
-                      .map((composite) => composite.name),
-                  },
+                language: {
+                  name: agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: agentNamesAggs[SERVICE_LANGUAGE_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+                runtime: {
+                  name: agentNamesAggs[SERVICE_RUNTIME_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: agentNamesAggs[SERVICE_RUNTIME_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
                 },
               },
             };
+            return acc;
           }, initAgentData);
 
           return {
