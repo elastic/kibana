@@ -35,8 +35,6 @@ export function handleUpdateStableSamples({
     )
   );
 
-  newStableSamples.sort();
-
   return {
     stableSamples: newStableSamples,
     lastReviewedSamples: [],
