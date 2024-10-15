@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
+import type {
+  KnowledgeBaseConfig,
+  TraceOptions,
+} from '@kbn/elastic-assistant/impl/assistant/types';
 import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -57,8 +60,8 @@ export const getRequestBody = ({
   alertsIndexPattern,
   anonymizationFields,
   genAiConfig,
+  knowledgeBase,
   selectedConnector,
-  size,
   traceOptions,
 }: {
   alertsIndexPattern: string | undefined;
@@ -80,7 +83,7 @@ export const getRequestBody = ({
     }>;
   };
   genAiConfig?: GenAiConfig;
-  size: number;
+  knowledgeBase: KnowledgeBaseConfig;
   selectedConnector?: ActionConnector;
   traceOptions: TraceOptions;
 }): AttackDiscoveryPostRequestBody => ({
@@ -92,8 +95,8 @@ export const getRequestBody = ({
   langSmithApiKey: isEmpty(traceOptions?.langSmithApiKey)
     ? undefined
     : traceOptions?.langSmithApiKey,
+  size: knowledgeBase.latestAlerts,
   replacements: {}, // no need to re-use replacements in the current implementation
-  size,
   subAction: 'invokeAI', // non-streaming
   apiConfig: {
     connectorId: selectedConnector?.id ?? '',
