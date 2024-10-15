@@ -25,7 +25,7 @@ export interface ConnectorServerSideDefinition {
 
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.azureBlob.description',
       {
@@ -42,7 +42,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'azure_blob_storage',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.confluence.description',
       {
@@ -59,7 +59,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'confluence',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.confluenceDataCenter.description',
       {
@@ -80,13 +80,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'confluence',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'elastic_stack', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.dropbox.description',
       {
@@ -104,14 +98,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'dropbox',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'jira',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'jira'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.jira.description',
       {
@@ -128,14 +115,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'jira',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'jira'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.jiraServer.description',
       {
@@ -152,7 +132,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.jiraDataCenter.description',
       {
@@ -170,7 +150,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.github.description',
       {
@@ -187,7 +167,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'github',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.googleCloud.description',
       {
@@ -204,7 +184,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'google_cloud_storage',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.googleDrive.description',
       {
@@ -221,7 +201,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'google_drive',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.graphQL.description',
       {
@@ -239,13 +219,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isTechPreview: true,
   },
   {
-    categories: [
-      'enterprise_search',
-      'datastore',
-      'elastic_stack',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'datastore', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.mongoDB.description',
       {
@@ -262,13 +236,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'mongodb',
   },
   {
-    categories: [
-      'enterprise_search',
-      'datastore',
-      'elastic_stack',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'datastore', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.mysql.description',
       {
@@ -285,14 +253,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'mysql',
   },
   {
-    categories: [
-      'enterprise_search',
-      'custom',
-      'elastic_stack',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'custom', 'elastic_stack', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.msSql.description',
       {
@@ -315,7 +276,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
         defaultMessage: 'Search over your Network Drive content.',
       }
     ),
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     iconPath: 'network_drive.svg',
     isBeta: false,
     isNative: true,
@@ -326,7 +287,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'network_drive',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.notion.description',
       {
@@ -349,14 +310,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
         defaultMessage: 'Search over your content on PostgreSQL.',
       }
     ),
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],
     iconPath: 'postgresql.svg',
     isBeta: false,
     isNative: true,
@@ -367,7 +321,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'postgresql',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.redis.description',
       {
@@ -385,7 +339,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'redis',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.salesforce.description',
       {
@@ -402,14 +356,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'salesforce',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.salesforceSandbox.description',
       {
@@ -426,7 +373,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'salesforce',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.serviceNow.description',
       {
@@ -444,7 +391,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'servicenow',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.sharepointOnline.description',
       {
@@ -462,7 +409,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'sharepoint_online',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.gmail.description',
       {
@@ -479,7 +426,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'gmail',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.openTextDocumentum.description',
       {
@@ -500,14 +447,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'opentext_documentum',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.oracle.description',
       {
@@ -524,14 +464,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'oracle',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'datastore',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.oneDrive.description',
       {
@@ -551,13 +484,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     description: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.s3.description', {
       defaultMessage: 'Search over your content on Amazon S3.',
     }),
-    categories: [
-      'enterprise_search',
-      'datastore',
-      'elastic_stack',
-      'connector',
-      'connector_client',
-    ],
+    categories: ['search', 'datastore', 'elastic_stack', 'connector', 'connector_client'],
     iconPath: 's3.svg',
     isBeta: false,
     isNative: true,
@@ -574,7 +501,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
         defaultMessage: 'Search over your content on Slack.',
       }
     ),
-    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
     iconPath: 'slack.svg',
     isBeta: false,
     isNative: true,
@@ -586,7 +513,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'slack',
   },
   {
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.sharepointServer.description',
       {
@@ -604,14 +531,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'sharepoint_server',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'box',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'box'],
     description: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.box.description', {
       defaultMessage: 'Search over your content on Box.',
     }),
@@ -632,14 +552,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
         defaultMessage: 'Search over your content on Outlook.',
       }
     ),
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'outlook',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'outlook'],
     iconPath: 'outlook.svg',
     isBeta: false,
     isNative: true,
@@ -650,14 +563,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'outlook',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'teams',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'teams'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.teams.description',
       {
@@ -675,14 +581,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'microsoft_teams',
   },
   {
-    categories: [
-      'enterprise_search',
-      'elastic_stack',
-      'custom',
-      'connector',
-      'connector_client',
-      'zoom',
-    ],
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'zoom'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.zoom.description',
       {
@@ -700,7 +599,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'zoom',
   },
   {
-    categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector', 'connector_client'],
+    categories: ['search', 'custom', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectorsPlugin.content.nativeConnectors.customConnector.description',
       {

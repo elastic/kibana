@@ -85,6 +85,21 @@ export const ALERT_DELAY_TITLE_PREFIX = i18n.translate(
   }
 );
 
+export const ALERT_FLAPPING_DETECTION_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDefinition.alertFlappingDetectionTitle',
+  {
+    defaultMessage: 'Alert flapping detection',
+  }
+);
+
+export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDefinition.alertFlappingDetectionDescription',
+  {
+    defaultMessage:
+      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts',
+  }
+);
+
 export const SCHEDULE_TITLE_PREFIX = i18n.translate(
   'alertsUIShared.ruleForm.ruleSchedule.scheduleTitlePrefix',
   {
@@ -179,7 +194,7 @@ export const RULE_TYPE_REQUIRED_TEXT = i18n.translate(
 export const RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.error.belowMinimumAlertDelayText',
   {
-    defaultMessage: 'Alert delay must be greater than 1.',
+    defaultMessage: 'Alert delay must be 1 or greater.',
   }
 );
 
@@ -483,6 +498,34 @@ export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUIShared.ruleForm.re
   defaultMessage: 'Return',
 });
 
+export const RULE_FORM_CANCEL_MODAL_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleFormCancelModalTitle',
+  {
+    defaultMessage: 'Discard unsaved changes to rule?',
+  }
+);
+
+export const RULE_FORM_CANCEL_MODAL_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleFormCancelModalDescription',
+  {
+    defaultMessage: "You can't recover unsaved changes.",
+  }
+);
+
+export const RULE_FORM_CANCEL_MODAL_CONFIRM = i18n.translate(
+  'alertsUIShared.ruleForm.ruleFormCancelModalConfirm',
+  {
+    defaultMessage: 'Discard changes',
+  }
+);
+
+export const RULE_FORM_CANCEL_MODAL_CANCEL = i18n.translate(
+  'alertsUIShared.ruleForm.ruleFormCancelModalCancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const MODAL_SEARCH_PLACEHOLDER = i18n.translate(
   'alertsUIShared.ruleForm.modalSearchPlaceholder',
   {
@@ -569,5 +612,12 @@ export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
+export const DISABLED_ACTIONS_WARNING_TITLE = i18n.translate(
+  'alertsUIShared.disabledActionsWarningTitle',
+  {
+    defaultMessage: 'This rule has actions that are disabled',
   }
 );

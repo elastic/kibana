@@ -26,7 +26,10 @@ export function getSafePaletteParams(
     accessor,
   };
   const minMaxByColumnId = findMinMaxByColumnId([accessor], currentData);
-  const currentMinMax = minMaxByColumnId[accessor];
+  const currentMinMax = minMaxByColumnId.get(accessor) ?? {
+    max: Number.NEGATIVE_INFINITY,
+    min: Number.POSITIVE_INFINITY,
+  };
 
   // need to tell the helper that the colorStops are required to display
   return {
