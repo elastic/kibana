@@ -54,5 +54,6 @@
     "@kbn/search-indices",
     "@kbn/core-http-server",
     "@kbn/logging",
+    "@kbn/security-plugin-types-public",
   ]
 }
