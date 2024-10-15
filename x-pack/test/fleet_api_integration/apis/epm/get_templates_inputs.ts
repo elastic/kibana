@@ -51,11 +51,11 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     const expectedYml = `inputs:
-  # Collect logs from Apache instances  Collecting Apache access and error logs
+  # Collect logs from Apache instances: Collecting Apache access and error logs
   - id: apache-logfile
     type: logfile
     streams:
-      # Apache access logs  Collect Apache access logs
+      # Apache access logs: Collect Apache access logs
       - id: logfile-apache.access
         data_stream:
           dataset: apache.access
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
-      # Apache error logs  Collect Apache error logs
+      # Apache error logs: Collect Apache error logs
       - id: logfile-apache.error
         data_stream:
           dataset: apache.error
@@ -87,11 +87,11 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
-  # Collect metrics from Apache instances  Collecting Apache status metrics
+  # Collect metrics from Apache instances: Collecting Apache status metrics
   - id: apache-apache/metrics
     type: apache/metrics
     streams:
-      # Apache status metrics  Collect Apache status metrics
+      # Apache status metrics: Collect Apache status metrics
       - id: apache/metrics-apache.status
         data_stream:
           dataset: apache.status
@@ -186,7 +186,7 @@ export default function (providerContext: FtrProviderContext) {
       const res = await supertest
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=yaml`)
         .expect(200);
-
+      console.log(res.text);
       expect(res.text).to.eql(expectedYml);
     });
 
