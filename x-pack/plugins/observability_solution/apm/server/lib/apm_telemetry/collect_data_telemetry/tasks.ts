@@ -15,10 +15,10 @@ import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
+  RUM_AGENT_NAMES,
   type OpenTelemetryAgentName,
 } from '@kbn/elastic-agent-utils/src/agent_names';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
