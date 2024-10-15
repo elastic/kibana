@@ -245,6 +245,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           <EuiTextArea
             name="description"
             fullWidth
+            placeholder={i18n.ENTRY_DESCRIPTION_PLACEHOLDER}
             value={entry?.description}
             onChange={setDescription}
             rows={2}
@@ -257,6 +258,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         >
           <EuiTextArea
             name="query_description"
+            placeholder={i18n.ENTRY_QUERY_DESCRIPTION_PLACEHOLDER}
             value={entry?.queryDescription}
             onChange={setQueryDescription}
             fullWidth

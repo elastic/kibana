@@ -265,8 +265,14 @@ export const ENTRY_DESCRIPTION_INPUT_LABEL = i18n.translate(
 export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionHelpLabel',
   {
-    defaultMessage:
-      'Describe when this custom knowledge should be used during a conversation. Ex: "Use this index to answer any question related to asset information"',
+    defaultMessage: 'Describe when this custom knowledge should be used during a conversation.',
+  }
+);
+
+export const ENTRY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionPlaceholder',
+  {
+    defaultMessage: 'Use this index to answer any question related to asset information.',
   }
 );
 
@@ -281,7 +287,15 @@ export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
     defaultMessage:
-      'Describe what query should be constructed by the model to retrieve this custom knowledge. Ex: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
+      'Describe what query should be constructed by the model to retrieve this custom knowledge.',
+  }
+);
+
+export const ENTRY_QUERY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionPlaceholder',
+  {
+    defaultMessage:
+      'Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects.',
   }
 );
 
