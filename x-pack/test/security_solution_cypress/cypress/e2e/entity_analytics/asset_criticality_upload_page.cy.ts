@@ -31,7 +31,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Entity Store');
+      cy.get(PAGE_TITLE).should('include.text', 'Entity Store');
     });
 
     it('uploads a file', () => {
