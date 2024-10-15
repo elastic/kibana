@@ -20,7 +20,7 @@ export function GroupSelector() {
   const { grouping, setGrouping } = useInventoryPageViewContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onGroupChange = (selected: string) => {
-    setGrouping((current) => (current === selected ? 'none' : selected));
+    setGrouping(grouping === selected ? 'none' : selected);
   };
   const isGroupSelected = (groupKey: string) => {
     return grouping === groupKey;

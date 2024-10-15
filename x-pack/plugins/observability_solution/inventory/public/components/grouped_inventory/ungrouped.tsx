@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
+import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -23,14 +24,16 @@ interface Props {
 }
 
 export function UngroupedInventoryPage({ entityType }: Props) {
+  const { pagination, setPagination } = useInventoryPageViewContext();
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex, kuery } = query;
+  const { sortDirection, sortField, kuery } = query;
   const { euiTheme } = useEuiTheme();
   const inventoryRoute = useInventoryRouter();
+  const pageIndex = (entityType ? pagination[entityType] : pagination.none) ?? 0;
 
   const {
     value = { entities: [] },
@@ -72,10 +75,7 @@ export function UngroupedInventoryPage({ entityType }: Props) {
   });
 
   function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
+    setPagination(entityType ?? 'none', nextPage);
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {

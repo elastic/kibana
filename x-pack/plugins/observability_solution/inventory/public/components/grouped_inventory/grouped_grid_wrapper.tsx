@@ -14,20 +14,23 @@ import { EntityType } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 
 interface Props {
   entityType?: EntityType;
 }
 
 export function GroupedGridWrapper({ entityType }: Props) {
+  const { pagination, setPagination } = useInventoryPageViewContext();
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
 
   const { query } = useInventoryParams('/');
-  const { pageIndex, kuery, sortField, sortDirection } = query;
+  const { kuery, sortField, sortDirection } = query;
   const inventoryRoute = useInventoryRouter();
+  const pageIndex = (entityType ? pagination[entityType] : pagination.none) ?? 0;
 
   useEffectOnce(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
@@ -69,10 +72,7 @@ export function GroupedGridWrapper({ entityType }: Props) {
   );
 
   function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
+    setPagination(entityType ?? 'none', nextPage);
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
