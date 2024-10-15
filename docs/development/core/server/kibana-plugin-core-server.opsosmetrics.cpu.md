@@ -6,7 +6,7 @@
 
 cpu cgroup metrics, undefined when not running in a cgroup
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 cpu?: {

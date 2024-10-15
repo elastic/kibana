@@ -6,7 +6,7 @@
 
 Describes Saved Object documents that have passed through the migration framework and are guaranteed to have a `references` root property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;

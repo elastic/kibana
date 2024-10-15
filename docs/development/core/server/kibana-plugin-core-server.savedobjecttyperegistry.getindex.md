@@ -6,7 +6,7 @@
 
 Returns the `indexPattern` property for given type, or `undefined` if the type is not registered.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getIndex(type: string): string | undefined;
@@ -18,7 +18,7 @@ getIndex(type: string): string | undefined;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string \| undefined
 

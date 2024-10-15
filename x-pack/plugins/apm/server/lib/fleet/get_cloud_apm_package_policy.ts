@@ -38,7 +38,5 @@ export function getApmPackagePolicy(agentPolicy: Maybe<AgentPolicy>) {
     return;
   }
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
-  return packagePolicies.find(
-    (packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME
-  );
+  return packagePolicies.find((packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME);
 }

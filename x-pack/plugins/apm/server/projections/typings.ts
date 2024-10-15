@@ -9,10 +9,7 @@ import { AggregationOptionsByType } from '../../../../../src/core/types/elastics
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
-  body: Omit<
-    Required<APMEventESSearchRequest>['body'],
-    'aggs' | 'aggregations'
-  > & {
+  body: Omit<Required<APMEventESSearchRequest>['body'], 'aggs' | 'aggregations'> & {
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };

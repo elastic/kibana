@@ -24,10 +24,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import {
-  getLatencyAggregation,
-  getLatencyValue,
-} from '../helpers/latency_aggregation_type';
+import { getLatencyAggregation, getLatencyValue } from '../helpers/latency_aggregation_type';
 import { Setup } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
@@ -72,19 +69,13 @@ export async function getServiceTransactionGroupDetailedStatistics({
     searchAggregatedTransactions,
   });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getTransactionDurationFieldForAggregatedTransactions(searchAggregatedTransactions);
 
   const response = await apmEventClient.search(
     'get_service_transaction_group_detailed_statistics',
     {
       apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
+        events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
       },
       body: {
         size: 0,
@@ -93,9 +84,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...getDocumentTypeFilterForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
+              ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -161,16 +150,13 @@ export async function getServiceTransactionGroupDetailedStatistics({
       x: timeseriesBucket.key,
       y: calculateFailedTransactionRate(timeseriesBucket[EVENT_OUTCOME]),
     }));
-    const transactionGroupTotalDuration =
-      bucket.transaction_group_total_duration.value || 0;
+    const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
     return {
       transactionName,
       latency,
       throughput,
       errorRate,
-      impact: totalDuration
-        ? (transactionGroupTotalDuration * 100) / totalDuration
-        : 0,
+      impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
     };
   });
 }

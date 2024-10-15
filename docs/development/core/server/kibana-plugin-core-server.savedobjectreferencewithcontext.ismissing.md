@@ -6,7 +6,7 @@
 
 Whether or not this object or reference is missing
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isMissing?: boolean;

@@ -32,9 +32,7 @@ describe('ManagedTable', () => {
 
   it('should render a page-full of items, with defaults', () => {
     expect(
-      shallow(
-        <UnoptimizedManagedTable<Person> columns={columns} items={people} />
-      )
+      shallow(<UnoptimizedManagedTable<Person> columns={columns} items={people} />)
     ).toMatchSnapshot();
   });
 

@@ -6,7 +6,7 @@
 
 Gets authentication state for a request. Returned by `auth` interceptor.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type GetAuthState = <T = unknown>(request: KibanaRequest) => {

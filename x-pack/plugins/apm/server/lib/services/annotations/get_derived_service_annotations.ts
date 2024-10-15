@@ -8,10 +8,7 @@
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import {
-  SERVICE_NAME,
-  SERVICE_VERSION,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_VERSION } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
@@ -39,9 +36,7 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
     ...environmentQuery(environment),
   ];
 
@@ -49,11 +44,7 @@ export async function getDerivedServiceAnnotations({
     (
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
-          events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          ],
+          events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
         },
         body: {
           size: 0,
@@ -78,38 +69,27 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await apmEventClient.search(
-        'get_first_seen_of_version',
-        {
-          apm: {
-            events: [
-              getProcessorEventForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-            ],
-          },
-          body: {
-            size: 1,
-            query: {
-              bool: {
-                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
-              },
-            },
-            sort: {
-              '@timestamp': 'asc',
+      const response = await apmEventClient.search('get_first_seen_of_version', {
+        apm: {
+          events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
+        },
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
-        }
-      );
+          sort: {
+            '@timestamp': 'asc',
+          },
+        },
+      });
 
-      const firstSeen = new Date(
-        response.hits.hits[0]._source['@timestamp']
-      ).getTime();
+      const firstSeen = new Date(response.hits.hits[0]._source['@timestamp']).getTime();
 
       if (!isFiniteNumber(firstSeen)) {
-        throw new Error(
-          'First seen for version was unexpectedly undefined or null.'
-        );
+        throw new Error('First seen for version was unexpectedly undefined or null.');
       }
 
       if (firstSeen < start || firstSeen > end) {

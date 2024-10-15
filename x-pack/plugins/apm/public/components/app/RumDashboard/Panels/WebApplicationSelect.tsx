@@ -36,10 +36,5 @@ export function WebApplicationSelect() {
 
   const rumServiceNames = data?.rumServices ?? [];
 
-  return (
-    <ServiceNameFilter
-      loading={status !== 'success'}
-      serviceNames={rumServiceNames}
-    />
-  );
+  return <ServiceNameFilter loading={status !== 'success'} serviceNames={rumServiceNames} />;
 }

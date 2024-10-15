@@ -1,10 +1,10 @@
-# It will build all declared code packages
+# Grouping target to call all underlying packages build
+# targets so we can build them all at once
 filegroup(
-  name = "build_pkg_code",
+  name = "build",
   srcs = [
       "//packages/elastic-apm-synthtrace:build",
       "//packages/elastic-datemath:build",
-      "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
       "//packages/kbn-alerts:build",
@@ -13,6 +13,7 @@ filegroup(
       "//packages/kbn-apm-utils:build",
       "//packages/kbn-babel-code-parser:build",
       "//packages/kbn-babel-preset:build",
+      "//packages/kbn-babel-register:build",
       "//packages/kbn-cli-dev-mode:build",
       "//packages/kbn-config:build",
       "//packages/kbn-config-schema:build",
@@ -22,6 +23,7 @@ filegroup(
       "//packages/kbn-es:build",
       "//packages/kbn-es-archiver:build",
       "//packages/kbn-es-query:build",
+      "//packages/kbn-eslint-config:build",
       "//packages/kbn-eslint-import-resolver-kibana:build",
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
@@ -37,6 +39,7 @@ filegroup(
       "//packages/kbn-plugin-generator:build",
       "//packages/kbn-plugin-helpers:build",
       "//packages/kbn-rule-data-utils:build",
+      "//packages/kbn-screenshotting-server:build",
       "//packages/kbn-securitysolution-autocomplete:build",
       "//packages/kbn-securitysolution-list-constants:build",
       "//packages/kbn-securitysolution-io-ts-types:build",
@@ -66,26 +69,5 @@ filegroup(
       "//packages/kbn-ui-shared-deps-src:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
-  ],
-)
-
-# It will build all declared package types
-filegroup(
-  name = "build_pkg_types",
-  srcs = [
-      "//packages/elastic-datemath:build_types",
-  ],
-)
-
-
-
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
-# It will auto build all declared code packages and types packages
-filegroup(
-  name = "build",
-  srcs = [
-      ":build_pkg_code",
-      ":build_pkg_types"
   ],
 )

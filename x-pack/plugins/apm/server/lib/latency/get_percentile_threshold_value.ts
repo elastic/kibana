@@ -13,9 +13,7 @@ import { getTransactionDurationPercentilesRequest } from '../correlations/querie
 
 import type { OverallLatencyDistributionOptions } from './types';
 
-export async function getPercentileThresholdValue(
-  options: OverallLatencyDistributionOptions
-) {
+export async function getPercentileThresholdValue(options: OverallLatencyDistributionOptions) {
   const { setup, percentileThreshold, ...rawParams } = options;
   const { apmEventClient } = setup;
   const params = {
@@ -46,8 +44,8 @@ export async function getPercentileThresholdValue(
   }
 
   const percentilesResponseThresholds =
-    transactionDurationPercentilesResponse.aggregations
-      .transaction_duration_percentiles?.values ?? {};
+    transactionDurationPercentilesResponse.aggregations.transaction_duration_percentiles?.values ??
+    {};
 
   return percentilesResponseThresholds[`${percentileThreshold}.0`];
 }

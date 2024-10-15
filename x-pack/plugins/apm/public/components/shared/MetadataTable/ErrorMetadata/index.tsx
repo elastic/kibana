@@ -37,10 +37,5 @@ export function ErrorMetadata({ error }: Props) {
     [errorEvent?.metadata]
   );
 
-  return (
-    <MetadataTable
-      sections={sections}
-      isLoading={status === FETCH_STATUS.LOADING}
-    />
-  );
+  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
 }

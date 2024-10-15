@@ -18,14 +18,10 @@ export function mergeServiceStats({
   healthStatuses,
 }: {
   transactionStats: PromiseReturnType<typeof getServiceTransactionStats>;
-  servicesFromMetricDocuments: PromiseReturnType<
-    typeof getServicesFromMetricDocuments
-  >;
+  servicesFromMetricDocuments: PromiseReturnType<typeof getServicesFromMetricDocuments>;
   healthStatuses: PromiseReturnType<typeof getHealthStatuses>;
 }) {
-  const foundServiceNames = transactionStats.map(
-    ({ serviceName }) => serviceName
-  );
+  const foundServiceNames = transactionStats.map(({ serviceName }) => serviceName);
 
   const servicesWithOnlyMetricDocuments = servicesFromMetricDocuments.filter(
     ({ serviceName }) => !foundServiceNames.includes(serviceName)

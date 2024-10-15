@@ -196,6 +196,7 @@ export const CustomMetricForm = withTheme(
                     options={fieldOptions}
                     onChange={handleFieldChange}
                     isClearable={false}
+                    data-test-subj="infraCustomMetricFieldSelect"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

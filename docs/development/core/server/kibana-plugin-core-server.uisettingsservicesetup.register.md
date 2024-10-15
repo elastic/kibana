@@ -6,7 +6,7 @@
 
 Sets settings with default values for the uiSettings.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 register(settings: Record<string, UiSettingsParams>): void;
@@ -18,7 +18,7 @@ register(settings: Record<string, UiSettingsParams>): void;
 |  --- | --- | --- |
 |  settings | Record&lt;string, UiSettingsParams&gt; |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

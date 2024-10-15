@@ -6,7 +6,7 @@
 
 [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navControls: ChromeNavControls;

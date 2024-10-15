@@ -241,7 +241,8 @@ describe('helpers', () => {
       {
         columnHeaderType: 'not-filtered',
         id: '@timestamp',
-        type: 'number',
+        type: 'date',
+        esTypes: ['date'],
         initialWidth: 190,
       },
       {
@@ -338,7 +339,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -411,7 +413,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -484,7 +487,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -555,7 +559,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -633,7 +638,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -782,7 +788,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -851,7 +858,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],
@@ -924,7 +932,8 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],

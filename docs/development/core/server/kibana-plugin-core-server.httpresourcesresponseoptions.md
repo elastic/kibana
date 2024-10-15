@@ -6,7 +6,7 @@
 
 HTTP Resources response parameters
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HttpResourcesResponseOptions = HttpResponseOptions;

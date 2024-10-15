@@ -110,21 +110,10 @@ export async function getWebCoreVitals({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search('get_web_core_vitals', params);
-  const {
-    lcp,
-    cls,
-    fid,
-    tbt,
-    fcp,
-    lcpRanks,
-    fidRanks,
-    clsRanks,
-    coreVitalPages,
-  } = response.aggregations ?? {};
+  const { lcp, cls, fid, tbt, fcp, lcpRanks, fidRanks, clsRanks, coreVitalPages } =
+    response.aggregations ?? {};
 
-  const getRanksPercentages = (
-    ranks?: Array<{ key: number; value: number | null }>
-  ) => {
+  const getRanksPercentages = (ranks?: Array<{ key: number; value: number | null }>) => {
     const ranksVal = ranks?.map(({ value }) => value?.toFixed(0) ?? 0) ?? [];
     return [
       Number(ranksVal?.[0]),
@@ -147,14 +136,8 @@ export async function getWebCoreVitals({
     tbt: tbt?.values[pkey] ?? 0,
     fcp: fcp?.values[pkey],
 
-    lcpRanks: lcp?.values[pkey]
-      ? getRanksPercentages(lcpRanks?.values)
-      : defaultRanks,
-    fidRanks: fid?.values[pkey]
-      ? getRanksPercentages(fidRanks?.values)
-      : defaultRanks,
-    clsRanks: cls?.values[pkey]
-      ? getRanksPercentages(clsRanks?.values)
-      : defaultRanks,
+    lcpRanks: lcp?.values[pkey] ? getRanksPercentages(lcpRanks?.values) : defaultRanks,
+    fidRanks: fid?.values[pkey] ? getRanksPercentages(fidRanks?.values) : defaultRanks,
+    clsRanks: cls?.values[pkey] ? getRanksPercentages(clsRanks?.values) : defaultRanks,
   };
 }

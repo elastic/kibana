@@ -15,7 +15,7 @@
       rect.selected-interval {
         fill: rgba(200, 200, 200, .1);
         stroke: $euiColorDarkShade;
-        stroke-width: $euiSizeXS / 2;
+        stroke-width: calc($euiSizeXS / 2);
         stroke-opacity: .8;
       }
 

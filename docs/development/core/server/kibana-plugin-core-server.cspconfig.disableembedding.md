@@ -4,7 +4,7 @@
 
 ## CspConfig.disableEmbedding property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly disableEmbedding: boolean;

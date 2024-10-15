@@ -61,7 +61,7 @@ export class UICapabilitiesService {
     this.log.debug(
       `requesting ${spaceUrlPrefix}/api/core/capabilities to parse the uiCapabilities`
     );
-    const requestHeaders = credentials
+    const requestHeaders: Record<string, string> = credentials
       ? {
           Authorization: `Basic ${Buffer.from(
             `${credentials.username}:${credentials.password}`

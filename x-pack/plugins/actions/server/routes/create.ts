@@ -8,16 +8,20 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
-import { ILicenseState } from '../lib';
+import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
-  name: schema.string(),
-  connector_type_id: schema.string(),
-  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  name: schema.string({ validate: validateEmptyStrings }),
+  connector_type_id: schema.string({ validate: validateEmptyStrings }),
+  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
 });
 
 const rewriteBodyReq: RewriteRequestCase<CreateOptions['action']> = ({

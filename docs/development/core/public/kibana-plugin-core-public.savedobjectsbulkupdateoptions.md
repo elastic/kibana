@@ -5,7 +5,7 @@
 ## SavedObjectsBulkUpdateOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkUpdateOptions 
@@ -13,7 +13,7 @@ export interface SavedObjectsBulkUpdateOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [namespace?](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.namespace.md) | string | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [namespace?](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.namespace.md) |  | string | _(Optional)_ |
 

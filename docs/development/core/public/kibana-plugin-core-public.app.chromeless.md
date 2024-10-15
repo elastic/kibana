@@ -6,7 +6,7 @@
 
 Hide the UI chrome when the application is mounted. Defaults to `false`<!-- -->. Takes precedence over chrome service visibility settings.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 chromeless?: boolean;

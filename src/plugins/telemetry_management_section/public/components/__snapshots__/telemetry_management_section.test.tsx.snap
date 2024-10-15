@@ -64,7 +64,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     values={
                       Object {
                         "privacyStatementLink": <EuiLink
-                          href="https://www.elastic.co/legal/privacy-statement"
+                          href="https://www.elastic.co/legal/product-privacy-statement"
                           target="_blank"
                         >
                           <FormattedMessage

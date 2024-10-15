@@ -6,7 +6,7 @@
 
 Attributes to use when upserting the document if it doesn't exist.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 upsertAttributes?: Attributes;

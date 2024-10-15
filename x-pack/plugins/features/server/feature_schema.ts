@@ -39,6 +39,7 @@ const validLicenseSchema = schema.oneOf([
 const validSubFeaturePrivilegeLicensesSchema = schema.oneOf([
   schema.literal('platinum'),
   schema.literal('enterprise'),
+  schema.literal('gold'),
   schema.literal('trial'),
 ]);
 

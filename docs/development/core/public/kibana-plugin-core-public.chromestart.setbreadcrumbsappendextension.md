@@ -6,7 +6,7 @@
 
 Mount an element next to the last breadcrumb
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
@@ -16,9 +16,9 @@ setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppe
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  breadcrumbsAppendExtension | ChromeBreadcrumbsAppendExtension |  |
+|  breadcrumbsAppendExtension | ChromeBreadcrumbsAppendExtension | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

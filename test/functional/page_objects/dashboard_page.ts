@@ -9,6 +9,8 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -49,6 +51,13 @@ export class DashboardPageObject extends FtrService {
     await this.esArchiver.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
+  }
+
+  public async expectAppStateRemovedFromURL() {
+    this.retry.try(async () => {
+      const url = await this.browser.getCurrentUrl();
+      expect(url.indexOf('_a')).to.be(-1);
+    });
   }
 
   public async preserveCrossAppState() {
@@ -514,6 +523,32 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('in getPanelTitles');
     const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
+  }
+
+  /**
+   * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
+   */
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const panels = await this.getDashboardPanels();
+    for (const panel of panels) {
+      const exists = await this.find.descendantExistsByCssSelector(
+        'figcaption.embPanel__header',
+        panel
+      );
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
   }
 
   public async getPanelDimensions() {

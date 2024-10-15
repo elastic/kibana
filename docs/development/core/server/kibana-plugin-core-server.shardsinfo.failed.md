@@ -4,7 +4,7 @@
 
 ## ShardsInfo.failed property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 failed: number;

@@ -13,22 +13,21 @@ import { getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';
 
 describe('<EditPolicy /> edit warning', () => {
   let testBed: TestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -38,7 +37,7 @@ describe('<EditPolicy /> edit warning', () => {
   test('no edit warning for a new policy', async () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -48,7 +47,7 @@ describe('<EditPolicy /> edit warning', () => {
   test('an edit warning is shown for an existing policy', async () => {
     httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -60,7 +59,7 @@ describe('<EditPolicy /> edit warning', () => {
       { ...getDefaultHotPhasePolicy(POLICY_NAME), indices: [] },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -72,7 +71,7 @@ describe('<EditPolicy /> edit warning', () => {
       { ...getDefaultHotPhasePolicy(POLICY_NAME), indexTemplates: [] },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -87,7 +86,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find } = testBed;
     component.update();
@@ -102,7 +101,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find } = testBed;
     component.update();
@@ -117,7 +116,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find, exists } = testBed;
     component.update();

@@ -6,7 +6,7 @@
 
 Accessibility status of an application.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AppStatus 

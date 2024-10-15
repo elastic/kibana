@@ -8,10 +8,7 @@
 import React, { createContext, ReactNode } from 'react';
 import { ValuesType } from 'utility-types';
 import { isRumAgentName } from '../../../common/agent_name';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
@@ -38,11 +35,7 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   alerts: [],
 });
 
-export function ApmServiceContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const {
     path: { serviceName },
     query,

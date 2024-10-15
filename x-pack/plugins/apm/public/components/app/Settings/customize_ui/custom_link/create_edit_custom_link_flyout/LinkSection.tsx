@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CustomLink } from '../../../../../../../common/custom_link/custom_link_types';
@@ -37,12 +31,9 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
   const inputFields: InputField[] = [
     {
       name: 'label',
-      label: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.flyout.link.label',
-        {
-          defaultMessage: 'Label',
-        }
-      ),
+      label: i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.link.label', {
+        defaultMessage: 'Label',
+      }),
       helpText: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.label.helpText',
         {
@@ -61,29 +52,19 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
     },
     {
       name: 'url',
-      label: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.flyout.link.url',
-        {
-          defaultMessage: 'URL',
-        }
-      ),
+      label: i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.link.url', {
+        defaultMessage: 'URL',
+      }),
       helpText: (
         <>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText',
-            {
-              defaultMessage:
-                'Add field name variables to your URL to apply values e.g. {sample}.',
-              values: { sample: '{{trace.id}}' },
-            }
-          )}{' '}
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText', {
+            defaultMessage: 'Add field name variables to your URL to apply values e.g. {sample}.',
+            values: { sample: '{{trace.id}}' },
+          })}{' '}
           <Documentation
-            label={i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.flyout.link.url.doc',
-              {
-                defaultMessage: 'Learn more in the docs.',
-              }
-            )}
+            label={i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.link.url.doc', {
+              defaultMessage: 'Learn more in the docs.',
+            })}
           />
         </>
       ),
@@ -102,12 +83,9 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.flyout.action.title',
-            {
-              defaultMessage: 'Link',
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.action.title', {
+            defaultMessage: 'Link',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
@@ -120,12 +98,9 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
             helpText={field.helpText}
             labelAppend={
               <EuiText size="xs">
-                {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.required',
-                  {
-                    defaultMessage: 'Required',
-                  }
-                )}
+                {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.required', {
+                  defaultMessage: 'Required',
+                })}
               </EuiText>
             }
           >

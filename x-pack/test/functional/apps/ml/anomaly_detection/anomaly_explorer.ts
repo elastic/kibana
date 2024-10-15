@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -65,6 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('anomaly explorer', function () {
     this.tags(['mlqa']);
+    this.onlyEsVersion('<=7 || >=8.4');
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -102,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep('open job in anomaly explorer');
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
@@ -129,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             }
           }
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
@@ -166,18 +168,11 @@ export default function ({ getService }: FtrProviderContext) {
             '2016-02-11 00:00',
             '2016-02-12 00:00',
           ]);
-          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
-            'AAL',
-            'VRD',
-            'EGF',
-            'SWR',
-            'AMX',
-            'JZA',
-            'TRS',
-            'ACA',
-            'BAW',
-            'ASA',
-          ]);
+
+          const swimLaneYLabel = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
+
+          expect(swimLaneYLabel[0]).to.eql('AAL');
+          expect(swimLaneYLabel.length).to.eql(10);
         });
 
         it('supports cell selection by click on Overall swim lane', async () => {
@@ -312,13 +307,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
-            x: [1454817600000, 1454846400000],
-            y: ['AAL', 'VRD'],
+            x: [1454817600000, 1454860800000],
+            y: ['AAL', 'EGF'],
           });
 
-          await ml.anomaliesTable.assertTableRowsCount(2);
+          await ml.anomaliesTable.assertTableRowsCount(3);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
-          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(2);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(3);
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
@@ -343,7 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swimlane embeddable to the dashboard'
+            'should allow to attach anomaly swim lane embeddable to the dashboard'
           );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');

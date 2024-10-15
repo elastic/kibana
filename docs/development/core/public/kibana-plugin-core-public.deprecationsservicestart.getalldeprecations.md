@@ -6,7 +6,7 @@
 
 Grabs deprecations details for all domains.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;

@@ -4,7 +4,7 @@
 
 ## SessionStorageFactory.asScoped property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 asScoped: (request: KibanaRequest) => SessionStorage<T>;

@@ -5,7 +5,7 @@
 ## ChromeHelpExtensionMenuLink type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;

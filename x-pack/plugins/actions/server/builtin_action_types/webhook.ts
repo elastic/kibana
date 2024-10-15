@@ -158,14 +158,14 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
       ...basicAuth,
-      headers,
+      headers: headers ? headers : {},
       data,
       configurationUtilities,
     })

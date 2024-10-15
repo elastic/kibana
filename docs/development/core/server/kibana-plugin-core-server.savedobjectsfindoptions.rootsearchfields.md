@@ -6,7 +6,7 @@
 
 The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not be modified. If used in conjunction with `searchFields`<!-- -->, both are concatenated together.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 rootSearchFields?: string[];

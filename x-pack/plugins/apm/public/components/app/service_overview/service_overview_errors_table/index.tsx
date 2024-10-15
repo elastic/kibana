@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
@@ -96,8 +91,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         return;
       }
       return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
+        endpoint: 'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -109,11 +103,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           },
         },
       }).then((response) => {
-        const currentPageErrorGroups = orderBy(
-          response.error_groups,
-          field,
-          direction
-        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+        const currentPageErrorGroups = orderBy(response.error_groups, field, direction).slice(
+          pageIndex * PAGE_SIZE,
+          (pageIndex + 1) * PAGE_SIZE
+        );
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
@@ -143,14 +136,11 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { requestId, items, totalItems } = data;
 
-  const {
-    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-  } = useFetcher(
+  const { data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+          endpoint: 'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -160,9 +150,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               end,
               numBuckets: 20,
               transactionType,
-              groupIds: JSON.stringify(
-                items.map(({ group_id: groupId }) => groupId).sort()
-              ),
+              groupIds: JSON.stringify(items.map(({ group_id: groupId }) => groupId).sort()),
               comparisonStart,
               comparisonEnd,
             },
@@ -207,29 +195,24 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <OverviewTableContainer
           fixedHeight={true}
-          isEmptyAndNotInitiated={
-            totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
-          }
+          isEmptyAndNotInitiated={totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED}
         >
           <EuiBasicTable
             error={
               status === FETCH_STATUS.FAILURE
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.errorsTable.errorMessage',
-                    { defaultMessage: 'Failed to fetch' }
-                  )
+                ? i18n.translate('xpack.apm.serviceOverview.errorsTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
                 : ''
             }
             noItemsMessage={
               status === FETCH_STATUS.LOADING
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.errorsTable.loading',
-                    { defaultMessage: 'Loading...' }
-                  )
-                : i18n.translate(
-                    'xpack.apm.serviceOverview.errorsTable.noResults',
-                    { defaultMessage: 'No errors found' }
-                  )
+                ? i18n.translate('xpack.apm.serviceOverview.errorsTable.loading', {
+                    defaultMessage: 'Loading...',
+                  })
+                : i18n.translate('xpack.apm.serviceOverview.errorsTable.noResults', {
+                    defaultMessage: 'No errors found',
+                  })
             }
             columns={columns}
             items={items}

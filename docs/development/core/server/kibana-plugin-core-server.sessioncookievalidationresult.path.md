@@ -6,7 +6,7 @@
 
 The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 path?: string;

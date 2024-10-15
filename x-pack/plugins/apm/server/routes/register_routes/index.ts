@@ -37,10 +37,7 @@ const CLIENT_CLOSED_REQUEST = {
   },
 };
 
-export const inspectableEsQueriesMap = new WeakMap<
-  KibanaRequest,
-  InspectResponse
->();
+export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export function registerRoutes({
   core,
@@ -68,12 +65,7 @@ export function registerRoutes({
 
     const { method, pathname } = parseEndpoint(endpoint);
 
-    (
-      router[method] as RouteRegistrar<
-        typeof method,
-        ApmPluginRequestHandlerContext
-      >
-    )(
+    (router[method] as RouteRegistrar<typeof method, ApmPluginRequestHandlerContext>)(
       {
         path: pathname,
         options,

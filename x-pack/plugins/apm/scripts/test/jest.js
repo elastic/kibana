@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').registerNodeAutoTranspilation();
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { run } = require('jest');

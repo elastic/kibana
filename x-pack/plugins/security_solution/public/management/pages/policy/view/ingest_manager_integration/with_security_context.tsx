@@ -46,6 +46,7 @@ export const withSecurityContext = <P extends {}>({
 }: WithSecurityContextProps<P>): ComponentType<P> => {
   let store: ReturnType<typeof createStore>; // created on first render
 
+  // eslint-disable-next-line react/display-name
   return memo((props) => {
     if (!store) {
       // Most of the code here was copied form

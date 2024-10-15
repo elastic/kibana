@@ -6,7 +6,7 @@
 
 An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 management?: SavedObjectsTypeManagementDefinition<Attributes>;

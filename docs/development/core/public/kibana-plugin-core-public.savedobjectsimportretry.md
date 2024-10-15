@@ -6,7 +6,7 @@
 
 Describes a retry operation for importing a saved object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportRetry 
@@ -14,13 +14,13 @@ export interface SavedObjectsImportRetry
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [createNewCopy?](./kibana-plugin-core-public.savedobjectsimportretry.createnewcopy.md) | boolean | <i>(Optional)</i> If <code>createNewCopy</code> is specified, the new object has a new (undefined) origin ID. This is only needed for the case where <code>createNewCopies</code> mode is disabled and ambiguous source conflicts are detected. |
-|  [destinationId?](./kibana-plugin-core-public.savedobjectsimportretry.destinationid.md) | string | <i>(Optional)</i> The object ID that will be created or overwritten. If not specified, the <code>id</code> field will be used. |
-|  [id](./kibana-plugin-core-public.savedobjectsimportretry.id.md) | string |  |
-|  [ignoreMissingReferences?](./kibana-plugin-core-public.savedobjectsimportretry.ignoremissingreferences.md) | boolean | <i>(Optional)</i> If <code>ignoreMissingReferences</code> is specified, reference validation will be skipped for this object. |
-|  [overwrite](./kibana-plugin-core-public.savedobjectsimportretry.overwrite.md) | boolean |  |
-|  [replaceReferences](./kibana-plugin-core-public.savedobjectsimportretry.replacereferences.md) | Array&lt;{ type: string; from: string; to: string; }&gt; |  |
-|  [type](./kibana-plugin-core-public.savedobjectsimportretry.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [createNewCopy?](./kibana-plugin-core-public.savedobjectsimportretry.createnewcopy.md) |  | boolean | _(Optional)_ If <code>createNewCopy</code> is specified, the new object has a new (undefined) origin ID. This is only needed for the case where <code>createNewCopies</code> mode is disabled and ambiguous source conflicts are detected. |
+|  [destinationId?](./kibana-plugin-core-public.savedobjectsimportretry.destinationid.md) |  | string | _(Optional)_ The object ID that will be created or overwritten. If not specified, the <code>id</code> field will be used. |
+|  [id](./kibana-plugin-core-public.savedobjectsimportretry.id.md) |  | string |  |
+|  [ignoreMissingReferences?](./kibana-plugin-core-public.savedobjectsimportretry.ignoremissingreferences.md) |  | boolean | _(Optional)_ If <code>ignoreMissingReferences</code> is specified, reference validation will be skipped for this object. |
+|  [overwrite](./kibana-plugin-core-public.savedobjectsimportretry.overwrite.md) |  | boolean |  |
+|  [replaceReferences](./kibana-plugin-core-public.savedobjectsimportretry.replacereferences.md) |  | Array&lt;{ type: string; from: string; to: string; }&gt; |  |
+|  [type](./kibana-plugin-core-public.savedobjectsimportretry.type.md) |  | string |  |
 

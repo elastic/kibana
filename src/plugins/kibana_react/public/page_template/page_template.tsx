@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import './page_template.scss';
 
 import React, { FunctionComponent, useState } from 'react';

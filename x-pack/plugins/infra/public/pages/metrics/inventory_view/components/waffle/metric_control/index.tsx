@@ -9,6 +9,7 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
+import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
@@ -134,10 +135,13 @@ export const WaffleMetricControls = ({
     return null;
   }
 
+  const canAdd = options.length + customMetrics.length < SNAPSHOT_API_MAX_METRICS;
+
   const button = (
     <DropdownButton
       onClick={handleToggle}
       label={i18n.translate('xpack.infra.waffle.metriclabel', { defaultMessage: 'Metric' })}
+      data-test-subj="infraInventoryMetricDropdown"
     >
       {currentLabel}
     </DropdownButton>
@@ -194,6 +198,7 @@ export const WaffleMetricControls = ({
           mode={mode}
           onSave={handleSaveEdit}
           customMetrics={customMetrics}
+          disableAdd={!canAdd}
         />
       </EuiPopover>
     </>

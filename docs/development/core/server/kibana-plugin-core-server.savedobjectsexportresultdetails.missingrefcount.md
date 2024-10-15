@@ -6,7 +6,7 @@
 
 number of missing references
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 missingRefCount: number;

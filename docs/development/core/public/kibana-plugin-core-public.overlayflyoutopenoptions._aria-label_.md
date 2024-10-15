@@ -4,7 +4,7 @@
 
 ## OverlayFlyoutOpenOptions."aria-label" property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 'aria-label'?: string;

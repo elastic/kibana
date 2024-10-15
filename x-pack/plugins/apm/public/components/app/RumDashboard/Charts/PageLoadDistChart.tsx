@@ -23,10 +23,7 @@ import {
   Fit,
   Position,
 } from '@elastic/charts';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
 import { I18LABELS } from '../translations';
@@ -89,9 +86,7 @@ export function PageLoadDistChart({
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+  const euiChartTheme = darkMode ? EUI_CHARTS_THEME_DARK : EUI_CHARTS_THEME_LIGHT;
 
   return (
     <ChartWrapper loading={loading || breakdownLoading} height="250px">
@@ -105,11 +100,7 @@ export function PageLoadDistChart({
             showLegend
           />
           <PercentileAnnotations percentiles={data?.percentiles} />
-          <Axis
-            id="bottom"
-            title={I18LABELS.pageLoadTime}
-            position={Position.Bottom}
-          />
+          <Axis id="bottom" title={I18LABELS.pageLoadTime} position={Position.Bottom} />
           <Axis
             id="left"
             title={I18LABELS.percPageLoaded}

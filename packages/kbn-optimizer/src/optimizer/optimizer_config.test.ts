@@ -15,11 +15,12 @@ jest.mock('./focus_bundles');
 jest.mock('../limits.ts');
 
 jest.mock('os', () => {
-  const realOs = jest.requireActual('os');
-  jest.spyOn(realOs, 'cpus').mockImplementation(() => {
-    return ['foo'] as any;
-  });
-  return realOs;
+  return {
+    ...jest.requireActual('os'),
+    cpus() {
+      return ['foo'] as any;
+    },
+  };
 });
 
 import Path from 'path';

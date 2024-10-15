@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isIncompatibleMappingException, isWriteBlockException } from './es_errors';
+import {
+  isIncompatibleMappingException,
+  isWriteBlockException,
+  isIndexNotFoundException,
+} from './es_errors';
 
 describe('isWriteBlockError', () => {
   it('returns true for a `index write` cluster_block_exception', () => {
@@ -33,6 +37,9 @@ describe('isWriteBlockError', () => {
       })
     ).toEqual(false);
   });
+  it('returns false undefined', () => {
+    expect(isWriteBlockException(undefined)).toEqual(false);
+  });
 });
 
 describe('isIncompatibleMappingExceptionError', () => {
@@ -52,5 +59,40 @@ describe('isIncompatibleMappingExceptionError', () => {
         reason: 'idk',
       })
     ).toEqual(true);
+  });
+
+  it('returns true for `document_parsing_exception` errors', () => {
+    expect(
+      isIncompatibleMappingException({
+        type: 'document_parsing_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
+
+  it('returns false undefined', () => {
+    expect(isIncompatibleMappingException(undefined)).toEqual(false);
+  });
+});
+
+describe('isIndexNotFoundException', () => {
+  it('returns true with index_not_found_exception errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'index_not_found_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for other errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'validation_exception',
+        reason: 'idk',
+      })
+    ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isIndexNotFoundException(undefined)).toEqual(false);
   });
 });

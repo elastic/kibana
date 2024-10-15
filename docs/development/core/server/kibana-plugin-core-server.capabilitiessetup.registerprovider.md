@@ -6,7 +6,7 @@
 
 Register a [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) to be used to provide [Capabilities](./kibana-plugin-core-server.capabilities.md) when resolving them.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerProvider(provider: CapabilitiesProvider): void;
@@ -18,7 +18,7 @@ registerProvider(provider: CapabilitiesProvider): void;
 |  --- | --- | --- |
 |  provider | CapabilitiesProvider |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

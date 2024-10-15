@@ -62,8 +62,7 @@ interface PopoverItem {
 }
 
 export function ServiceIcons({ start, end, serviceName }: Props) {
-  const [selectedIconPopover, setSelectedIconPopover] =
-    useState<Icons | null>();
+  const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
 
   const theme = useTheme();
 

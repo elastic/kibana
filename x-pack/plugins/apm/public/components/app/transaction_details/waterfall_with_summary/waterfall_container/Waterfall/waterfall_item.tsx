@@ -11,10 +11,7 @@ import React, { ReactNode } from 'react';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -157,9 +154,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
       let name = item.doc.span.name;
       if (item.doc.span.composite) {
         const compositePrefix =
-          item.doc.span.composite.compression_strategy === 'exact_match'
-            ? 'x'
-            : '';
+          item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
       return (
@@ -238,11 +233,16 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
+  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
+  if (item.doc.transaction?.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  }
+
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
-      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+      kuery,
     },
   });
 
@@ -250,11 +250,7 @@ function RelatedErrors({
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <EuiBadge
-          href={href}
-          color={theme.eui.euiColorDanger}
-          iconType="arrowRight"
-        >
+        <EuiBadge href={href} color={theme.eui.euiColorDanger} iconType="arrowRight">
           {i18n.translate('xpack.apm.waterfall.errorCount', {
             defaultMessage:
               '{errorCount, plural, one {View related error} other {View # related errors}}',
@@ -278,8 +274,7 @@ function getItemBarStyle(
 
   if (item.docType === 'span' && item.doc.span.composite) {
     const percNumItems = 100.0 / item.doc.span.composite.count;
-    const spanSumRatio =
-      item.doc.span.composite.sum.us / item.doc.span.duration.us;
+    const spanSumRatio = item.doc.span.composite.sum.us / item.doc.span.duration.us;
     const percDuration = percNumItems * spanSumRatio;
 
     itemBarStyle = {

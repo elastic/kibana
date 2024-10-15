@@ -6,7 +6,7 @@
 
 The CSP rules used for Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly rules: string[];

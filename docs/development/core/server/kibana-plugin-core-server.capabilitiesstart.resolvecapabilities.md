@@ -6,7 +6,7 @@
 
 Resolve the [Capabilities](./kibana-plugin-core-server.capabilities.md) to be used for given request
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolveCapabilities(request: KibanaRequest, options?: ResolveCapabilitiesOptions): Promise<Capabilities>;
@@ -17,9 +17,9 @@ resolveCapabilities(request: KibanaRequest, options?: ResolveCapabilitiesOptions
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  request | KibanaRequest |  |
-|  options | ResolveCapabilitiesOptions |  |
+|  options | ResolveCapabilitiesOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;Capabilities&gt;
 

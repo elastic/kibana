@@ -6,7 +6,7 @@
 
 DeprecationsService provides methods to fetch domain deprecation details from the Kibana server.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DeprecationsServiceStart 
@@ -14,10 +14,10 @@ export interface DeprecationsServiceStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations details for all domains. |
-|  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) | (domainId: string) =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations for a specific domain. |
-|  [isDeprecationResolvable](./kibana-plugin-core-public.deprecationsservicestart.isdeprecationresolvable.md) | (details: DomainDeprecationDetails) =&gt; boolean | Returns a boolean if the provided deprecation can be automatically resolvable. |
-|  [resolveDeprecation](./kibana-plugin-core-public.deprecationsservicestart.resolvedeprecation.md) | (details: DomainDeprecationDetails) =&gt; Promise&lt;ResolveDeprecationResponse&gt; | Calls the correctiveActions.api to automatically resolve the depprecation. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) |  | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations details for all domains. |
+|  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) |  | (domainId: string) =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations for a specific domain. |
+|  [isDeprecationResolvable](./kibana-plugin-core-public.deprecationsservicestart.isdeprecationresolvable.md) |  | (details: DomainDeprecationDetails) =&gt; boolean | Returns a boolean if the provided deprecation can be automatically resolvable. |
+|  [resolveDeprecation](./kibana-plugin-core-public.deprecationsservicestart.resolvedeprecation.md) |  | (details: DomainDeprecationDetails) =&gt; Promise&lt;ResolveDeprecationResponse&gt; | Calls the correctiveActions.api to automatically resolve the depprecation. |
 

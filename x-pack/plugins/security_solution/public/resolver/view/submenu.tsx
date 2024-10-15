@@ -16,8 +16,6 @@ import { useLinkProps } from './use_link_props';
 import { ResolverAction } from '../store/actions';
 import { SideEffectContext } from './side_effect_context';
 
-/* eslint-disable react/display-name */
-
 /**
  * Until browser support accomodates the `notation="compact"` feature of Intl.NumberFormat...
  * exported for testing
@@ -69,6 +67,7 @@ export function compactNotationParts(
  * A Submenu that displays a collection of "pills" for each related event
  * category it has events for.
  */
+// eslint-disable-next-line react/display-name
 export const NodeSubMenuComponents = React.memo(
   ({
     className,

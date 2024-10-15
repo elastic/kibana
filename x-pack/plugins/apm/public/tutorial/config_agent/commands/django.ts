@@ -25,12 +25,9 @@ ELASTIC_APM = {
     defaultMessage: 'Set the required service name. Allowed characters:',
   }
 )}
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.djangoClient.configure.commands.allowedCharactersComment', {
+  defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+})}
 'SERVICE_NAME': '',
 
 # ${i18n.translate(
@@ -44,8 +41,7 @@ ELASTIC_APM = {
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
   {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
+    defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}

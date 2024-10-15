@@ -4,7 +4,7 @@
 
 ## OverlayModalConfirmOptions.confirmButtonText property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 confirmButtonText?: string;

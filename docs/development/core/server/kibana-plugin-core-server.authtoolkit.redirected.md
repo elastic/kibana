@@ -6,7 +6,7 @@
 
 Redirects user to another location to complete authentication when authRequired: true Allows user to access a resource without redirection when authRequired: 'optional'
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 redirected: (headers: {

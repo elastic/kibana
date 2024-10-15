@@ -12,7 +12,8 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const security = getService('security');
 
-  describe('search hits', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('search hits', () => {
     before(async () => {
       await security.testUser.setRoles(
         [

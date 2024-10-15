@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.id property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id: SavedObjectType<T>['id'];

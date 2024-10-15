@@ -6,7 +6,7 @@
 
 Key to documentation links
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 docLinksKey: string;

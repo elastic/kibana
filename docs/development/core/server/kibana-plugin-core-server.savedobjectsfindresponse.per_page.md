@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindResponse.per\_page property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 per_page: number;

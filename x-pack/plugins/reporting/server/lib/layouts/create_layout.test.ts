@@ -72,9 +72,11 @@ describe('Create Layout', () => {
         },
         "useReportingBranding": true,
         "viewport": Object {
+          "deviceScaleFactor": 1,
           "height": 1200,
           "width": 1950,
         },
+        "width": 1950,
       }
     `);
   });

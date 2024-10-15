@@ -26,8 +26,7 @@ interface Props {
 export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
   const history = useHistory();
   const tabs = [timelineTab, metadataTab, logsTab];
-  const currentTab =
-    tabs.find(({ key }) => key === urlParams.detailTab) ?? timelineTab;
+  const currentTab = tabs.find(({ key }) => key === urlParams.detailTab) ?? timelineTab;
   const TabContent = currentTab.component;
 
   return (
@@ -56,11 +55,7 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
 
       <EuiSpacer />
 
-      <TabContent
-        urlParams={urlParams}
-        waterfall={waterfall}
-        transaction={transaction}
-      />
+      <TabContent urlParams={urlParams} waterfall={waterfall} transaction={transaction} />
     </React.Fragment>
   );
 }
@@ -105,9 +100,7 @@ function MetadataTabContent({ transaction }: { transaction: Transaction }) {
 
 function LogsTabContent({ transaction }: { transaction: Transaction }) {
   const startTimestamp = Math.floor(transaction.timestamp.us / 1000);
-  const endTimestamp = Math.ceil(
-    startTimestamp + transaction.transaction.duration.us / 1000
-  );
+  const endTimestamp = Math.ceil(startTimestamp + transaction.transaction.duration.us / 1000);
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
   return (
     <LogStream
@@ -120,10 +113,9 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
         {
           type: 'field',
           field: 'service.name',
-          header: i18n.translate(
-            'xpack.apm.propertiesTable.tabs.logs.serviceName',
-            { defaultMessage: 'Service Name' }
-          ),
+          header: i18n.translate('xpack.apm.propertiesTable.tabs.logs.serviceName', {
+            defaultMessage: 'Service Name',
+          }),
           width: 200,
         },
         { type: 'message' },

@@ -6,7 +6,7 @@
 
 Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
@@ -19,7 +19,7 @@ responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHtt
 |  httpErrorResponse | HttpInterceptorResponseError | [HttpInterceptorResponseError](./kibana-plugin-core-public.httpinterceptorresponseerror.md) |
 |  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 MaybePromise&lt;IHttpResponseInterceptorOverrides&gt; \| void
 

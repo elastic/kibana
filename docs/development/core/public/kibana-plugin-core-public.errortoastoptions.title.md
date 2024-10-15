@@ -6,7 +6,7 @@
 
 The title of the toast and the dialog when expanding the message.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title: string;

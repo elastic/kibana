@@ -6,7 +6,7 @@
 
 The number of entries in the history stack, including all entries forwards and backwards from the current location.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get length(): number;

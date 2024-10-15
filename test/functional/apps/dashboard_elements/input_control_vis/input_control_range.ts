@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const security = getService('security');
@@ -18,13 +19,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
-  describe.skip('input control range', () => {
+  describe('input control range', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      });
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
     });
@@ -52,9 +57,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.uiSettings.unset('defaultIndex');
       await security.testUser.restoreDefaults();
     });
   });

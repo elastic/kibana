@@ -5,17 +5,17 @@
 ## ConfigDeprecationDetails interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ConfigDeprecationDetails extends BaseDeprecationDetails 
 ```
-<b>Extends:</b> BaseDeprecationDetails
+**Extends:** BaseDeprecationDetails
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [configPath](./kibana-plugin-core-server.configdeprecationdetails.configpath.md) | string |  |
-|  [deprecationType](./kibana-plugin-core-server.configdeprecationdetails.deprecationtype.md) | 'config' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [configPath](./kibana-plugin-core-server.configdeprecationdetails.configpath.md) |  | string |  |
+|  [deprecationType](./kibana-plugin-core-server.configdeprecationdetails.deprecationtype.md) |  | 'config' |  |
 

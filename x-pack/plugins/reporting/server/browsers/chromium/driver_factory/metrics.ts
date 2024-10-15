@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import type { Metrics as PuppeteerMetrics } from 'puppeteer';
 import { cpus } from 'os';
-
-declare module 'puppeteer' {
-  interface CDPSession {
-    send(command: 'Performance.getMetrics'): Promise<RawMetrics>;
-  }
-}
-
-type RawMetrics = Metrics;
 
 export interface Metrics {
   metrics: Metric[];
@@ -25,8 +16,10 @@ interface Metric {
   value: unknown;
 }
 
-interface NormalizedMetrics extends Required<PuppeteerMetrics> {
+interface NormalizedMetrics {
+  Timestamp: number;
   ProcessTime: number;
+  JSHeapTotalSize: number;
 }
 
 interface PerformanceMetrics {

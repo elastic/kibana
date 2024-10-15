@@ -6,7 +6,7 @@
 
 Represents a failure to import due to a conflict.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportConflictError 
@@ -14,8 +14,8 @@ export interface SavedObjectsImportConflictError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [destinationId?](./kibana-plugin-core-server.savedobjectsimportconflicterror.destinationid.md) | string | <i>(Optional)</i> |
-|  [type](./kibana-plugin-core-server.savedobjectsimportconflicterror.type.md) | 'conflict' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [destinationId?](./kibana-plugin-core-server.savedobjectsimportconflicterror.destinationid.md) |  | string | _(Optional)_ |
+|  [type](./kibana-plugin-core-server.savedobjectsimportconflicterror.type.md) |  | 'conflict' |  |
 

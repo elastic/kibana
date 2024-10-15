@@ -6,7 +6,7 @@
 
 Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayRef 
@@ -14,9 +14,9 @@ export interface OverlayRef
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [onClose](./kibana-plugin-core-public.overlayref.onclose.md) | Promise&lt;void&gt; | A Promise that will resolve once this overlay is closed.<!-- -->Overlays can close from user interaction, calling <code>close()</code> on the overlay reference or another overlay replacing yours via <code>openModal</code> or <code>openFlyout</code>. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [onClose](./kibana-plugin-core-public.overlayref.onclose.md) |  | Promise&lt;void&gt; | <p>A Promise that will resolve once this overlay is closed.</p><p>Overlays can close from user interaction, calling <code>close()</code> on the overlay reference or another overlay replacing yours via <code>openModal</code> or <code>openFlyout</code>.</p> |
 
 ## Methods
 

@@ -6,7 +6,7 @@
 
 [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 status: StatusServiceSetup;

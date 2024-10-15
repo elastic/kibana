@@ -6,7 +6,7 @@
 
 The response when object references are collected.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse 
@@ -14,7 +14,7 @@ export interface SavedObjectsCollectMultiNamespaceReferencesResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.objects.md) | SavedObjectReferenceWithContext\[\] |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [objects](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.objects.md) |  | SavedObjectReferenceWithContext\[\] |  |
 

@@ -6,7 +6,7 @@
 
 a flag indicating that value cannot be changed
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly?: boolean;

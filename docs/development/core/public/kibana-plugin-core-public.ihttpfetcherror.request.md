@@ -4,7 +4,7 @@
 
 ## IHttpFetchError.request property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly request: Request;

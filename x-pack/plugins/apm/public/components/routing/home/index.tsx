@@ -41,12 +41,9 @@ function page<TPath extends string>({
   };
 }
 
-export const ServiceInventoryTitle = i18n.translate(
-  'xpack.apm.views.serviceInventory.title',
-  {
-    defaultMessage: 'Services',
-  }
-);
+export const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
+  defaultMessage: 'Services',
+});
 
 export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',

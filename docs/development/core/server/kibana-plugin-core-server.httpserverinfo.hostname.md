@@ -6,7 +6,7 @@
 
 The hostname of the server
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hostname: string;

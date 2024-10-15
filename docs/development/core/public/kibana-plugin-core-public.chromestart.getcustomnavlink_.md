@@ -6,12 +6,12 @@
 
 Get an observable of the current custom nav link
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;Partial&lt;ChromeNavLink&gt; \| undefined&gt;
 

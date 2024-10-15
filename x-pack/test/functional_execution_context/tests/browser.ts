@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
   const retry = getService('retry');
 
   // Failing: See https://github.com/elastic/kibana/issues/112102
@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('discover app', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
@@ -77,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });

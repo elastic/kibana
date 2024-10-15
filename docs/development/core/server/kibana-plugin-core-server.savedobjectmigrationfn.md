@@ -6,7 +6,7 @@
 
 A migration function for a [saved object type](./kibana-plugin-core-server.savedobjectstype.md) used to migrate it to a given version
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;

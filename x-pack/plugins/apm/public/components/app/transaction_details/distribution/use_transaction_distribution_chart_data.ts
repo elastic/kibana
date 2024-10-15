@@ -31,12 +31,7 @@ export const useTransactionDistributionChartData = () => {
     error: overallLatencyError,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        params.serviceName &&
-        params.environment &&
-        params.start &&
-        params.end
-      ) {
+      if (params.serviceName && params.environment && params.start && params.end) {
         return callApmApi({
           endpoint: 'POST /internal/apm/latency/overall_distribution',
           params: {
@@ -57,8 +52,7 @@ export const useTransactionDistributionChartData = () => {
         title: i18n.translate(
           'xpack.apm.transactionDetails.distribution.latencyDistributionErrorTitle',
           {
-            defaultMessage:
-              'An error occurred fetching the overall latency distribution.',
+            defaultMessage: 'An error occurred fetching the overall latency distribution.',
           }
         ),
         text: overallLatencyError.toString(),
@@ -71,38 +65,30 @@ export const useTransactionDistributionChartData = () => {
     overallLatencyStatus !== FETCH_STATUS.LOADING
       ? []
       : overallLatencyData.overallHistogram;
-  const hasData =
-    Array.isArray(overallLatencyHistogram) &&
-    overallLatencyHistogram.length > 0;
+  const hasData = Array.isArray(overallLatencyHistogram) && overallLatencyHistogram.length > 0;
 
-  const { data: errorHistogramData = {}, error: errorHistogramError } =
-    useFetcher(
-      (callApmApi) => {
-        if (
-          params.serviceName &&
-          params.environment &&
-          params.start &&
-          params.end
-        ) {
-          return callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
-            params: {
-              body: {
-                ...params,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
-              },
+  const { data: errorHistogramData = {}, error: errorHistogramError } = useFetcher(
+    (callApmApi) => {
+      if (params.serviceName && params.environment && params.start && params.end) {
+        return callApmApi({
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          params: {
+            body: {
+              ...params,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              termFilters: [
+                {
+                  fieldName: EVENT_OUTCOME,
+                  fieldValue: EventOutcome.failure,
+                },
+              ],
             },
-          });
-        }
-      },
-      [params]
-    );
+          },
+        });
+      }
+    },
+    [params]
+  );
 
   useEffect(() => {
     if (isErrorMessage(errorHistogramError)) {

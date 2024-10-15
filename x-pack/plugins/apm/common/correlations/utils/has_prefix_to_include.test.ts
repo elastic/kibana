@@ -18,9 +18,7 @@ describe('aggregation utils', () => {
     });
     it('returns false if the prefix is included', async () => {
       FIELD_PREFIX_TO_ADD_AS_CANDIDATE.forEach((prefix) => {
-        expect(
-          hasPrefixToInclude(`unknown-prefix-.${prefix}the-field-name`)
-        ).toBe(false);
+        expect(hasPrefixToInclude(`unknown-prefix-.${prefix}the-field-name`)).toBe(false);
         expect(hasPrefixToInclude('the-field-name')).toBe(false);
       });
     });

@@ -6,7 +6,7 @@
 
 API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface StatusServiceSetup 
@@ -67,13 +67,13 @@ core.status.set(
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | Observable&lt;CoreStatus&gt; | Current status for all Core services. |
-|  [dependencies$](./kibana-plugin-core-server.statusservicesetup.dependencies_.md) | Observable&lt;Record&lt;string, ServiceStatus&gt;&gt; | Current status for all plugins this plugin depends on. Each key of the <code>Record</code> is a plugin id. |
-|  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) | Observable&lt;ServiceStatus&gt; | The status of this plugin as derived from its dependencies. |
-|  [isStatusPageAnonymous](./kibana-plugin-core-server.statusservicesetup.isstatuspageanonymous.md) | () =&gt; boolean | Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present. |
-|  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | Observable&lt;ServiceStatus&gt; | Overall system status for all of Kibana. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) |  | Observable&lt;CoreStatus&gt; | Current status for all Core services. |
+|  [dependencies$](./kibana-plugin-core-server.statusservicesetup.dependencies_.md) |  | Observable&lt;Record&lt;string, ServiceStatus&gt;&gt; | Current status for all plugins this plugin depends on. Each key of the <code>Record</code> is a plugin id. |
+|  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) |  | Observable&lt;ServiceStatus&gt; | The status of this plugin as derived from its dependencies. |
+|  [isStatusPageAnonymous](./kibana-plugin-core-server.statusservicesetup.isstatuspageanonymous.md) |  | () =&gt; boolean | Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present. |
+|  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) |  | Observable&lt;ServiceStatus&gt; | Overall system status for all of Kibana. |
 
 ## Methods
 

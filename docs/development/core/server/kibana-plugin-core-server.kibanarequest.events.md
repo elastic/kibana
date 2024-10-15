@@ -6,7 +6,7 @@
 
 Request events [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly events: KibanaRequestEvents;

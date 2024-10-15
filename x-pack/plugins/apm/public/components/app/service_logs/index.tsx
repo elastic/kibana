@@ -15,10 +15,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { LogStream } from '../../../../../infra/public';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
-import {
-  CONTAINER_ID,
-  HOSTNAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { CONTAINER_ID, HOSTNAME } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 

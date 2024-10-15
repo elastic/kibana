@@ -8,7 +8,7 @@
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
@@ -74,7 +74,7 @@ const withCore = makeDecorator({
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}
           >
-            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
           </PluginContext.Provider>
         </KibanaReactContext.Provider>
       </MemoryRouter>

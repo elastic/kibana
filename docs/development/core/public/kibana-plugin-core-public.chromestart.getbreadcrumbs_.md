@@ -6,12 +6,12 @@
 
 Get an observable of the current list of breadcrumbs
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;ChromeBreadcrumb\[\]&gt;
 

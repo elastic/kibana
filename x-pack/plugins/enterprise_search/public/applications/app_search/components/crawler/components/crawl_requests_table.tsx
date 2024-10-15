@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiIconTip,
   EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,9 @@ import { CrawlEvent, readableCrawlerStatuses } from '../types';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
+const columns: Array<
+  EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
+> = [
   {
     field: 'id',
     name: i18n.translate(

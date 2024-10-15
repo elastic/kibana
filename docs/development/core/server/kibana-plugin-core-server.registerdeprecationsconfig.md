@@ -5,7 +5,7 @@
 ## RegisterDeprecationsConfig interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RegisterDeprecationsConfig 
@@ -13,7 +13,7 @@ export interface RegisterDeprecationsConfig
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [getDeprecations](./kibana-plugin-core-server.registerdeprecationsconfig.getdeprecations.md) | (context: GetDeprecationsContext) =&gt; MaybePromise&lt;DeprecationsDetails\[\]&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [getDeprecations](./kibana-plugin-core-server.registerdeprecationsconfig.getdeprecations.md) |  | (context: GetDeprecationsContext) =&gt; MaybePromise&lt;DeprecationsDetails\[\]&gt; |  |
 

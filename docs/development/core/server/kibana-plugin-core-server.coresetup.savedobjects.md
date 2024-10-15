@@ -6,7 +6,7 @@
 
 [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savedObjects: SavedObjectsServiceSetup;

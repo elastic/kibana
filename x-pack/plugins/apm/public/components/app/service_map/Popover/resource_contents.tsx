@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-} from '@elastic/eui';
+import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ContentsProps } from '.';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import {
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 
 const ItemRow = euiStyled.div`
   line-height: 2;
@@ -54,12 +48,8 @@ export function ResourceContents({ nodeData }: ContentsProps) {
           description && (
             <div key={title}>
               <ItemRow>
-                <SubduedDescriptionListTitle>
-                  {title}
-                </SubduedDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {description}
-                </EuiDescriptionListDescription>
+                <SubduedDescriptionListTitle>{title}</SubduedDescriptionListTitle>
+                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
               </ItemRow>
             </div>
           )

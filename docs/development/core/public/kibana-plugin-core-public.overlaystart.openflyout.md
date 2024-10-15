@@ -5,7 +5,7 @@
 ## OverlayStart.openFlyout property
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openFlyout: OverlayFlyoutStart['open'];

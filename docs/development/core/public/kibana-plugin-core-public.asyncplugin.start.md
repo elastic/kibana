@@ -4,7 +4,7 @@
 
 ## AsyncPlugin.start() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -17,7 +17,7 @@ start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
 |  core | CoreStart |  |
 |  plugins | TPluginsStart |  |
 
-<b>Returns:</b>
+**Returns:**
 
 TStart \| Promise&lt;TStart&gt;
 

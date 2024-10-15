@@ -6,7 +6,7 @@
 
 If defined, the type instances will be stored in the given index instead of the default one.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 indexPattern?: string;

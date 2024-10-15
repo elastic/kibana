@@ -6,7 +6,7 @@
 
 Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed `start`<!-- -->. This should only be used inside handlers registered during `setup` that will only be executed after `start` lifecycle.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;

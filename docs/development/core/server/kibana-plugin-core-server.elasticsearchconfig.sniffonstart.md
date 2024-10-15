@@ -6,7 +6,7 @@
 
 Specifies whether the client should attempt to detect the rest of the cluster when it is first instantiated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly sniffOnStart: boolean;

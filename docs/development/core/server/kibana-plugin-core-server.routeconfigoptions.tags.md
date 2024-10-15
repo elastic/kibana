@@ -6,7 +6,7 @@
 
 Additional metadata tag strings to attach to the route.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 tags?: readonly string[];

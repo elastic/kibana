@@ -28,13 +28,10 @@ export function getNoDataConfig({
           title: i18n.translate('xpack.apm.ux.overview.agent.title', {
             defaultMessage: 'Add the APM integration',
           }),
-          description: i18n.translate(
-            'xpack.apm.ux.overview.agent.description',
-            {
-              defaultMessage:
-                'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-            }
-          ),
+          description: i18n.translate('xpack.apm.ux.overview.agent.description', {
+            defaultMessage:
+              'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
+          }),
           href: `${basePath}/app/home#/tutorial/apm`,
         },
       },

@@ -6,7 +6,7 @@
 
 To respond with a custom HTML page.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;

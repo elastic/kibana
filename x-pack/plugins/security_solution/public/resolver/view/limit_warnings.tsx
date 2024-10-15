@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LimitWarningsEuiCallOut } from './styles';
@@ -18,6 +16,7 @@ const lineageLimitMessage = (
   />
 );
 
+// eslint-disable-next-line react/display-name
 const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOfEntries: number }) {
   return (
     <FormattedMessage
@@ -28,6 +27,7 @@ const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOf
   );
 });
 
+// eslint-disable-next-line react/display-name
 const RelatedEventsLimitMessage = React.memo(function ({
   category,
   numberOfEventsMissing,
@@ -44,6 +44,7 @@ const RelatedEventsLimitMessage = React.memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const RelatedLimitTitleMessage = React.memo(function ({
   category,
   numberOfEventsDisplayed,
@@ -63,6 +64,7 @@ const RelatedLimitTitleMessage = React.memo(function ({
 /**
  * Limit warning for hitting the /events API limit
  */
+// eslint-disable-next-line react/display-name
 export const RelatedEventLimitWarning = React.memo(function ({
   eventCategory,
   numberActuallyDisplayed,
@@ -95,6 +97,7 @@ export const RelatedEventLimitWarning = React.memo(function ({
 /**
  * Limit warning for hitting a limit of nodes in the tree
  */
+// eslint-disable-next-line react/display-name
 export const LimitWarning = React.memo(function ({ numberDisplayed }: { numberDisplayed: number }) {
   return (
     <LimitWarningsEuiCallOut

@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '30m',
@@ -106,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -181,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -286,7 +283,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -396,7 +392,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is enabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(
@@ -442,7 +437,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is disabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(

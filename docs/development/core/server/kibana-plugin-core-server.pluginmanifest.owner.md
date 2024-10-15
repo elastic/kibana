@@ -4,7 +4,7 @@
 
 ## PluginManifest.owner property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly owner: {

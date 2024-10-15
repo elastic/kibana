@@ -8,7 +8,7 @@ Schema to use to validate the plugin configuration.
 
 [PluginConfigSchema](./kibana-plugin-core-server.pluginconfigschema.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 schema: PluginConfigSchema<T>;

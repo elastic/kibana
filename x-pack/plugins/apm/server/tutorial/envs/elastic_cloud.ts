@@ -44,9 +44,7 @@ export function createElasticCloudInstructions({
     instructionSets.push(getApmServerInstructionSet(cloudSetup));
   }
 
-  instructionSets.push(
-    getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled })
-  );
+  instructionSets.push(getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled }));
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {
@@ -54,9 +52,7 @@ export function createElasticCloudInstructions({
   };
 }
 
-function getApmServerInstructionSet(
-  cloudSetup?: CloudSetup
-): InstructionSetSchema {
+function getApmServerInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchema {
   const deploymentId = cloudSetup?.deploymentId;
 
   return {
@@ -81,9 +77,7 @@ function getApmServerInstructionSet(
   };
 }
 
-function getApmAgentInstructionSet(
-  cloudSetup?: CloudSetup
-): InstructionSetSchema {
+function getApmAgentInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchema {
   const apmServerUrl = cloudSetup?.apm.url;
   const secretToken = cloudSetup?.apm.secretToken;
 

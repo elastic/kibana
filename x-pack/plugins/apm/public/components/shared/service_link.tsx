@@ -23,11 +23,7 @@ interface ServiceLinkProps {
   serviceName: string;
 }
 
-export function ServiceLink({
-  agentName,
-  query,
-  serviceName,
-}: ServiceLinkProps) {
+export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
   return (

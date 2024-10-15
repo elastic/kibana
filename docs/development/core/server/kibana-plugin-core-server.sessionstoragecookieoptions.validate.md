@@ -6,7 +6,7 @@
 
 Function called to validate a cookie's decrypted value.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 validate: (sessionValue: T | T[]) => SessionCookieValidationResult;

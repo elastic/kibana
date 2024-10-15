@@ -6,7 +6,7 @@
 
 Observable that emits once if and when the request has been aborted.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 aborted$: Observable<void>;

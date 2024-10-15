@@ -9,7 +9,7 @@
 > Use `meta.title` instead
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title?: string;

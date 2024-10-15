@@ -165,10 +165,11 @@ const deprecations: ConfigDeprecationProvider = () => [
           manualSteps: [
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps1', {
               defaultMessage:
-                'Use the elasticsearch-service-tokens CLI tool to create a new service account token for the "elastic/kibana" service account.',
+                'Use Kibana Dev Tools to create a service account token using the API: "POST /_security/service/elastic/kibana/credential/token"',
             }),
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps2', {
-              defaultMessage: 'Add the "elasticsearch.serviceAccountToken" setting to kibana.yml.',
+              defaultMessage:
+                'Copy the returned token.value and add it as the "elasticsearch.serviceAccountToken" setting to kibana.yml.',
             }),
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps3', {
               defaultMessage:

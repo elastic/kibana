@@ -1,0 +1,25 @@
+paths-ignore:
+  - '**/*.test.*'
+  - packages/elastic-datemath/npm_module_types
+  - packages/kbn-babel-code-parser
+  - packages/kbn-babel-preset
+  - packages/kbn-cli-dev-mode
+  - packages/kbn-dev-utils
+  - packages/kbn-docs-utils
+  - packages/kbn-es
+  - packages/kbn-es-archiver
+  - packages/kbn-eslint-config
+  - packages/kbn-eslint-import-resolver-kibana
+  - packages/kbn-eslint-plugin-eslint
+  - packages/kbn-expect
+  - packages/kbn-optimizer
+  - packages/kbn-plugin-generator
+  - packages/kbn-plugin-helpers
+  - packages/kbn-pm
+  - packages/kbn-spec-to-console
+  - packages/kbn-storybook
+  - packages/kbn-telemetry-tools
+  - packages/kbn-test
+  - packages/kbn-test-subj-selector
+  - test
+  - x-pack/test

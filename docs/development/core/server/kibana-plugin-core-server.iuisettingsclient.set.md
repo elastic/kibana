@@ -6,7 +6,7 @@
 
 Writes uiSettings value and marks it as set by the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set: (key: string, value: any) => Promise<void>;

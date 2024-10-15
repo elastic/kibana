@@ -54,8 +54,7 @@ const paramsSchema = schema.object({
   ]),
 });
 
-const alertTypeConfig =
-  ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
 
 export function registerTransactionDurationAnomalyAlertType({
   logger,
@@ -95,19 +94,10 @@ export function registerTransactionDurationAnomalyAlertType({
         }
         const alertParams = params;
         const request = {} as KibanaRequest;
-        const { mlAnomalySearch } = ml.mlSystemProvider(
-          request,
-          services.savedObjectsClient
-        );
-        const anomalyDetectors = ml.anomalyDetectorsProvider(
-          request,
-          services.savedObjectsClient
-        );
+        const { mlAnomalySearch } = ml.mlSystemProvider(request, services.savedObjectsClient);
+        const anomalyDetectors = ml.anomalyDetectorsProvider(request, services.savedObjectsClient);
 
-        const mlJobs = await getMLJobs(
-          anomalyDetectors,
-          alertParams.environment
-        );
+        const mlJobs = await getMLJobs(anomalyDetectors, alertParams.environment);
 
         const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
           (option) => option.type === alertParams.anomalySeverityType
@@ -205,9 +195,7 @@ export function registerTransactionDurationAnomalyAlertType({
               const job = mlJobs.find((j) => j.job_id === latest.job_id);
 
               if (!job) {
-                logger.warn(
-                  `Could not find matching job for job id ${latest.job_id}`
-                );
+                logger.warn(`Could not find matching job for job id ${latest.job_id}`);
                 return undefined;
               }
 
@@ -218,9 +206,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 score: latest.record_score as number,
               };
             })
-            .filter((anomaly) =>
-              anomaly ? anomaly.score >= threshold : false
-            ) ?? [];
+            .filter((anomaly) => (anomaly ? anomaly.score >= threshold : false)) ?? [];
 
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
@@ -228,12 +214,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
           services
             .alertWithLifecycle({
-              id: [
-                AlertType.TransactionDurationAnomaly,
-                serviceName,
-                environment,
-                transactionType,
-              ]
+              id: [AlertType.TransactionDurationAnomaly, serviceName, environment, transactionType]
                 .filter((name) => name)
                 .join('_'),
               fields: {

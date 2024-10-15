@@ -25,6 +25,7 @@ const createActionsConfigMock = () => {
     }),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(undefined),
+    validateEmailAddresses: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

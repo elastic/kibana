@@ -45,6 +45,7 @@ export interface TakeActionDropdownProps {
   timelineId: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const TakeActionDropdown = React.memo(
   ({
     detailsData,

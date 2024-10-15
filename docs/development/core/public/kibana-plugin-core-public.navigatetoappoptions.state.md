@@ -6,7 +6,7 @@
 
 optional state to forward to the application
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 state?: unknown;

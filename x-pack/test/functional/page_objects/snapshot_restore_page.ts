@@ -49,12 +49,15 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
         const repoToView = repos.filter((r) => (r.repoName = name))[0];
         await repoToView.repoLink.click();
       }
-      await retry.waitForWithTimeout(`Repo title should be ${name}`, 10000, async () => {
+      await retry.waitForWithTimeout(`Repo title should be ${name}`, 25000, async () => {
         return (await testSubjects.getVisibleText('title')) === name;
       });
     },
     async performRepositoryCleanup() {
       await testSubjects.click('cleanupRepositoryButton');
+      await retry.waitForWithTimeout(`wait for code block to be visible`, 25000, async () => {
+        return await testSubjects.isDisplayed('cleanupCodeBlock');
+      });
       return await testSubjects.getVisibleText('cleanupCodeBlock');
     },
   };

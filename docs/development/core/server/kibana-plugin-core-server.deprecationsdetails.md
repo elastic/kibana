@@ -5,7 +5,7 @@
 ## DeprecationsDetails type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;

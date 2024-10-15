@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportConflictError.destinationId property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 destinationId?: string;

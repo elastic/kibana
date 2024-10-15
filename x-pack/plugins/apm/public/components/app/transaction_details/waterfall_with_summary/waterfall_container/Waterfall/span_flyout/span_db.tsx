@@ -20,8 +20,7 @@ import { TruncateHeightSection } from './truncate_height_section';
 SyntaxHighlighter.registerLanguage('sql', sql);
 
 const DatabaseStatement = euiStyled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  padding: ${({ theme }) => `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
   background: ${({ theme }) => tint(0.9, theme.eui.euiColorWarning)};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -50,12 +49,9 @@ export function SpanDatabase({ spanDb }: Props) {
     <Fragment>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
-            {
-              defaultMessage: 'Database statement',
-            }
-          )}
+          {i18n.translate('xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle', {
+            defaultMessage: 'Database statement',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
@@ -65,9 +61,9 @@ export function SpanDatabase({ spanDb }: Props) {
             language={'sql'}
             style={xcode}
             customStyle={{
-              color: null,
-              background: null,
-              padding: null,
+              color: undefined,
+              background: undefined,
+              padding: undefined,
               lineHeight: dbSyntaxLineHeight,
               whiteSpace: 'pre-wrap',
               overflowX: 'scroll',

@@ -6,7 +6,7 @@
 
 A tooltip shown when hovering over app link.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 tooltip?: string;

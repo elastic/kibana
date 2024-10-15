@@ -6,7 +6,7 @@
 
 The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = object> 
@@ -17,5 +17,5 @@ export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = obj
 |  Method | Description |
 |  --- | --- |
 |  [setup(core, plugins)](./kibana-plugin-core-server.prebootplugin.setup.md) |  |
-|  [stop()?](./kibana-plugin-core-server.prebootplugin.stop.md) | <i>(Optional)</i> |
+|  [stop()?](./kibana-plugin-core-server.prebootplugin.stop.md) | _(Optional)_ |
 

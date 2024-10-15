@@ -82,12 +82,7 @@ export async function getJSErrors({
             },
             sample: {
               top_hits: {
-                _source: [
-                  ERROR_EXC_MESSAGE,
-                  ERROR_EXC_TYPE,
-                  ERROR_GROUP_ID,
-                  '@timestamp',
-                ],
+                _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
                 sort: [{ '@timestamp': 'desc' as const }],
                 size: 1,
               },
@@ -102,8 +97,7 @@ export async function getJSErrors({
 
   const response = await apmEventClient.search('get_js_errors', params);
 
-  const { totalErrorGroups, totalErrorPages, errors } =
-    response.aggregations ?? {};
+  const { totalErrorGroups, totalErrorPages, errors } = response.aggregations ?? {};
 
   return {
     totalErrorPages: totalErrorPages?.value ?? 0,

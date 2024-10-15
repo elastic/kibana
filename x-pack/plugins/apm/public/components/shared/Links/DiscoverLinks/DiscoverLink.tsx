@@ -52,9 +52,7 @@ export const getDiscoverHref = ({
 
   const href = url.format({
     pathname: basePath.prepend('/app/discover'),
-    hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
-      risonQuery._a as RisonValue
-    )}`,
+    hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(risonQuery._a as RisonValue)}`,
   });
   return href;
 };

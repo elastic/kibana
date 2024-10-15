@@ -19,7 +19,7 @@ spaces in **{stack-manage-app}** in {kib}. For more information, see
 {ref}/security-privileges.html[Security privileges],
 <<kibana-privileges, {kib} privileges>>, and <<kibana-role-management, {kib} role management>>.
 
-To upload GeoJSON files in {kib} with *Maps*, you must have:
+To upload GeoJSON files and draw features in {kib} with *Maps*, you must have:
 
 * The `all` {kib} privilege for *Maps*
 * The `all` {kib} privilege for *{ipm-app}*
@@ -57,6 +57,55 @@ On the {kib} home page, you can upload a file and import it into an {es} index w
 . Select *Upload GeoJSON*.
 . Use the file chooser to select a GeoJSON file.
 . Click *Import file*.
+
+[discrete]
+=== Draw features in a map
+
+Upload features into {es} by drawing lines, polygons, circles, bounding boxes, and points in a map.
+
+To create a new index for drawing:
+
+. <<maps-create, Create a map>>.
+. Click *Add layer*.
+. Select *Create index*.
+. Set *Index name*.
+. Click *Create index*.
+
+To open an existing index for drawing:
+
+. <<maps-create, Create a map>>.
+
+. Click *Add layer*.
+
+. Select *Documents*.
+
+. Select the index pattern that points to your index. A <<index-patterns, index pattern>> can point to one or more indices. For feature editing, the data view must point to a single index.
+
+. Click *Add layer*.
+
+. Set *Scaling* to *Limit results to 10,000*.
+
+. In **Filtering**:
+** Clear the *Apply global search to layer data* checkbox.
+** If your data view contains a default time field, clear the *Apply global time to layer data* checkbox.
+
+. Click *Save & close*.
+
+. In the legend, click the layer name and select *Edit features*.
+
+When feature editing is open, a feature editing toolbox is displayed on the left side of the map.
+
+[role="screenshot"]
+image::maps/images/drawing_layer.png[]
+
+To draw features:
+
+. Click on the line, polygon, circle, bounding box, or point icon.
+. Move the mouse cursor over the map and follow the on screen instructions to draw a feature.
++
+When a feature is complete, the feature is added to the index as a new document.
+. Repeat to draw additional features.
+. When you are finished adding features, go to the legend, and click *Exit* under the layer name.
 
 [discrete]
 === Upload data with IP addresses

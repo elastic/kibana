@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `RouteValidationError` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(error: Error | string, path?: string[]);
@@ -17,5 +17,5 @@ constructor(error: Error | string, path?: string[]);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  error | Error \| string |  |
-|  path | string\[\] |  |
+|  path | string\[\] | _(Optional)_ |
 

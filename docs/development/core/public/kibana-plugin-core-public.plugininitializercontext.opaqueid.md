@@ -6,7 +6,7 @@
 
 A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly opaqueId: PluginOpaqueId;

@@ -30,17 +30,11 @@ import type {
 } from '../../../server';
 import { InspectResponse } from '../../../../observability/typings/common';
 
-export type APMClientOptions = Omit<
-  FetchOptions,
-  'query' | 'body' | 'pathname' | 'signal'
-> & {
+export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
   signal: AbortSignal | null;
 };
 
-export type APMClient = RouteRepositoryClient<
-  APMServerRouteRepository,
-  APMClientOptions
->;
+export type APMClient = RouteRepositoryClient<APMServerRouteRepository, APMClientOptions>;
 
 export type AutoAbortedAPMClient = RouteRepositoryClient<
   APMServerRouteRepository,
@@ -54,27 +48,21 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   _inspect?: InspectResponse;
 };
 
-export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
-  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequestParamsOf<
+  APMServerRouteRepository,
+  TEndpoint
+>;
 
 export type AbstractAPMRepository = ServerRouteRepository<
   APMRouteHandlerResources,
   {},
-  Record<
-    string,
-    ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>
-  >
+  Record<string, ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>>
 >;
 
-export type AbstractAPMClient = RouteRepositoryClient<
-  AbstractAPMRepository,
-  APMClientOptions
->;
+export type AbstractAPMClient = RouteRepositoryClient<AbstractAPMRepository, APMClientOptions>;
 
 export let callApmApi: APMClient = () => {
-  throw new Error(
-    'callApmApi has to be initialized before used. Call createCallApmApi first.'
-  );
+  throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
 };
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {
@@ -84,10 +72,9 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(
-      endpoint,
-      params?.path
-    ) as ReturnType<typeof formatRequestType>;
+    const { method, pathname } = formatRequest(endpoint, params?.path) as ReturnType<
+      typeof formatRequestType
+    >;
 
     return callApi(core, {
       ...opts,

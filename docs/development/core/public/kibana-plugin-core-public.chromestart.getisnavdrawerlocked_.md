@@ -6,12 +6,12 @@
 
 Get an observable of the current locked state of the nav drawer.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getIsNavDrawerLocked$(): Observable<boolean>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;boolean&gt;
 

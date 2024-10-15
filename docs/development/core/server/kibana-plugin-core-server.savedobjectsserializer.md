@@ -6,7 +6,7 @@
 
 A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SavedObjectsSerializer 

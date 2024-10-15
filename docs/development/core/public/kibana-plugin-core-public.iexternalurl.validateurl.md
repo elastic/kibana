@@ -8,7 +8,7 @@ Determines if the provided URL is a valid location to send users. Validation is 
 
 If the URL is valid, then a URL will be returned. Otherwise, this will return null.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 validateUrl(relativeOrAbsoluteUrl: string): URL | null;
@@ -20,7 +20,7 @@ validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 |  --- | --- | --- |
 |  relativeOrAbsoluteUrl | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 URL \| null
 

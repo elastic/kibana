@@ -4,7 +4,7 @@
 
 ## ElasticsearchStatusMeta.nodesInfoRequestError property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];

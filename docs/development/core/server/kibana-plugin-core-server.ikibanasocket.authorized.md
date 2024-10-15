@@ -6,7 +6,7 @@
 
 Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS isn't used the value is `undefined`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly authorized?: boolean;

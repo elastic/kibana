@@ -33,12 +33,7 @@ interface ChartPreviewProps {
   uiSettings?: IUiSettingsClient;
 }
 
-export function ChartPreview({
-  data = [],
-  yTickFormat,
-  threshold,
-  uiSettings,
-}: ChartPreviewProps) {
+export function ChartPreview({ data = [], yTickFormat, threshold, uiSettings }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);

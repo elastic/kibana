@@ -5,7 +5,7 @@
 ## ISavedObjectsImporter type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;

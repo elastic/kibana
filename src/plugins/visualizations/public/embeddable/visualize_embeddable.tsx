@@ -368,7 +368,7 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
-    this.updateHandler();
+    await this.updateHandler();
   }
 
   public destroy() {

@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.get() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get(key: string): any;
@@ -16,7 +16,7 @@ get(key: string): any;
 |  --- | --- | --- |
 |  key | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

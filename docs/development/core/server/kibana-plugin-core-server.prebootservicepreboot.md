@@ -6,7 +6,7 @@
 
 Kibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PrebootServicePreboot 
@@ -36,8 +36,8 @@ core.preboot.holdSetupUntilResolved('Just waiting for 5 seconds before reloading
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [holdSetupUntilResolved](./kibana-plugin-core-server.prebootservicepreboot.holdsetupuntilresolved.md) | (reason: string, promise: Promise&lt;{ shouldReloadConfig: boolean; } \| undefined&gt;) =&gt; void | Registers a <code>Promise</code> as a precondition before Kibana can proceed to <code>setup</code>. This method can be invoked multiple times and from multiple <code>preboot</code> plugins. Kibana will proceed to <code>setup</code> only when all registered <code>Promises</code> instances are resolved, or it will shut down if any of them is rejected. |
-|  [isSetupOnHold](./kibana-plugin-core-server.prebootservicepreboot.issetuponhold.md) | () =&gt; boolean | Indicates whether Kibana is currently on hold and cannot proceed to <code>setup</code> yet. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [holdSetupUntilResolved](./kibana-plugin-core-server.prebootservicepreboot.holdsetupuntilresolved.md) | <code>readonly</code> | (reason: string, promise: Promise&lt;{ shouldReloadConfig: boolean; } \| undefined&gt;) =&gt; void | Registers a <code>Promise</code> as a precondition before Kibana can proceed to <code>setup</code>. This method can be invoked multiple times and from multiple <code>preboot</code> plugins. Kibana will proceed to <code>setup</code> only when all registered <code>Promises</code> instances are resolved, or it will shut down if any of them is rejected. |
+|  [isSetupOnHold](./kibana-plugin-core-server.prebootservicepreboot.issetuponhold.md) | <code>readonly</code> | () =&gt; boolean | Indicates whether Kibana is currently on hold and cannot proceed to <code>setup</code> yet. |
 

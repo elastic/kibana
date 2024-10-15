@@ -6,7 +6,7 @@
 
 Version of the plugin.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly version: string;

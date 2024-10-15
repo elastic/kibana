@@ -435,7 +435,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     updated_at: updatedAt,
     updated_by: updatedBy,
     created_at: createdAt,
-    created_by: 'elastic',
+    created_by: 'system_indices_superuser',
     name,
     tags: [],
     interval: '100m',

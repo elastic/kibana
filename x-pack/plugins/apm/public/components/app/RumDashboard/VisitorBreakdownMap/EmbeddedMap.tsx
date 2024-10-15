@@ -9,10 +9,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-} from '../../../../../../maps/public';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -59,12 +56,9 @@ export function EmbeddedMapComponent() {
 
   const layerList = useLayerList();
 
-  const [embeddable, setEmbeddable] = useState<
-    MapEmbeddable | ErrorEmbeddable | undefined
-  >();
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> =
-    useRef<HTMLDivElement>(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const {
     services: { embeddable: embeddablePlugin },
@@ -73,9 +67,7 @@ export function EmbeddedMapComponent() {
   if (!embeddablePlugin) {
     throw new Error('Embeddable start plugin not found');
   }
-  const factory: any = embeddablePlugin.getEmbeddableFactory(
-    MAP_SAVED_OBJECT_TYPE
-  );
+  const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     attributes: { title: '' },

@@ -30,9 +30,6 @@ export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
   version: string
 ): SavedDashboardPanel {
-  const customTitle: string | undefined = panelState.explicitInput.title
-    ? (panelState.explicitInput.title as string)
-    : undefined;
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
     version,
@@ -40,7 +37,7 @@ export function convertPanelStateToSavedDashboardPanel(
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
     embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-    ...(customTitle && { title: customTitle }),
+    ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
   };

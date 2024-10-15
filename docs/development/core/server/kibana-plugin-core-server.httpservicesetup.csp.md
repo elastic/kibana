@@ -6,7 +6,7 @@
 
 The CSP config used for Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 csp: ICspConfig;

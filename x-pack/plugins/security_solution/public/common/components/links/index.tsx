@@ -368,10 +368,12 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
+/* eslint-disable react/no-unused-prop-types */
 export interface ReputationLinkSetting {
   name: string;
   url_template: string;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (

@@ -22,9 +22,7 @@ describe('ExceptionStacktrace', () => {
 
     describe('with more than one stack trace', () => {
       it('renders cause stacktraces', () => {
-        expect(
-          mount(<JavaWithLongLines />).find('CauseStacktrace')
-        ).toHaveLength(2);
+        expect(mount(<JavaWithLongLines />).find('CauseStacktrace')).toHaveLength(2);
       });
     });
   });

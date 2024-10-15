@@ -6,16 +6,16 @@
 
 Similar to [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) but with the URL path included.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpFetchOptionsWithPath extends HttpFetchOptions 
 ```
-<b>Extends:</b> HttpFetchOptions
+**Extends:** HttpFetchOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [path](./kibana-plugin-core-public.httpfetchoptionswithpath.path.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [path](./kibana-plugin-core-public.httpfetchoptionswithpath.path.md) |  | string |  |
 

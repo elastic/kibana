@@ -10,14 +10,13 @@ import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
 import { Observable } from 'rxjs';
-
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ensureDeepObject } from '@kbn/std';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { take } from 'rxjs/operators';
 import { TelemetryConfigType } from '../../config';
 
 // look for telemetry.yml in the same places we expect kibana.yml
-import { ensureDeepObject } from './ensure_deep_object';
 import { staticTelemetrySchema } from './schema';
 
 /**

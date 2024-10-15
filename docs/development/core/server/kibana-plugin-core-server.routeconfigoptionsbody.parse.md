@@ -8,7 +8,7 @@ Determines if the incoming payload is processed or presented raw. Available valu
 
 Default value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 parse?: boolean | 'gunzip';

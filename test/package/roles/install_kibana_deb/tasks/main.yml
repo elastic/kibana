@@ -6,6 +6,7 @@
       - fonts-liberation
       - libfontconfig
     state: latest
+    cache_valid_time: 3600
 
 - name: find deb package
   find:
@@ -25,6 +26,12 @@
     src: templates/kibana.yml
     dest: /etc/kibana/kibana.yml
   register: config
+
+- name: copy node.options
+  become: yes
+  template:
+    src: templates/node.options
+    dest: /etc/kibana/node.options
 
 - name: start kibana
   become: yes

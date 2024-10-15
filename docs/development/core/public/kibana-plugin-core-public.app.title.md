@@ -6,7 +6,7 @@
 
 The title of the application.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title: string;

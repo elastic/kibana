@@ -80,11 +80,7 @@ export const fetchNumericFieldStats = async (
   field: FieldValuePair,
   termFilters?: FieldValuePair[]
 ): Promise<NumericFieldStats> => {
-  const request: SearchRequest = getNumericFieldStatsRequest(
-    params,
-    field.fieldName,
-    termFilters
-  );
+  const request: SearchRequest = getNumericFieldStatsRequest(params, field.fieldName, termFilters);
   const { body } = await esClient.search(request);
 
   const aggregations = body.aggregations as unknown as {
@@ -98,8 +94,7 @@ export const fetchNumericFieldStats = async (
     };
   };
   const docCount = aggregations?.sample.sampled_field_stats?.doc_count ?? 0;
-  const fieldStatsResp =
-    aggregations?.sample.sampled_field_stats?.actual_stats ?? {};
+  const fieldStatsResp = aggregations?.sample.sampled_field_stats?.actual_stats ?? {};
   const topValues = aggregations?.sample.sampled_top?.buckets ?? [];
 
   const stats: NumericFieldStats = {
@@ -117,12 +112,9 @@ export const fetchNumericFieldStats = async (
 
   if (stats.count !== undefined && stats.count > 0) {
     const percentiles = aggregations?.sample.sampled_percentiles.values ?? [];
-    const medianPercentile: { value: number; key: number } | undefined = find(
-      percentiles,
-      {
-        key: 50,
-      }
-    );
+    const medianPercentile: { value: number; key: number } | undefined = find(percentiles, {
+      key: 50,
+    });
     stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
   }
 

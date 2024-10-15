@@ -7,10 +7,7 @@
 
 import { EVENT_KIND } from '@kbn/rule-data-utils/technical_field_names';
 import { IRuleDataClient } from '../../../../rule_registry/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 

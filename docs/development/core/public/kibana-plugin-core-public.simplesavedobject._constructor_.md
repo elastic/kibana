@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `SimpleSavedObject` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObjectType<T>);

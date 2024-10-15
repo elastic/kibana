@@ -6,7 +6,7 @@
 
 Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ToastOptions 
@@ -14,7 +14,7 @@ export interface ToastOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [toastLifeTimeMs?](./kibana-plugin-core-public.toastoptions.toastlifetimems.md) | number | <i>(Optional)</i> How long should the toast remain on screen. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [toastLifeTimeMs?](./kibana-plugin-core-public.toastoptions.toastlifetimems.md) |  | number | _(Optional)_ How long should the toast remain on screen. |
 

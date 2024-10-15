@@ -6,7 +6,7 @@
 
 Define an interceptor to be executed before a request is sent.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
@@ -19,7 +19,7 @@ request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInte
 |  fetchOptions | Readonly&lt;HttpFetchOptionsWithPath&gt; |  |
 |  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 MaybePromise&lt;Partial&lt;HttpFetchOptionsWithPath&gt;&gt; \| void
 

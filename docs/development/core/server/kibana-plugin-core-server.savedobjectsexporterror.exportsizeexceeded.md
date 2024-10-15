@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportError.exportSizeExceeded() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static exportSizeExceeded(limit: number): SavedObjectsExportError;
@@ -16,7 +16,7 @@ static exportSizeExceeded(limit: number): SavedObjectsExportError;
 |  --- | --- | --- |
 |  limit | number |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsExportError
 

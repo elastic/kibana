@@ -6,14 +6,10 @@
  */
 
 import { Setup } from '../helpers/setup_request';
-import {
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { HOST_NAME, CONTAINER_ID } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
   kuery,
@@ -22,6 +18,7 @@ export async function getServiceNodeMetadata({
   setup,
   start,
   end,
+  environment,
 }: {
   kuery: string;
   serviceName: string;
@@ -29,6 +26,7 @@ export async function getServiceNodeMetadata({
   setup: Setup;
   start: number;
   end: number;
+  environment: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -37,7 +35,7 @@ export async function getServiceNodeMetadata({
       kuery,
       serviceName,
       serviceNodeName,
-      environment: ENVIRONMENT_ALL.value,
+      environment,
       start,
       end,
     }),
@@ -62,14 +60,10 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await apmEventClient.search(
-    'get_service_node_metadata',
-    query
-  );
+  const response = await apmEventClient.search('get_service_node_metadata', query);
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
-    containerId:
-      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    containerId: response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
 }

@@ -11,7 +11,7 @@
 
 Process related metrics.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 process: OpsProcessMetrics;

@@ -8,7 +8,7 @@ Allowed property validation options: either @<!-- -->kbn/config-schema validatio
 
 See [RouteValidationFunction](./kibana-plugin-core-server.routevalidationfunction.md) for custom validation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;

@@ -12,7 +12,7 @@ The generator wraps calls to [SavedObjectsClient.find()](./kibana-plugin-core-se
 
 Once you have retrieved all of the results you need, it is recommended to call `close()` to clean up the PIT and prevent Elasticsearch from consuming resources unnecessarily. This is only required if you are done iterating and have not yet paged through all of the results: the PIT will automatically be closed for you once you reach the last page of results, or if the underlying call to `find` fails for any reason.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
@@ -23,9 +23,9 @@ createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreat
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  findOptions | SavedObjectsCreatePointInTimeFinderOptions |  |
-|  dependencies | SavedObjectsCreatePointInTimeFinderDependencies |  |
+|  dependencies | SavedObjectsCreatePointInTimeFinderDependencies | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 ISavedObjectsPointInTimeFinder&lt;T, A&gt;
 

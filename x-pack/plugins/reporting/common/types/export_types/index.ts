@@ -8,6 +8,7 @@
 export * from './csv';
 export * from './csv_searchsource';
 export * from './csv_searchsource_immediate';
+export * from './csv_saved_object';
 export * from './png';
 export * from './png_v2';
 export * from './printable_pdf';

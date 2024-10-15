@@ -6,7 +6,7 @@
 
 A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> 
@@ -14,9 +14,9 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [options](./kibana-plugin-core-server.ikibanaresponse.options.md) | HttpResponseOptions |  |
-|  [payload?](./kibana-plugin-core-server.ikibanaresponse.payload.md) | T | <i>(Optional)</i> |
-|  [status](./kibana-plugin-core-server.ikibanaresponse.status.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [options](./kibana-plugin-core-server.ikibanaresponse.options.md) | <code>readonly</code> | HttpResponseOptions |  |
+|  [payload?](./kibana-plugin-core-server.ikibanaresponse.payload.md) | <code>readonly</code> | T | _(Optional)_ |
+|  [status](./kibana-plugin-core-server.ikibanaresponse.status.md) | <code>readonly</code> | number |  |
 

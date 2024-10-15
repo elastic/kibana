@@ -6,7 +6,7 @@
 
 Structure of the export result details entry
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsExportResultDetails 
@@ -14,11 +14,11 @@ export interface SavedObjectsExportResultDetails
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [excludedObjects](./kibana-plugin-core-server.savedobjectsexportresultdetails.excludedobjects.md) | SavedObjectsExportExcludedObject\[\] | excluded objects details |
-|  [excludedObjectsCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.excludedobjectscount.md) | number | number of objects that were excluded from the export |
-|  [exportedCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.exportedcount.md) | number | number of successfully exported objects |
-|  [missingRefCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.missingrefcount.md) | number | number of missing references |
-|  [missingReferences](./kibana-plugin-core-server.savedobjectsexportresultdetails.missingreferences.md) | Array&lt;{ id: string; type: string; }&gt; | missing references details |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [excludedObjects](./kibana-plugin-core-server.savedobjectsexportresultdetails.excludedobjects.md) |  | SavedObjectsExportExcludedObject\[\] | excluded objects details |
+|  [excludedObjectsCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.excludedobjectscount.md) |  | number | number of objects that were excluded from the export |
+|  [exportedCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.exportedcount.md) |  | number | number of successfully exported objects |
+|  [missingRefCount](./kibana-plugin-core-server.savedobjectsexportresultdetails.missingrefcount.md) |  | number | number of missing references |
+|  [missingReferences](./kibana-plugin-core-server.savedobjectsexportresultdetails.missingreferences.md) |  | Array&lt;{ id: string; type: string; }&gt; | missing references details |
 

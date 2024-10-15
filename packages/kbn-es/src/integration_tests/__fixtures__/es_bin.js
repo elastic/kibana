@@ -69,6 +69,16 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
         });
       }
 
+      if (url.pathname === '/_cluster/health') {
+        return send(
+          200,
+          {
+            status: 'green',
+          },
+          { 'x-elastic-product': 'Elasticsearch' }
+        );
+      }
+
       return send(404, {
         error: {
           reason: 'not found',
@@ -77,11 +87,11 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
     }
   );
 
-  // setup server auto close after 1 second of silence
+  // setup server auto close after 5 second of silence
   let serverCloseTimer;
   const delayServerClose = () => {
     clearTimeout(serverCloseTimer);
-    serverCloseTimer = setTimeout(() => server.close(), 1000);
+    serverCloseTimer = setTimeout(() => server.close(), 5000);
   };
   server.on('request', delayServerClose);
   server.on('listening', delayServerClose);

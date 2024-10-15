@@ -6,7 +6,7 @@
 
 The os distrib. Only present for linux platforms
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 distro?: string;

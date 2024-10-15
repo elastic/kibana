@@ -480,6 +480,106 @@ describe('deprecations', () => {
       `);
     });
 
+    test('getDeprecations handles multiple spaces with and without siem feature', async () => {
+      getKibanaRoles.mockResolvedValue({
+        roles: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                },
+                spaces: ['spaceOne'],
+              },
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  siem: ['minimal_all', 'cases_read'],
+                },
+                spaces: ['spaceTwo'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'first_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      });
+      const response = await getDeprecations(mockContext);
+      expect(response).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "api": Object {
+                "body": Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Array [
+                    Object {
+                      "base": Array [],
+                      "feature": Object {
+                        "bar": Array [
+                          "bar-privilege-1",
+                        ],
+                      },
+                      "spaces": Array [
+                        "spaceOne",
+                      ],
+                    },
+                    Object {
+                      "base": Array [],
+                      "feature": Object {
+                        "bar": Array [
+                          "bar-privilege-1",
+                        ],
+                        "securitySolutionCases": Array [
+                          "read",
+                        ],
+                        "siem": Array [
+                          "minimal_all",
+                          "cases_read",
+                        ],
+                      },
+                      "spaces": Array [
+                        "spaceTwo",
+                      ],
+                    },
+                  ],
+                  "metadata": Object {
+                    "_reserved": true,
+                  },
+                },
+                "method": "PUT",
+                "omitContextFromBody": true,
+                "path": "/api/security/role/first_role",
+              },
+              "manualSteps": Array [],
+            },
+            "deprecationType": "feature",
+            "level": "warning",
+            "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"first_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
+            "title": "The Security feature is changing, and the \\"first_role\\" role requires an update",
+          },
+        ]
+      `);
+    });
+
     test('getDeprecations handles multiple roles and filters out any that have already been updated', async () => {
       getKibanaRoles.mockResolvedValue({
         roles: [

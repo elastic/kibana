@@ -23,9 +23,7 @@ import { iconForNode } from './icons';
 export const popoverWidth = 280;
 
 function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
-  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
-    'serviceAnomalyStats'
-  );
+  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data('serviceAnomalyStats');
 
   return serviceAnomalyStats;
 }
@@ -84,9 +82,7 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 // @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-export const getAnimationOptions = (
-  theme: EuiTheme
-): cytoscape.AnimationOptions => ({
+export const getAnimationOptions = (theme: EuiTheme): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
   // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.eui.euiAnimSlightBounce,
@@ -119,10 +115,8 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        'background-height': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
-        'background-width': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
+        'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
+        'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'border-color': getBorderColorFn(theme),
         'border-style': getBorderStyle,
         'border-width': getBorderWidth,
@@ -172,9 +166,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         // fairly new.
         //
         // @ts-expect-error
-        'target-distance-from-node': isIE11
-          ? undefined
-          : theme.eui.paddingSizes.xs,
+        'target-distance-from-node': isIE11 ? undefined : theme.eui.paddingSizes.xs,
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
@@ -187,12 +179,8 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // @ts-expect-error
-        'source-distance-from-node': isIE11
-          ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
-        'target-distance-from-node': isIE11
-          ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
+        'source-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.paddingSizes.xs, 10),
+        'target-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.paddingSizes.xs, 10),
       },
     },
     {
@@ -232,10 +220,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
 
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
-export const getCytoscapeDivStyle = (
-  theme: EuiTheme,
-  status: FETCH_STATUS
-): CSSProperties => ({
+export const getCytoscapeDivStyle = (theme: EuiTheme, status: FETCH_STATUS): CSSProperties => ({
   background: `linear-gradient(
   90deg,
   ${theme.eui.euiPageBackgroundColor}
@@ -255,9 +240,7 @@ ${theme.eui.euiColorLightShade}`,
   marginTop: 0,
 });
 
-export const getCytoscapeOptions = (
-  theme: EuiTheme
-): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = (theme: EuiTheme): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,

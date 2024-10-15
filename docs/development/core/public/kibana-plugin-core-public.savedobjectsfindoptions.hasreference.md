@@ -6,7 +6,7 @@
 
 Search for documents having a reference to the specified objects. Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];

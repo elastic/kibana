@@ -4,7 +4,7 @@
 
 ## CoreStatus.savedObjects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savedObjects: ServiceStatus;

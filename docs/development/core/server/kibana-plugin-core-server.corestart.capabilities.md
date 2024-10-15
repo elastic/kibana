@@ -6,7 +6,7 @@
 
 [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 capabilities: CapabilitiesStart;

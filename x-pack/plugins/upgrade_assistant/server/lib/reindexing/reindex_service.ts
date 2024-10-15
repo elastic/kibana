@@ -293,12 +293,8 @@ export const reindexServiceFactory = (
       // Do any other cleanup work necessary
       reindexOp = await cleanupChanges(reindexOp);
     } else {
-      // Check that it reindexed all documents
-      const {
-        body: { count },
-      } = await esClient.count({ index: reindexOp.attributes.indexName });
-
-      if (taskResponse.task.status!.created < count) {
+      // Check that no failures occurred
+      if (taskResponse.response?.failures?.length) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);

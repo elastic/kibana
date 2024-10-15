@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { APMConfig } from '../..';
-import {
-  InstructionsSchema,
-  INSTRUCTION_VARIANT,
-} from '../../../../../../src/plugins/home/server';
+import { InstructionsSchema, INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -49,27 +46,15 @@ export function getOnPremApmServerInstructionSet({
     instructionVariants: [
       {
         id: INSTRUCTION_VARIANT.DEB,
-        instructions: [
-          createDownloadServerDeb(),
-          EDIT_CONFIG,
-          START_SERVER_UNIX_SYSV,
-        ],
+        instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
       },
       {
         id: INSTRUCTION_VARIANT.RPM,
-        instructions: [
-          createDownloadServerRpm(),
-          EDIT_CONFIG,
-          START_SERVER_UNIX_SYSV,
-        ],
+        instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
       },
       {
         id: INSTRUCTION_VARIANT.OSX,
-        instructions: [
-          createDownloadServerOsx(),
-          EDIT_CONFIG,
-          START_SERVER_UNIX,
-        ],
+        instructions: [createDownloadServerOsx(), EDIT_CONFIG, START_SERVER_UNIX],
       },
       {
         id: INSTRUCTION_VARIANT.WINDOWS,
@@ -101,25 +86,16 @@ export function getOnPremApmServerInstructionSet({
         defaultMessage:
           'Make sure APM Server is running before you start implementing the APM agents.',
       }),
-      btnLabel: i18n.translate(
-        'xpack.apm.tutorial.apmServer.statusCheck.btnLabel',
-        {
-          defaultMessage: 'Check APM Server status',
-        }
-      ),
-      success: i18n.translate(
-        'xpack.apm.tutorial.apmServer.statusCheck.successMessage',
-        {
-          defaultMessage: 'You have correctly setup APM Server',
-        }
-      ),
-      error: i18n.translate(
-        'xpack.apm.tutorial.apmServer.statusCheck.errorMessage',
-        {
-          defaultMessage:
-            'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
-        }
-      ),
+      btnLabel: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.btnLabel', {
+        defaultMessage: 'Check APM Server status',
+      }),
+      success: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.successMessage', {
+        defaultMessage: 'You have correctly setup APM Server',
+      }),
+      error: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.errorMessage', {
+        defaultMessage:
+          'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
+      }),
       esHitsCheck: {
         index: apmConfig.indices.onboarding,
         query: {

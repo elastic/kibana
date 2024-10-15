@@ -5,7 +5,7 @@
 ## SavedObjectsOpenPointInTimeResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsOpenPointInTimeResponse 
@@ -13,7 +13,7 @@ export interface SavedObjectsOpenPointInTimeResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.id.md) | string | PIT ID returned from ES. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.id.md) |  | string | PIT ID returned from ES. |
 

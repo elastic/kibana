@@ -27,13 +27,10 @@ export interface RectCoordinate {
 
 type Accessor = Array<string | number | AccessorFn>;
 
-export type TimeSeries<
-  TCoordinate extends { x: number } = Coordinate | RectCoordinate
-> = APMChartSpec<TCoordinate>;
+export type TimeSeries<TCoordinate extends { x: number } = Coordinate | RectCoordinate> =
+  APMChartSpec<TCoordinate>;
 
-export interface APMChartSpec<
-  TCoordinate extends { x: number } = Coordinate | RectCoordinate
-> {
+export interface APMChartSpec<TCoordinate extends { x: number } = Coordinate | RectCoordinate> {
   title: string;
   titleShort?: string;
   hideLegend?: boolean;

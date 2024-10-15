@@ -4,7 +4,7 @@
 
 ## GetDeprecationsContext.esClient property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 esClient: IScopedClusterClient;

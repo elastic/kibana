@@ -4,7 +4,7 @@
 
 ## IKibanaSocket.getPeerCertificate() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
@@ -16,7 +16,7 @@ getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
 |  --- | --- | --- |
 |  detailed | true |  |
 
-<b>Returns:</b>
+**Returns:**
 
 DetailedPeerCertificate \| null
 

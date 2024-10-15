@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
@@ -115,8 +110,7 @@ export function TransactionsTable({
         return;
       }
       return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+        endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -200,9 +194,7 @@ export function TransactionsTable({
               numBuckets: 20,
               transactionType,
               latencyAggregationType,
-              transactionNames: JSON.stringify(
-                transactionGroups.map(({ name }) => name).sort()
-              ),
+              transactionNames: JSON.stringify(transactionGroups.map(({ name }) => name).sort()),
               comparisonStart,
               comparisonEnd,
             },
@@ -266,13 +258,9 @@ export function TransactionsTable({
       {showAggregationAccurateCallout && !isAggregationAccurate && (
         <EuiFlexItem>
           <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.transactionsTable.cardinalityWarning.title',
-              {
-                defaultMessage:
-                  'This view shows a subset of reported transactions.',
-              }
-            )}
+            title={i18n.translate('xpack.apm.transactionsTable.cardinalityWarning.title', {
+              defaultMessage: 'This view shows a subset of reported transactions.',
+            })}
             color="danger"
             iconType="alert"
           >
@@ -282,9 +270,7 @@ export function TransactionsTable({
                 defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
                 values={{
                   bucketSize,
-                  codeBlock: (
-                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
-                  ),
+                  codeBlock: <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>,
                 }}
               />
 
@@ -292,10 +278,9 @@ export function TransactionsTable({
                 section="/kibana"
                 path="/troubleshooting.html#troubleshooting-too-many-transactions"
               >
-                {i18n.translate(
-                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
-                  { defaultMessage: 'Learn more in the docs' }
-                )}
+                {i18n.translate('xpack.apm.transactionsTable.cardinalityWarning.docsLink', {
+                  defaultMessage: 'Learn more in the docs',
+                })}
               </ElasticDocsLink>
             </p>
           </EuiCallOut>
@@ -305,9 +290,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <OverviewTableContainer
             fixedHeight={fixedHeight}
-            isEmptyAndNotInitiated={
-              transactionGroupsTotalItems === 0 && isNotInitiated
-            }
+            isEmptyAndNotInitiated={transactionGroupsTotalItems === 0 && isNotInitiated}
           >
             <EuiBasicTable
               noItemsMessage={

@@ -126,7 +126,7 @@ describe('MetaRewritePolicy', () => {
           "b": Object {},
           "d": Array [
             0,
-            undefined,
+            ,
           ],
         }
       `);

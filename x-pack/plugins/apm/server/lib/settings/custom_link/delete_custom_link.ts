@@ -7,13 +7,7 @@
 
 import { Setup } from '../../helpers/setup_request';
 
-export function deleteCustomLink({
-  customLinkId,
-  setup,
-}: {
-  customLinkId: string;
-  setup: Setup;
-}) {
+export function deleteCustomLink({ customLinkId, setup }: { customLinkId: string; setup: Setup }) {
   const { internalClient, indices } = setup;
 
   const params = {

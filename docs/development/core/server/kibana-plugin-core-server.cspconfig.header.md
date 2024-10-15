@@ -4,7 +4,7 @@
 
 ## CspConfig.header property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly header: string;

@@ -2,20 +2,20 @@
   "extends": "../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "fixtures/**/*.json"
+    "fixtures/**/*.json",
   ],
   "exclude": [
     "target/**/*"
   ],
   "compilerOptions": {
+    "baseUrl": "../",
     "target": "ES2019",
-    "outDir": "target/types",
+    "outDir": "./target/types",
     "types": [
       "cypress",
       "cypress-file-upload",
       "cypress-pipe",
       "node",
-      "resize-observer-polyfill",
     ],
   },
   "references": [

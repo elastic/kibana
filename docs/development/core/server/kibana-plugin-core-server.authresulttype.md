@@ -5,7 +5,7 @@
 ## AuthResultType enum
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AuthResultType 

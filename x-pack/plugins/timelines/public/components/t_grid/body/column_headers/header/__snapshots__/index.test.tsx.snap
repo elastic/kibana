@@ -6,9 +6,12 @@ exports[`Header renders correctly against snapshot 1`] = `
     header={
       Object {
         "columnHeaderType": "not-filtered",
+        "esTypes": Array [
+          "date",
+        ],
         "id": "@timestamp",
         "initialWidth": 190,
-        "type": "number",
+        "type": "date",
       }
     }
     isLoading={false}
@@ -19,7 +22,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Array [
         Object {
           "columnId": "@timestamp",
-          "columnType": "number",
+          "columnType": "date",
           "sortDirection": "desc",
         },
       ]
@@ -29,9 +32,12 @@ exports[`Header renders correctly against snapshot 1`] = `
       header={
         Object {
           "columnHeaderType": "not-filtered",
+          "esTypes": Array [
+            "date",
+          ],
           "id": "@timestamp",
           "initialWidth": 190,
-          "type": "number",
+          "type": "date",
         }
       }
       isLoading={false}
@@ -40,7 +46,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         Array [
           Object {
             "columnId": "@timestamp",
-            "columnType": "number",
+            "columnType": "date",
             "sortDirection": "desc",
           },
         ]

@@ -4,7 +4,7 @@
 
 ## Plugin\_2.setup() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
@@ -17,7 +17,7 @@ setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 |  core | CoreSetup&lt;TPluginsStart, TStart&gt; |  |
 |  plugins | TPluginsSetup |  |
 
-<b>Returns:</b>
+**Returns:**
 
 TSetup
 

@@ -10,7 +10,7 @@ All changed configs except booleans and numbers will be reported as \[redacted\]
 
 [MakeUsageFromSchema](./kibana-plugin-core-server.makeusagefromschema.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exposeToUsage?: MakeUsageFromSchema<T>;

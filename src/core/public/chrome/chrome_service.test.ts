@@ -32,11 +32,14 @@ class FakeApp implements App {
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
-(window as any).localStorage = {
-  setItem: (key: string, value: string) => store.set(String(key), String(value)),
-  getItem: (key: string) => store.get(String(key)),
-  removeItem: (key: string) => store.delete(String(key)),
-};
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    setItem: (key: string, value: string) => store.set(String(key), String(value)),
+    getItem: (key: string) => store.get(String(key)),
+    removeItem: (key: string) => store.delete(String(key)),
+  },
+  writable: true,
+});
 
 function defaultStartDeps(availableApps?: App[]) {
   const deps = {

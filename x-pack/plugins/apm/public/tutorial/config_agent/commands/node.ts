@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const node = `// ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
   {
-    defaultMessage:
-      'Add this to the VERY top of the first file loaded in your app',
+    defaultMessage: 'Add this to the VERY top of the first file loaded in your app',
   }
 )}
 var apm = require('elastic-apm-node').start({
@@ -21,12 +20,9 @@ var apm = require('elastic-apm-node').start({
     defaultMessage: 'Override the service name from package.json',
   }
 )}
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
+// ${i18n.translate('xpack.apm.tutorial.nodeClient.configure.commands.allowedCharactersComment', {
+  defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
+})}
 serviceName: '',
 
 // ${i18n.translate(
@@ -40,8 +36,7 @@ secretToken: '{{{secretToken}}}',
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
   {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
+    defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}

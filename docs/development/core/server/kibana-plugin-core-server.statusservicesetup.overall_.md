@@ -6,7 +6,7 @@
 
 Overall system status for all of Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overall$: Observable<ServiceStatus>;

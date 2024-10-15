@@ -6,7 +6,7 @@
 
 Additional data to extend a response.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreResponseExtensions 
@@ -14,7 +14,7 @@ export interface OnPreResponseExtensions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [headers?](./kibana-plugin-core-server.onpreresponseextensions.headers.md) | ResponseHeaders | <i>(Optional)</i> additional headers to attach to the response |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [headers?](./kibana-plugin-core-server.onpreresponseextensions.headers.md) |  | ResponseHeaders | _(Optional)_ additional headers to attach to the response |
 

@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isNotFoundError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isNotFoundError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isNotFoundError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

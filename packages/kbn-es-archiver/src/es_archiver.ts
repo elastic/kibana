@@ -153,14 +153,12 @@ export class EsArchiver {
   }
 
   /**
-   * Delete any Kibana indices, and initialize the Kibana index as Kibana would do
-   * on startup.
+   * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
     return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kbnClient: this.kbnClient,
     });
   }
 

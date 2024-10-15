@@ -4,7 +4,7 @@
 
 ## SavedObjectError interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectError 
@@ -12,10 +12,10 @@ export interface SavedObjectError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.savedobjecterror.error.md) | string |  |
-|  [message](./kibana-plugin-core-public.savedobjecterror.message.md) | string |  |
-|  [metadata?](./kibana-plugin-core-public.savedobjecterror.metadata.md) | Record&lt;string, unknown&gt; | <i>(Optional)</i> |
-|  [statusCode](./kibana-plugin-core-public.savedobjecterror.statuscode.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [error](./kibana-plugin-core-public.savedobjecterror.error.md) |  | string |  |
+|  [message](./kibana-plugin-core-public.savedobjecterror.message.md) |  | string |  |
+|  [metadata?](./kibana-plugin-core-public.savedobjecterror.metadata.md) |  | Record&lt;string, unknown&gt; | _(Optional)_ |
+|  [statusCode](./kibana-plugin-core-public.savedobjecterror.statuscode.md) |  | number |  |
 

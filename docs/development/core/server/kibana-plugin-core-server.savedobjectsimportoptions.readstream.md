@@ -6,7 +6,7 @@
 
 The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readStream: Readable;

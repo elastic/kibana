@@ -10,7 +10,7 @@
 
 exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 injectedMetadata: {

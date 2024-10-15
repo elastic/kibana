@@ -38,9 +38,7 @@ export const fetchUxOverviewDate = async ({
   };
 };
 
-export async function hasRumData(
-  params: HasDataParams
-): Promise<UXHasDataResponse> {
+export async function hasRumData(params: HasDataParams): Promise<UXHasDataResponse> {
   return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_rum_data',
     signal: null,

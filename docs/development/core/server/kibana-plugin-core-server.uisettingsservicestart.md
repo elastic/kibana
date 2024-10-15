@@ -5,7 +5,7 @@
 ## UiSettingsServiceStart interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface UiSettingsServiceStart 
@@ -15,5 +15,5 @@ export interface UiSettingsServiceStart
 
 |  Method | Description |
 |  --- | --- |
-|  [asScopedToClient(savedObjectsClient)](./kibana-plugin-core-server.uisettingsservicestart.asscopedtoclient.md) | Creates a [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) with provided \*scoped\* saved objects client.<!-- -->This should only be used in the specific case where the client needs to be accessed from outside of the scope of a [RequestHandler](./kibana-plugin-core-server.requesthandler.md)<!-- -->. |
+|  [asScopedToClient(savedObjectsClient)](./kibana-plugin-core-server.uisettingsservicestart.asscopedtoclient.md) | <p>Creates a [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) with provided \*scoped\* saved objects client.</p><p>This should only be used in the specific case where the client needs to be accessed from outside of the scope of a [RequestHandler](./kibana-plugin-core-server.requesthandler.md)<!-- -->.</p> |
 

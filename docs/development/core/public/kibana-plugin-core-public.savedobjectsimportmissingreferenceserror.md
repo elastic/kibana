@@ -6,7 +6,7 @@
 
 Represents a failure to import due to missing references.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportMissingReferencesError 
@@ -14,8 +14,8 @@ export interface SavedObjectsImportMissingReferencesError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [references](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.references.md) | Array&lt;{ type: string; id: string; }&gt; |  |
-|  [type](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.type.md) | 'missing\_references' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [references](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.references.md) |  | Array&lt;{ type: string; id: string; }&gt; |  |
+|  [type](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.type.md) |  | 'missing\_references' |  |
 

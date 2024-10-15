@@ -6,7 +6,7 @@
 
 Set of settings configure SSL connection between Kibana and Elasticsearch that are required when `xpack.ssl.verification_mode` in Elasticsearch is set to either `certificate` or `full`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly ssl: Pick<SslConfigSchema, Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>> & {

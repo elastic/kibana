@@ -5,7 +5,7 @@
 ## DeleteDocumentResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DeleteDocumentResponse 
@@ -13,14 +13,14 @@ export interface DeleteDocumentResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [\_id](./kibana-plugin-core-server.deletedocumentresponse._id.md) | string |  |
-|  [\_index](./kibana-plugin-core-server.deletedocumentresponse._index.md) | string |  |
-|  [\_shards](./kibana-plugin-core-server.deletedocumentresponse._shards.md) | ShardsResponse |  |
-|  [\_type](./kibana-plugin-core-server.deletedocumentresponse._type.md) | string |  |
-|  [\_version](./kibana-plugin-core-server.deletedocumentresponse._version.md) | number |  |
-|  [error?](./kibana-plugin-core-server.deletedocumentresponse.error.md) | { type: string; } | <i>(Optional)</i> |
-|  [found](./kibana-plugin-core-server.deletedocumentresponse.found.md) | boolean |  |
-|  [result](./kibana-plugin-core-server.deletedocumentresponse.result.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [\_id](./kibana-plugin-core-server.deletedocumentresponse._id.md) |  | string |  |
+|  [\_index](./kibana-plugin-core-server.deletedocumentresponse._index.md) |  | string |  |
+|  [\_shards](./kibana-plugin-core-server.deletedocumentresponse._shards.md) |  | ShardsResponse |  |
+|  [\_type](./kibana-plugin-core-server.deletedocumentresponse._type.md) |  | string |  |
+|  [\_version](./kibana-plugin-core-server.deletedocumentresponse._version.md) |  | number |  |
+|  [error?](./kibana-plugin-core-server.deletedocumentresponse.error.md) |  | { type: string; } | _(Optional)_ |
+|  [found](./kibana-plugin-core-server.deletedocumentresponse.found.md) |  | boolean |  |
+|  [result](./kibana-plugin-core-server.deletedocumentresponse.result.md) |  | string |  |
 

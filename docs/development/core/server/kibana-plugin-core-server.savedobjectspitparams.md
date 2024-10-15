@@ -5,7 +5,7 @@
 ## SavedObjectsPitParams interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsPitParams 
@@ -13,8 +13,8 @@ export interface SavedObjectsPitParams
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectspitparams.id.md) | string |  |
-|  [keepAlive?](./kibana-plugin-core-server.savedobjectspitparams.keepalive.md) | string | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectspitparams.id.md) |  | string |  |
+|  [keepAlive?](./kibana-plugin-core-server.savedobjectspitparams.keepalive.md) |  | string | _(Optional)_ |
 

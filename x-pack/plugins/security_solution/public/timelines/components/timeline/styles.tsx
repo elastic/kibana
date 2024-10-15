@@ -282,7 +282,7 @@ export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width 
 }))<WidthProp>``;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trSupplement ${className}`,
+  className: `siemEventsTable__trSupplement ${className}` as string,
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -410,7 +410,7 @@ export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
 `;
 
 export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsHeading__extra ${className}`,
+  className: `siemEventsHeading__extra ${className}` as string,
 }))`
   margin-left: auto;
   margin-right: 2px;

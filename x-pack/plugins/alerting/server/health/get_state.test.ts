@@ -25,7 +25,7 @@ jest.mock('./get_health', () => ({
   }),
 }));
 
-const tick = () => new Promise((resolve) => setImmediate(resolve));
+const tick = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 const getHealthCheckTask = (overrides = {}): ConcreteTaskInstance => ({
   id: 'test',
@@ -52,7 +52,7 @@ const logger = loggingSystemMock.create().get();
 const savedObjects = savedObjectsServiceMock.createStartContract();
 
 describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   it('should get status at each interval', async () => {
     const mockTaskManager = taskManagerMock.createStart();

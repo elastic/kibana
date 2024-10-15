@@ -11,17 +11,13 @@ import { RolloverTestBed, setupRolloverTestBed } from './rollover.helpers';
 
 describe('<EditPolicy /> rollover', () => {
   let testBed: RolloverTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupRolloverTestBed();
+      testBed = await setupRolloverTestBed(httpSetup);
     });
 
     const { component } = testBed;

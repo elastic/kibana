@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
     describe('setup performs upgrades', async () => {
-      const oldEndpointVersion = '0.13.0';
+      const oldEndpointVersion = '1.0.0';
       beforeEach(async () => {
         await supertest
           .post(`/api/fleet/epm/packages/endpoint-${oldEndpointVersion}`)

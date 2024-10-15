@@ -117,10 +117,16 @@ export interface BaseState extends ControlState {
    */
   readonly versionIndex: string;
   /**
-   * An alias on the target index used as part of an "reindex block" that
-   * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
+   * A temporary index used as part of an "reindex block" that
+   * prevents lost deletes e.g. `.kibana_7.11.0_reindex_temp`.
    */
   readonly tempIndex: string;
+  /**
+   * An alias to the tempIndex used to prevent ES from auto-creating the temp
+   * index if one node deletes it while another writes to it
+   * e.g. `.kibana_7.11.0_reindex_temp_alias`.
+   */
+  readonly tempIndexAlias: string;
   /**
    * When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated

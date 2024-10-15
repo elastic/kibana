@@ -166,8 +166,7 @@ describe('setupRequest', () => {
         },
       });
       const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
+        mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -194,8 +193,7 @@ describe('setupRequest', () => {
         },
       });
       const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
+        mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -224,8 +222,7 @@ describe('without a bool filter', () => {
       },
     });
     const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
+      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
     expect(params.body).toEqual({
       query: {
         bool: {
@@ -255,8 +252,7 @@ describe('with includeFrozen=false', () => {
     });
 
     const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
+      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
     expect(params.ignore_throttled).toBe(undefined);
   });
 });
@@ -275,8 +271,7 @@ describe('with includeFrozen=true', () => {
     });
 
     const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
+      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
     expect(params.ignore_throttled).toBe(false);
   });
 });

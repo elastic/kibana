@@ -276,10 +276,10 @@ the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/discover/view-document.asciidoc[]
+include::{kibana-root}/docs/discover/view-document.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
+include::{kibana-root}/docs/discover/search-for-relevance.asciidoc[]
 
-include::{kib-repo-dir}/discover/save-search.asciidoc[]
+include::{kibana-root}/docs/discover/save-search.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+include::{kibana-root}/docs/discover/search-sessions.asciidoc[]

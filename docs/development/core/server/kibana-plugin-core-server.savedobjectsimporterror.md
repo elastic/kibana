@@ -5,19 +5,19 @@
 ## SavedObjectsImportError class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SavedObjectsImportError extends Error 
 ```
-<b>Extends:</b> Error
+**Extends:** Error
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [attributes?](./kibana-plugin-core-server.savedobjectsimporterror.attributes.md) |  | Record&lt;string, any&gt; \| undefined | <i>(Optional)</i> |
-|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) |  | string |  |
+|  [attributes?](./kibana-plugin-core-server.savedobjectsimporterror.attributes.md) | <code>readonly</code> | Record&lt;string, any&gt; \| undefined | _(Optional)_ |
+|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) | <code>readonly</code> | string |  |
 
 ## Methods
 

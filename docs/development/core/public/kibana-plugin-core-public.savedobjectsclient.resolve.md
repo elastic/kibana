@@ -6,7 +6,7 @@
 
 Resolves a single object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;

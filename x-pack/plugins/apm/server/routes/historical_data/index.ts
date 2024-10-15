@@ -20,5 +20,4 @@ const hasDataRoute = createApmServerRoute({
   },
 });
 
-export const historicalDataRouteRepository =
-  createApmServerRouteRepository().add(hasDataRoute);
+export const historicalDataRouteRepository = createApmServerRouteRepository().add(hasDataRoute);

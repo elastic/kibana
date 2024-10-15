@@ -8,11 +8,13 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { Config, createRunner } from './lib';
+import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
   downloadFreshNode: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
@@ -29,12 +31,12 @@ export interface BuildOptions {
   createExamplePlugins: boolean;
 }
 
-export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
+export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  const config = await Config.create(options);
+  const config: Config = await Config.create(options);
 
-  const run = createRunner({
+  const run: (task: Task | GlobalTask) => Promise<void> = createRunner({
     config,
     log,
   });
@@ -89,13 +91,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.createPlatformFolders) {
     await run(Tasks.CreateArchivesSources);
-    await run(Tasks.PatchNativeModules);
     await run(Tasks.InstallChromium);
     await run(Tasks.CleanExtraBinScripts);
     await run(Tasks.CleanNodeBuilds);
 
-    await run(Tasks.PathLength);
-    await run(Tasks.UuidVerification);
+    await run(Tasks.AssertFileTime);
+    await run(Tasks.AssertPathLength);
+    await run(Tasks.AssertNoUUID);
   }
 
   /**

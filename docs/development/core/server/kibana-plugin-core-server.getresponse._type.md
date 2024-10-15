@@ -4,7 +4,7 @@
 
 ## GetResponse.\_type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _type: string;

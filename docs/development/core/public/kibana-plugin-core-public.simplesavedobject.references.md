@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.references property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 references: SavedObjectType<T>['references'];

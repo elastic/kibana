@@ -6,7 +6,7 @@
 
 Client used to query the elasticsearch cluster.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {

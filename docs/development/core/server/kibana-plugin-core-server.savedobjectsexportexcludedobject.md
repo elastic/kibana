@@ -5,7 +5,7 @@
 ## SavedObjectsExportExcludedObject interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsExportExcludedObject 
@@ -13,9 +13,9 @@ export interface SavedObjectsExportExcludedObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsexportexcludedobject.id.md) | string | id of the excluded object |
-|  [reason?](./kibana-plugin-core-server.savedobjectsexportexcludedobject.reason.md) | string | <i>(Optional)</i> optional cause of the exclusion |
-|  [type](./kibana-plugin-core-server.savedobjectsexportexcludedobject.type.md) | string | type of the excluded object |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectsexportexcludedobject.id.md) |  | string | id of the excluded object |
+|  [reason?](./kibana-plugin-core-server.savedobjectsexportexcludedobject.reason.md) |  | string | _(Optional)_ optional cause of the exclusion |
+|  [type](./kibana-plugin-core-server.savedobjectsexportexcludedobject.type.md) |  | string | type of the excluded object |
 

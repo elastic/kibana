@@ -37,6 +37,7 @@ types.eslint.config.js
 /x-pack/test/*/screenshots/failure
 /x-pack/test/*/screenshots/session
 /x-pack/test/*/screenshots/visual_regression_gallery.html
+/x-pack/test/functional/apps/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -55,6 +56,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -78,15 +80,18 @@ report.asciidoc
 *.tsbuildinfo
 
 # Ignore gihub folder to avoid pings on backports
-.github
+.github/*
+!.github/workflows/
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+*.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user
@@ -94,3 +99,9 @@ report.asciidoc
 
 # Exclude renovate config file (we only need it on master)
 renovate.json5
+
+# Exclude auto generated files from tooling
+/packages/*/synthetic-packages.json
+/packages/*/package-map.json
+/packages/*/config-paths.json
+/x-pack/plugins/screenshotting/chromium

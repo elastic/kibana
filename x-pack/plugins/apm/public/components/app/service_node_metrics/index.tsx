@@ -20,10 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../common/service_nodes';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -62,16 +59,13 @@ export function ServiceNodeMetrics() {
 
   useBreadcrumb({
     title: getServiceNodeName(serviceNodeName),
-    href: apmRouter.link(
-      '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
-      {
-        path: {
-          serviceName,
-          serviceNodeName,
-        },
-        query,
-      }
-    ),
+    href: apmRouter.link('/services/{serviceName}/nodes/{serviceNodeName}/metrics', {
+      path: {
+        serviceName,
+        serviceNodeName,
+      },
+      query,
+    }),
   });
 
   const { data } = useServiceMetricChartsFetcher({
@@ -84,20 +78,20 @@ export function ServiceNodeMetrics() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
             path: { serviceName, serviceNodeName },
             query: {
               kuery,
               start,
               end,
+              environment,
             },
           },
         });
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end]
+    [kuery, serviceName, serviceNodeName, start, end, environment]
   );
 
   const { docLinks } = useApmPluginContext().core;
@@ -139,12 +133,9 @@ export function ServiceNodeMetrics() {
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleSize="s"
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.serviceName',
-                  {
-                    defaultMessage: 'Service name',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.serviceName', {
+                  defaultMessage: 'Service name',
+                })}
                 title={
                   <EuiToolTip content={serviceName}>
                     <Truncate>{serviceName}</Truncate>
@@ -156,12 +147,9 @@ export function ServiceNodeMetrics() {
               <EuiStat
                 titleSize="s"
                 isLoading={isLoading}
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.host',
-                  {
-                    defaultMessage: 'Host',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
+                  defaultMessage: 'Host',
+                })}
                 title={
                   <EuiToolTip content={host}>
                     <Truncate>{host}</Truncate>
@@ -173,12 +161,9 @@ export function ServiceNodeMetrics() {
               <EuiStat
                 titleSize="s"
                 isLoading={isLoading}
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.containerId',
-                  {
-                    defaultMessage: 'Container ID',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.containerId', {
+                  defaultMessage: 'Container ID',
+                })}
                 title={
                   <EuiToolTip content={containerId}>
                     <Truncate>{containerId}</Truncate>
@@ -197,12 +182,7 @@ export function ServiceNodeMetrics() {
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel hasBorder={true}>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    fetchStatus={status}
-                  />
+                  <MetricsChart start={start} end={end} chart={chart} fetchStatus={status} />
                 </EuiPanel>
               </EuiFlexItem>
             ))}

@@ -20,13 +20,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
-    body: SnapshotRequest
+    body: SnapshotRequest,
+    expectStatusCode = 200
   ): Promise<SnapshotNodeResponse | undefined> => {
     const response = await supertest
       .post('/api/metrics/snapshot')
       .set('kbn-xsrf', 'xxx')
       .send(body)
-      .expect(200);
+      .expect(expectStatusCode);
     return response.body;
   };
 
@@ -408,6 +409,27 @@ export default function ({ getService }: FtrProviderContext) {
             ]);
           }
         });
+      });
+    });
+
+    describe('request validation', () => {
+      it('should return 400 when requesting more than 20 metrics', async () => {
+        const { min, max } = DATES['8.0.0'].logs_and_metrics;
+        await fetchSnapshot(
+          {
+            sourceId: 'default',
+            timerange: {
+              to: max,
+              from: min,
+              interval: '1m',
+            },
+            metrics: Array(21).fill({ type: 'cpu' }),
+            nodeType: 'host',
+            groupBy: [{ field: 'service.type' }],
+            includeTimeseries: true,
+          },
+          400
+        );
       });
     });
   });

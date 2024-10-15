@@ -19,10 +19,7 @@ import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../timeseries_chart';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../transaction_charts/helper';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
 function getYTickFormatter(chart: GenericMetricsChart) {
   const max = getMaxY(chart.series);

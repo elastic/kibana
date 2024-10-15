@@ -6,7 +6,7 @@
 
 Result from a [import hook](./kibana-plugin-core-server.savedobjectsimporthook.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportHookResult 
@@ -14,7 +14,7 @@ export interface SavedObjectsImportHookResult
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [warnings?](./kibana-plugin-core-server.savedobjectsimporthookresult.warnings.md) | SavedObjectsImportWarning\[\] | <i>(Optional)</i> An optional list of warnings to display in the UI when the import succeeds. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [warnings?](./kibana-plugin-core-server.savedobjectsimporthookresult.warnings.md) |  | SavedObjectsImportWarning\[\] | _(Optional)_ An optional list of warnings to display in the UI when the import succeeds. |
 

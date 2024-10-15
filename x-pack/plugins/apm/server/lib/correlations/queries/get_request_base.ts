@@ -7,10 +7,7 @@
 
 import type { CorrelationsParams } from '../../../../common/correlations/types';
 
-export const getRequestBase = ({
-  index,
-  includeFrozen,
-}: CorrelationsParams) => ({
+export const getRequestBase = ({ index, includeFrozen }: CorrelationsParams) => ({
   index,
   // matches APM's event client settings
   ...(includeFrozen ? { ignore_throttled: false } : {}),

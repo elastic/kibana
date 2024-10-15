@@ -113,11 +113,11 @@ export interface TGridIntegratedProps {
   graphEventId: string | undefined;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
-  height?: number;
+  height?: number; // eslint-disable-line react/no-unused-prop-types
   id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
-  isLive: boolean;
+  isLive: boolean; // eslint-disable-line react/no-unused-prop-types
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -218,10 +218,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );

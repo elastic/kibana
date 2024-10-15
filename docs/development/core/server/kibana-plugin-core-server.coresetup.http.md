@@ -6,7 +6,7 @@
 
 [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 http: HttpServiceSetup & {

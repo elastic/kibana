@@ -5,7 +5,7 @@
 ## SavedObjectsResolveResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsResolveResponse<T = unknown> 
@@ -13,9 +13,9 @@ export interface SavedObjectsResolveResponse<T = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [alias\_target\_id?](./kibana-plugin-core-server.savedobjectsresolveresponse.alias_target_id.md) | string | <i>(Optional)</i> The ID of the object that the legacy URL alias points to. This is only defined when the outcome is <code>'aliasMatch'</code> or <code>'conflict'</code>. |
-|  [outcome](./kibana-plugin-core-server.savedobjectsresolveresponse.outcome.md) | 'exactMatch' \| 'aliasMatch' \| 'conflict' | The outcome for a successful <code>resolve</code> call is one of the following values:<!-- -->\* <code>'exactMatch'</code> -- One document exactly matched the given ID. \* <code>'aliasMatch'</code> -- One document with a legacy URL alias matched the given ID; in this case the <code>saved_object.id</code> field is different than the given ID. \* <code>'conflict'</code> -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the <code>saved_object</code> object is the exact match, and the <code>saved_object.id</code> field is the same as the given ID. |
-|  [saved\_object](./kibana-plugin-core-server.savedobjectsresolveresponse.saved_object.md) | SavedObject&lt;T&gt; | The saved object that was found. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [alias\_target\_id?](./kibana-plugin-core-server.savedobjectsresolveresponse.alias_target_id.md) |  | string | _(Optional)_ The ID of the object that the legacy URL alias points to. This is only defined when the outcome is <code>'aliasMatch'</code> or <code>'conflict'</code>. |
+|  [outcome](./kibana-plugin-core-server.savedobjectsresolveresponse.outcome.md) |  | 'exactMatch' \| 'aliasMatch' \| 'conflict' | <p>The outcome for a successful <code>resolve</code> call is one of the following values:</p><p>\* <code>'exactMatch'</code> -- One document exactly matched the given ID. \* <code>'aliasMatch'</code> -- One document with a legacy URL alias matched the given ID; in this case the <code>saved_object.id</code> field is different than the given ID. \* <code>'conflict'</code> -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the <code>saved_object</code> object is the exact match, and the <code>saved_object.id</code> field is the same as the given ID.</p> |
+|  [saved\_object](./kibana-plugin-core-server.savedobjectsresolveresponse.saved_object.md) |  | SavedObject&lt;T&gt; | The saved object that was found. |
 

@@ -20,17 +20,17 @@ export default ({ getService }: FtrProviderContext) => {
     index: string,
     fields?: string[]
   ): Promise<{ indices: string[]; fields: any }> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/indices/field_caps`)
       .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ index, fields })
-      .expect(200);
+      .send({ index, fields });
+    ml.api.assertResponseStatusCode(200, status, body);
 
     return body;
   }
 
-  describe('field_caps', () => {
+  describe('field_caps', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
     });
@@ -60,11 +60,16 @@ export default ({ getService }: FtrProviderContext) => {
         1,
         `Expected number of indices to be 1, but got ${indices.length}`
       );
-      const fieldsLength = Object.keys(fields).length;
-      expect(fieldsLength).to.eql(
-        21,
-        `Expected number of fields to be 21, but got ${fieldsLength}`
-      );
+      const fieldsArr = Object.keys(fields);
+
+      // The fields we expect at least to be present. We don't check for all fields in the test here
+      // because the number of fields can vary depending on the ES version.
+      const expectedFieldsArr = ['@timestamp', 'airline', 'responsetime'];
+      const allExpectedFieldsPresent = expectedFieldsArr.every((f) => fieldsArr.includes(f));
+      expect(allExpectedFieldsPresent).to.eql(true, 'Not all expected fields are present.');
+
+      // Across ES versions the number of returned meta fields can vary, but there should be at least 20.
+      expect(fieldsArr.length).to.greaterThan(20, 'Expected at least 20 fields to be returned.');
     });
   });
 };

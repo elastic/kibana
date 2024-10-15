@@ -6,7 +6,7 @@
 
 The number to increment the field by (defaults to 1).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 incrementBy?: number;

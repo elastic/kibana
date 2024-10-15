@@ -58,13 +58,7 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-function ErrorGroupHeader({
-  groupId,
-  isUnhandled,
-}: {
-  groupId: string;
-  isUnhandled?: boolean;
-}) {
+function ErrorGroupHeader({ groupId, isUnhandled }: { groupId: string; isUnhandled?: boolean }) {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
@@ -162,8 +156,7 @@ export function ErrorGroupDetails() {
   const logMessage = errorGroupData.error?.error.log?.message;
   const excMessage = errorGroupData.error?.error.exception?.[0].message;
   const culprit = errorGroupData.error?.error.culprit;
-  const isUnhandled =
-    errorGroupData.error?.error.exception?.[0].handled === false;
+  const isUnhandled = errorGroupData.error?.error.exception?.[0].handled === false;
 
   return (
     <>
@@ -180,23 +173,17 @@ export function ErrorGroupDetails() {
               {logMessage && (
                 <>
                   <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.logMessageLabel',
-                      {
-                        defaultMessage: 'Log message',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.errorGroupDetails.logMessageLabel', {
+                      defaultMessage: 'Log message',
+                    })}
                   </Label>
                   <Message>{logMessage}</Message>
                 </>
               )}
               <Label>
-                {i18n.translate(
-                  'xpack.apm.errorGroupDetails.exceptionMessageLabel',
-                  {
-                    defaultMessage: 'Exception message',
-                  }
-                )}
+                {i18n.translate('xpack.apm.errorGroupDetails.exceptionMessageLabel', {
+                  defaultMessage: 'Exception message',
+                })}
               </Label>
               <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
               <Label>
@@ -211,21 +198,14 @@ export function ErrorGroupDetails() {
         <ErrorDistribution
           fetchStatus={status}
           distribution={errorDistributionData}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
-          )}
+          title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
+            defaultMessage: 'Occurrences',
+          })}
         />
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (
-        <DetailView
-          errorGroup={errorGroupData}
-          urlParams={urlParams}
-          kuery={kuery}
-        />
+        <DetailView errorGroup={errorGroupData} urlParams={urlParams} kuery={kuery} />
       )}
     </>
   );

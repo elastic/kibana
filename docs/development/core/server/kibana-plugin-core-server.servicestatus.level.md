@@ -6,7 +6,7 @@
 
 The current availability level of the service.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 level: ServiceStatusLevel;

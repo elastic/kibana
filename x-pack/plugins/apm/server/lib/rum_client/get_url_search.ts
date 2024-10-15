@@ -8,10 +8,7 @@
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import {
-  TRANSACTION_DURATION,
-  TRANSACTION_URL,
-} from '../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION, TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
 
 export async function getUrlSearch({
   setup,

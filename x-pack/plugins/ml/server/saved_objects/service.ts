@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import RE2 from 're2';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -41,7 +40,7 @@ export function jobSavedObjectServiceFactory(
     currentSpaceOnly: boolean = true
   ) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -183,7 +182,7 @@ export function jobSavedObjectServiceFactory(
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -281,7 +280,7 @@ export function jobSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return jobIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replaceAll('*', '.*'));
       return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }
@@ -307,7 +306,7 @@ export function jobSavedObjectServiceFactory(
     spacesToAdd: string[],
     spacesToRemove: string[]
   ) {
-    const results: Record<string, { success: boolean; error?: any }> = {};
+    const results: Record<string, { success: boolean; error?: any }> = Object.create(null);
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];

@@ -6,7 +6,7 @@
 
 corrective action needed to fix this deprecation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 correctiveActions: {

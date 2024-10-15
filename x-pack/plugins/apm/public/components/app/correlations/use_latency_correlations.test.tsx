@@ -21,13 +21,7 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 
 import { useLatencyCorrelations } from './use_latency_correlations';
 
-function wrapper({
-  children,
-  error = false,
-}: {
-  children?: ReactNode;
-  error: boolean;
-}) {
+function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
   const httpMethodMock = jest.fn().mockImplementation(async (endpoint) => {
     await delay(100);
     if (error) {
@@ -43,9 +37,7 @@ function wrapper({
         return { fieldCandidates: ['field-1', 'field2'] };
       case '/internal/apm/correlations/field_value_pairs':
         return {
-          fieldValuePairs: [
-            { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
-          ],
+          fieldValuePairs: [{ fieldName: 'field-name-1', fieldValue: 'field-value-1' }],
         };
       case '/internal/apm/correlations/significant_correlations':
         return {
@@ -97,7 +89,7 @@ function wrapper({
 
 describe('useLatencyCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -141,12 +133,9 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+        wrapper,
+      });
 
       try {
         jest.advanceTimersByTime(150);
@@ -223,9 +212,7 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
+        await waitFor(() => expect(result.current.response.fieldStats).toBeDefined());
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -303,21 +290,16 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+        wrapper,
+        initialProps: {
+          error: true,
+        },
+      });
 
       try {
         jest.advanceTimersByTime(150);
-        await waitFor(() =>
-          expect(result.current.progress.error).toBeDefined()
-        );
+        await waitFor(() => expect(result.current.progress.error).toBeDefined());
 
         expect(result.current.progress).toEqual({
           error: 'Something went wrong',
@@ -332,12 +314,9 @@ describe('useLatencyCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+        wrapper,
+      });
 
       try {
         jest.advanceTimersByTime(150);
@@ -349,9 +328,7 @@ describe('useLatencyCorrelations', () => {
           result.current.cancelFetch();
         });
 
-        await waitFor(() =>
-          expect(result.current.progress.isRunning).toEqual(false)
-        );
+        await waitFor(() => expect(result.current.progress.isRunning).toEqual(false));
       } finally {
         unmount();
       }

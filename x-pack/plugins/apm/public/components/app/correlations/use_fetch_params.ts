@@ -35,14 +35,6 @@ export const useFetchParams = () => {
       start,
       end,
     }),
-    [
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    ]
+    [serviceName, transactionName, transactionType, kuery, environment, start, end]
   );
 };

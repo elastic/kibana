@@ -6,7 +6,7 @@
 
 Adds a new [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md) to the global HTTP client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 intercept(interceptor: HttpInterceptor): () => void;
@@ -18,7 +18,7 @@ intercept(interceptor: HttpInterceptor): () => void;
 |  --- | --- | --- |
 |  interceptor | HttpInterceptor | a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 () =&gt; void
 

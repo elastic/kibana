@@ -6,15 +6,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import {
-  merge,
-  omit,
-  defaultsDeep,
-  range,
-  mapValues,
-  isPlainObject,
-  flatten,
-} from 'lodash';
+import { merge, omit, defaultsDeep, range, mapValues, isPlainObject, flatten } from 'lodash';
 import uuid from 'uuid';
 import {
   CollectTelemetryParams,
@@ -31,11 +23,7 @@ interface GenerateOptions {
   };
 }
 
-const randomize = (
-  value: unknown,
-  instanceVariation: number,
-  dailyGrowth: number
-) => {
+const randomize = (value: unknown, instanceVariation: number, dailyGrowth: number) => {
   if (typeof value === 'boolean') {
     return Math.random() > 0.5;
   }
@@ -94,8 +82,7 @@ export async function generateSampleDocuments(
       };
 
       const instanceVariation =
-        Math.random() * (opts.variation.max - opts.variation.min) +
-        opts.variation.min;
+        Math.random() * (opts.variation.max - opts.variation.min) + opts.variation.min;
 
       return range(0, opts.days).map((dayNo) => {
         const dailyGrowth = Math.pow(1.005, opts.days - 1 - dayNo);

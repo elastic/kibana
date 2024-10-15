@@ -6,12 +6,12 @@
 
 Get the sum of all loading count sources as a single Observable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLoadingCount$(): Observable<number>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;number&gt;
 

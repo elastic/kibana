@@ -4,7 +4,7 @@
 
 ## DeprecationsClient.getAllDeprecations property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;

@@ -33,6 +33,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
   const [indexLabel, setIndexLabel] = useState(labels.index as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
@@ -72,6 +73,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       const response = await services.http?.fetch(url, {
         method: 'POST',
         body: JSON.stringify({
+          ccs,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
@@ -103,7 +105,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       });
       setAlerts(alertsResponse);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [services.data?.query.timefilter.timefilter, services.http, clusterUuid, index, ccs]);
 
   return (
     <ItemTemplate

@@ -116,6 +116,8 @@ export class TooltipSelector extends Component<Props, State> {
     const prop: FieldProps | undefined = this.state.fieldProps.find((field: FieldProps) => {
       return field.name === propertyName;
     });
+
+    // @ts-expect-error 4.3.5 upgrade
     return prop ? prop!.label : propertyName;
   };
 
@@ -190,9 +192,7 @@ export class TooltipSelector extends Component<Props, State> {
                   {(provided, state) => (
                     <div
                       className={classNames('mapTooltipSelector__propertyRow', {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         'mapTooltipSelector__propertyRow-isDragging': state.isDragging,
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver,
                       })}
                     >

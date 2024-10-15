@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportResponse.warnings property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warnings: SavedObjectsImportWarning[];

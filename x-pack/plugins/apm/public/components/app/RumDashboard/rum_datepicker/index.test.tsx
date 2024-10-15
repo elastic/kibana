@@ -147,7 +147,7 @@ describe('RumDatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const { wrapper } = mountDatePicker({
       refreshPaused: false,
       refreshInterval: 1000,
@@ -160,7 +160,7 @@ describe('RumDatePicker', () => {
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     mountDatePicker({ refreshPaused: true, refreshInterval: 1000 });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
@@ -192,15 +192,11 @@ describe('RumDatePicker', () => {
 
     it('updates the url with the default `rangeFrom` ', async () => {
       expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
-      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
-        'rangeFrom=now-15m'
-      );
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain('rangeFrom=now-15m');
     });
 
     it('preserves `rangeTo`', () => {
-      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
-        'rangeTo=now-5m'
-      );
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain('rangeTo=now-5m');
     });
   });
 });

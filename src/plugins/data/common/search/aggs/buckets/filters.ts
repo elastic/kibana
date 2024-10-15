@@ -12,7 +12,6 @@ import { buildEsQuery, Query } from '@kbn/es-query';
 
 import { QueryFilter, queryFilterToAst } from '../../expressions';
 import { createFilterFilters } from './create_filter/filters';
-import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFiltersFnName } from './filters_fn';
@@ -83,7 +82,7 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
                 matchAllLabel ||
                 (typeof filter.input.query === 'string'
                   ? filter.input.query
-                  : toAngularJSON(filter.input.query));
+                  : JSON.stringify(filter.input.query));
               filters[label] = query;
             },
             {}

@@ -6,7 +6,7 @@
 
 [APIs](./kibana-plugin-core-public.chromenavlinks.md) for manipulating nav links.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navLinks: ChromeNavLinks;

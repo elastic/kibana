@@ -71,7 +71,7 @@ This configuration runs cypress tests against an arbitrary host.
 
 #### integration-test (CI)
 
-This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_integration).
+This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_e2e).
 
 The two clusters are named `admin` and `data` and are reachable as follows:
 

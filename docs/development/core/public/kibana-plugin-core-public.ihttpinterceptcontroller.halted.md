@@ -6,7 +6,7 @@
 
 Whether or not this chain has been halted.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 halted: boolean;

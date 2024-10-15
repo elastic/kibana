@@ -6,7 +6,7 @@
 
 The Elasticsearch `_score` of this result.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 score: number;

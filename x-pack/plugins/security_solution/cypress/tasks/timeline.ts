@@ -70,6 +70,9 @@ import {
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   PINNED_TAB_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
+  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
+  KQLORLUCENELANGUAGE_TOGGLE,
+  TIMELINE_QUERY,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -87,6 +90,8 @@ export const addDescriptionToTimeline = (description: string) => {
 
 export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('exist');
+  cy.get(TIMELINE_TITLE_INPUT).should('be.visible');
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
@@ -95,6 +100,8 @@ export const addNameToTimeline = (name: string) => {
 
 export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('exist');
+  cy.get(TIMELINE_TITLE_INPUT).should('be.visible');
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
@@ -172,6 +179,11 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_FILTER_BTN).click();
+};
+
+export const changeTimelineQueryLanguage = () => {
+  cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
+  cy.get(KQLORLUCENELANGUAGE_TOGGLE).click({ force: true });
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -252,6 +264,10 @@ export const createNewTimelineTemplate = () => {
 
 export const executeTimelineKQL = (query: string) => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+};
+
+export const executeTimelineSearch = (query: string) => {
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
 };
 
 export const expandFirstTimelineEventDetails = () => {
@@ -397,3 +413,15 @@ export const expandEventAction = () => {
   });
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
 };
+
+export const setKibanaTimezoneToUTC = () =>
+  cy
+    .request({
+      method: 'POST',
+      url: 'api/kibana/settings',
+      body: { changes: { 'dateFormat:tz': 'UTC' } },
+      headers: { 'kbn-xsrf': 'set-kibana-timezone-utc' },
+    })
+    .then(() => {
+      cy.reload();
+    });

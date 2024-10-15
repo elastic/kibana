@@ -8,11 +8,7 @@
 import { useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
-import {
-  getBreakpoint,
-  isWithinMaxBreakpoint,
-  isWithinMinBreakpoint,
-} from '@elastic/eui';
+import { getBreakpoint, isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
 
 export type Breakpoints = ReturnType<typeof getScreenSizes>;
 

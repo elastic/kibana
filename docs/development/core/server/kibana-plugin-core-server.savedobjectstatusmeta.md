@@ -6,7 +6,7 @@
 
 Meta information about the SavedObjectService's status. Available to plugins via [CoreSetup.status](./kibana-plugin-core-server.coresetup.status.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectStatusMeta 
@@ -14,7 +14,7 @@ export interface SavedObjectStatusMeta
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [migratedIndices](./kibana-plugin-core-server.savedobjectstatusmeta.migratedindices.md) | { \[status: string\]: number; skipped: number; migrated: number; } |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [migratedIndices](./kibana-plugin-core-server.savedobjectstatusmeta.migratedindices.md) |  | { \[status: string\]: number; skipped: number; migrated: number; } |  |
 

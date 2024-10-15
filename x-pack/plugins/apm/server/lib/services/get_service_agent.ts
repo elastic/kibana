@@ -41,11 +41,7 @@ export async function getServiceAgent({
   const params = {
     terminateAfter: 1,
     apm: {
-      events: [
-        ProcessorEvent.error,
-        ProcessorEvent.transaction,
-        ProcessorEvent.metric,
-      ],
+      events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
     body: {
       size: 1,
@@ -76,10 +72,7 @@ export async function getServiceAgent({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_agent_name',
-    params
-  );
+  const response = await apmEventClient.search('get_service_agent_name', params);
   if (response.hits.total.value === 0) {
     return {};
   }

@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `SavedObjectsExportError` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(type: string, message: string, attributes?: Record<string, any> | undefined);
@@ -18,5 +18,5 @@ constructor(type: string, message: string, attributes?: Record<string, any> | un
 |  --- | --- | --- |
 |  type | string |  |
 |  message | string |  |
-|  attributes | Record&lt;string, any&gt; \| undefined |  |
+|  attributes | Record&lt;string, any&gt; \| undefined | _(Optional)_ |
 

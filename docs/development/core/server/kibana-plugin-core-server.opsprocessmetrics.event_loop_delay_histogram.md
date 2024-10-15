@@ -6,7 +6,7 @@
 
 node event loop delay histogram since last collection
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 event_loop_delay_histogram: IntervalHistogram;

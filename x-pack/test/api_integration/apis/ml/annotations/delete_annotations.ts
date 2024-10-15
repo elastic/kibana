@@ -41,11 +41,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationIdToDelete = annotationsForJob[0]._id;
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(annotationIdToDelete);
       expect(body.result).to.eql('deleted');
@@ -59,11 +59,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationIdToDelete = annotationsForJob[0]._id;
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(annotationIdToDelete);
       expect(body.result).to.eql('deleted');
@@ -77,11 +77,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationIdToDelete = annotationsForJob[0]._id;
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

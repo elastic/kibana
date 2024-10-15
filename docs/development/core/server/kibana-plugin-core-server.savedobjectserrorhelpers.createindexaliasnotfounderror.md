@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createIndexAliasNotFoundError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createIndexAliasNotFoundError(alias: string): DecoratedError;
@@ -16,7 +16,7 @@ static createIndexAliasNotFoundError(alias: string): DecoratedError;
 |  --- | --- | --- |
 |  alias | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

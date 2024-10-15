@@ -88,15 +88,11 @@ describe('filterByAgent', () => {
     });
 
     it('js-base', () => {
-      expect(getSettingKeysForAgent('js-base')).toEqual([
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('js-base')).toEqual(['transaction_sample_rate']);
     });
 
     it('rum-js', () => {
-      expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('rum-js')).toEqual(['transaction_sample_rate']);
     });
 
     it('nodejs', () => {

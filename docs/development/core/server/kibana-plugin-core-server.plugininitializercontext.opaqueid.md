@@ -4,7 +4,7 @@
 
 ## PluginInitializerContext.opaqueId property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 opaqueId: PluginOpaqueId;

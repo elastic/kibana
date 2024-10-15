@@ -6,7 +6,7 @@
 
 Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with the exception of the `'default'` namespace string (which has a namespace ID of `undefined`<!-- -->).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static namespaceStringToId: (namespace: string) => string | undefined;

@@ -6,7 +6,7 @@
 
 [ChromeStart](./kibana-plugin-core-public.chromestart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 chrome: ChromeStart;

@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isGeneralError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isGeneralError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isGeneralError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

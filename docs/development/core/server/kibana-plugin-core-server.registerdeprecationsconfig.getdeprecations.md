@@ -4,7 +4,7 @@
 
 ## RegisterDeprecationsConfig.getDeprecations property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;

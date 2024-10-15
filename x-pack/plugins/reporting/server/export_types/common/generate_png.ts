@@ -39,6 +39,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
+    logger.debug(`Layout: id=${layout.id} width=${layout.width} height=${layout.height}`);
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],

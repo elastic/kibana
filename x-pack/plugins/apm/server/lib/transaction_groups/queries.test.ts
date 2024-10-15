@@ -6,10 +6,7 @@
  */
 
 import { topTransactionGroupsFetcher } from './fetcher';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('transaction group queries', () => {

@@ -13,11 +13,7 @@ import {
   ESSearchResponse,
   ESSearchRequest,
 } from '../../../../../../../../src/core/types/elasticsearch';
-import {
-  callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
-} from '../call_async_with_debug';
+import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
@@ -59,10 +55,7 @@ export function createInternalESClient({
   }
 
   return {
-    search: async <
-      TDocument = unknown,
-      TSearchRequest extends ESSearchRequest = ESSearchRequest
-    >(
+    search: async <TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
@@ -79,20 +72,14 @@ export function createInternalESClient({
         params,
       });
     },
-    delete: (
-      operationName: string,
-      params: estypes.DeleteRequest
-    ): Promise<{ result: string }> => {
+    delete: (operationName: string, params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs(operationName, {
         requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (
-      operationName: string,
-      params: estypes.IndicesCreateRequest
-    ) => {
+    indicesCreate: (operationName: string, params: estypes.IndicesCreateRequest) => {
       return callEs(operationName, {
         requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),

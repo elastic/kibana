@@ -4,7 +4,7 @@
 
 ## Plugin\_2.start() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 start(core: CoreStart, plugins: TPluginsStart): TStart;
@@ -17,7 +17,7 @@ start(core: CoreStart, plugins: TPluginsStart): TStart;
 |  core | CoreStart |  |
 |  plugins | TPluginsStart |  |
 
-<b>Returns:</b>
+**Returns:**
 
 TStart
 

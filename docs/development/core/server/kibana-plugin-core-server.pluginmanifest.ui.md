@@ -6,7 +6,7 @@
 
 Specifies whether plugin includes some client/browser specific functionality that should be included into client bundle via `public/ui_plugin.js` file.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly ui: boolean;

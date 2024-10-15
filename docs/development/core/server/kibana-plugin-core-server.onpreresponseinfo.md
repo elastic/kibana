@@ -6,7 +6,7 @@
 
 Response status code.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreResponseInfo 
@@ -14,7 +14,7 @@ export interface OnPreResponseInfo
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [statusCode](./kibana-plugin-core-server.onpreresponseinfo.statuscode.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [statusCode](./kibana-plugin-core-server.onpreresponseinfo.statuscode.md) |  | number |  |
 

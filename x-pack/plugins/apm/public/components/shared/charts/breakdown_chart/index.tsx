@@ -98,9 +98,7 @@ export function BreakdownChart({
       <Chart ref={chartRef}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={(event) =>
-            onBrushEnd({ x: (event as XYBrushEvent).x, history })
-          }
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
@@ -121,12 +119,7 @@ export function BreakdownChart({
           tickFormat={xFormatter}
           gridLine={{ visible: false }}
         />
-        <Axis
-          id="y-axis"
-          ticks={3}
-          position={Position.Left}
-          tickFormat={yTickFormat}
-        />
+        <Axis id="y-axis" ticks={3} position={Position.Left} tickFormat={yTickFormat} />
 
         {showAnnotations && (
           <LineAnnotation
@@ -161,9 +154,7 @@ export function BreakdownChart({
                 yAccessors={['y']}
                 data={serie.data}
                 stackAccessors={['x']}
-                stackMode={
-                  yAxisType === 'percentage' ? 'percentage' : undefined
-                }
+                stackMode={yAxisType === 'percentage' ? 'percentage' : undefined}
                 color={serie.areaColor}
                 curve={CurveType.CURVE_MONOTONE_X}
               />

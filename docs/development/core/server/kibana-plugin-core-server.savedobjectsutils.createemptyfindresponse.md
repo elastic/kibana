@@ -6,7 +6,7 @@
 
 Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;

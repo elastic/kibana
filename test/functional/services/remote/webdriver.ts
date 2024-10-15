@@ -14,8 +14,6 @@ import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/opera
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import chromeDriver from 'chromedriver';
-// @ts-ignore types not available
-import geckoDriver from 'geckodriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
@@ -32,7 +30,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import { NETWORK_PROFILES } from './network_profiles';
+import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
@@ -101,7 +99,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   if (headlessBrowser === '1') {
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    options.headless();
+    options.addArguments('headless=old');
     options.addArguments('disable-gpu');
   }
 
@@ -111,12 +109,12 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (remoteDebug === '1') {
     // Visit chrome://inspect in chrome to remotely view/debug
-    options.headless();
+    options.addArguments('headless=old');
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
 
   if (browserBinaryPath) {
-    options.setChromeBinaryPath(browserBinaryPath);
+    options.setBinaryPath(browserBinaryPath);
   }
 
   if (noCache === '1') {
@@ -226,8 +224,8 @@ async function attemptToCreateCommand(
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.headless();
+          // See: https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+          firefoxOptions.addArguments('-headless');
         }
 
         // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
@@ -235,7 +233,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser(browserType)
             .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .setFirefoxService(new firefox.ServiceBuilder())
             .build();
           return {
             session,
@@ -249,9 +247,7 @@ async function attemptToCreateCommand(
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
+          .setFirefoxService(new firefox.ServiceBuilder().setStdio(['ignore', input, 'ignore']))
           .build();
 
         const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
@@ -287,22 +283,17 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const { KBN_NETWORK_TEST_PROFILE = 'CLOUD_USER' } = process.env;
+    const KBN_NETWORK_TEST_PROFILE = (process.env.KBN_NETWORK_TEST_PROFILE ??
+      'CLOUD_USER') as NetworkProfile;
 
     const profile =
-      KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
-        ? KBN_NETWORK_TEST_PROFILE
-        : 'CLOUD_USER';
+      KBN_NETWORK_TEST_PROFILE in NETWORK_PROFILES ? KBN_NETWORK_TEST_PROFILE : 'CLOUD_USER';
 
-    const {
-      DOWNLOAD: downloadThroughput,
-      UPLOAD: uploadThroughput,
-      LATENCY: latency,
-    } = NETWORK_PROFILES[`${profile}`];
+    const networkProfileOptions = NETWORK_PROFILES[profile];
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${networkProfileOptions.download_throughput} B/s down, ${networkProfileOptions.upload_throughput} B/s up, ${networkProfileOptions.latency} ms latency.`
     );
 
     if (noCache) {
@@ -313,12 +304,7 @@ async function attemptToCreateCommand(
     }
 
     // @ts-expect-error
-    session.setNetworkConditions({
-      offline: false,
-      latency,
-      download_throughput: downloadThroughput,
-      upload_throughput: uploadThroughput,
-    });
+    session.setNetworkConditions(networkProfileOptions);
   }
 
   if (attemptId !== attemptCounter) {

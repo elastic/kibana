@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientProviderOptions.excludedWrappers property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excludedWrappers?: string[];

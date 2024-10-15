@@ -5,7 +5,7 @@
 ## ShardsResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ShardsResponse 
@@ -13,10 +13,10 @@ export interface ShardsResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [failed](./kibana-plugin-core-server.shardsresponse.failed.md) | number |  |
-|  [skipped](./kibana-plugin-core-server.shardsresponse.skipped.md) | number |  |
-|  [successful](./kibana-plugin-core-server.shardsresponse.successful.md) | number |  |
-|  [total](./kibana-plugin-core-server.shardsresponse.total.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [failed](./kibana-plugin-core-server.shardsresponse.failed.md) |  | number |  |
+|  [skipped](./kibana-plugin-core-server.shardsresponse.skipped.md) |  | number |  |
+|  [successful](./kibana-plugin-core-server.shardsresponse.successful.md) |  | number |  |
+|  [total](./kibana-plugin-core-server.shardsresponse.total.md) |  | number |  |
 

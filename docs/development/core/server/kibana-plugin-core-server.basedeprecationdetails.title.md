@@ -6,7 +6,7 @@
 
 The title of the deprecation. Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title: string;

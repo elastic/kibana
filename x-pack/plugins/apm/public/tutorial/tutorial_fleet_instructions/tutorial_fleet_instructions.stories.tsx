@@ -19,11 +19,7 @@ function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
     get: () => ({ hasData: hasFleetPoliciesWithApmIntegration }),
   } as unknown as HttpStart;
   return (
-    <TutorialFleetInstructions
-      http={http}
-      basePath="http://localhost:5601"
-      isDarkTheme={false}
-    />
+    <TutorialFleetInstructions http={http} basePath="http://localhost:5601" isDarkTheme={false} />
   );
 }
 

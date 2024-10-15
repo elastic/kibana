@@ -57,18 +57,14 @@ export function SelectedFilters({
                 removeFilter={() => {
                   onChange(
                     name,
-                    (uxUiFilters?.[name] as string[]).filter(
-                      (valT) => valT !== value
-                    )
+                    (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
                   );
                 }}
                 invertFilter={({ negate }) => {
                   invertFilter(name, value, negate);
                 }}
                 field={fieldName}
-                value={
-                  name === 'transactionUrl' ? formatUrlValue(value) : value
-                }
+                value={name === 'transactionUrl' ? formatUrlValue(value) : value}
                 negate={!!excluded}
                 label={title}
               />
@@ -78,12 +74,7 @@ export function SelectedFilters({
       ))}
 
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          onClick={clearValues}
-          data-cy="clearFilters"
-        >
+        <EuiButtonEmpty size="xs" iconType="cross" onClick={clearValues} data-cy="clearFilters">
           {i18n.translate('xpack.apm.clearFilters', {
             defaultMessage: 'Clear filters',
           })}

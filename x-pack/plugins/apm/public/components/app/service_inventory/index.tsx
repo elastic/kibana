@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import uuid from 'uuid';
@@ -46,7 +41,9 @@ function useServicesFetcher() {
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/services/{serviceName}', '/services');
+  } =
+    // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
+    useApmParams('/services/{serviceName}', '/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -121,8 +118,7 @@ function useServicesFetcher() {
 
       core.notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceInventory.toastTitle', {
-          defaultMessage:
-            'Legacy data was detected within the selected time range',
+          defaultMessage: 'Legacy data was detected within the selected time range',
         }),
         text: toMountPoint(
           <p>
@@ -132,22 +128,15 @@ function useServicesFetcher() {
             })}
 
             <EuiLink href={upgradeAssistantHref}>
-              {i18n.translate(
-                'xpack.apm.serviceInventory.upgradeAssistantLinkText',
-                {
-                  defaultMessage: 'the upgrade assistant',
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceInventory.upgradeAssistantLinkText', {
+                defaultMessage: 'the upgrade assistant',
+              })}
             </EuiLink>
           </p>
         ),
       });
     }
-  }, [
-    mainStatisticsData.hasLegacyData,
-    upgradeAssistantHref,
-    core.notifications.toasts,
-  ]);
+  }, [mainStatisticsData.hasLegacyData, upgradeAssistantHref, core.notifications.toasts]);
 
   return {
     mainStatisticsData,
@@ -159,11 +148,9 @@ function useServicesFetcher() {
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
 
-  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
-    useServicesFetcher();
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } = useServicesFetcher();
 
-  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
-    useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } = useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',

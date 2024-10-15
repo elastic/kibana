@@ -6,7 +6,7 @@
 
 APIs to open and manage modal dialogs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayModalStart 

@@ -27,17 +27,13 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
     it('ml jobs are not available', async () => {
-      jest
-        .spyOn(GetServiceAnomalies, 'getMLJobs')
-        .mockReturnValue(Promise.resolve([]));
+      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(Promise.resolve([]));
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
@@ -54,9 +50,7 @@ describe('Transaction duration anomaly alert', () => {
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
       await executor({ params });
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
@@ -106,9 +100,7 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
   });
@@ -128,8 +120,7 @@ describe('Transaction duration anomaly alert', () => {
         ] as unknown as Job[])
       );
 
-      const { services, dependencies, executor, scheduleActions } =
-        createRuleTypeMocks();
+      const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
       const ml = {
         mlSystemProvider: () => ({

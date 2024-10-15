@@ -34,18 +34,13 @@ export function FlyoutFooter({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-            {i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.flyout.close',
-              {
-                defaultMessage: 'Close',
-              }
-            )}
+            {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.close', {
+              defaultMessage: 'Close',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ display: 'block' }}>
-          {customLinkId && (
-            <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
-          )}
+          {customLinkId && <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />}
           <EuiButton
             form="customLink_form"
             fill
@@ -53,12 +48,9 @@ export function FlyoutFooter({
             isLoading={isSaving}
             isDisabled={!isSaveButtonEnabled}
           >
-            {i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.flyout.save',
-              {
-                defaultMessage: 'Save',
-              }
-            )}
+            {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.save', {
+              defaultMessage: 'Save',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

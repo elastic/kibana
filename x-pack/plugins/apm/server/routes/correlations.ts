@@ -197,12 +197,7 @@ const significantCorrelationsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_significant_correlations',
-      async () =>
-        await fetchSignificantCorrelations(
-          esClient,
-          paramsWithIndex,
-          fieldValuePairs
-        )
+      async () => await fetchSignificantCorrelations(esClient, paramsWithIndex, fieldValuePairs)
     );
   },
 });

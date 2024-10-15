@@ -107,10 +107,7 @@ describe('query_percentiles', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationPercentiles(
-        esClientMock,
-        params
-      );
+      const resp = await fetchTransactionDurationPercentiles(esClientMock, params);
 
       expect(resp).toEqual({ percentiles: percentilesValues, totalDocs });
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);

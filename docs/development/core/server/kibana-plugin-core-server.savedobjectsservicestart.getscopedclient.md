@@ -8,7 +8,7 @@ Creates a [Saved Objects client](./kibana-plugin-core-server.savedobjectsclientc
 
 A client that is already scoped to the incoming request is also exposed from the route handler context see [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;

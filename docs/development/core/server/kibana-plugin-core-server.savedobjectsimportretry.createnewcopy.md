@@ -6,7 +6,7 @@
 
 If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createNewCopy?: boolean;

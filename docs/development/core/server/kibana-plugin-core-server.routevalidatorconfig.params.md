@@ -6,7 +6,7 @@
 
 Validation logic for the URL params
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 params?: RouteValidationSpec<P>;

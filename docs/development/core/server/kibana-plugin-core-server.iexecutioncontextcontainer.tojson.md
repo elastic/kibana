@@ -4,12 +4,12 @@
 
 ## IExecutionContextContainer.toJSON() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 toJSON(): Readonly<KibanaExecutionContext>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Readonly&lt;KibanaExecutionContext&gt;
 

@@ -28,7 +28,8 @@ const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('../../../detections/containers/detection_engine/rules/api');
 jest.mock('@kbn/securitysolution-list-api');
 
-describe('useFetchOrCreateRuleExceptionList', () => {
+// Broken during Jest 29 upgrade (also skipped on main see https://github.com/elastic/kibana/issues/145749)
+describe.skip('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
   let patchRule: jest.SpyInstance<ReturnType<typeof rulesApi.patchRule>>;
   let addExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionList>>;
@@ -107,7 +108,6 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('initializes hook', async () => {

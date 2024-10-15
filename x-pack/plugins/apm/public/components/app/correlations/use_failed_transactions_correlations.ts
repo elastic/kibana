@@ -47,10 +47,7 @@ export function useFailedTransactionsCorrelations() {
     getReducer<FailedTransactionsCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(
-    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
-  );
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL), []);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -79,39 +76,37 @@ export function useFailedTransactionsCorrelations() {
         ccsWarning: false,
       };
 
-      const [overallHistogramResponse, errorHistogramRespone] =
-        await Promise.all([
-          // Initial call to fetch the overall distribution for the log-log plot.
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-              },
+      const [overallHistogramResponse, errorHistogramRespone] = await Promise.all([
+        // Initial call to fetch the overall distribution for the log-log plot.
+        callApmApi({
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
             },
-          }),
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
-              },
+          },
+        }),
+        callApmApi({
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              termFilters: [
+                {
+                  fieldName: EVENT_OUTCOME,
+                  fieldValue: EventOutcome.failure,
+                },
+              ],
             },
-          }),
-        ]);
+          },
+        }),
+      ]);
 
-      const { overallHistogram, percentileThresholdValue } =
-        overallHistogramResponse;
+      const { overallHistogram, percentileThresholdValue } = overallHistogramResponse;
       const { overallHistogram: errorHistogram } = errorHistogramRespone;
 
       responseUpdate.errorHistogram = errorHistogram;
@@ -147,8 +142,7 @@ export function useFailedTransactionsCorrelations() {
       });
       setResponse.flush();
 
-      const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
-        [];
+      const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
       let chunkLoadCounter = 0;
@@ -168,13 +162,9 @@ export function useFailedTransactionsCorrelations() {
           pValues.failedTransactionsCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          failedTransactionsCorrelations.push(
-            ...pValues.failedTransactionsCorrelations
-          );
+          failedTransactionsCorrelations.push(...pValues.failedTransactionsCorrelations);
           responseUpdate.failedTransactionsCorrelations =
-            getFailedTransactionsCorrelationsSortedByScore([
-              ...failedTransactionsCorrelations,
-            ]);
+            getFailedTransactionsCorrelationsSortedByScore([...failedTransactionsCorrelations]);
         }
 
         chunkLoadCounter++;
@@ -182,8 +172,7 @@ export function useFailedTransactionsCorrelations() {
           ...responseUpdate,
           loaded:
             LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidatesChunks.length) *
-              PROGRESS_STEP_P_VALUES,
+            (chunkLoadCounter / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES,
         });
 
         if (abortCtrl.current.signal.aborted) {
@@ -211,10 +200,7 @@ export function useFailedTransactionsCorrelations() {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError;
         setResponse({
-          error:
-            'response' in err
-              ? err.body?.message ?? err.response?.statusText
-              : err.message,
+          error: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
           isRunning: false,
         });
         setResponse.flush();

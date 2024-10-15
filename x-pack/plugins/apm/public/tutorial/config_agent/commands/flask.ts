@@ -17,13 +17,9 @@ from elasticapm.contrib.flask import ElasticAPM
 app = Flask(__name__)
 apm = ElasticAPM(app)
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment',
-  {
-    defaultMessage:
-      "or configure to use ELASTIC_APM in your application's settings",
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment', {
+  defaultMessage: "or configure to use ELASTIC_APM in your application's settings",
+})}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
 # ${i18n.translate(
@@ -32,12 +28,9 @@ app.config['ELASTIC_APM'] = {
     defaultMessage: 'Set the required service name. Allowed characters:',
   }
 )}
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.flaskClient.configure.commands.allowedCharactersComment', {
+  defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+})}
 'SERVICE_NAME': '',
 
 # ${i18n.translate(
@@ -51,8 +44,7 @@ app.config['ELASTIC_APM'] = {
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
   {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
+    defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}

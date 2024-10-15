@@ -26,16 +26,11 @@ async function init() {
   }
 
   if (!kibanaBaseUrl) {
-    console.error(
-      'Please specify the url for Kibana: `--kibana-url http://localhost:5601` '
-    );
+    console.error('Please specify the url for Kibana: `--kibana-url http://localhost:5601` ');
     process.exit();
   }
 
-  if (
-    !kibanaBaseUrl.startsWith('https://') &&
-    !kibanaBaseUrl.startsWith('http://')
-  ) {
+  if (!kibanaBaseUrl.startsWith('https://') && !kibanaBaseUrl.startsWith('http://')) {
     console.error(
       'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`'
     );
@@ -58,13 +53,9 @@ async function init() {
   console.log(`Connected to Kibana ${version}`);
 
   const users = await createApmUsersAndRoles({ elasticsearch, kibana });
-  const credentials = users
-    .map((u) => ` - ${u.username} / ${esPassword}`)
-    .join('\n');
+  const credentials = users.map((u) => ` - ${u.username} / ${esPassword}`).join('\n');
 
-  console.log(
-    `\nYou can now login to ${kibana.hostname} with:\n${credentials}`
-  );
+  console.log(`\nYou can now login to ${kibana.hostname} with:\n${credentials}`);
 }
 
 init().catch((e) => {
@@ -72,19 +63,11 @@ init().catch((e) => {
     console.error(e.message);
   } else if (isAxiosError(e)) {
     console.error(
-      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${
-        e.response?.status
-      })`
+      `${e.config?.method?.toUpperCase() || 'GET'} ${e.config?.url} (Code: ${e.response?.status})`
     );
 
     if (e.response) {
-      console.error(
-        JSON.stringify(
-          { request: e.config, response: e.response.data },
-          null,
-          2
-        )
-      );
+      console.error(JSON.stringify({ request: e.config, response: e.response.data }, null, 2));
     }
   } else {
     console.error(e);

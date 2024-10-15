@@ -21,6 +21,12 @@ import {
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 
+/**
+ * @todo Replace with `Infinity` once elastic/eui#5945 is resolved.
+ * @see https://github.com/elastic/eui/issues/5945
+ */
+const COMPLETED_JOB_TOAST_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
+
 function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
 }
@@ -47,6 +53,8 @@ export class ReportingNotifierStreamHandler {
     failed: failedJobs,
   }: JobSummarySet): Rx.Observable<JobSummarySet> {
     const showNotificationsAsync = async () => {
+      const completedOptions = { toastLifeTimeMs: COMPLETED_JOB_TOAST_TIMEOUT };
+
       // notifications with download link
       for (const job of completedJobs) {
         if (job.csvContainsFormulas) {
@@ -55,7 +63,8 @@ export class ReportingNotifierStreamHandler {
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink
-            )
+            ),
+            completedOptions
           );
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
@@ -63,11 +72,13 @@ export class ReportingNotifierStreamHandler {
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink
-            )
+            ),
+            completedOptions
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(job, this.apiClient.getManagementLink, this.apiClient.getDownloadLink)
+            getSuccessToast(job, this.apiClient.getManagementLink, this.apiClient.getDownloadLink),
+            completedOptions
           );
         }
       }

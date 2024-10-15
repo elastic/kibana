@@ -33,12 +33,12 @@ describe('UserActionUsername ', () => {
 
   test('it shows the fullname when hovering the username', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     wrapper.find('[data-test-subj="user-action-username-tooltip"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe('Elastic');
@@ -49,7 +49,7 @@ describe('UserActionUsername ', () => {
 
   test('it shows the username when hovering the username and the fullname is missing', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const newWrapper = mount(<UserActionUsername username="elastic" />);
     newWrapper
@@ -58,7 +58,7 @@ describe('UserActionUsername ', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     newWrapper.update();
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe('elastic');

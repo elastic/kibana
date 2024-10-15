@@ -6,10 +6,12 @@
  */
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
+
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
-import { withAppContext } from './app_context.mock';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
@@ -19,8 +21,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(withAppContext(WatchEdit), testBedConfig);
 
 export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThresholdTestSubjects> {
   actions: {
@@ -33,7 +33,8 @@ export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThreshol
   };
 }
 
-export const setup = async (): Promise<WatchCreateThresholdTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<WatchCreateThresholdTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(WatchEdit, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**

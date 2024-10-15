@@ -6,7 +6,7 @@
 
 OS related metrics
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 os: OpsOsMetrics;

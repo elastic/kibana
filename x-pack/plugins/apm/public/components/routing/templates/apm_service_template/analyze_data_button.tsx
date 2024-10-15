@@ -11,10 +11,7 @@ import React from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
-import {
-  isIosAgentName,
-  isRumAgentName,
-} from '../../../../../common/agent_name';
+import { isIosAgentName, isRumAgentName } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,

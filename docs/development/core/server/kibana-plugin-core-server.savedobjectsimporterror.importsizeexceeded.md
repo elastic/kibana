@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.importSizeExceeded() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static importSizeExceeded(limit: number): SavedObjectsImportError;
@@ -16,7 +16,7 @@ static importSizeExceeded(limit: number): SavedObjectsImportError;
 |  --- | --- | --- |
 |  limit | number |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsImportError
 

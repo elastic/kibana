@@ -17,10 +17,7 @@ import { getAgentMarks } from '../Marks/get_agent_marks';
 import { getErrorMarks } from '../Marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import {
-  IWaterfall,
-  IWaterfallItem,
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
   transition: 0.1s padding ease;
@@ -28,13 +25,7 @@ const Container = euiStyled.div`
   overflow: hidden;
 `;
 
-const toggleFlyout = ({
-  history,
-  item,
-}: {
-  history: History;
-  item?: IWaterfallItem;
-}) => {
+const toggleFlyout = ({ history, item }: { history: History; item?: IWaterfallItem }) => {
   history.replace({
     ...history.location,
     search: fromQuery({
@@ -82,8 +73,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
           size="s"
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
-            defaultMessage:
-              'Number of items in this trace exceed what is displayed',
+            defaultMessage: 'Number of items in this trace exceed what is displayed',
           })}
         />
       )}
@@ -116,9 +106,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
               duration={duration}
               waterfall={waterfall}
               timelineMargins={timelineMargins}
-              onClickWaterfallItem={(item: IWaterfallItem) =>
-                toggleFlyout({ history, item })
-              }
+              onClickWaterfallItem={(item: IWaterfallItem) => toggleFlyout({ history, item })}
             />
           )}
         </WaterfallItemsContainer>

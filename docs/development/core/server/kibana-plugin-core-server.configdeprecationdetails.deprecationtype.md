@@ -4,7 +4,7 @@
 
 ## ConfigDeprecationDetails.deprecationType property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecationType: 'config';

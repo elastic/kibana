@@ -8,7 +8,7 @@ A string or an array of strings with the allowed mime types for the endpoint. Us
 
 Default value: allows parsing of the following mime types: \* application/json \* application/\*+json \* application/octet-stream \* application/x-www-form-urlencoded \* multipart/form-data \* text/\*
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 accepts?: RouteContentType | RouteContentType[] | string | string[];

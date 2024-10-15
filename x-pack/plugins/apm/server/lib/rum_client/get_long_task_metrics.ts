@@ -74,8 +74,7 @@ export async function getLongTaskMetrics({
 
   const pkey = percentile.toFixed(1);
 
-  const { longTaskSum, longTaskCount, longTaskMax } =
-    response.aggregations ?? {};
+  const { longTaskSum, longTaskCount, longTaskMax } = response.aggregations ?? {};
 
   return {
     noOfLongTasks: longTaskCount?.values[pkey] ?? 0,

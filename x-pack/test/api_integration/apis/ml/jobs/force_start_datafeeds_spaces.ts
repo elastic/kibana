@@ -34,15 +34,15 @@ export default ({ getService }: FtrProviderContext) => {
     start: number,
     end: number
   ): Promise<Record<string, { started: boolean; error?: string }>> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/jobs/force_start_datafeeds`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS)
-      .send({ datafeedIds, start, end })
-      .expect(expectedStatusCode);
+      .send({ datafeedIds, start, end });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

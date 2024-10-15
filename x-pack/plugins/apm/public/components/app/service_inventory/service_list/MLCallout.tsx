@@ -18,8 +18,7 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.apm.serviceInventory.mlNudgeMessageTitle', {
-        defaultMessage:
-          'Enable anomaly detection to add health status indicators to your services',
+        defaultMessage: 'Enable anomaly detection to add health status indicators to your services',
       })}
       iconType="iInCircle"
     >
@@ -31,27 +30,18 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
       <EuiFlexGrid gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton>
-            <APMLink
-              path="/settings/anomaly-detection"
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              {i18n.translate(
-                'xpack.apm.serviceOverview.mlNudgeMessage.learnMoreButton',
-                {
-                  defaultMessage: `Get started`,
-                }
-              )}
+            <APMLink path="/settings/anomaly-detection" style={{ whiteSpace: 'nowrap' }}>
+              {i18n.translate('xpack.apm.serviceOverview.mlNudgeMessage.learnMoreButton', {
+                defaultMessage: `Get started`,
+              })}
             </APMLink>
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={() => onDismiss()}>
-            {i18n.translate(
-              'xpack.apm.serviceOverview.mlNudgeMessage.dismissButton',
-              {
-                defaultMessage: `Dismiss`,
-              }
-            )}
+            {i18n.translate('xpack.apm.serviceOverview.mlNudgeMessage.dismissButton', {
+              defaultMessage: `Dismiss`,
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGrid>

@@ -6,7 +6,7 @@
 
 An optional label to use for the link button. If unspecified, a default label will be used.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 buttonLabel?: string;

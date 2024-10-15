@@ -31,7 +31,6 @@ describe.each([
 ])('read_rules - %s', (_, isRuleRegistryEnabled) => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
   describe('readRules', () => {

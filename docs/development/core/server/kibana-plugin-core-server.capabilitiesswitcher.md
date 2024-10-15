@@ -6,7 +6,7 @@
 
 See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities, useDefaultCapabilities: boolean) => Partial<Capabilities> | Promise<Partial<Capabilities>>;

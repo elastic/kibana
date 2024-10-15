@@ -6,7 +6,7 @@
 
 A BodyInit object or null to set request's body.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 body?: BodyInit | null;

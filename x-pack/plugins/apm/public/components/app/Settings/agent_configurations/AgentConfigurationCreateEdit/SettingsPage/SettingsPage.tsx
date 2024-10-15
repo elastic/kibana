@@ -38,9 +38,7 @@ import { saveConfig } from './saveConfig';
 import { SettingFormRow } from './SettingFormRow';
 
 function removeEmpty(obj: { [key: string]: any }) {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v != null && v !== '')
-  );
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
 }
 
 export function SettingsPage({
@@ -103,18 +101,16 @@ export function SettingsPage({
   if (status === FETCH_STATUS.FAILURE) {
     return (
       <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.agentConfig.settingsPage.notFound.title',
-          { defaultMessage: 'Sorry, there was an error' }
-        )}
+        title={i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.title', {
+          defaultMessage: 'Sorry, there was an error',
+        })}
         color="danger"
         iconType="alert"
       >
         <p>
-          {i18n.translate(
-            'xpack.apm.agentConfig.settingsPage.notFound.message',
-            { defaultMessage: 'The requested configuration does not exist' }
-          )}
+          {i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.message', {
+            defaultMessage: 'The requested configuration does not exist',
+          })}
         </p>
       </EuiCallOut>
     );
@@ -150,11 +146,7 @@ export function SettingsPage({
             <EuiFlexItem>
               <EuiStat
                 titleSize="xs"
-                title={
-                  isLoading
-                    ? '-'
-                    : getOptionLabel(newConfig.service.environment)
-                }
+                title={isLoading ? '-' : getOptionLabel(newConfig.service.environment)}
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.environment.label',
                   { defaultMessage: 'Environment' }
@@ -164,10 +156,9 @@ export function SettingsPage({
             <EuiFlexItem grow={false}>
               {!isEditMode && (
                 <EuiButton onClick={onClickEdit} iconType="pencil">
-                  {i18n.translate(
-                    'xpack.apm.agentConfig.chooseService.editButton',
-                    { defaultMessage: 'Edit' }
-                  )}
+                  {i18n.translate('xpack.apm.agentConfig.chooseService.editButton', {
+                    defaultMessage: 'Edit',
+                  })}
                 </EuiButton>
               )}
             </EuiFlexItem>
@@ -212,10 +203,9 @@ export function SettingsPage({
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty color="ghost" onClick={resetSettings}>
-                    {i18n.translate(
-                      'xpack.apm.agentConfig.settingsPage.discardChangesButton',
-                      { defaultMessage: 'Discard changes' }
-                    )}
+                    {i18n.translate('xpack.apm.agentConfig.settingsPage.discardChangesButton', {
+                      defaultMessage: 'Discard changes',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -227,10 +217,9 @@ export function SettingsPage({
                     color="secondary"
                     iconType="check"
                   >
-                    {i18n.translate(
-                      'xpack.apm.agentConfig.settingsPage.saveButton',
-                      { defaultMessage: 'Save configuration' }
-                    )}
+                    {i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
+                      defaultMessage: 'Save configuration',
+                    })}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

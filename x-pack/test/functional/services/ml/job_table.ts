@@ -239,6 +239,7 @@ export function MachineLearningJobTableProvider(
 
     public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForJobsToLoad();
+      await this.refreshJobList();
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();

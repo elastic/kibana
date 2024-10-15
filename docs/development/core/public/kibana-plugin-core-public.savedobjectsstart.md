@@ -5,7 +5,7 @@
 ## SavedObjectsStart interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsStart 
@@ -13,7 +13,7 @@ export interface SavedObjectsStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [client](./kibana-plugin-core-public.savedobjectsstart.client.md) | SavedObjectsClientContract | [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [client](./kibana-plugin-core-public.savedobjectsstart.client.md) |  | SavedObjectsClientContract | [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
 

@@ -6,7 +6,7 @@
 
 Returns an Observable that notifies subscribers of each error while trying to update the settings, containing the actual Error class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getUpdateErrors$: () => Observable<Error>;

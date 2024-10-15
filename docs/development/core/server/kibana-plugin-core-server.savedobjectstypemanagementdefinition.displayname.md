@@ -6,7 +6,7 @@
 
 When specified, will be used instead of the type's name in SO management section's labels.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 displayName?: string;

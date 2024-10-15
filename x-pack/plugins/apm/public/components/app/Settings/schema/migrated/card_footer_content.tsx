@@ -18,10 +18,9 @@ export function CardFooterContent() {
   return (
     <div>
       <EuiButton href={fleetCloudAgentPolicyHref}>
-        {i18n.translate(
-          'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
-          { defaultMessage: 'View the APM integration in Fleet' }
-        )}
+        {i18n.translate('xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText', {
+          defaultMessage: 'View the APM integration in Fleet',
+        })}
       </EuiButton>
       <EuiSpacer size="xs" />
       <EuiText size="s">

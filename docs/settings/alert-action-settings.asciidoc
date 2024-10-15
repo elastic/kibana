@@ -130,10 +130,19 @@ The contents of a PEM-encoded certificate file, or multiple files appended
 into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
+[[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
+A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
+
+WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+
 `xpack.actions.enabledActionTypes` {ess-icon}::
 A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, and `.webhook`. An empty list `[]` will disable all action types.
 +
+--
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
+
+IMPORTANT: <<pre-configured-connectors,Preconfigured connectors>> are not affected by this setting.
+--
 
 `xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
 Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
@@ -143,12 +152,44 @@ Specifies preconfigured connector IDs and configs. Default: {}.
 
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
++
+Proxies may be used to proxy http or https requests through a proxy using the http or https protocol.  Kibana only uses proxies in "CONNECT" mode (sometimes referred to as "tunneling" TCP mode, compared to HTTP mode).  That is, Kibana will always make requests through a proxy using the HTTP `CONNECT` method.
++
+If your proxy is using the https protocol (vs the http protocol), the setting `xpack.actions.ssl.proxyVerificationMode: none` will likely be needed, unless your proxy's certificates are signed using a publicly available certificate authority.
++
+There is currently no support for using basic authentication with a proxy (authentication for the proxy itself, not the URL being requested through the proxy).
++
+To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
+proxy in tunneling mode, and display some of the interaction between the client and the proxy.
++
+[source,sh]
+--
+curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+--
++
+
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
-Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
+----
++
+By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyOnlyHosts` {ess-icon}::
-Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
+----
++
+By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.

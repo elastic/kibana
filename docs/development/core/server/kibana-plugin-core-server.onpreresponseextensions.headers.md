@@ -6,7 +6,7 @@
 
 additional headers to attach to the response
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 headers?: ResponseHeaders;

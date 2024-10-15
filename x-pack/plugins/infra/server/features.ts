@@ -15,7 +15,7 @@ import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-    defaultMessage: 'Metrics',
+    defaultMessage: 'Infrastructure',
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
@@ -29,7 +29,7 @@ export const METRICS_FEATURE = {
     all: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops', 'metrics'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       savedObject: {
         all: ['infrastructure-ui-source'],
         read: ['index-pattern'],
@@ -50,7 +50,7 @@ export const METRICS_FEATURE = {
     read: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops', 'metrics'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       savedObject: {
         all: [],
         read: ['infrastructure-ui-source', 'index-pattern'],
@@ -88,7 +88,7 @@ export const LOGS_FEATURE = {
     all: {
       app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging', 'logs'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       savedObject: {
         all: ['infrastructure-ui-source'],
         read: [],
@@ -109,7 +109,7 @@ export const LOGS_FEATURE = {
     read: {
       app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging', 'logs'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       alerting: {
         rule: {
           read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],

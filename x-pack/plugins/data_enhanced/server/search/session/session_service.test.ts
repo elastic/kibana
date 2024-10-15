@@ -27,7 +27,8 @@ import { TaskManagerStartContract } from '../../../../task_manager/server';
 
 const MAX_UPDATE_RETRIES = 3;
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;

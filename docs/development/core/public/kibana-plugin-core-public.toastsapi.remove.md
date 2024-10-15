@@ -6,7 +6,7 @@
 
 Removes a toast from the current array of toasts if present.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 remove(toastOrId: Toast | string): void;
@@ -18,7 +18,7 @@ remove(toastOrId: Toast | string): void;
 |  --- | --- | --- |
 |  toastOrId | Toast \| string | a [Toast](./kibana-plugin-core-public.toast.md) returned by [ToastsApi.add()](./kibana-plugin-core-public.toastsapi.add.md) or its id |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

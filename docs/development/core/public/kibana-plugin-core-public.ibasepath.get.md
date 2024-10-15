@@ -6,7 +6,7 @@
 
 Gets the `basePath` string.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: () => string;

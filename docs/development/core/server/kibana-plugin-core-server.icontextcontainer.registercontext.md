@@ -6,7 +6,7 @@
 
 Register a new context provider.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(pluginOpaqueId: PluginOpaqueId, contextName: ContextName, provider: IContextProvider<Context, ContextName>): this;
@@ -20,7 +20,7 @@ registerContext<Context extends RequestHandlerContext, ContextName extends keyof
 |  contextName | ContextName | The key of the <code>TContext</code> object this provider supplies the value for. |
 |  provider | IContextProvider&lt;Context, ContextName&gt; | A [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) to be called each time a new context is created. |
 
-<b>Returns:</b>
+**Returns:**
 
 this
 

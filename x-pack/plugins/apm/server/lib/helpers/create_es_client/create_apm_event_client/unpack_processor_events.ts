@@ -8,10 +8,7 @@
 import { uniq, defaultsDeep, cloneDeep } from 'lodash';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../../src/core/types/elasticsearch';
+import { ESSearchRequest, ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 

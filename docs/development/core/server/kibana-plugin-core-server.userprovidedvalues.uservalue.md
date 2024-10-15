@@ -4,7 +4,7 @@
 
 ## UserProvidedValues.userValue property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 userValue?: T;

@@ -40,10 +40,7 @@ export function CorrelationsContextPopover({
   if (!topValueStats) return null;
 
   const popoverTitle = (
-    <EuiPopoverTitle
-      style={{ textTransform: 'none' }}
-      className="eui-textBreakWord"
-    >
+    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={true}>
           <h5>{fieldName}</h5>
@@ -88,12 +85,9 @@ export function CorrelationsContextPopover({
       {popoverTitle}
       <EuiTitle size="xxxs">
         <h5>
-          {i18n.translate(
-            'xpack.apm.correlations.fieldContextPopover.fieldTopValuesLabel',
-            {
-              defaultMessage: 'Top 10 values',
-            }
-          )}
+          {i18n.translate('xpack.apm.correlations.fieldContextPopover.fieldTopValuesLabel', {
+            defaultMessage: 'Top 10 values',
+          })}
         </h5>
       </EuiTitle>
       {infoIsOpen ? (

@@ -6,7 +6,7 @@
 
 A pre-configured [Elasticsearch client](./kibana-plugin-core-server.iclusterclient.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly client: IClusterClient;

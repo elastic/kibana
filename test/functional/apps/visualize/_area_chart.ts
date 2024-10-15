@@ -435,6 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('interval errors', () => {
         before(async () => {
+          await PageObjects.visEditor.selectField('@timestamp');
           // to trigger displaying of error messages
           await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
           // this will avoid issues with the play tooltip covering the interval field
@@ -463,16 +464,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(isIntervalErrorMessageExists).to.be(true);
         });
 
-        it('should show error when calendar interval invalid', async () => {
+        it('should show error when calendar interval invalid - 2w', async () => {
           await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
           const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          let errorMessage = await intervalErrorMessage.getVisibleText();
+          const errorMessage = await intervalErrorMessage.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+        });
 
+        it('should show error when calendar interval invalid - 3w', async () => {
           await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
-          errorMessage = await intervalErrorMessage.getVisibleText();
+          const intervalErrorMessage = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          const errorMessage = await intervalErrorMessage.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
         });
       });

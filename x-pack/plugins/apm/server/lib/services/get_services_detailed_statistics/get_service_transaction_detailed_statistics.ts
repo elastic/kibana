@@ -7,14 +7,8 @@
 
 import { keyBy } from 'lodash';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import {
@@ -61,110 +55,92 @@ export async function getServiceTransactionDetailedStatistics({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getTransactionDurationFieldForAggregatedTransactions(searchAggregatedTransactions),
       },
     },
     outcomes,
   };
 
-  const response = await apmEventClient.search(
-    'get_service_transaction_stats',
-    {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...getDocumentTypeFilterForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_service_transaction_stats', {
+    apm: {
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              include: serviceNames,
-              size: serviceNames.length,
-            },
-            aggs: {
-              transactionType: {
-                terms: {
-                  field: TRANSACTION_TYPE,
-                },
-                aggs: {
-                  ...metrics,
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSizeForAggregatedTransactions({
-                        start: startWithOffset,
-                        end: endWithOffset,
-                        numBuckets: 20,
-                        searchAggregatedTransactions,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: startWithOffset,
-                        max: endWithOffset,
-                      },
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: SERVICE_NAME,
+            include: serviceNames,
+            size: serviceNames.length,
+          },
+          aggs: {
+            transactionType: {
+              terms: {
+                field: TRANSACTION_TYPE,
+              },
+              aggs: {
+                ...metrics,
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: getBucketSizeForAggregatedTransactions({
+                      start: startWithOffset,
+                      end: endWithOffset,
+                      numBuckets: 20,
+                      searchAggregatedTransactions,
+                    }).intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: startWithOffset,
+                      max: endWithOffset,
                     },
-                    aggs: metrics,
                   },
+                  aggs: metrics,
                 },
               },
             },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return keyBy(
     response.aggregations?.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+          ({ key }) => key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
         ) ?? bucket.transactionType.buckets[0];
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: calculateFailedTransactionRate(dateBucket.outcomes),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: calculateThroughput({
-              start,
-              end,
-              value: dateBucket.doc_count,
-            }),
-          })
-        ),
+        latency: topTransactionTypeBucket.timeseries.buckets.map((dateBucket) => ({
+          x: dateBucket.key + offsetInMs,
+          y: dateBucket.avg_duration.value,
+        })),
+        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map((dateBucket) => ({
+          x: dateBucket.key + offsetInMs,
+          y: calculateFailedTransactionRate(dateBucket.outcomes),
+        })),
+        throughput: topTransactionTypeBucket.timeseries.buckets.map((dateBucket) => ({
+          x: dateBucket.key + offsetInMs,
+          y: calculateThroughput({
+            start,
+            end,
+            value: dateBucket.doc_count,
+          }),
+        })),
       };
     }) ?? [],
     'serviceName'

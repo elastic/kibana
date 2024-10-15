@@ -14,16 +14,24 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const browser = getService('browser');
   const pageObjects = getPageObjects(['common']);
+  const comboBox = getService('comboBox');
 
   return {
     async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
+
+      // explicitly focus to trigger tooltip
+      await datePickerInput.focus();
+
       await datePickerInput.clearValueWithKeyboard({ charByChar: true });
-      await datePickerInput.type([time, browser.keys.RETURN]);
+      await datePickerInput.type(time);
+
+      // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
+      await testSubjects.click('waffleDatePickerIntervalTooltip');
+
       await this.waitForLoading();
     },
 
@@ -209,24 +217,65 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async dismissDatePickerTooltip() {
+      const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+        timeout: 1000,
+      });
+
+      if (isTooltipOpen) {
+        await testSubjects.click(`waffleDatePickerIntervalTooltip`);
+      }
+    },
+
     async openInventoryAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
-      await testSubjects.click('inventory-alerts-create-rule');
-      await testSubjects.missingOrFail('inventory-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () => testSubjects.click('inventory-alerts-create-rule'));
+      await testSubjects.missingOrFail('inventory-alerts-create-rule', { timeout: 30000 });
     },
 
     async openMetricsThresholdAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
-      await testSubjects.click('metrics-threshold-alerts-create-rule');
-      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () =>
+        testSubjects.click('metrics-threshold-alerts-create-rule')
+      );
+      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule', { timeout: 30000 });
     },
 
     async closeAlertFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
+    },
+    async clickCustomMetricDropdown() {
+      await testSubjects.click('infraInventoryMetricDropdown');
+    },
+
+    async addCustomMetric(field: string) {
+      await testSubjects.click('infraModeSwitcherAddMetricButton');
+      const groupByCustomField = await testSubjects.find('infraCustomMetricFieldSelect');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('infraCustomMetricFormSaveButton');
+    },
+
+    async getMetricsContextMenuItemsCount() {
+      const contextMenu = await testSubjects.find('infraInventoryMetricsContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      return menuItems.length;
+    },
+
+    async ensureCustomMetricAddButtonIsDisabled() {
+      const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
+      expect(await button.getAttribute('disabled')).to.be('true');
     },
   };
 }

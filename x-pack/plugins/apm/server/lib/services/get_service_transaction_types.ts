@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -33,20 +30,14 @@ export async function getServiceTransactionTypes({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+            ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
           ],
@@ -60,11 +51,7 @@ export async function getServiceTransactionTypes({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
-    'get_service_transaction_types',
-    params
-  );
-  const transactionTypes =
-    aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
+  const { aggregations } = await apmEventClient.search('get_service_transaction_types', params);
+  const transactionTypes = aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };
 }

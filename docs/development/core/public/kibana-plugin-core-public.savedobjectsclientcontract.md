@@ -6,7 +6,7 @@
 
 SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;

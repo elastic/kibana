@@ -22,11 +22,7 @@ interface Props {
   dataTestSubj: string;
 }
 
-export function BreakdownFilter({
-  selectedBreakdown,
-  onBreakdownChange,
-  dataTestSubj,
-}: Props) {
+export function BreakdownFilter({ selectedBreakdown, onBreakdownChange, dataTestSubj }: Props) {
   const NO_BREAKDOWN = 'noBreakdown';
 
   const items: BreakdownItem[] = [

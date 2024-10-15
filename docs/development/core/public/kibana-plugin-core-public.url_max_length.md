@@ -6,7 +6,7 @@
 
 The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 URL_MAX_LENGTH: number

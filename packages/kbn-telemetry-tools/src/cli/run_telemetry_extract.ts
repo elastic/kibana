@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { run } from '@kbn/dev-utils';
 
 import {
@@ -21,24 +21,31 @@ import {
 export function runTelemetryExtract() {
   run(
     async ({ flags: {}, log }) => {
-      const list = new Listr([
+      const list = new Listr(
+        [
+          {
+            title: 'Parsing .telemetryrc.json files',
+            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
+          },
+          {
+            title: 'Extracting Telemetry Collectors',
+            task: (context, task) =>
+              task.newListr(extractCollectorsTask(context), { exitOnError: true }),
+          },
+          {
+            title: 'Generating Schema files',
+            task: (context, task) =>
+              task.newListr(generateSchemasTask(context), { exitOnError: true }),
+          },
+          {
+            title: 'Writing to file',
+            task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
+          },
+        ],
         {
-          title: 'Parsing .telemetryrc.json files',
-          task: () => new Listr(parseConfigsTask(), { exitOnError: true }),
-        },
-        {
-          title: 'Extracting Telemetry Collectors',
-          task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
-        },
-        {
-          title: 'Generating Schema files',
-          task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
-        },
-        {
-          title: 'Writing to file',
-          task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
-        },
-      ]);
+          renderer: process.env.CI ? 'verbose' : 'default',
+        }
+      );
 
       try {
         const context = createTaskContext();

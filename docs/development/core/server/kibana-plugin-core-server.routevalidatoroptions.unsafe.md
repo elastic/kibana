@@ -6,7 +6,7 @@
 
 Set the `unsafe` config to avoid running some additional internal \*safe\* validations on top of your custom validation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unsafe?: {

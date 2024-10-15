@@ -12,13 +12,21 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
+  const esVersion = getService('esVersion');
 
   describe('Generate CSV from SearchSource', function () {
-    this.onlyEsVersion('<=7');
+    let csvFile: string;
 
-    it(`exported CSV file matches snapshot`, async () => {
+    before(async () => {
       await reportingAPI.initEcommerce();
+
+      log.info(`updating Advanced Settings`);
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': true,
+      });
 
       const fromTime = '2019-06-20T00:00:00.000Z';
       const toTime = '2019-06-24T00:00:00.000Z';
@@ -26,33 +34,57 @@ export default function ({ getService }: FtrProviderContext) {
       const { text: reportApiJson, status } = await reportingAPI.generateCsv({
         title: 'CSV Report',
         browserTimezone: 'UTC',
+        columns: [
+          'order_date',
+          'category',
+          'currency',
+          'customer_id',
+          'order_id',
+          'day_of_week_i',
+          'products.created_on',
+          'sku',
+        ],
         objectType: 'search',
-        version: '7.15.0',
+        version: '7.17.19',
         searchSource: {
-          version: true,
-          query: { query: '', language: 'kuery' },
           index: '5193f870-d861-11e9-a311-0fa548c5f953',
           sort: [{ order_date: 'desc' }],
-          fields: ['*'],
-          filter: [],
-          parent: {
-            query: { language: 'kuery', query: '' },
-            filter: [],
-            parent: {
-              filter: [
-                {
-                  meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                  range: {
-                    order_date: {
-                      gte: fromTime,
-                      lte: toTime,
-                      format: 'strict_date_optional_time',
-                    },
+          fields: [
+            'order_date',
+            'category',
+            'currency',
+            'customer_id',
+            'order_id',
+            'day_of_week_i',
+            'products.created_on',
+            'sku',
+          ],
+          filter: [
+            {
+              meta: {
+                field: 'order_date',
+                index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                params: {},
+              },
+              query: {
+                range: {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    gte: fromTime,
+                    lte: toTime,
                   },
                 },
-              ],
+              },
             },
+          ],
+          parent: {
+            filter: [],
+            highlightAll: true,
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            version: true,
           },
+          trackTotalHits: true,
         } as unknown as SearchSourceFields,
       });
       expect(status).to.be(200);
@@ -67,11 +99,23 @@ export default function ({ getService }: FtrProviderContext) {
       // wait for the the pending job to complete
       await reportingAPI.waitForJobToFinish(downloadPath);
 
-      const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
-      expectSnapshot(csvFile).toMatch();
+      csvFile = (await reportingAPI.getCompletedJobOutput(downloadPath)) as string;
+    });
 
+    after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+    });
+
+    const itIf7 = esVersion.matchRange('<8') ? it : it.skip;
+    const itIf8 = esVersion.matchRange('>=8') ? it : it.skip;
+
+    itIf7(`exported CSV file matches snapshot (7.17)`, async () => {
+      expectSnapshot(csvFile).toMatch();
+    });
+
+    itIf8(`exported CSV file matches snapshot (8.0)`, async () => {
+      expectSnapshot(csvFile).toMatch();
     });
   });
 }

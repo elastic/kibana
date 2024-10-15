@@ -15,7 +15,6 @@ const STORYBOOKS = [
   'apm',
   'canvas',
   'codeeditor',
-  'ci_composite',
   'custom_integrations',
   'url_template_editor',
   'dashboard',
@@ -68,20 +67,20 @@ const build = () => {
   }
 };
 
+const kibanaRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+
 const upload = () => {
   const originalDirectory = process.cwd();
   try {
     console.log('--- Generating Storybooks HTML');
 
     process.chdir(path.join('.', 'built_assets', 'storybook'));
-    fs.renameSync('ci_composite', 'composite');
 
     const storybooks = execSync(`ls -1d */`)
       .toString()
       .trim()
       .split('\n')
-      .map((path) => path.replace('/', ''))
-      .filter((path) => path !== 'composite');
+      .map((filePath) => filePath.replace('/', ''));
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -91,8 +90,6 @@ const upload = () => {
       <html>
         <body>
           <h1>Storybooks</h1>
-          <p><a href="${STORYBOOK_BASE_URL}/composite">Composite Storybook</a></p>
-          <h2>All</h2>
           <ul>
             ${listHtml}
           </ul>
@@ -102,8 +99,12 @@ const upload = () => {
 
     fs.writeFileSync('index.html', html);
 
-    console.log('--- Uploading Storybooks');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(kibanaRoot, '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);

@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
 
   describe('saved objects relationships flyout', () => {
@@ -35,20 +36,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.savedObjects.clickRelationshipsByTitle('Dashboard with missing refs');
 
-      const invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
+      let invalidRelations: any[] = [];
+
+      await retry.waitFor('2 invalid relations to be found', async () => {
+        invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
+        return invalidRelations.length === 2;
+      });
 
       expect(invalidRelations).to.eql([
-        {
-          error: 'Saved object [visualization/missing-vis-ref] not found',
-          id: 'missing-vis-ref',
-          relationship: 'Child',
-          type: 'visualization',
-        },
         {
           error: 'Saved object [dashboard/missing-dashboard-ref] not found',
           id: 'missing-dashboard-ref',
           relationship: 'Child',
           type: 'dashboard',
+        },
+        {
+          error: 'Saved object [visualization/missing-vis-ref] not found',
+          id: 'missing-vis-ref',
+          relationship: 'Child',
+          type: 'visualization',
         },
       ]);
     });

@@ -21,8 +21,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
 
   const { uxUiFilters } = useUrlParams();
 
-  const { transactionUrl, transactionUrlExcluded, ...restFilters } =
-    uxUiFilters;
+  const { transactionUrl, transactionUrlExcluded, ...restFilters } = uxUiFilters;
 
   const [searchValue, setSearchValue] = useState(query ?? '');
 

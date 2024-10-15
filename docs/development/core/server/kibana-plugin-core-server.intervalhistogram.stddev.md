@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.stddev property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stddev: number;

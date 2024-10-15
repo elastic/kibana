@@ -17,10 +17,7 @@ export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath
 ): TypeOf<ApmRoutes, TPath>;
 
-export function useApmParams<
-  TPath1 extends PathsOf<ApmRoutes>,
-  TPath2 extends PathsOf<ApmRoutes>
->(
+export function useApmParams<TPath1 extends PathsOf<ApmRoutes>, TPath2 extends PathsOf<ApmRoutes>>(
   path1: TPath1,
   path2: TPath2
 ): TypeOf<ApmRoutes, TPath1> | TypeOf<ApmRoutes, TPath2>;
@@ -33,13 +30,8 @@ export function useApmParams<
   path1: TPath1,
   path2: TPath2,
   path3: TPath3
-):
-  | TypeOf<ApmRoutes, TPath1>
-  | TypeOf<ApmRoutes, TPath2>
-  | TypeOf<ApmRoutes, TPath3>;
+): TypeOf<ApmRoutes, TPath1> | TypeOf<ApmRoutes, TPath2> | TypeOf<ApmRoutes, TPath3>;
 
-export function useApmParams(
-  ...args: any[]
-): TypeOf<ApmRoutes, PathsOf<ApmRoutes>> | undefined {
+export function useApmParams(...args: any[]): TypeOf<ApmRoutes, PathsOf<ApmRoutes>> | undefined {
   return useParams(...args);
 }

@@ -6,7 +6,7 @@
 
 Whether to allow kibana to connect to a non-compatible elasticsearch node.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly ignoreVersionMismatch: boolean;

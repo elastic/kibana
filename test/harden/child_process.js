@@ -25,10 +25,7 @@ test('test setup ok', (t) => {
   t.end();
 });
 
-// TODO: fork() has been omitted as it doesn't validate its arguments in
-// Node.js 10 and will throw an internal error asynchronously. This is fixed in
-// newer versions. See https://github.com/elastic/kibana/issues/59628
-const functions = ['exec', 'execFile', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
+const functions = ['exec', 'execFile', 'fork', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
 for (const name of functions) {
   test(`${name}()`, (t) => {
     t.throws(() => cp[name](), /argument must be of type string/);
@@ -308,6 +305,50 @@ for (const name of functions) {
 
   test('spawn(command, args, options) - with custom env', (t) => {
     assertProcess(t, cp.spawn(command, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
+  });
+
+  test('spawn(command, options) - prevent object prototype pollution', (t) => {
+    const pathName = path.join(__dirname, '_node_script.js');
+    const options = {};
+    const pollutedObject = {
+      env: {
+        NODE_OPTIONS: `--require ${pathName}`,
+      },
+      shell: process.argv[0],
+    };
+    // eslint-disable-next-line no-proto
+    options.__proto__['2'] = pollutedObject;
+
+    const argsArray = [];
+
+    /**
+     * Declares that 3 assertions should be run.
+     * We don't use the assertProcess function here as we need an extra assertion
+     * for the polluted prototype
+     */
+    t.plan(3);
+
+    t.deepEqual(
+      argsArray[2],
+      pollutedObject,
+      'Prototype should be polluted with the object at index 2'
+    );
+
+    const stdout = '';
+
+    const cmd = cp.spawn(command, argsArray);
+    cmd.stdout.on('data', (data) => {
+      t.equal(data.toString().trim(), stdout);
+    });
+
+    cmd.stderr.on('data', (data) => {
+      t.fail(`Unexpected data on STDERR: "${data}"`);
+    });
+
+    cmd.on('close', (code) => {
+      t.equal(code, 0);
+      t.end();
+    });
   });
 
   for (const unset of notSet) {

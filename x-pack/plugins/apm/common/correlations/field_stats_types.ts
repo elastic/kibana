@@ -51,7 +51,4 @@ export interface BooleanFieldStats {
   [key: string]: number | string;
 }
 
-export type FieldStats =
-  | NumericFieldStats
-  | KeywordFieldStats
-  | BooleanFieldStats;
+export type FieldStats = NumericFieldStats | KeywordFieldStats | BooleanFieldStats;

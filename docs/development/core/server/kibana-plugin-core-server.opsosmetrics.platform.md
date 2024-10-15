@@ -6,7 +6,7 @@
 
 The os platform
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 platform: NodeJS.Platform;

@@ -26,7 +26,7 @@ const alertInstanceFactory =
       GeoContainmentInstanceState,
       GeoContainmentInstanceContext
     >();
-    alertInstance.scheduleActions.mockImplementation(
+    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
       (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
         // Check subset of alert for comparison to expected results
         // @ts-ignore

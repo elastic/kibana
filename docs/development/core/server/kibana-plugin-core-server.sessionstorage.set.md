@@ -6,7 +6,7 @@
 
 Puts current session value into the session storage.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set(sessionValue: T): void;
@@ -18,7 +18,7 @@ set(sessionValue: T): void;
 |  --- | --- | --- |
 |  sessionValue | T | value to put |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

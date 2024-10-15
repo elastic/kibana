@@ -6,7 +6,7 @@
 
 Rewrite requested resources url before is was authenticated and routed to a handler
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 rewriteUrl: (url: string) => OnPreRoutingResult;

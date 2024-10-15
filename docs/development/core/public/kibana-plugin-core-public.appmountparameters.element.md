@@ -6,7 +6,7 @@
 
 The container element to render the application into.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 element: HTMLElement;

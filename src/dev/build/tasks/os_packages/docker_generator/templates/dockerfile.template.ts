@@ -17,6 +17,8 @@ function generator(options: TemplateContext) {
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
   return Mustache.render(template.toString(), {
     packageManager: options.ubi ? 'microdnf' : 'apt-get',
+    opensslLegacyProvider: !options.cloud,
+    ubi: options.ubi,
     ...options,
   });
 }

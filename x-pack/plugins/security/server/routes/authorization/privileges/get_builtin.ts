@@ -16,10 +16,10 @@ export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionPara
 
       // Exclude the `none` privilege, as it doesn't make sense as an option within the Kibana UI
       privileges.cluster = privileges.cluster.filter((privilege) => privilege !== 'none');
-      const indexPriviledges = Array.isArray(privileges.index)
+      const indexPrivileges = Array.isArray(privileges.index)
         ? privileges.index
         : [privileges.index];
-      privileges.index = indexPriviledges.filter((privilege) => privilege !== 'none');
+      privileges.index = indexPrivileges.filter((privilege) => privilege !== 'none');
 
       return response.ok({ body: privileges });
     }

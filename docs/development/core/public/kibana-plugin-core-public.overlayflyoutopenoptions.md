@@ -5,7 +5,7 @@
 ## OverlayFlyoutOpenOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayFlyoutOpenOptions 
@@ -13,15 +13,15 @@ export interface OverlayFlyoutOpenOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  ["aria-label"?](./kibana-plugin-core-public.overlayflyoutopenoptions._aria-label_.md) | string | <i>(Optional)</i> |
-|  ["data-test-subj"?](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) | string | <i>(Optional)</i> |
-|  [className?](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) | string | <i>(Optional)</i> |
-|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | string | <i>(Optional)</i> |
-|  [hideCloseButton?](./kibana-plugin-core-public.overlayflyoutopenoptions.hideclosebutton.md) | boolean | <i>(Optional)</i> |
-|  [maxWidth?](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | boolean \| number \| string | <i>(Optional)</i> |
-|  [onClose?](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | (flyout: OverlayRef) =&gt; void | <i>(Optional)</i> EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
-|  [ownFocus?](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | boolean | <i>(Optional)</i> |
-|  [size?](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | EuiFlyoutSize | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  ["aria-label"?](./kibana-plugin-core-public.overlayflyoutopenoptions._aria-label_.md) |  | string | _(Optional)_ |
+|  ["data-test-subj"?](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) |  | string | _(Optional)_ |
+|  [className?](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) |  | string | _(Optional)_ |
+|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) |  | string | _(Optional)_ |
+|  [hideCloseButton?](./kibana-plugin-core-public.overlayflyoutopenoptions.hideclosebutton.md) |  | boolean | _(Optional)_ |
+|  [maxWidth?](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) |  | boolean \| number \| string | _(Optional)_ |
+|  [onClose?](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) |  | (flyout: OverlayRef) =&gt; void | _(Optional)_ EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
+|  [ownFocus?](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) |  | boolean | _(Optional)_ |
+|  [size?](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) |  | EuiFlyoutSize | _(Optional)_ |
 

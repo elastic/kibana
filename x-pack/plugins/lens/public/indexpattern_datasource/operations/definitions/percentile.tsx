@@ -17,6 +17,7 @@ import {
   getSafeName,
   isValidNumber,
   getFilter,
+  isColumnOfType,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -53,7 +54,11 @@ const DEFAULT_PERCENTILE_VALUE = 95;
 
 const supportedFieldTypes = ['number', 'histogram'];
 
-export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
+export const percentileOperation: OperationDefinition<
+  PercentileIndexPatternColumn,
+  'field',
+  { percentile: number }
+> = {
   type: 'percentile',
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
@@ -91,9 +96,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' &&
-      previousColumn.params &&
-      'percentile' in previousColumn.params &&
+      previousColumn &&
+      isColumnOfType<PercentileIndexPatternColumn>('percentile', previousColumn) &&
       previousColumn.params.percentile;
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
@@ -174,7 +178,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
                 ...currentColumn.params,
                 percentile: inputValueAsNumber,
               },
-            },
+            } as PercentileIndexPatternColumn,
           },
         });
       },

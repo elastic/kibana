@@ -46,7 +46,7 @@ function createDataMock(
 }
 
 describe('getFetchObservable', () => {
-  test('refetch$.next should trigger fetch$.next', async (done) => {
+  test('refetch$.next should trigger fetch$.next', (done) => {
     const searchSessionManagerMock = createSearchSessionMock();
 
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
@@ -67,7 +67,7 @@ describe('getFetchObservable', () => {
     refetch$.next();
   });
   test('getAutoRefreshFetch$ should trigger fetch$.next', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const searchSessionManagerMock = createSearchSessionMock();
     const autoRefreshFetch$ = new Subject();
 

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
 import type { Story } from '@storybook/react';
 import React from 'react';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
@@ -37,16 +31,8 @@ export const List: Story = () => {
               <EuiCard
                 icon={
                   <p>
-                    <EuiToolTip
-                      position="top"
-                      content="Icon rendered with `EuiImage`"
-                    >
-                      <EuiImage
-                        size="s"
-                        hasShadow
-                        alt={id}
-                        src={getSpanIcon(type, subtype)}
-                      />
+                    <EuiToolTip position="top" content="Icon rendered with `EuiImage`">
+                      <EuiImage size="s" hasShadow alt={id} src={getSpanIcon(type, subtype)} />
                     </EuiToolTip>
                   </p>
                 }
@@ -54,10 +40,7 @@ export const List: Story = () => {
                 description={
                   <>
                     <div>
-                      <EuiToolTip
-                        position="bottom"
-                        content="Icon rendered with `SpanIcon`"
-                      >
+                      <EuiToolTip position="bottom" content="Icon rendered with `SpanIcon`">
                         <SpanIcon type={type} subtype={subtype} />
                       </EuiToolTip>
                     </div>

@@ -6,7 +6,7 @@
 
 Updates one or more objects to add and/or remove them from specified spaces.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAdd: string[], spacesToRemove: string[], options?: SavedObjectsUpdateObjectsSpacesOptions): Promise<import("./update_objects_spaces").SavedObjectsUpdateObjectsSpacesResponse>;
@@ -19,9 +19,9 @@ updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAd
 |  objects | SavedObjectsUpdateObjectsSpacesObject\[\] |  |
 |  spacesToAdd | string\[\] |  |
 |  spacesToRemove | string\[\] |  |
-|  options | SavedObjectsUpdateObjectsSpacesOptions |  |
+|  options | SavedObjectsUpdateObjectsSpacesOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;import("./update\_objects\_spaces").SavedObjectsUpdateObjectsSpacesResponse&gt;
 

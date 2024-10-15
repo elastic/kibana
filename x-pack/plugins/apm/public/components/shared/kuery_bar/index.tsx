@@ -64,8 +64,7 @@ export function KueryBar(props: {
     transaction: 'transaction.duration.us > 300000',
     error: 'http.response.status_code >= 400',
     metric: 'process.pid = "1234"',
-    defaults:
-      'transaction.duration.us > 300000 AND http.response.status_code >= 400',
+    defaults: 'transaction.duration.us > 300000 AND http.response.status_code >= 400',
   };
 
   const example = examples[processorEvent || 'defaults'];
@@ -135,10 +134,7 @@ export function KueryBar(props: {
     }
 
     try {
-      const res = convertKueryToEsQuery(
-        inputValue,
-        indexPattern as IndexPattern
-      );
+      const res = convertKueryToEsQuery(inputValue, indexPattern as IndexPattern);
       if (!res) {
         return;
       }

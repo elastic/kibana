@@ -6,7 +6,7 @@
 
 Creates a deep-link to app-specific documentation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 linkType: 'documentation';

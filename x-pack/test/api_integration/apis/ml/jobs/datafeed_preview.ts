@@ -65,12 +65,12 @@ export default ({ getService }: FtrProviderContext) => {
         runtime_mappings: {},
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(200);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1000, 'Response body total hits should be 1000');
       expect(typeof body[0]?.airline).to.eql('string', 'Response body airlines should be a string');
@@ -102,12 +102,12 @@ export default ({ getService }: FtrProviderContext) => {
         runtime_mappings: {},
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(200);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1000, 'Response body total hits should be 1000');
       expect(typeof body[0]?.airline).to.eql('string', 'Response body airlines should be a string');
@@ -144,12 +144,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(200);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1000, 'Response body total hits should be 1000');
       expect(typeof body[0]?.airline).to.eql('string', 'Response body airlines should be a string');
@@ -189,12 +189,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(200);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1000, 'Response body total hits should be 1000');
       expect(typeof body[0]?.airline).to.eql('string', 'Response body airlines should be a string');
@@ -224,12 +224,12 @@ export default ({ getService }: FtrProviderContext) => {
         runtime_mappings: {},
       };
 
-      await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(403);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(403, status, body);
     });
 
     it(`should return not a datafeed preview for unauthorized user`, async () => {
@@ -249,12 +249,12 @@ export default ({ getService }: FtrProviderContext) => {
         runtime_mappings: {},
       };
 
-      await supertest
+      const { body, status } = await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job, datafeed })
-        .expect(403);
+        .send({ job, datafeed });
+      ml.api.assertResponseStatusCode(403, status, body);
     });
   });
 };

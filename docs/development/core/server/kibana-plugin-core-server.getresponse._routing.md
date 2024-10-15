@@ -4,7 +4,7 @@
 
 ## GetResponse.\_routing property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _routing?: string;

@@ -152,9 +152,7 @@ export async function fetchAndTransformGcMetrics({
       };
     });
 
-    const values = data
-      .map((coordinate) => coordinate.y)
-      .filter((y) => y !== null);
+    const values = data.map((coordinate) => coordinate.y).filter((y) => y !== null);
 
     const overallValue = sum(values) / values.length;
 

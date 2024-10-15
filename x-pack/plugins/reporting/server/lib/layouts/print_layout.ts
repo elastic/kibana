@@ -17,6 +17,7 @@ export class PrintLayout extends Layout implements LayoutInstance {
     screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
   };
   public readonly groupCount = 2;
+  public readonly width = DEFAULT_VIEWPORT.width;
   private readonly captureConfig: CaptureConfig;
   private readonly viewport = DEFAULT_VIEWPORT;
 

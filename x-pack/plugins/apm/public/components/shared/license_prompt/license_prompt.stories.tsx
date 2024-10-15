@@ -28,10 +28,7 @@ export default {
   ],
 };
 
-export function Example({
-  showBetaBadge,
-  text,
-}: ComponentProps<typeof LicensePrompt>) {
+export function Example({ showBetaBadge, text }: ComponentProps<typeof LicensePrompt>) {
   return <LicensePrompt showBetaBadge={showBetaBadge} text={text} />;
 }
 Example.args = {

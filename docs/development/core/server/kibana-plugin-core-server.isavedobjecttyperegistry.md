@@ -6,7 +6,7 @@
 
 See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) for documentation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;

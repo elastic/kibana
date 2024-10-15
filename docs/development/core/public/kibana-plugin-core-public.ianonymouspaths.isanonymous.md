@@ -6,7 +6,7 @@
 
 Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isAnonymous(path: string): boolean;
@@ -18,7 +18,7 @@ isAnonymous(path: string): boolean;
 |  --- | --- | --- |
 |  path | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

@@ -6,7 +6,7 @@
 
 Dedicated type for plugin configuration schema.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type PluginConfigSchema<T> = Type<T>;

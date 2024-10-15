@@ -4,7 +4,7 @@
 
 ## SearchResponse.took property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 took: number;

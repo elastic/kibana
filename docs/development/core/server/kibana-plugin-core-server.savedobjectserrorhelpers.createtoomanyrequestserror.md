@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createTooManyRequestsError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createTooManyRequestsError(type: string, id: string): DecoratedError;
@@ -17,7 +17,7 @@ static createTooManyRequestsError(type: string, id: string): DecoratedError;
 |  type | string |  |
 |  id | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

@@ -6,7 +6,7 @@
 
 Adds a new item to the recently accessed history.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 add(link: string, label: string, id: string): void;
@@ -20,7 +20,7 @@ add(link: string, label: string, id: string): void;
 |  label | string | the label to display in the UI |
 |  id | string | a unique string used to de-duplicate the recently accessed list. |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

@@ -6,7 +6,7 @@
 
 server requests stats
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 requests: OpsServerMetrics['requests'];

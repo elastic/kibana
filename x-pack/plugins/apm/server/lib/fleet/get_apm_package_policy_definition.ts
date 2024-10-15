@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import yaml from 'js-yaml';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
@@ -16,9 +16,7 @@ interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
 }
-export function getApmPackagePolicyDefinition(
-  options: GetApmPackagePolicyDefinitionOptions
-) {
+export function getApmPackagePolicyDefinition(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema, cloudPluginSetup } = options;
   return {
     name: 'Elastic APM',
@@ -84,17 +82,27 @@ export function preprocessLegacyFields({
 function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema } = options;
   const apmServerConfigs = Object.entries(apmConfigMapping).map(
-    ([key, { name, type, getValue }]) => ({ key, name, type, getValue })
+    ([key, { name, type, getValue, frozen }]) => ({
+      key,
+      name,
+      type,
+      getValue,
+      frozen,
+    })
   );
 
-  const inputVars: Record<string, { type: string; value: any }> =
-    apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
-      const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
+  const inputVars: Record<string, { type: string; value: any }> = apmServerConfigs.reduce(
+    (acc, { key, name, type, getValue, frozen }) => {
+      const apmServerSchemaValue = apmServerSchema[key];
+      const value =
+        (getValue ? getValue(options, apmServerSchemaValue) : apmServerSchemaValue) ?? ''; // defaults to an empty string to be edited in Fleet UI
       return {
         ...acc,
-        [name]: { type, value },
+        [name]: { type, value, frozen },
       };
-    }, {});
+    },
+    {}
+  );
   return inputVars;
 }
 
@@ -103,17 +111,20 @@ export const apmConfigMapping: Record<
   {
     name: string;
     type: string;
-    getValue?: (options: GetApmPackagePolicyDefinitionOptions) => any;
+    getValue?: (options: GetApmPackagePolicyDefinitionOptions, value?: any) => any;
+    frozen?: boolean;
   }
 > = {
   'apm-server.host': {
     name: 'host',
     type: 'text',
+    frozen: true,
   },
   'apm-server.url': {
     name: 'url',
     type: 'text',
     getValue: ({ cloudPluginSetup }) => cloudPluginSetup?.apm?.url,
+    frozen: true,
   },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
@@ -126,6 +137,8 @@ export const apmConfigMapping: Record<
   'apm-server.rum.allow_origins': {
     name: 'rum_allow_origins',
     type: 'text',
+    getValue: (options, apmServerSchemaValue) =>
+      ensureValidMultiText(apmServerSchemaValue as string[]) ?? '',
   },
   'apm-server.rum.allow_headers': {
     name: 'rum_allow_headers',
@@ -198,14 +211,17 @@ export const apmConfigMapping: Record<
   'apm-server.ssl.enabled': {
     name: 'tls_enabled',
     type: 'bool',
+    frozen: true,
   },
   'apm-server.ssl.certificate': {
     name: 'tls_certificate',
     type: 'text',
+    frozen: true,
   },
   'apm-server.ssl.key': {
     name: 'tls_key',
     type: 'text',
+    frozen: true,
   },
   'apm-server.ssl.supported_protocols': {
     name: 'tls_supported_protocols',
@@ -252,3 +268,20 @@ export const apmConfigMapping: Record<
     type: 'integer',
   },
 };
+
+function ensureValidMultiText(textMultiValue: string[] | undefined) {
+  if (!textMultiValue) {
+    return undefined;
+  }
+  return textMultiValue.map(escapeInvalidYamlString);
+}
+function escapeInvalidYamlString(yamlString: string) {
+  try {
+    yaml.safeLoad(yamlString);
+  } catch (error) {
+    if (error instanceof yaml.YAMLException) {
+      return `"${yamlString}"`;
+    }
+  }
+  return yamlString;
+}

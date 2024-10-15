@@ -130,7 +130,7 @@ export function registerAnomalyDetectionAlertType({
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest

@@ -13,14 +13,14 @@ import {
 } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import { QUERY_INVALID } from './expression';
+import { FilterQuery, QUERY_INVALID } from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
 }: {
   criteria: InventoryMetricConditions[];
-  filterQuery?: string | symbol;
+  filterQuery?: FilterQuery;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {

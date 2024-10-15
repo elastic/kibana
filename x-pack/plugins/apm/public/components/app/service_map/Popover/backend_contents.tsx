@@ -19,16 +19,9 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
-export function BackendContents({
-  nodeData,
-  environment,
-  start,
-  end,
-}: ContentsProps) {
-  const { query } = useApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map'
-  );
+export function BackendContents({ nodeData, environment, start, end }: ContentsProps) {
+  // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
+  const { query } = useApmParams('/service-map', '/services/{serviceName}/service-map');
 
   const apmRouter = useApmRouter();
 

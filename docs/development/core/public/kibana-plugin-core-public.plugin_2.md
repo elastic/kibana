@@ -6,7 +6,7 @@
 
 The interface that should be returned by a `PluginInitializer`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> 
@@ -18,5 +18,5 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 |  --- | --- |
 |  [setup(core, plugins)](./kibana-plugin-core-public.plugin_2.setup.md) |  |
 |  [start(core, plugins)](./kibana-plugin-core-public.plugin_2.start.md) |  |
-|  [stop()?](./kibana-plugin-core-public.plugin_2.stop.md) | <i>(Optional)</i> |
+|  [stop()?](./kibana-plugin-core-public.plugin_2.stop.md) | _(Optional)_ |
 

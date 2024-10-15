@@ -6,7 +6,7 @@
 
 optional query string to filter exported objects.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 search?: string;

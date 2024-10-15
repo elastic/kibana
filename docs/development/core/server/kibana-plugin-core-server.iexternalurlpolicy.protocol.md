@@ -6,7 +6,7 @@
 
 Optional protocol describing the external destination. May be combined with `host`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 protocol?: string;

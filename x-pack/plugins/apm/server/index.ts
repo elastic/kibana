@@ -6,10 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
@@ -60,18 +57,11 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({
-    deprecate,
-    renameFromRoot,
-    deprecateFromRoot,
-    unusedFromRoot,
-  }) => [
+  deprecations: ({ deprecate, renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
     deprecate('enabled', '8.0.0'),
-    renameFromRoot(
-      'apm_oss.transactionIndices',
-      'xpack.apm.indices.transaction',
-      { level: 'warning' }
-    ),
+    renameFromRoot('apm_oss.transactionIndices', 'xpack.apm.indices.transaction', {
+      level: 'warning',
+    }),
     renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
       level: 'warning',
     }),
@@ -84,24 +74,18 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap', {
       level: 'warning',
     }),
-    renameFromRoot(
-      'apm_oss.onboardingIndices',
-      'xpack.apm.indices.onboarding',
-      { level: 'warning' }
-    ),
+    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding', {
+      level: 'warning',
+    }),
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
     unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
-    renameFromRoot(
-      'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
-    renameFromRoot(
-      'xpack.apm.maxServiceSelections',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
+    renameFromRoot('xpack.apm.maxServiceEnvironments', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.apm.maxServiceSelections', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
   ],
   exposeToBrowser: {
     serviceMapEnabled: true,
@@ -114,8 +98,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
 export type APMConfig = TypeOf<typeof configSchema>;
 export type ApmIndicesConfigName = keyof APMConfig['indices'];
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new APMPlugin(initContext);
+export const plugin = (initContext: PluginInitializerContext) => new APMPlugin(initContext);
 
 export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';

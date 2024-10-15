@@ -6,7 +6,7 @@
 
 Request specific route information exposed to a handler.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface KibanaRequestRoute<Method extends RouteMethod> 
@@ -14,9 +14,9 @@ export interface KibanaRequestRoute<Method extends RouteMethod>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [method](./kibana-plugin-core-server.kibanarequestroute.method.md) | Method |  |
-|  [options](./kibana-plugin-core-server.kibanarequestroute.options.md) | KibanaRequestRouteOptions&lt;Method&gt; |  |
-|  [path](./kibana-plugin-core-server.kibanarequestroute.path.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [method](./kibana-plugin-core-server.kibanarequestroute.method.md) |  | Method |  |
+|  [options](./kibana-plugin-core-server.kibanarequestroute.options.md) |  | KibanaRequestRouteOptions&lt;Method&gt; |  |
+|  [path](./kibana-plugin-core-server.kibanarequestroute.path.md) |  | string |  |
 

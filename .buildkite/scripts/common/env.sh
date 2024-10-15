@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo '--- Setup environment vars'
+
 export CI=true
 
 KIBANA_DIR=$(pwd)
@@ -25,10 +27,21 @@ export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_VERSION
 
-export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
+BUILDKITE_AGENT_GCP_REGION=""
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
+  BUILDKITE_AGENT_GCP_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
+fi
+export BUILDKITE_AGENT_GCP_REGION
+
+CI_PROXY_CACHE_SUFFIX=""
+if [[ "$BUILDKITE_AGENT_GCP_REGION" ]]; then
+  CI_PROXY_CACHE_SUFFIX="/region/$BUILDKITE_AGENT_GCP_REGION"
+fi
+
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
+export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
+export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX/cypress"
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
@@ -96,11 +109,8 @@ fi
 export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
-export TEST_KIBANA_HOST=localhost
-export TEST_KIBANA_PORT=6101
-export TEST_KIBANA_URL="http://elastic:changeme@localhost:6101"
-export TEST_ES_URL="http://elastic:changeme@localhost:6102"
-export TEST_ES_TRANSPORT_PORT=6301-6309
-export TEST_CORS_SERVER_PORT=6106
-export ALERTING_PROXY_PORT=6105
-export TEST_PROXY_SERVER_PORT=6107
+# Prevent Browserlist from logging on CI about outdated database versions
+export BROWSERSLIST_IGNORE_OLD_DATA=true
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana

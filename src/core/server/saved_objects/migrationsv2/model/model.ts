@@ -504,7 +504,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
         const batches = createBatches(
           res.right.processedDocs,
-          stateP.tempIndex,
+          stateP.tempIndexAlias,
           stateP.maxBatchSizeBytes
         );
         if (Either.isRight(batches)) {

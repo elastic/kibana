@@ -26,26 +26,23 @@ export async function getHasAggregatedTransactions({
   apmEventClient: APMEventClient;
   kuery: string;
 }) {
-  const response = await apmEventClient.search(
-    'get_has_aggregated_transactions',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(start && end ? rangeQuery(start, end) : []),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_has_aggregated_transactions', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+            ...(start && end ? rangeQuery(start, end) : []),
+            ...kqlQuery(kuery),
+          ],
         },
       },
-      terminateAfter: 1,
-    }
-  );
+    },
+    terminateAfter: 1,
+  });
 
   return response.hits.total.value > 0;
 }
@@ -65,9 +62,7 @@ export async function getSearchAggregatedTransactions({
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
-      return kuery
-        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
-        : true;
+      return kuery ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery }) : true;
 
     case SearchAggregatedTransactionSetting.auto:
       return getHasAggregatedTransactions({
@@ -85,9 +80,7 @@ export async function getSearchAggregatedTransactions({
 export function getTransactionDurationFieldForAggregatedTransactions(
   searchAggregatedTransactions: boolean
 ) {
-  return searchAggregatedTransactions
-    ? TRANSACTION_DURATION_HISTOGRAM
-    : TRANSACTION_DURATION;
+  return searchAggregatedTransactions ? TRANSACTION_DURATION_HISTOGRAM : TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForAggregatedTransactions(
@@ -101,7 +94,5 @@ export function getDocumentTypeFilterForAggregatedTransactions(
 export function getProcessorEventForAggregatedTransactions(
   searchAggregatedTransactions: boolean
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
-  return searchAggregatedTransactions
-    ? ProcessorEvent.metric
-    : ProcessorEvent.transaction;
+  return searchAggregatedTransactions ? ProcessorEvent.metric : ProcessorEvent.transaction;
 }

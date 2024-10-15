@@ -6,7 +6,7 @@
 
 description provided to a user in UI
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 description?: string;

@@ -6,7 +6,7 @@
 
 Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 close: () => Promise<void>;

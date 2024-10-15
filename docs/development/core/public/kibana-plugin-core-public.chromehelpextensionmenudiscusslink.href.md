@@ -6,7 +6,7 @@
 
 URL to discuss page. i.e. `https://discuss.elastic.co/c/${appName}`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 href: string;

@@ -8,7 +8,7 @@ Returns the server's root basePath as configured, without any namespace prefix.
 
 See  for getting the basePath value for a specific request
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly serverBasePath: string;

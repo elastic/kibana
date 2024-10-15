@@ -6,12 +6,12 @@
 
 Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered that are importable/exportable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getImportableAndExportableTypes(): SavedObjectsType<any>[];
 ```
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsType&lt;any&gt;\[\]
 

@@ -6,7 +6,7 @@
 
 Returns a boolean if the provided deprecation can be automatically resolvable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;

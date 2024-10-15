@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isEmpty, get } from 'lodash';
 import { FILTER_OPTIONS } from '../../../../../../../common/custom_link/custom_link_filter_options';
-import {
-  Filter,
-  FilterKey,
-} from '../../../../../../../common/custom_link/custom_link_types';
+import { Filter, FilterKey } from '../../../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 interface FilterSelectOption {
@@ -22,10 +19,9 @@ interface FilterSelectOption {
 
 export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
-  text: i18n.translate(
-    'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption',
-    { defaultMessage: 'Select field...' }
-  ),
+  text: i18n.translate('xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption', {
+    defaultMessage: 'Select field...',
+  }),
 };
 
 export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
@@ -42,20 +38,13 @@ export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
  * @param filters
  * @param selectedKey
  */
-export const getSelectOptions = (
-  filters: Filter[],
-  selectedKey: Filter['key']
-) => {
+export const getSelectOptions = (filters: Filter[], selectedKey: Filter['key']) => {
   return FILTER_SELECT_OPTIONS.filter(
-    ({ value }) =>
-      !filters.some(({ key }) => key === value && key !== selectedKey)
+    ({ value }) => !filters.some(({ key }) => key === value && key !== selectedKey)
   );
 };
 
-const getInvalidTemplateVariables = (
-  template: string,
-  transaction: Transaction
-) => {
+const getInvalidTemplateVariables = (template: string, transaction: Transaction) => {
   return (Mustache.parse(template) as Array<[string, string]>)
     .filter(([type]) => type === 'name')
     .map(([, value]) => value)
@@ -81,9 +70,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
           defaultMessage:
             "We couldn't find a value match for {variables} in the example transaction document.",
           values: {
-            variables: invalidVariables
-              .map((variable) => `{{${variable}}}`)
-              .join(', '),
+            variables: invalidVariables.map((variable) => `{{${variable}}}`).join(', '),
           },
         }
       );
@@ -99,10 +86,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
   }
 };
 
-export const replaceTemplateVariables = (
-  url: string,
-  transaction?: Transaction
-) => {
+export const replaceTemplateVariables = (url: string, transaction?: Transaction) => {
   const error = validateUrl(url, transaction);
   try {
     return { formattedUrl: Mustache.render(url, transaction), error };

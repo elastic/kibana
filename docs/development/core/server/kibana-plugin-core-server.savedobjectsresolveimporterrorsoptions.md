@@ -6,7 +6,7 @@
 
 Options to control the "resolve import" operation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsResolveImportErrorsOptions 
@@ -14,10 +14,10 @@ export interface SavedObjectsResolveImportErrorsOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [createNewCopies](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.createnewcopies.md) | boolean | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
-|  [namespace?](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.namespace.md) | string | <i>(Optional)</i> if specified, will import in given namespace |
-|  [readStream](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.readstream.md) | Readable | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from |
-|  [retries](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.retries.md) | SavedObjectsImportRetry\[\] | saved object import references to retry |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [createNewCopies](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.createnewcopies.md) |  | boolean | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
+|  [namespace?](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.namespace.md) |  | string | _(Optional)_ if specified, will import in given namespace |
+|  [readStream](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.readstream.md) |  | Readable | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from |
+|  [retries](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.retries.md) |  | SavedObjectsImportRetry\[\] | saved object import references to retry |
 

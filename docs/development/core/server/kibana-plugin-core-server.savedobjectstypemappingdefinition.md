@@ -6,7 +6,7 @@
 
 Describe a saved object type mapping.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsTypeMappingDefinition 
@@ -38,8 +38,8 @@ const typeDefinition: SavedObjectsTypeMappingDefinition = {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [dynamic?](./kibana-plugin-core-server.savedobjectstypemappingdefinition.dynamic.md) | false \| 'strict' | <i>(Optional)</i> The dynamic property of the mapping, either <code>false</code> or <code>'strict'</code>. If unspecified <code>dynamic: 'strict'</code> will be inherited from the top-level index mappings. |
-|  [properties](./kibana-plugin-core-server.savedobjectstypemappingdefinition.properties.md) | SavedObjectsMappingProperties | The underlying properties of the type mapping |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [dynamic?](./kibana-plugin-core-server.savedobjectstypemappingdefinition.dynamic.md) |  | false \| 'strict' | _(Optional)_ The dynamic property of the mapping, either <code>false</code> or <code>'strict'</code>. If unspecified <code>dynamic: 'strict'</code> will be inherited from the top-level index mappings. |
+|  [properties](./kibana-plugin-core-server.savedobjectstypemappingdefinition.properties.md) |  | SavedObjectsMappingProperties | The underlying properties of the type mapping |
 

@@ -18,7 +18,6 @@ export const INVALID_LICENSE = i18n.translate(
 export const NO_PERMISSION_LABEL = i18n.translate(
   'xpack.apm.settings.customizeUI.customLink.noPermissionTooltipLabel',
   {
-    defaultMessage:
-      "Your user role doesn't have permissions to create custom links",
+    defaultMessage: "Your user role doesn't have permissions to create custom links",
   }
 );

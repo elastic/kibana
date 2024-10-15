@@ -22,8 +22,7 @@ var apm = initApm({
   // ${i18n.translate(
     'xpack.apm.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
     {
-      defaultMessage:
-        'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
@@ -32,8 +31,7 @@ var apm = initApm({
   // ${i18n.translate(
     'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
     {
-      defaultMessage:
-        'Set the service version (required for source map feature)',
+      defaultMessage: 'Set the service version (required for source map feature)',
     }
   )}
   serviceVersion: '',

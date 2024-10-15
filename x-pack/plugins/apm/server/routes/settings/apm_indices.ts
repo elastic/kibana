@@ -8,10 +8,7 @@
 import * as t from 'io-ts';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 import { createApmServerRoute } from '../create_apm_server_route';
-import {
-  getApmIndices,
-  getApmIndexSettings,
-} from '../../lib/settings/apm_indices/get_apm_indices';
+import { getApmIndices, getApmIndexSettings } from '../../lib/settings/apm_indices/get_apm_indices';
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
 import { APMConfig } from '../..';
 

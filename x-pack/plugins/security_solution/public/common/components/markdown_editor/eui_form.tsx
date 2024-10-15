@@ -12,6 +12,7 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_impo
 
 import { MarkdownEditor, MarkdownEditorRef } from './editor';
 
+/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook;
@@ -20,6 +21,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
 };
+/* eslint-enable react/no-unused-prop-types */
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `

@@ -5,7 +5,7 @@
 ## SavedObjectsBulkResolveResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkResolveResponse<T = unknown> 
@@ -13,7 +13,7 @@ export interface SavedObjectsBulkResolveResponse<T = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [resolved\_objects](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.resolved_objects.md) | Array&lt;SavedObjectsResolveResponse&lt;T&gt;&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [resolved\_objects](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.resolved_objects.md) |  | Array&lt;SavedObjectsResolveResponse&lt;T&gt;&gt; |  |
 

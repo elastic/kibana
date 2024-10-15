@@ -47,9 +47,9 @@ To use {kib} i18n tooling, create a `.i18nrc.json` file with the following confi
 }
 -----------
 
-An example {kib} `.i18nrc.json` is {blob}.i18nrc.json[here].
+An example {kib} `.i18nrc.json` is {kibana-blob}.i18nrc.json[here].
 
-Full documentation about i18n tooling is {blob}src/dev/i18n/README.md[here].
+Full documentation about i18n tooling is {kibana-blob}src/dev/i18n/README.md[here].
 
 [discrete]
 === Extracting default messages
@@ -109,7 +109,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+Full details are {kib-repo}tree/{branch}/packages/kbn-i18n#vanilla-js[here].
 
 [discrete]
 ==== i18n for React
@@ -133,14 +133,14 @@ export const Component = () => {
 };
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
+Full details are {kib-repo}tree/{branch}/packages/kbn-i18n#react[here].
 
 [discrete]
 === Resources
 
-To learn more about i18n tooling, see {blob}src/dev/i18n/README.md[i18n dev tooling].
+To learn more about i18n tooling, see {kib-repo}blob/{branch}/src/dev/i18n/README.md[i18n dev tooling].
 
 To learn more about implementing i18n in the UI, use the following links:
 
-* {blob}packages/kbn-i18n/README.md[i18n plugin]
-* {blob}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]
+* {kib-repo}blob/{branch}/packages/kbn-i18n/README.md[i18n plugin]
+* {kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n guidelines]

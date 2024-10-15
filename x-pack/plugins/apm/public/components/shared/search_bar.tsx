@@ -6,12 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
@@ -83,11 +78,7 @@ export function SearchBar({
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        direction={searchBarDirection}
-      >
+      <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
         <EuiFlexItem>
           <EuiFlexGroup
             direction={isLarge ? 'columnReverse' : 'row'}
@@ -102,10 +93,7 @@ export function SearchBar({
 
             {showKueryBar && (
               <EuiFlexItem>
-                <KueryBar
-                  placeholder={kueryBarPlaceholder}
-                  boolFilter={kueryBarBoolFilter}
-                />
+                <KueryBar placeholder={kueryBarPlaceholder} boolFilter={kueryBarBoolFilter} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

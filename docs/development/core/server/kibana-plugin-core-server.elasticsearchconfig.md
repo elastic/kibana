@@ -6,7 +6,7 @@
 
 Wrapper of config schema.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ElasticsearchConfig 
@@ -22,20 +22,20 @@ export declare class ElasticsearchConfig
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [apiVersion](./kibana-plugin-core-server.elasticsearchconfig.apiversion.md) |  | string | Version of the Elasticsearch (6.7, 7.1 or <code>master</code>) client will be connecting to. |
-|  [customHeaders](./kibana-plugin-core-server.elasticsearchconfig.customheaders.md) |  | ElasticsearchConfigType\['customHeaders'\] | Header names and values to send to Elasticsearch with every request. These headers cannot be overwritten by client-side headers and aren't affected by <code>requestHeadersWhitelist</code> configuration. |
-|  [healthCheckDelay](./kibana-plugin-core-server.elasticsearchconfig.healthcheckdelay.md) |  | Duration | The interval between health check requests Kibana sends to the Elasticsearch. |
-|  [hosts](./kibana-plugin-core-server.elasticsearchconfig.hosts.md) |  | string\[\] | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |
-|  [ignoreVersionMismatch](./kibana-plugin-core-server.elasticsearchconfig.ignoreversionmismatch.md) |  | boolean | Whether to allow kibana to connect to a non-compatible elasticsearch node. |
-|  [password?](./kibana-plugin-core-server.elasticsearchconfig.password.md) |  | string | <i>(Optional)</i> If Elasticsearch is protected with basic authentication, this setting provides the password that the Kibana server uses to perform its administrative functions. |
-|  [pingTimeout](./kibana-plugin-core-server.elasticsearchconfig.pingtimeout.md) |  | Duration | Timeout after which PING HTTP request will be aborted and retried. |
-|  [requestHeadersWhitelist](./kibana-plugin-core-server.elasticsearchconfig.requestheaderswhitelist.md) |  | string\[\] | List of Kibana client-side headers to send to Elasticsearch when request scoped cluster client is used. If this is an empty array then \*no\* client-side will be sent. |
-|  [requestTimeout](./kibana-plugin-core-server.elasticsearchconfig.requesttimeout.md) |  | Duration | Timeout after which HTTP request will be aborted and retried. |
-|  [serviceAccountToken?](./kibana-plugin-core-server.elasticsearchconfig.serviceaccounttoken.md) |  | string | <i>(Optional)</i> If Elasticsearch security features are enabled, this setting provides the service account token that the Kibana server users to perform its administrative functions.<!-- -->This is an alternative to specifying a username and password. |
-|  [shardTimeout](./kibana-plugin-core-server.elasticsearchconfig.shardtimeout.md) |  | Duration | Timeout for Elasticsearch to wait for responses from shards. Set to 0 to disable. |
-|  [sniffInterval](./kibana-plugin-core-server.elasticsearchconfig.sniffinterval.md) |  | false \| Duration | Interval to perform a sniff operation and make sure the list of nodes is complete. If <code>false</code> then sniffing is disabled. |
-|  [sniffOnConnectionFault](./kibana-plugin-core-server.elasticsearchconfig.sniffonconnectionfault.md) |  | boolean | Specifies whether the client should immediately sniff for a more current list of nodes when a connection dies. |
-|  [sniffOnStart](./kibana-plugin-core-server.elasticsearchconfig.sniffonstart.md) |  | boolean | Specifies whether the client should attempt to detect the rest of the cluster when it is first instantiated. |
-|  [ssl](./kibana-plugin-core-server.elasticsearchconfig.ssl.md) |  | Pick&lt;SslConfigSchema, Exclude&lt;keyof SslConfigSchema, 'certificateAuthorities' \| 'keystore' \| 'truststore'&gt;&gt; &amp; { certificateAuthorities?: string\[\]; } | Set of settings configure SSL connection between Kibana and Elasticsearch that are required when <code>xpack.ssl.verification_mode</code> in Elasticsearch is set to either <code>certificate</code> or <code>full</code>. |
-|  [username?](./kibana-plugin-core-server.elasticsearchconfig.username.md) |  | string | <i>(Optional)</i> If Elasticsearch is protected with basic authentication, this setting provides the username that the Kibana server uses to perform its administrative functions. Cannot be used in conjunction with serviceAccountToken. |
+|  [apiVersion](./kibana-plugin-core-server.elasticsearchconfig.apiversion.md) | <code>readonly</code> | string | Version of the Elasticsearch (6.7, 7.1 or <code>master</code>) client will be connecting to. |
+|  [customHeaders](./kibana-plugin-core-server.elasticsearchconfig.customheaders.md) | <code>readonly</code> | ElasticsearchConfigType\['customHeaders'\] | Header names and values to send to Elasticsearch with every request. These headers cannot be overwritten by client-side headers and aren't affected by <code>requestHeadersWhitelist</code> configuration. |
+|  [healthCheckDelay](./kibana-plugin-core-server.elasticsearchconfig.healthcheckdelay.md) | <code>readonly</code> | Duration | The interval between health check requests Kibana sends to the Elasticsearch. |
+|  [hosts](./kibana-plugin-core-server.elasticsearchconfig.hosts.md) | <code>readonly</code> | string\[\] | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |
+|  [ignoreVersionMismatch](./kibana-plugin-core-server.elasticsearchconfig.ignoreversionmismatch.md) | <code>readonly</code> | boolean | Whether to allow kibana to connect to a non-compatible elasticsearch node. |
+|  [password?](./kibana-plugin-core-server.elasticsearchconfig.password.md) | <code>readonly</code> | string | _(Optional)_ If Elasticsearch is protected with basic authentication, this setting provides the password that the Kibana server uses to perform its administrative functions. |
+|  [pingTimeout](./kibana-plugin-core-server.elasticsearchconfig.pingtimeout.md) | <code>readonly</code> | Duration | Timeout after which PING HTTP request will be aborted and retried. |
+|  [requestHeadersWhitelist](./kibana-plugin-core-server.elasticsearchconfig.requestheaderswhitelist.md) | <code>readonly</code> | string\[\] | List of Kibana client-side headers to send to Elasticsearch when request scoped cluster client is used. If this is an empty array then \*no\* client-side will be sent. |
+|  [requestTimeout](./kibana-plugin-core-server.elasticsearchconfig.requesttimeout.md) | <code>readonly</code> | Duration | Timeout after which HTTP request will be aborted and retried. |
+|  [serviceAccountToken?](./kibana-plugin-core-server.elasticsearchconfig.serviceaccounttoken.md) | <code>readonly</code> | string | <p>_(Optional)_ If Elasticsearch security features are enabled, this setting provides the service account token that the Kibana server users to perform its administrative functions.</p><p>This is an alternative to specifying a username and password.</p> |
+|  [shardTimeout](./kibana-plugin-core-server.elasticsearchconfig.shardtimeout.md) | <code>readonly</code> | Duration | Timeout for Elasticsearch to wait for responses from shards. Set to 0 to disable. |
+|  [sniffInterval](./kibana-plugin-core-server.elasticsearchconfig.sniffinterval.md) | <code>readonly</code> | false \| Duration | Interval to perform a sniff operation and make sure the list of nodes is complete. If <code>false</code> then sniffing is disabled. |
+|  [sniffOnConnectionFault](./kibana-plugin-core-server.elasticsearchconfig.sniffonconnectionfault.md) | <code>readonly</code> | boolean | Specifies whether the client should immediately sniff for a more current list of nodes when a connection dies. |
+|  [sniffOnStart](./kibana-plugin-core-server.elasticsearchconfig.sniffonstart.md) | <code>readonly</code> | boolean | Specifies whether the client should attempt to detect the rest of the cluster when it is first instantiated. |
+|  [ssl](./kibana-plugin-core-server.elasticsearchconfig.ssl.md) | <code>readonly</code> | Pick&lt;SslConfigSchema, Exclude&lt;keyof SslConfigSchema, 'certificateAuthorities' \| 'keystore' \| 'truststore'&gt;&gt; &amp; { certificateAuthorities?: string\[\]; } | Set of settings configure SSL connection between Kibana and Elasticsearch that are required when <code>xpack.ssl.verification_mode</code> in Elasticsearch is set to either <code>certificate</code> or <code>full</code>. |
+|  [username?](./kibana-plugin-core-server.elasticsearchconfig.username.md) | <code>readonly</code> | string | _(Optional)_ If Elasticsearch is protected with basic authentication, this setting provides the username that the Kibana server uses to perform its administrative functions. Cannot be used in conjunction with serviceAccountToken. |
 

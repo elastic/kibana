@@ -13,7 +13,7 @@ A function that can be used to register a handler that will be called when the u
 
 This will be called either when the user goes to another application, or when trying to close the tab or manually changing the url.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 onAppLeave: (handler: AppLeaveHandler) => void;

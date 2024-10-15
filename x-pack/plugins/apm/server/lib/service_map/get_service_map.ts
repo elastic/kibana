@@ -18,10 +18,7 @@ import { mergeProjection } from '../../projections/util/merge_projection';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../helpers/setup_request';
-import {
-  DEFAULT_ANOMALIES,
-  getServiceAnomalies,
-} from './get_service_anomalies';
+import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
@@ -37,13 +34,7 @@ export interface IEnvOptions {
   end: number;
 }
 
-async function getConnectionData({
-  setup,
-  serviceName,
-  environment,
-  start,
-  end,
-}: IEnvOptions) {
+async function getConnectionData({ setup, serviceName, environment, start, end }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
@@ -64,35 +55,30 @@ async function getConnectionData({
       return init;
     }
 
-    const chunkedResponses = await withApmSpan(
-      'get_service_paths_from_all_trace_ids',
-      () =>
-        Promise.all(
-          chunks.map((traceIdsChunk) =>
-            getServiceMapFromTraceIds({
-              setup,
-              traceIds: traceIdsChunk,
-              start,
-              end,
-            })
-          )
+    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
+      Promise.all(
+        chunks.map((traceIdsChunk) =>
+          getServiceMapFromTraceIds({
+            setup,
+            traceIds: traceIdsChunk,
+            start,
+            end,
+          })
         )
+      )
     );
 
     return chunkedResponses.reduce((prev, current) => {
       return {
         connections: prev.connections.concat(current.connections),
-        discoveredServices: prev.discoveredServices.concat(
-          current.discoveredServices
-        ),
+        discoveredServices: prev.discoveredServices.concat(current.discoveredServices),
       };
     });
   });
 }
 
 async function getServicesData(options: IEnvOptions) {
-  const { environment, setup, searchAggregatedTransactions, start, end } =
-    options;
+  const { environment, setup, searchAggregatedTransactions, start, end } = options;
 
   const projection = getServicesProjection({
     setup,
@@ -102,10 +88,7 @@ async function getServicesData(options: IEnvOptions) {
     end,
   });
 
-  let filter = [
-    ...projection.body.query.bool.filter,
-    ...environmentQuery(environment),
-  ];
+  let filter = [...projection.body.query.bool.filter, ...environmentQuery(environment)];
 
   if (options.serviceName) {
     filter = filter.concat({
@@ -144,21 +127,15 @@ async function getServicesData(options: IEnvOptions) {
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(
-    'get_service_stats_for_service_map',
-    params
-  );
+  const response = await apmEventClient.search('get_service_stats_for_service_map', params);
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
       return {
         [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]:
-          (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
         [SERVICE_ENVIRONMENT]:
-          options.environment === ENVIRONMENT_ALL.value
-            ? null
-            : options.environment,
+          options.environment === ENVIRONMENT_ALL.value ? null : options.environment,
       };
     }) || []
   );

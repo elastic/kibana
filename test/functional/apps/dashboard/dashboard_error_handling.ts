@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -22,13 +21,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    */
   describe('dashboard error handling', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      // The kbn_archiver above was created from an es_archiver which intentionally had
+      // 2 missing index patterns.  But that would fail to load with kbn_archiver.
+      // So we unload those 2 index patterns here.
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
       );
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard_error_cases.json'
       );
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('correctly loads default index pattern on first load with an error embeddable', async () => {

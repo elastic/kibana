@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -15,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/164452
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -47,12 +49,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.getWaffleMapTooltips();
+        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
+      });
+
+      it('should not allow adding more than 20 custom metrics', async () => {
+        // open
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraHome.addCustomMetric(field);
+        }
+        const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
+        // there are 6 default metrics in the context menu for hosts
+        expect(metricsCount).to.eql(20);
+
+        await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
+        // close
+        await pageObjects.infraHome.clickCustomMetricDropdown();
       });
     });
 
@@ -73,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });
@@ -86,14 +121,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106650
-    describe.skip('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    describe('Saved Views', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('should have save and load controls', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraSavedViews.getSavedViewsButton();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
       });

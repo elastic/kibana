@@ -21,7 +21,7 @@ WARNING: This API supports <<token-api-authentication>> only.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-WARNING: As part of the {kibana-ref-all}/master/sharing-saved-objects.html[Sharing Saved Objects] effort, IDs for rules in a custom space will be regenerated in 8.0.0. Rules created prior to 8.0.0 using this API that specify both the `id` and `space_id` path parameters will be re-assigned a randomly generated ID upon upgrading to 8.0.0.
+WARNING: As part of the <<sharing-saved-objects,Sharing Saved Objects>> effort, IDs for rules in a custom space will be regenerated in 8.0.0. Rules created prior to 8.0.0 using this API that specify both the `id` and `space_id` path parameters will be re-assigned a randomly generated ID upon upgrading to 8.0.0.
 
 `id`::
   (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.

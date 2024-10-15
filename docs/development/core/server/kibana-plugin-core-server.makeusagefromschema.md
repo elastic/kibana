@@ -6,7 +6,7 @@
 
 List of configuration values that will be exposed to usage collection. If parent node or actual config path is set to `true` then the actual value of these configs will be reoprted. If parent node or actual config path is set to `false` then the config will be reported as \[redacted\].
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type MakeUsageFromSchema<T> = {

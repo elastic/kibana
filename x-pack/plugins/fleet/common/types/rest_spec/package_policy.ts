@@ -11,6 +11,7 @@ import type {
   UpdatePackagePolicy,
   DryRunPackagePolicy,
   PackagePolicyPackage,
+  FullAgentPolicyInput,
 } from '../models';
 
 export interface GetPackagePoliciesRequest {
@@ -79,6 +80,7 @@ export interface UpgradePackagePolicyBaseResponse {
 export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
   hasErrors: boolean;
   diff?: [PackagePolicy, DryRunPackagePolicy];
+  agent_diff?: [FullAgentPolicyInput[]];
 }
 
 export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];

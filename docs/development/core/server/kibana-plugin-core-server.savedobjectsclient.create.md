@@ -6,7 +6,7 @@
 
 Persists a SavedObject
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
@@ -18,9 +18,9 @@ create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOpt
 |  --- | --- | --- |
 |  type | string |  |
 |  attributes | T |  |
-|  options | SavedObjectsCreateOptions |  |
+|  options | SavedObjectsCreateOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObject&lt;T&gt;&gt;
 

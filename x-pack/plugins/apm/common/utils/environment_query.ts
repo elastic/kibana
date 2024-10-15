@@ -7,14 +7,9 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 
-export function environmentQuery(
-  environment: string
-): QueryDslQueryContainer[] {
+export function environmentQuery(environment: string): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }

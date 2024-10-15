@@ -6,7 +6,7 @@
 
 Updater for applications. see [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;

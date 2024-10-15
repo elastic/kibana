@@ -51,21 +51,18 @@ export function LatencyChart({ height, kuery, environment }: Props) {
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
-  const { latencyChartsData, latencyChartsStatus } =
-    useTransactionLatencyChartsFetcher({
-      kuery,
-      environment,
-    });
+  const { latencyChartsData, latencyChartsStatus } = useTransactionLatencyChartsFetcher({
+    kuery,
+    environment,
+  });
 
-  const { currentPeriod, previousPeriod, anomalyTimeseries, mlJobId } =
-    latencyChartsData;
+  const { currentPeriod, previousPeriod, anomalyTimeseries, mlJobId } = latencyChartsData;
 
   const { alerts } = useApmServiceContext();
 
-  const timeseries = [
-    currentPeriod,
-    comparisonEnabled ? previousPeriod : undefined,
-  ].filter(filterNil);
+  const timeseries = [currentPeriod, comparisonEnabled ? previousPeriod : undefined].filter(
+    filterNil
+  );
 
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
@@ -79,22 +76,18 @@ export function LatencyChart({ height, kuery, environment }: Props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
-                    {i18n.translate(
-                      'xpack.apm.serviceOverview.latencyChartTitle',
-                      {
-                        defaultMessage: 'Latency',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.serviceOverview.latencyChartTitle', {
+                      defaultMessage: 'Latency',
+                    })}
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   compressed
-                  prepend={i18n.translate(
-                    'xpack.apm.serviceOverview.latencyChartTitle.prepend',
-                    { defaultMessage: 'Metric' }
-                  )}
+                  prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
+                    defaultMessage: 'Metric',
+                  })}
                   options={options}
                   value={latencyAggregationType}
                   onChange={(nextOption) => {
@@ -109,10 +102,7 @@ export function LatencyChart({ height, kuery, environment }: Props) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MLHeader
-              hasValidMlLicense={license?.getFeature('ml').isAvailable}
-              mlJobId={mlJobId}
-            />
+            <MLHeader hasValidMlLicense={license?.getFeature('ml').isAvailable} mlJobId={mlJobId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -127,10 +117,8 @@ export function LatencyChart({ height, kuery, environment }: Props) {
           anomalyTimeseries={anomalyTimeseries}
           alerts={alerts.filter(
             (alert) =>
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDuration ||
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDurationAnomaly
+              alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionDuration ||
+              alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionDurationAnomaly
           )}
         />
       </EuiFlexItem>

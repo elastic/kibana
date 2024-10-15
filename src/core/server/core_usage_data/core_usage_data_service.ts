@@ -133,11 +133,11 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             return index != null ? acc.add(index) : acc;
           }, new Set<string>())
           .values()
-      ).map((index) => {
+      ).map(async (index) => {
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
-        // call for every alias
-        return elasticsearch.client.asInternalUser.cat
+        // call for every alias. The document count is the lucene document count.
+        const catIndicesResults = await elasticsearch.client.asInternalUser.cat
           .indices<any[]>({
             index,
             format: 'JSON',
@@ -145,6 +145,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           })
           .then(({ body }) => {
             const stats = body[0];
+
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
@@ -155,6 +156,27 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
                 : 0,
             };
           });
+        // We use the GET <index>/_count API to get the number of saved objects
+        // to monitor if the cluster will hit the scalling limit of saved object migrations
+        const savedObjectsCounts = await elasticsearch.client.asInternalUser
+          .count({
+            index,
+          })
+          .then(({ body }) => {
+            return {
+              savedObjectsDocsCount: body.count ? body.count : 0,
+            };
+          });
+        this.logger.debug(
+          `Lucene documents count ${catIndicesResults.docsCount} from index ${catIndicesResults.alias}`
+        );
+        this.logger.debug(
+          `Saved objects documents count ${savedObjectsCounts.savedObjectsDocsCount} from index ${catIndicesResults.alias}`
+        );
+        return {
+          ...catIndicesResults,
+          ...savedObjectsCounts,
+        };
       })
     );
   }

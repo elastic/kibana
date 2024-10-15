@@ -5,7 +5,7 @@
 ## SavedObjectsExporter class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SavedObjectsExporter 
@@ -21,6 +21,6 @@ export declare class SavedObjectsExporter
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [exportByObjects(options)](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |  | Generates an export stream for given object references.<!-- -->See the [options](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) for more detailed information. |
-|  [exportByTypes(options)](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |  | Generates an export stream for given types.<!-- -->See the [options](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) for more detailed information. |
+|  [exportByObjects(options)](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |  | <p>Generates an export stream for given object references.</p><p>See the [options](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) for more detailed information.</p> |
+|  [exportByTypes(options)](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |  | <p>Generates an export stream for given types.</p><p>See the [options](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) for more detailed information.</p> |
 

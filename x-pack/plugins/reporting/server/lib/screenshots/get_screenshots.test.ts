@@ -8,10 +8,13 @@
 import { HeadlessChromiumDriver } from '../../browsers';
 import {
   createMockBrowserDriverFactory,
+  createMockConfig,
   createMockConfigSchema,
+  createMockLayoutInstance,
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
+import { LayoutInstance } from '../layouts';
 import { getScreenshots } from './get_screenshots';
 
 describe('getScreenshots', () => {
@@ -34,6 +37,7 @@ describe('getScreenshots', () => {
 
   let logger: ReturnType<typeof createMockLevelLogger>;
   let browser: jest.Mocked<HeadlessChromiumDriver>;
+  let layout: LayoutInstance;
 
   beforeEach(async () => {
     const core = await createMockReportingCore(createMockConfigSchema());
@@ -56,6 +60,8 @@ describe('getScreenshots', () => {
         return jest.fn();
       },
     });
+    const config = createMockConfig(createMockConfigSchema());
+    layout = createMockLayoutInstance(config.get('capture'));
   });
 
   afterEach(() => {
@@ -63,7 +69,7 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, elementsPositionAndAttributes, logger)).resolves
+    await expect(getScreenshots(browser, layout, elementsPositionAndAttributes, logger)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -109,7 +115,7 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, elementsPositionAndAttributes, logger);
+    await getScreenshots(browser, layout, elementsPositionAndAttributes, logger);
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(
@@ -126,7 +132,7 @@ describe('getScreenshots', () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, elementsPositionAndAttributes, logger)
+      getScreenshots(browser, layout, elementsPositionAndAttributes, logger)
     ).rejects.toBeInstanceOf(Error);
   });
 });

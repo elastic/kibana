@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createActionRoute } from './create';
+import { createActionRoute, bodySchema } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
@@ -158,5 +158,17 @@ describe('createActionRoute', () => {
     );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+  });
+
+  test('validates body to prevent empty strings', async () => {
+    const body = {
+      name: 'My name',
+      connector_type_id: 'abc',
+      config: { foo: ' ' },
+      secrets: {},
+    };
+    expect(() => bodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
+      `"[config.foo]: value '' is not valid"`
+    );
   });
 });

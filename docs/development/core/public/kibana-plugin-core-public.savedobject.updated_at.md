@@ -6,7 +6,7 @@
 
 Timestamp of the last time this document had been updated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 updated_at?: string;

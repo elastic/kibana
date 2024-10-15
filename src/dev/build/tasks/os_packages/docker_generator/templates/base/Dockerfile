@@ -22,7 +22,7 @@ RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager
 RUN cd /tmp && \
   curl --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://artifacts.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
 
@@ -102,7 +102,7 @@ RUN set -e ; \
   chmod +x /bin/tini
 
 RUN mkdir /usr/share/fonts/local
-RUN curl -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
 RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
 RUN fc-cache -v
 
@@ -119,6 +119,9 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
+{{^opensslLegacyProvider}}
+RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
+{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.

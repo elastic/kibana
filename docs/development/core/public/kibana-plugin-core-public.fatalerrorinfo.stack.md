@@ -4,7 +4,7 @@
 
 ## FatalErrorInfo.stack property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stack: string | undefined;

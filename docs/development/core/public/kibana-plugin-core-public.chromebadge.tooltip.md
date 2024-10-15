@@ -4,7 +4,7 @@
 
 ## ChromeBadge.tooltip property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 tooltip: string;

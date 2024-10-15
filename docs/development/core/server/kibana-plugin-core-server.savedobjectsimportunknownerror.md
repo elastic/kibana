@@ -6,7 +6,7 @@
 
 Represents a failure to import due to an unknown reason.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportUnknownError 
@@ -14,9 +14,9 @@ export interface SavedObjectsImportUnknownError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [message](./kibana-plugin-core-server.savedobjectsimportunknownerror.message.md) | string |  |
-|  [statusCode](./kibana-plugin-core-server.savedobjectsimportunknownerror.statuscode.md) | number |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimportunknownerror.type.md) | 'unknown' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [message](./kibana-plugin-core-server.savedobjectsimportunknownerror.message.md) |  | string |  |
+|  [statusCode](./kibana-plugin-core-server.savedobjectsimportunknownerror.statuscode.md) |  | number |  |
+|  [type](./kibana-plugin-core-server.savedobjectsimportunknownerror.type.md) |  | 'unknown' |  |
 

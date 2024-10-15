@@ -8,7 +8,7 @@ Creates a [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) 
 
 This should only be used in the specific case where the client needs to be accessed from outside of the scope of a [RequestHandler](./kibana-plugin-core-server.requesthandler.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
@@ -20,7 +20,7 @@ asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsCli
 |  --- | --- | --- |
 |  savedObjectsClient | SavedObjectsClientContract |  |
 
-<b>Returns:</b>
+**Returns:**
 
 IUiSettingsClient
 

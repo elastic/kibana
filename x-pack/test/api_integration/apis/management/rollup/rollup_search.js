@@ -14,10 +14,12 @@ import { getRandomString } from './lib';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+  const { createIndexWithMappings, createMockRollupIndex, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
   describe('search', () => {
+    after(() => cleanUp());
+
     const URI = `${API_BASE_PATH}/search`;
 
     it('return a 404 if the rollup index does not exist', async () => {
@@ -31,6 +33,11 @@ export default function ({ getService }) {
     });
 
     it('should return a 200 when searching on existing rollup index', async () => {
+      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex();
+
       // Create a Rollup job on an index with the INDEX_TO_ROLLUP_MAPPINGS
       const indexName = await createIndexWithMappings();
       const rollupIndex = getRandomString();

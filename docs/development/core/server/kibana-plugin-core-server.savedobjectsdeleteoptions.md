@@ -5,17 +5,17 @@
 ## SavedObjectsDeleteOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions 
 ```
-<b>Extends:</b> SavedObjectsBaseOptions
+**Extends:** SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [force?](./kibana-plugin-core-server.savedobjectsdeleteoptions.force.md) | boolean | <i>(Optional)</i> Force deletion of an object that exists in multiple namespaces |
-|  [refresh?](./kibana-plugin-core-server.savedobjectsdeleteoptions.refresh.md) | MutatingOperationRefreshSetting | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [force?](./kibana-plugin-core-server.savedobjectsdeleteoptions.force.md) |  | boolean | _(Optional)_ Force deletion of an object that exists in multiple namespaces |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsdeleteoptions.refresh.md) |  | MutatingOperationRefreshSetting | _(Optional)_ The Elasticsearch Refresh setting for this operation |
 

@@ -49,9 +49,7 @@ function TransactionSummary({ transaction, totalDuration, errorCount }: Props) {
     />,
     getTransactionResultSummaryItem(transaction),
     errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,
-    transaction.user_agent ? (
-      <UserAgentSummaryItem {...transaction.user_agent} />
-    ) : null,
+    transaction.user_agent ? <UserAgentSummaryItem {...transaction.user_agent} /> : null,
   ];
 
   return <Summary items={items} />;

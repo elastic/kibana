@@ -14,7 +14,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'savedObjects']);
   const browser = getService('browser');
   const find = getService('find');
 
@@ -55,6 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await button.click();
     // Allow some time for the transition/animations to occur before assuming the click is done
     await delay(100);
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('saved objects edition page', () => {

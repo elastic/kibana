@@ -6,7 +6,7 @@
 
 The Elasticsearch `sort` value of this result.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sort?: string[];

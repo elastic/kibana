@@ -75,7 +75,7 @@ export async function runTypeCheckCli() {
               [
                 '--max-old-space-size=5120',
                 require.resolve('typescript/bin/tsc'),
-                ...['--project', p.tsConfigPath, ...(flags.verbose ? ['--verbose'] : [])],
+                ...['--project', p.tsConfigPath],
                 ...tscArgs,
               ],
               {

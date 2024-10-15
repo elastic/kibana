@@ -6,7 +6,8 @@
  */
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { mount } from 'enzyme';
-import { omit, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { defaultHeaders } from './default_headers';
@@ -209,6 +210,7 @@ describe('helpers', () => {
           defaultSortDirection,
           description:
             'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+          esTypes: ['date'],
           example: '2016-05-23T08:05:34.853Z',
           format: '',
           id: '@timestamp',

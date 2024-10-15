@@ -4,7 +4,7 @@
 
 ## SavedObjectError.statusCode property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 statusCode: number;

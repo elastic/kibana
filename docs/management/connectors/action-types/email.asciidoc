@@ -7,7 +7,11 @@
 
 The email connector uses the SMTP protocol to send mail messages, using an integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email message text is sent as both plain text and html text.
 
-NOTE: For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+[NOTE]
+====
+* For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+* When the <<action-config-email-domain-allowlist,`xpack.actions.email.domain_allowlist`>> configuration setting is used, the email addresses used for all of the Sender (from), To, CC, and BCC properties must have email domains specified in the configuration setting.
+====
 
 [float]
 [[email-connector-configuration]]
@@ -115,7 +119,7 @@ For other email servers, you can check the list of well-known services that Node
 [[elasticcloud]]
 ==== Sending email from Elastic Cloud
 
-IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email addresses that notifications get sent.
+IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-allowlist[allowlist] the email addresses that notifications get sent.
 
 Use the following connector settings to send email from Elastic Cloud: 
 

@@ -6,7 +6,7 @@
 
 [OverlayStart](./kibana-plugin-core-public.overlaystart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overlays: OverlayStart;

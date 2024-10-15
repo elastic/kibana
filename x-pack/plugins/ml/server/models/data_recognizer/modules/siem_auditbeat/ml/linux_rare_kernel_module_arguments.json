@@ -1,5 +1,4 @@
 {
-    "job_type": "anomaly_detector",
     "description": "Security: Auditbeat - Looks for unusual kernel modules which are often used for stealth.",
     "groups": [
       "security",

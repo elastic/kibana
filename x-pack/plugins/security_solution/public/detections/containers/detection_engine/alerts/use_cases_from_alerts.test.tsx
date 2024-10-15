@@ -22,9 +22,6 @@ describe('useCasesFromAlerts hook', () => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
 
   it('returns an array of caseIds', async () => {
     const spyOnCases = jest.spyOn(api, 'getCaseIdsFromAlertId');

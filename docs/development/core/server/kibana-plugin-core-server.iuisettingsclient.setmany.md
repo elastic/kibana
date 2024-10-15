@@ -6,7 +6,7 @@
 
 Writes multiple uiSettings values and marks them as set by the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setMany: (changes: Record<string, any>) => Promise<void>;

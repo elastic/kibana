@@ -6,7 +6,7 @@
 
 Raw response received, may be undefined if there was an error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly response?: Readonly<Response>;

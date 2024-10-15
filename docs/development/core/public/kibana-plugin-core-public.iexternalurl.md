@@ -6,7 +6,7 @@
 
 APIs for working with external URLs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IExternalUrl 
@@ -16,5 +16,5 @@ export interface IExternalUrl
 
 |  Method | Description |
 |  --- | --- |
-|  [validateUrl(relativeOrAbsoluteUrl)](./kibana-plugin-core-public.iexternalurl.validateurl.md) | Determines if the provided URL is a valid location to send users. Validation is based on the configured allow list in kibana.yml.<!-- -->If the URL is valid, then a URL will be returned. Otherwise, this will return null. |
+|  [validateUrl(relativeOrAbsoluteUrl)](./kibana-plugin-core-public.iexternalurl.validateurl.md) | <p>Determines if the provided URL is a valid location to send users. Validation is based on the configured allow list in kibana.yml.</p><p>If the URL is valid, then a URL will be returned. Otherwise, this will return null.</p> |
 

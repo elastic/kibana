@@ -45,9 +45,7 @@ describe('createStaticIndexPattern', () => {
 
   it(`should not create index pattern if no APM data is found`, async () => {
     // does not have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(false);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(false);
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
@@ -62,9 +60,7 @@ describe('createStaticIndexPattern', () => {
 
   it(`should create index pattern`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
@@ -80,9 +76,7 @@ describe('createStaticIndexPattern', () => {
 
   it(`should overwrite the index pattern if the new index pattern title does not match the old index pattern title`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     const expectedIndexPatternTitle =
@@ -98,18 +92,14 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.get).toHaveBeenCalled();
     expect(savedObjectsClient.create).toHaveBeenCalled();
     // @ts-ignore
-    expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
-      expectedIndexPatternTitle
-    );
+    expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(expectedIndexPatternTitle);
     // @ts-ignore
     expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
   });
 
   it(`should not overwrite an index pattern if the new index pattern title matches the old index pattern title`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const savedObjectsClient = getMockSavedObjectsClient(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'

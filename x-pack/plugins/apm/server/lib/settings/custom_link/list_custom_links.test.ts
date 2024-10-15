@@ -6,15 +6,9 @@
  */
 
 import { listCustomLinks } from './list_custom_links';
-import {
-  inspectSearchParams,
-  SearchParamsMock,
-} from '../../../utils/test_helpers';
+import { inspectSearchParams, SearchParamsMock } from '../../../utils/test_helpers';
 import { Setup } from '../../helpers/setup_request';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/elasticsearch_fieldnames';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;

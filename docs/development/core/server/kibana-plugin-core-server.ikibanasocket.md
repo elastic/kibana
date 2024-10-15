@@ -6,7 +6,7 @@
 
 A tiny abstraction for TCP socket.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IKibanaSocket 
@@ -14,10 +14,10 @@ export interface IKibanaSocket
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [authorizationError?](./kibana-plugin-core-server.ikibanasocket.authorizationerror.md) | Error | <i>(Optional)</i> The reason why the peer's certificate has not been verified. This property becomes available only when <code>authorized</code> is <code>false</code>. |
-|  [authorized?](./kibana-plugin-core-server.ikibanasocket.authorized.md) | boolean | <i>(Optional)</i> Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS isn't used the value is <code>undefined</code>. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [authorizationError?](./kibana-plugin-core-server.ikibanasocket.authorizationerror.md) | <code>readonly</code> | Error | _(Optional)_ The reason why the peer's certificate has not been verified. This property becomes available only when <code>authorized</code> is <code>false</code>. |
+|  [authorized?](./kibana-plugin-core-server.ikibanasocket.authorized.md) | <code>readonly</code> | boolean | _(Optional)_ Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS isn't used the value is <code>undefined</code>. |
 
 ## Methods
 

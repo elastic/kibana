@@ -6,7 +6,7 @@
 
 If Elasticsearch is protected with basic authentication, this setting provides the password that the Kibana server uses to perform its administrative functions.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly password?: string;

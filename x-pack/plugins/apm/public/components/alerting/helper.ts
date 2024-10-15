@@ -26,9 +26,7 @@ export function getIntervalAndTimeRange({
   windowUnit: TimeUnit;
 }) {
   const end = Date.now();
-  const start =
-    end -
-    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
+  const start = end - moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,

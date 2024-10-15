@@ -7,17 +7,12 @@
 
 import { APMConfig } from '../';
 import { PromiseReturnType } from '../../../observability/typings/common';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../src/core/types/elasticsearch';
+import { ESSearchRequest, ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../typings/ui_filters';
 import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 
 interface Options {
-  mockResponse?: (
-    request: ESSearchRequest
-  ) => ESSearchResponse<unknown, ESSearchRequest>;
+  mockResponse?: (request: ESSearchRequest) => ESSearchResponse<unknown, ESSearchRequest>;
   uiFilters?: Record<string, string>;
   config?: Partial<APMConfig>;
 }

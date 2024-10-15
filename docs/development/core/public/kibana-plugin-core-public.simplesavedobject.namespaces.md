@@ -6,7 +6,7 @@
 
 Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with `namespaceType: 'agnostic'`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespaces: SavedObjectType<T>['namespaces'];

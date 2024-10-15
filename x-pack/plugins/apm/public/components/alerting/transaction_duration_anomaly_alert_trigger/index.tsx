@@ -13,18 +13,11 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
-import {
-  EnvironmentField,
-  ServiceField,
-  TransactionTypeField,
-} from '../fields';
+import { EnvironmentField, ServiceField, TransactionTypeField } from '../fields';
 import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
-import {
-  AnomalySeverity,
-  SelectAnomalySeverity,
-} from './select_anomaly_severity';
+import { AnomalySeverity, SelectAnomalySeverity } from './select_anomaly_severity';
 
 interface AlertParams {
   anomalySeverityType?:
@@ -82,12 +75,9 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     />,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity',
-        {
-          defaultMessage: 'Has anomaly with severity',
-        }
-      )}
+      title={i18n.translate('xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity', {
+        defaultMessage: 'Has anomaly with severity',
+      })}
     >
       <SelectAnomalySeverity
         value={params.anomalySeverityType}

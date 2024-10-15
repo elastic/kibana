@@ -15,15 +15,9 @@ export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionJobsRefetch: () => void;
 }
 
-export const AnomalyDetectionJobsContext = createContext(
-  {} as AnomalyDetectionJobsContextValue
-);
+export const AnomalyDetectionJobsContext = createContext({} as AnomalyDetectionJobsContextValue);
 
-export function AnomalyDetectionJobsContextProvider({
-  children,
-}: {
-  children: ReactChild;
-}) {
+export function AnomalyDetectionJobsContextProvider({ children }: { children: ReactChild }) {
   const [fetchId, setFetchId] = useState(0);
   const refetch = () => setFetchId((id) => id + 1);
 

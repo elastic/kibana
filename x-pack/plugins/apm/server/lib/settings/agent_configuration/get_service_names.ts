@@ -12,9 +12,7 @@ import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggregated_transactions';
 
-export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
-  typeof getServiceNames
->;
+export type AgentConfigurationServicesAPIResponse = PromiseReturnType<typeof getServiceNames>;
 
 export async function getServiceNames({
   setup,
@@ -30,9 +28,7 @@ export async function getServiceNames({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForAggregatedTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -52,13 +48,8 @@ export async function getServiceNames({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_service_names_for_agent_config',
-    params
-  );
+  const resp = await apmEventClient.search('get_service_names_for_agent_config', params);
   const serviceNames =
-    resp.aggregations?.services.buckets
-      .map((bucket) => bucket.key as string)
-      .sort() || [];
+    resp.aggregations?.services.buckets.map((bucket) => bucket.key as string).sort() || [];
   return [ALL_OPTION_VALUE, ...serviceNames];
 }

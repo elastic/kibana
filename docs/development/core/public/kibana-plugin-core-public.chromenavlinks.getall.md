@@ -6,12 +6,12 @@
 
 Get the current state of all navlinks.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getAll(): Array<Readonly<ChromeNavLink>>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Array&lt;Readonly&lt;ChromeNavLink&gt;&gt;
 

@@ -21,8 +21,7 @@ import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
-  defaultMessage:
-    'Collect performance metrics from your applications with Elastic APM.',
+  defaultMessage: 'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -71,12 +70,9 @@ export const tutorialProvider =
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
-        label: i18n.translate(
-          'xpack.apm.tutorial.specProvider.artifacts.application.label',
-          {
-            defaultMessage: 'Launch APM',
-          }
-        ),
+        label: i18n.translate('xpack.apm.tutorial.specProvider.artifacts.application.label', {
+          defaultMessage: 'Launch APM',
+        }),
       };
     }
 
@@ -88,20 +84,17 @@ export const tutorialProvider =
       moduleName,
       category: TutorialsCategory.OTHER,
       shortDescription: apmIntro,
-      longDescription: i18n.translate(
-        'xpack.apm.tutorial.specProvider.longDescription',
-        {
-          defaultMessage:
-            'Application Performance Monitoring (APM) collects in-depth \
+      longDescription: i18n.translate('xpack.apm.tutorial.specProvider.longDescription', {
+        defaultMessage:
+          'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
 [Learn more]({learnMoreLink}).',
-          values: {
-            learnMoreLink:
-              '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
-          },
-        }
-      ),
+        values: {
+          learnMoreLink:
+            '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
+        },
+      }),
       euiIconType: 'apmApp',
       integrationBrowserCategories: ['web'],
       artifacts,
@@ -117,8 +110,7 @@ It allows you to monitor the performance of thousands of applications in real ti
       savedObjectsInstallMsg: i18n.translate(
         'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
         {
-          defaultMessage:
-            'An APM index pattern is required for some features in the APM UI.',
+          defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
         }
       ),
     } as TutorialSchema;

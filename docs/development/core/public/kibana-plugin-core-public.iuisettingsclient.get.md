@@ -6,7 +6,7 @@
 
 Gets the value for a specific uiSetting. If this setting has no user-defined value then the `defaultOverride` parameter is returned (and parsed if setting is of type "json" or "number). If the parameter is not defined and the key is not registered by any plugin then an error is thrown, otherwise reads the default value defined by a plugin.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: <T = any>(key: string, defaultOverride?: T) => T;

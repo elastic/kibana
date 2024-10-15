@@ -6,7 +6,7 @@
 
 Changes the current document title.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 change(newTitle: string | string[]): void;
@@ -18,7 +18,7 @@ change(newTitle: string | string[]): void;
 |  --- | --- | --- |
 |  newTitle | string \| string\[\] | The new title to set, either a string or string array |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

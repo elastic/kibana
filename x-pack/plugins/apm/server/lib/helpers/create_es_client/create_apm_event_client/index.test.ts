@@ -11,9 +11,9 @@ import {
 } from '../../../../../../../../src/core/server/mocks';
 import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { createApmEventClient } from '.';
+import { APMEventClient } from '.';
 
-describe('createApmEventClient', () => {
+describe('APMEventClient', () => {
   let server: ReturnType<typeof createHttpServer>;
 
   beforeEach(() => {
@@ -29,41 +29,34 @@ describe('createApmEventClient', () => {
     });
     const { server: innerServer, createRouter } = await server.setup({
       context: contextServiceMock.createSetupContract(),
-      executionContext:
-        executionContextServiceMock.createInternalSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     const router = createRouter('/');
 
     const abort = jest.fn();
-    router.get(
-      { path: '/', validate: false },
-      async (context, request, res) => {
-        const eventClient = createApmEventClient({
-          esClient: {
-            search: () => {
-              return Object.assign(
-                new Promise((resolve) => setTimeout(resolve, 3000)),
-                { abort }
-              );
-            },
-          } as any,
-          debug: false,
-          request,
-          indices: {} as any,
-          options: {
-            includeFrozen: false,
+    router.get({ path: '/', validate: false }, async (context, request, res) => {
+      const eventClient = new APMEventClient({
+        esClient: {
+          search: () => {
+            return Object.assign(new Promise((resolve) => setTimeout(resolve, 3000)), { abort });
           },
-        });
+        } as any,
+        debug: false,
+        request,
+        indices: {} as any,
+        options: {
+          includeFrozen: false,
+        },
+      });
 
-        await eventClient.search('foo', {
-          apm: {
-            events: [],
-          },
-        });
+      await eventClient.search('foo', {
+        apm: {
+          events: [],
+        },
+      });
 
-        return res.ok({ body: 'ok' });
-      }
-    );
+      return res.ok({ body: 'ok' });
+    });
 
     await server.start();
 

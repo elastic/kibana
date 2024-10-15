@@ -31,7 +31,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: 
   ES_ARCHIVER_LOAD_METHODS.forEach((method) => {
     const originalMethod = esArchiver[method];
 
-    esArchiver[method] = async (...args: unknown[]) => {
+    esArchiver[method] = async (...args: any[]) => {
       // esArchiver methods return a stats object, with information about the indexes created
       const stats = await originalMethod.apply(esArchiver, args as any);
 

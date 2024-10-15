@@ -6,7 +6,7 @@
 
 Remove a banner
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 remove(id: string): boolean;
@@ -18,7 +18,7 @@ remove(id: string): boolean;
 |  --- | --- | --- |
 |  id | string | the unique identifier for the banner returned by [OverlayBannersStart.add()](./kibana-plugin-core-public.overlaybannersstart.add.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

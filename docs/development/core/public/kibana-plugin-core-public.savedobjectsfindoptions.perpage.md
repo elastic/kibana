@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindOptions.perPage property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 perPage?: number;

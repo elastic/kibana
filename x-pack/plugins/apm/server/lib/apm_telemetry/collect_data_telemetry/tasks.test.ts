@@ -7,10 +7,7 @@
 
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -249,9 +246,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'processor_events');
 
     it('returns a map of processor events', async () => {
-      const getTime = jest
-        .spyOn(Date.prototype, 'getTime')
-        .mockReturnValue(1594330792957);
+      const getTime = jest.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
 
       const search = jest.fn().mockImplementation((params: any) => {
         const isTotalHitsQuery = params?.body?.track_total_hits;
@@ -324,13 +319,9 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'integrations');
 
     it('returns the count of ML jobs', async () => {
-      const transportRequest = jest
-        .fn()
-        .mockResolvedValueOnce({ body: { count: 1 } });
+      const transportRequest = jest.fn().mockResolvedValueOnce({ body: { count: 1 } });
 
-      expect(
-        await task?.executor({ indices, transportRequest } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, transportRequest } as any)).toEqual({
         integrations: {
           ml: {
             all_jobs_count: 1,
@@ -343,9 +334,7 @@ describe('data telemetry collection tasks', () => {
       it('returns a count of 0', async () => {
         const transportRequest = jest.fn().mockResolvedValueOnce({});
 
-        expect(
-          await task?.executor({ indices, transportRequest } as any)
-        ).toEqual({
+        expect(await task?.executor({ indices, transportRequest } as any)).toEqual({
           integrations: {
             ml: {
               all_jobs_count: 0,

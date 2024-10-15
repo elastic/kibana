@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiSelectOption,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 interface Props {
@@ -35,11 +31,7 @@ export function FormRowSelect({
   onChange,
 }: Props) {
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{title}</h3>}
-      description={description}
-    >
+    <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
       <EuiFormRow label={fieldLabel}>
         <SelectWithPlaceholder
           isLoading={isLoading}

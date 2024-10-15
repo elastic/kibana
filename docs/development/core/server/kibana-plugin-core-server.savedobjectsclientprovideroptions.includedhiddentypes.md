@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientProviderOptions.includedHiddenTypes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 includedHiddenTypes?: string[];

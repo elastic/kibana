@@ -6,7 +6,7 @@
 
 The original [HttpFetchOptionsWithPath](./kibana-plugin-core-public.httpfetchoptionswithpath.md) used to send this request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;

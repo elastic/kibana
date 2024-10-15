@@ -37,8 +37,10 @@ export function tabifyAggResponse(
 
     if (column) {
       const agg = column.aggConfig;
-      const aggInfo = agg.write(aggs);
-      aggScale *= aggInfo.metricScale || 1;
+      if (agg.getParam('scaleMetricValues')) {
+        const aggInfo = agg.write(aggs);
+        aggScale *= aggInfo.metricScale || 1;
+      }
 
       switch (agg.type.type) {
         case AggGroupNames.Buckets:

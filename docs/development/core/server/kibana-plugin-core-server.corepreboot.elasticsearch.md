@@ -6,7 +6,7 @@
 
 [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 elasticsearch: ElasticsearchServicePreboot;

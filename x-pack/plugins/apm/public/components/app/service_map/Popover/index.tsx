@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPopover, EuiTitle } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
@@ -22,10 +16,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  SERVICE_NAME,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
 import { CytoscapeContext } from '../Cytoscape';
@@ -36,10 +27,7 @@ import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 
 function getContentsComponent(selectedNodeData: cytoscape.NodeDataDefinition) {
-  if (
-    selectedNodeData.groupedConnections &&
-    Array.isArray(selectedNodeData.groupedConnections)
-  ) {
+  if (selectedNodeData.groupedConnections && Array.isArray(selectedNodeData.groupedConnections)) {
     return ExternalsListContents;
   }
   if (selectedNodeData[SERVICE_NAME]) {
@@ -69,18 +57,10 @@ interface PopoverProps {
   end: string;
 }
 
-export function Popover({
-  focusedServiceName,
-  environment,
-  kuery,
-  start,
-  end,
-}: PopoverProps) {
+export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
-  const [selectedNode, setSelectedNode] = useState<
-    cytoscape.NodeSingular | undefined
-  >(undefined);
+  const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>(undefined);
   const deselect = useCallback(() => {
     if (cy) {
       cy.elements().unselect();
@@ -170,16 +150,10 @@ export function Popover({
       ref={popoverRef}
       style={popoverStyle}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ width: popoverWidth }}
-      >
+      <EuiFlexGroup direction="column" gutterSize="s" style={{ width: popoverWidth }}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }}>
-              {selectedNodeData.label ?? selectedNodeId}
-            </h3>
+            <h3 style={{ wordBreak: 'break-all' }}>{selectedNodeData.label ?? selectedNodeId}</h3>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>

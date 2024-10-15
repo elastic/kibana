@@ -6,7 +6,7 @@
 
 Context that's available to plugins during initialization stage.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PluginInitializerContext<ConfigSchema = unknown> 
@@ -14,10 +14,10 @@ export interface PluginInitializerContext<ConfigSchema = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [config](./kibana-plugin-core-server.plugininitializercontext.config.md) | { legacy: { globalConfig$: Observable&lt;SharedGlobalConfig&gt;; get: () =&gt; SharedGlobalConfig; }; create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;; get: &lt;T = ConfigSchema&gt;() =&gt; T; } | Accessors for the plugin's configuration |
-|  [env](./kibana-plugin-core-server.plugininitializercontext.env.md) | { mode: EnvironmentMode; packageInfo: Readonly&lt;PackageInfo&gt;; instanceUuid: string; configs: readonly string\[\]; } |  |
-|  [logger](./kibana-plugin-core-server.plugininitializercontext.logger.md) | LoggerFactory |  instance already bound to the plugin's logging context |
-|  [opaqueId](./kibana-plugin-core-server.plugininitializercontext.opaqueid.md) | PluginOpaqueId |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [config](./kibana-plugin-core-server.plugininitializercontext.config.md) |  | { legacy: { globalConfig$: Observable&lt;SharedGlobalConfig&gt;; get: () =&gt; SharedGlobalConfig; }; create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;; get: &lt;T = ConfigSchema&gt;() =&gt; T; } | Accessors for the plugin's configuration |
+|  [env](./kibana-plugin-core-server.plugininitializercontext.env.md) |  | { mode: EnvironmentMode; packageInfo: Readonly&lt;PackageInfo&gt;; instanceUuid: string; configs: readonly string\[\]; } |  |
+|  [logger](./kibana-plugin-core-server.plugininitializercontext.logger.md) |  | LoggerFactory |  instance already bound to the plugin's logging context |
+|  [opaqueId](./kibana-plugin-core-server.plugininitializercontext.opaqueid.md) |  | PluginOpaqueId |  |
 

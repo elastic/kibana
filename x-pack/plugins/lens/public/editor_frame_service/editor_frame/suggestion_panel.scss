@@ -24,8 +24,8 @@
   width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
   height: $lnsSuggestionHeight;
   margin-right: $euiSizeS;
-  margin-left: $euiSizeXS / 2;
-  margin-bottom: $euiSizeXS / 2;
+  margin-left: calc($euiSizeXS / 2);
+  margin-bottom: calc($euiSizeXS / 2);
   box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {

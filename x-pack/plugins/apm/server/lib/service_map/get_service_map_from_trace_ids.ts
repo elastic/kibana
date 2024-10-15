@@ -10,11 +10,7 @@ import { Connection, ConnectionNode } from '../../../common/service_map';
 import { Setup } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
-export function getConnections({
-  paths,
-}: {
-  paths: ConnectionNode[][] | undefined;
-}) {
+export function getConnections({ paths }: { paths: ConnectionNode[][] | undefined }) {
   if (!paths) {
     return [];
   }
@@ -32,9 +28,7 @@ export function getConnections({
     }, [] as Connection[]);
   }, [] as Connection[]);
 
-  const connections = uniqBy(connectionsArr, (value) =>
-    find(connectionsArr, value)
-  );
+  const connections = uniqBy(connectionsArr, (value) => find(connectionsArr, value));
 
   return connections;
 }
@@ -50,8 +44,12 @@ export async function getServiceMapFromTraceIds({
   start: number;
   end: number;
 }) {
-  const serviceMapFromTraceIdsScriptResponse =
-    await fetchServicePathsFromTraceIds(setup, traceIds, start, end);
+  const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds(
+    setup,
+    traceIds,
+    start,
+    end
+  );
 
   const serviceMapScriptedAggValue =
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;

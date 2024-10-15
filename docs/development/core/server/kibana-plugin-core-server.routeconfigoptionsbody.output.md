@@ -8,7 +8,7 @@ The processed payload format. The value must be one of: \* 'data' - the incoming
 
 Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 output?: typeof validBodyOutput[number];

@@ -5,7 +5,7 @@
 ## AppenderConfigType type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;

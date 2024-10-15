@@ -18,10 +18,7 @@ import {
 } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../../context/license/license_context';
 import * as hooks from '../../../../../hooks/use_fetcher';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../../../utils/testHelpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/saveCustomLink';
 
 const data = {
@@ -131,12 +128,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsInDocument(component, [
-        'label 1',
-        'url 1',
-        'label 2',
-        'url 2',
-      ]);
+      expectTextsInDocument(component, ['label 1', 'url 1', 'label 2', 'url 2']);
     });
 
     it('checks if create custom link button is available and working', () => {

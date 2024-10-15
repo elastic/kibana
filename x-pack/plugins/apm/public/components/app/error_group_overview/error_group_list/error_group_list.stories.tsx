@@ -58,8 +58,7 @@ Example.args = {
       type: 'OpError',
     },
     {
-      message:
-        'write tcp 10.36.2.24:3000->10.36.1.14:34232: write: connection reset by peer',
+      message: 'write tcp 10.36.2.24:3000->10.36.1.14:34232: write: connection reset by peer',
       occurrenceCount: 4,
       culprit: 'apiHandlers.getProductCustomers',
       groupId: '95ca0e312c109aa11e298bcf07f1445b',
@@ -68,8 +67,7 @@ Example.args = {
       type: 'OpError',
     },
     {
-      message:
-        'write tcp 10.36.0.21:3000->10.36.1.252:57070: write: connection reset by peer',
+      message: 'write tcp 10.36.0.21:3000->10.36.1.252:57070: write: connection reset by peer',
       occurrenceCount: 3,
       culprit: 'apiHandlers.getCustomers',
       groupId: '4053d7e33d2b716c819bd96d9d6121a2',
@@ -78,8 +76,7 @@ Example.args = {
       type: 'OpError',
     },
     {
-      message:
-        'write tcp 10.36.0.21:3000->10.36.0.88:33926: write: broken pipe',
+      message: 'write tcp 10.36.0.21:3000->10.36.0.88:33926: write: broken pipe',
       occurrenceCount: 2,
       culprit: 'apiHandlers.getOrders',
       groupId: '94f4ca8ec8c02e5318cf03f46ae4c1f3',

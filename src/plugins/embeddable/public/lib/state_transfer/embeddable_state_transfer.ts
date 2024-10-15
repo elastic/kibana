@@ -29,15 +29,17 @@ export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER'
 export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
+  private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
     currentAppId$: ApplicationStart['currentAppId$'],
-    private appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
+    appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
     customStorage?: Storage
   ) {
     this.storage = customStorage ? customStorage : new Storage(sessionStorage);
     this.isTransferInProgress = false;
+    this.appList = appList;
     currentAppId$.subscribe(() => {
       this.isTransferInProgress = false;
     });

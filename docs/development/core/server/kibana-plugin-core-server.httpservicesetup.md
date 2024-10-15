@@ -6,7 +6,7 @@
 
 Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpServiceSetup 
@@ -75,18 +75,18 @@ async (context, request, response) => {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [auth](./kibana-plugin-core-server.httpservicesetup.auth.md) | HttpAuth | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
-|  [basePath](./kibana-plugin-core-server.httpservicesetup.basepath.md) | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
-|  [createCookieSessionStorageFactory](./kibana-plugin-core-server.httpservicesetup.createcookiesessionstoragefactory.md) | &lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt; | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) |
-|  [createRouter](./kibana-plugin-core-server.httpservicesetup.createrouter.md) | &lt;Context extends RequestHandlerContext = RequestHandlerContext&gt;() =&gt; IRouter&lt;Context&gt; | Provides ability to declare a handler function for a particular path and HTTP request method. |
-|  [csp](./kibana-plugin-core-server.httpservicesetup.csp.md) | ICspConfig | The CSP config used for Kibana. |
-|  [getServerInfo](./kibana-plugin-core-server.httpservicesetup.getserverinfo.md) | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
-|  [registerAuth](./kibana-plugin-core-server.httpservicesetup.registerauth.md) | (handler: AuthenticationHandler) =&gt; void | To define custom authentication and/or authorization mechanism for incoming requests. |
-|  [registerOnPostAuth](./kibana-plugin-core-server.httpservicesetup.registeronpostauth.md) | (handler: OnPostAuthHandler) =&gt; void | To define custom logic after Auth interceptor did make sure a user has access to the requested resource. |
-|  [registerOnPreAuth](./kibana-plugin-core-server.httpservicesetup.registeronpreauth.md) | (handler: OnPreAuthHandler) =&gt; void | To define custom logic to perform for incoming requests before the Auth interceptor performs a check that user has access to requested resources. |
-|  [registerOnPreResponse](./kibana-plugin-core-server.httpservicesetup.registeronpreresponse.md) | (handler: OnPreResponseHandler) =&gt; void | To define custom logic to perform for the server response. |
-|  [registerOnPreRouting](./kibana-plugin-core-server.httpservicesetup.registeronprerouting.md) | (handler: OnPreRoutingHandler) =&gt; void | To define custom logic to perform for incoming requests before server performs a route lookup. |
-|  [registerRouteHandlerContext](./kibana-plugin-core-server.httpservicesetup.registerroutehandlercontext.md) | &lt;Context extends RequestHandlerContext, ContextName extends keyof Context&gt;(contextName: ContextName, provider: RequestHandlerContextProvider&lt;Context, ContextName&gt;) =&gt; RequestHandlerContextContainer | Register a context provider for a route handler. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [auth](./kibana-plugin-core-server.httpservicesetup.auth.md) |  | HttpAuth | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
+|  [basePath](./kibana-plugin-core-server.httpservicesetup.basepath.md) |  | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [createCookieSessionStorageFactory](./kibana-plugin-core-server.httpservicesetup.createcookiesessionstoragefactory.md) |  | &lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt; | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) |
+|  [createRouter](./kibana-plugin-core-server.httpservicesetup.createrouter.md) |  | &lt;Context extends RequestHandlerContext = RequestHandlerContext&gt;() =&gt; IRouter&lt;Context&gt; | Provides ability to declare a handler function for a particular path and HTTP request method. |
+|  [csp](./kibana-plugin-core-server.httpservicesetup.csp.md) |  | ICspConfig | The CSP config used for Kibana. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicesetup.getserverinfo.md) |  | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
+|  [registerAuth](./kibana-plugin-core-server.httpservicesetup.registerauth.md) |  | (handler: AuthenticationHandler) =&gt; void | To define custom authentication and/or authorization mechanism for incoming requests. |
+|  [registerOnPostAuth](./kibana-plugin-core-server.httpservicesetup.registeronpostauth.md) |  | (handler: OnPostAuthHandler) =&gt; void | To define custom logic after Auth interceptor did make sure a user has access to the requested resource. |
+|  [registerOnPreAuth](./kibana-plugin-core-server.httpservicesetup.registeronpreauth.md) |  | (handler: OnPreAuthHandler) =&gt; void | To define custom logic to perform for incoming requests before the Auth interceptor performs a check that user has access to requested resources. |
+|  [registerOnPreResponse](./kibana-plugin-core-server.httpservicesetup.registeronpreresponse.md) |  | (handler: OnPreResponseHandler) =&gt; void | To define custom logic to perform for the server response. |
+|  [registerOnPreRouting](./kibana-plugin-core-server.httpservicesetup.registeronprerouting.md) |  | (handler: OnPreRoutingHandler) =&gt; void | To define custom logic to perform for incoming requests before server performs a route lookup. |
+|  [registerRouteHandlerContext](./kibana-plugin-core-server.httpservicesetup.registerroutehandlercontext.md) |  | &lt;Context extends RequestHandlerContext, ContextName extends keyof Context&gt;(contextName: ContextName, provider: RequestHandlerContextProvider&lt;Context, ContextName&gt;) =&gt; RequestHandlerContextContainer | Register a context provider for a route handler. |
 

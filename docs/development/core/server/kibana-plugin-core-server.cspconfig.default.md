@@ -4,7 +4,7 @@
 
 ## CspConfig.DEFAULT property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static readonly DEFAULT: CspConfig;

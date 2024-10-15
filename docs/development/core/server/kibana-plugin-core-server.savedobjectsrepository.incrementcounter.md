@@ -6,7 +6,7 @@
 
 Increments all the specified counter fields (by one by default). Creates the document if one doesn't exist for the given id.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions<T>): Promise<SavedObject<T>>;
@@ -19,9 +19,9 @@ incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<str
 |  type | string | The type of saved object whose fields should be incremented |
 |  id | string | The id of the document whose fields should be incremented |
 |  counterFields | Array&lt;string \| SavedObjectsIncrementCounterField&gt; | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
-|  options | SavedObjectsIncrementCounterOptions&lt;T&gt; | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
+|  options | SavedObjectsIncrementCounterOptions&lt;T&gt; | _(Optional)_ [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObject&lt;T&gt;&gt;
 

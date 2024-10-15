@@ -6,8 +6,8 @@
 
 Pushes a new location onto the history stack. If there are forward entries in the stack, they will be removed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState) => void;
 ```

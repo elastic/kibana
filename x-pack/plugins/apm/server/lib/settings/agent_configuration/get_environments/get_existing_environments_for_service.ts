@@ -6,10 +6,7 @@
  */
 
 import { Setup } from '../../../helpers/setup_request';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export async function getExistingEnvironmentsForService({
@@ -44,13 +41,8 @@ export async function getExistingEnvironmentsForService({
     },
   };
 
-  const resp = await internalClient.search(
-    'get_existing_environments_for_service',
-    params
-  );
+  const resp = await internalClient.search('get_existing_environments_for_service', params);
   const existingEnvironments =
-    resp.aggregations?.environments.buckets.map(
-      (bucket) => bucket.key as string
-    ) || [];
+    resp.aggregations?.environments.buckets.map((bucket) => bucket.key as string) || [];
   return existingEnvironments;
 }

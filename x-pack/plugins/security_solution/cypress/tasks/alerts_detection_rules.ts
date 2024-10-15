@@ -149,6 +149,10 @@ export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
 };
 
+export const goToRuleDetailsByName = (name: string) => {
+  cy.get(RULE_NAME).contains(name).click({ force: true });
+};
+
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
 };
@@ -198,7 +202,6 @@ export const waitForRulesTableToBeLoaded = () => {
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 

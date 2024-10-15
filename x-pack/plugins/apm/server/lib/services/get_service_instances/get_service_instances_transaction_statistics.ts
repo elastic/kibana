@@ -23,10 +23,7 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
-import {
-  getLatencyAggregation,
-  getLatencyValue,
-} from '../../helpers/latency_aggregation_type';
+import { getLatencyAggregation, getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { Setup } from '../../helpers/setup_request';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
@@ -47,9 +44,7 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   ? ServiceInstanceTransactionComparisonStatistics
   : ServiceInstanceTransactionPrimaryStatistics;
 
-export async function getServiceInstancesTransactionStatistics<
-  T extends true | false
->({
+export async function getServiceInstancesTransactionStatistics<T extends true | false>({
   environment,
   kuery,
   latencyAggregationType,
@@ -80,18 +75,14 @@ export async function getServiceInstancesTransactionStatistics<
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions(
-    {
-      start,
-      end,
-      numBuckets,
-      searchAggregatedTransactions,
-    }
-  );
+  const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    numBuckets,
+    searchAggregatedTransactions,
+  });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getTransactionDurationFieldForAggregatedTransactions(searchAggregatedTransactions);
 
   const subAggs = {
     ...getLatencyAggregation(latencyAggregationType, field),
@@ -109,15 +100,11 @@ export async function getServiceInstancesTransactionStatistics<
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
-        ...getDocumentTypeFilterForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-        ...getDocumentTypeFilterForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
@@ -149,62 +136,54 @@ export async function getServiceInstancesTransactionStatistics<
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_instances_transaction_statistics',
-    {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
-      },
-      body: { size: 0, query, aggs },
-    }
-  );
+  const response = await apmEventClient.search('get_service_instances_transaction_statistics', {
+    apm: {
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
+    },
+    body: { size: 0, query, aggs },
+  });
 
   const bucketSizeInMinutes = bucketSize / 60;
 
   return (
-    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-      (serviceNodeBucket) => {
-        const { doc_count: count, key } = serviceNodeBucket;
-        const serviceNodeName = String(key);
+    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map((serviceNodeBucket) => {
+      const { doc_count: count, key } = serviceNodeBucket;
+      const serviceNodeName = String(key);
 
-        // Timeseries is returned when isComparisonSearch is true
-        if ('timeseries' in serviceNodeBucket) {
-          const { timeseries } = serviceNodeBucket;
-          return {
-            serviceNodeName,
-            errorRate: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.failures.doc_count / dateBucket.doc_count,
-            })),
-            throughput: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.doc_count / bucketSizeInMinutes,
-            })),
-            latency: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: getLatencyValue({
-                aggregation: dateBucket.latency,
-                latencyAggregationType,
-              }),
-            })),
-          };
-        } else {
-          const { failures, latency } = serviceNodeBucket;
-          return {
-            serviceNodeName,
-            errorRate: failures.doc_count / count,
-            latency: getLatencyValue({
-              aggregation: latency,
+      // Timeseries is returned when isComparisonSearch is true
+      if ('timeseries' in serviceNodeBucket) {
+        const { timeseries } = serviceNodeBucket;
+        return {
+          serviceNodeName,
+          // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.
+          errorRate: timeseries.buckets.map((dateBucket) => ({
+            x: dateBucket.key,
+            y: dateBucket.failures.doc_count / dateBucket.doc_count,
+          })),
+          throughput: timeseries.buckets.map((dateBucket) => ({
+            x: dateBucket.key,
+            y: dateBucket.doc_count / bucketSizeInMinutes,
+          })),
+          latency: timeseries.buckets.map((dateBucket) => ({
+            x: dateBucket.key,
+            y: getLatencyValue({
+              aggregation: dateBucket.latency,
               latencyAggregationType,
             }),
-            throughput: calculateThroughput({ start, end, value: count }),
-          };
-        }
+          })),
+        };
+      } else {
+        const { failures, latency } = serviceNodeBucket;
+        return {
+          serviceNodeName,
+          errorRate: failures.doc_count / count,
+          latency: getLatencyValue({
+            aggregation: latency,
+            latencyAggregationType,
+          }),
+          throughput: calculateThroughput({ start, end, value: count }),
+        };
       }
-    ) as Array<ServiceInstanceTransactionStatistics<T>>) || []
+    }) as Array<ServiceInstanceTransactionStatistics<T>>) || []
   );
 }

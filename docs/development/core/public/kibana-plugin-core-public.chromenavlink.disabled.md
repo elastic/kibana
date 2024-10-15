@@ -6,7 +6,7 @@
 
 Disables a link from being clickable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly disabled?: boolean;

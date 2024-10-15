@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `ElasticsearchConfig` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(rawConfig: ElasticsearchConfigType);

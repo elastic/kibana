@@ -40,7 +40,5 @@ export function DiscoverTransactionLink({
   readonly transaction: Transaction;
   children?: ReactNode;
 }) {
-  return (
-    <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />
-  );
+  return <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />;
 }

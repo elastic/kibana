@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindOptions.sortField property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sortField?: string;

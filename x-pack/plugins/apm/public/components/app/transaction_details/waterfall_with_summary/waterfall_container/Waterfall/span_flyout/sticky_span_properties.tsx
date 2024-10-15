@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  METRIC_TYPE,
-  useUiTracker,
-} from '../../../../../../../../../observability/public';
+import { METRIC_TYPE, useUiTracker } from '../../../../../../../../../observability/public';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -34,12 +31,7 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const {
-    environment,
-    latencyAggregationType,
-    comparisonEnabled,
-    comparisonType,
-  } = query;
+  const { environment, latencyAggregationType, comparisonEnabled, comparisonType } = query;
 
   const trackEvent = useUiTracker();
 
@@ -71,12 +63,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
           width: '25%',
         },
         {
-          label: i18n.translate(
-            'xpack.apm.transactionDetails.transactionLabel',
-            {
-              defaultMessage: 'Transaction',
-            }
-          ),
+          label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
+            defaultMessage: 'Transaction',
+          }),
           fieldName: TRANSACTION_NAME,
           val: (
             <TransactionDetailLink
@@ -101,12 +90,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
   const backendStickyProperties = backendName
     ? [
         {
-          label: i18n.translate(
-            'xpack.apm.transactionDetails.spanFlyout.backendLabel',
-            {
-              defaultMessage: 'Backend',
-            }
-          ),
+          label: i18n.translate('xpack.apm.transactionDetails.spanFlyout.backendLabel', {
+            defaultMessage: 'Backend',
+          }),
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
             <BackendLink
@@ -132,12 +118,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
 
   const stickyProperties = [
     {
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.nameLabel',
-        {
-          defaultMessage: 'Name',
-        }
-      ),
+      label: i18n.translate('xpack.apm.transactionDetails.spanFlyout.nameLabel', {
+        defaultMessage: 'Name',
+      }),
       fieldName: SPAN_NAME,
       val: spanName ?? NOT_AVAILABLE_LABEL,
       truncated: true,

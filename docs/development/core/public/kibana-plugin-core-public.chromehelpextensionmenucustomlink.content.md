@@ -6,7 +6,7 @@
 
 Content of the button (in lieu of `children`<!-- -->)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 content: React.ReactNode;

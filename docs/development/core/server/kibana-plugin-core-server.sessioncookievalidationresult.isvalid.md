@@ -6,7 +6,7 @@
 
 Whether the cookie is valid or not.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isValid: boolean;

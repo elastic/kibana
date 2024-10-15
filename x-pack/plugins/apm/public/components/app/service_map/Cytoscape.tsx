@@ -23,9 +23,7 @@ import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
 cytoscape.use(dagre);
 
-export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
-  undefined
-);
+export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
 export interface CytoscapeProps {
   children?: ReactNode;
@@ -57,13 +55,7 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
 
-function CytoscapeComponent({
-  children,
-  elements,
-  height,
-  serviceName,
-  style,
-}: CytoscapeProps) {
+function CytoscapeComponent({ children, elements, height, serviceName, style }: CytoscapeProps) {
   const theme = useTheme();
   const [ref, cy] = useCytoscape({
     ...getCytoscapeOptions(theme),
@@ -110,12 +102,8 @@ function CytoscapeComponent({
 }
 
 export const Cytoscape = memo(CytoscapeComponent, (prevProps, nextProps) => {
-  const prevElementIds = prevProps.elements
-    .map((element) => element.data.id)
-    .sort();
-  const nextElementIds = nextProps.elements
-    .map((element) => element.data.id)
-    .sort();
+  const prevElementIds = prevProps.elements.map((element) => element.data.id).sort();
+  const nextElementIds = nextProps.elements.map((element) => element.data.id).sort();
 
   const propsAreEqual =
     prevProps.height === nextProps.height &&

@@ -6,7 +6,7 @@
 
 The configuration object to the RouteValidator class. Set `params`<!-- -->, `query` and/or `body` to specify the validation logic to follow for that property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RouteValidatorConfig<P, Q, B> 
@@ -14,9 +14,9 @@ export interface RouteValidatorConfig<P, Q, B>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-server.routevalidatorconfig.body.md) | RouteValidationSpec&lt;B&gt; | <i>(Optional)</i> Validation logic for the body payload |
-|  [params?](./kibana-plugin-core-server.routevalidatorconfig.params.md) | RouteValidationSpec&lt;P&gt; | <i>(Optional)</i> Validation logic for the URL params |
-|  [query?](./kibana-plugin-core-server.routevalidatorconfig.query.md) | RouteValidationSpec&lt;Q&gt; | <i>(Optional)</i> Validation logic for the Query params |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-server.routevalidatorconfig.body.md) |  | RouteValidationSpec&lt;B&gt; | _(Optional)_ Validation logic for the body payload |
+|  [params?](./kibana-plugin-core-server.routevalidatorconfig.params.md) |  | RouteValidationSpec&lt;P&gt; | _(Optional)_ Validation logic for the URL params |
+|  [query?](./kibana-plugin-core-server.routevalidatorconfig.query.md) |  | RouteValidationSpec&lt;Q&gt; | _(Optional)_ Validation logic for the Query params |
 

@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';
@@ -19,8 +20,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateList), testBedConfig);
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
@@ -127,7 +126,11 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<IndexTemplatesTabTestBed> => {
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateList, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

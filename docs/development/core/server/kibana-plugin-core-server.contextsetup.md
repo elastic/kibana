@@ -6,7 +6,7 @@
 
 An object that handles registration of context providers and configuring handlers with context.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ContextSetup 

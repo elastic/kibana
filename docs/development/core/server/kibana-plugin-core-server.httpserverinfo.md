@@ -6,7 +6,7 @@
 
 Information about what hostname, port, and protocol the server process is running on. Note that this may not match the URL that end-users access Kibana at. For the public URL, see [BasePath.publicBaseUrl](./kibana-plugin-core-server.basepath.publicbaseurl.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpServerInfo 
@@ -14,10 +14,10 @@ export interface HttpServerInfo
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [hostname](./kibana-plugin-core-server.httpserverinfo.hostname.md) | string | The hostname of the server |
-|  [name](./kibana-plugin-core-server.httpserverinfo.name.md) | string | The name of the Kibana server |
-|  [port](./kibana-plugin-core-server.httpserverinfo.port.md) | number | The port the server is listening on |
-|  [protocol](./kibana-plugin-core-server.httpserverinfo.protocol.md) | 'http' \| 'https' \| 'socket' | The protocol used by the server |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [hostname](./kibana-plugin-core-server.httpserverinfo.hostname.md) |  | string | The hostname of the server |
+|  [name](./kibana-plugin-core-server.httpserverinfo.name.md) |  | string | The name of the Kibana server |
+|  [port](./kibana-plugin-core-server.httpserverinfo.port.md) |  | number | The port the server is listening on |
+|  [protocol](./kibana-plugin-core-server.httpserverinfo.protocol.md) |  | 'http' \| 'https' \| 'socket' | The protocol used by the server |
 

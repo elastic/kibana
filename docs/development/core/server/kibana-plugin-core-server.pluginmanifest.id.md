@@ -6,7 +6,7 @@
 
 Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly id: PluginName;

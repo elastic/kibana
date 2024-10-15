@@ -4,7 +4,7 @@
 
 ## KibanaRequest.auth property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly auth: {

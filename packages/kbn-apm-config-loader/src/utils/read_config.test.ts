@@ -29,6 +29,12 @@ test('reads and merges multiple yaml files from file system and parses to json',
   expect(config).toMatchSnapshot();
 });
 
+test('reads yaml files from file system and parses to json, even if one is missing', () => {
+  const config = getConfigFromFiles([fixtureFile('one.yml'), fixtureFile('boo.yml')]);
+
+  expect(config).toMatchSnapshot();
+});
+
 test('should inject an environment variable value when setting a value with ${ENV_VAR}', () => {
   process.env.KBN_ENV_VAR1 = 'val1';
   process.env.KBN_ENV_VAR2 = 'val2';
@@ -61,8 +67,9 @@ describe('different cwd()', () => {
     expect(config).toMatchSnapshot();
   });
 
-  test('fails to load relative paths, not found because of the cwd', () => {
+  test('ignores errors loading relative paths', () => {
     const relativePath = relative(resolve(__dirname, '..', '..'), fixtureFile('one.yml'));
-    expect(() => getConfigFromFiles([relativePath])).toThrowError(/ENOENT/);
+    const config = getConfigFromFiles([relativePath]);
+    expect(config).toStrictEqual({});
   });
 });

@@ -17,17 +17,15 @@ type SourceProjection = DeepPartial<APMEventESSearchRequest>;
 type DeepMerge<T, U> = U extends PlainObject
   ? T extends PlainObject
     ? Omit<T, keyof U> & {
-        [key in keyof U]: T extends { [k in key]: any }
-          ? DeepMerge<T[key], U[key]>
-          : U[key];
+        [key in keyof U]: T extends { [k in key]: any } ? DeepMerge<T[key], U[key]> : U[key];
       }
     : U
   : U;
 
-export function mergeProjection<
-  T extends Projection,
-  U extends SourceProjection
->(target: T, source: U): DeepMerge<T, U> {
+export function mergeProjection<T extends Projection, U extends SourceProjection>(
+  target: T,
+  source: U
+): DeepMerge<T, U> {
   return mergeWith({}, cloneDeep(target), source, (a, b) => {
     if (isPlainObject(a) && isPlainObject(b)) {
       return undefined;

@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.decorateTooManyRequestsError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static decorateTooManyRequestsError(error: Error, reason?: string): DecoratedError;
@@ -15,9 +15,9 @@ static decorateTooManyRequestsError(error: Error, reason?: string): DecoratedErr
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  error | Error |  |
-|  reason | string |  |
+|  reason | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

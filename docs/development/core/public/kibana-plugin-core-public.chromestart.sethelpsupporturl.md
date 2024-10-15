@@ -6,7 +6,7 @@
 
 Override the default support URL shown in the help menu
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setHelpSupportUrl(url: string): void;
@@ -18,7 +18,7 @@ setHelpSupportUrl(url: string): void;
 |  --- | --- | --- |
 |  url | string | The updated support URL |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

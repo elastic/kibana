@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `ToastsApi` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(deps: {

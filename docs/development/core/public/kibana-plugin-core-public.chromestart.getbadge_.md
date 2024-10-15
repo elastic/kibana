@@ -6,12 +6,12 @@
 
 Get an observable of the current badge
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getBadge$(): Observable<ChromeBadge | undefined>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;ChromeBadge \| undefined&gt;
 

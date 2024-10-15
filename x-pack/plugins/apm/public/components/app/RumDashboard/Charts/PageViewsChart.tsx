@@ -19,10 +19,7 @@ import {
   timeFormatter,
   Position,
 } from '@elastic/charts';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React from 'react';
@@ -46,10 +43,7 @@ export function PageViewsChart({ data, loading }: Props) {
   const { urlParams } = useUrlParams();
 
   const { start, end } = urlParams;
-  const diffInDays = moment(new Date(end as string)).diff(
-    moment(new Date(start as string)),
-    'day'
-  );
+  const diffInDays = moment(new Date(end as string)).diff(moment(new Date(start as string)), 'day');
 
   const formatter = timeFormatter(niceTimeFormatByDay(diffInDays > 1 ? 2 : 1));
 
@@ -86,9 +80,7 @@ export function PageViewsChart({ data, loading }: Props) {
     return yAccessor;
   };
 
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+  const euiChartTheme = darkMode ? EUI_CHARTS_THEME_DARK : EUI_CHARTS_THEME_LIGHT;
 
   return (
     <ChartWrapper loading={loading} height="250px">
@@ -104,11 +96,7 @@ export function PageViewsChart({ data, loading }: Props) {
               max: new Date(end as string).valueOf(),
             }}
           />
-          <Axis
-            id="date_time"
-            position={Position.Bottom}
-            tickFormat={formatter}
-          />
+          <Axis id="date_time" position={Position.Bottom} tickFormat={formatter} />
           <Axis
             id="page_views"
             title={I18LABELS.pageViews}
@@ -125,11 +113,7 @@ export function PageViewsChart({ data, loading }: Props) {
             stackAccessors={['x']}
             data={data?.items ?? []}
             name={customSeriesNaming}
-            color={
-              !hasBreakdowns
-                ? euiChartTheme.theme.colors?.vizColors?.[1]
-                : undefined
-            }
+            color={!hasBreakdowns ? euiChartTheme.theme.colors?.vizColors?.[1] : undefined}
           />
         </Chart>
       )}

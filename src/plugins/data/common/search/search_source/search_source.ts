@@ -838,6 +838,12 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
+    // If we aren't requesting any documents, there isn't any reason to request any field information
+    if (body.size === 0) {
+      delete body._source;
+      delete body.fields;
+    }
+
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
       sort.hasOwnProperty('_score')

@@ -6,7 +6,7 @@
 
 Returns whether the type is single-namespace (isolated); resolves to `true` if the type is not registered
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isSingleNamespace(type: string): boolean;
@@ -18,7 +18,7 @@ isSingleNamespace(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

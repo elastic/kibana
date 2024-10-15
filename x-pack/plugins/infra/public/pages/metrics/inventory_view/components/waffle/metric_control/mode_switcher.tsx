@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
@@ -21,10 +22,11 @@ interface Props {
   onEditCancel: () => void;
   mode: CustomMetricMode;
   customMetrics: SnapshotCustomMetricInput[];
+  disableAdd?: boolean;
 }
 
 export const ModeSwitcher = withTheme(
-  ({ onSave, onEditCancel, onEdit, onAdd, mode, customMetrics, theme }: Props) => {
+  ({ onSave, onEditCancel, onEdit, onAdd, mode, customMetrics, disableAdd, theme }: Props) => {
     if (['editMetric', 'addMetric'].includes(mode)) {
       return null;
     }
@@ -91,20 +93,36 @@ export const ModeSwitcher = withTheme(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onAdd}
-                  size="s"
-                  flush="right"
-                  aria-label={i18n.translate(
-                    'xpack.infra.waffle.customMetrics.modeSwitcher.addMetricAriaLabel',
-                    { defaultMessage: 'Add custom metric' }
-                  )}
+                <EuiToolTip
+                  content={
+                    disableAdd
+                      ? i18n.translate(
+                          'xpack.infra.waffle.customMetrics.modeSwitcher.addDisabledTooltip',
+                          {
+                            defaultMessage: 'Maximum number of {maxMetrics} metrics reached.',
+                            values: { maxMetrics: SNAPSHOT_API_MAX_METRICS },
+                          }
+                        )
+                      : undefined
+                  }
                 >
-                  <FormattedMessage
-                    id="xpack.infra.waffle.customMetrics.modeSwitcher.addMetric"
-                    defaultMessage="Add metric"
-                  />
-                </EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="infraModeSwitcherAddMetricButton"
+                    onClick={onAdd}
+                    disabled={disableAdd}
+                    size="s"
+                    flush="right"
+                    aria-label={i18n.translate(
+                      'xpack.infra.waffle.customMetrics.modeSwitcher.addMetricAriaLabel',
+                      { defaultMessage: 'Add custom metric' }
+                    )}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.waffle.customMetrics.modeSwitcher.addMetric"
+                      defaultMessage="Add metric"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexItem>
             </>
           )}

@@ -14,11 +14,7 @@ interface Props {
   isCloudEnabled: boolean;
 }
 
-function TutorialConfigAgentRumScript({
-  http,
-  basePath,
-  isCloudEnabled,
-}: Props) {
+function TutorialConfigAgentRumScript({ http, basePath, isCloudEnabled }: Props) {
   return (
     <TutorialConfigAgent
       variantId="js_script"

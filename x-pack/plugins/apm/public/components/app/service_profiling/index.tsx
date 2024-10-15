@@ -6,10 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import {
-  getValueTypeConfig,
-  ProfilingValueType,
-} from '../../../../common/profiling';
+import { getValueTypeConfig, ProfilingValueType } from '../../../../common/profiling';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -18,8 +15,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
-type ApiResponse =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/profiling/timeline'>;
+type ApiResponse = APIReturnType<'GET /internal/apm/services/{serviceName}/profiling/timeline'>;
 const DEFAULT_DATA: ApiResponse = { profilingTimeline: [] };
 
 export function ServiceProfiling() {
@@ -63,11 +59,7 @@ export function ServiceProfiling() {
     }
 
     const availableValueTypes = profilingTimeline.reduce((set, point) => {
-      (
-        Object.keys(point.valueTypes).filter(
-          (type) => type !== 'unknown'
-        ) as ProfilingValueType[]
-      )
+      (Object.keys(point.valueTypes).filter((type) => type !== 'unknown') as ProfilingValueType[])
         .filter((type) => point.valueTypes[type] > 0)
         .forEach((type) => {
           set.add(type);

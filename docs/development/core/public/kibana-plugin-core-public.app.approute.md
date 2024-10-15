@@ -6,7 +6,7 @@
 
 Override the application's routing path from `/app/${id}`<!-- -->. Must be unique across registered applications. Should not include the base path from HTTP.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appRoute?: string;

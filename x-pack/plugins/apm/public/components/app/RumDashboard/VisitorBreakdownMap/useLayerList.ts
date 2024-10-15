@@ -23,10 +23,7 @@ import {
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {

@@ -332,7 +332,7 @@ describe('RelevanceTuningLogic', () => {
 
     describe('getSearchResults', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterAll(() => {

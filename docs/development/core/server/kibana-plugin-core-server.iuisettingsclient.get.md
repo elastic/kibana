@@ -6,7 +6,7 @@
 
 Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: <T = any>(key: string) => Promise<T>;

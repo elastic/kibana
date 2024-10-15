@@ -6,7 +6,7 @@
 
 APIs for denoting paths as not requiring authentication
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IAnonymousPaths 

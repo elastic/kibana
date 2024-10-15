@@ -14,10 +14,7 @@ interface ServiceProfilingLinkProps extends APMLinkExtendProps {
   environment?: string;
 }
 
-export function useServiceProfilingHref({
-  serviceName,
-  environment,
-}: ServiceProfilingLinkProps) {
+export function useServiceProfilingHref({ serviceName, environment }: ServiceProfilingLinkProps) {
   const query = environment
     ? {
         environment,

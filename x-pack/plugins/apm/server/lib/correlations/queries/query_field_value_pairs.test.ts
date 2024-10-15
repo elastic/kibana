@@ -35,11 +35,7 @@ describe('query_field_value_pairs', () => {
 
   describe('fetchTransactionDurationFieldValuePairs', () => {
     it('returns field/value pairs for field candidates', async () => {
-      const fieldCandidates = [
-        'myFieldCandidate1',
-        'myFieldCandidate2',
-        'myFieldCandidate3',
-      ];
+      const fieldCandidates = ['myFieldCandidate1', 'myFieldCandidate2', 'myFieldCandidate3'];
 
       const esClientSearchMock = jest.fn(
         (

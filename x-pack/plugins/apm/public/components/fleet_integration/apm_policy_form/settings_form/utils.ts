@@ -11,18 +11,15 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty, isFinite } from 'lodash';
 import { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';
 
-export const REQUIRED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.requiredLabel',
-  { defaultMessage: 'Required' }
-);
-export const OPTIONAL_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.optionalLabel',
-  { defaultMessage: 'Optional' }
-);
-const REQUIRED_FIELD = i18n.translate(
-  'xpack.apm.fleet_integration.settings.requiredFieldLabel',
-  { defaultMessage: 'Required field' }
-);
+export const REQUIRED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.requiredLabel', {
+  defaultMessage: 'Required',
+});
+export const OPTIONAL_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.optionalLabel', {
+  defaultMessage: 'Optional',
+});
+const REQUIRED_FIELD = i18n.translate('xpack.apm.fleet_integration.settings.requiredFieldLabel', {
+  defaultMessage: 'Required field',
+});
 
 export function mergeNewVars(
   oldVars: PackagePolicyVars,
@@ -32,10 +29,7 @@ export function mergeNewVars(
   return { ...oldVars, [key]: { ...oldVars[key], value } };
 }
 
-export function isSettingsFormValid(
-  parentSettings: SettingsRow[],
-  vars: PackagePolicyVars
-) {
+export function isSettingsFormValid(parentSettings: SettingsRow[], vars: PackagePolicyVars) {
   function isSettingsValid(settings: SettingsRow[]): boolean {
     return !settings
       .map((setting) => {
@@ -46,10 +40,7 @@ export function isSettingsFormValid(
         if (setting.settings) {
           return isSettingsValid(setting.settings);
         }
-        const { isValid } = validateSettingValue(
-          setting,
-          vars[setting.key]?.value
-        );
+        const { isValid } = validateSettingValue(setting, vars[setting.key]?.value);
         return isValid;
       })
       .flat()

@@ -6,7 +6,7 @@
 
 The Elasticsearch Refresh setting for this operation. Defaults to `true`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 refresh?: boolean;

@@ -6,13 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -70,15 +64,7 @@ export function PageLoadDistribution() {
       }
       return Promise.resolve(null);
     },
-    [
-      end,
-      start,
-      uxUiFilters,
-      percentileRange.min,
-      percentileRange.max,
-      searchTerm,
-      serviceName,
-    ]
+    [end, start, uxUiFilters, percentileRange.min, percentileRange.max, searchTerm, serviceName]
   );
 
   const onPercentileChange = (min: number, max: number) => {
@@ -126,15 +112,8 @@ export function PageLoadDistribution() {
         </EuiFlexItem>
         {showAnalyzeButton && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              isDisabled={!serviceName?.[0]}
-              href={exploratoryViewLink}
-            >
-              <FormattedMessage
-                id="xpack.apm.csm.pageViews.analyze"
-                defaultMessage="Analyze"
-              />
+            <EuiButton size="s" isDisabled={!serviceName?.[0]} href={exploratoryViewLink}>
+              <FormattedMessage id="xpack.apm.csm.pageViews.analyze" defaultMessage="Analyze" />
             </EuiButton>
           </EuiFlexItem>
         )}

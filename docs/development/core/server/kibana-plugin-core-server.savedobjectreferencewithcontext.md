@@ -6,7 +6,7 @@
 
 A returned input object or one of its references, with additional context.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectReferenceWithContext 
@@ -14,12 +14,12 @@ export interface SavedObjectReferenceWithContext
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectreferencewithcontext.id.md) | string | The ID of the referenced object |
-|  [inboundReferences](./kibana-plugin-core-server.savedobjectreferencewithcontext.inboundreferences.md) | Array&lt;{ type: string; id: string; name: string; }&gt; | References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation |
-|  [isMissing?](./kibana-plugin-core-server.savedobjectreferencewithcontext.ismissing.md) | boolean | <i>(Optional)</i> Whether or not this object or reference is missing |
-|  [spaces](./kibana-plugin-core-server.savedobjectreferencewithcontext.spaces.md) | string\[\] | The space(s) that the referenced object exists in |
-|  [spacesWithMatchingAliases?](./kibana-plugin-core-server.savedobjectreferencewithcontext.spaceswithmatchingaliases.md) | string\[\] | <i>(Optional)</i> The space(s) that legacy URL aliases matching this type/id exist in |
-|  [type](./kibana-plugin-core-server.savedobjectreferencewithcontext.type.md) | string | The type of the referenced object |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectreferencewithcontext.id.md) |  | string | The ID of the referenced object |
+|  [inboundReferences](./kibana-plugin-core-server.savedobjectreferencewithcontext.inboundreferences.md) |  | Array&lt;{ type: string; id: string; name: string; }&gt; | References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation |
+|  [isMissing?](./kibana-plugin-core-server.savedobjectreferencewithcontext.ismissing.md) |  | boolean | _(Optional)_ Whether or not this object or reference is missing |
+|  [spaces](./kibana-plugin-core-server.savedobjectreferencewithcontext.spaces.md) |  | string\[\] | The space(s) that the referenced object exists in |
+|  [spacesWithMatchingAliases?](./kibana-plugin-core-server.savedobjectreferencewithcontext.spaceswithmatchingaliases.md) |  | string\[\] | _(Optional)_ The space(s) that legacy URL aliases matching this type/id exist in |
+|  [type](./kibana-plugin-core-server.savedobjectreferencewithcontext.type.md) |  | string | The type of the referenced object |
 

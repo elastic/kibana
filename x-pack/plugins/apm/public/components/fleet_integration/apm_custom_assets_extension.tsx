@@ -8,10 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  CustomAssetsAccordionProps,
-  CustomAssetsAccordion,
-} from '../../../../fleet/public';
+import { CustomAssetsAccordionProps, CustomAssetsAccordion } from '../../../../fleet/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../plugin';
 
@@ -25,10 +22,9 @@ export function ApmCustomAssetsExtension() {
         defaultMessage: 'Services',
       }),
       url: `${basePath}/app/apm`,
-      description: i18n.translate(
-        'xpack.apm.fleetIntegration.assets.description',
-        { defaultMessage: 'View application traces and service maps in APM' }
-      ),
+      description: i18n.translate('xpack.apm.fleetIntegration.assets.description', {
+        defaultMessage: 'View application traces and service maps in APM',
+      }),
     },
   ];
 

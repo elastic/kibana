@@ -6,9 +6,10 @@
  */
 
 import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
+import { rootRequest } from '../common';
 
 export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
@@ -30,7 +31,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
   });
 
 export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
@@ -51,7 +52,7 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
   });
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
@@ -96,7 +97,7 @@ export const createCustomRuleActivated = (
   interval = '100m',
   maxSignals = 500
 ) =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
@@ -121,7 +122,7 @@ export const createCustomRuleActivated = (
   });
 
 export const deleteCustomRule = (ruleId = '1') => {
-  cy.request({
+  rootRequest({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -130,7 +131,7 @@ export const deleteCustomRule = (ruleId = '1') => {
 };
 
 export const createSignalsIndex = () => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/detection_engine/index',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -138,9 +139,9 @@ export const createSignalsIndex = () => {
 };
 
 export const removeSignalsIndex = () => {
-  cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
+  rootRequest({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
     if (response.status === 200) {
-      cy.request({
+      rootRequest({
         method: 'DELETE',
         url: `api/detection_engine/index`,
         headers: { 'kbn-xsrf': 'delete-signals' },

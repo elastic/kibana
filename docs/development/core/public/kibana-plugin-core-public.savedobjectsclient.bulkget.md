@@ -6,7 +6,7 @@
 
 Returns an array of objects by id
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkGet: (objects?: Array<{

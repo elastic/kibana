@@ -6,7 +6,7 @@
 
 Removes the prepended basePath from the `path`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 remove: (path: string) => string;

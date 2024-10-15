@@ -7,10 +7,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { HttpStart } from 'kibana/public';
 import React from 'react';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../utils/testHelpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../utils/testHelpers';
 import TutorialConfigAgent from './';
 
 const policyElasticAgentOnCloudAgent = {
@@ -78,9 +75,7 @@ describe('TutorialConfigAgent', () => {
           isCloudEnabled={false}
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
       let commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
@@ -125,12 +120,8 @@ describe('TutorialConfigAgent', () => {
             isCloudEnabled={false}
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_onPrem')
-        ).toBeInTheDocument();
+        expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
+        expect(component.getByTestId('policySelector_onPrem')).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -160,12 +151,8 @@ describe('TutorialConfigAgent', () => {
             isCloudEnabled
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_onPrem')
-        ).toBeInTheDocument();
+        expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
+        expect(component.getByTestId('policySelector_onPrem')).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -201,12 +188,8 @@ describe('TutorialConfigAgent', () => {
             isCloudEnabled
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_cloud')
-        ).toBeInTheDocument();
+        expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
+        expect(component.getByTestId('policySelector_cloud')).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -239,9 +222,7 @@ describe('TutorialConfigAgent', () => {
             isCloudEnabled
           />
         );
-        expect(
-          await screen.findByText('Elastic Cloud agent policy')
-        ).toBeInTheDocument();
+        expect(await screen.findByText('Elastic Cloud agent policy')).toBeInTheDocument();
         expect(
           component.getByTestId('policySelector_policy-elastic-agent-on-cloud')
         ).toBeInTheDocument();
@@ -273,9 +254,7 @@ describe('TutorialConfigAgent', () => {
             isCloudEnabled
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
+        expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -309,10 +288,7 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      expectTextsNotInDocument(component, [
-        'Get started with fleet',
-        'Manage fleet policies',
-      ]);
+      expectTextsNotInDocument(component, ['Get started with fleet', 'Manage fleet policies']);
     });
     it('shows default standalone on prem', async () => {
       const component = render(
@@ -331,12 +307,8 @@ describe('TutorialConfigAgent', () => {
           isCloudEnabled
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
-      expect(
-        component.getByTestId('policySelector_onPrem')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
+      expect(component.getByTestId('policySelector_onPrem')).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
@@ -369,9 +341,7 @@ describe('TutorialConfigAgent', () => {
           isCloudEnabled
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Default Standalone configuration')).toBeInTheDocument();
       expect(component.getByTestId('policySelector_cloud')).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');

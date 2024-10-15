@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   IErrorObject,
@@ -42,7 +42,6 @@ import { ExpressionChart } from './expression_chart';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
   AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,

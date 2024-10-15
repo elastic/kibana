@@ -6,7 +6,7 @@
 
 Retrieve an observable emitting the [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) gathered. The observable will emit an initial value during core's `start` phase, and a new value every fixed interval of time, based on the `opts.interval` configuration property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getOpsMetrics$: () => Observable<OpsMetrics>;

@@ -6,7 +6,7 @@
 
 The name of the Kibana server
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 name: string;

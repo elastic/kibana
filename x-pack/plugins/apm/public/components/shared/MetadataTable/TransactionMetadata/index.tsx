@@ -36,10 +36,5 @@ export function TransactionMetadata({ transaction }: Props) {
     () => getSectionsFromFields(transactionEvent?.metadata || {}),
     [transactionEvent?.metadata]
   );
-  return (
-    <MetadataTable
-      sections={sections}
-      isLoading={status === FETCH_STATUS.LOADING}
-    />
-  );
+  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
 }

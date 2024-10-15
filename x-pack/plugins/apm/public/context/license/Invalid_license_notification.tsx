@@ -11,9 +11,7 @@ import React from 'react';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 
 export function InvalidLicenseNotification() {
-  const manageLicenseURL = useKibanaUrl(
-    '/app/management/stack/license_management'
-  );
+  const manageLicenseURL = useKibanaUrl('/app/management/stack/license_management');
 
   return (
     <EuiEmptyPrompt

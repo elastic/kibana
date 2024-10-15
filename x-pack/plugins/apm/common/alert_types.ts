@@ -99,17 +99,14 @@ export function formatTransactionDurationAnomalyReason({
   severityLevel: string;
   measured: number;
 }) {
-  return i18n.translate(
-    'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
-    {
-      defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
-      values: {
-        serviceName,
-        severityLevel,
-        measured,
-      },
-    }
-  );
+  return i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly.reason', {
+    defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
+    values: {
+      serviceName,
+      severityLevel,
+      measured,
+    },
+  });
 }
 
 export const ALERT_TYPES_CONFIG: Record<
@@ -196,9 +193,7 @@ export const ANOMALY_ALERT_SEVERITY_TYPES = [
   },
 ] as const;
 
-export type AnomalyAlertSeverityType = ValuesType<
-  typeof ANOMALY_ALERT_SEVERITY_TYPES
->['type'];
+export type AnomalyAlertSeverityType = ValuesType<typeof ANOMALY_ALERT_SEVERITY_TYPES>['type'];
 
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts

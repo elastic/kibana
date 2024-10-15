@@ -6,7 +6,7 @@
 
 Unique identifier for the categories
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id: string;

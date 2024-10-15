@@ -30,9 +30,7 @@ describe('query_fractions', () => {
     it('returns the request body for the transaction duration ranges aggregation', () => {
       const req = getTransactionDurationRangesRequest(params, ranges);
 
-      expect(req?.body?.aggs?.latency_ranges?.range?.field).toBe(
-        'transaction.duration.us'
-      );
+      expect(req?.body?.aggs?.latency_ranges?.range?.field).toBe('transaction.duration.us');
       expect(req?.body?.aggs?.latency_ranges?.range?.ranges).toEqual(ranges);
     });
   });
@@ -62,11 +60,7 @@ describe('query_fractions', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationFractions(
-        esClientMock,
-        params,
-        ranges
-      );
+      const resp = await fetchTransactionDurationFractions(esClientMock, params, ranges);
 
       expect(resp).toEqual({
         fractions: [0.3333333333333333, 0.6666666666666666],

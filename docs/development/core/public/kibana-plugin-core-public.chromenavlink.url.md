@@ -6,7 +6,7 @@
 
 The route used to open the default path and the deep links of an application.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly url: string;

@@ -6,7 +6,7 @@
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { ElasticsearchClient } from 'src/core/server';
 import { statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';

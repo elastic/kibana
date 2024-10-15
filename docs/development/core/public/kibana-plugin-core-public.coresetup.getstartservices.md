@@ -6,7 +6,7 @@
 
 [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getStartServices: StartServicesAccessor<TPluginsStart, TStart>;

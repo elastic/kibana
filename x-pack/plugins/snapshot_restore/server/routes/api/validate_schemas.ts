@@ -52,8 +52,8 @@ export const snapshotListSchema = schema.object({
 });
 
 export const policySchema = schema.object({
-  name: schema.string(),
-  snapshotName: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
+  snapshotName: schema.string({ maxLength: 1000 }),
   schedule: schema.string(),
   repository: schema.string(),
   config: schema.maybe(snapshotConfigSchema),
@@ -71,7 +71,7 @@ const fsRepositorySettings = schema.object({
 });
 
 const fsRepositorySchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: fsRepositorySettings,
 });
@@ -81,7 +81,7 @@ const readOnlyRepositorySettings = schema.object({
 });
 
 const readOnlyRepository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: readOnlyRepositorySettings,
 });
@@ -102,7 +102,7 @@ const s3RepositorySettings = schema.object({
 });
 
 const s3Repository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: s3RepositorySettings,
 });
@@ -123,7 +123,7 @@ const hdsRepositorySettings = schema.object(
 );
 
 const hdsfRepository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: hdsRepositorySettings,
 });
@@ -141,7 +141,7 @@ const azureRepositorySettings = schema.object({
 });
 
 const azureRepository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: azureRepositorySettings,
 });
@@ -158,13 +158,13 @@ const gcsRepositorySettings = schema.object({
 });
 
 const gcsRepository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: gcsRepositorySettings,
 });
 
 const sourceRepository = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: schema.oneOf([
     fsRepositorySettings,

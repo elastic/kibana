@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportResponse.errors property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 errors?: SavedObjectsImportFailure[];

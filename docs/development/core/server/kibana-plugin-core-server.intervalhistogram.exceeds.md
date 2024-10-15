@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.exceeds property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exceeds: number;

@@ -5,7 +5,7 @@
 ## ApplicationSetup interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ApplicationSetup 
@@ -16,5 +16,5 @@ export interface ApplicationSetup
 |  Method | Description |
 |  --- | --- |
 |  [register(app)](./kibana-plugin-core-public.applicationsetup.register.md) | Register an mountable application to the system. |
-|  [registerAppUpdater(appUpdater$)](./kibana-plugin-core-public.applicationsetup.registerappupdater.md) | Register an application updater that can be used to change the [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) fields of all applications at runtime.<!-- -->This is meant to be used by plugins that needs to updates the whole list of applications. To only updates a specific application, use the <code>updater$</code> property of the registered application instead. |
+|  [registerAppUpdater(appUpdater$)](./kibana-plugin-core-public.applicationsetup.registerappupdater.md) | <p>Register an application updater that can be used to change the [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) fields of all applications at runtime.</p><p>This is meant to be used by plugins that needs to updates the whole list of applications. To only updates a specific application, use the <code>updater$</code> property of the registered application instead.</p> |
 

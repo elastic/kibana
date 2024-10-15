@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { debounceTime } from 'rxjs/operators';
 
 import { migrateAppState } from '.';
 import { DashboardSavedObject } from '../..';
@@ -25,8 +26,6 @@ import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
 
-let awaitingRemoval = false;
-
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
@@ -36,14 +35,44 @@ export const syncDashboardUrlState = ({
   savedDashboard,
   kibanaVersion,
 }: SyncDashboardUrlStateProps) => {
+  /**
+   * Loads any dashboard state from the URL, and removes the state from the URL.
+   */
+  const loadAndRemoveDashboardState = (): Partial<DashboardState> => {
+    const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
+    if (!rawAppStateInUrl) return {};
+
+    let panelsMap: DashboardPanelMap = {};
+    if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
+      const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
+      panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
+    }
+
+    const migratedQuery = rawAppStateInUrl.query
+      ? migrateLegacyQuery(rawAppStateInUrl.query)
+      : undefined;
+
+    const nextUrl = replaceUrlHashQuery(window.location.href, (query) => {
+      delete query[DASHBOARD_STATE_STORAGE_KEY];
+      return query;
+    });
+    kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
+
+    return {
+      ..._.omit(rawAppStateInUrl, ['panels', 'query']),
+      ...(migratedQuery ? { query: migratedQuery } : {}),
+      ...(rawAppStateInUrl.panels ? { panels: panelsMap } : {}),
+    };
+  };
+
   // load initial state before subscribing to avoid state removal triggering update.
-  const loadDashboardStateProps = { kbnUrlStateStorage, usageCollection, kibanaVersion };
-  const initialDashboardStateFromUrl = loadDashboardUrlState(loadDashboardStateProps);
+  const initialDashboardStateFromUrl = loadAndRemoveDashboardState();
 
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
+    .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
     .subscribe(() => {
-      const stateFromUrl = loadDashboardUrlState(loadDashboardStateProps);
+      const stateFromUrl = loadAndRemoveDashboardState();
 
       const updatedDashboardState = { ...getLatestDashboardState(), ...stateFromUrl };
       applyDashboardFilterState({
@@ -57,57 +86,6 @@ export const syncDashboardUrlState = ({
       dispatchDashboardStateChange(setDashboardState(updatedDashboardState));
     });
 
-  const stopWatchingAppStateInUrl = () => {
-    appStateSubscription.unsubscribe();
-  };
+  const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();
   return { initialDashboardStateFromUrl, stopWatchingAppStateInUrl };
-};
-
-interface LoadDashboardUrlStateProps {
-  kibanaVersion: DashboardBuildContext['kibanaVersion'];
-  usageCollection: DashboardBuildContext['usageCollection'];
-  kbnUrlStateStorage: DashboardBuildContext['kbnUrlStateStorage'];
-}
-
-/**
- * Loads any dashboard state from the URL, and removes the state from the URL.
- */
-const loadDashboardUrlState = ({
-  kibanaVersion,
-  usageCollection,
-  kbnUrlStateStorage,
-}: LoadDashboardUrlStateProps): Partial<DashboardState> => {
-  const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
-  if (!rawAppStateInUrl) return {};
-
-  let panelsMap: DashboardPanelMap = {};
-  if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-    const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
-    panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
-  }
-
-  const migratedQuery = rawAppStateInUrl.query
-    ? migrateLegacyQuery(rawAppStateInUrl.query)
-    : undefined;
-
-  // remove state from URL
-  if (!awaitingRemoval) {
-    awaitingRemoval = true;
-    kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
-      if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
-        return replaceUrlHashQuery(nextUrl, (query) => {
-          delete query[DASHBOARD_STATE_STORAGE_KEY];
-          return query;
-        });
-      }
-      awaitingRemoval = false;
-      return nextUrl;
-    }, true);
-  }
-
-  return {
-    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
-    ...(migratedQuery ? { query: migratedQuery } : {}),
-    ...(rawAppStateInUrl.panels ? { panels: panelsMap } : {}),
-  };
 };

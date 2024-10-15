@@ -7,28 +7,42 @@
  */
 import { IndexPattern, getFieldSubtypeMulti } from '../../../../data/common';
 
+/**
+ * Returns am array of fields to display in the Documents column of the data table
+ * If showMultiFields is set to false, it filters out multifields that have a parent, to prevent entries for multifields
+ * like this: field, field.keyword, field.whatever
+ * @param fields
+ * @param dataView
+ * @param showMultiFields
+ */
 export const getFieldsToShow = (
   fields: string[],
-  indexPattern: IndexPattern,
+  dataView: IndexPattern,
   showMultiFields: boolean
 ) => {
-  const childParentFieldsMap = {} as Record<string, string>;
-  const mapping = (name: string) => indexPattern.fields.getByName(name);
+  if (showMultiFields) {
+    return fields;
+  }
+  const fieldSet = new Set();
+  const childParentFieldsMap = new Map();
+  const parentFieldSet = new Set();
   fields.forEach((key) => {
-    const mapped = mapping(key);
+    const mapped = dataView.fields.getByName(key);
     const subTypeMulti = mapped && getFieldSubtypeMulti(mapped.spec);
+    const isMultiField = Boolean(subTypeMulti?.multi);
     if (mapped && subTypeMulti?.multi?.parent) {
-      childParentFieldsMap[mapped.name] = subTypeMulti.multi.parent;
+      childParentFieldsMap.set(key, subTypeMulti.multi.parent);
     }
+    if (mapped && isMultiField) {
+      parentFieldSet.add(key);
+    }
+    fieldSet.add(key);
   });
   return fields.filter((key: string) => {
-    const fieldMapping = mapping(key);
-    const subTypeMulti = fieldMapping && getFieldSubtypeMulti(fieldMapping.spec);
-    const isMultiField = !!subTypeMulti?.multi;
-    if (!isMultiField) {
+    if (!parentFieldSet.has(key)) {
       return true;
     }
-    const parent = childParentFieldsMap[key];
-    return showMultiFields || (parent && !fields.includes(parent));
+    const parent = childParentFieldsMap.get(key);
+    return parent && !fieldSet.has(parent);
   });
 };

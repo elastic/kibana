@@ -23,6 +23,9 @@ jest.mock('../../../../../app_context', () => {
     useAppContext: () => {
       return {
         services: {
+          api: {
+            useLoadNodeDiskSpace: () => [],
+          },
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
           },

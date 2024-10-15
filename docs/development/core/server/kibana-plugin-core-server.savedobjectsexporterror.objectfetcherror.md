@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportError.objectFetchError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
@@ -16,7 +16,7 @@ static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
 |  --- | --- | --- |
 |  objects | SavedObject\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsExportError
 

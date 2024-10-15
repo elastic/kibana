@@ -6,7 +6,7 @@
 
 Retrieves a set of all uiSettings values set by the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;

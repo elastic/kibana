@@ -6,7 +6,7 @@
 
 UiSettings deprecation field options.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DeprecationSettings 
@@ -14,8 +14,8 @@ export interface DeprecationSettings
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [docLinksKey](./kibana-plugin-core-server.deprecationsettings.doclinkskey.md) | string | Key to documentation links |
-|  [message](./kibana-plugin-core-server.deprecationsettings.message.md) | string | Deprecation message |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [docLinksKey](./kibana-plugin-core-server.deprecationsettings.doclinkskey.md) |  | string | Key to documentation links |
+|  [message](./kibana-plugin-core-server.deprecationsettings.message.md) |  | string | Deprecation message |
 

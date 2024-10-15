@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
@@ -42,11 +39,7 @@ export async function getTransactionsPerMinute({
     'observability_overview_get_transactions_per_minute',
     {
       apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
+        events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
       },
       body: {
         size: 0,
@@ -54,9 +47,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getDocumentTypeFilterForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
+              ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
             ],
           },
         },
@@ -87,8 +78,7 @@ export async function getTransactionsPerMinute({
   const topTransactionTypeBucket =
     aggregations.transactionType.buckets.find(
       ({ key: transactionType }) =>
-        transactionType === TRANSACTION_REQUEST ||
-        transactionType === TRANSACTION_PAGE_LOAD
+        transactionType === TRANSACTION_REQUEST || transactionType === TRANSACTION_PAGE_LOAD
     ) || aggregations.transactionType.buckets[0];
 
   return {

@@ -6,7 +6,7 @@
 
 Specifies whether plugin includes some server-side specific functionality.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly server: boolean;

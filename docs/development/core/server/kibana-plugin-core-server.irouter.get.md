@@ -6,7 +6,7 @@
 
 Register a route handler for `GET` request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: RouteRegistrar<'get', Context>;

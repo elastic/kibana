@@ -6,7 +6,7 @@
 
 A tool set defining an outcome of OnPreResponse interceptor for incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreResponseToolkit 
@@ -14,8 +14,8 @@ export interface OnPreResponseToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) | (responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult | To pass request to the next handler |
-|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) | (responseRender: OnPreResponseRender) =&gt; OnPreResponseResult | To override the response with a different body |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) |  | (responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult | To pass request to the next handler |
+|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) |  | (responseRender: OnPreResponseRender) =&gt; OnPreResponseResult | To override the response with a different body |
 

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SERVICE_NAME,
-  ERROR_GROUP_ID,
-} from '../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, ERROR_GROUP_ID } from '../../common/elasticsearch_fieldnames';
 import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { environmentQuery } from '../../common/utils/environment_query';
 import { ProcessorEvent } from '../../common/processor_event';

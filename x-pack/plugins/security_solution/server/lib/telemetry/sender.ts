@@ -178,6 +178,7 @@ export class TelemetryEventsSender {
         telemetryUrl,
         'alerts-endpoint',
         clusterInfo?.cluster_uuid,
+        clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
         licenseInfo?.uid
       );
@@ -220,6 +221,7 @@ export class TelemetryEventsSender {
         telemetryUrl,
         channel,
         clusterInfo?.cluster_uuid,
+        clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
         licenseInfo?.uid
       );
@@ -254,6 +256,7 @@ export class TelemetryEventsSender {
     telemetryUrl: string,
     channel: string,
     clusterUuid: string | undefined,
+    clusterName: string | undefined,
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
@@ -264,7 +267,8 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
+          ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.10.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },

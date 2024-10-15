@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { has, mapKeys, set, unset, find } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { has, mapKeys, unset, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {
@@ -19,7 +20,8 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, getInitialPolicies } from './utils';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -61,6 +63,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -78,18 +83,31 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         return response.conflict({ body: `Pack with name "${name}" already exists.` });
       }
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      })) ?? { items: [] };
+      const { items: packagePolicies } = (await packagePolicyService?.list(
+        internalSavedObjectsClient,
+        {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        }
+      )) ?? { items: [] };
 
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsClient, policy_ids), 'id')
+      const { policiesList, invalidPolicies } = getInitialPolicies(packagePolicies, policy_ids);
+
+      if (invalidPolicies?.length) {
+        return response.badRequest({
+          body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
+        });
+      }
+      const agentPolicies = policiesList
+        ? mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
+            'id'
+          )
         : {};
 
-      const references = policy_ids
-        ? policy_ids.map((policyId: string) => ({
+      const references = policiesList
+        ? policiesList.map((policyId: string) => ({
             id: policyId,
             name: agentPolicies[policyId].name,
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -114,13 +132,13 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       );
 
-      if (enabled && policy_ids?.length) {
+      if (enabled && policiesList?.length) {
         await Promise.all(
-          policy_ids.map((agentPolicyId) => {
+          policiesList.map((agentPolicyId) => {
             const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {

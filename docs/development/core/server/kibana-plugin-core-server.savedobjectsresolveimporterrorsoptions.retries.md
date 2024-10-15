@@ -6,7 +6,7 @@
 
 saved object import references to retry
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 retries: SavedObjectsImportRetry[];

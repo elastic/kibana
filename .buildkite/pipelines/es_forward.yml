@@ -1,0 +1,116 @@
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c2-standard-16
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+
+  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
+    label: 'Default CI Group'
+    parallelism: 27
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    depends_on: build
+    timeout_in_minutes: 150
+    key: default-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
+    label: 'Docker CI Group'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    depends_on: build
+    timeout_in_minutes: 120
+    key: default-cigroup-docker
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
+    label: 'OSS CI Group'
+    parallelism: 11
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    depends_on: build
+    timeout_in_minutes: 120
+    key: oss-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/jest_integration.sh
+    label: 'Jest Integration Tests'
+    parallelism: 3
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    timeout_in_minutes: 120
+    key: jest-integration
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/api_integration.sh
+    label: 'API Integration Tests'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
+    timeout_in_minutes: 120
+    key: api-integration
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

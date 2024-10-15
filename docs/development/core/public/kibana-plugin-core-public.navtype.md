@@ -4,7 +4,7 @@
 
 ## NavType type
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type NavType = 'modern' | 'legacy';

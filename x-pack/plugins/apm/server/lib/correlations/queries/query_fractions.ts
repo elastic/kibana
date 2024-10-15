@@ -41,9 +41,7 @@ export const fetchTransactionDurationFractions = async (
   params: CorrelationsParams,
   ranges: estypes.AggregationsAggregationRange[]
 ): Promise<{ fractions: number[]; totalDocCount: number }> => {
-  const resp = await esClient.search(
-    getTransactionDurationRangesRequest(params, ranges)
-  );
+  const resp = await esClient.search(getTransactionDurationRangesRequest(params, ranges));
 
   if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
     return {
@@ -53,14 +51,11 @@ export const fetchTransactionDurationFractions = async (
   }
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationFractions failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationFractions failed, did not return aggregations.');
   }
 
   const buckets = (
-    resp.body.aggregations
-      .latency_ranges as estypes.AggregationsMultiBucketAggregate<{
+    resp.body.aggregations.latency_ranges as estypes.AggregationsMultiBucketAggregate<{
       doc_count: number;
     }>
   )?.buckets;

@@ -6,7 +6,7 @@
 
 optional array of objects to export.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 objects: Array<{

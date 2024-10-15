@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SinonFakeServer } from 'sinon';
 import { TestBed } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 
@@ -17,20 +16,13 @@ const notInArray = (array: string[]) => (value: string) => array.indexOf(value) 
 
 let component: TestBed['component'];
 let actions: RemoteClustersActions;
-let server: SinonFakeServer;
 
 describe('Create Remote cluster', () => {
-  beforeAll(() => {
-    ({ server } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup } = setupEnvironment();
 
   beforeEach(async () => {
     await act(async () => {
-      ({ actions, component } = await setup());
+      ({ actions, component } = await setup(httpSetup));
     });
     component.update();
   });
@@ -95,7 +87,7 @@ describe('Create Remote cluster', () => {
     describe('on cloud', () => {
       beforeEach(async () => {
         await act(async () => {
-          ({ actions, component } = await setup(true));
+          ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
         });
 
         component.update();
@@ -153,7 +145,7 @@ describe('Create Remote cluster', () => {
     describe('proxy address', () => {
       beforeEach(async () => {
         await act(async () => {
-          ({ actions, component } = await setup());
+          ({ actions, component } = await setup(httpSetup));
         });
 
         component.update();
@@ -190,7 +182,7 @@ describe('Create Remote cluster', () => {
     describe('on prem', () => {
       beforeEach(async () => {
         await act(async () => {
-          ({ actions, component } = await setup());
+          ({ actions, component } = await setup(httpSetup));
         });
 
         component.update();
@@ -235,7 +227,7 @@ describe('Create Remote cluster', () => {
     describe('on cloud', () => {
       beforeEach(async () => {
         await act(async () => {
-          ({ actions, component } = await setup(true));
+          ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
         });
 
         component.update();

@@ -6,7 +6,7 @@
 
 The name of the type, which is also used as the internal id.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 name: string;

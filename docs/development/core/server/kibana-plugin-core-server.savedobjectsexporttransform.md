@@ -8,7 +8,7 @@ Transformation function used to mutate the exported objects of the associated ty
 
 A type's export transform function will be executed once per user-initiated export, for all objects of that type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsExportTransform<T = unknown> = (context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;

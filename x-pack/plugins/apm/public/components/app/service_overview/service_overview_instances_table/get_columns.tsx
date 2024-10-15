@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '../../../../../../observability/public';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../../common/service_nodes';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
   asPercent,
@@ -34,8 +27,7 @@ import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem =
-  ServiceInstanceMainStatistics['currentPeriod'][0];
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -67,14 +59,12 @@ export function getColumns({
   return [
     {
       field: 'serviceNodeName',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnNodeName',
-        { defaultMessage: 'Node name' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnNodeName', {
+        defaultMessage: 'Node name',
+      }),
       render: (_, item) => {
         const { serviceNodeName } = item;
-        const isMissingServiceNodeName =
-          serviceNodeName === SERVICE_NODE_NAME_MISSING;
+        const isMissingServiceNodeName = serviceNodeName === SERVICE_NODE_NAME_MISSING;
         const text = getServiceNodeName(serviceNodeName);
 
         const link = isJavaAgentName(agentName) ? (
@@ -107,8 +97,7 @@ export function getColumns({
       name: getLatencyColumnLabel(latencyAggregationType),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, latency }) => {
-        const currentPeriodTimestamp =
-          detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
+        const currentPeriodTimestamp = detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
         return (
@@ -117,9 +106,7 @@ export function getColumns({
             valueLabel={asMillisecondDuration(latency)}
             hideSeries={!shouldShowSparkPlots}
             series={currentPeriodTimestamp}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousPeriodTimestamp : undefined}
           />
         );
       },
@@ -127,10 +114,9 @@ export function getColumns({
     },
     {
       field: 'throughput',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnThroughput', {
+        defaultMessage: 'Throughput',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
@@ -144,9 +130,7 @@ export function getColumns({
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asTransactionRate(throughput)}
             series={currentPeriodTimestamp}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousPeriodTimestamp : undefined}
           />
         );
       },
@@ -154,10 +138,9 @@ export function getColumns({
     },
     {
       field: 'errorRate',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
@@ -171,9 +154,7 @@ export function getColumns({
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(errorRate, 1)}
             series={currentPeriodTimestamp}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousPeriodTimestamp : undefined}
           />
         );
       },
@@ -181,10 +162,9 @@ export function getColumns({
     },
     {
       field: 'cpuUsage',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
-        { defaultMessage: 'CPU usage (avg.)' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnCpuUsage', {
+        defaultMessage: 'CPU usage (avg.)',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
@@ -198,9 +178,7 @@ export function getColumns({
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(cpuUsage, 1)}
             series={currentPeriodTimestamp}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousPeriodTimestamp : undefined}
           />
         );
       },
@@ -208,10 +186,9 @@ export function getColumns({
     },
     {
       field: 'memoryUsage',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
-        { defaultMessage: 'Memory usage (avg.)' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnMemoryUsage', {
+        defaultMessage: 'Memory usage (avg.)',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
@@ -225,9 +202,7 @@ export function getColumns({
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(memoryUsage, 1)}
             series={currentPeriodTimestamp}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousPeriodTimestamp : undefined}
           />
         );
       },
@@ -239,9 +214,7 @@ export function getColumns({
         return (
           <ActionMenu
             id="instanceActionMenu"
-            closePopover={() =>
-              toggleRowActionMenu(instanceItem.serviceNodeName)
-            }
+            closePopover={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
             isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
             anchorPosition="leftCenter"
             button={
@@ -249,9 +222,7 @@ export function getColumns({
                 aria-label="Edit"
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
-                onClick={() =>
-                  toggleRowActionMenu(instanceItem.serviceNodeName)
-                }
+                onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
               />
             }
           >
@@ -275,14 +246,10 @@ export function getColumns({
             data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
             onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
             aria-label={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                ? 'Collapse'
-                : 'Expand'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
             }
             iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                ? 'arrowUp'
-                : 'arrowDown'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'arrowUp' : 'arrowDown'
             }
           />
         );

@@ -4,7 +4,7 @@
 
 ## RequestHandlerContext.core property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 core: {

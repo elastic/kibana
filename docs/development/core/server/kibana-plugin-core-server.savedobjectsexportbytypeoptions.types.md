@@ -6,7 +6,7 @@
 
 array of saved object types.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 types: string[];

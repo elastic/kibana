@@ -1,21 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:without-timefield",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fields": "[]",
-        "title": "without-timefield"
-      },
-      "type": "index-pattern"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "AU_x3-TaGFA8no6QjiSJ",
     "index": "without-timefield",
     "source": {

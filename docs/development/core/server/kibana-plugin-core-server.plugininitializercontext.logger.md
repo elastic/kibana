@@ -6,7 +6,7 @@
 
  instance already bound to the plugin's logging context
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 logger: LoggerFactory;

@@ -23,7 +23,8 @@ import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
-    columnType: 'number',
+    columnType: 'date',
+    esTypes: ['date'],
     sortDirection: Direction.desc,
   },
 ];

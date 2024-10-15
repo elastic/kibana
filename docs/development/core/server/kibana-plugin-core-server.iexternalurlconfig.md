@@ -6,7 +6,7 @@
 
 External Url configuration for use in Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IExternalUrlConfig 
@@ -14,7 +14,7 @@ export interface IExternalUrlConfig
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [policy](./kibana-plugin-core-server.iexternalurlconfig.policy.md) | IExternalUrlPolicy\[\] | A set of policies describing which external urls are allowed. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [policy](./kibana-plugin-core-server.iexternalurlconfig.policy.md) | <code>readonly</code> | IExternalUrlPolicy\[\] | A set of policies describing which external urls are allowed. |
 

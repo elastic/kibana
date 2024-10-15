@@ -10,11 +10,7 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OPTIONAL_LABEL } from '../settings_form/utils';
 import { SettingsRow } from '../typings';
 
-export function getAgentAuthorizationSettings({
-  isCloudPolicy,
-}: {
-  isCloudPolicy: boolean;
-}): SettingsRow[] {
+export function getAgentAuthorizationSettings(): SettingsRow[] {
   return [
     {
       type: 'boolean',
@@ -27,8 +23,7 @@ export function getAgentAuthorizationSettings({
       helpText: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyAuthenticationHelpText',
         {
-          defaultMessage:
-            'Enable API Key auth between APM Server and APM Agents.',
+          defaultMessage: 'Enable API Key auth between APM Server and APM Agents.',
         }
       ),
       settings: [
@@ -47,8 +42,7 @@ export function getAgentAuthorizationSettings({
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitTitle',
             {
-              defaultMessage:
-                'Maximum number of API keys of Agent authentication',
+              defaultMessage: 'Maximum number of API keys of Agent authentication',
             }
           ),
           rowDescription: i18n.translate(
@@ -65,7 +59,6 @@ export function getAgentAuthorizationSettings({
     {
       type: 'text',
       key: 'secret_token',
-      readOnly: isCloudPolicy,
       labelAppend: OPTIONAL_LABEL,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.secretTokenLabel',
@@ -82,8 +75,7 @@ export function getAgentAuthorizationSettings({
       helpText: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.anonymousEnabledHelpText',
         {
-          defaultMessage:
-            'Enable anonymous access to APM Server for select APM Agents.',
+          defaultMessage: 'Enable anonymous access to APM Server for select APM Agents.',
         }
       ),
       rowDescription: i18n.translate(
@@ -154,8 +146,7 @@ export function getAgentAuthorizationSettings({
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.agentAuthorization.anonymousRateLimitEventLimitHelpText',
             {
-              defaultMessage:
-                'Maximum number of events per client IP per second.',
+              defaultMessage: 'Maximum number of events per client IP per second.',
             }
           ),
           validation: getIntegerRt({ min: 1 }),

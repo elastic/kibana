@@ -6,7 +6,7 @@
 
 type of the excluded object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: string;

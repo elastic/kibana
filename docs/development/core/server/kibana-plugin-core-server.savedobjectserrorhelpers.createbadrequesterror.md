@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createBadRequestError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createBadRequestError(reason?: string): DecoratedError;
@@ -14,9 +14,9 @@ static createBadRequestError(reason?: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  reason | string |  |
+|  reason | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

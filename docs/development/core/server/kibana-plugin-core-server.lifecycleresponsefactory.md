@@ -6,7 +6,7 @@
 
 Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type LifecycleResponseFactory = typeof lifecycleResponseFactory;

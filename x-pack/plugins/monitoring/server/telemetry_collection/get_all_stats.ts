@@ -36,9 +36,9 @@ export async function getAllStats(
   const end = moment(timestamp).toISOString();
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
-    getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getElasticsearchStats(callCluster, clusterUuids, start, end, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
-    getLogstashStats(callCluster, clusterUuids), // stack_stats.logstash
+    getLogstashStats(callCluster, clusterUuids, start, end), // stack_stats.logstash
     getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
   ]);
 

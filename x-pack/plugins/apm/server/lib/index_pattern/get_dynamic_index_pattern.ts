@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, FieldDescriptor } from '../../../../../../src/plugins/data/server';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';

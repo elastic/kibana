@@ -39,13 +39,23 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: REPO_ROOT,
       all: true,
     }
   );
+  const filterLogs = (logs: string | undefined) => {
+    return logs
+      ?.split('\n')
+      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .join('\n');
+  };
 
-  expect(generateProc.all).toMatchInlineSnapshot(`
-    " succ 🎉
+  expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/7.17/production.html#openssl-legacy-provider
+     succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
@@ -55,18 +65,17 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: PLUGIN_DIR,
       all: true,
     }
   );
 
-  expect(
-    buildProc.all
-      ?.split('\n')
-      .filter((l) => !l.includes('failed to reach ci-stats service'))
-      .join('\n')
-  ).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+  expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/7.17/production.html#openssl-legacy-provider
+     info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]

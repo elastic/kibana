@@ -43,10 +43,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
   );
 }
 
-async function deleteConfig(
-  customLinkId: string,
-  toasts: NotificationsStart['toasts']
-) {
+async function deleteConfig(customLinkId: string, toasts: NotificationsStart['toasts']) {
   try {
     await callApmApi({
       endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
@@ -57,18 +54,16 @@ async function deleteConfig(
     });
     toasts.addSuccess({
       iconType: 'trash',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.delete.successed',
-        { defaultMessage: 'Deleted custom link.' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customizeUI.customLink.delete.successed', {
+        defaultMessage: 'Deleted custom link.',
+      }),
     });
   } catch (error) {
     toasts.addDanger({
       iconType: 'cross',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.delete.failed',
-        { defaultMessage: 'Custom link could not be deleted' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customizeUI.customLink.delete.failed', {
+        defaultMessage: 'Custom link could not be deleted',
+      }),
     });
   }
 }

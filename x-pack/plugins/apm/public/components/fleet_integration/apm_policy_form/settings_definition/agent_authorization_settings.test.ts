@@ -6,65 +6,29 @@
  */
 
 import { getAgentAuthorizationSettings } from './agent_authorization_settings';
-import { SettingsRow } from '../typings';
 import { isSettingsFormValid } from '../settings_form/utils';
 
 describe('apm-fleet-apm-integration', () => {
-  describe('getAgentAuthorizationSettings', () => {
-    function findSetting(key: string, settings: SettingsRow[]) {
-      return settings.find(
-        (setting) => setting.type !== 'advanced_setting' && setting.key === key
-      );
-    }
-    it('returns read only secret token when on cloud', () => {
-      const settings = getAgentAuthorizationSettings({ isCloudPolicy: true });
-      const secretToken = findSetting('secret_token', settings);
-      expect(secretToken).toEqual({
-        type: 'text',
-        key: 'secret_token',
-        readOnly: true,
-        labelAppend: 'Optional',
-        label: 'Secret token',
-      });
-    });
-    it('returns secret token when NOT on cloud', () => {
-      const settings = getAgentAuthorizationSettings({ isCloudPolicy: false });
-      const secretToken = findSetting('secret_token', settings);
-
-      expect(secretToken).toEqual({
-        type: 'text',
-        key: 'secret_token',
-        readOnly: false,
-        labelAppend: 'Optional',
-        label: 'Secret token',
-      });
-    });
-  });
-
   describe('isAgentAuthorizationFormValid', () => {
     describe('validates integer fields', () => {
-      [
-        'api_key_limit',
-        'anonymous_rate_limit_ip_limit',
-        'anonymous_rate_limit_event_limit',
-      ].map((key) => {
-        it(`returns false when ${key} is lower than 1`, () => {
-          const settings = getAgentAuthorizationSettings({
-            isCloudPolicy: true,
-          });
-          expect(
-            isSettingsFormValid(settings, {
-              [key]: { value: 0, type: 'integer' },
-            })
-          ).toBeFalsy();
+      ['api_key_limit', 'anonymous_rate_limit_ip_limit', 'anonymous_rate_limit_event_limit'].map(
+        (key) => {
+          it(`returns false when ${key} is lower than 1`, () => {
+            const settings = getAgentAuthorizationSettings();
+            expect(
+              isSettingsFormValid(settings, {
+                [key]: { value: 0, type: 'integer' },
+              })
+            ).toBeFalsy();
 
-          expect(
-            isSettingsFormValid(settings, {
-              [key]: { value: -1, type: 'integer' },
-            })
-          ).toBeFalsy();
-        });
-      });
+            expect(
+              isSettingsFormValid(settings, {
+                [key]: { value: -1, type: 'integer' },
+              })
+            ).toBeFalsy();
+          });
+        }
+      );
     });
   });
 });

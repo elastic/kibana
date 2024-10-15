@@ -8,7 +8,7 @@ Defines authentication mode for a route: - true. A user has to have valid creden
 
 Defaults to `true` if an auth mechanism is registered.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 authRequired?: boolean | 'optional';

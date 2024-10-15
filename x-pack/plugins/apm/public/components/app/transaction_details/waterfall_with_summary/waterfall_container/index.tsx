@@ -8,10 +8,7 @@
 import React from 'react';
 import { keyBy } from 'lodash';
 import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
-import {
-  IWaterfall,
-  WaterfallLegendType,
-} from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfall, WaterfallLegendType } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './Waterfall';
 import { WaterfallLegends } from './WaterfallLegends';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
@@ -31,9 +28,7 @@ export function WaterfallContainer({ urlParams, waterfall }: Props) {
   const { legends, items } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
-  const serviceLegends = legends.filter(
-    ({ type }) => type === WaterfallLegendType.ServiceName
-  );
+  const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
   const serviceColors = serviceLegends.reduce((colorMap, legend) => {
     return {
       ...colorMap,
@@ -43,9 +38,7 @@ export function WaterfallContainer({ urlParams, waterfall }: Props) {
 
   // only color by span type if there are only events for one service
   const colorBy =
-    serviceLegends.length > 1
-      ? WaterfallLegendType.ServiceName
-      : WaterfallLegendType.SpanType;
+    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
 
   const displayedLegends = legends.filter((legend) => legend.type === colorBy);
 
@@ -75,10 +68,7 @@ export function WaterfallContainer({ urlParams, waterfall }: Props) {
   return (
     <div>
       <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      <Waterfall
-        waterfallItemId={urlParams.waterfallItemId}
-        waterfall={waterfall}
-      />
+      <Waterfall waterfallItemId={urlParams.waterfallItemId} waterfall={waterfall} />
     </div>
   );
 }

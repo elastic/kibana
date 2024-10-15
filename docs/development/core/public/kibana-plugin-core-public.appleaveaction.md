@@ -8,7 +8,7 @@ Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.
 
 See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;

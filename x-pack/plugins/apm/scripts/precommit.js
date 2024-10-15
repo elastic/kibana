@@ -9,7 +9,7 @@
 /* eslint-disable import/no-extraneous-dependencies*/
 
 const execa = require('execa');
-const Listr = require('listr');
+const { Listr } = require('listr2');
 const { resolve } = require('path');
 const { argv } = require('yargs');
 
@@ -39,9 +39,7 @@ const tasks = new Listr(
           [
             resolve(
               __dirname,
-              useOptimizedTsConfig
-                ? './optimize-tsconfig.js'
-                : './unoptimize-tsconfig.js'
+              useOptimizedTsConfig ? './optimize-tsconfig.js' : './unoptimize-tsconfig.js'
             ),
           ],
           execaOpts
@@ -80,7 +78,11 @@ const tasks = new Listr(
         ),
     },
   ],
-  { exitOnError: true, concurrent: false }
+  {
+    exitOnError: true,
+    concurrent: false,
+    renderer: process.env.CI ? 'verbose' : 'default',
+  }
 );
 
 tasks.run().catch((error) => {

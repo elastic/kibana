@@ -6,7 +6,7 @@
 
 Allowed fields for [ToastInput](./kibana-plugin-core-public.toastinput.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {

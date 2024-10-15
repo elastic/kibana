@@ -6,18 +6,21 @@
  */
 
 import expect from '@kbn/expect';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const es = getService('es');
+  const esVersion = getService('esVersion');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
   const filterBar = getService('filterBar');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -25,6 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await PageObjects.reporting.clearToastNotifications();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -37,8 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', function () {
-    this.onlyEsVersion('<=7');
-
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -49,12 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      await es.deleteByQuery({
-        index: '.reporting-*',
-        refresh: true,
-        body: { query: { match_all: {} } },
-      });
-      await esArchiver.emptyKibanaIndex();
     });
 
     describe('Check Available', () => {
@@ -72,11 +70,81 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
-      beforeEach(async () => {
-        await kibanaServer.importExport.load(ecommerceSOPath);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+    const describeIfEs7 = esVersion.matchRange('<8') ? describe : describe.skip;
+    const describeIfEs8 = esVersion.matchRange('>=8') ? describe : describe.skip;
+
+    const newSearchBeforeEach = async () => {
+      await kibanaServer.importExport.load(ecommerceSOPath);
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('ecommerce');
+    };
+
+    describeIfEs8('Generate: CSV: new search (8.x)', () => {
+      beforeEach(newSearchBeforeEach);
+
+      it('generates a report from a new search with data: default', async () => {
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describeIfEs7('Generate CSV: new search (7.17)', () => {
+      beforeEach(newSearchBeforeEach);
+
+      it('generates a report with single timefilter', async () => {
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
+        await PageObjects.discover.saveSearch('single-timefilter-search');
+
+        // get shared URL value
+        await PageObjects.share.clickShareTopNavButton();
+        const sharedURL = await PageObjects.share.getSharedUrl();
+
+        // click 'Copy POST URL'
+        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.reporting.openCsvReportingPanel();
+        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
+        await advOpt.click();
+        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
+        await postUrl.click();
+
+        // get clipboard value using field search input, since
+        // 'browser.getClipboardValue()' doesn't work, due to permissions
+        const textInput = await testSubjects.find('fieldFilterSearchInput');
+        await textInput.click();
+        await browser.getActions().keyDown(Key.CONTROL).perform();
+        await browser.getActions().keyDown('v').perform();
+
+        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
+
+        // get number of filters in URLs
+        const timeFiltersNumberInReportURL =
+          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
+        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
+
+        expect(timeFiltersNumberInSharedURL).to.be(1);
+        expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
+
+        expect(timeFiltersNumberInReportURL).to.be(1);
+        expect(
+          reportURL.includes(
+            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
+          )
+        ).to.be(true);
+
+        // return keyboard state
+        await browser.getActions().keyUp(Key.CONTROL).perform();
+        await browser.getActions().keyUp('v').perform();
+
+        //  return field search input state
+        await textInput.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
@@ -137,6 +205,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(() => PageObjects.common.navigateToApp('discover'));
+
+      afterEach(async () => {
+        await PageObjects.reporting.checkForReportingToasts();
+      });
 
       it('generates a report with data', async () => {
         await setupPage();

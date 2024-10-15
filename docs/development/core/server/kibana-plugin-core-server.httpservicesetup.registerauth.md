@@ -6,7 +6,7 @@
 
 To define custom authentication and/or authorization mechanism for incoming requests.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerAuth: (handler: AuthenticationHandler) => void;

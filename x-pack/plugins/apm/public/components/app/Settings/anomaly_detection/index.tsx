@@ -59,10 +59,7 @@ export function AnomalyDetection() {
   if (!canGetJobs) {
     return (
       <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="alert"
-          body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
-        />
+        <EuiEmptyPrompt iconType="alert" body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>} />
       </EuiPanel>
     );
   }

@@ -6,7 +6,7 @@
  */
 
 import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
-import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { isSavedObjectNotFoundError } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   IndexPattern,
@@ -163,8 +163,8 @@ export class ObservabilityIndexPatterns {
         // this is intentional a non blocking call, so no await clause
         this.validateFieldFormats(app, indexPattern);
         return indexPattern;
-      } catch (e: unknown) {
-        if (e instanceof SavedObjectNotFound) {
+      } catch (e) {
+        if (isSavedObjectNotFoundError(e)) {
           return await this.createIndexPattern(app, appIndices);
         }
       }

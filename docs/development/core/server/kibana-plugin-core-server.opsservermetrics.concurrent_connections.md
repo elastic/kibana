@@ -6,7 +6,7 @@
 
 number of current concurrent connections to the server
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 concurrent_connections: number;

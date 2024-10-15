@@ -6,7 +6,7 @@
 
 Observable emitting the list of currently registered apps and their associated status.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;

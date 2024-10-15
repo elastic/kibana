@@ -5,7 +5,7 @@
 ## SavedObjectsMigrationLogger interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsMigrationLogger 
@@ -13,11 +13,11 @@ export interface SavedObjectsMigrationLogger
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [debug](./kibana-plugin-core-server.savedobjectsmigrationlogger.debug.md) | (msg: string) =&gt; void |  |
-|  [error](./kibana-plugin-core-server.savedobjectsmigrationlogger.error.md) | &lt;Meta extends LogMeta = LogMeta&gt;(msg: string, meta: Meta) =&gt; void |  |
-|  [info](./kibana-plugin-core-server.savedobjectsmigrationlogger.info.md) | (msg: string) =&gt; void |  |
-|  [warn](./kibana-plugin-core-server.savedobjectsmigrationlogger.warn.md) | (msg: string) =&gt; void |  |
-|  [warning](./kibana-plugin-core-server.savedobjectsmigrationlogger.warning.md) | (msg: string) =&gt; void |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [debug](./kibana-plugin-core-server.savedobjectsmigrationlogger.debug.md) |  | (msg: string) =&gt; void |  |
+|  [error](./kibana-plugin-core-server.savedobjectsmigrationlogger.error.md) |  | &lt;Meta extends LogMeta = LogMeta&gt;(msg: string, meta: Meta) =&gt; void |  |
+|  [info](./kibana-plugin-core-server.savedobjectsmigrationlogger.info.md) |  | (msg: string) =&gt; void |  |
+|  [warn](./kibana-plugin-core-server.savedobjectsmigrationlogger.warn.md) |  | (msg: string) =&gt; void |  |
+|  [warning](./kibana-plugin-core-server.savedobjectsmigrationlogger.warning.md) |  | (msg: string) =&gt; void |  |
 

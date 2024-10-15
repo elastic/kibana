@@ -34,12 +34,7 @@ interface Props {
 
 const POPOVER_WIDTH = '305px';
 
-export function InstanceActionsMenu({
-  serviceName,
-  serviceNodeName,
-  kuery,
-  onClose,
-}: Props) {
+export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClose }: Props) {
   const { core } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
@@ -52,10 +47,7 @@ export function InstanceActionsMenu({
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED) {
     return (
       <div
         style={{
@@ -103,9 +95,7 @@ export function InstanceActionsMenu({
             {section.map((item) => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
+                {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                 <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink

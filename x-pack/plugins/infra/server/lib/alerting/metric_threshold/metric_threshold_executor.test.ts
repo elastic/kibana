@@ -840,10 +840,12 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
     alertInstance.state = newState;
     return alertInstance.instance;
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
   return alertInstance.instance;
 });
 

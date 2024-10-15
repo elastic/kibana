@@ -6,7 +6,7 @@
 
 APIs to access the application [Capabilities](./kibana-plugin-core-server.capabilities.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CapabilitiesStart 

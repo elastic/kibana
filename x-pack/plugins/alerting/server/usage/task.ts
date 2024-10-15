@@ -78,8 +78,8 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(esClient, kibanaIndex),
-          getTotalCountInUse(esClient, kibanaIndex),
+          getTotalCountAggregations(esClient, kibanaIndex, logger),
+          getTotalCountInUse(esClient, kibanaIndex, logger),
         ])
           .then(([totalCountAggregations, totalInUse]) => {
             return {

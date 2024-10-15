@@ -6,7 +6,7 @@
 
 Registers a `Promise` as a precondition before Kibana can proceed to `setup`<!-- -->. This method can be invoked multiple times and from multiple `preboot` plugins. Kibana will proceed to `setup` only when all registered `Promises` instances are resolved, or it will shut down if any of them is rejected.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly holdSetupUntilResolved: (reason: string, promise: Promise<{

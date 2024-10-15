@@ -6,7 +6,7 @@
 
 An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) or a function returning a map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);

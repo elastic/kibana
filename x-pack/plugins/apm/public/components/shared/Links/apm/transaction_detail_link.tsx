@@ -32,10 +32,7 @@ interface Props extends APMLinkExtendProps {
   comparisonType?: TimeRangeComparisonType;
 }
 
-const persistedFilters: Array<keyof APMQueryParams> = [
-  'transactionResult',
-  'serviceVersion',
-];
+const persistedFilters: Array<keyof APMQueryParams> = ['transactionResult', 'serviceVersion'];
 
 export function TransactionDetailLink({
   serviceName,

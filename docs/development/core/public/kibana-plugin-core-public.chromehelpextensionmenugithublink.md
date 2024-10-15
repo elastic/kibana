@@ -5,18 +5,18 @@
 ## ChromeHelpExtensionMenuGitHubLink interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase 
 ```
-<b>Extends:</b> ChromeHelpExtensionLinkBase
+**Extends:** ChromeHelpExtensionLinkBase
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [labels](./kibana-plugin-core-public.chromehelpextensionmenugithublink.labels.md) | string\[\] | Include at least one app-specific label to be applied to the new github issue |
-|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenugithublink.linktype.md) | 'github' | Creates a link to a new github issue in the Kibana repo |
-|  [title?](./kibana-plugin-core-public.chromehelpextensionmenugithublink.title.md) | string | <i>(Optional)</i> Provides initial text for the title of the issue |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [labels](./kibana-plugin-core-public.chromehelpextensionmenugithublink.labels.md) |  | string\[\] | Include at least one app-specific label to be applied to the new github issue |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenugithublink.linktype.md) |  | 'github' | Creates a link to a new github issue in the Kibana repo |
+|  [title?](./kibana-plugin-core-public.chromehelpextensionmenugithublink.title.md) |  | string | _(Optional)_ Provides initial text for the title of the issue |
 

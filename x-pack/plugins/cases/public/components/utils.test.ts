@@ -83,5 +83,16 @@ describe('Utils', () => {
         })
       ).toBe(true);
     });
+
+    it('returns false if the connector preconfigured', () => {
+      expect(isDeprecatedConnector({ ...connector, isPreconfigured: true })).toBe(false);
+    });
+
+    it('returns false if the config is undefined', () => {
+      expect(
+        // @ts-expect-error
+        isDeprecatedConnector({ ...connector, config: undefined })
+      ).toBe(false);
+    });
   });
 });

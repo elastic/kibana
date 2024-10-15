@@ -6,7 +6,7 @@
 
 The available core services passed to a `PluginInitializer`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PluginInitializerContext<ConfigSchema extends object = object> 
@@ -14,9 +14,9 @@ export interface PluginInitializerContext<ConfigSchema extends object = object>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [config](./kibana-plugin-core-public.plugininitializercontext.config.md) | { get: &lt;T extends object = ConfigSchema&gt;() =&gt; T; } |  |
-|  [env](./kibana-plugin-core-public.plugininitializercontext.env.md) | { mode: Readonly&lt;EnvironmentMode&gt;; packageInfo: Readonly&lt;PackageInfo&gt;; } |  |
-|  [opaqueId](./kibana-plugin-core-public.plugininitializercontext.opaqueid.md) | PluginOpaqueId | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [config](./kibana-plugin-core-public.plugininitializercontext.config.md) | <code>readonly</code> | { get: &lt;T extends object = ConfigSchema&gt;() =&gt; T; } |  |
+|  [env](./kibana-plugin-core-public.plugininitializercontext.env.md) | <code>readonly</code> | { mode: Readonly&lt;EnvironmentMode&gt;; packageInfo: Readonly&lt;PackageInfo&gt;; } |  |
+|  [opaqueId](./kibana-plugin-core-public.plugininitializercontext.opaqueid.md) | <code>readonly</code> | PluginOpaqueId | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
 

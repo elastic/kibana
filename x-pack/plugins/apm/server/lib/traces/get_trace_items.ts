@@ -17,12 +17,7 @@ import {
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 
-export async function getTraceItems(
-  traceId: string,
-  setup: Setup,
-  start: number,
-  end: number
-) {
+export async function getTraceItems(traceId: string, setup: Setup, start: number, end: number) {
   const { apmEventClient, config } = setup;
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
@@ -35,10 +30,7 @@ export async function getTraceItems(
       size: maxTraceItems,
       query: {
         bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
@@ -71,10 +63,8 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse] = await Promise.all([
-    errorResponsePromise,
-    traceResponsePromise,
-  ]);
+  const errorResponse = await errorResponsePromise;
+  const traceResponse = await traceResponsePromise;
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);

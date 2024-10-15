@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "nested.timestamp",
+    "title": "date-nested"
+  },
+  "coreMigrationVersion": "7.11.0",
+  "id": "date-nested",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzIyLDFd"
+}

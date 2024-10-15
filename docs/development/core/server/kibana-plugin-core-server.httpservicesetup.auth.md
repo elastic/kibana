@@ -11,7 +11,7 @@
 
 Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 auth: HttpAuth;

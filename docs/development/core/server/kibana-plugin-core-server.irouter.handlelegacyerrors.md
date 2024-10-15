@@ -6,7 +6,7 @@
 
 Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 handleLegacyErrors: RequestHandlerWrapper;

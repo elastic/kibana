@@ -6,7 +6,7 @@
 
 [ExecutionContextSetup](./kibana-plugin-core-server.executioncontextsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 executionContext: ExecutionContextSetup;

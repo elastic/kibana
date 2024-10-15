@@ -6,7 +6,7 @@
 
 Is the type importable or exportable. Defaults to `false`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 importableAndExportable?: boolean;

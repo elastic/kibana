@@ -135,7 +135,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardCommon.createJobWithoutDatafeedStart();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(

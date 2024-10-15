@@ -6,7 +6,7 @@
 
 A mount function called when the user navigates to this app's route.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mount: AppMount<HistoryLocationState>;

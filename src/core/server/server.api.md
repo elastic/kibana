@@ -30,11 +30,11 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import type { estypes } from '@elastic/elasticsearch';
 import { IncomingHttpHeaders } from 'http';
+import { inspect } from 'util';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { Logger } from '@kbn/logging';
+import { Logger as Logger_2 } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
-import { LogLevelId } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -416,6 +416,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -834,6 +835,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 // @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
+    readonly enabledOnAnonymousPages?: boolean;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
     readonly requiredBundles: readonly PluginName[];
@@ -942,7 +944,7 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
-// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class EventLoopDelaysMonitor {
@@ -959,6 +961,14 @@ export interface ExecutionContextSetup {
 
 // @public (undocumented)
 export type ExecutionContextStart = ExecutionContextSetup;
+
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type ExposedToBrowserDescriptor<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? // can be nested for objects
+    ExposedToBrowserDescriptor<T[Key]> | boolean : boolean;
+};
 
 // @public
 export interface FakeRequest {
@@ -1041,6 +1051,8 @@ export interface HttpResources {
 // @public
 export interface HttpResourcesRenderOptions {
     headers?: ResponseHeaders;
+    // @internal
+    includeExposedConfigKeys?: boolean;
 }
 
 // @public
@@ -1217,7 +1229,9 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    includeUserSettings?: boolean;
+    // @internal
+    includeExposedConfigKeys?: boolean;
+    isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
 }
@@ -1290,6 +1304,21 @@ export type KibanaExecutionContext = {
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {
+    // (undocumented)
+    [inspect.custom](): {
+        id: string;
+        uuid: string;
+        url: string;
+        isSystemRequest: boolean;
+        auth: {
+            isAuthenticated: boolean;
+        };
+        route: Readonly<{
+            path: string;
+            method: RecursiveReadonly<Method>;
+            options: RecursiveReadonly<KibanaRequestRouteOptions<Method>>;
+        }>;
+    };
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request_2;
     constructor(request: Request_2, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
@@ -1315,6 +1344,23 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
     // (undocumented)
     readonly socket: IKibanaSocket;
+    // (undocumented)
+    toJSON(): {
+        id: string;
+        uuid: string;
+        url: string;
+        isSystemRequest: boolean;
+        auth: {
+            isAuthenticated: boolean;
+        };
+        route: Readonly<{
+            path: string;
+            method: RecursiveReadonly<Method>;
+            options: RecursiveReadonly<KibanaRequestRouteOptions<Method>>;
+        }>;
+    };
+    // (undocumented)
+    toString(): string;
     readonly url: URL_2;
     readonly uuid: string;
 }
@@ -1345,14 +1391,32 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 export const kibanaResponseFactory: {
     custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
-        attributes?: Record<string, any> | undefined;
+        attributes?: ResponseErrorAttributes | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
-    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -1369,7 +1433,7 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 // @public
 export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
-export { Logger }
+export { Logger_2 as Logger }
 
 // Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
 //
@@ -1397,8 +1461,6 @@ export { LogMeta }
 
 export { LogRecord }
 
-// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
-//
 // @public
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
@@ -1416,7 +1478,7 @@ export type MetricsServiceStart = MetricsServiceSetup;
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
-// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface NodesVersionCompatibility {
@@ -1587,9 +1649,7 @@ export { Plugin_2 as Plugin }
 export interface PluginConfigDescriptor<T = any> {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     deprecations?: ConfigDeprecationProvider;
-    exposeToBrowser?: {
-        [P in keyof T]?: boolean;
-    };
+    exposeToBrowser?: ExposedToBrowserDescriptor<T>;
     exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
@@ -1628,6 +1688,7 @@ export interface PluginManifest {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     readonly configPath: ConfigPath;
     readonly description?: string;
+    readonly enabledOnAnonymousPages?: boolean;
     // @deprecated
     readonly extraPublicDirs?: string[];
     readonly id: PluginName;
@@ -1841,7 +1902,7 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
-// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SavedObject" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
@@ -2234,7 +2295,7 @@ export class SavedObjectsExporter {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
-        logger: Logger;
+        logger: Logger_2;
     });
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
@@ -2636,7 +2697,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger_2, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -2800,7 +2861,7 @@ export class SavedObjectsUtils {
     static generateId(): string;
     static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
     static isRandomId(id: string | undefined): boolean;
-    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceIdToString: (namespace?: string) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
 
@@ -3030,11 +3091,12 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
+// bazel-kibana/packages/kbn-config-schema/src/byte_size_value/index.ts:1:1 - (ae-wrong-input-file-type) Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. Troubleshooting tips: https://api-extractor.com/link/dts-error
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:486:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:406:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:406:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:409:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:515:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

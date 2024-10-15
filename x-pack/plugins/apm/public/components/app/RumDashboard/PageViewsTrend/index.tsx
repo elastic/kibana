@@ -6,13 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -97,15 +91,8 @@ export function PageViewsTrend() {
         </EuiFlexItem>
         {showAnalyzeButton && (
           <EuiFlexItem grow={false} style={{ width: 170 }}>
-            <EuiButton
-              size="s"
-              isDisabled={!serviceName?.[0]}
-              href={exploratoryViewLink}
-            >
-              <FormattedMessage
-                id="xpack.apm.csm.pageViews.analyze"
-                defaultMessage="Analyze"
-              />
+            <EuiButton size="s" isDisabled={!serviceName?.[0]} href={exploratoryViewLink}>
+              <FormattedMessage id="xpack.apm.csm.pageViews.analyze" defaultMessage="Analyze" />
             </EuiButton>
           </EuiFlexItem>
         )}

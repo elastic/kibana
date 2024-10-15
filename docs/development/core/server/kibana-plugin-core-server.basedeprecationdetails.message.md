@@ -6,7 +6,7 @@
 
 The description message to be displayed for the deprecation. Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 message: string;

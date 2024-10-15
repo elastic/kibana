@@ -5,7 +5,7 @@
 ## ElasticsearchServiceSetup interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ElasticsearchServiceSetup 
@@ -13,7 +13,7 @@ export interface ElasticsearchServiceSetup
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | { readonly config$: Observable&lt;ElasticsearchConfig&gt;; } |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) |  | { readonly config$: Observable&lt;ElasticsearchConfig&gt;; } |  |
 

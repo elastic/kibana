@@ -7,6 +7,7 @@
  */
 
 import { UiPlugins } from '../../plugins';
+import { filterUiPlugins } from '../filter_ui_plugins';
 
 export interface PluginInfo {
   publicPath: string;
@@ -16,12 +17,14 @@ export interface PluginInfo {
 export const getPluginsBundlePaths = ({
   uiPlugins,
   regularBundlePath,
+  isAnonymousPage,
 }: {
   uiPlugins: UiPlugins;
   regularBundlePath: string;
+  isAnonymousPage: boolean;
 }) => {
   const pluginBundlePaths = new Map<string, PluginInfo>();
-  const pluginsToProcess = [...uiPlugins.public.keys()];
+  const pluginsToProcess = filterUiPlugins({ uiPlugins, isAnonymousPage }).map(([id]) => id);
 
   while (pluginsToProcess.length > 0) {
     const pluginId = pluginsToProcess.pop() as string;

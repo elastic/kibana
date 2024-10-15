@@ -41,18 +41,14 @@ export const fetchPValues = async (
     )
   );
 
-  const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
-    fulfilled
-      .flat()
-      .filter(
-        (record) =>
-          record &&
-          typeof record.pValue === 'number' &&
-          record.pValue < ERROR_CORRELATION_THRESHOLD
-      );
+  const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = fulfilled
+    .flat()
+    .filter(
+      (record) =>
+        record && typeof record.pValue === 'number' && record.pValue < ERROR_CORRELATION_THRESHOLD
+    );
 
-  const ccsWarning =
-    rejected.length > 0 && paramsWithIndex?.index.includes(':');
+  const ccsWarning = rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
   return { failedTransactionsCorrelations, ccsWarning };
 };

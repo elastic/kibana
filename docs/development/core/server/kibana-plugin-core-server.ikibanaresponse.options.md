@@ -4,7 +4,7 @@
 
 ## IKibanaResponse.options property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly options: HttpResponseOptions;

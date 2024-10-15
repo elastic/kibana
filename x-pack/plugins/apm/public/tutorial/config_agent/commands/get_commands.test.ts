@@ -511,7 +511,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"\\"
-        elastic.apm.secret_token=\\"\\"
+        elastic_apm.secret_token=\\"\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);
@@ -527,7 +527,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"localhost:8220\\"
-        elastic.apm.secret_token=\\"foobar\\"
+        elastic_apm.secret_token=\\"foobar\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);

@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
 import { TemplateDeserialized } from '../../../common';
 
-interface MappingField {
+export interface MappingField {
   name: string;
   type: string;
 }

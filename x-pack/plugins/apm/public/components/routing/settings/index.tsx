@@ -60,19 +60,17 @@ export const settings = {
     page({
       path: '/settings/agent-configuration',
       tab: 'agent-configurations',
-      title: i18n.translate(
-        'xpack.apm.views.settings.agentConfiguration.title',
-        { defaultMessage: 'Agent Configuration' }
-      ),
+      title: i18n.translate('xpack.apm.views.settings.agentConfiguration.title', {
+        defaultMessage: 'Agent Configuration',
+      }),
       element: <AgentConfigurations />,
     }),
     {
       ...page({
         path: '/settings/agent-configuration/create',
-        title: i18n.translate(
-          'xpack.apm.views.settings.createAgentConfiguration.title',
-          { defaultMessage: 'Create Agent Configuration' }
-        ),
+        title: i18n.translate('xpack.apm.views.settings.createAgentConfiguration.title', {
+          defaultMessage: 'Create Agent Configuration',
+        }),
         tab: 'agent-configurations',
         element: <CreateAgentConfigurationRouteView />,
       }),
@@ -85,10 +83,9 @@ export const settings = {
     {
       ...page({
         path: '/settings/agent-configuration/edit',
-        title: i18n.translate(
-          'xpack.apm.views.settings.editAgentConfiguration.title',
-          { defaultMessage: 'Edit Agent Configuration' }
-        ),
+        title: i18n.translate('xpack.apm.views.settings.editAgentConfiguration.title', {
+          defaultMessage: 'Edit Agent Configuration',
+        }),
         tab: 'agent-configurations',
         element: <EditAgentConfigurationRouteView />,
       }),

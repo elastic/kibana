@@ -6,7 +6,7 @@
 
 Override the current set of custom nav link
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
@@ -16,9 +16,9 @@ setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  newCustomNavLink | Partial&lt;ChromeNavLink&gt; |  |
+|  newCustomNavLink | Partial&lt;ChromeNavLink&gt; | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

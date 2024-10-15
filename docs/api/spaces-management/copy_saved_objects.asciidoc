@@ -63,6 +63,15 @@ NOTE: This cannot be used with the `overwrite` option.
 +
 NOTE: This cannot be used with the `createNewCopies` option.
 
+[[spaces-api-copy-saved-objects-response-codes]]
+==== Response codes
+
+`200`::
+    Indicates a successful call.
+
+`404`::
+    Indicates that the request failed because one or more of the objects specified could not be found. A list of the unresolved objects are included in the 404 response attributes.
+
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
 ==== {api-response-body-title}

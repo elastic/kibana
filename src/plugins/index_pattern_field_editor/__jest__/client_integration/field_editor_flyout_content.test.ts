@@ -12,16 +12,15 @@ import { setupEnvironment } from './helpers';
 import { setup } from './field_editor_flyout_content.helpers';
 
 describe('<FieldEditorFlyoutContent />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['foo'] });
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   test('should have the correct title', async () => {

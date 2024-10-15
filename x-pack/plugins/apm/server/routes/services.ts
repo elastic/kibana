@@ -36,13 +36,7 @@ import { getServiceInfrastructure } from '../lib/services/get_service_infrastruc
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import {
-  comparisonRangeRt,
-  environmentRt,
-  kueryRt,
-  offsetRt,
-  rangeRt,
-} from './default_api_types';
+import { comparisonRangeRt, environmentRt, kueryRt, offsetRt, rangeRt } from './default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
@@ -90,8 +84,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery, offset, serviceNames, start, end } =
-      params.query;
+    const { environment, kuery, offset, serviceNames, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       start,
@@ -234,21 +227,20 @@ const serviceTransactionTypesRoute = createApmServerRoute({
 });
 
 const serviceNodeMetadataRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
   params: t.type({
     path: t.type({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end } = params.query;
+    const { kuery, start, end, environment } = params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -257,6 +249,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceNodeName,
       start,
       end,
+      environment,
     });
   },
 });
@@ -278,22 +271,20 @@ const serviceAnnotationsRoute = createApmServerRoute({
 
     const { observability } = plugins;
 
-    const [annotationsClient, searchAggregatedTransactions] = await Promise.all(
-      [
-        observability
-          ? withApmSpan('get_scoped_annotations_client', () =>
-              observability.setup.getScopedAnnotationsClient(context, request)
-            )
-          : undefined,
-        getSearchAggregatedTransactions({
-          apmEventClient: setup.apmEventClient,
-          config: setup.config,
-          start,
-          end,
-          kuery: '',
-        }),
-      ]
-    );
+    const [annotationsClient, searchAggregatedTransactions] = await Promise.all([
+      observability
+        ? withApmSpan('get_scoped_annotations_client', () =>
+            observability.setup.getScopedAnnotationsClient(context, request)
+          )
+        : undefined,
+      getSearchAggregatedTransactions({
+        apmEventClient: setup.apmEventClient,
+        config: setup.config,
+        start,
+        end,
+        kuery: '',
+      }),
+    ]);
 
     return getServiceAnnotations({
       environment,
@@ -375,8 +366,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
 });
 
 const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -412,8 +402,7 @@ const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
 });
 
 const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -500,12 +489,11 @@ const serviceThroughputRoute = createApmServerRoute({
       end,
     });
 
-    const { bucketSize, intervalString } =
-      getBucketSizeForAggregatedTransactions({
-        start,
-        end,
-        searchAggregatedTransactions,
-      });
+    const { bucketSize, intervalString } = getBucketSizeForAggregatedTransactions({
+      start,
+      end,
+      searchAggregatedTransactions,
+    });
 
     const commonProps = {
       environment,
@@ -545,8 +533,7 @@ const serviceThroughputRoute = createApmServerRoute({
 });
 
 const serviceInstancesMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,

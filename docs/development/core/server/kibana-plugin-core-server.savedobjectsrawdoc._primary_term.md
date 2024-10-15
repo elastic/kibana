@@ -4,7 +4,7 @@
 
 ## SavedObjectsRawDoc.\_primary\_term property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _primary_term?: number;

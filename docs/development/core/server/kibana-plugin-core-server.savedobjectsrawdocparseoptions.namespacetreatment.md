@@ -8,7 +8,7 @@ Optional setting to allow for lax handling of the raw document ID and namespace 
 
 If not specified, the default treatment is `strict`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespaceTreatment?: 'strict' | 'lax';

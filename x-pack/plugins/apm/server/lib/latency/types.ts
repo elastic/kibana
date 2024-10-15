@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type {
-  FieldValuePair,
-  CorrelationsClientParams,
-} from '../../../common/correlations/types';
+import type { FieldValuePair, CorrelationsClientParams } from '../../../common/correlations/types';
 
 import { Setup } from '../helpers/setup_request';
 
-export interface OverallLatencyDistributionOptions
-  extends CorrelationsClientParams {
+export interface OverallLatencyDistributionOptions extends CorrelationsClientParams {
   percentileThreshold: number;
   termFilters?: FieldValuePair[];
   setup: Setup;

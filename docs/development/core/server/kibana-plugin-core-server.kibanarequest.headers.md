@@ -6,7 +6,7 @@
 
 Readonly copy of incoming request headers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly headers: Headers;

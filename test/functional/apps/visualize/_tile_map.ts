@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'tileMap',
   ]);
 
-  describe('tile map visualize app', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/142082
+  describe.skip('tile map visualize app', function () {
     describe('incomplete config', function describeIndexTests() {
       before(async function () {
         await PageObjects.visualize.initTests();

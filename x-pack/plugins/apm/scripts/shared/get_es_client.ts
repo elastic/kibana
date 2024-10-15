@@ -7,20 +7,11 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../../../src/core/types/elasticsearch';
+import { ESSearchResponse, ESSearchRequest } from '../../../../../src/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 
-export function getEsClient({
-  node,
-  auth,
-}: {
-  node: string;
-  auth?: BasicAuth | ApiKeyAuth;
-}) {
+export function getEsClient({ node, auth }: { node: string; auth?: BasicAuth | ApiKeyAuth }) {
   const client = new Client({
     node,
     ssl: {
@@ -40,10 +31,7 @@ export function getEsClient({
 
     return {
       ...response,
-      body: response.body as unknown as ESSearchResponse<
-        TDocument,
-        TSearchRequest
-      >,
+      body: response.body as unknown as ESSearchResponse<TDocument, TSearchRequest>,
     };
   }
 

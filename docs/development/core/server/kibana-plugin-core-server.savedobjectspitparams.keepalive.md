@@ -4,7 +4,7 @@
 
 ## SavedObjectsPitParams.keepAlive property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 keepAlive?: string;

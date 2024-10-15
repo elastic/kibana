@@ -36,7 +36,7 @@ export default new Datasource('graphite', {
       max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD'),
     };
     const allowedUrls = tlConfig.allowedGraphiteUrls;
-    const configuredUrl = tlConfig.settings['timelion:graphite.url'];
+    const configuredUrl = tlConfig.settings['timelion:graphite.url'] || allowedUrls[0];
     if (!allowedUrls.includes(configuredUrl)) {
       throw new Error(
         i18n.translate('timelion.help.functions.notAllowedGraphiteUrl', {
@@ -48,7 +48,7 @@ export default new Datasource('graphite', {
     }
 
     const URL =
-      tlConfig.settings['timelion:graphite.url'] +
+      configuredUrl +
       '/render/' +
       '?format=json' +
       '&from=' +

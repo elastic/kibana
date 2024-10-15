@@ -9,10 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  METRIC_TYPE,
-  useTrackMetric,
-} from '../../../../../observability/public';
+import { METRIC_TYPE, useTrackMetric } from '../../../../../observability/public';
 
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 
@@ -43,12 +40,9 @@ function FailedTransactionsCorrelationsTab({ onFilter }: TabContentProps) {
     <FailedTransactionsCorrelations onFilter={onFilter} />
   ) : (
     <LicensePrompt
-      text={i18n.translate(
-        'xpack.apm.failedTransactionsCorrelations.licenseCheckText',
-        {
-          defaultMessage: `To use the failed transaction correlations feature, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which attributes are contributing to failed transactions.`,
-        }
-      )}
+      text={i18n.translate('xpack.apm.failedTransactionsCorrelations.licenseCheckText', {
+        defaultMessage: `To use the failed transaction correlations feature, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which attributes are contributing to failed transactions.`,
+      })}
     />
   );
 }
@@ -58,12 +52,9 @@ export const failedTransactionsCorrelationsTab = {
   key: 'failedTransactionsCorrelations',
   label: (
     <>
-      {i18n.translate(
-        'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsLabel',
-        {
-          defaultMessage: 'Failed transaction correlations',
-        }
-      )}
+      {i18n.translate('xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsLabel', {
+        defaultMessage: 'Failed transaction correlations',
+      })}
     </>
   ),
   component: FailedTransactionsCorrelationsTab,

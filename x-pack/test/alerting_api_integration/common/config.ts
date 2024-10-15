@@ -24,6 +24,7 @@ interface CreateTestConfigOptions {
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
+  emailDomainsAllowed?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -60,6 +61,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
+    emailDomainsAllowed = undefined,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -130,6 +132,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
+    const emailSettings = emailDomainsAllowed
+      ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
+      : [];
+
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
@@ -156,7 +162,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
-            'smtp.live.com',
+            'smtp-mail.outlook.com',
+            'slack.com',
           ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
@@ -167,6 +174,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
+          ...emailSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
@@ -242,7 +250,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               },
             },
           })}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`

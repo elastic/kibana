@@ -46,17 +46,11 @@ export const AGENT_NAMES: AgentName[] = [
 
 export const JAVA_AGENT_NAMES: AgentName[] = ['java', 'opentelemetry/java'];
 
-export function isJavaAgentName(
-  agentName?: string
-): agentName is 'java' | 'opentelemetry/java' {
+export function isJavaAgentName(agentName?: string): agentName is 'java' | 'opentelemetry/java' {
   return JAVA_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
-export const RUM_AGENT_NAMES: AgentName[] = [
-  'js-base',
-  'rum-js',
-  'opentelemetry/webjs',
-];
+export const RUM_AGENT_NAMES: AgentName[] = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
 export function isRumAgentName(
   agentName?: string
@@ -64,9 +58,7 @@ export function isRumAgentName(
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
-export function normalizeAgentName<T extends string | undefined>(
-  agentName: T
-): T | string {
+export function normalizeAgentName<T extends string | undefined>(agentName: T): T | string {
   if (isRumAgentName(agentName)) {
     return 'rum-js';
   }

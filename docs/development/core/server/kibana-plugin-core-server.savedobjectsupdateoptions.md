@@ -5,19 +5,19 @@
 ## SavedObjectsUpdateOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions 
 ```
-<b>Extends:</b> SavedObjectsBaseOptions
+**Extends:** SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [references?](./kibana-plugin-core-server.savedobjectsupdateoptions.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> A reference to another saved object. |
-|  [refresh?](./kibana-plugin-core-server.savedobjectsupdateoptions.refresh.md) | MutatingOperationRefreshSetting | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation |
-|  [upsert?](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) | Attributes | <i>(Optional)</i> If specified, will be used to perform an upsert if the document doesn't exist |
-|  [version?](./kibana-plugin-core-server.savedobjectsupdateoptions.version.md) | string | <i>(Optional)</i> An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [references?](./kibana-plugin-core-server.savedobjectsupdateoptions.references.md) |  | SavedObjectReference\[\] | _(Optional)_ A reference to another saved object. |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsupdateoptions.refresh.md) |  | MutatingOperationRefreshSetting | _(Optional)_ The Elasticsearch Refresh setting for this operation |
+|  [upsert?](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) |  | Attributes | _(Optional)_ If specified, will be used to perform an upsert if the document doesn't exist |
+|  [version?](./kibana-plugin-core-server.savedobjectsupdateoptions.version.md) |  | string | _(Optional)_ An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 

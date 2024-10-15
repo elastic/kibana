@@ -21,6 +21,7 @@ export const LICENSE_ALLOWED = [
   '(MIT AND Zlib)',
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
+  '(MIT OR GPL-3.0-or-later)',
   '(WTFPL OR MIT)',
   '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
@@ -56,6 +57,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR CC0-1.0)',
   'MIT',
   'MIT*',
+  'MIT-0',
   'MIT/X11',
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',
@@ -65,6 +67,8 @@ export const LICENSE_ALLOWED = [
   'WTFPL OR ISC',
   'WTFPL',
   'Nuclide software',
+  'Python-2.0',
+  'BlueOak-1.0.0',
 ];
 
 // The following list only applies to licenses that
@@ -75,7 +79,9 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@7.16.0': ['Elastic License 2.0'],
+  '@elastic/ems-client@7.17.3': ['Elastic License 2.0'],
   '@elastic/eui@39.1.3': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
+  'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
+  '@bufbuild/protobuf@1.2.1': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
 };

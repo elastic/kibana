@@ -6,7 +6,7 @@
 
 The category definition of the product See [AppCategory](./kibana-plugin-core-public.appcategory.md) See DEFAULT\_APP\_CATEGORIES for more reference
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 category?: AppCategory;

@@ -8,9 +8,6 @@
 import { Setup } from '../helpers/setup_request';
 import { topTransactionGroupsFetcher, TopTraceOptions } from './fetcher';
 
-export async function getTopTransactionGroupList(
-  options: TopTraceOptions,
-  setup: Setup
-) {
+export async function getTopTransactionGroupList(options: TopTraceOptions, setup: Setup) {
   return await topTransactionGroupsFetcher(options, setup);
 }

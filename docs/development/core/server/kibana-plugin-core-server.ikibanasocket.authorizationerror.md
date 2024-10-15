@@ -6,7 +6,7 @@
 
 The reason why the peer's certificate has not been verified. This property becomes available only when `authorized` is `false`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly authorizationError?: Error;

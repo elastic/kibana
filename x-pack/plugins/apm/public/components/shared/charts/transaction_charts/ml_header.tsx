@@ -58,13 +58,10 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
     />
   ) : (
     <EuiIconTip
-      content={i18n.translate(
-        'xpack.apm.metrics.transactionChart.machineLearningTooltip',
-        {
-          defaultMessage:
-            'The stream displays the expected bounds of the average latency. A red vertical annotation indicates anomalies with an anomaly score of 75 or above.',
-        }
-      )}
+      content={i18n.translate('xpack.apm.metrics.transactionChart.machineLearningTooltip', {
+        defaultMessage:
+          'The stream displays the expected bounds of the average latency. A red vertical annotation indicates anomalies with an anomaly score of 75 or above.',
+      })}
     />
   );
 
@@ -73,12 +70,9 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
       <ShiftedEuiText size="xs">
         <ShiftedIconWrapper>{icon}</ShiftedIconWrapper>
         <span>
-          {i18n.translate(
-            'xpack.apm.metrics.transactionChart.machineLearningLabel',
-            {
-              defaultMessage: 'Machine learning:',
-            }
-          )}{' '}
+          {i18n.translate('xpack.apm.metrics.transactionChart.machineLearningLabel', {
+            defaultMessage: 'Machine learning:',
+          })}{' '}
         </span>
         <MLSingleMetricLink
           jobId={mlJobId}

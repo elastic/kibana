@@ -180,7 +180,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           sort: [{ record_score: { order: 'desc' } }],
         },
       },
-      []
+      jobIds
     );
 
     const tableData: {
@@ -217,9 +217,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         (item: any) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
-        tableData.examplesByJobId = {};
+        tableData.examplesByJobId = Object.create(null);
 
-        const categoryIdsByJobId: { [key: string]: any } = {};
+        const categoryIdsByJobId: { [key: string]: any } = Object.create(null);
         categoryAnomalies.forEach((anomaly) => {
           if (categoryIdsByJobId[anomaly.jobId] === undefined) {
             categoryIdsByJobId[anomaly.jobId] = [];
@@ -311,7 +311,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       },
     };
 
-    const { body } = await mlClient.anomalySearch(query, []);
+    const { body } = await mlClient.anomalySearch(query, jobIds);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -375,7 +375,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      jobIds
     );
 
     const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
@@ -383,7 +383,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       ['aggregations', 'byJobId', 'buckets'],
       []
     );
-    const timestampByJobId: { [key: string]: number | undefined } = {};
+    const timestampByJobId: { [key: string]: number | undefined } = Object.create(null);
     bucketsByJobId.forEach((bucket) => {
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
@@ -406,10 +406,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
-    const examplesByCategoryId: { [key: string]: any } = {};
+    const examplesByCategoryId: { [key: string]: any } = Object.create(null);
     // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {
@@ -443,7 +443,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
@@ -492,7 +492,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
     return body ? body.hits.hits.map((r) => r._source) : [];
   }
@@ -583,7 +583,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             aggs,
           },
         },
-        []
+        jobIds
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {

@@ -57,10 +57,7 @@ export function TransactionLink() {
 
   return (
     <CentralizedContainer>
-      <EuiEmptyPrompt
-        iconType="apmTrace"
-        title={<h2>Fetching transaction...</h2>}
-      />
+      <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching transaction...</h2>} />
     </CentralizedContainer>
   );
 }

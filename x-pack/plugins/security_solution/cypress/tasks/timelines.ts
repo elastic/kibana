@@ -34,6 +34,7 @@ export const importTimeline = (timeline: string) => {
   cy.get(IMPORT_TIMELINE_BTN).click();
   cy.get(INPUT_FILE).should('exist');
   cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(timeline).trigger('change');
+  cy.get(IMPORT_BTN).should('have.length', 9);
   cy.get(IMPORT_BTN).eq(IMPORT_BTN_POSITION).click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
@@ -48,7 +49,6 @@ export const openTimeline = (id?: string) => {
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get(TIMELINES_TABLE).should('exist');
 };

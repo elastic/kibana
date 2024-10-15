@@ -5,17 +5,17 @@
 ## SavedObjectsFindResult interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> 
 ```
-<b>Extends:</b> SavedObject&lt;T&gt;
+**Extends:** SavedObject&lt;T&gt;
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [score](./kibana-plugin-core-server.savedobjectsfindresult.score.md) | number | The Elasticsearch <code>_score</code> of this result. |
-|  [sort?](./kibana-plugin-core-server.savedobjectsfindresult.sort.md) | string\[\] | <i>(Optional)</i> The Elasticsearch <code>sort</code> value of this result. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [score](./kibana-plugin-core-server.savedobjectsfindresult.score.md) |  | number | The Elasticsearch <code>_score</code> of this result. |
+|  [sort?](./kibana-plugin-core-server.savedobjectsfindresult.sort.md) |  | string\[\] | _(Optional)_ The Elasticsearch <code>sort</code> value of this result. |
 

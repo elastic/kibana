@@ -8,7 +8,7 @@ returns the server's basePath
 
 See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly serverBasePath: string;

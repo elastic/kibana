@@ -8,7 +8,7 @@ An optional [import hook](./kibana-plugin-core-server.savedobjectsimporthook.md)
 
 Import hooks are executed during the savedObjects import process and allow to interact with the imported objects. See the [hook documentation](./kibana-plugin-core-server.savedobjectsimporthook.md) for more info.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 onImport?: SavedObjectsImportHook<Attributes>;

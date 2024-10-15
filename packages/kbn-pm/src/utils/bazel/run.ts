@@ -52,6 +52,9 @@ async function runBazelCommandWithRunner(
   try {
     await bazelProc;
   } catch {
+    log.error(
+      'HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`'
+    );
     throw new CliError(`The bazel command that was running failed to complete.`);
   }
   await bazelLogs$.toPromise();

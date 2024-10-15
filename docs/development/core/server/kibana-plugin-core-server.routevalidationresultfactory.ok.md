@@ -4,7 +4,7 @@
 
 ## RouteValidationResultFactory.ok property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 ok: <T>(value: T) => {

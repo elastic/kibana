@@ -25,7 +25,7 @@ const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useAutoplayHelper', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
   test('starts the timer when fullscreen and autoplay is on', () => {
     const context = getMockedContext({
       isFullscreen: true,
@@ -47,7 +47,7 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.runTimersToTime(context.autoplayInterval - 1);
+    jest.advanceTimersByTime(context.autoplayInterval - 1);
 
     context.isAutoplayPaused = true;
 

@@ -6,7 +6,7 @@
 
 Returns authentication status for a request. [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isAuthenticated: IsAuthenticated;

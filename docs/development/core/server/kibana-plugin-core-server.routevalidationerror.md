@@ -6,12 +6,12 @@
 
 Error to return when the validation is not successful.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class RouteValidationError extends SchemaTypeError 
 ```
-<b>Extends:</b> SchemaTypeError
+**Extends:** SchemaTypeError
 
 ## Constructors
 

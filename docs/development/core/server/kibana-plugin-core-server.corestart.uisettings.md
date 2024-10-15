@@ -6,7 +6,7 @@
 
 [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 uiSettings: UiSettingsServiceStart;

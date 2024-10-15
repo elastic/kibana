@@ -6,7 +6,7 @@
 
 Provides initial text for the title of the issue
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title?: string;

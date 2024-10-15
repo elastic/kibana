@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import chalk from 'chalk';
 import { createFailError, run } from '@kbn/dev-utils';
 
@@ -47,64 +47,72 @@ export function runTelemetryCheck() {
         );
       }
 
-      const list = new Listr([
-        {
-          title: 'Checking .telemetryrc.json files',
-          task: () => new Listr(parseConfigsTask(), { exitOnError: true }),
-        },
-        {
-          title: 'Extracting Collectors',
-          task: (context) => new Listr(extractCollectorsTask(context, path), { exitOnError: true }),
-        },
-        {
-          enabled: () => typeof path !== 'undefined',
-          title: 'Checking collectors in --path are not excluded',
-          task: ({ roots }: TaskContext) => {
-            const totalCollections = roots.reduce((acc, root) => {
-              return acc + (root.parsedCollections?.length || 0);
-            }, 0);
-            const collectorsInPath = Array.isArray(path) ? path.length : 1;
+      const list = new Listr<TaskContext>(
+        [
+          {
+            title: 'Checking .telemetryrc.json files',
+            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
+          },
+          {
+            title: 'Extracting Collectors',
+            task: (context, task) =>
+              task.newListr(extractCollectorsTask(context, path), { exitOnError: true }),
+          },
+          {
+            enabled: () => typeof path !== 'undefined',
+            title: 'Checking collectors in --path are not excluded',
+            task: (context) => {
+              const totalCollections = context.roots.reduce((acc, root) => {
+                return acc + (root.parsedCollections?.length || 0);
+              }, 0);
+              const collectorsInPath = Array.isArray(path) ? path.length : 1;
 
-            if (totalCollections !== collectorsInPath) {
-              throw new Error(
-                'Collector specified in `path` is excluded; Check the telemetryrc.json files.'
+              if (totalCollections !== collectorsInPath) {
+                throw new Error(
+                  'Collector specified in `path` is excluded; Check the telemetryrc.json files.'
+                );
+              }
+            },
+          },
+          {
+            title: 'Checking Compatible collector.schema with collector.fetch type',
+            task: (context, task) =>
+              task.newListr(checkCompatibleTypesTask(context), { exitOnError: true }),
+          },
+          {
+            enabled: (_) => fix || !ignoreStoredJson,
+            title: 'Checking Matching collector.schema against stored json files',
+            task: (context, task) =>
+              task.newListr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
+          },
+          {
+            enabled: (_) => fix,
+            skip: (context) => {
+              const noDiffs = context.roots.every(
+                ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
               );
-            }
+              return noDiffs && 'No changes needed.';
+            },
+            title: 'Generating new telemetry mappings',
+            task: (context, task) =>
+              task.newListr(generateSchemasTask(context), { exitOnError: true }),
           },
-        },
-        {
-          title: 'Checking Compatible collector.schema with collector.fetch type',
-          task: (context) => new Listr(checkCompatibleTypesTask(context), { exitOnError: true }),
-        },
-        {
-          enabled: (_) => fix || !ignoreStoredJson,
-          title: 'Checking Matching collector.schema against stored json files',
-          task: (context) =>
-            new Listr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
-        },
-        {
-          enabled: (_) => fix,
-          skip: ({ roots }: TaskContext) => {
-            const noDiffs = roots.every(
-              ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
-            );
-            return noDiffs && 'No changes needed.';
+          {
+            enabled: (_) => fix,
+            skip: (context) => {
+              const noDiffs = context.roots.every(
+                ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
+              );
+              return noDiffs && 'No changes needed.';
+            },
+            title: 'Updating telemetry mapping files',
+            task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
-          title: 'Generating new telemetry mappings',
-          task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
-        },
+        ],
         {
-          enabled: (_) => fix,
-          skip: ({ roots }: TaskContext) => {
-            const noDiffs = roots.every(
-              ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
-            );
-            return noDiffs && 'No changes needed.';
-          },
-          title: 'Updating telemetry mapping files',
-          task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
-        },
-      ]);
+          renderer: process.env.CI ? 'verbose' : ('default' as any),
+        }
+      );
 
       try {
         const context = createTaskContext();

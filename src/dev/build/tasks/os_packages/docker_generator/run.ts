@@ -39,11 +39,10 @@ export async function runDockerGenerator(
 ) {
   let baseOSImage = '';
   if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
-  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
-  const ubiVersionTag = 'ubi8';
+  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
   let imageFlavor = '';
-  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.ubi) imageFlavor += '-ubi';
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
 
@@ -73,6 +72,8 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -84,6 +85,7 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
@@ -94,6 +96,7 @@ export async function runDockerGenerator(
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -102,7 +105,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 
@@ -122,13 +125,6 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
-
-  if (flags.ironbank) {
-    await copyAll(
-      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
-      dockerBuildDir
-    );
-  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we

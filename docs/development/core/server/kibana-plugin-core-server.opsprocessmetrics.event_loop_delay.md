@@ -6,7 +6,7 @@
 
 mean event loop delay since last collection
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 event_loop_delay: number;

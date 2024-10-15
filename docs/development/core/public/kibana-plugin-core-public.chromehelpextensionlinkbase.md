@@ -5,7 +5,7 @@
 ## ChromeHelpExtensionLinkBase type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' | 'target' | 'rel' | 'data-test-subj'>;

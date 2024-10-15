@@ -37,64 +37,59 @@ export async function getServiceErrorGroupMainStatistics({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(
-    'get_service_error_group_main_statistics',
-    {
-      apm: {
-        events: [ProcessorEvent.error],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_service_error_group_main_statistics', {
+    apm: {
+      events: [ProcessorEvent.error],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          error_groups: {
-            terms: {
-              field: ERROR_GROUP_ID,
-              size: 500,
-              order: {
-                _count: 'desc',
-              },
+      },
+      aggs: {
+        error_groups: {
+          terms: {
+            field: ERROR_GROUP_ID,
+            size: 500,
+            order: {
+              _count: 'desc',
             },
-            aggs: {
-              sample: {
-                top_hits: {
-                  size: 1,
-                  _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, '@timestamp'],
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
+          },
+          aggs: {
+            sample: {
+              top_hits: {
+                size: 1,
+                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, '@timestamp'],
+                sort: {
+                  '@timestamp': 'desc',
                 },
               },
             },
           },
         },
       },
-    }
-  );
+    },
+  });
 
+  // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent. ts(2590)
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => ({
       group_id: bucket.key as string,
       name: getErrorName(bucket.sample.hits.hits[0]._source),
-      lastSeen: new Date(
-        bucket.sample.hits.hits[0]?._source['@timestamp']
-      ).getTime(),
+      lastSeen: new Date(bucket.sample.hits.hits[0]?._source['@timestamp']).getTime(),
       occurrences: bucket.doc_count,
     })) ?? [];
 
   return {
-    is_aggregation_accurate:
-      (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
+    is_aggregation_accurate: (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
     error_groups: errorGroups,
   };
 }

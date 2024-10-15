@@ -8,7 +8,7 @@ An object to collect references for. It must be a multi-namespace type (in other
 
 Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with the `namespaceType: 'multiple'`<!-- -->).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsCollectMultiNamespaceReferencesObject 
@@ -16,8 +16,8 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.id.md) | string |  |
-|  [type](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.id.md) |  | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.type.md) |  | string |  |
 

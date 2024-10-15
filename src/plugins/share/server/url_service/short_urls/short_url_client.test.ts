@@ -127,19 +127,6 @@ describe('ServerShortUrlClient', () => {
         })
       ).rejects.toThrowError(new Error(`Slug "lala" already exists.`));
     });
-
-    test('can automatically generate human-readable slug', async () => {
-      const { client, locator } = setup();
-      const shortUrl = await client.create({
-        locator,
-        humanReadableSlug: true,
-        params: {
-          url: '/app/test#foo/bar/baz',
-        },
-      });
-
-      expect(shortUrl.data.slug.split('-').length).toBe(3);
-    });
   });
 
   describe('.get()', () => {

@@ -17,10 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
-import {
-  ServiceOverviewInstancesTable,
-  TableOptions,
-} from './service_overview_instances_table';
+import { ServiceOverviewInstancesTable, TableOptions } from './service_overview_instances_table';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -89,10 +86,7 @@ export function ServiceOverviewInstancesChartAndTable({
     comparisonEnabled,
   });
 
-  const {
-    data: mainStatsData = INITIAL_STATE_MAIN_STATS,
-    status: mainStatsStatus,
-  } = useFetcher(
+  const { data: mainStatsData = INITIAL_STATE_MAIN_STATS, status: mainStatsStatus } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
@@ -145,12 +139,8 @@ export function ServiceOverviewInstancesChartAndTable({
     ]
   );
 
-  const {
-    currentPeriodItems,
-    previousPeriodItems,
-    requestId,
-    currentPeriodItemsCount,
-  } = mainStatsData;
+  const { currentPeriodItems, previousPeriodItems, requestId, currentPeriodItemsCount } =
+    mainStatsData;
 
   const currentPeriodOrderedItems = orderBy(
     // need top-level sortable fields for the managed table
@@ -166,48 +156,47 @@ export function ServiceOverviewInstancesChartAndTable({
     direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const { data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS } =
-    useFetcher(
-      (callApmApi) => {
-        if (
-          !start ||
-          !end ||
-          !transactionType ||
-          !latencyAggregationType ||
-          !currentPeriodItemsCount
-        ) {
-          return;
-        }
+  const { data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS } = useFetcher(
+    (callApmApi) => {
+      if (
+        !start ||
+        !end ||
+        !transactionType ||
+        !latencyAggregationType ||
+        !currentPeriodItemsCount
+      ) {
+        return;
+      }
 
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              environment,
-              kuery,
-              latencyAggregationType,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              serviceNodeIds: JSON.stringify(
-                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
-              ),
-              comparisonStart,
-              comparisonEnd,
-            },
+      return callApmApi({
+        endpoint:
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+        params: {
+          path: {
+            serviceName,
           },
-        });
-      },
-      // only fetches detailed statistics when requestId is invalidated by main statistics api call
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [requestId],
-      { preservePreviousData: false }
-    );
+          query: {
+            environment,
+            kuery,
+            latencyAggregationType,
+            start,
+            end,
+            numBuckets: 20,
+            transactionType,
+            serviceNodeIds: JSON.stringify(
+              currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+            ),
+            comparisonStart,
+            comparisonEnd,
+          },
+        },
+      });
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
+  );
 
   return (
     <>

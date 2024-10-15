@@ -9,10 +9,7 @@ import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../utils/testHelpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/testHelpers';
 import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import moment from 'moment';
@@ -45,9 +42,7 @@ function getWrapper({
           `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
         ]}
       >
-        <MockUrlParamsContextProvider
-          params={{ comparisonType, comparisonEnabled }}
-        >
+        <MockUrlParamsContextProvider params={{ comparisonType, comparisonEnabled }}>
           <MockApmPluginContextWrapper>
             <EuiThemeProvider>{children}</EuiThemeProvider>
           </MockApmPluginContextWrapper>
@@ -184,9 +179,9 @@ describe('TimeComparison', () => {
   });
 
   describe('TimeComparison component', () => {
-    const spy = jest.spyOn(urlHelpers, 'replace');
+    const spy = jest.spyOn(urlHelpers, 'replace').mockImplementation(() => {});
     beforeEach(() => {
-      jest.resetAllMocks();
+      spy.mockClear();
     });
     describe('Time range is between 0 - 24 hours', () => {
       it('sets default values', () => {
@@ -212,8 +207,7 @@ describe('TimeComparison', () => {
         const component = render(<TimeComparison />, { wrapper: Wrapper });
         expectTextsInDocument(component, ['Day before', 'Week before']);
         expect(
-          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-            .selectedIndex
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
         ).toEqual(0);
       });
 
@@ -227,8 +221,7 @@ describe('TimeComparison', () => {
         const component = render(<TimeComparison />, { wrapper: Wrapper });
         expectTextsInDocument(component, ['Day before', 'Week before']);
         expect(
-          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-            .selectedIndex
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
         ).toEqual(0);
       });
     });
@@ -275,8 +268,7 @@ describe('TimeComparison', () => {
         expectTextsNotInDocument(component, ['Day before']);
         expectTextsInDocument(component, ['Week before']);
         expect(
-          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-            .selectedIndex
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
         ).toEqual(0);
       });
     });
@@ -295,8 +287,7 @@ describe('TimeComparison', () => {
         expect(spy).not.toHaveBeenCalled();
         expectTextsInDocument(component, ['19/05 18:32 - 27/05 18:32']);
         expect(
-          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-            .selectedIndex
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
         ).toEqual(0);
       });
 
@@ -313,8 +304,7 @@ describe('TimeComparison', () => {
         expect(spy).not.toHaveBeenCalled();
         expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
         expect(
-          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-            .selectedIndex
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
         ).toEqual(0);
       });
     });

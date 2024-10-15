@@ -6,10 +6,11 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { TemplateClone } from '../../../public/application/sections/template_clone';
 import { WithAppDependencies } from '../helpers';
 
-import { formSetup } from './template_form.helpers';
+import { formSetup, TestSubjects } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
 const testBedConfig: AsyncTestBedConfig = {
@@ -20,6 +21,11 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(TemplateClone), testBedConfig);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateClone, httpSetup),
+    testBedConfig
+  );
 
-export const setup: any = formSetup.bind(null, initTestBed);
+  return formSetup(initTestBed);
+};

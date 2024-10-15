@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const APPEND_TYPE = 'append';
 
@@ -14,8 +14,10 @@ describe('Processor: Append', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
+  const { httpSetup } = setupEnvironment();
+
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -26,7 +28,7 @@ describe('Processor: Append', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },

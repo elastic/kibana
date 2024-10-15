@@ -4,7 +4,7 @@
 
 ## AppLeaveConfirmAction.callback property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 callback?: () => void;

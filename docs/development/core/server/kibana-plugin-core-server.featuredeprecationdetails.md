@@ -5,16 +5,16 @@
 ## FeatureDeprecationDetails interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface FeatureDeprecationDetails extends BaseDeprecationDetails 
 ```
-<b>Extends:</b> BaseDeprecationDetails
+**Extends:** BaseDeprecationDetails
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [deprecationType?](./kibana-plugin-core-server.featuredeprecationdetails.deprecationtype.md) | 'feature' \| undefined | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [deprecationType?](./kibana-plugin-core-server.featuredeprecationdetails.deprecationtype.md) |  | 'feature' \| undefined | _(Optional)_ |
 

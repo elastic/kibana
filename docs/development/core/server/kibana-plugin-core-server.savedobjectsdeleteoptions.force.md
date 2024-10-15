@@ -6,7 +6,7 @@
 
 Force deletion of an object that exists in multiple namespaces
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 force?: boolean;

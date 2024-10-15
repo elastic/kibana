@@ -6,7 +6,7 @@
 
 Gets authentication state for a request. Returned by `auth` interceptor. [GetAuthState](./kibana-plugin-core-server.getauthstate.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: GetAuthState;

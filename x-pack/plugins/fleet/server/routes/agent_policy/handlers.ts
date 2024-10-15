@@ -24,7 +24,6 @@ import type {
   GetFullAgentPolicyRequestSchema,
   FleetRequestHandler,
 } from '../../types';
-import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
   GetAgentPoliciesResponse,
@@ -113,10 +112,7 @@ export const createAgentPolicyHandler: RequestHandler<
 
   try {
     // eslint-disable-next-line prefer-const
-    let [agentPolicy, newSysPackagePolicy] = await Promise.all<
-      AgentPolicy,
-      NewPackagePolicy | undefined
-    >([
+    let [agentPolicy, newSysPackagePolicy] = await Promise.all([
       agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),

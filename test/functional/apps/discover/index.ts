@@ -15,12 +15,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover app', function () {
     this.tags('ciGroup6');
 
-    before(function () {
-      return browser.setWindowSize(1300, 800);
+    before(async function () {
+      await browser.setWindowSize(1300, 800);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    after(async function unloadMakelogs() {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));
@@ -53,6 +53,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_date_nested'));
     loadTestFile(require.resolve('./_search_on_page_load'));
     loadTestFile(require.resolve('./_chart_hidden'));
-    loadTestFile(require.resolve('./_context_encoded_url_param'));
+    loadTestFile(require.resolve('./_context_encoded_url_params'));
   });
 }

@@ -6,7 +6,7 @@
 
 Send the user one location forward in the history stack. Equivalent to calling [ScopedHistory.go(1)](./kibana-plugin-core-public.scopedhistory.go.md)<!-- -->. If no more entries are available forwards, this is a no-op.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 goForward: () => void;

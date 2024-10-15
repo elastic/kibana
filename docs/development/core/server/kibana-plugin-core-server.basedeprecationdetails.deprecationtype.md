@@ -8,7 +8,7 @@
 
 Feel free to add new types if necessary. Predefined types are necessary to reduce having similar definitions with different keywords across kibana deprecations.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecationType?: 'config' | 'feature';

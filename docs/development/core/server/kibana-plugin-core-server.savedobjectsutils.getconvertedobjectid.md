@@ -6,7 +6,7 @@
 
 Uses a single-namespace object's "legacy ID" to determine what its new ID will be after it is converted to a multi-namespace type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
@@ -20,7 +20,7 @@ static getConvertedObjectId(namespace: string | undefined, type: string, id: str
 |  type | string | The type of the saved object before it is converted. |
 |  id | string | The ID of the saved object before it is converted. |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

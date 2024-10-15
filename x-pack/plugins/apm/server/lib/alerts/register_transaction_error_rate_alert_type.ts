@@ -98,12 +98,9 @@ export function registerTransactionErrorRateAlertType({
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          config.searchAggregatedTransactions !==
-          SearchAggregatedTransactionSetting.never;
+          config.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never;
 
-        const index = searchAggregatedTransactions
-          ? indices.metric
-          : indices.transaction;
+        const index = searchAggregatedTransactions ? indices.metric : indices.transaction;
 
         const searchParams = {
           index,
@@ -119,15 +116,10 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForAggregatedTransactions(
-                    searchAggregatedTransactions
-                  ),
+                  ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
                   {
                     terms: {
-                      [EVENT_OUTCOME]: [
-                        EventOutcome.failure,
-                        EventOutcome.success,
-                      ],
+                      [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
                     },
                   },
                   ...(alertParams.serviceName
@@ -180,40 +172,36 @@ export function registerTransactionErrorRateAlertType({
           return {};
         }
 
-        const results = response.aggregations.series.buckets
-          .map((bucket) => {
-            const [serviceName, environment, transactionType] = bucket.key;
+        const results = [];
+        for (const bucket of response.aggregations.series.buckets) {
+          const [serviceName, environment, transactionType] = bucket.key;
 
-            const failed =
-              bucket.outcomes.buckets.find(
-                (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-              )?.doc_count ?? 0;
-            const succesful =
-              bucket.outcomes.buckets.find(
-                (outcomeBucket) => outcomeBucket.key === EventOutcome.success
-              )?.doc_count ?? 0;
+          const failed =
+            bucket.outcomes.buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+            )?.doc_count ?? 0;
+          const succesful =
+            bucket.outcomes.buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.success
+            )?.doc_count ?? 0;
+          const errorRate = (failed / (failed + succesful)) * 100;
 
-            return {
+          if (errorRate >= alertParams.threshold) {
+            results.push({
               serviceName,
               environment,
               transactionType,
-              errorRate: (failed / (failed + succesful)) * 100,
-            };
-          })
-          .filter((result) => result.errorRate >= alertParams.threshold);
+              errorRate,
+            });
+          }
+        }
 
         results.forEach((result) => {
-          const { serviceName, environment, transactionType, errorRate } =
-            result;
+          const { serviceName, environment, transactionType, errorRate } = result;
 
           services
             .alertWithLifecycle({
-              id: [
-                AlertType.TransactionErrorRate,
-                serviceName,
-                transactionType,
-                environment,
-              ]
+              id: [AlertType.TransactionErrorRate, serviceName, transactionType, environment]
                 .filter((name) => name)
                 .join('_'),
               fields: {

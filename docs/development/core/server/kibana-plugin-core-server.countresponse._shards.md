@@ -4,7 +4,7 @@
 
 ## CountResponse.\_shards property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _shards: ShardsInfo;

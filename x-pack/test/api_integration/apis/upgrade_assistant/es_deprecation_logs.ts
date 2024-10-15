@@ -21,7 +21,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { createDeprecationLog, deleteDeprecationLogs } = initHelpers(getService);
 
-  describe('Elasticsearch deprecation logs', () => {
+  describe('Elasticsearch deprecation logs', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/deprecation_logging', () => {
       describe('/count', () => {
         it('should filter out the deprecation from Elastic products', async () => {

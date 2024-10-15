@@ -4,7 +4,7 @@
 
 ## SearchResponse.aggregations property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 aggregations?: any;

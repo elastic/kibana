@@ -10,19 +10,29 @@ import ReactDOM from 'react-dom';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { GlobalSearchPluginStart } from '../../global_search/public';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import { SearchBar } from './components/search_bar';
 
 export interface GlobalSearchBarPluginStartDeps {
-  globalSearch: GlobalSearchPluginStart;
+  globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   usageCollection?: UsageCollectionSetup;
 }
 
+export interface GlobalSearchBarConfigType {
+  input_max_limit: number;
+}
+
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
+  private config: GlobalSearchBarConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<GlobalSearchBarConfigType>();
+  }
+
   public setup() {
     return {};
   }
@@ -40,7 +50,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
       mount: (container) =>
         this.mount({
           container,
-          globalSearch,
+          globalSearch: { ...globalSearch, searchCharLimit: this.config.input_max_limit },
           savedObjectsTagging,
           navigateToUrl: core.application.navigateToUrl,
           basePathUrl: core.http.basePath.prepend('/plugins/globalSearchBar/assets/'),
@@ -61,7 +71,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     trackUiMetric,
   }: {
     container: HTMLElement;
-    globalSearch: GlobalSearchPluginStart;
+    globalSearch: GlobalSearchBarPluginStartDeps['globalSearch'];
     savedObjectsTagging?: SavedObjectTaggingPluginStart;
     navigateToUrl: ApplicationStart['navigateToUrl'];
     basePathUrl: string;

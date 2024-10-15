@@ -15,7 +15,7 @@ import {
   Ping,
   MonitorSummary,
 } from '../../../../common/runtime_types';
-import { MonitorListComponent, noItemsMessage } from './monitor_list';
+import { MonitorListComponent } from './monitor_list';
 import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../src/core/public';
@@ -140,7 +140,10 @@ describe('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    global.localStorage = localStorageMock;
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
   });
 
   it('renders a no items message when no data is provided', async () => {
@@ -293,26 +296,6 @@ describe('MonitorList component', () => {
           expect(queryByText('Downtime history')).not.toBeInTheDocument();
         });
       });
-    });
-  });
-
-  describe('noItemsMessage', () => {
-    it('returns loading message while loading', () => {
-      expect(noItemsMessage(true)).toEqual(`Loading...`);
-    });
-
-    it('returns loading message when filters are defined and loading', () => {
-      expect(noItemsMessage(true, 'filters')).toEqual(`Loading...`);
-    });
-
-    it('returns no monitors selected when filters are defined and not loading', () => {
-      expect(noItemsMessage(false, 'filters')).toEqual(
-        `No monitors found for selected filter criteria`
-      );
-    });
-
-    it('returns no data message when no filters and not loading', () => {
-      expect(noItemsMessage(false)).toEqual(`No uptime monitors found`);
     });
   });
 });

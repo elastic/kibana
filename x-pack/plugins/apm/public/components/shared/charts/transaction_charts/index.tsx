@@ -29,11 +29,7 @@ export function TransactionCharts({
 }) {
   return (
     <>
-      <AnnotationsContextProvider
-        environment={environment}
-        start={start}
-        end={end}
-      >
+      <AnnotationsContextProvider environment={environment} start={start} end={end}>
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
@@ -55,16 +51,10 @@ export function TransactionCharts({
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} environment={environment} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <TransactionBreakdownChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <TransactionBreakdownChart kuery={kuery} environment={environment} />
             </EuiFlexItem>
           </EuiFlexGrid>
         </ChartPointerEventContextProvider>

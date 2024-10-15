@@ -47,11 +47,7 @@ export function IconPopover({
       ownFocus={false}
       button={
         <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
-          <EuiIcon
-            type={icon.type}
-            size={icon.size ?? 'l'}
-            color={icon.color}
-          />
+          <EuiIcon type={icon.type} size={icon.size ?? 'l'} color={icon.color} />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
@@ -59,11 +55,7 @@ export function IconPopover({
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>
-        {isLoading ? (
-          <EuiLoadingContent data-test-subj="loading-content" />
-        ) : (
-          children
-        )}
+        {isLoading ? <EuiLoadingContent data-test-subj="loading-content" /> : children}
       </div>
     </EuiPopover>
   );

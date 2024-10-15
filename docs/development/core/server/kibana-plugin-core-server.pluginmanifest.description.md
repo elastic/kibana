@@ -6,7 +6,7 @@
 
 TODO: make required once all plugins specify this. A brief description of what this plugin does and any capabilities it provides.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly description?: string;

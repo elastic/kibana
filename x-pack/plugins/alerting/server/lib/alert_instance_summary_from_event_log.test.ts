@@ -7,7 +7,7 @@
 
 import { random, mean } from 'lodash';
 import { SanitizedAlert, AlertInstanceSummary } from '../types';
-import { IValidatedEvent } from '../../../event_log/server';
+import { IValidatedEvent, millisToNanos, nanosToMillis } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertInstanceSummaryFromEventLog } from './alert_instance_summary_from_event_log';
 
@@ -617,7 +617,7 @@ export class EventsFactory {
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.execute,
-        duration: random(2000, 180000) * 1000 * 1000,
+        duration: millisToNanos(random(2000, 180000)),
       },
     };
 
@@ -684,7 +684,7 @@ export class EventsFactory {
     return this.events
       .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
       .reduce((res: Record<string, number>, ev) => {
-        res[ev?.['@timestamp']!] = ev?.event?.duration! / (1000 * 1000);
+        res[ev?.['@timestamp']!] = nanosToMillis(ev?.event?.duration!);
         return res;
       }, {});
   }

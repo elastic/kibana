@@ -21,7 +21,15 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   deprecations,
   exposeToBrowser: {
     enabled: true,
-    ui: true,
+    ui: {
+      enabled: true,
+      min_interval_seconds: true,
+      show_license_expiration: true,
+      container: true,
+      ccs: {
+        enabled: true,
+      },
+    },
     kibana: true,
   },
 };

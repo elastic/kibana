@@ -14,6 +14,7 @@ import ReactDOM from 'react-dom';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
 import { SavedObjectNotFound } from '..';
+import { isSavedObjectNotFoundError } from '../../common';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (
@@ -71,11 +72,9 @@ export function redirectWhenMissing({
     localMappingObject = mapping;
   }
 
-  return (error: SavedObjectNotFound) => {
-    // if this error is not "404", rethrow
-    // we can't check "error instanceof SavedObjectNotFound" since this class can live in a separate bundle
-    // and the error will be an instance of other class with the same interface (actually the copy of SavedObjectNotFound class)
-    if (!error.savedObjectType) {
+  return (error: Error) => {
+    if (!isSavedObjectNotFoundError(error)) {
+      // if this error is not "404", rethrow
       throw error;
     }
 

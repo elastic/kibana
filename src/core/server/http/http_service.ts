@@ -40,11 +40,11 @@ import {
   ExternalUrlConfig,
 } from '../external_url';
 
-interface PrebootDeps {
+export interface PrebootDeps {
   context: InternalContextPreboot;
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   context: ContextSetup;
   executionContext: InternalExecutionContextSetup;
 }
@@ -102,6 +102,8 @@ export class HttpService
           .header('Retry-After', '30');
       },
     });
+
+    registerCoreHandlers(prebootSetup, config, this.env);
 
     if (this.shouldListen(config)) {
       this.log.debug('starting preboot server');

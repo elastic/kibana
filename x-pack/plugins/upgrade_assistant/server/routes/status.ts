@@ -63,12 +63,44 @@ export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: R
               );
             }
 
+            const upgradeIssues: string[] = [];
+
+            if (notMigratedSystemIndices) {
+              upgradeIssues.push(
+                i18n.translate('xpack.upgradeAssistant.status.systemIndicesMessage', {
+                  defaultMessage:
+                    '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} other {indices}}',
+                  values: { notMigratedSystemIndices },
+                })
+              );
+            }
+
+            if (esTotalCriticalDeps) {
+              upgradeIssues.push(
+                i18n.translate('xpack.upgradeAssistant.status.esTotalCriticalDepsMessage', {
+                  defaultMessage:
+                    '{esTotalCriticalDeps} Elasticsearch deprecation {esTotalCriticalDeps, plural, one {issue} other {issues}}',
+                  values: { esTotalCriticalDeps },
+                })
+              );
+            }
+
+            if (kibanaTotalCriticalDeps) {
+              upgradeIssues.push(
+                i18n.translate('xpack.upgradeAssistant.status.kibanaTotalCriticalDepsMessage', {
+                  defaultMessage:
+                    '{kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}}',
+                  values: { kibanaTotalCriticalDeps },
+                })
+              );
+            }
+
             return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
               defaultMessage:
-                'You have {notMigratedSystemIndices} system {notMigratedSystemIndices, plural, one {index} other {indices}} that must be migrated ' +
-                'and {esTotalCriticalDeps} Elasticsearch deprecation {esTotalCriticalDeps, plural, one {issue} other {issues}} ' +
-                'and {kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}} that must be resolved before upgrading.',
-              values: { esTotalCriticalDeps, kibanaTotalCriticalDeps, notMigratedSystemIndices },
+                'The following issues must be resolved before upgrading: {upgradeIssues}.',
+              values: {
+                upgradeIssues: upgradeIssues.join(', '),
+              },
             });
           };
 

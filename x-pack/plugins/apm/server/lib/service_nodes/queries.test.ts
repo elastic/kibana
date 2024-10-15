@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { getServiceNodes } from './';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { getServiceNodes } from '.';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -45,6 +42,7 @@ describe('service node queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        environment: ENVIRONMENT_ALL.value,
       })
     );
 
@@ -60,6 +58,7 @@ describe('service node queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        environment: ENVIRONMENT_ALL.value,
       })
     );
 

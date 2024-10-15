@@ -16,12 +16,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key:
-    | 'agent-configurations'
-    | 'anomaly-detection'
-    | 'apm-indices'
-    | 'customize-ui'
-    | 'schema';
+  key: 'agent-configurations' | 'anomaly-detection' | 'apm-indices' | 'customize-ui' | 'schema';
   hidden?: boolean;
 };
 

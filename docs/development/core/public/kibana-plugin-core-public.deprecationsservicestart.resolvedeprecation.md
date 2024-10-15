@@ -6,7 +6,7 @@
 
 Calls the correctiveActions.api to automatically resolve the depprecation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;

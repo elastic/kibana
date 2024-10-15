@@ -26,30 +26,20 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../URLFilter';
 import { SelectedFilters } from './SelectedFilters';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useIndexPattern } from './use_index_pattern';
 import { environmentQuery } from './queries';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 
-const filterNames: UxLocalUIFilterName[] = [
-  'location',
-  'device',
-  'os',
-  'browser',
-];
+const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
 
 export const getExcludedName = (filterName: string) => {
   return `${filterName}Excluded` as UxLocalUIFilterName;
 };
 
-const RUM_DATA_FILTERS = [
-  { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-];
+const RUM_DATA_FILTERS = [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }];
 
 function LocalUIFilters() {
   const { indexPatternTitle, indexPattern } = useIndexPattern();
@@ -60,9 +50,7 @@ function LocalUIFilters() {
     invertFilter,
     clearValues,
   } = useLocalUIFilters({
-    filterNames: uxLocalUIFilterNames.filter(
-      (name) => !['serviceName'].includes(name)
-    ),
+    filterNames: uxLocalUIFilterNames.filter((name) => !['serviceName'].includes(name)),
   });
 
   const {
@@ -111,23 +99,15 @@ function LocalUIFilters() {
                 indexPatternTitle={indexPatternTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
-                selectedValue={
-                  filters.find((ft) => ft.name === filterName && !ft.excluded)
-                    ?.value
-                }
+                selectedValue={filters.find((ft) => ft.name === filterName && !ft.excluded)?.value}
                 excludedValue={
-                  filters.find(
-                    (ft) =>
-                      ft.name === getExcludedName(filterName) && ft.excluded
-                  )?.value
+                  filters.find((ft) => ft.name === getExcludedName(filterName) && ft.excluded)
+                    ?.value
                 }
                 asFilterButton={true}
                 onChange={(values, excludedValues) => {
                   setFilterValue(filterName, values || []);
-                  setFilterValue(
-                    getExcludedName(filterName),
-                    excludedValues || []
-                  );
+                  setFilterValue(getExcludedName(filterName), excludedValues || []);
                 }}
                 filters={getFilters}
                 time={{ from: start!, to: end! }}

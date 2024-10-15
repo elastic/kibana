@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not allow pivot and latest configs in same transform', async () => {
       const transformId = 'test_transform_id';
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/transform/transforms/${transformId}`)
         .auth(
           USER.TRANSFORM_POWERUSER,
@@ -43,8 +43,8 @@ export default ({ getService }: FtrProviderContext) => {
             unique_key: ['country', 'gender'],
             sort: 'infected',
           },
-        })
-        .expect(400);
+        });
+      transform.api.assertResponseStatusCode(400, status, body);
 
       expect(body.message).to.eql('[request body]: pivot and latest are not allowed together');
     });
@@ -54,15 +54,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { pivot, ...config } = generateTransformConfig(transformId);
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/transform/transforms/${transformId}`)
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send(config)
-        .expect(400);
+        .send(config);
+      transform.api.assertResponseStatusCode(400, status, body);
 
       expect(body.message).to.eql(
         '[request body]: pivot or latest is required for transform configuration'

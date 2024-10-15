@@ -6,7 +6,7 @@
 
 Flag indicating whether the cookie should be sent only via a secure connection.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isSecure: boolean;

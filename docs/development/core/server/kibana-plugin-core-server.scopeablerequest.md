@@ -8,7 +8,7 @@ A user credentials container. It accommodates the necessary auth credentials to 
 
 See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ScopeableRequest = KibanaRequest | FakeRequest;

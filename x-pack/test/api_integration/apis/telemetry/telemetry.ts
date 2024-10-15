@@ -50,44 +50,24 @@ function updateMonitoringDates(
   toTimestamp: string,
   timestamp: string
 ) {
-  return Promise.all([
-    esSupertest
-      .post('/.monitoring-es-*/_update_by_query?refresh=true')
-      .send({
-        query: {
-          range: {
-            timestamp: {
-              format: 'epoch_millis',
-              gte: moment(fromTimestamp).valueOf(),
-              lte: moment(toTimestamp).valueOf(),
-            },
+  return esSupertest
+    .post('/.monitoring-*/_update_by_query?refresh=true')
+    .send({
+      query: {
+        range: {
+          timestamp: {
+            format: 'epoch_millis',
+            gte: moment(fromTimestamp).valueOf(),
+            lte: moment(toTimestamp).valueOf(),
           },
         },
-        script: {
-          source: `ctx._source.timestamp='${timestamp}'`,
-          lang: 'painless',
-        },
-      })
-      .expect(200),
-    esSupertest
-      .post('/.monitoring-kibana-*/_update_by_query?refresh=true')
-      .send({
-        query: {
-          range: {
-            timestamp: {
-              format: 'epoch_millis',
-              gte: moment(fromTimestamp).valueOf(),
-              lte: moment(toTimestamp).valueOf(),
-            },
-          },
-        },
-        script: {
-          source: `ctx._source.timestamp='${timestamp}'`,
-          lang: 'painless',
-        },
-      })
-      .expect(200),
-  ]);
+      },
+      script: {
+        source: `ctx._source.timestamp='${timestamp}'`,
+        lang: 'painless',
+      },
+    })
+    .expect(200);
 }
 
 export default function ({ getService }: FtrProviderContext) {

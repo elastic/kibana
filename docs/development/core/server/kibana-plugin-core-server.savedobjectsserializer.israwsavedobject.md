@@ -6,7 +6,7 @@
 
 Determines whether or not the raw document can be converted to a saved object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
@@ -17,9 +17,9 @@ isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptio
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  doc | SavedObjectsRawDoc | The raw ES document to be tested |
-|  options | SavedObjectsRawDocParseOptions | Options for parsing the raw document. |
+|  options | SavedObjectsRawDocParseOptions | _(Optional)_ Options for parsing the raw document. |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

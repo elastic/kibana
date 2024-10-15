@@ -31,8 +31,7 @@ export function EmptyBanner() {
   const { docLinks } = useApmPluginContext().core;
 
   useEffect(() => {
-    const handler: cytoscape.EventHandler = (event) =>
-      setNodeCount(event.cy.nodes().length);
+    const handler: cytoscape.EventHandler = (event) => setNodeCount(event.cy.nodes().length);
 
     if (cy) {
       cy.on('add remove', 'node', handler);

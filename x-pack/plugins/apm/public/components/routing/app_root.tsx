@@ -16,10 +16,7 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
-import {
-  HeaderMenuPortal,
-  InspectorContextProvider,
-} from '../../../../observability/public';
+import { HeaderMenuPortal, InspectorContextProvider } from '../../../../observability/public';
 import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {

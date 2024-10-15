@@ -12,6 +12,32 @@ const concurrency = 25;
 const defaultCount = concurrency * 2;
 const initialJobs = 3;
 
+const getAgentRule = (queueName = 'n2-4-spot') => {
+  if (
+    process.env.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld' ||
+    process.env.BUILDKITE_AGENT_META_DATA_PROVIDER === 'k8s'
+  ) {
+    const [kind, cores, addition] = queueName.split('-');
+    const additionalProps =
+      {
+        spot: { preemptible: true },
+        virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+      }[addition] || {};
+
+    return {
+      provider: 'gcp',
+      image: 'family/kibana-ubuntu-2004',
+      imageProject: 'elastic-images-prod',
+      machineType: `${kind}-standard-${cores}`,
+      ...additionalProps,
+    };
+  } else {
+    return {
+      queue: queueName,
+    };
+  }
+};
+
 function getTestSuitesFromMetadata() {
   const keys = execSync('buildkite-agent meta-data keys')
     .toString()
@@ -111,11 +137,12 @@ const pipeline = {
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
   label: 'Build Kibana Distribution and Plugins',
-  agents: { queue: 'c2-8' },
+  agents: getAgentRule('c2-8'),
   key: 'build',
-  if: "build.env('BUILD_ID_FOR_ARTIFACTS') == null || build.env('BUILD_ID_FOR_ARTIFACTS') == ''",
+  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+let suiteIndex = 0;
 for (const testSuite of testSuites) {
   const TEST_SUITE = testSuite.key;
   const RUN_COUNT = testSuite.count;
@@ -136,7 +163,8 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
           label: `Default CI Group ${CI_GROUP}`,
-          agents: { queue: 'n2-4' },
+          key: `test-group-${suiteIndex++}`,
+          agents: getAgentRule('n2-4'),
           depends_on: 'build',
           parallelism: RUN_COUNT,
           concurrency: concurrency,
@@ -147,7 +175,8 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
           label: `OSS CI Group ${CI_GROUP}`,
-          agents: { queue: 'ci-group-4d' },
+          key: `test-group-${suiteIndex++}`,
+          agents: getAgentRule('n2-4-spot'),
           depends_on: 'build',
           parallelism: RUN_COUNT,
           concurrency: concurrency,
@@ -161,7 +190,8 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        key: `test-group-${suiteIndex++}`,
+        agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
@@ -176,7 +206,8 @@ for (const testSuite of testSuites) {
           IS_XPACK ? 'xpack' : 'oss'
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        key: `test-group-${suiteIndex++}`,
+        agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
@@ -186,5 +217,21 @@ for (const testSuite of testSuites) {
       break;
   }
 }
+
+pipeline.steps.push({
+  wait: '~',
+  continue_on_failure: true,
+});
+
+pipeline.steps.push({
+  command: 'node .buildkite/pipelines/flaky_tests/post_stats_on_pr.js',
+  label: 'Post results on Github pull request',
+  agents: getAgentRule('n2-4-spot'),
+  timeout_in_minutes: 15,
+  retry: {
+    automatic: [{ exit_status: '-1', limit: 3 }],
+  },
+  soft_fail: true,
+});
 
 console.log(JSON.stringify(pipeline, null, 2));

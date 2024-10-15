@@ -4,7 +4,7 @@
 
 ## SavedObjectsBulkResolveResponse.resolved\_objects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolved_objects: Array<SavedObjectsResolveResponse<T>>;

@@ -13,7 +13,6 @@ import { setup as watchEditSetup } from './watch_edit.helpers';
 
 export type { TestBed } from '@kbn/test/jest';
 export { getRandomString, findTestSubject } from '@kbn/test/jest';
-export { wrapBodyResponse, unwrapBodyResponse } from './body_response';
 export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {

@@ -18,7 +18,7 @@ export class RenderingPlugin implements Plugin {
         validate: {
           query: schema.object(
             {
-              includeUserSettings: schema.boolean({ defaultValue: true }),
+              isAnonymousPage: schema.boolean({ defaultValue: false }),
             },
             { unknowns: 'allow' }
           ),
@@ -28,12 +28,12 @@ export class RenderingPlugin implements Plugin {
         },
       },
       async (context, req, res) => {
-        const { includeUserSettings } = req.query;
+        const { isAnonymousPage } = req.query;
 
-        if (includeUserSettings) {
-          return res.renderCoreApp();
+        if (isAnonymousPage) {
+          return res.renderAnonymousCoreApp({ includeExposedConfigKeys: true });
         }
-        return res.renderAnonymousCoreApp();
+        return res.renderCoreApp({ includeExposedConfigKeys: true });
       }
     );
   }

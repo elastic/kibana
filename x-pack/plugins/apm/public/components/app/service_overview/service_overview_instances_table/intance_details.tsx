@@ -61,11 +61,7 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({
-  serviceName,
-  serviceNodeName,
-  kuery,
-}: Props) {
+export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
   const theme = useTheme();
   const history = useHistory();
 
@@ -74,10 +70,7 @@ export function InstanceDetails({
     serviceNodeName,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED) {
     return (
       <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />
@@ -94,10 +87,7 @@ export function InstanceDetails({
   };
 
   const serviceDetailsKeyValuePairs = toKeyValuePairs(serviceDetailsKeys, data);
-  const containerDetailsKeyValuePairs = toKeyValuePairs(
-    containerDetailsKeys,
-    data
-  );
+  const containerDetailsKeyValuePairs = toKeyValuePairs(containerDetailsKeys, data);
   const cloudDetailsKeyValuePairs = toKeyValuePairs(cloudDetailsKeys, data);
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
@@ -106,10 +96,9 @@ export function InstanceDetails({
       <EuiFlexItem>
         <KeyValueFilterList
           initialIsOpen
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.serviceTitle',
-            { defaultMessage: 'Service' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
+            defaultMessage: 'Service',
+          })}
           icon={getAgentIcon(data.agent?.name, theme.darkMode)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
@@ -117,10 +106,9 @@ export function InstanceDetails({
       </EuiFlexItem>
       <EuiFlexItem>
         <KeyValueFilterList
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.containerTitle',
-            { defaultMessage: 'Container' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.containerTitle', {
+            defaultMessage: 'Container',
+          })}
           icon={getContainerIcon(containerType)}
           keyValueList={containerDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
@@ -128,10 +116,9 @@ export function InstanceDetails({
       </EuiFlexItem>
       <EuiFlexItem>
         <KeyValueFilterList
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
-            { defaultMessage: 'Cloud' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.cloudTitle', {
+            defaultMessage: 'Cloud',
+          })}
           icon={getCloudIcon(data.cloud?.provider)}
           keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}

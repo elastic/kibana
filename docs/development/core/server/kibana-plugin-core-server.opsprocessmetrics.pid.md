@@ -6,7 +6,7 @@
 
 pid of the kibana process
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 pid: number;

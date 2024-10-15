@@ -8,10 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 
 export function HeightRetainer(
-  props: React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLDivElement>,
-    HTMLDivElement
-  >
+  props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 ) {
   const containerElement = useRef<HTMLDivElement>(null);
   const minHeight = useRef<number>(0);
@@ -25,11 +22,5 @@ export function HeightRetainer(
     }
   });
 
-  return (
-    <div
-      {...props}
-      ref={containerElement}
-      style={{ minHeight: minHeight.current }}
-    />
-  );
+  return <div {...props} ref={containerElement} style={{ minHeight: minHeight.current }} />;
 }

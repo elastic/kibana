@@ -7,10 +7,7 @@
 
 import moment from 'moment';
 import { SetupUX } from '../../routes/rum_client';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
@@ -58,8 +55,7 @@ export async function hasRumData({
     return {
       indices: setup.indices.transaction,
       hasData: response.hits.total.value > 0,
-      serviceName:
-        response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
+      serviceName: response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
     };
   } catch (e) {
     return {

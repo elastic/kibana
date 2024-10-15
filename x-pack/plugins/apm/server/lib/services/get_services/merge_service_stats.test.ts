@@ -9,9 +9,7 @@ import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
-type ServiceTransactionStat = PromiseReturnType<
-  typeof getServiceTransactionStats
->[number];
+type ServiceTransactionStat = PromiseReturnType<typeof getServiceTransactionStats>[number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
   return {

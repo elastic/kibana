@@ -17,22 +17,14 @@ import type { CorrelationsParams } from '../../../../common/correlations/types';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
-export const getHistogramRangeSteps = (
-  min: number,
-  max: number,
-  steps: number
-) => {
+export const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   // We round the final values because the ES range agg we use won't accept numbers with decimals for `transaction.duration.us`.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);
-  return [...Array(steps).keys()]
-    .map(logFn.invert)
-    .map((d) => (isNaN(d) ? 0 : Math.round(d)));
+  return [...Array(steps).keys()].map(logFn.invert).map((d) => (isNaN(d) ? 0 : Math.round(d)));
 };
 
-export const getHistogramIntervalRequest = (
-  params: CorrelationsParams
-): estypes.SearchRequest => ({
+export const getHistogramIntervalRequest = (params: CorrelationsParams): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
     query: getQueryWithParams({ params }),
@@ -63,14 +55,11 @@ export const fetchTransactionDurationHistogramRangeSteps = async (
   }
 
   const min = (
-    resp.body.aggregations
-      .transaction_duration_min as estypes.AggregationsValueAggregate
+    resp.body.aggregations.transaction_duration_min as estypes.AggregationsValueAggregate
   ).value;
   const max =
-    (
-      resp.body.aggregations
-        .transaction_duration_max as estypes.AggregationsValueAggregate
-    ).value * 2;
+    (resp.body.aggregations.transaction_duration_max as estypes.AggregationsValueAggregate).value *
+    2;
 
   return getHistogramRangeSteps(min, max, steps);
 };

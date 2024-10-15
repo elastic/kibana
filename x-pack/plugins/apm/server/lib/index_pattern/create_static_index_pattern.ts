@@ -91,11 +91,10 @@ async function getForceOverwrite({
 }) {
   if (!overwrite) {
     try {
-      const existingIndexPattern =
-        await savedObjectsClient.get<ApmIndexPatternAttributes>(
-          'index-pattern',
-          APM_STATIC_INDEX_PATTERN_ID
-        );
+      const existingIndexPattern = await savedObjectsClient.get<ApmIndexPatternAttributes>(
+        'index-pattern',
+        APM_STATIC_INDEX_PATTERN_ID
+      );
 
       // if the existing index pattern does not matches the new one, force an update
       return existingIndexPattern.attributes.title !== apmIndexPatternTitle;

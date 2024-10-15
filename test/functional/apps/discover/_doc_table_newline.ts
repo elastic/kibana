@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     after(async () => {
       await security.testUser.restoreDefaults();
-      esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });

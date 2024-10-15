@@ -4,7 +4,7 @@
 
 ## PluginInitializerContext.env property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 env: {

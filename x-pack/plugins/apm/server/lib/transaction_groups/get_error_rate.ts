@@ -71,9 +71,7 @@ export async function getErrorRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -83,11 +81,7 @@ export async function getErrorRate({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -113,10 +107,7 @@ export async function getErrorRate({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_group_error_rate',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_group_error_rate', params);
 
   const noHits = resp.hits.total.value === 0;
 

@@ -26,14 +26,14 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace2 = 'space2';
 
   async function runRequest(expectedStatusCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/saved_objects/status`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

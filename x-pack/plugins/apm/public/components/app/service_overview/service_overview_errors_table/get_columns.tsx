@@ -40,10 +40,7 @@ export function getColumns({
           <TruncateWithTooltip
             text={name}
             content={
-              <ErrorDetailLink
-                serviceName={serviceName}
-                errorGroupId={errorGroupId}
-              >
+              <ErrorDetailLink serviceName={serviceName} errorGroupId={errorGroupId}>
                 {name}
               </ErrorDetailLink>
             }
@@ -53,12 +50,9 @@ export function getColumns({
     },
     {
       field: 'lastSeen',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
-        {
-          defaultMessage: 'Last seen',
-        }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnLastSeen', {
+        defaultMessage: 'Last seen',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { lastSeen }) => {
         return (
@@ -70,37 +64,27 @@ export function getColumns({
     },
     {
       field: 'occurrences',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnOccurrences',
-        {
-          defaultMessage: 'Occurrences',
-        }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnOccurrences', {
+        defaultMessage: 'Occurrences',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
-          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
-            ?.timeseries;
+          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]?.timeseries;
         const previousPeriodTimeseries =
-          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
-            ?.timeseries;
+          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]?.timeseries;
 
         return (
           <SparkPlot
             color="euiColorVis7"
             series={currentPeriodTimeseries}
-            valueLabel={i18n.translate(
-              'xpack.apm.serviceOveriew.errorsTableOccurrences',
-              {
-                defaultMessage: `{occurrencesCount} occ.`,
-                values: {
-                  occurrencesCount: asInteger(occurrences),
-                },
-              }
-            )}
-            comparisonSeries={
-              comparisonEnabled ? previousPeriodTimeseries : undefined
-            }
+            valueLabel={i18n.translate('xpack.apm.serviceOveriew.errorsTableOccurrences', {
+              defaultMessage: `{occurrencesCount} occ.`,
+              values: {
+                occurrencesCount: asInteger(occurrences),
+              },
+            })}
+            comparisonSeries={comparisonEnabled ? previousPeriodTimeseries : undefined}
           />
         );
       },

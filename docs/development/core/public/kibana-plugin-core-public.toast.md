@@ -4,7 +4,7 @@
 
 ## Toast type
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type Toast = ToastInputFields & {

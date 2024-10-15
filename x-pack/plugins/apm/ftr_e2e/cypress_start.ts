@@ -18,7 +18,10 @@ export function cypressRunTests(spec?: string) {
   return async ({ getService }: FtrProviderContext) => {
     const result = await cypressStart(getService, cypress.run, spec);
 
-    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+    if (
+      (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+      (result as CypressCommandLine.CypressRunResult)?.totalFailed
+    ) {
       throw new Error(`APM Cypress tests failed`);
     }
   };
@@ -61,7 +64,11 @@ async function cypressStart(
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
-    config: { baseUrl: kibanaUrl },
+    config: {
+      e2e: {
+        baseUrl: kibanaUrl,
+      },
+    },
     env: {
       START_DATE: start,
       END_DATE: end,

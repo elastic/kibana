@@ -16,11 +16,7 @@ import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
   t.partial({
-    aggregationType: t.union([
-      t.literal('avg'),
-      t.literal('95th'),
-      t.literal('99th'),
-    ]),
+    aggregationType: t.union([t.literal('avg'), t.literal('95th'), t.literal('99th')]),
     serviceName: t.string,
     transactionType: t.string,
   }),
@@ -90,9 +86,8 @@ const transactionDurationChartPreview = createApmServerRoute({
   },
 });
 
-export const alertsChartPreviewRouteRepository =
-  createApmServerRouteRepository()
-    .add(transactionErrorRateChartPreview)
-    .add(transactionDurationChartPreview)
-    .add(transactionErrorCountChartPreview)
-    .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository = createApmServerRouteRepository()
+  .add(transactionErrorRateChartPreview)
+  .add(transactionDurationChartPreview)
+  .add(transactionErrorCountChartPreview)
+  .add(transactionDurationChartPreview);

@@ -9,10 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, CorrelationsParams } from '../../../../common/correlations/types';
 
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import {

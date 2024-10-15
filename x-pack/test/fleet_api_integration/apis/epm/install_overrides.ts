@@ -113,34 +113,48 @@ export default function (providerContext: FtrProviderContext) {
         },
       }));
 
-      expect(body).to.eql({
-        template: {
-          settings: {
-            index: {
-              codec: 'best_compression',
-              lifecycle: {
-                name: 'overridden by user',
-              },
-              mapping: {
-                total_fields: {
-                  limit: '10000',
-                },
-              },
-              number_of_shards: '3',
+      // omit routings
+      delete body.template.settings.index.routing;
+
+      expect(Object.keys(body)).to.eql(['template', 'overlapping']);
+      expect(body.template).to.eql({
+        settings: {
+          index: {
+            codec: 'best_compression',
+            lifecycle: {
+              name: 'overridden by user',
             },
+            mapping: {
+              total_fields: {
+                limit: '10000',
+              },
+            },
+            number_of_shards: '3',
           },
-          mappings: {
-            dynamic: 'false',
-          },
-          aliases: {},
         },
-        overlapping: [
-          {
-            name: 'logs',
-            index_patterns: ['logs-*-*'],
-          },
-        ],
+        mappings: {
+          dynamic: 'false',
+        },
+        aliases: {},
       });
+
+      // otel logs templates were added in 8.16 but these tests also run against
+      // previous versions, so we conditionally test based on the ES version
+      const esVersion = getService('esVersion');
+      expect(body.overlapping).to.eql([
+        {
+          name: 'logs',
+          index_patterns: ['logs-*-*'],
+        },
+        ...(esVersion.matchRange('>=8.16.0')
+          ? [
+              {
+                index_patterns: ['logs-*.otel-*'],
+                name: 'logs-otel@template',
+              },
+            ]
+          : []),
+      ]);
     });
   });
 }

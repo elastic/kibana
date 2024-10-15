@@ -6,7 +6,7 @@
 
 A tool set defining an outcome of Auth interceptor for incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AuthToolkit 
@@ -14,9 +14,9 @@ export interface AuthToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [authenticated](./kibana-plugin-core-server.authtoolkit.authenticated.md) | (data?: AuthResultParams) =&gt; AuthResult | Authentication is successful with given credentials, allow request to pass through |
-|  [notHandled](./kibana-plugin-core-server.authtoolkit.nothandled.md) | () =&gt; AuthResult | User has no credentials. Allows user to access a resource when authRequired is 'optional' Rejects a request when authRequired: true |
-|  [redirected](./kibana-plugin-core-server.authtoolkit.redirected.md) | (headers: { location: string; } &amp; ResponseHeaders) =&gt; AuthResult | Redirects user to another location to complete authentication when authRequired: true Allows user to access a resource without redirection when authRequired: 'optional' |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [authenticated](./kibana-plugin-core-server.authtoolkit.authenticated.md) |  | (data?: AuthResultParams) =&gt; AuthResult | Authentication is successful with given credentials, allow request to pass through |
+|  [notHandled](./kibana-plugin-core-server.authtoolkit.nothandled.md) |  | () =&gt; AuthResult | User has no credentials. Allows user to access a resource when authRequired is 'optional' Rejects a request when authRequired: true |
+|  [redirected](./kibana-plugin-core-server.authtoolkit.redirected.md) |  | (headers: { location: string; } &amp; ResponseHeaders) =&gt; AuthResult | Redirects user to another location to complete authentication when authRequired: true Allows user to access a resource without redirection when authRequired: 'optional' |
 

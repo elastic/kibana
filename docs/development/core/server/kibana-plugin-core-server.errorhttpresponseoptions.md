@@ -6,7 +6,7 @@
 
 HTTP response parameters
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ErrorHttpResponseOptions 
@@ -14,8 +14,8 @@ export interface ErrorHttpResponseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-server.errorhttpresponseoptions.body.md) | ResponseError | <i>(Optional)</i> HTTP message to send to the client |
-|  [headers?](./kibana-plugin-core-server.errorhttpresponseoptions.headers.md) | ResponseHeaders | <i>(Optional)</i> HTTP Headers with additional information about response |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-server.errorhttpresponseoptions.body.md) |  | ResponseError | _(Optional)_ HTTP message to send to the client |
+|  [headers?](./kibana-plugin-core-server.errorhttpresponseoptions.headers.md) |  | ResponseHeaders | _(Optional)_ HTTP Headers with additional information about response |
 

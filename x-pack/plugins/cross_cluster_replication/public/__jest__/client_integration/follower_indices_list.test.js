@@ -21,17 +21,15 @@ import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 const { setup } = pageHelpers.followerIndexList;
 
 describe('<FollowerIndicesList />', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(() => {

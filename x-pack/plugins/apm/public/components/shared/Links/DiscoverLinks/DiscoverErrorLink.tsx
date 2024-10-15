@@ -6,10 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import {
-  ERROR_GROUP_ID,
-  SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './DiscoverLink';
 
@@ -42,9 +39,7 @@ function DiscoverErrorLink({
   readonly error: APMError;
   readonly kuery?: string;
 }) {
-  return (
-    <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />
-  );
+  return <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />;
 }
 
 export { DiscoverErrorLink };

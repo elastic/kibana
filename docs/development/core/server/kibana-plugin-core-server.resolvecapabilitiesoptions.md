@@ -6,7 +6,7 @@
 
 Defines a set of additional options for the `resolveCapabilities` method of [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ResolveCapabilitiesOptions 
@@ -14,7 +14,7 @@ export interface ResolveCapabilitiesOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [useDefaultCapabilities](./kibana-plugin-core-server.resolvecapabilitiesoptions.usedefaultcapabilities.md) | boolean | Indicates if capability switchers are supposed to return a default set of capabilities. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [useDefaultCapabilities](./kibana-plugin-core-server.resolvecapabilitiesoptions.usedefaultcapabilities.md) |  | boolean | Indicates if capability switchers are supposed to return a default set of capabilities. |
 

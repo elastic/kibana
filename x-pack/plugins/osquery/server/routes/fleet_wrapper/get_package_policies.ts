@@ -10,6 +10,7 @@ import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -21,9 +22,12 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-      const policies = await packagePolicyService?.list(context.core.savedObjects.client, {
+      const policies = await packagePolicyService?.list(internalSavedObjectsClient, {
         kuery,
       });
 

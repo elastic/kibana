@@ -6,7 +6,7 @@
 
 [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 capabilities: CapabilitiesSetup;

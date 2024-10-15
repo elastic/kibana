@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../src/core/types/elasticsearch';
+import { ESSearchRequest, ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { AlertServices } from '../../../../alerting/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,
   params,
 }: {
-  scopedClusterClient: AlertServices<
-    never,
-    never,
-    never
-  >['scopedClusterClient'];
+  scopedClusterClient: AlertServices<never, never, never>['scopedClusterClient'];
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
   const response = await scopedClusterClient.asCurrentUser.search({

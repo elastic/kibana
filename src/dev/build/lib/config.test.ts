@@ -29,6 +29,8 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
   return await Config.create({
     isRelease: true,
     targetAllPlatforms,
+    dockerContextUseLocalArtifact: false,
+    dockerCrossCompile: false,
   });
 };
 

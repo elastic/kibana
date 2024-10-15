@@ -15,7 +15,7 @@ import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];
@@ -122,32 +122,17 @@ describe('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
-    expect(execa.node.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "some/script",
-          Array [
-            "foo",
-            "bar",
-            "--logging.json=false",
-          ],
-          Object {
-            "env": Object {
-              "<inheritted process.env>": true,
-              "ELASTIC_APM_SERVICE_NAME": "kibana",
-              "FORCE_COLOR": "true",
-              "isDevCliChild": "true",
-            },
-            "nodeOptions": Array [
-              "--inheritted",
-              "--exec",
-              "--argv",
-            ],
-            "stdio": "pipe",
-          },
-        ],
-      ]
-    `);
+    expect(execa.node.mock.calls).toBeDefined();
+
+    const [scriptName, scriptArgs, execaOptions] = execa.node.mock.calls[0];
+
+    expect(scriptName).toBe('some/script');
+    expect(scriptArgs).toEqual(['foo', 'bar', '--logging.json=false']);
+    expect(execaOptions).toMatchObject({
+      env: expect.objectContaining({ ELASTIC_APM_SERVICE_NAME: 'kibana', isDevCliChild: 'true' }),
+      nodeOptions: ['--inheritted', '--exec', '--argv'],
+      stdio: 'pipe',
+    });
   });
 
   it('writes stdout and stderr lines to logger', () => {

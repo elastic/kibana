@@ -7,11 +7,16 @@
  */
 
 import expect from '@kbn/expect';
-import { DuplicateField, SavedObjectNotFound, KbnError } from './errors';
+import {
+  DuplicateField,
+  SavedObjectNotFound,
+  KbnError,
+  isSavedObjectNotFoundError,
+} from './errors';
+
+const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];
 
 describe('errors', () => {
-  const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];
-
   errors.forEach((error) => {
     const className = error.constructor.name;
     it(`${className} has a message`, () => {
@@ -25,5 +30,24 @@ describe('errors', () => {
     it(`${className} is an instance of KbnError`, () => {
       expect(error instanceof KbnError).to.be(true);
     });
+  });
+});
+
+describe('isSavedObjectNotFoundError', () => {
+  it(`returns false if passed 'undefined'`, () => {
+    expect(isSavedObjectNotFoundError(undefined)).to.be(false);
+  });
+
+  it('returns false if passed an Error other than SavedObjectNotFound', () => {
+    expect(isSavedObjectNotFoundError(errors[0])).to.be(false);
+  });
+
+  it('returns true if passed a SavedObjectNotFound error', () => {
+    expect(isSavedObjectNotFoundError(errors[1])).to.be(true);
+  });
+
+  it('returns true if passed a specialization of SavedObjectNotFound error', () => {
+    class SpecializedError extends SavedObjectNotFound {}
+    expect(isSavedObjectNotFoundError(new SpecializedError('dashboard', '123'))).to.be(true);
   });
 });

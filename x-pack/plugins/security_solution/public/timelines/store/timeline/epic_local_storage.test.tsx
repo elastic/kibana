@@ -58,7 +58,8 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
@@ -79,6 +80,7 @@ describe('epicLocalStorage', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
+      kqlQueryLanguage: 'kuery',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -163,6 +165,7 @@ describe('epicLocalStorage', () => {
           {
             columnId: 'event.severity',
             columnType: 'number',
+            esTypes: ['long'],
             sortDirection: Direction.desc,
           },
         ],

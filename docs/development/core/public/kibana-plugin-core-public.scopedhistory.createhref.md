@@ -6,7 +6,7 @@
 
 Creates an href (string) to the location. If `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {

@@ -73,7 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('Generating signals from ml anomalies', () => {
+  // FAILING 7.latest ES 8.3 forward compatibility : https://github.com/elastic/kibana/issues/125033
+  describe.skip('Generating signals from ml anomalies', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -244,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {
-        const valueListId = 'value-list-id';
+        const valueListId = 'value-list-id.txt';
         await importFile(supertest, 'keyword', ['mothra'], valueListId);
         const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
           [

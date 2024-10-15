@@ -45,7 +45,6 @@ TYPES_DEPS = [
   "@npm//moment",
   "@npm//@types/hapi__hapi",
   "@npm//@types/jest",
-  "@npm//@types/joi",
   "@npm//@types/node",
   "@npm//@types/uuid",
 ]

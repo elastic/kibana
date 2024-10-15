@@ -6,7 +6,7 @@
 
 optional cause of the exclusion
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 reason?: string;

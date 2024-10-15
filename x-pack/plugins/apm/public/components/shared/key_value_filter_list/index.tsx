@@ -33,8 +33,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
+  margin: ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
   .descriptionList__title,
   .descriptionList__description {
     border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
@@ -81,10 +80,7 @@ export function KeyValueFilterList({
         {nonEmptyKeyValueList.map(({ key, value }) => {
           return (
             <Fragment key={key}>
-              <EuiDescriptionListTitle
-                className="descriptionList__title"
-                style={{ width: '20%' }}
-              >
+              <EuiDescriptionListTitle className="descriptionList__title" style={{ width: '20%' }}>
                 <EuiText size="s" style={{ fontWeight: 'bold' }}>
                   {key}
                 </EuiText>
@@ -102,10 +98,9 @@ export function KeyValueFilterList({
                   >
                     <EuiToolTip
                       position="top"
-                      content={i18n.translate(
-                        'xpack.apm.keyValueFilterList.actionFilterLabel',
-                        { defaultMessage: 'Filter by value' }
-                      )}
+                      content={i18n.translate('xpack.apm.keyValueFilterList.actionFilterLabel', {
+                        defaultMessage: 'Filter by value',
+                      })}
                     >
                       <EuiIcon type="filter" color="text" size="m" />
                     </EuiToolTip>
@@ -121,23 +116,12 @@ export function KeyValueFilterList({
   );
 }
 
-function AccordionButtonContent({
-  icon,
-  title,
-}: {
-  icon?: string;
-  title: string;
-}) {
+function AccordionButtonContent({ icon, title }: { icon?: string; title: string }) {
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={icon}
-            size="l"
-            title={title}
-            data-test-subj="accordion_title_icon"
-          />
+          <EuiIcon type={icon} size="l" title={title} data-test-subj="accordion_title_icon" />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

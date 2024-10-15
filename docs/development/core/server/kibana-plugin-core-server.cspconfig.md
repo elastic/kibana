@@ -6,12 +6,12 @@
 
 CSP configuration for use in Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class CspConfig implements ICspConfig 
 ```
-<b>Implements:</b> ICspConfig
+**Implements:** ICspConfig
 
 ## Remarks
 
@@ -21,10 +21,10 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [DEFAULT](./kibana-plugin-core-server.cspconfig.default.md) | <code>static</code> | CspConfig |  |
-|  [disableEmbedding](./kibana-plugin-core-server.cspconfig.disableembedding.md) |  | boolean |  |
-|  [header](./kibana-plugin-core-server.cspconfig.header.md) |  | string |  |
-|  [rules](./kibana-plugin-core-server.cspconfig.rules.md) |  | string\[\] |  |
-|  [strict](./kibana-plugin-core-server.cspconfig.strict.md) |  | boolean |  |
-|  [warnLegacyBrowsers](./kibana-plugin-core-server.cspconfig.warnlegacybrowsers.md) |  | boolean |  |
+|  [DEFAULT](./kibana-plugin-core-server.cspconfig.default.md) | <p><code>static</code></p><p><code>readonly</code></p> | CspConfig |  |
+|  [disableEmbedding](./kibana-plugin-core-server.cspconfig.disableembedding.md) | <code>readonly</code> | boolean |  |
+|  [header](./kibana-plugin-core-server.cspconfig.header.md) | <code>readonly</code> | string |  |
+|  [rules](./kibana-plugin-core-server.cspconfig.rules.md) | <code>readonly</code> | string\[\] |  |
+|  [strict](./kibana-plugin-core-server.cspconfig.strict.md) | <code>readonly</code> | boolean |  |
+|  [warnLegacyBrowsers](./kibana-plugin-core-server.cspconfig.warnlegacybrowsers.md) | <code>readonly</code> | boolean |  |
 

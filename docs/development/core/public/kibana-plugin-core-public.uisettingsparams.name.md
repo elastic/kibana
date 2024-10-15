@@ -6,7 +6,7 @@
 
 title in the UI
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 name?: string;

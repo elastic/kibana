@@ -84,11 +84,7 @@ export function getServiceColumns({
       width: `${unit * 6}px`,
       sortable: true,
       render: (_, { healthStatus }) => {
-        return (
-          <HealthBadge
-            healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
-          />
-        );
+        return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
       },
     },
     {
@@ -115,17 +111,12 @@ export function getServiceColumns({
       ? [
           {
             field: 'environments',
-            name: i18n.translate(
-              'xpack.apm.servicesTable.environmentColumnLabel',
-              {
-                defaultMessage: 'Environment',
-              }
-            ),
+            name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
+              defaultMessage: 'Environment',
+            }),
             width: `${unit * 10}px`,
             sortable: true,
-            render: (_, { environments }) => (
-              <EnvironmentBadge environments={environments ?? []} />
-            ),
+            render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
           } as ITableColumn<ServiceListItem>,
         ]
       : []),
@@ -133,10 +124,9 @@ export function getServiceColumns({
       ? [
           {
             field: 'transactionType',
-            name: i18n.translate(
-              'xpack.apm.servicesTable.transactionColumnLabel',
-              { defaultMessage: 'Transaction type' }
-            ),
+            name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
+              defaultMessage: 'Transaction type',
+            }),
             width: `${unit * 10}px`,
             sortable: true,
           },
@@ -152,9 +142,7 @@ export function getServiceColumns({
       render: (_, { serviceName, latency }) => (
         <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.latency}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.latency
-          }
+          comparisonSeries={comparisonData?.previousPeriod[serviceName]?.latency}
           hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis1"
           valueLabel={asMillisecondDuration(latency || 0)}
@@ -172,9 +160,7 @@ export function getServiceColumns({
       render: (_, { serviceName, throughput }) => (
         <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.throughput
-          }
+          comparisonSeries={comparisonData?.previousPeriod[serviceName]?.throughput}
           hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis0"
           valueLabel={asTransactionRate(throughput)}
@@ -193,12 +179,8 @@ export function getServiceColumns({
         const valueLabel = asPercent(transactionErrorRate, 1);
         return (
           <ListMetric
-            series={
-              comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
-            }
-            comparisonSeries={
-              comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
-            }
+            series={comparisonData?.currentPeriod[serviceName]?.transactionErrorRate}
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.transactionErrorRate}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
             color="euiColorVis7"
             valueLabel={valueLabel}
@@ -230,8 +212,7 @@ export function ServiceList({
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
-      transactionType !== TRANSACTION_REQUEST &&
-      transactionType !== TRANSACTION_PAGE_LOAD
+      transactionType !== TRANSACTION_REQUEST && transactionType !== TRANSACTION_PAGE_LOAD
   );
 
   const { query } = useApmParams('/services');
@@ -255,18 +236,12 @@ export function ServiceList({
   const columns = displayHealthStatus
     ? serviceColumns
     : serviceColumns.filter((column) => column.field !== 'healthStatus');
-  const initialSortField = displayHealthStatus
-    ? 'healthStatus'
-    : 'transactionsPerMinute';
+  const initialSortField = displayHealthStatus ? 'healthStatus' : 'transactionsPerMinute';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xs"
-          justifyContent="flexEnd"
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
           {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsBadge />
@@ -275,23 +250,19 @@ export function ServiceList({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate(
-                'xpack.apm.servicesTable.tooltip.metricsExplanation',
-                {
-                  defaultMessage:
-                    'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
+                defaultMessage:
+                  'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
+              })}
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.apm.servicesTable.metricsExplanationLabel',
-                { defaultMessage: 'What are these metrics?' }
-              )}
+              {i18n.translate('xpack.apm.servicesTable.metricsExplanationLabel', {
+                defaultMessage: 'What are these metrics?',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

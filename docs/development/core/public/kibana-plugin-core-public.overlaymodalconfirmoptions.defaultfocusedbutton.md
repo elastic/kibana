@@ -4,7 +4,7 @@
 
 ## OverlayModalConfirmOptions.defaultFocusedButton property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];

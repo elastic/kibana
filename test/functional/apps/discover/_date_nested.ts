@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
 
   // Skipping this test for 7.16 specifically. The change in this test was a side-effect
   // of some other change and the change in the test now keeps failing this for yet
@@ -22,6 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('timefield is a date in a nested field', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nested.json'
+      );
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
       await PageObjects.common.navigateToApp('discover');
     });
@@ -29,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
     });
 
     it('should show an error message', async function () {

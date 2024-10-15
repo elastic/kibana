@@ -6,7 +6,7 @@
 
 Fetches a single object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;

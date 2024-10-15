@@ -15,11 +15,7 @@ export async function hasHistoricalAgentData(setup: Setup) {
   const params = {
     terminateAfter: 1,
     apm: {
-      events: [
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-      ],
+      events: [ProcessorEvent.error, ProcessorEvent.metric, ProcessorEvent.transaction],
     },
     body: {
       size: 0,

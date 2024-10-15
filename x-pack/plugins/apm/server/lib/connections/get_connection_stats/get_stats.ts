@@ -184,8 +184,7 @@ export const getStats = async ({
         from: {
           id: objectHash({ serviceName }),
           serviceName,
-          environment: (sample[SERVICE_ENVIRONMENT] ||
-            ENVIRONMENT_NOT_DEFINED.value) as string,
+          environment: (sample[SERVICE_ENVIRONMENT] || ENVIRONMENT_NOT_DEFINED.value) as string,
           agentName: sample[AGENT_NAME] as AgentName,
           type: NodeType.service as const,
         },
@@ -197,15 +196,9 @@ export const getStats = async ({
           type: NodeType.backend as const,
         },
         value: {
-          count: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.count.value ?? 0
-            )
-          ),
+          count: sum(bucket.timeseries.buckets.map((dateBucket) => dateBucket.count.value ?? 0)),
           latency_sum: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.latency_sum.value ?? 0
-            )
+            bucket.timeseries.buckets.map((dateBucket) => dateBucket.latency_sum.value ?? 0)
           ),
           error_count: sum(
             bucket.timeseries.buckets.flatMap(

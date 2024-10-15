@@ -44,20 +44,10 @@ describe('KeyUXMetrics', () => {
       };
     };
 
-    expect(
-      getAllByText(checkText('Longest long task duration271 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('Total long tasks duration520 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('No. of long tasks3'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('Total blocking time271 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('First contentful paint1.27 s'))[0]
-    ).toBeInTheDocument();
+    expect(getAllByText(checkText('Longest long task duration271 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('Total long tasks duration520 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('No. of long tasks3'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('Total blocking time271 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('First contentful paint1.27 s'))[0]).toBeInTheDocument();
   });
 });

@@ -36,10 +36,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
     }
 
     const [jobs, legacyJobs] = await withApmSpan('get_available_ml_jobs', () =>
-      Promise.all([
-        getAnomalyDetectionJobs(setup, logger),
-        hasLegacyJobs(setup),
-      ])
+      Promise.all([getAnomalyDetectionJobs(setup, logger), hasLegacyJobs(setup)])
     );
 
     return {
@@ -93,9 +90,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-    const size = await resources.context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await resources.context.core.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getAllEnvironments({
       includeMissing: true,
       searchAggregatedTransactions,

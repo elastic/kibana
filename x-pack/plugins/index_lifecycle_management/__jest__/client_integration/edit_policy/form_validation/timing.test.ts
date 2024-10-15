@@ -15,15 +15,14 @@ import { setupValidationTestBed, ValidationTestBed } from './validation.helpers'
 describe('<EditPolicy /> timing validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
@@ -31,7 +30,7 @@ describe('<EditPolicy /> timing validation', () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
 
     await act(async () => {
-      testBed = await setupValidationTestBed();
+      testBed = await setupValidationTestBed(httpSetup);
     });
 
     const { component } = testBed;

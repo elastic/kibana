@@ -6,7 +6,7 @@
 
 Updates an SavedObject
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
@@ -19,9 +19,9 @@ update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: 
 |  type | string |  |
 |  id | string |  |
 |  attributes | Partial&lt;T&gt; |  |
-|  options | SavedObjectsUpdateOptions&lt;T&gt; |  |
+|  options | SavedObjectsUpdateOptions&lt;T&gt; | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsUpdateResponse&lt;T&gt;&gt;
 

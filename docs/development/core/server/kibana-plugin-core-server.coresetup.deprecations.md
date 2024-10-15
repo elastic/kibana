@@ -6,7 +6,7 @@
 
 [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecations: DeprecationsServiceSetup;

@@ -14,10 +14,19 @@ import { getRandomString } from './lib';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+  const { createIndexWithMappings, createMockRollupIndex, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
   describe('index patterns extension', () => {
+    // The step below is done for the 7.17 ES 8.x forward compatibility tests
+    // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+    // We will simulate rollup usage by creating a mock-up rollup index
+    before(async () => {
+      await createMockRollupIndex();
+    });
+
+    after(() => cleanUp());
+
     describe('Fields for wildcards', () => {
       const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
 

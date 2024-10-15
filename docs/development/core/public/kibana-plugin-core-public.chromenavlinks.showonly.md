@@ -6,7 +6,7 @@
 
 Remove all navlinks except the one matching the given id.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 showOnly(id: string): void;
@@ -18,7 +18,7 @@ showOnly(id: string): void;
 |  --- | --- | --- |
 |  id | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

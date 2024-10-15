@@ -4,7 +4,7 @@
 
 ## SavedObjectsUpdateResponse.attributes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 attributes: Partial<T>;

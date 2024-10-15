@@ -48,8 +48,7 @@ const OverviewTableContainerDiv = euiStyled.div<{
   `}
 
   .euiTableRowCell {
-    visibility: ${({ isEmptyAndNotInitiated }) =>
-      isEmptyAndNotInitiated ? 'hidden' : 'visible'};
+    visibility: ${({ isEmptyAndNotInitiated }) => (isEmptyAndNotInitiated ? 'hidden' : 'visible')};
   }
 `;
 

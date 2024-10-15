@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  AreaSeries,
-  Chart,
-  CurveType,
-  LineSeries,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Chart, CurveType, LineSeries, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { merge } from 'lodash';
 import React from 'react';
@@ -34,9 +27,7 @@ export type Color =
   | 'euiColorVis8'
   | 'euiColorVis9';
 
-function hasValidTimeseries(
-  series?: Coordinate[] | null
-): series is Coordinate[] {
+function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
 }
 
@@ -94,11 +85,7 @@ export function SparkPlot({
       <EuiFlexItem grow={false}>
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
-            <Settings
-              theme={sparkplotChartTheme}
-              showLegend={false}
-              tooltip="none"
-            />
+            <Settings theme={sparkplotChartTheme} showLegend={false} tooltip="none" />
             <Sparkline
               id="Sparkline"
               xScaleType={ScaleType.Time}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from 'src/core/public';
 import { AppServicesContext } from '../../../../public/types';
 import {
   createColdPhaseActions,
@@ -23,10 +24,13 @@ type SetupReturn = ReturnType<typeof setupSerializationTestBed>;
 
 export type SerializationTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupSerializationTestBed = async (arg?: {
-  appServicesContext?: Partial<AppServicesContext>;
-}) => {
-  const testBed = await initTestBed(arg);
+export const setupSerializationTestBed = async (
+  httpSetup: HttpSetup,
+  arg?: {
+    appServicesContext?: Partial<AppServicesContext>;
+  }
+) => {
+  const testBed = await initTestBed(httpSetup, arg);
 
   return {
     ...testBed,

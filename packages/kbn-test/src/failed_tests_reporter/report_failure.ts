@@ -15,19 +15,32 @@ export async function createFailureIssue(
   buildUrl: string,
   failure: TestFailure,
   api: GithubApi,
-  branch: string
+  branch: string,
+  pipeline: string
 ) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
+
+  // Github API body length maximum is 65536 characters
+  // Let's keep consistency with Mocha output that is truncated to 8192 characters
+  const failureMaxCharacters = 8192;
+
+  const failureBody =
+    failure.failure.length <= failureMaxCharacters
+      ? failure.failure
+      : [
+          failure.failure.substring(0, failureMaxCharacters),
+          `[report_failure] output truncated to ${failureMaxCharacters} characters`,
+        ].join('\n');
 
   const body = updateIssueMetadata(
     [
       'A test failed on a tracked branch',
       '',
       '```',
-      failure.failure,
+      failureBody,
       '```',
       '',
-      `First failure: [CI Build - ${branch}](${buildUrl})`,
+      `First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -43,7 +56,8 @@ export async function updateFailureIssue(
   buildUrl: string,
   issue: ExistingFailedTestIssue,
   api: GithubApi,
-  branch: string
+  branch: string,
+  pipeline: string
 ) {
   // Increment failCount
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
@@ -54,7 +68,7 @@ export async function updateFailureIssue(
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
   await api.addIssueComment(
     issue.github.number,
-    `New failure: [CI Build - ${branch}](${buildUrl})`
+    `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`
   );
 
   return { newBody, newCount };

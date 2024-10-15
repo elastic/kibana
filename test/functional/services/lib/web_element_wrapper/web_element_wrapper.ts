@@ -130,7 +130,10 @@ export class WebElementWrapper {
   }
 
   private getActions() {
-    return this.driver.actions();
+    return this.driver.actions({
+      async: undefined,
+      bridge: undefined,
+    });
   }
 
   /**
@@ -200,6 +203,18 @@ export class WebElementWrapper {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
     });
+  }
+
+  /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
   }
 
   /**
@@ -688,7 +703,32 @@ export class WebElementWrapper {
   }
 
   /**
-   * Scroll the element into view, avoiding the fixed header if necessary
+   * Scroll the element into view
+   *
+   * @param {ScrollIntoViewOptions} scrollIntoViewOptions
+   * @return {Promise<void>}
+   */
+  public scrollIntoView(scrollIntoViewOptions?: ScrollIntoViewOptions) {
+    return this.driver.executeScript<void>(
+      (target: HTMLElement, options: ScrollIntoViewOptions) => target.scrollIntoView(options),
+      this._webElement,
+      scrollIntoViewOptions
+    );
+  }
+
+  /**
+   * Scroll the element into view if it is not already, avoiding the fixed header if necessary
+   * This method is a variation of the scrollIntoView method, where we only scroll into an element
+   * if it is not part of the "scrollable view".
+   * This implies a specific behavior, since the "scrollable view" of the view is identified by
+   * the `document.scrollingElement`, which always results to the html or body tag.
+   *
+   * Use cases:
+   * - An element (a section, a footer) is not visible in the whole page and we need to scroll into it.
+   * - An element is covered by the fixed header and we need to scroll into it ensuring is not covered.
+   *
+   * In case you have a scrollable list smaller that the size of the HTML document and you need
+   * to scroll into an element of that list, prefer using the `.scrollIntoView` method.
    *
    * @nonstandard
    * @return {Promise<void>}

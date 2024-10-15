@@ -54,9 +54,7 @@ export async function createApmUsersAndRoles({
   ];
 
   // create roles
-  await Promise.all(
-    roles.map(async (role) => createRole({ elasticsearch, kibana, ...role }))
-  );
+  await Promise.all(roles.map(async (role) => createRole({ elasticsearch, kibana, ...role })));
 
   // user definitions
   const users = [
@@ -65,11 +63,7 @@ export async function createApmUsersAndRoles({
   ];
 
   // create users
-  await Promise.all(
-    users.map(async (user) =>
-      createOrUpdateUser({ elasticsearch, kibana, user })
-    )
-  );
+  await Promise.all(users.map(async (user) => createOrUpdateUser({ elasticsearch, kibana, user })));
 
   return users;
 }

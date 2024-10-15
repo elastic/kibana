@@ -9,16 +9,10 @@ import { range } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, CorrelationsParams } from '../../../../common/correlations/types';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
-import {
-  computeExpectationsAndRanges,
-  splitAllSettledPromises,
-} from '../utils';
+import { computeExpectationsAndRanges, splitAllSettledPromises } from '../utils';
 
 import {
   fetchTransactionDurationCorrelationWithHistogram,
@@ -34,12 +28,11 @@ export const fetchSignificantCorrelations = async (
 ) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
-  const { percentiles: percentilesRecords } =
-    await fetchTransactionDurationPercentiles(
-      esClient,
-      paramsWithIndex,
-      percentileAggregationPercents
-    );
+  const { percentiles: percentilesRecords } = await fetchTransactionDurationPercentiles(
+    esClient,
+    paramsWithIndex,
+    percentileAggregationPercents
+  );
 
   // We need to round the percentiles values
   // because the queries we're using based on it
@@ -80,8 +73,7 @@ export const fetchSignificantCorrelations = async (
     (d): d is LatencyCorrelation => d !== undefined
   );
 
-  const ccsWarning =
-    rejected.length > 0 && paramsWithIndex?.index.includes(':');
+  const ccsWarning = rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
   return { latencyCorrelations, ccsWarning, totalDocCount };
 };

@@ -60,14 +60,8 @@ export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
 };
 
 function getRequest(topTraceOptions: TopTraceOptions) {
-  const {
-    searchAggregatedTransactions,
-    environment,
-    kuery,
-    transactionName,
-    start,
-    end,
-  } = topTraceOptions;
+  const { searchAggregatedTransactions, environment, kuery, transactionName, start, end } =
+    topTraceOptions;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -75,11 +69,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
 
   return {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -87,9 +77,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
         bool: {
           filter: [
             ...transactionNameFilter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+            ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
@@ -150,9 +138,7 @@ function getItemsWithRelativeImpact(
   start: number,
   end: number
 ) {
-  const values = items
-    .map(({ sum }) => sum)
-    .filter((value) => value !== null) as number[];
+  const values = items.map(({ sum }) => sum).filter((value) => value !== null) as number[];
 
   const max = Math.max(...values);
   const min = Math.min(...values);
@@ -186,8 +172,7 @@ export function topTransactionGroupsFetcher(
     const params = {
       request,
       setup,
-      searchAggregatedTransactions:
-        topTraceOptions.searchAggregatedTransactions,
+      searchAggregatedTransactions: topTraceOptions.searchAggregatedTransactions,
     };
 
     const [counts, averages, sums] = await Promise.all([
@@ -202,12 +187,7 @@ export function topTransactionGroupsFetcher(
 
     const { start, end } = topTraceOptions;
 
-    const itemsWithRelativeImpact = getItemsWithRelativeImpact(
-      setup,
-      items,
-      start,
-      end
-    );
+    const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items, start, end);
 
     const itemsWithKeys = itemsWithRelativeImpact.map((item) => ({
       ...item,

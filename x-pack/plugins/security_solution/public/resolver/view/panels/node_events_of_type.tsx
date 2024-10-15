@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +34,7 @@ import { useFormattedDate } from './use_formatted_date';
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
+// eslint-disable-next-line react/display-name
 export const NodeEventsInCategory = memo(function ({
   nodeID,
   eventCategory,
@@ -94,6 +93,7 @@ export const NodeEventsInCategory = memo(function ({
 /**
  * Rendered for each event in the list.
  */
+// eslint-disable-next-line react/display-name
 const NodeEventsListItem = memo(function ({
   event,
   nodeID,
@@ -204,6 +204,7 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
+// eslint-disable-next-line react/display-name
 const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
   eventCategory,

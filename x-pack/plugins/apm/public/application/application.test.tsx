@@ -30,7 +30,8 @@ jest.mock('../components/app/RumDashboard/RumHome', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
-describe('renderApp (APM)', () => {
+// FAILING: https://github.com/elastic/kibana/issues/141543
+describe.skip('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
   beforeAll(() => {
     // The RUM agent logs an unnecessary message here. There's a couple open
@@ -112,15 +113,13 @@ describe('renderApp (APM)', () => {
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi(coreStart);
 
-    jest
-      .spyOn(window.console, 'warn')
-      .mockImplementationOnce((message: string) => {
-        if (message.startsWith('[Elastic APM')) {
-          return;
-        } else {
-          console.warn(message); // eslint-disable-line no-console
-        }
-      });
+    jest.spyOn(window.console, 'warn').mockImplementationOnce((message: string) => {
+      if (message.startsWith('[Elastic APM')) {
+        return;
+      } else {
+        console.warn(message); // eslint-disable-line no-console
+      }
+    });
 
     return {
       coreStart,
@@ -154,14 +153,10 @@ describe('renderUxApp', () => {
 
     const wrapper = mount(<UXAppRoot {...(uxMountProps as any)} />);
 
-    wrapper
-      .find(RumHome)
-      .simulateError(new Error('Oh no, an unexpected error!'));
+    wrapper.find(RumHome).simulateError(new Error('Oh no, an unexpected error!'));
 
     expect(wrapper.find(RumHome)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
-      /Error: Oh no, an unexpected error!/
-    );
+    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(/Error: Oh no, an unexpected error!/);
   });
 });

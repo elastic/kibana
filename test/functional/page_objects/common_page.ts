@@ -486,6 +486,7 @@ export class CommonPageObject extends FtrService {
    * Get visible text of the Welcome Banner
    */
   async getWelcomeText() {
+    await this.testSubjects.exists('global-banner-item');
     return await this.testSubjects.getVisibleText('global-banner-item');
   }
 
@@ -518,7 +519,7 @@ export class CommonPageObject extends FtrService {
    */
   formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
     return Object.keys(time)
-      .map((x) => moment(time[x], [fmt]).format())
+      .map((x) => moment.utc(time[x], [fmt]).format())
       .reduce(
         (acc, curr, idx) => {
           if (idx === 0) acc.from = curr;

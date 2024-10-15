@@ -8,7 +8,7 @@ Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleaveha
 
 See 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AppLeaveConfirmAction 
@@ -16,10 +16,10 @@ export interface AppLeaveConfirmAction
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [callback?](./kibana-plugin-core-public.appleaveconfirmaction.callback.md) | () =&gt; void | <i>(Optional)</i> |
-|  [text](./kibana-plugin-core-public.appleaveconfirmaction.text.md) | string |  |
-|  [title?](./kibana-plugin-core-public.appleaveconfirmaction.title.md) | string | <i>(Optional)</i> |
-|  [type](./kibana-plugin-core-public.appleaveconfirmaction.type.md) | AppLeaveActionType.confirm |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [callback?](./kibana-plugin-core-public.appleaveconfirmaction.callback.md) |  | () =&gt; void | _(Optional)_ |
+|  [text](./kibana-plugin-core-public.appleaveconfirmaction.text.md) |  | string |  |
+|  [title?](./kibana-plugin-core-public.appleaveconfirmaction.title.md) |  | string | _(Optional)_ |
+|  [type](./kibana-plugin-core-public.appleaveconfirmaction.type.md) |  | AppLeaveActionType.confirm |  |
 

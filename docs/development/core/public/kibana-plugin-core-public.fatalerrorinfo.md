@@ -6,7 +6,7 @@
 
 Represents the `message` and `stack` of a fatal Error
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface FatalErrorInfo 
@@ -14,8 +14,8 @@ export interface FatalErrorInfo
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [message](./kibana-plugin-core-public.fatalerrorinfo.message.md) | string |  |
-|  [stack](./kibana-plugin-core-public.fatalerrorinfo.stack.md) | string \| undefined |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [message](./kibana-plugin-core-public.fatalerrorinfo.message.md) |  | string |  |
+|  [stack](./kibana-plugin-core-public.fatalerrorinfo.stack.md) |  | string \| undefined |  |
 

@@ -14,6 +14,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
@@ -30,6 +31,7 @@ export async function resetPreconfiguredAgentPolicies(
   logger.warn('Reseting Fleet preconfigured agent policies');
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
+  await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);
 
   await setupFleet(soClient, esClient);
 }
@@ -76,6 +78,40 @@ async function _deleteGhostPackagePolicies(
       concurrency: 20,
     }
   );
+}
+
+async function _deletePreconfigurationDeleteRecord(
+  soClient: SavedObjectsClientContract,
+  logger: Logger,
+  agentPolicyId?: string
+) {
+  const existingDeletionRecord = await soClient.find<{ id: string }>({
+    type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  const deletionRecordSavedObjects = agentPolicyId
+    ? existingDeletionRecord.saved_objects.filter((so) => so.attributes.id === agentPolicyId)
+    : existingDeletionRecord.saved_objects;
+
+  if (deletionRecordSavedObjects.length > 0) {
+    await pMap(
+      deletionRecordSavedObjects,
+      (savedObject) =>
+        soClient
+          .delete(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, savedObject.id)
+          .catch((err) => {
+            if (soClient.errors.isNotFoundError(err)) {
+              return undefined;
+            }
+            throw err;
+          }),
+
+      {
+        concurrency: 20,
+      }
+    );
+  }
 }
 
 async function _deleteExistingData(

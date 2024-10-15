@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportResponse.successResults property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 successResults?: SavedObjectsImportSuccess[];

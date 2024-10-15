@@ -6,7 +6,7 @@
 
 The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readStream: Readable;

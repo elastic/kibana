@@ -9,10 +9,7 @@ import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  asMillisecondDuration,
-  asTransactionRate,
-} from '../../../../common/utils/formatters';
+import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
@@ -41,10 +38,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (
-      _: string,
-      { serviceName, transactionName, transactionType }: TraceGroup
-    ) => (
+    render: (_: string, { serviceName, transactionName, transactionType }: TraceGroup) => (
       <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
         <StyledTransactionLink
           serviceName={serviceName}
@@ -58,12 +52,9 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
   },
   {
     field: 'serviceName',
-    name: i18n.translate(
-      'xpack.apm.tracesTable.originatingServiceColumnLabel',
-      {
-        defaultMessage: 'Originating service',
-      }
-    ),
+    name: i18n.translate('xpack.apm.tracesTable.originatingServiceColumnLabel', {
+      defaultMessage: 'Originating service',
+    }),
     sortable: true,
   },
   {
@@ -73,8 +64,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (_, { averageResponseTime }) =>
-      asMillisecondDuration(averageResponseTime),
+    render: (_, { averageResponseTime }) => asMillisecondDuration(averageResponseTime),
   },
   {
     field: 'transactionsPerMinute',
@@ -83,31 +73,22 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (_, { transactionsPerMinute }) =>
-      asTransactionRate(transactionsPerMinute),
+    render: (_, { transactionsPerMinute }) => asTransactionRate(transactionsPerMinute),
   },
   {
     field: 'impact',
     name: (
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.tracesTable.impactColumnDescription',
-          {
-            defaultMessage:
-              'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
-          }
-        )}
+        content={i18n.translate('xpack.apm.tracesTable.impactColumnDescription', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
+        })}
       >
         <>
           {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
             defaultMessage: 'Impact',
           })}{' '}
-          <EuiIcon
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-          />
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

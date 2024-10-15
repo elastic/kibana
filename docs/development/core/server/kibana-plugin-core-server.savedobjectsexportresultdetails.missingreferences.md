@@ -6,7 +6,7 @@
 
 missing references details
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 missingReferences: Array<{

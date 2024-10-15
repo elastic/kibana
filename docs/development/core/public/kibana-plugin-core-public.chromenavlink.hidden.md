@@ -6,7 +6,7 @@
 
 Hides a link from the navigation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly hidden?: boolean;

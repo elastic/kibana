@@ -4,12 +4,12 @@
 
 ## OverlayBannersStart.getComponent() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getComponent(): JSX.Element;
 ```
-<b>Returns:</b>
+**Returns:**
 
 JSX.Element
 

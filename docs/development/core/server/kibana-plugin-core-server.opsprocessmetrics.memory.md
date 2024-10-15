@@ -6,7 +6,7 @@
 
 process memory usage
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 memory: {

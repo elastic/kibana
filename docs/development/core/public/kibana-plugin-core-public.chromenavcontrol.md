@@ -5,7 +5,7 @@
 ## ChromeNavControl interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeNavControl 
@@ -13,8 +13,8 @@ export interface ChromeNavControl
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [mount](./kibana-plugin-core-public.chromenavcontrol.mount.md) | MountPoint |  |
-|  [order?](./kibana-plugin-core-public.chromenavcontrol.order.md) | number | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [mount](./kibana-plugin-core-public.chromenavcontrol.mount.md) |  | MountPoint |  |
+|  [order?](./kibana-plugin-core-public.chromenavcontrol.order.md) |  | number | _(Optional)_ |
 

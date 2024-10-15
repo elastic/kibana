@@ -6,7 +6,7 @@
 
 Return the [type](./kibana-plugin-core-server.savedobjectstype.md) definition for given type name.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getType(type: string): SavedObjectsType<any> | undefined;
@@ -18,7 +18,7 @@ getType(type: string): SavedObjectsType<any> | undefined;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsType&lt;any&gt; \| undefined
 

@@ -8,17 +8,11 @@
 import * as createCallApmApi from './createCallApmApi';
 import type { AbstractAPMClient } from './createCallApmApi';
 
-export type CallApmApiSpy = jest.SpyInstance<
-  Promise<any>,
-  Parameters<AbstractAPMClient>
->;
+export type CallApmApiSpy = jest.SpyInstance<Promise<any>, Parameters<AbstractAPMClient>>;
 
 export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 
 export const getCreateCallApmApiSpy = () =>
-  jest.spyOn(
-    createCallApmApi,
-    'createCallApmApi'
-  ) as unknown as CreateCallApmApiSpy;
+  jest.spyOn(createCallApmApi, 'createCallApmApi') as unknown as CreateCallApmApiSpy;
 export const getCallApmApiSpy = () =>
   jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;

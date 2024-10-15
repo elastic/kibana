@@ -50,7 +50,7 @@ export function categorizationExamplesProvider({
         },
       };
       if (query.bool === undefined) {
-        query.bool = {};
+        query.bool = Object.create(null);
       }
       if (query.bool.filter === undefined) {
         query.bool.filter = range;

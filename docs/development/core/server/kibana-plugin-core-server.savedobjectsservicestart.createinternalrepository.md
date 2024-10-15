@@ -6,7 +6,7 @@
 
 Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;

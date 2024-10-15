@@ -12,7 +12,7 @@ Plugins having the responsibility to restrict capabilities depending on a given 
 
 Refers to the methods documentation for complete description and examples.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CapabilitiesSetup 
@@ -23,5 +23,5 @@ export interface CapabilitiesSetup
 |  Method | Description |
 |  --- | --- |
 |  [registerProvider(provider)](./kibana-plugin-core-server.capabilitiessetup.registerprovider.md) | Register a [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) to be used to provide [Capabilities](./kibana-plugin-core-server.capabilities.md) when resolving them. |
-|  [registerSwitcher(switcher)](./kibana-plugin-core-server.capabilitiessetup.registerswitcher.md) | Register a [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) to be used to change the default state of the [Capabilities](./kibana-plugin-core-server.capabilities.md) entries when resolving them.<!-- -->A capabilities switcher can only change the state of existing capabilities. Capabilities added or removed when invoking the switcher will be ignored. |
+|  [registerSwitcher(switcher)](./kibana-plugin-core-server.capabilitiessetup.registerswitcher.md) | <p>Register a [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) to be used to change the default state of the [Capabilities](./kibana-plugin-core-server.capabilities.md) entries when resolving them.</p><p>A capabilities switcher can only change the state of existing capabilities. Capabilities added or removed when invoking the switcher will be ignored.</p> |
 

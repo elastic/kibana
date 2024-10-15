@@ -21,10 +21,7 @@ import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw'
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
 
-type ServiceMetadataIconsRaw = Pick<
-  TransactionRaw,
-  'kubernetes' | 'cloud' | 'container' | 'agent'
->;
+type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
 export interface ServiceMetadataIcons {
   agentName?: string;
@@ -55,17 +52,12 @@ export async function getServiceMetadataIcons({
 }): Promise<ServiceMetadataIcons> {
   const { apmEventClient } = setup;
 
-  const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...rangeQuery(start, end),
-  ];
+  const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForAggregatedTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -77,10 +69,7 @@ export async function getServiceMetadataIcons({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_metadata_icons',
-    params
-  );
+  const response = await apmEventClient.search('get_service_metadata_icons', params);
 
   if (response.hits.total.value === 0) {
     return {

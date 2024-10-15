@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  AnnotationDomainType,
-  LineAnnotation,
-  Position,
-  RectAnnotation,
-} from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,9 +23,7 @@ import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { asDuration, asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-type Alert = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
->;
+type Alert = ValuesType<APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']>;
 
 function getAlertColor({
   severityLevel,
@@ -47,11 +40,7 @@ function getAlertColor({
   }
 }
 
-function getAlertHeader({
-  severityLevel,
-}: {
-  severityLevel: string | undefined;
-}) {
+function getAlertHeader({ severityLevel }: { severityLevel: string | undefined }) {
   switch (severityLevel) {
     case 'critical':
       return i18n.translate('xpack.apm.alertAnnotationCriticalTitle', {
@@ -98,17 +87,13 @@ export function getAlertAnnotations({
     const parsed = parseTechnicalFields(alert);
     const uuid = parsed[ALERT_UUID]!;
     // Don't start the annotation before the beginning of the chart time range
-    const start = Math.max(
-      chartStartTime,
-      new Date(parsed[ALERT_START]!).getTime()
-    );
+    const start = Math.max(chartStartTime, new Date(parsed[ALERT_START]!).getTime());
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const experimentalLabel = i18n.translate(
-      'xpack.apm.alertAnnotationTooltipExperimentalText',
-      { defaultMessage: 'Experimental' }
-    );
+    const experimentalLabel = i18n.translate('xpack.apm.alertAnnotationTooltipExperimentalText', {
+      defaultMessage: 'Experimental',
+    });
     const header = `${getAlertHeader({
       severityLevel,
     })} - ${experimentalLabel}`;
@@ -122,10 +107,9 @@ export function getAlertAnnotations({
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
-    const moreDetails = i18n.translate(
-      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
-      { defaultMessage: 'Click to see more details.' }
-    );
+    const moreDetails = i18n.translate('xpack.apm.alertAnnotationTooltipMoreDetailsText', {
+      defaultMessage: 'Click to see more details.',
+    });
     const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
@@ -142,10 +126,9 @@ export function getAlertAnnotations({
         key={`alert_${uuid}_line`}
         marker={
           <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.apm.alertAnnotationButtonAriaLabel',
-              { defaultMessage: 'View alert details' }
-            )}
+            aria-label={i18n.translate('xpack.apm.alertAnnotationButtonAriaLabel', {
+              defaultMessage: 'View alert details',
+            })}
             color={severityLevel === 'warning' ? 'warning' : 'danger'}
             onClick={() => {
               if (selectedAlertId === uuid) {

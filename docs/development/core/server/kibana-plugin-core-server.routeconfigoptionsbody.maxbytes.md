@@ -8,7 +8,7 @@ Limits the size of incoming payloads to the specified byte count. Allowing very 
 
 Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 maxBytes?: number;

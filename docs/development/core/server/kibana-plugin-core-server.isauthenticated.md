@@ -6,7 +6,7 @@
 
 Returns authentication status for a request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type IsAuthenticated = (request: KibanaRequest) => boolean;

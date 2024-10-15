@@ -13,7 +13,7 @@ If Not Exist "%NODE%" (
 )
 
 set CONFIG_DIR=%KBN_PATH_CONF%
-If ["%KBN_PATH_CONF%"] == [] (
+If ["%KBN_PATH_CONF%"] == [""] (
   set "CONFIG_DIR=%DIR%\config"
 )
 

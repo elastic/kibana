@@ -10,18 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { DeprecationsServiceSetup, PackageInfo } from 'src/core/server';
 import type { PrivilegeDeprecationsService, Role } from '../../../security/common/model';
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
+import { roleHasReadAccess, roleIsExternal } from './utils';
 
 const PREVIEW_INDEX_PREFIX = '.preview.alerts-security.alerts';
-const READ_PRIVILEGES = ['all', 'read'];
-
-export const roleHasReadAccess = (role: Role, indexPrefix = DEFAULT_SIGNALS_INDEX): boolean =>
-  role.elasticsearch.indices.some(
-    (index) =>
-      index.names.some((indexName) => indexName.startsWith(indexPrefix)) &&
-      index.privileges.some((indexPrivilege) => READ_PRIVILEGES.includes(indexPrivilege))
-  );
-
-export const roleIsExternal = (role: Role): boolean => role.metadata?._reserved !== true;
 
 const buildManualSteps = (roleNames: string[]): string[] => {
   const baseSteps = [

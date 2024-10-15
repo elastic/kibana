@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import {
-  invalidLicenseMessage,
-  SERVICE_MAP_TIMEOUT_ERROR,
-} from '../../../../common/service_map';
+import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
@@ -45,10 +37,7 @@ function PromptContainer({ children }: { children: ReactNode }) {
         // Set the height to give it some top margin
         style={{ height: '60vh' }}
       >
-        <EuiFlexItem
-          grow={false}
-          style={{ width: 600, textAlign: 'center' as const }}
-        >
+        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
           {children}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -57,12 +46,7 @@ function PromptContainer({ children }: { children: ReactNode }) {
 }
 
 function LoadingSpinner() {
-  return (
-    <EuiLoadingSpinner
-      size="xl"
-      style={{ position: 'absolute', top: '50%', left: '50%' }}
-    />
-  );
+  return <EuiLoadingSpinner size="xl" style={{ position: 'absolute', top: '50%', left: '50%' }} />;
 }
 
 export function ServiceMapHome() {
@@ -70,14 +54,7 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-    />
-  );
+  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
 export function ServiceMapServiceDetail() {
@@ -85,14 +62,7 @@ export function ServiceMapServiceDetail() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-    />
-  );
+  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
 export function ServiceMap({
@@ -182,11 +152,7 @@ export function ServiceMap({
     <>
       <SearchBar showKueryBar={false} />
       <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="ServiceMap"
-          style={{ height: heightWithPadding }}
-          ref={ref}
-        >
+        <div data-test-subj="ServiceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape
             elements={data.elements}
             height={heightWithPadding}

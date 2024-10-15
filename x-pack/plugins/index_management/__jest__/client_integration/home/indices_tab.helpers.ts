@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -28,6 +29,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
+    dataStreamLinkExistsAt: (index: number) => boolean;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
     clickModalConfirm: () => void;
@@ -36,9 +38,12 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
   findDataStreamDetailPanelTitle: () => string;
 }
 
-export const setup = async (overridingDependencies: any = {}): Promise<IndicesTestBed> => {
+export const setup = async (
+  httpSetup: HttpSetup,
+  overridingDependencies: any = {}
+): Promise<IndicesTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    WithAppDependencies(IndexManagementHome, httpSetup, overridingDependencies),
     testBedConfig
   );
   const testBed = await initTestBed();
@@ -98,6 +103,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     component.update();
   };
 
+  const dataStreamLinkExistsAt = (index: number) => {
+    const { table } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    return findTestSubject(rows[index].reactWrapper, 'dataStreamLink').exists();
+  };
+
   const clickModalConfirm = async () => {
     const { find, component } = testBed;
 
@@ -124,8 +135,9 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
-      clickContextMenuOption,
+      dataStreamLinkExistsAt,
       clickManageContextMenuButton,
+      clickContextMenuOption,
       clickModalConfirm,
     },
     findDataStreamDetailPanel,

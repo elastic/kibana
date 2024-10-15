@@ -5,7 +5,7 @@
 ## SavedObjectsUpdateOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateOptions<Attributes = unknown> 
@@ -13,9 +13,9 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [references?](./kibana-plugin-core-public.savedobjectsupdateoptions.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> |
-|  [upsert?](./kibana-plugin-core-public.savedobjectsupdateoptions.upsert.md) | Attributes | <i>(Optional)</i> |
-|  [version?](./kibana-plugin-core-public.savedobjectsupdateoptions.version.md) | string | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [references?](./kibana-plugin-core-public.savedobjectsupdateoptions.references.md) |  | SavedObjectReference\[\] | _(Optional)_ |
+|  [upsert?](./kibana-plugin-core-public.savedobjectsupdateoptions.upsert.md) |  | Attributes | _(Optional)_ |
+|  [version?](./kibana-plugin-core-public.savedobjectsupdateoptions.version.md) |  | string | _(Optional)_ |
 

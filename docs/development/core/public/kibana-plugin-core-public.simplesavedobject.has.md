@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.has() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 has(key: string): boolean;
@@ -16,7 +16,7 @@ has(key: string): boolean;
 |  --- | --- | --- |
 |  key | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

@@ -6,7 +6,7 @@
 
 Allows to configure HTTP response parameters
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpResourcesRenderOptions 
@@ -14,7 +14,7 @@ export interface HttpResourcesRenderOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [headers?](./kibana-plugin-core-server.httpresourcesrenderoptions.headers.md) | ResponseHeaders | <i>(Optional)</i> HTTP Headers with additional information about response. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [headers?](./kibana-plugin-core-server.httpresourcesrenderoptions.headers.md) |  | ResponseHeaders | _(Optional)_ HTTP Headers with additional information about response. |
 

@@ -6,7 +6,7 @@
 
 defines a type of UI element [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type?: UiSettingsType;

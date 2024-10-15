@@ -6,7 +6,7 @@
 
 [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly socket: IKibanaSocket;

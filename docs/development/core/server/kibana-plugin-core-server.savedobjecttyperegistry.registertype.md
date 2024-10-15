@@ -6,7 +6,7 @@
 
 Register a [type](./kibana-plugin-core-server.savedobjectstype.md) inside the registry. A type can only be registered once. subsequent calls with the same type name will throw an error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerType(type: SavedObjectsType): void;
@@ -18,7 +18,7 @@ registerType(type: SavedObjectsType): void;
 |  --- | --- | --- |
 |  type | SavedObjectsType |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

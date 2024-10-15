@@ -60,11 +60,7 @@ export const fetchBooleanFieldStats = async (
   field: FieldValuePair,
   termFilters?: FieldValuePair[]
 ): Promise<BooleanFieldStats> => {
-  const request = getBooleanFieldStatsRequest(
-    params,
-    field.fieldName,
-    termFilters
-  );
+  const request = getBooleanFieldStatsRequest(params, field.fieldName, termFilters);
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as unknown as {
     sample: {
@@ -78,8 +74,7 @@ export const fetchBooleanFieldStats = async (
     count: aggregations?.sample.sampled_value_count.doc_count ?? 0,
   };
 
-  const valueBuckets: TopValueBucket[] =
-    aggregations?.sample.sampled_values?.buckets ?? [];
+  const valueBuckets: TopValueBucket[] = aggregations?.sample.sampled_values?.buckets ?? [];
   valueBuckets.forEach((bucket) => {
     stats[`${bucket.key.toString()}Count`] = bucket.doc_count;
   });

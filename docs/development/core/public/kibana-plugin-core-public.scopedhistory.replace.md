@@ -6,8 +6,8 @@
 
 Replaces the current location in the history stack. Does not remove forward or backward entries.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState) => void;
 ```

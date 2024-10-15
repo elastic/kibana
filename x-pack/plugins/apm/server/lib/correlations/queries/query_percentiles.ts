@@ -64,9 +64,7 @@ export const fetchTransactionDurationPercentiles = async (
   }
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationPercentiles failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationPercentiles failed, did not return aggregations.');
   }
 
   return {

@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from '../../fleet/common';
-import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -51,12 +45,8 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [
-            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            ASSETS_SAVED_OBJECT_TYPE,
-            AGENT_POLICY_SAVED_OBJECT_TYPE,
-          ],
-          read: [PACKAGES_SAVED_OBJECT_TYPE],
+          all: [],
+          read: [],
         },
         ui: ['write'],
       },
@@ -66,11 +56,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         catalogue: [PLUGIN_ID],
         savedObject: {
           all: [],
-          read: [
-            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            PACKAGES_SAVED_OBJECT_TYPE,
-            AGENT_POLICY_SAVED_OBJECT_TYPE,
-          ],
+          read: [],
         },
         ui: ['read'],
       },
@@ -176,11 +162,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [
-                    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-                    ASSETS_SAVED_OBJECT_TYPE,
-                    packSavedObjectType,
-                  ],
+                  all: [packSavedObjectType],
                   read: [],
                 },
                 ui: ['writePacks', 'readPacks'],

@@ -6,7 +6,7 @@
 
 Returns an array of objects by id
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -16,10 +16,10 @@ bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjec
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | SavedObjectsBulkGetObject\[\] | an array of objects containing id, type and optionally fields |
-|  options | SavedObjectsBaseOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
+|  objects | SavedObjectsBulkGetObject\[\] | _(Optional)_ an array of objects containing id, type and optionally fields |
+|  options | SavedObjectsBaseOptions | _(Optional)_  {<!-- -->string<!-- -->} \[options.namespace\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 

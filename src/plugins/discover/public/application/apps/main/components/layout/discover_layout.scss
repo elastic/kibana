@@ -25,7 +25,7 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
-  padding-top: $euiSizeXS / 2; // A little breathing room for the index pattern button
+  padding-top: calc($euiSizeXS / 2); // A little breathing room for the index pattern button
 }
 
 .dscPageContent__wrapper {

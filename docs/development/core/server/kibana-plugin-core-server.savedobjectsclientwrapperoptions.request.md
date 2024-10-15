@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientWrapperOptions.request property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 request: KibanaRequest;

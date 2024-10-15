@@ -10,7 +10,9 @@ export * from './layer_helpers';
 export * from './time_scale_utils';
 export type {
   OperationType,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   IncompleteColumn,
   RequiredReference,

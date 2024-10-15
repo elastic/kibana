@@ -6,7 +6,7 @@
 
 Indicates whether Kibana is currently on hold and cannot proceed to `setup` yet.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isSetupOnHold: () => boolean;

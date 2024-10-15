@@ -20,9 +20,7 @@ export type { ApmIndicesConfig };
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
-async function getApmIndicesSavedObject(
-  savedObjectsClient: ISavedObjectsClient
-) {
+async function getApmIndicesSavedObject(savedObjectsClient: ISavedObjectsClient) {
   const apmIndices = await withApmSpan('get_apm_indices_saved_object', () =>
     savedObjectsClient.get<Partial<ApmIndicesConfig>>(
       APM_INDICES_SAVED_OBJECT_TYPE,
@@ -52,11 +50,9 @@ export async function getApmIndices({
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
-}) {
+}): Promise<ApmIndicesConfig> {
   try {
-    const apmIndicesSavedObject = await getApmIndicesSavedObject(
-      savedObjectsClient
-    );
+    const apmIndicesSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
     const apmIndicesConfig = getApmIndicesConfig(config);
     return { ...apmIndicesConfig, ...apmIndicesSavedObject };
   } catch (error) {
@@ -70,9 +66,7 @@ export async function getApmIndexSettings({
 }: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
   let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
   try {
-    apmIndicesSavedObject = await getApmIndicesSavedObject(
-      context.core.savedObjects.client
-    );
+    apmIndicesSavedObject = await getApmIndicesSavedObject(context.core.savedObjects.client);
   } catch (error: any) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};
@@ -82,9 +76,7 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(config);
 
-  const apmIndices = Object.keys(config.indices) as Array<
-    keyof typeof config.indices
-  >;
+  const apmIndices = Object.keys(config.indices) as Array<keyof typeof config.indices>;
 
   return apmIndices.map((configurationName) => ({
     configurationName,

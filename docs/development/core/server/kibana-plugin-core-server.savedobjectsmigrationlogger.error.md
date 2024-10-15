@@ -4,7 +4,7 @@
 
 ## SavedObjectsMigrationLogger.error property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;

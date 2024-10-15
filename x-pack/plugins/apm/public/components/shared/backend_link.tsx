@@ -23,12 +23,7 @@ interface BackendLinkProps {
   onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
-export function BackendLink({
-  query,
-  subtype,
-  type,
-  onClick,
-}: BackendLinkProps) {
+export function BackendLink({ query, subtype, type, onClick }: BackendLinkProps) {
   const { link } = useApmRouter();
 
   return (

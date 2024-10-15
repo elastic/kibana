@@ -28,9 +28,7 @@ const suggestionsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await context.core.uiSettings.client.get<number>(maxSuggestions);
     const suggestions = await getSuggestions({
       field,
       searchAggregatedTransactions,
@@ -43,5 +41,4 @@ const suggestionsRoute = createApmServerRoute({
   },
 });
 
-export const suggestionsRouteRepository =
-  createApmServerRouteRepository().add(suggestionsRoute);
+export const suggestionsRouteRepository = createApmServerRouteRepository().add(suggestionsRoute);

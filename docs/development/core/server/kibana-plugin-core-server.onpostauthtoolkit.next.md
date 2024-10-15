@@ -6,7 +6,7 @@
 
 To pass request to the next handler
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 next: () => OnPostAuthResult;

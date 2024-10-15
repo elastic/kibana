@@ -6,7 +6,7 @@
 
 Core services exposed to the `Plugin` setup lifecycle
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> 
@@ -14,13 +14,13 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [application](./kibana-plugin-core-public.coresetup.application.md) | ApplicationSetup | [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
-|  [fatalErrors](./kibana-plugin-core-public.coresetup.fatalerrors.md) | FatalErrorsSetup | [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) |
-|  [getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md) | StartServicesAccessor&lt;TPluginsStart, TStart&gt; | [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) |
-|  [http](./kibana-plugin-core-public.coresetup.http.md) | HttpSetup | [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
-|  [injectedMetadata](./kibana-plugin-core-public.coresetup.injectedmetadata.md) | { getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown; } | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. |
-|  [notifications](./kibana-plugin-core-public.coresetup.notifications.md) | NotificationsSetup | [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |
-|  [uiSettings](./kibana-plugin-core-public.coresetup.uisettings.md) | IUiSettingsClient | [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [application](./kibana-plugin-core-public.coresetup.application.md) |  | ApplicationSetup | [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
+|  [fatalErrors](./kibana-plugin-core-public.coresetup.fatalerrors.md) |  | FatalErrorsSetup | [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) |
+|  [getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md) |  | StartServicesAccessor&lt;TPluginsStart, TStart&gt; | [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) |
+|  [http](./kibana-plugin-core-public.coresetup.http.md) |  | HttpSetup | [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
+|  [injectedMetadata](./kibana-plugin-core-public.coresetup.injectedmetadata.md) |  | { getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown; } | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. |
+|  [notifications](./kibana-plugin-core-public.coresetup.notifications.md) |  | NotificationsSetup | [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |
+|  [uiSettings](./kibana-plugin-core-public.coresetup.uisettings.md) |  | IUiSettingsClient | [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 

@@ -4,7 +4,7 @@
 
 ## SavedObjectsUpdateOptions.upsert property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 upsert?: Attributes;

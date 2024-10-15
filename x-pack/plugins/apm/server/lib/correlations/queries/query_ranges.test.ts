@@ -131,11 +131,7 @@ describe('query_ranges', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationRanges(
-        esClientMock,
-        params,
-        rangeSteps
-      );
+      const resp = await fetchTransactionDurationRanges(esClientMock, params, rangeSteps);
 
       expect(resp).toEqual([
         { doc_count: 2, key: 100 },

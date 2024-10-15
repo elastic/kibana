@@ -5,17 +5,17 @@
 ## ChromeHelpExtensionMenuDocumentationLink interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase 
 ```
-<b>Extends:</b> ChromeHelpExtensionLinkBase
+**Extends:** ChromeHelpExtensionLinkBase
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [href](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.href.md) | string | URL to documentation page. i.e. <code>${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html</code>, |
-|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.linktype.md) | 'documentation' | Creates a deep-link to app-specific documentation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [href](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.href.md) |  | string | URL to documentation page. i.e. <code>${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html</code>, |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.linktype.md) |  | 'documentation' | Creates a deep-link to app-specific documentation |
 

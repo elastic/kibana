@@ -57,7 +57,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
+    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -407,6 +407,7 @@ test('return all set optional fields as they are in manifest', async () => {
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
           owner: { name: 'foo' },
+          enabledOnAnonymousPages: true,
         })
       )
     );
@@ -424,6 +425,7 @@ test('return all set optional fields as they are in manifest', async () => {
     server: false,
     ui: true,
     owner: { name: 'foo' },
+    enabledOnAnonymousPages: true,
   });
 });
 

@@ -6,7 +6,7 @@
 
 Observable that emits once if and when the request has been completely handled.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 completed$: Observable<void>;

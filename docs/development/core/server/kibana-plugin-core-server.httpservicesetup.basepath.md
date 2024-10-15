@@ -6,7 +6,7 @@
 
 Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 basePath: IBasePath;

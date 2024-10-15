@@ -6,7 +6,7 @@
 
 Whether or not request can outlive the global in which it was created.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 keepalive?: boolean;

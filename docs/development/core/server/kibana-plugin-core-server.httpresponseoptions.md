@@ -6,7 +6,7 @@
 
 HTTP response parameters
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpResponseOptions 
@@ -14,9 +14,9 @@ export interface HttpResponseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-server.httpresponseoptions.body.md) | HttpResponsePayload | <i>(Optional)</i> HTTP message to send to the client |
-|  [bypassErrorFormat?](./kibana-plugin-core-server.httpresponseoptions.bypasserrorformat.md) | boolean | <i>(Optional)</i> Bypass the default error formatting |
-|  [headers?](./kibana-plugin-core-server.httpresponseoptions.headers.md) | ResponseHeaders | <i>(Optional)</i> HTTP Headers with additional information about response |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-server.httpresponseoptions.body.md) |  | HttpResponsePayload | _(Optional)_ HTTP message to send to the client |
+|  [bypassErrorFormat?](./kibana-plugin-core-server.httpresponseoptions.bypasserrorformat.md) |  | boolean | _(Optional)_ Bypass the default error formatting |
+|  [headers?](./kibana-plugin-core-server.httpresponseoptions.headers.md) |  | ResponseHeaders | _(Optional)_ HTTP Headers with additional information about response |
 

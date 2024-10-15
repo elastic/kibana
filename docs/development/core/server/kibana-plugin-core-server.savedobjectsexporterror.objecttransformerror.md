@@ -6,7 +6,7 @@
 
 Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static objectTransformError(objects: SavedObject[], cause: Error): SavedObjectsExportError;
@@ -19,7 +19,7 @@ static objectTransformError(objects: SavedObject[], cause: Error): SavedObjectsE
 |  objects | SavedObject\[\] |  |
 |  cause | Error |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsExportError
 

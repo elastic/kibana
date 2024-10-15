@@ -6,7 +6,7 @@
 
 [I18nStart](./kibana-plugin-core-public.i18nstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 i18n: I18nStart;

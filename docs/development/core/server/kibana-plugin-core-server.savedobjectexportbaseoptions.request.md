@@ -6,7 +6,7 @@
 
 The http request initiating the export.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 request: KibanaRequest;

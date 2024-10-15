@@ -6,7 +6,7 @@
 
 An opaque version number which changes on each successful write operation. Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 version?: string;

@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isEsCannotExecuteScriptError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

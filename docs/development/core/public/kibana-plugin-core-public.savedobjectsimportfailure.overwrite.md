@@ -6,7 +6,7 @@
 
 If `overwrite` is specified, an attempt was made to overwrite an existing object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite?: boolean;

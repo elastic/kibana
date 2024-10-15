@@ -4,7 +4,7 @@
 
 ## AppLeaveConfirmAction.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: AppLeaveActionType.confirm;

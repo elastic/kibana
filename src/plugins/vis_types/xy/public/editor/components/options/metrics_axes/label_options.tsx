@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
-import { Labels } from '../../../../../../../charts/public';
+import type { LabelRotation, Labels } from '../../../../../../../charts/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';
@@ -28,7 +28,8 @@ export interface LabelOptionsProps {
 function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
-      setAxisLabel(paramName, Number(value));
+      const rotation = Number(value) as LabelRotation;
+      setAxisLabel(paramName, rotation);
     },
     [setAxisLabel]
   );
@@ -80,6 +81,7 @@ function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: Labe
             options={rotateOptions}
             paramName="rotate"
             value={axisLabels.rotate}
+            // @ts-ignore ts upgrade v4.7.4
             setValue={setAxisLabelRotate}
           />
         </EuiFlexItem>

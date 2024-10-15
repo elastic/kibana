@@ -6,7 +6,7 @@
 
 If specified, will be used to perform an upsert if the document doesn't exist
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 upsert?: Attributes;

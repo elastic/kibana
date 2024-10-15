@@ -85,7 +85,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // already bundled with all its necessary depedencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
       ],
 
       rules: [
@@ -154,8 +154,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                    postcssOptions: {
+                      config: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },
@@ -171,12 +171,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         )
                       )};\n${content}`;
                     },
-                    webpackImporter: false,
-                    implementation: require('node-sass'),
+                    implementation: require('sass-embedded'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
+                      outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      sourceMap: true,
+                      quietDeps: true,
                     },
                   },
                 },
@@ -224,6 +224,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },

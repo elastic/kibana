@@ -13,7 +13,7 @@ A handler that will be executed before leaving the application, either when goin
 
 See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;

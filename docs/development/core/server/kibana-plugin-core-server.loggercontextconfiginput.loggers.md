@@ -4,7 +4,7 @@
 
 ## LoggerContextConfigInput.loggers property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 loggers?: LoggerConfigType[];

@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportRetry.overwrite property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite: boolean;

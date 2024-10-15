@@ -8,10 +8,7 @@
 import React from 'react';
 import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  createExploratoryViewUrl,
-  HeaderMenuPortal,
-} from '../../../../../../observability/public';
+import { createExploratoryViewUrl, HeaderMenuPortal } from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
@@ -22,19 +19,12 @@ const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',
 });
 
-const ANALYZE_MESSAGE = i18n.translate(
-  'xpack.apm.analyzeDataButtonLabel.message',
-  {
-    defaultMessage:
-      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
-  }
-);
+const ANALYZE_MESSAGE = i18n.translate('xpack.apm.analyzeDataButtonLabel.message', {
+  defaultMessage:
+    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+});
 
-export function UXActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
+export function UXActionMenu({ appMountParameters }: { appMountParameters: AppMountParameters }) {
   const {
     services: { http },
   } = useKibana();
@@ -62,9 +52,7 @@ export function UXActionMenu({
   const kibana = useKibana();
 
   return (
-    <HeaderMenuPortal
-      setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-    >
+    <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
       <EuiHeaderLinks gutterSize="xs">
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiHeaderLink
@@ -80,9 +68,7 @@ export function UXActionMenu({
           color="primary"
           iconType="indexOpen"
           iconSide="left"
-          href={kibana.services?.application?.getUrlForApp(
-            '/home#/tutorial/apm'
-          )}
+          href={kibana.services?.application?.getUrlForApp('/home#/tutorial/apm')}
         >
           {i18n.translate('xpack.apm.addDataButtonLabel', {
             defaultMessage: 'Add data',

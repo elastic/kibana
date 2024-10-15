@@ -4,7 +4,7 @@
 
 ## OverlayFlyoutOpenOptions.hideCloseButton property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hideCloseButton?: boolean;

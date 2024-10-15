@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ApmFetchDataResponse,
-  FetchDataParams,
-} from '../../../../observability/public';
+import { ApmFetchDataResponse, FetchDataParams } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
 export const fetchObservabilityOverviewPageData = async ({

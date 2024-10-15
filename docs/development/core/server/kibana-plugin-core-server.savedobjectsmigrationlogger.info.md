@@ -4,7 +4,7 @@
 
 ## SavedObjectsMigrationLogger.info property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 info: (msg: string) => void;

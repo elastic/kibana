@@ -6,7 +6,7 @@
 
 Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getServerInfo: () => HttpServerInfo;

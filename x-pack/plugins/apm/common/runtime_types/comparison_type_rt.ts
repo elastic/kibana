@@ -12,10 +12,6 @@ export enum TimeRangeComparisonEnum {
   PeriodBefore = 'period',
 }
 
-export const comparisonTypeRt = t.union([
-  t.literal('day'),
-  t.literal('week'),
-  t.literal('period'),
-]);
+export const comparisonTypeRt = t.union([t.literal('day'), t.literal('week'), t.literal('period')]);
 
 export type TimeRangeComparisonType = t.TypeOf<typeof comparisonTypeRt>;

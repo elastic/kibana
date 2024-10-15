@@ -6,7 +6,7 @@
 
 Creates a link to a new github issue in the Kibana repo
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 linkType: 'github';

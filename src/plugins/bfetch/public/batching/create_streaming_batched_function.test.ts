@@ -11,7 +11,8 @@ import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streami
 import { AbortError, defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
@@ -50,7 +51,7 @@ const setup = () => {
 
 describe('createStreamingBatchedFunction()', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -716,7 +717,7 @@ describe('createStreamingBatchedFunction()', () => {
       const [, error1] = await promise1;
       const [result1] = await promise2;
       expect(error1).toMatchObject({
-        message: 'Unexpected token N in JSON at position 0',
+        message: `Unexpected token 'N', "Not a JSON\n" is not valid JSON`,
         code: 'STREAM',
       });
       expect(result1).toMatchObject({

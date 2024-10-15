@@ -6,7 +6,7 @@
 
 Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 catalogue: Record<string, boolean>;

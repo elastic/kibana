@@ -4,7 +4,7 @@
 
 ## SavedObjectsUpdateObjectsSpacesResponse.objects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 objects: SavedObjectsUpdateObjectsSpacesResponseObject[];

@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard save', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/88385
+  describe.skip('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
@@ -58,6 +59,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // after saving a new dashboard, the app state must be removed
+      await await PageObjects.dashboard.expectAppStateRemovedFromURL();
+
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 2);

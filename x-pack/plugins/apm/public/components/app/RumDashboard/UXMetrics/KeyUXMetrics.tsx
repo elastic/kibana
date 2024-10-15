@@ -25,10 +25,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { UXMetrics } from '../../../../../../observability/public';
 
-export function formatToSec(
-  value?: number | string,
-  fromUnit = 'MicroSec'
-): string {
+export function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 
   if (valueInMs < 1000) {
@@ -44,8 +41,7 @@ interface Props {
 }
 
 function formatTitle(unit: string, value?: number | null) {
-  if (typeof value === 'undefined' || value === null)
-    return DATA_UNDEFINED_LABEL;
+  if (typeof value === 'undefined' || value === null) return DATA_UNDEFINED_LABEL;
   return formatToSec(value, unit);
 }
 
@@ -109,10 +105,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {NO_OF_LONG_TASK}
-              <EuiIconTip
-                content={NO_OF_LONG_TASK_TOOLTIP}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={NO_OF_LONG_TASK_TOOLTIP} type="questionInCircle" />
             </>
           }
           isLoading={status !== 'success'}
@@ -125,10 +118,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {LONGEST_LONG_TASK}
-              <EuiIconTip
-                content={LONGEST_LONG_TASK_TOOLTIP}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={LONGEST_LONG_TASK_TOOLTIP} type="questionInCircle" />
             </>
           }
           isLoading={status !== 'success'}
@@ -141,10 +131,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {SUM_LONG_TASKS}
-              <EuiIconTip
-                content={SUM_LONG_TASKS_TOOLTIP}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={SUM_LONG_TASKS_TOOLTIP} type="questionInCircle" />
             </>
           }
           isLoading={status !== 'success'}

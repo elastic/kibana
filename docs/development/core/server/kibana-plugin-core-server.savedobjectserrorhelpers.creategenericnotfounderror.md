@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createGenericNotFoundError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
@@ -14,10 +14,10 @@ static createGenericNotFoundError(type?: string | null, id?: string | null): Dec
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | string \| null |  |
-|  id | string \| null |  |
+|  type | string \| null | _(Optional)_ |
+|  id | string \| null | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

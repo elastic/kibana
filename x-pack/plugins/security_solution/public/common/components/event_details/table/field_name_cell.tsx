@@ -19,7 +19,7 @@ import { getFieldTypeName } from './get_field_type_name';
 export interface FieldNameCellProps {
   data: EventFieldsData;
   field: string;
-  fieldFromBrowserField: BrowserField;
+  fieldFromBrowserField: BrowserField; // eslint-disable-line react/no-unused-prop-types
   fieldMapping?: IndexPatternField;
   scripted?: boolean;
 }

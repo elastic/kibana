@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isForbiddenError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isForbiddenError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isForbiddenError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

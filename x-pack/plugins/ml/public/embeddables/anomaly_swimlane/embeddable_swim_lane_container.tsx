@@ -35,6 +35,9 @@ export interface ExplorerSwimlaneContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalySwimlaneEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
@@ -45,6 +48,9 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   refresh,
   onInputChange,
   onOutputChange,
+  onRenderComplete,
+  onLoading,
+  onError,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -61,7 +67,8 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       refresh,
       services,
       chartWidth,
-      fromPage
+      fromPage,
+      { onRenderComplete, onError, onLoading }
     );
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
+import { difference } from 'lodash';
 import {
   AlertExecutorOptions,
   AlertInstance,
@@ -18,12 +19,11 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
-import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -37,6 +37,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
+import { fetchExistingAlerts } from './fetch_existing_alerts';
 import {
   CommonAlertFieldName,
   CommonAlertIdFieldName,
@@ -177,13 +178,13 @@ export const createLifecycleExecutor =
 
     const currentAlertIds = Object.keys(currentAlerts);
     const trackedAlertIds = Object.keys(state.trackedAlerts);
-    const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
+    const newAlertIds = difference(currentAlertIds, trackedAlertIds);
     const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
     const trackedAlertStates = Object.values(state.trackedAlerts);
 
     logger.debug(
-      `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
+      `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
     const trackedAlertsDataMap: Record<
@@ -192,47 +193,19 @@ export const createLifecycleExecutor =
     > = {};
 
     if (trackedAlertStates.length) {
-      const { hits } = await ruleDataClient.getReader().search({
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    [ALERT_RULE_UUID]: commonRuleFields[ALERT_RULE_UUID],
-                  },
-                },
-                {
-                  terms: {
-                    [ALERT_UUID]: trackedAlertStates.map(
-                      (trackedAlertState) => trackedAlertState.alertUuid
-                    ),
-                  },
-                },
-              ],
-            },
-          },
-          size: trackedAlertStates.length,
-          collapse: {
-            field: ALERT_UUID,
-          },
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
-          sort: {
-            [TIMESTAMP]: 'desc' as const,
-          },
-        },
-        allow_no_indices: true,
-      });
-
-      hits.hits.forEach((hit) => {
-        const fields = parseTechnicalFields(hit.fields);
-        const indexName = hit._index;
-        const alertId = fields[ALERT_INSTANCE_ID];
-        trackedAlertsDataMap[alertId] = {
-          indexName,
-          fields,
-        };
+      const result = await fetchExistingAlerts(
+        ruleDataClient,
+        trackedAlertStates,
+        commonRuleFields
+      );
+      result.forEach((hit) => {
+        const alertId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
+        if (alertId && hit._source) {
+          trackedAlertsDataMap[alertId] = {
+            indexName: hit._index,
+            fields: hit._source,
+          };
+        }
       });
     }
 
@@ -242,7 +215,7 @@ export const createLifecycleExecutor =
         const currentAlertData = currentAlerts[alertId];
 
         if (!alertData) {
-          logger.warn(`Could not find alert data for ${alertId}`);
+          logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
         const isNew = !state.trackedAlerts[alertId];
@@ -282,7 +255,7 @@ export const createLifecycleExecutor =
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
     if (allEventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
-      logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
+      logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClient.getWriter().bulk({
         body: allEventsToIndex.flatMap(({ event, indexName }) => [

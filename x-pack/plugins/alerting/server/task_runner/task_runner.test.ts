@@ -40,6 +40,7 @@ import { omit } from 'lodash';
 import { UntypedNormalizedAlertType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import moment from 'moment';
 
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
@@ -52,6 +53,10 @@ const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   executor: jest.fn(),
   producer: 'alerts',
 };
+
+const mockRunNowResponse = {
+  id: 1,
+} as jest.ResolvedValue<unknown>;
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -481,7 +486,7 @@ describe('Task Runner', () => {
             action: 'new-instance',
             category: ['alerts'],
             kind: 'alert',
-            duration: 0,
+            duration: '0',
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
@@ -514,7 +519,7 @@ describe('Task Runner', () => {
           event: {
             action: 'active-instance',
             category: ['alerts'],
-            duration: 0,
+            duration: '0',
             kind: 'alert',
             start: '1970-01-01T00:00:00.000Z',
           },
@@ -701,7 +706,7 @@ describe('Task Runner', () => {
         action: 'new-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -734,7 +739,7 @@ describe('Task Runner', () => {
         action: 'active-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -865,6 +870,78 @@ describe('Task Runner', () => {
       }
   );
 
+  testAgainstEphemeralSupport(
+    'skips firing actions for active alert if alert is throttled %s',
+    (customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType) =>
+      async () => {
+        (
+          customTaskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
+        ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+            executorServices.alertInstanceFactory('2').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '2': {
+                  meta: {
+                    lastScheduledActions: { date: moment().toISOString(), group: 'default' },
+                  },
+                  state: {
+                    bar: false,
+                    start: '1969-12-31T00:00:00.000Z',
+                    duration: 86400000000000,
+                  },
+                },
+              },
+            },
+          },
+          taskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue({
+          ...mockedAlertTypeSavedObject,
+          throttle: '1d',
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        await taskRunner.run();
+        // expect(enqueueFunction).toHaveBeenCalledTimes(1);
+
+        const logger = customTaskRunnerFactoryInitializerParams.logger;
+        // expect(logger.debug).toHaveBeenCalledTimes(5);
+        expect(logger.debug).nthCalledWith(
+          3,
+          "skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is throttled"
+        );
+      }
+  );
+
   test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
@@ -964,7 +1041,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -1302,7 +1379,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -1338,7 +1415,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -1529,7 +1606,7 @@ describe('Task Runner', () => {
             },
             "state": Object {
               "bar": false,
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
           },
@@ -1598,7 +1675,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
@@ -1634,7 +1711,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -2112,7 +2189,7 @@ describe('Task Runner', () => {
           },
           "state": Object {
             "bar": false,
-            "duration": 86400000000000,
+            "duration": "86400000000000",
             "start": "1969-12-31T00:00:00.000Z",
           },
         },
@@ -2165,7 +2242,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
@@ -2202,7 +2279,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -3250,7 +3327,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3286,7 +3363,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3322,7 +3399,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3358,7 +3435,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3459,7 +3536,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T00:00:00.000Z',
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -3467,7 +3544,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -3536,7 +3613,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -3572,7 +3649,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
@@ -3862,7 +3939,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T00:00:00.000Z',
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -3870,7 +3947,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -3939,7 +4016,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
@@ -3975,7 +4052,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",

@@ -47,41 +47,43 @@ it(
     );
 
     expect(result.exitCode).toBe(1);
-    await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
-      testsuites: {
-        $: {
-          failures: '1',
-          name: 'jest',
-          skipped: '0',
-          tests: '1',
-          time: expect.anything(),
-          timestamp: expect.anything(),
-        },
-        testsuite: [
-          {
-            $: {
-              failures: '1',
-              file: resolve(FIXTURE_DIR, './test.js'),
-              name: 'test.js',
-              skipped: '0',
-              tests: '1',
-              time: expect.anything(),
-              timestamp: expect.anything(),
-            },
-            testcase: [
-              {
-                $: {
-                  classname: 'JUnit Reporter Integration Test.·',
-                  name: 'JUnit Reporter fails',
-                  time: expect.anything(),
-                },
-                failure: [expect.stringMatching(/Error: failure\s+at /m)],
-              },
-            ],
+    await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual(
+      expect.objectContaining({
+        testsuites: {
+          $: {
+            failures: '1',
+            name: 'jest',
+            skipped: '0',
+            tests: '1',
+            time: expect.anything(),
+            timestamp: expect.anything(),
           },
-        ],
-      },
-    });
+          testsuite: [
+            {
+              $: {
+                failures: '1',
+                file: resolve(FIXTURE_DIR, './test.js'),
+                name: 'test.js',
+                skipped: '0',
+                tests: '1',
+                time: expect.anything(),
+                timestamp: expect.anything(),
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'JUnit Reporter Integration Test.·',
+                    name: 'JUnit Reporter fails',
+                    time: expect.anything(),
+                  },
+                  failure: [expect.stringMatching(/Error: failure\s+at /m)],
+                },
+              ],
+            },
+          ],
+        },
+      })
+    );
   },
   3 * MINUTE
 );

@@ -72,10 +72,9 @@ export function BackendLatencyChart({ height }: { height: number }) {
         data: data.comparisonTimeseries,
         type: 'area',
         color: theme.eui.euiColorMediumShade,
-        title: i18n.translate(
-          'xpack.apm.backendLatencyChart.previousPeriodLabel',
-          { defaultMessage: 'Previous period' }
-        ),
+        title: i18n.translate('xpack.apm.backendLatencyChart.previousPeriodLabel', {
+          defaultMessage: 'Previous period',
+        }),
       });
     }
 

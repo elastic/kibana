@@ -4,12 +4,12 @@
 
 ## SimpleSavedObject.delete() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 delete(): Promise<{}>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;{}&gt;
 

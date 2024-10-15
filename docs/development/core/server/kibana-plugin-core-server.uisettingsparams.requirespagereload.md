@@ -6,7 +6,7 @@
 
 a flag indicating whether new value applying requires page reloading
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 requiresPageReload?: boolean;

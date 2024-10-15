@@ -35,7 +35,8 @@ export class HomePageObject extends FtrService {
   }
 
   async isWelcomeInterstitialDisplayed() {
-    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
+    await this.common.sleep(500); // give the interstitial enough time to fade in
+    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', 2000);
   }
 
   async getVisibileSolutions() {
@@ -83,10 +84,40 @@ export class HomePageObject extends FtrService {
     await this.find.clickByLinkText('Dashboard');
   }
 
+  async launchSampleCanvas(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Canvas');
+  }
+
+  async launchSampleMap(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Map');
+  }
+
+  async launchSampleLogs(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Logs');
+  }
+
+  async launchSampleGraph(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Graph');
+  }
+
+  async launchSampleML(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('ML jobs');
+  }
+
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
     await this.common.closeToastIfExists();
-    await this.testSubjects.click(`launchSampleDataSet${id}`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`launchSampleDataSet${id}`);
+      await this.find.byCssSelector(
+        `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`
+      );
+    });
   }
 
   async clickAllKibanaPlugins() {

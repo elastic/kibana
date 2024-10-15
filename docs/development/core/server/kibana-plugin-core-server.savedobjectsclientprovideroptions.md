@@ -6,7 +6,7 @@
 
 Options to control the creation of the Saved Objects Client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsClientProviderOptions 
@@ -14,8 +14,8 @@ export interface SavedObjectsClientProviderOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [excludedWrappers?](./kibana-plugin-core-server.savedobjectsclientprovideroptions.excludedwrappers.md) | string\[\] | <i>(Optional)</i> |
-|  [includedHiddenTypes?](./kibana-plugin-core-server.savedobjectsclientprovideroptions.includedhiddentypes.md) | string\[\] | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [excludedWrappers?](./kibana-plugin-core-server.savedobjectsclientprovideroptions.excludedwrappers.md) |  | string\[\] | _(Optional)_ |
+|  [includedHiddenTypes?](./kibana-plugin-core-server.savedobjectsclientprovideroptions.includedhiddentypes.md) |  | string\[\] | _(Optional)_ |
 

@@ -6,7 +6,7 @@
 
 Returns true if the setting has no user-defined value or is unknown
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isDefault: (key: string) => boolean;

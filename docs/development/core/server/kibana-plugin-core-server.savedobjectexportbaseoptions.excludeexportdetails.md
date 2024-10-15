@@ -6,7 +6,7 @@
 
 flag to not append [export details](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) to the end of the export stream.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excludeExportDetails?: boolean;

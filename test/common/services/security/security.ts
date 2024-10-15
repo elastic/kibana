@@ -11,6 +11,7 @@ import { User } from './user';
 import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createTestUserService, TestUserSupertestProvider, TestUser } from './test_user';
+import { createSystemIndicesUser } from './system_indices_user';
 
 export class SecurityService {
   constructor(
@@ -28,6 +29,7 @@ export async function SecurityServiceProvider(ctx: FtrProviderContext) {
 
   const role = new Role(log, kibanaServer);
   const user = new User(log, kibanaServer);
+  await createSystemIndicesUser(ctx);
   const testUser = await createTestUserService(ctx, role, user);
   const testUserSupertest = TestUserSupertestProvider(ctx);
   const roleMappings = new RoleMappings(log, kibanaServer);

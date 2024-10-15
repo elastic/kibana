@@ -6,7 +6,7 @@
 
 array of permitted values for this setting
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 options?: string[];

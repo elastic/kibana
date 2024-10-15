@@ -6,7 +6,7 @@
 
 returns `basePath` value, specific for an incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: (request: KibanaRequest) => string;

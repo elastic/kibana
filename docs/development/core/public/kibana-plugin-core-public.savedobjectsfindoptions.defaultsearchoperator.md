@@ -6,7 +6,7 @@
 
 The search operator to use with the provided filter. Defaults to `OR`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 defaultSearchOperator?: 'AND' | 'OR';

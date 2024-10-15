@@ -6,7 +6,7 @@
 
 Http request headers to read.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type Headers = {

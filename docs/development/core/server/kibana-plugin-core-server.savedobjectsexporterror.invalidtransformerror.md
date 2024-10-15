@@ -6,7 +6,7 @@
 
 Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) performed an invalid operation during the transform, such as removing objects from the export, or changing an object's type or id.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static invalidTransformError(objectKeys: string[]): SavedObjectsExportError;
@@ -18,7 +18,7 @@ static invalidTransformError(objectKeys: string[]): SavedObjectsExportError;
 |  --- | --- | --- |
 |  objectKeys | string\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsExportError
 

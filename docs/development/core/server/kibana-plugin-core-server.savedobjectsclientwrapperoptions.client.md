@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientWrapperOptions.client property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 client: SavedObjectsClientContract;

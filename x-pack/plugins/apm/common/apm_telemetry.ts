@@ -24,10 +24,7 @@ function schemaToMapping(schemaLeaf: any): any {
 
     return {
       ...acc,
-      [key]:
-        typeof propMapping.type === 'string'
-          ? propMapping
-          : { properties: propMapping },
+      [key]: typeof propMapping.type === 'string' ? propMapping : { properties: propMapping },
     };
   }, {});
 }
@@ -45,9 +42,7 @@ export function getApmTelemetryMapping() {
  * Merge a telemetry mapping object (from https://github.com/elastic/telemetry/blob/master/config/templates/xpack-phone-home.json)
  * with the output from `getApmTelemetryMapping`.
  */
-export function mergeApmTelemetryMapping(
-  xpackPhoneHomeMapping: Record<string, any>
-) {
+export function mergeApmTelemetryMapping(xpackPhoneHomeMapping: Record<string, any>) {
   return produce(xpackPhoneHomeMapping, (draft: Record<string, any>) => {
     draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm =
       getApmTelemetryMapping();

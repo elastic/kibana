@@ -6,7 +6,7 @@
 
 Given a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
@@ -20,7 +20,7 @@ generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string
 |  type | string | The saved object type |
 |  id | string | The id of the saved object |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

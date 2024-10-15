@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
@@ -44,6 +45,11 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'rollup',
       });
+
+      // The step below is done for the 7.17 ES 8.x forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
     });
 
     it('create hybrid index pattern', async () => {
@@ -119,6 +125,7 @@ export default function ({ getService, getPageObjects }) {
         rollupTargetIndexName,
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
+        MOCK_ROLLUP_INDEX_NAME,
       ]);
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'

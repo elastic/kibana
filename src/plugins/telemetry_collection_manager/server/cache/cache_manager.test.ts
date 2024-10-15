@@ -15,7 +15,7 @@ describe('CacheManager', () => {
   let mockNow: number;
 
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     mockNow = jest.getRealSystemTime();
     jest.setSystemTime(mockNow);
   });

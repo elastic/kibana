@@ -6,7 +6,7 @@
 
 The class name for top level \*and\* nested application wrappers to ensure proper layout
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 APP_WRAPPER_CLASS = "kbnAppWrapper"

@@ -50,10 +50,7 @@ export function useWaterfallFetcher() {
     [traceId, start, end]
   );
 
-  const waterfall = useMemo(
-    () => getWaterfall(data, transactionId),
-    [data, transactionId]
-  );
+  const waterfall = useMemo(() => getWaterfall(data, transactionId), [data, transactionId]);
 
   return { waterfall, status, error };
 }

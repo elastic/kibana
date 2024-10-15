@@ -13,6 +13,7 @@ import { coerce } from 'semver';
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';
+import { millisToNanos } from '../common';
 import {
   IEvent,
   IValidatedEvent,
@@ -61,7 +62,7 @@ export class EventLogger implements IEventLogger {
 
     const end = Date.now();
     event.event.end = new Date(end).toISOString();
-    event.event.duration = (end - start) * 1000 * 1000; // nanoseconds
+    event.event.duration = millisToNanos(end - start);
   }
 
   // non-blocking, but spawns an async task to do the work

@@ -10,15 +10,9 @@ import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
-  const { server } = setupEnvironment();
-
   beforeEach(async () => {
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(setupEnvironment().httpSetup);
     testBed.component.update();
-  });
-
-  afterAll(() => {
-    server.restore();
   });
 
   describe('Documentation links', () => {

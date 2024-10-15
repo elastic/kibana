@@ -7,7 +7,8 @@
 
 import Axios from 'axios';
 import { createHash } from 'crypto';
-import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
+import { mkdir, open } from 'fs/promises';
+import { writeSync } from 'fs';
 import { dirname } from 'path';
 import { GenericLevelLogger } from '../../lib/level_logger';
 
@@ -21,11 +22,10 @@ export async function download(
 ): Promise<string> {
   logger.info(`Downloading ${url} to ${path}`);
 
-  const hash = createHash('md5');
+  const hash = createHash('sha256');
 
-  mkdirSync(dirname(path), { recursive: true });
-  const handle = openSync(path, 'w');
-
+  await mkdir(dirname(path), { recursive: true });
+  const handle = await open(path, 'w');
   try {
     const resp = await Axios.request({
       url,
@@ -34,7 +34,7 @@ export async function download(
     });
 
     resp.data.on('data', (chunk: Buffer) => {
-      writeSync(handle, chunk);
+      writeSync(handle.fd, chunk);
       hash.update(chunk);
     });
 
@@ -52,7 +52,7 @@ export async function download(
   } catch (err) {
     throw new Error(`Unable to download ${url}: ${err}`);
   } finally {
-    closeSync(handle);
+    await handle.close();
   }
 
   return hash.digest('hex');

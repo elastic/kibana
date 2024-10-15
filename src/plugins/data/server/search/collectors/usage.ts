@@ -62,15 +62,15 @@ export function usageProvider(core: CoreSetup): SearchUsage {
     { maxWait: 5000 }
   );
 
-  const trackSuccess = (duration: number) => {
+  const trackSuccess = async (duration: number) => {
     collectedUsage.successCount++;
     collectedUsage.totalDuration += duration;
-    return updateSearchUsage();
+    return await updateSearchUsage();
   };
 
-  const trackError = () => {
+  const trackError = async () => {
     collectedUsage.errorCount++;
-    return updateSearchUsage();
+    return await updateSearchUsage();
   };
 
   return { trackSuccess, trackError };

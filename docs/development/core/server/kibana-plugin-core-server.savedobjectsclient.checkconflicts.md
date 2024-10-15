@@ -6,7 +6,7 @@
 
 Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
@@ -16,10 +16,10 @@ checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObje
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | SavedObjectsCheckConflictsObject\[\] |  |
-|  options | SavedObjectsBaseOptions |  |
+|  objects | SavedObjectsCheckConflictsObject\[\] | _(Optional)_ |
+|  options | SavedObjectsBaseOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsCheckConflictsResponse&gt;
 

@@ -188,7 +188,6 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Role',
         }),
         sortable: true,
-        truncateText: true,
         render: (name: string, record: Role) => {
           return (
             <EuiText color="subdued" size="s">

@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.set() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set(key: string, value: any): T;
@@ -17,7 +17,7 @@ set(key: string, value: any): T;
 |  key | string |  |
 |  value | any |  |
 
-<b>Returns:</b>
+**Returns:**
 
 T
 

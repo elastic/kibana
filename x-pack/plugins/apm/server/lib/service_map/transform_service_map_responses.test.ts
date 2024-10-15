@@ -83,9 +83,7 @@ describe('transformServiceMapResponses', () => {
       expect(connection.data.target).toBe('opbeans-node');
     }
 
-    expect(
-      elements.find((element) => element.data.id === '>opbeans-node')
-    ).toBeUndefined();
+    expect(elements.find((element) => element.data.id === '>opbeans-node')).toBeUndefined();
   });
 
   it('collapses external destinations based on span.destination.resource.name', () => {

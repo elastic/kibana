@@ -18,3 +18,4 @@ export { EmbeddableRoot } from './embeddable_root';
 export * from '../../../common/lib/saved_object_embeddable';
 export type { EmbeddableRendererProps } from './embeddable_renderer';
 export { EmbeddableRenderer, useEmbeddableFactory } from './embeddable_renderer';
+export { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';

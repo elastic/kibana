@@ -9,7 +9,7 @@
 > Use [ElasticsearchServiceStart.legacy](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) instead.
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 legacy: {

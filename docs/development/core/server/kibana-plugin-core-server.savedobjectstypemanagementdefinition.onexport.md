@@ -12,7 +12,7 @@ See [the transform type documentation](./kibana-plugin-core-server.savedobjectse
 
 When implementing both `isExportable` and `onExport`<!-- -->, it is mandatory that `isExportable` returns the same value for an object before and after going though the export transform. E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 onExport?: SavedObjectsExportTransform<Attributes>;

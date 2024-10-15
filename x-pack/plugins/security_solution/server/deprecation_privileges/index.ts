@@ -64,7 +64,9 @@ const SIEM_PRIVILEGES_FOR_CASES = new Set(['all', 'read', 'cases_all', 'cases_re
 function outdatedSiemRolePredicate(role: Role) {
   return role.kibana.some(
     ({ feature }) =>
-      !feature[CASES_FEATURE_ID] && feature.siem.some((x) => SIEM_PRIVILEGES_FOR_CASES.has(x))
+      !feature[CASES_FEATURE_ID] &&
+      feature.siem &&
+      feature.siem.some((x) => SIEM_PRIVILEGES_FOR_CASES.has(x))
   );
 }
 

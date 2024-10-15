@@ -85,9 +85,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
         expect(chartType).to.equal('bar chart');
       });
+
+      it('should not allow adding more than 20 metrics', async () => {
+        await pageObjects.infraMetricsExplorer.clearMetrics();
+
+        const fields = [
+          'kubernetes.pod.cpu.usage.limit.pct',
+          'kubernetes.pod.memory.usage.bytes',
+          'kubernetes.pod.memory.usage.limit.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+          'system.cpu.softirq.pct',
+          'system.cpu.steal.pct',
+          'system.cpu.user.norm.pct',
+          'kubernetes.pod.memory.usage.node.pct',
+          'kubernetes.pod.cpu.usage.node.pct',
+          'docker.cpu.total.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraMetricsExplorer.addMetric(field);
+        }
+
+        await pageObjects.infraMetricsExplorer.ensureMaxMetricsLimiteReachedIsVisible();
+      });
     });
 
-    describe('Saved Views', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/111076
+    describe.skip('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       describe('save functionality', () => {

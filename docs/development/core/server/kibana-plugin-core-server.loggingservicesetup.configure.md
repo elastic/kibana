@@ -6,7 +6,7 @@
 
 Customizes the logging config for the plugin's context.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 configure(config$: Observable<LoggerContextConfigInput>): void;
@@ -18,7 +18,7 @@ configure(config$: Observable<LoggerContextConfigInput>): void;
 |  --- | --- | --- |
 |  config$ | Observable&lt;LoggerContextConfigInput&gt; |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

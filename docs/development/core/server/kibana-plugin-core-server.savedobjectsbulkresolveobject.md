@@ -5,7 +5,7 @@
 ## SavedObjectsBulkResolveObject interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkResolveObject 
@@ -13,8 +13,8 @@ export interface SavedObjectsBulkResolveObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsbulkresolveobject.id.md) | string |  |
-|  [type](./kibana-plugin-core-server.savedobjectsbulkresolveobject.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectsbulkresolveobject.id.md) |  | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectsbulkresolveobject.type.md) |  | string |  |
 

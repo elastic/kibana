@@ -6,7 +6,7 @@
 
 Only used for the automatically generated API documentation. Specifying service folders will cause your plugin API reference to be broken up into sub sections.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly serviceFolders?: readonly string[];

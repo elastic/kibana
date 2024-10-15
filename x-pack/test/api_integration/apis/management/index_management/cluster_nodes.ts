@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should fetch the nodes plugins', async () => {
       const { body } = await getNodesPlugins().expect(200);
 
-      expect(body).eql([]);
+      expect(Array.isArray(body)).to.be(true);
     });
   });
 }

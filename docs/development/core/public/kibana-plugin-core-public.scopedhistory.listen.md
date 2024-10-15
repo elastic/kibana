@@ -6,7 +6,7 @@
 
 Adds a listener for location updates.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;

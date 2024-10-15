@@ -39,10 +39,7 @@ describe('MetadataTable', () => {
         ],
       },
     ];
-    const output = render(
-      <MetadataTable sections={sections} isLoading={false} />,
-      renderOptions
-    );
+    const output = render(<MetadataTable sections={sections} isLoading={false} />, renderOptions);
     expectTextsInDocument(output, [
       'Foo',
       'No data available',

@@ -4,7 +4,7 @@
 
 ## DocLinksStart.DOC\_LINK\_VERSION property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly DOC_LINK_VERSION: string;

@@ -6,7 +6,7 @@
 
 Opens a modal panel with the given mount point inside. You can use `close()` on the returned OverlayRef to close the modal.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
@@ -17,9 +17,9 @@ open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - Mounts the children inside the modal |
-|  options | OverlayModalOpenOptions | [OverlayModalOpenOptions](./kibana-plugin-core-public.overlaymodalopenoptions.md) - options for the modal  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened modal. |
+|  options | OverlayModalOpenOptions | _(Optional)_ [OverlayModalOpenOptions](./kibana-plugin-core-public.overlaymodalopenoptions.md) - options for the modal  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened modal. |
 
-<b>Returns:</b>
+**Returns:**
 
 OverlayRef
 

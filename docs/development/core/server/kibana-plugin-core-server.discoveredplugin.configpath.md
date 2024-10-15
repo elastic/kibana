@@ -6,7 +6,7 @@
 
 Root configuration path used by the plugin, defaults to "id" in snake\_case format.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly configPath: ConfigPath;

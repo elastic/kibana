@@ -6,7 +6,7 @@
 
 [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 application: ApplicationSetup;

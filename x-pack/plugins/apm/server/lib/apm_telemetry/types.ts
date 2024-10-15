@@ -6,10 +6,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import {
-  AgentName,
-  ElasticAgentName,
-} from '../../../typings/es_schemas/ui/fields/agent';
+import { AgentName, ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 export interface TimeframeMap {
   '1d': number;

@@ -17,8 +17,7 @@ const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: 0 0 ${({ theme }) =>
     `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
-  padding:  ${({ theme }) =>
-    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  padding:  ${({ theme }) => `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
 `;
 
 interface Props {
@@ -36,10 +35,9 @@ export function Variables({ vars }: Props) {
         <EuiAccordion
           id="local-variables"
           className="euiAccordion"
-          buttonContent={i18n.translate(
-            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-            { defaultMessage: 'Local variables' }
-          )}
+          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', {
+            defaultMessage: 'Local variables',
+          })}
         >
           <React.Fragment>
             <KeyValueTable keyValuePairs={flattenedVariables} />

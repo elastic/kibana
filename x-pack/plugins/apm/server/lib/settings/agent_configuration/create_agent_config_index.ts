@@ -6,10 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
-import {
-  createOrUpdateIndex,
-  Mappings,
-} from '../../../../../observability/server';
+import { createOrUpdateIndex, Mappings } from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 

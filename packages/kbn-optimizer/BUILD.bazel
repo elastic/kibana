@@ -31,6 +31,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-babel-register",
   "//packages/kbn-config",
   "//packages/kbn-config-schema",
   "//packages/kbn-dev-utils",
@@ -46,12 +47,11 @@ RUNTIME_DEPS = [
   "@npm//execa",
   "@npm//jest-diff",
   "@npm//json-stable-stringify",
-  "@npm//lmdb-store",
+  "@npm//lmdb",
   "@npm//loader-utils",
-  "@npm//node-sass",
+  "@npm//sass-embedded",
   "@npm//normalize-path",
   "@npm//pirates",
-  "@npm//resize-observer-polyfill",
   "@npm//rxjs",
   "@npm//source-map-support",
   "@npm//watchpack",
@@ -62,6 +62,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-babel-register",
   "//packages/kbn-config",
   "//packages/kbn-config-schema",
   "//packages/kbn-dev-utils",
@@ -75,9 +76,8 @@ TYPES_DEPS = [
   "@npm//del",
   "@npm//execa",
   "@npm//jest-diff",
-  "@npm//lmdb-store",
+  "@npm//lmdb",
   "@npm//pirates",
-  "@npm//resize-observer-polyfill",
   "@npm//rxjs",
   "@npm//zlib",
   "@npm//@types/compression-webpack-plugin",

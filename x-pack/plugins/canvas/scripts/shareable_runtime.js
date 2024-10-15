@@ -42,7 +42,9 @@ run(
       clean();
     }
 
-    const env = {};
+    const env = {
+      NODE_OPTIONS: '--openssl-legacy-provider',
+    };
 
     if (!flags.dev) {
       env.NODE_ENV = 'production';
@@ -57,10 +59,7 @@ run(
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
-          '--hide-modules',
-          '--display-entrypoints',
-          'false',
-          '--content-base',
+          '--static',
           SHAREABLE_RUNTIME_SRC,
         ],
         options
@@ -92,7 +91,6 @@ run(
         'webpack',
         '--config',
         webpackConfig,
-        '--hide-modules',
         ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
       ],
       {

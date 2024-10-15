@@ -6,7 +6,7 @@
 
 Retrieves a single object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
@@ -18,9 +18,9 @@ get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): P
 |  --- | --- | --- |
 |  type | string | The type of SavedObject to retrieve |
 |  id | string | The ID of the SavedObject to retrieve |
-|  options | SavedObjectsBaseOptions |  |
+|  options | SavedObjectsBaseOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObject&lt;T&gt;&gt;
 

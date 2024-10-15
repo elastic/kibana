@@ -4,7 +4,7 @@
 
 ## GetResponse.found property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 found: boolean;

@@ -6,7 +6,7 @@
 
 A tool set defining an outcome of OnPostAuth interceptor for incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPostAuthToolkit 
@@ -14,7 +14,7 @@ export interface OnPostAuthToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpostauthtoolkit.next.md) | () =&gt; OnPostAuthResult | To pass request to the next handler |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [next](./kibana-plugin-core-server.onpostauthtoolkit.next.md) |  | () =&gt; OnPostAuthResult | To pass request to the next handler |
 

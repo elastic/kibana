@@ -117,6 +117,7 @@ const StyledOuterGroup = styled.g<{ isNodeLoading: boolean }>`
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
+// eslint-disable-next-line react/display-name
 const UnstyledProcessEventDot = React.memo(
   ({
     className,

@@ -14,10 +14,7 @@ import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST } from '../../../common/transaction_types';
 import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
@@ -28,9 +25,7 @@ export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = PromiseReturnType<
-  typeof getServiceAnomalies
->;
+export type ServiceAnomaliesResponse = PromiseReturnType<typeof getServiceAnomalies>;
 
 export async function getServiceAnomalies({
   setup,
@@ -57,11 +52,7 @@ export async function getServiceAnomalies({
           bool: {
             filter: [
               { terms: { result_type: ['model_plot', 'record'] } },
-              ...rangeQuery(
-                Math.min(end - 30 * 60 * 1000, start),
-                end,
-                'timestamp'
-              ),
+              ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
               {
                 terms: {
                   // Only retrieving anomalies for transaction types "request" and "page-load"
@@ -78,9 +69,7 @@ export async function getServiceAnomalies({
               sources: [
                 { serviceName: { terms: { field: 'partition_field_value' } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<
-                Record<string, estypes.AggregationsCompositeAggregationSource>
-              >,
+              ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
             },
             aggs: {
               metrics: {
@@ -105,17 +94,15 @@ export async function getServiceAnomalies({
     const [anomalyResponse, jobIds] = await Promise.all([
       // pass an empty array of job ids to anomaly search
       // so any validation is skipped
-      withApmSpan('ml_anomaly_search', () =>
-        ml.mlSystem.mlAnomalySearch(params, [])
-      ),
+      withApmSpan('ml_anomaly_search', () => ml.mlSystem.mlAnomalySearch(params, [])),
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
-      anomalyResponse as any;
+    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> = anomalyResponse as any;
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
+        // @ts-ignore 4.3.5 upgrade
         typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
         ) ?? [],

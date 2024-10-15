@@ -18,12 +18,7 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 
-const {
-  kibanaRoot,
-  tsconfigTpl,
-  tsconfigTplTest,
-  filesToIgnore,
-} = require('./paths');
+const { kibanaRoot, tsconfigTpl, tsconfigTplTest, filesToIgnore } = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
 async function prepareBaseTsConfig() {
@@ -52,9 +47,7 @@ async function prepareBaseTsConfig() {
 async function addApmFilesToRootTsConfig() {
   const template = json5.parse(await readFile(tsconfigTpl, 'utf-8'));
   const rootTsConfigFilename = path.join(kibanaRoot, 'tsconfig.json');
-  const rootTsConfig = json5.parse(
-    await readFile(rootTsConfigFilename, 'utf-8')
-  );
+  const rootTsConfig = json5.parse(await readFile(rootTsConfigFilename, 'utf-8'));
 
   await writeFile(
     rootTsConfigFilename,
@@ -65,13 +58,8 @@ async function addApmFilesToRootTsConfig() {
 
 async function addApmFilesToTestTsConfig() {
   const template = json5.parse(await readFile(tsconfigTplTest, 'utf-8'));
-  const testTsConfigFilename = path.join(
-    kibanaRoot,
-    'x-pack/test/tsconfig.json'
-  );
-  const testTsConfig = json5.parse(
-    await readFile(testTsConfigFilename, 'utf-8')
-  );
+  const testTsConfigFilename = path.join(kibanaRoot, 'x-pack/test/tsconfig.json');
+  const testTsConfig = json5.parse(await readFile(testTsConfigFilename, 'utf-8'));
 
   await writeFile(
     testTsConfigFilename,
@@ -90,9 +78,7 @@ async function deleteTsConfigs() {
   const toDelete = ['apm', 'observability', 'rule_registry'];
 
   for (const app of toDelete) {
-    await unlink(
-      path.resolve(kibanaRoot, 'x-pack/plugins', app, 'tsconfig.json')
-    );
+    await unlink(path.resolve(kibanaRoot, 'x-pack/plugins', app, 'tsconfig.json'));
   }
 }
 

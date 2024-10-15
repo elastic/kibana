@@ -6,7 +6,7 @@
 
 Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences'
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';

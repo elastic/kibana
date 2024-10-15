@@ -14,10 +14,7 @@ import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
-import {
-  TRANSACTION_DURATION,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION, PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
@@ -46,9 +43,7 @@ export async function createAnomalyDetectionJobs(
   }
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
-    logger.info(
-      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
-    );
+    logger.info(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
 
     const indexPatternName = indices.metric;
     const responses = await Promise.all(
@@ -61,9 +56,7 @@ export async function createAnomalyDetectionJobs(
 
     if (failedJobs.length > 0) {
       const errors = failedJobs.map(({ id, error }) => ({ id, error }));
-      throw new Error(
-        `An error occurred while creating ML jobs: ${JSON.stringify(errors)}`
-      );
+      throw new Error(`An error occurred while creating ML jobs: ${JSON.stringify(errors)}`);
     }
 
     return jobResponses;
@@ -114,17 +107,11 @@ async function createAnomalyDetectionJob({
   });
 }
 
-async function getUniqueMlJobEnvs(
-  setup: Setup,
-  environments: string[],
-  logger: Logger
-) {
+async function getUniqueMlJobEnvs(setup: Setup, environments: string[], logger: Logger) {
   // skip creation of duplicate ML jobs
   const jobs = await getAnomalyDetectionJobs(setup, logger);
   const existingMlJobEnvs = jobs.map(({ environment }) => environment);
-  const requestedExistingMlJobEnvs = environments.filter((env) =>
-    existingMlJobEnvs.includes(env)
-  );
+  const requestedExistingMlJobEnvs = environments.filter((env) => existingMlJobEnvs.includes(env));
 
   if (requestedExistingMlJobEnvs.length) {
     logger.warn(

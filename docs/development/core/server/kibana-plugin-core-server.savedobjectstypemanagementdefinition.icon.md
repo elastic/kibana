@@ -6,7 +6,7 @@
 
 The eui icon name to display in the management table. If not defined, the default icon will be used.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 icon?: string;

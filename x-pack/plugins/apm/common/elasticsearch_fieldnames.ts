@@ -67,8 +67,7 @@ export const SPAN_SELF_TIME_SUM = 'span.self_time.sum.us';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
-export const SPAN_DESTINATION_SERVICE_RESOURCE =
-  'span.destination.service.resource';
+export const SPAN_DESTINATION_SERVICE_RESOURCE = 'span.destination.service.resource';
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
   'span.destination.service.response_time.count';
 
@@ -93,17 +92,14 @@ export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
-export const METRIC_CGROUP_MEMORY_LIMIT_BYTES =
-  'system.process.cgroup.memory.mem.limit.bytes';
-export const METRIC_CGROUP_MEMORY_USAGE_BYTES =
-  'system.process.cgroup.memory.mem.usage.bytes';
+export const METRIC_CGROUP_MEMORY_LIMIT_BYTES = 'system.process.cgroup.memory.mem.limit.bytes';
+export const METRIC_CGROUP_MEMORY_USAGE_BYTES = 'system.process.cgroup.memory.mem.usage.bytes';
 
 export const METRIC_JAVA_HEAP_MEMORY_MAX = 'jvm.memory.heap.max';
 export const METRIC_JAVA_HEAP_MEMORY_COMMITTED = 'jvm.memory.heap.committed';
 export const METRIC_JAVA_HEAP_MEMORY_USED = 'jvm.memory.heap.used';
 export const METRIC_JAVA_NON_HEAP_MEMORY_MAX = 'jvm.memory.non_heap.max';
-export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
-  'jvm.memory.non_heap.committed';
+export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED = 'jvm.memory.non_heap.committed';
 export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
 export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
@@ -129,10 +125,8 @@ export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
-export const TRANSACTION_TIME_TO_FIRST_BYTE =
-  'transaction.marks.agent.timeToFirstByte';
-export const TRANSACTION_DOM_INTERACTIVE =
-  'transaction.marks.agent.domInteractive';
+export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
+export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';
 
 export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
 export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';

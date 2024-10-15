@@ -8,7 +8,7 @@ This class is a very simple wrapper for SavedObjects loaded from the server with
 
 It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SimpleSavedObject<T = unknown> 
@@ -24,7 +24,7 @@ export declare class SimpleSavedObject<T = unknown>
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [\_version?](./kibana-plugin-core-public.simplesavedobject._version.md) |  | SavedObjectType&lt;T&gt;\['version'\] | <i>(Optional)</i> |
+|  [\_version?](./kibana-plugin-core-public.simplesavedobject._version.md) |  | SavedObjectType&lt;T&gt;\['version'\] | _(Optional)_ |
 |  [attributes](./kibana-plugin-core-public.simplesavedobject.attributes.md) |  | T |  |
 |  [coreMigrationVersion](./kibana-plugin-core-public.simplesavedobject.coremigrationversion.md) |  | SavedObjectType&lt;T&gt;\['coreMigrationVersion'\] |  |
 |  [error](./kibana-plugin-core-public.simplesavedobject.error.md) |  | SavedObjectType&lt;T&gt;\['error'\] |  |

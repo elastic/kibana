@@ -11,7 +11,7 @@ import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
 import { Layout } from '../layouts';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
+import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
   timeout: number,
@@ -41,6 +41,27 @@ export const openUrl = async (
     await browser.open(
       url,
       { conditionalHeaders, waitForSelector, timeout, locator, layout },
+      logger
+    );
+
+    // Debug logging for viewport size and resizing
+    await browser.evaluate(
+      {
+        fn() {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+            );
+          });
+        },
+        args: [],
+      },
+      { context: CONTEXT_DEBUG },
       logger
     );
   } catch (err) {

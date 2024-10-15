@@ -12,10 +12,7 @@ import { CustomLinkMenuSection } from '.';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/testHelpers';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -44,10 +41,9 @@ describe('Custom links', () => {
       refetch: jest.fn(),
     });
 
-    const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
-    );
+    const component = render(<CustomLinkMenuSection transaction={transaction} />, {
+      wrapper: Wrapper,
+    });
 
     expectTextsInDocument(component, [
       'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
@@ -62,10 +58,9 @@ describe('Custom links', () => {
       refetch: jest.fn(),
     });
 
-    const { getByTestId } = render(
-      <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
-    );
+    const { getByTestId } = render(<CustomLinkMenuSection transaction={transaction} />, {
+      wrapper: Wrapper,
+    });
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
@@ -85,10 +80,9 @@ describe('Custom links', () => {
       refetch: jest.fn(),
     });
 
-    const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
-    );
+    const component = render(<CustomLinkMenuSection transaction={transaction} />, {
+      wrapper: Wrapper,
+    });
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
     expectTextsNotInDocument(component, ['qux']);
   });
@@ -109,10 +103,9 @@ describe('Custom links', () => {
       refetch: jest.fn(),
     });
 
-    const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
-    );
+    const component = render(<CustomLinkMenuSection transaction={transaction} />, {
+      wrapper: Wrapper,
+    });
 
     expect(component.getAllByRole('listitem').length).toEqual(3);
     act(() => {
@@ -133,10 +126,9 @@ describe('Custom links', () => {
         refetch: jest.fn(),
       });
 
-      const component = render(
-        <CustomLinkMenuSection transaction={transaction} />,
-        { wrapper: Wrapper }
-      );
+      const component = render(<CustomLinkMenuSection transaction={transaction} />, {
+        wrapper: Wrapper,
+      });
 
       expectTextsInDocument(component, ['Create custom link']);
       expectTextsNotInDocument(component, ['Create']);
@@ -158,10 +150,9 @@ describe('Custom links', () => {
         refetch: jest.fn(),
       });
 
-      const component = render(
-        <CustomLinkMenuSection transaction={transaction} />,
-        { wrapper: Wrapper }
-      );
+      const component = render(<CustomLinkMenuSection transaction={transaction} />, {
+        wrapper: Wrapper,
+      });
       expectTextsInDocument(component, ['Create']);
       expectTextsNotInDocument(component, ['Create custom link']);
     });

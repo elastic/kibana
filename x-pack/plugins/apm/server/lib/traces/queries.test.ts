@@ -6,10 +6,7 @@
  */
 
 import { getTraceItems } from './get_trace_items';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 
 describe('trace queries', () => {
   let mock: SearchParamsMock;
@@ -19,9 +16,7 @@ describe('trace queries', () => {
   });
 
   it('fetches a trace', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getTraceItems('foo', setup, 0, 50000)
-    );
+    mock = await inspectSearchParams((setup) => getTraceItems('foo', setup, 0, 50000));
 
     expect(mock.params).toMatchSnapshot();
   });

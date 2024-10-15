@@ -6,7 +6,7 @@
 
 Sets the value for a uiSetting. If the setting is not registered by any plugin it will be stored as a custom setting. The new value will be synchronously available via the `get()` method and sent to the server in the background. If the request to the server fails then a updateErrors$ will be notified and the setting will be reverted to its value before `set()` was called.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set: (key: string, value: any) => Promise<boolean>;

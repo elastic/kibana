@@ -4,7 +4,7 @@
 
 ## OverlayModalConfirmOptions.title property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 title?: string;

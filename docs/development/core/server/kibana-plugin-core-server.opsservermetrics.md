@@ -6,7 +6,7 @@
 
 server related metrics
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OpsServerMetrics 
@@ -14,9 +14,9 @@ export interface OpsServerMetrics
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [concurrent\_connections](./kibana-plugin-core-server.opsservermetrics.concurrent_connections.md) | number | number of current concurrent connections to the server |
-|  [requests](./kibana-plugin-core-server.opsservermetrics.requests.md) | { disconnects: number; total: number; statusCodes: Record&lt;number, number&gt;; } | server requests stats |
-|  [response\_times](./kibana-plugin-core-server.opsservermetrics.response_times.md) | { avg\_in\_millis: number; max\_in\_millis: number; } | server response time stats |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [concurrent\_connections](./kibana-plugin-core-server.opsservermetrics.concurrent_connections.md) |  | number | number of current concurrent connections to the server |
+|  [requests](./kibana-plugin-core-server.opsservermetrics.requests.md) |  | { disconnects: number; total: number; statusCodes: Record&lt;number, number&gt;; } | server requests stats |
+|  [response\_times](./kibana-plugin-core-server.opsservermetrics.response_times.md) |  | { avg\_in\_millis: number; max\_in\_millis: number; } | server response time stats |
 

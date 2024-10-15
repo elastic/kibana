@@ -12,7 +12,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
@@ -56,7 +56,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     [layer, columnId, currentIndexPattern, invalid]
   );
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
     return null;
@@ -126,7 +126,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: IndexPatternColumn | null =
+  const selectedColumn: GenericIndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
   return (
     <DimensionEditor

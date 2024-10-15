@@ -12,11 +12,7 @@ import { AgentConfigurationCreateEdit } from '../../app/Settings/agent_configura
 
 export function EditAgentConfigurationRouteView() {
   const {
-    query: {
-      name,
-      environment,
-      pageStep = AgentConfigurationPageStep.ChooseSettings,
-    },
+    query: { name, environment, pageStep = AgentConfigurationPageStep.ChooseSettings },
   } = useApmParams('/settings/agent-configuration/edit');
 
   const res = useFetcher(
@@ -29,10 +25,5 @@ export function EditAgentConfigurationRouteView() {
     [name, environment]
   );
 
-  return (
-    <AgentConfigurationCreateEdit
-      pageStep={pageStep}
-      existingConfigResult={res}
-    />
-  );
+  return <AgentConfigurationCreateEdit pageStep={pageStep} existingConfigResult={res} />;
 }

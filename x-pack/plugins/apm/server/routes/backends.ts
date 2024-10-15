@@ -22,12 +22,7 @@ const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',
   params: t.intersection([
     t.type({
-      query: t.intersection([
-        rangeRt,
-        environmentRt,
-        kueryRt,
-        t.type({ numBuckets: toNumberRt }),
-      ]),
+      query: t.intersection([rangeRt, environmentRt, kueryRt, t.type({ numBuckets: toNumberRt })]),
     }),
     t.partial({
       query: offsetRt,
@@ -38,8 +33,7 @@ const topBackendsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { environment, offset, numBuckets, kuery, start, end } =
-      resources.params.query;
+    const { environment, offset, numBuckets, kuery, start, end } = resources.params.query;
 
     const opts = { setup, start, end, numBuckets, environment, kuery };
 
@@ -51,9 +45,7 @@ const topBackendsRoute = createApmServerRoute({
     return {
       backends: currentBackends.map((backend) => {
         const { stats, ...rest } = backend;
-        const prev = previousBackends.find(
-          (item) => item.location.id === backend.location.id
-        );
+        const prev = previousBackends.find((item) => item.location.id === backend.location.id);
         return {
           ...rest,
           currentStats: stats,
@@ -84,15 +76,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const {
-      query: {
-        backendName,
-        environment,
-        offset,
-        numBuckets,
-        kuery,
-        start,
-        end,
-      },
+      query: { backendName, environment, offset, numBuckets, kuery, start, end },
     } = resources.params;
 
     const opts = {
@@ -107,17 +91,13 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
 
     const [currentServices, previousServices] = await Promise.all([
       getUpstreamServicesForBackend(opts),
-      offset
-        ? getUpstreamServicesForBackend({ ...opts, offset })
-        : Promise.resolve([]),
+      offset ? getUpstreamServicesForBackend({ ...opts, offset }) : Promise.resolve([]),
     ]);
 
     return {
       services: currentServices.map((service) => {
         const { stats, ...rest } = service;
-        const prev = previousServices.find(
-          (item) => item.location.id === service.location.id
-        );
+        const prev = previousServices.find((item) => item.location.id === service.location.id);
         return {
           ...rest,
           currentStats: stats,
@@ -170,8 +150,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const { backendName, kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getLatencyChartsForBackend({
@@ -216,8 +195,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const { backendName, kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getThroughputChartsForBackend({
@@ -262,8 +240,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const { backendName, kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getErrorRateChartsForBackend({

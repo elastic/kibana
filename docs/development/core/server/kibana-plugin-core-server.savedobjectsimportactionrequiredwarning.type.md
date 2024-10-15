@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportActionRequiredWarning.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: 'action_required';

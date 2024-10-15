@@ -6,7 +6,7 @@
 
 The category the app lives in
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly category?: AppCategory;

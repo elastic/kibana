@@ -6,7 +6,7 @@
 
 The os platform release, prefixed by the platform name
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 platformRelease: string;

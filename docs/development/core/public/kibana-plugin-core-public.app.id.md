@@ -4,9 +4,11 @@
 
 ## App.id property
 
-The unique identifier of the application
+The unique identifier of the application.
 
-<b>Signature:</b>
+Can only be composed of alphanumeric characters, `-`<!-- -->, `:` and `_`
+
+**Signature:**
 
 ```typescript
 id: string;

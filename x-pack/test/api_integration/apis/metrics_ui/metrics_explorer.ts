@@ -196,6 +196,31 @@ export default function ({ getService }: FtrProviderContext) {
           total: 4,
         });
       });
+
+      it('should return 400 when requesting more than 20 metrics', async () => {
+        const postBody = {
+          timerange: {
+            field: '@timestamp',
+            to: max,
+            from: min,
+            interval: '>=1m',
+          },
+          indexPattern: 'metricbeat-*',
+          groupBy: ['host.name', 'system.network.name'],
+          limit: 3,
+          afterKey: null,
+          metrics: Array(21).fill({
+            aggregation: 'rate',
+            field: 'system.network.out.bytes',
+          }),
+        };
+
+        await supertest
+          .post('/api/infra/metrics_explorer')
+          .set('kbn-xsrf', 'xxx')
+          .send(postBody)
+          .expect(400);
+      });
     });
 
     describe('without data', () => {

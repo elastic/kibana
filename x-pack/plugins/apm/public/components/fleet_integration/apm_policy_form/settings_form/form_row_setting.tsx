@@ -22,22 +22,22 @@ interface Props {
   row: SettingsRow;
   value?: any;
   onChange: FormRowOnChange;
+  isDisabled?: boolean;
 }
 
-const ENABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.enabledLabel',
-  { defaultMessage: 'Enabled' }
-);
-const DISABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.disabledLabel',
-  { defaultMessage: 'Disabled' }
-);
+const ENABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
+const DISABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.disabledLabel', {
+  defaultMessage: 'Disabled',
+});
 
-export function FormRowSetting({ row, value, onChange }: Props) {
+export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
   switch (row.type) {
     case 'boolean': {
       return (
         <EuiSwitch
+          disabled={isDisabled}
           label={row.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)}
           checked={value}
           onChange={(e) => {
@@ -50,9 +50,9 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'text': {
       return (
         <EuiFieldText
-          readOnly={row.readOnly}
+          disabled={isDisabled}
           value={value}
-          prepend={row.readOnly ? <EuiIcon type="lock" /> : undefined}
+          prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
           onChange={(e) => {
             onChange(row.key, e.target.value);
           }}
@@ -62,6 +62,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'area': {
       return (
         <EuiTextArea
+          disabled={isDisabled}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);
@@ -73,6 +74,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'integer': {
       return (
         <EuiFieldNumber
+          disabled={isDisabled}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);
@@ -81,9 +83,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
       );
     }
     case 'combo': {
-      const comboOptions = Array.isArray(value)
-        ? value.map((label) => ({ label }))
-        : [];
+      const comboOptions = Array.isArray(value) ? value.map((label) => ({ label })) : [];
       return (
         <EuiComboBox
           noSuggestions

@@ -6,7 +6,7 @@
 
 [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fatalErrors: FatalErrorsSetup;

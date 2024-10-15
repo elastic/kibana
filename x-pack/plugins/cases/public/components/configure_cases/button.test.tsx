@@ -82,7 +82,7 @@ describe('Configuration button', () => {
 
   test('it shows the tooltip when hovering the button', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const msgTooltip = 'My message tooltip';
     const titleTooltip = 'My title';
@@ -102,7 +102,7 @@ describe('Configuration button', () => {
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     newWrapper.update();
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);

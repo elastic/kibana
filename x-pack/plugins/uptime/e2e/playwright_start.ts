@@ -13,14 +13,12 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 
-const listOfJourneys = ['uptime', 'TlsFlyoutInAlertingApp', 'StatusFlyoutInAlertingApp'] as const;
-
 export function playwrightRunTests() {
   return async ({ getService }: any) => {
-    const result = await playwrightStart(getService);
+    const results = await playwrightStart(getService);
 
-    listOfJourneys.forEach((journey) => {
-      if (result?.[journey] && result[journey].status !== 'succeeded') {
+    Object.entries(results).forEach(([_journey, result]) => {
+      if (result.status !== 'succeeded') {
         throw new Error('Tests failed');
       }
     });
@@ -44,7 +42,7 @@ async function playwrightStart(getService: any) {
   });
 
   const res = await playwrightRun({
-    params: { kibanaUrl },
+    params: { kibanaUrl, getService },
     playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
   });
 

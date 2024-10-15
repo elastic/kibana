@@ -6,7 +6,7 @@
 
 The field name to increment the counter by.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fieldName: string;

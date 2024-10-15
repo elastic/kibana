@@ -6,7 +6,7 @@
 
 Validates that a saved object ID has been randomly generated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isRandomId(id: string | undefined): boolean;
@@ -18,7 +18,7 @@ static isRandomId(id: string | undefined): boolean;
 |  --- | --- | --- |
 |  id | string \| undefined | The ID of a saved object.  Use <code>uuid.validate</code> once upgraded to v5.3+ |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

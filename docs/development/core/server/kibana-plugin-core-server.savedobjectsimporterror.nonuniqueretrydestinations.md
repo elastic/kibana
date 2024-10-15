@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.nonUniqueRetryDestinations() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedObjectsImportError;
@@ -16,7 +16,7 @@ static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedOb
 |  --- | --- | --- |
 |  nonUniqueRetryDestinations | string\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsImportError
 

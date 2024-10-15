@@ -6,7 +6,7 @@
 
 Current status for all plugins this plugin depends on. Each key of the `Record` is a plugin id.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 dependencies$: Observable<Record<string, ServiceStatus>>;

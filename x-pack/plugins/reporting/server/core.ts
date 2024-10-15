@@ -47,7 +47,7 @@ export interface ReportingInternalSetup {
 }
 
 export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
+  browserDriverFactory: HeadlessChromiumDriverFactory | null;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -259,7 +259,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  public async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }

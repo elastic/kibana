@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Story, StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
+import type { Story, DecoratorFn } from '@storybook/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -26,7 +26,7 @@ export default {
   title: 'routing/templates/ApmServiceTemplate/AnalyzeDataButton',
   component: AnalyzeDataButton,
   decorators: [
-    (StoryComponent: ComponentType, { args }: StoryContext) => {
+    (StoryComponent, { args }) => {
       const { agentName, canShowDashboard, environment, serviceName } = args;
 
       const KibanaContext = createKibanaReactContext({
@@ -61,7 +61,7 @@ export default {
         </MemoryRouter>
       );
     },
-  ],
+  ] as DecoratorFn[],
 };
 
 export const Example: Story<Args> = () => {

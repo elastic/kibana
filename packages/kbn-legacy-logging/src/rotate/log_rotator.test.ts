@@ -232,7 +232,7 @@ describe('LogRotator', () => {
   });
 
   it('rotates log file service correctly fallback to usePolling true after defined timeout', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     writeBytesToFile(testFilePath, 1);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
@@ -242,7 +242,7 @@ describe('LogRotator', () => {
         ({
           on: jest.fn((ev: string) => {
             if (ev === 'error') {
-              jest.runTimersToTime(15000);
+              jest.advanceTimersByTime(15000);
             }
           }),
           close: jest.fn(),

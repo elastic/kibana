@@ -4,7 +4,7 @@
 
 ## ChromeBadge.iconType property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 iconType?: IconType;

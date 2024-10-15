@@ -6,12 +6,12 @@
 
 Resets the collected histogram data.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 reset(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

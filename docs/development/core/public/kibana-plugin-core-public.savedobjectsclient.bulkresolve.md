@@ -6,7 +6,7 @@
 
 Resolves an array of objects by id, using any legacy URL aliases if they exist
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkResolve: <T = unknown>(objects?: Array<{

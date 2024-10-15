@@ -73,17 +73,12 @@ export async function getServiceMetadataDetails({
 }): Promise<ServiceMetadataDetails> {
   const { apmEventClient } = setup;
 
-  const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...rangeQuery(start, end),
-  ];
+  const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForAggregatedTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -117,10 +112,7 @@ export async function getServiceMetadataDetails({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_metadata_details',
-    params
-  );
+  const response = await apmEventClient.search('get_service_metadata_details', params);
 
   if (response.hits.total.value === 0) {
     return {
@@ -130,20 +122,17 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud } = response.hits
-    .hits[0]._source as ServiceMetadataDetailsRaw;
+  const { service, agent, host, kubernetes, container, cloud } = response.hits.hits[0]
+    ._source as ServiceMetadataDetailsRaw;
 
   const serviceMetadataDetails = {
-    versions: response.aggregations?.serviceVersions.buckets.map(
-      (bucket) => bucket.key as string
-    ),
+    versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
     runtime: service.runtime,
     framework: service.framework?.name,
     agent,
   };
 
-  const totalNumberInstances =
-    response.aggregations?.totalNumberInstances.value;
+  const totalNumberInstances = response.aggregations?.totalNumberInstances.value;
 
   const containerDetails =
     host || container || totalNumberInstances || kubernetes

@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: SavedObjectType<T>['type'];

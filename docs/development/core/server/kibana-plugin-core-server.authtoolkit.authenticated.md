@@ -6,7 +6,7 @@
 
 Authentication is successful with given credentials, allow request to pass through
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 authenticated: (data?: AuthResultParams) => AuthResult;

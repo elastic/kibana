@@ -6,7 +6,7 @@
 
 The current location of the history stack.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get location(): Location<HistoryLocationState>;

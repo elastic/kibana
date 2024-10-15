@@ -7,3 +7,4 @@
 
 export * from './uptime.journey';
 export * from './alerts';
+export * from './monitor_details';

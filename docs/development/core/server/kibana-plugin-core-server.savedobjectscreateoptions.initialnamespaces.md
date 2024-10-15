@@ -8,7 +8,7 @@ Optional initial namespaces for the object to be created in. If this is defined,
 
 \* For shareable object types (registered with `namespaceType: 'multiple'`<!-- -->): this option can be used to specify one or more spaces, including the "All spaces" identifier (`'*'`<!-- -->). \* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`<!-- -->): this option can only be used to specify a single space, and the "All spaces" identifier (`'*'`<!-- -->) is not allowed. \* For global object types (registered with `namespaceType: 'agnostic'`<!-- -->): this option cannot be used.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 initialNamespaces?: string[];

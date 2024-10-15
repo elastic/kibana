@@ -40,6 +40,10 @@ import { FieldFormatsStart } from '../../field_formats/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
+export interface HistoryLocationState {
+  referrer: string;
+}
+
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
@@ -47,7 +51,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  history: () => History;
+  history: () => History<HistoryLocationState>;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;

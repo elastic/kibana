@@ -10,7 +10,7 @@ If this hook fails, the migration will proceed without these documents having be
 
 Experimental and subject to change
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {

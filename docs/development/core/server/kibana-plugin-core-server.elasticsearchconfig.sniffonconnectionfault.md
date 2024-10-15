@@ -6,7 +6,7 @@
 
 Specifies whether the client should immediately sniff for a more current list of nodes when a connection dies.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly sniffOnConnectionFault: boolean;

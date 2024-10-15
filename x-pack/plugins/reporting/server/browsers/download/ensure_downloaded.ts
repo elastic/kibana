@@ -9,7 +9,7 @@ import { existsSync } from 'fs';
 import del from 'del';
 import { BrowserDownload, chromium } from '../';
 import { GenericLevelLogger } from '../../lib/level_logger';
-import { md5 } from './checksum';
+import { sha256 } from './checksum';
 import { download } from './download';
 
 /**
@@ -48,7 +48,7 @@ async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLeve
 
             let foundChecksum: string;
             try {
-              foundChecksum = await md5(path).catch();
+              foundChecksum = await sha256(path).catch();
             } catch {
               foundChecksum = 'MISSING';
             }

@@ -6,7 +6,7 @@
 
 Persists an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
@@ -18,9 +18,9 @@ create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOpt
 |  --- | --- | --- |
 |  type | string |  |
 |  attributes | T |  |
-|  options | SavedObjectsCreateOptions |  {<!-- -->string<!-- -->} \[options.id\] - force id on creation, not recommended  {<!-- -->boolean<!-- -->} \[options.overwrite=false\]  {<!-- -->object<!-- -->} \[options.migrationVersion=undefined\]  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references=\[\]\] - \[{ name, type, id }<!-- -->\] |
+|  options | SavedObjectsCreateOptions | _(Optional)_  {<!-- -->string<!-- -->} \[options.id\] - force id on creation, not recommended  {<!-- -->boolean<!-- -->} \[options.overwrite=false\]  {<!-- -->object<!-- -->} \[options.migrationVersion=undefined\]  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references=\[\]\] - \[{ name, type, id }<!-- -->\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObject&lt;T&gt;&gt;
 

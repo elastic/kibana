@@ -7,10 +7,7 @@
 
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<T = {}> = string | ((props: RouteComponentProps<T>) => string) | null;
 
 export interface APMRouteDefinition<T = any> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;

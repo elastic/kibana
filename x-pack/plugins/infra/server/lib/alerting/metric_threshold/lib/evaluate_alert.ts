@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
+import { difference, mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -97,27 +97,21 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
       // If any previous groups are no longer being reported, backfill them with null values
       const currentGroups = Object.keys(currentValues);
 
-      const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
+      const missingGroups = difference(prevGroups, currentGroups);
       if (currentGroups.length === 0 && missingGroups.length === 0) {
         missingGroups.push(UNGROUPED_FACTORY_KEY);
       }
       const backfillTimestamp =
         last(last(Object.values(currentValues)))?.key ?? new Date().toISOString();
-      const backfilledPrevGroups: Record<
-        string,
-        Array<{ key: string; value: number }>
-      > = missingGroups.reduce(
-        (result, group) => ({
-          ...result,
-          [group]: [
-            {
-              key: backfillTimestamp,
-              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
-            },
-          ],
-        }),
-        {}
-      );
+      const backfilledPrevGroups: Record<string, Array<{ key: string; value: number | null }>> = {};
+      for (const group of missingGroups) {
+        backfilledPrevGroups[group] = [
+          {
+            key: backfillTimestamp,
+            value: criterion.aggType === Aggregators.COUNT ? 0 : null,
+          },
+        ];
+      }
       const currentValuesWithBackfilledPrevGroups = {
         ...currentValues,
         ...backfilledPrevGroups,
@@ -206,21 +200,18 @@ const getMetric: (
         bucketSelector,
         afterKeyHandler
       )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
-      const groupedResults = compositeBuckets.reduce(
-        (result, bucket) => ({
-          ...result,
-          [Object.values(bucket.key)
-            .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(
-            bucket,
-            aggType,
-            dropPartialBucketsOptions,
-            calculatedTimerange,
-            bucket.doc_count
-          ),
-        }),
-        {}
-      );
+      const groupedResults: Record<string, any> = {};
+      for (const bucket of compositeBuckets) {
+        const key = Object.values(bucket.key).join(', ');
+        const value = getValuesFromAggregations(
+          bucket,
+          aggType,
+          dropPartialBucketsOptions,
+          calculatedTimerange,
+          bucket.doc_count
+        );
+        groupedResults[key] = value;
+      }
       return groupedResults;
     }
     const { body: result } = await esClient.search({

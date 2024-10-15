@@ -6,7 +6,7 @@
 
 [HttpSetup](./kibana-plugin-core-public.httpsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 http: HttpSetup;

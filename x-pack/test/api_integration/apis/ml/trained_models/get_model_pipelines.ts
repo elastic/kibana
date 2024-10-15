@@ -29,11 +29,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('returns trained model pipelines by id', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_0/pipelines`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1);
       expect(body[0].model_id).to.eql('dfa_regression_model_n_0');
@@ -41,11 +41,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('returns an error in case user does not have required permission', async () => {
-      await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_0/pipelines`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
     });
   });
 };

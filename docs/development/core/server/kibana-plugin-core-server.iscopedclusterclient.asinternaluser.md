@@ -6,7 +6,7 @@
 
 A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the internal Kibana user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly asInternalUser: ElasticsearchClient;

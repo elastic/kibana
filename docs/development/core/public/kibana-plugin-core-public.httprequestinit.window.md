@@ -6,7 +6,7 @@
 
 Can only be null. Used to disassociate request from any Window.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 window?: null;

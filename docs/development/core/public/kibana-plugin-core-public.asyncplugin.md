@@ -11,7 +11,7 @@
 
 A plugin with asynchronous lifecycle methods.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> 
@@ -23,5 +23,5 @@ export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends
 |  --- | --- |
 |  [setup(core, plugins)](./kibana-plugin-core-public.asyncplugin.setup.md) |  |
 |  [start(core, plugins)](./kibana-plugin-core-public.asyncplugin.start.md) |  |
-|  [stop()?](./kibana-plugin-core-public.asyncplugin.stop.md) | <i>(Optional)</i> |
+|  [stop()?](./kibana-plugin-core-public.asyncplugin.stop.md) | _(Optional)_ |
 

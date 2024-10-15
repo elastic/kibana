@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { relative, resolve, sep } from 'path';
 import { writeFileSync } from 'fs';
-
-import execa from 'execa';
-import globby from 'globby';
+import path from 'path';
 import Mustache from 'mustache';
 
-import { run } from '@kbn/dev-utils';
+import { run, createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 
-// @ts-ignore
-import { testMatch } from '../../jest-preset';
+import { JestConfigs, CONFIG_NAMES } from './configs';
 
-const template: string = `module.exports = {
+const unitTestingTemplate: string = `module.exports = {
   preset: '@kbn/test',
+  rootDir: '{{{relToRoot}}}',
+  roots: ['<rootDir>/{{{modulePath}}}'],
+};
+`;
+
+const integrationTestingTemplate: string = `module.exports = {
+  preset: '@kbn/test/jest_integration',
   rootDir: '{{{relToRoot}}}',
   roots: ['<rootDir>/{{{modulePath}}}'],
 };
@@ -40,68 +43,43 @@ const roots: string[] = [
 export async function runCheckJestConfigsCli() {
   run(
     async ({ flags: { fix = false }, log }) => {
-      const { stdout: coveredFiles } = await execa(
-        'yarn',
-        ['--silent', 'jest', '--listTests', '--json'],
-        {
-          cwd: REPO_ROOT,
-        }
-      );
+      const jestConfigs = new JestConfigs(REPO_ROOT, roots);
 
-      const allFiles = new Set(
-        await globby(testMatch.concat(['!**/integration_tests/**']), {
-          gitignore: true,
-        })
-      );
+      const missing = await jestConfigs.allMissing();
 
-      JSON.parse(coveredFiles).forEach((file: string) => {
-        const pathFromRoot = relative(REPO_ROOT, file);
-        allFiles.delete(pathFromRoot);
-      });
-
-      if (allFiles.size) {
+      if (missing.length) {
         log.error(
-          `The following files do not belong to a jest.config.js file, or that config is not included from the root jest.config.js\n${[
-            ...allFiles,
+          `The following Jest config files do not exist for which there are test files for:\n${[
+            ...missing,
           ]
             .map((file) => ` - ${file}`)
             .join('\n')}`
         );
-      } else {
-        log.success('All test files are included by a Jest configuration');
-        return;
-      }
 
-      if (fix) {
-        allFiles.forEach((file) => {
-          const root = roots.find((r) => file.startsWith(r));
+        if (fix) {
+          missing.forEach((file) => {
+            const template = file.endsWith(CONFIG_NAMES.unit)
+              ? unitTestingTemplate
+              : integrationTestingTemplate;
 
-          if (root) {
-            const name = relative(root, file).split(sep)[0];
-            const modulePath = [root, name].join('/');
-
+            const modulePath = path.dirname(file);
             const content = Mustache.render(template, {
-              relToRoot: relative(modulePath, '.'),
+              relToRoot: path.relative(modulePath, '.'),
               modulePath,
             });
 
-            const configPath = resolve(root, name, 'jest.config.js');
-            log.info('created %s', configPath);
-            writeFileSync(configPath, content);
-          } else {
-            log.warning(`Unable to determind where to place jest.config.js for ${file}`);
-          }
-        });
-      } else {
-        log.info(
-          `Run 'node scripts/check_jest_configs --fix' to attempt to create the missing config files`
-        );
+            writeFileSync(file, content);
+            log.info('created %s', file);
+          });
+        } else {
+          throw createFailError(
+            `Run 'node scripts/check_jest_configs --fix' to create the missing config files`
+          );
+        }
       }
-
-      process.exit(1);
     },
     {
-      description: 'Check that all test files are covered by a jest.config.js',
+      description: 'Check that all test files are covered by a Jest config',
       flags: {
         boolean: ['fix'],
         help: `

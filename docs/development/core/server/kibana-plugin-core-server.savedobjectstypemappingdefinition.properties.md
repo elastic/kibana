@@ -6,7 +6,7 @@
 
 The underlying properties of the type mapping
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 properties: SavedObjectsMappingProperties;

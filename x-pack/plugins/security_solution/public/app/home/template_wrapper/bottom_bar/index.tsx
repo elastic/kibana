@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -20,6 +18,7 @@ import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirec
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
+// eslint-disable-next-line react/display-name
 export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
     const { pathname } = useLocation();

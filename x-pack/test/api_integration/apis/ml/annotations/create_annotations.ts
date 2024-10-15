@@ -34,12 +34,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should successfully create annotations for anomaly job', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationRequestBody)
-        .expect(200);
+        .send(annotationRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
       const annotationId = body._id;
 
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
@@ -56,12 +56,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should successfully create annotation for user with ML read permissions', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationRequestBody)
-        .expect(200);
+        .send(annotationRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       const annotationId = body._id;
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
@@ -76,12 +76,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not allow to create annotation for unauthorized user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationRequestBody)
-        .expect(403);
+        .send(annotationRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

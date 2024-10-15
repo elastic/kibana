@@ -51,7 +51,6 @@ const defaultProps = {
 describe('Sourcerer component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();

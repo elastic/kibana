@@ -39,10 +39,9 @@ export function useExplorerHref({ jobId }: { jobId: string }) {
   } = useApmPluginContext();
   const { urlParams } = useUrlParams();
 
-  const timePickerRefreshIntervalDefaults =
-    core.uiSettings.get<TimePickerRefreshInterval>(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-    );
+  const timePickerRefreshIntervalDefaults = core.uiSettings.get<TimePickerRefreshInterval>(
+    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
+  );
 
   const {
     // hardcoding a custom default of 1 hour since the default kibana timerange of 15 minutes is shorter than the ML interval

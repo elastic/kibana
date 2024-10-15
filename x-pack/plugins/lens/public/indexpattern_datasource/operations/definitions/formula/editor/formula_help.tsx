@@ -28,7 +28,7 @@ import { hasFunctionFieldArgument } from '../validation';
 
 import type {
   GenericOperationDefinition,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   OperationDefinition,
   ParamEditorProps,
 } from '../../index';
@@ -503,7 +503,7 @@ export function getFunctionSignatureLabel(
 
 function getFunctionArgumentsStringified(
   params: Required<
-    OperationDefinition<IndexPatternColumn, 'field' | 'fullReference'>
+    OperationDefinition<GenericIndexPatternColumn, 'field' | 'fullReference'>
   >['operationParams']
 ) {
   return params

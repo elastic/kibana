@@ -47,10 +47,7 @@ const listSourceMapRoute = createApmServerRoute({
         return { artifacts };
       }
     } catch (e) {
-      throw Boom.internal(
-        'Something went wrong while fetching artifacts source maps',
-        e
-      );
+      throw Boom.internal('Something went wrong while fetching artifacts source maps', e);
     }
   },
 });
@@ -66,10 +63,7 @@ const uploadSourceMapRoute = createApmServerRoute({
       service_name: t.string,
       service_version: t.string,
       bundle_filepath: t.string,
-      sourcemap: t
-        .union([t.string, stringFromBufferRt])
-        .pipe(jsonRt)
-        .pipe(sourceMapRt),
+      sourcemap: t.union([t.string, stringFromBufferRt]).pipe(jsonRt).pipe(sourceMapRt),
     }),
   }),
   handler: async ({ params, plugins, core }) => {
@@ -98,18 +92,14 @@ const uploadSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient:
-            savedObjectsClient as unknown as SavedObjectsClientContract,
+          savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
 
         return artifact;
       }
     } catch (e) {
-      throw Boom.internal(
-        'Something went wrong while creating a new source map',
-        e
-      );
+      throw Boom.internal('Something went wrong while creating a new source map', e);
     }
   },
 });
@@ -134,16 +124,12 @@ const deleteSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient:
-            savedObjectsClient as unknown as SavedObjectsClientContract,
+          savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
       }
     } catch (e) {
-      throw Boom.internal(
-        `Something went wrong while deleting source map. id: ${id}`,
-        e
-      );
+      throw Boom.internal(`Something went wrong while deleting source map. id: ${id}`, e);
     }
   },
 });

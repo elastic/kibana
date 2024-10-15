@@ -6,7 +6,7 @@
 
 Update multiple documents at once
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
@@ -16,9 +16,9 @@ bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<Saved
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | SavedObjectsBulkUpdateObject\[\] | \[{ type, id, attributes, options: { version, references } }<!-- -->\] |
+|  objects | SavedObjectsBulkUpdateObject\[\] | _(Optional)_ \[{ type, id, attributes, options: { version, references } }<!-- -->\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;
 

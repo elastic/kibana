@@ -6,7 +6,7 @@
 
 Accessors for the plugin's configuration
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 config: {

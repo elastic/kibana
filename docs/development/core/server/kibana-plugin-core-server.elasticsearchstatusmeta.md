@@ -5,7 +5,7 @@
 ## ElasticsearchStatusMeta interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ElasticsearchStatusMeta 
@@ -13,9 +13,9 @@ export interface ElasticsearchStatusMeta
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [incompatibleNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.incompatiblenodes.md) | NodesVersionCompatibility\['incompatibleNodes'\] |  |
-|  [nodesInfoRequestError?](./kibana-plugin-core-server.elasticsearchstatusmeta.nodesinforequesterror.md) | NodesVersionCompatibility\['nodesInfoRequestError'\] | <i>(Optional)</i> |
-|  [warningNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.warningnodes.md) | NodesVersionCompatibility\['warningNodes'\] |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [incompatibleNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.incompatiblenodes.md) |  | NodesVersionCompatibility\['incompatibleNodes'\] |  |
+|  [nodesInfoRequestError?](./kibana-plugin-core-server.elasticsearchstatusmeta.nodesinforequesterror.md) |  | NodesVersionCompatibility\['nodesInfoRequestError'\] | _(Optional)_ |
+|  [warningNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.warningnodes.md) |  | NodesVersionCompatibility\['warningNodes'\] |  |
 

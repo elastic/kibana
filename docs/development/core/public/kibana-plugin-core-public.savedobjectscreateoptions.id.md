@@ -6,7 +6,7 @@
 
 (Not recommended) Specify an id instead of having the saved objects service generate one for you.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id?: string;

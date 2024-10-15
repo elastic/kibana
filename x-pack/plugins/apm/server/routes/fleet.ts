@@ -172,9 +172,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const coreStart = await resources.core.start();
-    const esClient = coreStart.elasticsearch.client.asScoped(
-      resources.request
-    ).asCurrentUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(resources.request).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
@@ -214,7 +212,6 @@ const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
 const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud',
   {
-    defaultMessage:
-      'Operation only permitted by Elastic Cloud users with the superuser role.',
+    defaultMessage: 'Operation only permitted by Elastic Cloud users with the superuser role.',
   }
 );

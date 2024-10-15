@@ -6,7 +6,7 @@
 
 [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 elasticsearch: ElasticsearchServiceStart;

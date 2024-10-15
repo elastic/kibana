@@ -15,8 +15,8 @@ function readableEnd(stream: Readable) {
   });
 }
 
-export async function md5(path: string) {
-  const hash = createHash('md5');
+export async function sha256(path: string) {
+  const hash = createHash('sha256');
   await readableEnd(createReadStream(path).on('data', (chunk) => hash.update(chunk)));
   return hash.digest('hex');
 }

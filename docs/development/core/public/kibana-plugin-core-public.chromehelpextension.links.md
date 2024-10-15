@@ -6,7 +6,7 @@
 
 Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 links?: ChromeHelpExtensionMenuLink[];

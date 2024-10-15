@@ -56,8 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
     return savedObject;
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/98240
-  describe.skip('UI Counters API', () => {
+  describe('UI Counters API', () => {
     const dayDate = moment().format('DDMMYYYY');
     before(async () => await esArchiver.emptyKibanaIndex());
 

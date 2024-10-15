@@ -6,7 +6,7 @@
 
 Additional route options [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 options?: RouteConfigOptions<Method>;

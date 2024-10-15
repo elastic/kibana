@@ -45,7 +45,7 @@ describe('axios connections', () => {
     // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
     // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
     savedAxiosDefaultsAdapter = axios.defaults.adapter;
-    axios.defaults.adapter = require('axios/lib/adapters/http');
+    axios.defaults.adapter = 'http';
   });
 
   afterAll(() => {

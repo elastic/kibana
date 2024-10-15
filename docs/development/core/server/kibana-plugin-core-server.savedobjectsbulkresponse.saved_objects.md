@@ -4,7 +4,7 @@
 
 ## SavedObjectsBulkResponse.saved\_objects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 saved_objects: Array<SavedObject<T>>;

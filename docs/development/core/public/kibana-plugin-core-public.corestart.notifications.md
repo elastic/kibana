@@ -6,7 +6,7 @@
 
 [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 notifications: NotificationsStart;

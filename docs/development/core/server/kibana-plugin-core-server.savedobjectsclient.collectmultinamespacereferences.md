@@ -6,7 +6,7 @@
 
 Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceReferencesObject[], options?: SavedObjectsCollectMultiNamespaceReferencesOptions): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
@@ -17,9 +17,9 @@ collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceRefere
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | SavedObjectsCollectMultiNamespaceReferencesObject\[\] |  |
-|  options | SavedObjectsCollectMultiNamespaceReferencesOptions |  |
+|  options | SavedObjectsCollectMultiNamespaceReferencesOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsCollectMultiNamespaceReferencesResponse&gt;
 

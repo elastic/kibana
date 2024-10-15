@@ -6,7 +6,7 @@
 
 Function returning the url to use to redirect to this object from the management section. If not defined, redirecting to the object will not be allowed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getInAppUrl?: (savedObject: SavedObject<Attributes>) => {

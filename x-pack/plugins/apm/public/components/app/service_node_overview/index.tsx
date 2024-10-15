@@ -8,15 +8,8 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../common/service_nodes';
-import {
-  asDynamicBytes,
-  asInteger,
-  asPercent,
-} from '../../../../common/utils/formatters';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import { asDynamicBytes, asInteger, asPercent } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -78,12 +71,7 @@ function ServiceNodeOverview() {
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
               defaultMessage: 'Name',
             })}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -94,22 +82,16 @@ function ServiceNodeOverview() {
           name === SERVICE_NODE_NAME_MISSING
             ? {
                 displayedName: getServiceNodeName(name),
-                tooltip: i18n.translate(
-                  'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
-                  {
-                    defaultMessage:
-                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
-                  }
-                ),
+                tooltip: i18n.translate('xpack.apm.jvmsTable.explainServiceNodeNameMissing', {
+                  defaultMessage:
+                    'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
+                }),
               }
             : { displayedName: name, tooltip: name };
 
         return (
           <EuiToolTip content={tooltip}>
-            <ServiceNodeMetricOverviewLink
-              serviceName={serviceName}
-              serviceNodeName={name}
-            >
+            <ServiceNodeMetricOverviewLink serviceName={serviceName} serviceNodeName={name}>
               <ServiceNodeName>{displayedName}</ServiceNodeName>
             </ServiceNodeMetricOverviewLink>
           </EuiToolTip>

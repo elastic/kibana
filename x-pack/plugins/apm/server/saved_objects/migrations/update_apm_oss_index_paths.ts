@@ -23,9 +23,7 @@ type DeprecatedApmIndicesSavedObjectAttributes = Partial<{
   [Property in DeprecatedApmIndexConfigPaths]: string;
 }>;
 
-export function updateApmOssIndexPaths(
-  attributes: DeprecatedApmIndicesSavedObjectAttributes
-) {
+export function updateApmOssIndexPaths(attributes: DeprecatedApmIndicesSavedObjectAttributes) {
   return apmIndexConfigs.reduce((attrs, [configPath, deprecatedConfigPath]) => {
     const indexConfig: string | undefined = attributes[deprecatedConfigPath];
     if (indexConfig) {

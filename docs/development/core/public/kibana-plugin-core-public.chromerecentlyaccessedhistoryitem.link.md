@@ -4,7 +4,7 @@
 
 ## ChromeRecentlyAccessedHistoryItem.link property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 link: string;

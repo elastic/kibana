@@ -64,6 +64,8 @@ export {
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
+  genericEmbeddableInputIsEqual,
+  omitGenericEmbeddableInput,
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,

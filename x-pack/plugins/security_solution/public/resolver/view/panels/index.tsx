@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
@@ -21,6 +19,7 @@ import { PanelViewAndParameters } from '../../types';
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 
+// eslint-disable-next-line react/display-name
 export const PanelRouter = memo(function () {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
   if (params.panelView === 'nodeDetail') {

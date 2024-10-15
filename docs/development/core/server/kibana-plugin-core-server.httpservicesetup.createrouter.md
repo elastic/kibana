@@ -6,7 +6,7 @@
 
 Provides ability to declare a handler function for a particular path and HTTP request method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;

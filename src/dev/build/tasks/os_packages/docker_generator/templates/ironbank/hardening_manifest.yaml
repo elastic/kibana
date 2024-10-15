@@ -13,8 +13,8 @@ tags:
 
 # Build args passed to Dockerfile ARGs
 args:
-  BASE_IMAGE: 'redhat/ubi/ubi8'
-  BASE_TAG: '8.5'
+  BASE_IMAGE: 'redhat/ubi/ubi9'
+  BASE_TAG: '9.4'
 
 # Docker image labels
 labels:
@@ -34,7 +34,7 @@ resources:
     url: <artifact_path>/kibana-{{version}}-linux-x86_64.tar.gz
     validation:
       type: sha512
-      value: aa68f850cc09cf5dcb7c0b48bb8df788ca58eaad38d96141b8e59917fd38b42c728c0968f7cb2c8132c5aaeb595525cdde0859554346c496f53c569e03abe412
+      value: null
   - filename: tini
     url: https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64
     validation:
@@ -48,15 +48,39 @@ resources:
 
 # List of project maintainers
 maintainers:
-  - email: 'tyler.smalley@elastic.co'
-    name: 'Tyler Smalley'
-    username: 'tylersmalley'
+  - email: 'jon@elastic.co'
+    name: 'Jonathan Budzenski'
+    username: 'jbudz'
+    cht_member: false
+  - email: 'brad.white@elastic.co'
+    name: 'Brad White'
+    username: 'brad.white'
     cht_member: false
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
     cht_member: true
-  - email: "yalabe.dukuly@anchore.com"
-    name: "Yalabe Dukuly"
-    username: "yalabe.dukuly"
-    cht_member: true
+  - cht_member: false
+    email: larry.gregory@elastic.co
+    name: Larry Gregory
+    username: legrego
+  - cht_member: false
+    email: aleh.zasypkin@elastic.co
+    name: Aleh Zasypkin
+    username: azasypkin
+  - cht_member: false
+    email: kurt.greiner@elastic.co
+    name: Kurt Greiner
+    username: kc13greiner
+  - cht_member: false
+    email: jeramy.soucy@elastic.co
+    name: Jeramy Soucy
+    username: jeramysoucy
+  - cht_member: false
+    email: sid.mantri@elastic.co
+    name: Sid Mantri
+    username: sidmantri
+  - cht_member: false
+    email: elena.shostak@elastic.co
+    name: Elena Shostak
+    username: elena.shostak

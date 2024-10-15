@@ -61,8 +61,7 @@ export function ErrorCountAlertTrigger(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/alerts/chart_preview/transaction_error_count',
+          endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
               environment: params.environment,
@@ -75,12 +74,7 @@ export function ErrorCountAlertTrigger(props: Props) {
         });
       }
     },
-    [
-      params.windowSize,
-      params.windowUnit,
-      params.environment,
-      params.serviceName,
-    ]
+    [params.windowSize, params.windowUnit, params.environment, params.serviceName]
   );
 
   const fields = [
@@ -100,12 +94,8 @@ export function ErrorCountAlertTrigger(props: Props) {
       onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
-      }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
-      }
+      onChangeWindowSize={(timeWindowSize) => setAlertParams('windowSize', timeWindowSize || '')}
+      onChangeWindowUnit={(timeWindowUnit) => setAlertParams('windowUnit', timeWindowUnit)}
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{

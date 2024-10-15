@@ -4,7 +4,7 @@
 
 ## SavedObjectStatusMeta.migratedIndices property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 migratedIndices: {

@@ -6,7 +6,7 @@
 
 The migration version that this migration function is defined for
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly migrationVersion: string;

@@ -59,6 +59,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -106,17 +107,22 @@ class PackagePolicyService {
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
-    });
+    if (!options?.skipUniqueNameVerification) {
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      });
 
-    // Check that the name does not exist already
-    if (existingPoliciesWithName.items.length > 0) {
-      throw new IngestManagerError('There is already an integration policy with the same name');
+      // Check that the name does not exist already
+      if (existingPoliciesWithName.items.length > 0) {
+        throw new IngestManagerError('There is already an integration policy with the same name');
+      }
     }
+
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
@@ -369,9 +375,10 @@ class PackagePolicyService {
     }
     // Check that the name does not exist already but exclude the current package policy
     const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
     });
+
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
@@ -675,6 +682,9 @@ class PackagePolicyService {
       return {
         name: updatedPackagePolicy.name,
         diff: [packagePolicy, updatedPackagePolicy],
+        // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+        // as we only show this version in the UI
+        agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
         hasErrors,
       };
     } catch (error) {

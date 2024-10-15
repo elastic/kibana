@@ -480,6 +480,7 @@ describe('Endpoint Action Status', () => {
         config: () => Promise.resolve(createMockConfig()),
         experimentalFeatures: {
           ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
+          // @ts-expect-error ts upgrade v4.7.4
           pendingActionResponsesWithAck: false,
         },
       });

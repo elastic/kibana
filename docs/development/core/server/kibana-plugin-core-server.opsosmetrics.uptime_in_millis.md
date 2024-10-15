@@ -6,7 +6,7 @@
 
 the OS uptime
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 uptime_in_millis: number;

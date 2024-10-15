@@ -8,7 +8,7 @@ Optional namespace string to use when searching for this object. If this is defi
 
 Note: the default namespace's string representation is `'default'`<!-- -->, and its ID representation is `undefined`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespace?: string;

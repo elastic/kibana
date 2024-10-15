@@ -31,6 +31,7 @@ describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
+    // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.ts(2590)
     const executor = createLifecycleExecutor(
       logger,
       ruleDataClientMock
@@ -126,7 +127,7 @@ describe('createLifecycleExecutor', () => {
       hits: {
         hits: [
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_UUID]: 'ALERT_0_UUID',
@@ -143,7 +144,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'ALERT_1_UUID',
@@ -246,7 +247,7 @@ describe('createLifecycleExecutor', () => {
       hits: {
         hits: [
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_UUID]: 'ALERT_0_UUID',
@@ -262,7 +263,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'ALERT_1_UUID',

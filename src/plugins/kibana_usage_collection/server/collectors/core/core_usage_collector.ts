@@ -355,14 +355,14 @@ export function getCoreUsageCollector(
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of documents in the index, including hidden nested documents.',
+                    'The number of lucene documents in the index, including hidden nested documents.',
                 },
               },
               docsDeleted: {
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of deleted documents in the index, including hidden nested documents.',
+                    'The number of deleted lucene documents in the index, including hidden nested documents.',
                 },
               },
               alias: {
@@ -380,6 +380,12 @@ export function getCoreUsageCollector(
                 type: 'long',
                 _meta: {
                   description: 'The size in bytes of the index, for primaries and replicas.',
+                },
+              },
+              savedObjectsDocsCount: {
+                type: 'long',
+                _meta: {
+                  description: 'The number of saved objects documents in the index.',
                 },
               },
             },

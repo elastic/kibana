@@ -6,7 +6,7 @@
 
 Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;

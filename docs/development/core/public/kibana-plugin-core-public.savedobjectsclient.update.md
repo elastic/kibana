@@ -6,7 +6,7 @@
 
 Updates an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
@@ -19,9 +19,9 @@ update<T = unknown>(type: string, id: string, attributes: T, { version, referenc
 |  type | string |  |
 |  id | string |  |
 |  attributes | T |  |
-|  { version, references, upsert } | SavedObjectsUpdateOptions |  |
+|  { version, references, upsert } | SavedObjectsUpdateOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SimpleSavedObject&lt;T&gt;&gt;
 

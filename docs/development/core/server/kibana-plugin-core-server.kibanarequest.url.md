@@ -6,7 +6,7 @@
 
 a WHATWG URL standard object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly url: URL;

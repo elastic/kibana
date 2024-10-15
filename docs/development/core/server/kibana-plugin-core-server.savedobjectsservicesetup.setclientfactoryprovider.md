@@ -6,7 +6,7 @@
 
 Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;

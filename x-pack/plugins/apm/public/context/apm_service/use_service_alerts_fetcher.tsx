@@ -30,13 +30,7 @@ export function useServiceAlertsFetcher({
 
   const fetcherStatus = useFetcher(
     (callApmApi) => {
-      if (
-        !start ||
-        !end ||
-        !serviceName ||
-        !transactionType ||
-        !experimentalAlertsEnabled
-      ) {
+      if (!start || !end || !serviceName || !transactionType || !experimentalAlertsEnabled) {
         return;
       }
 
@@ -60,14 +54,7 @@ export function useServiceAlertsFetcher({
         };
       });
     },
-    [
-      start,
-      end,
-      serviceName,
-      transactionType,
-      environment,
-      experimentalAlertsEnabled,
-    ]
+    [start, end, serviceName, transactionType, environment, experimentalAlertsEnabled]
   );
 
   const { data, ...rest } = fetcherStatus;

@@ -67,5 +67,6 @@ const latencyOverallDistributionRoute = createApmServerRoute({
   },
 });
 
-export const latencyDistributionRouteRepository =
-  createApmServerRouteRepository().add(latencyOverallDistributionRoute);
+export const latencyDistributionRouteRepository = createApmServerRouteRepository().add(
+  latencyOverallDistributionRoute
+);

@@ -35,6 +35,7 @@ export default function () {
     },
     mochaReporter: {
       captureLogOutput: false,
+      sendToCiStats: false,
     },
   };
 }

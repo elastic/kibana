@@ -18,14 +18,10 @@ export function saveApmIndices(
   apmIndices: Partial<ApmIndicesConfig>
 ) {
   return withApmSpan('save_apm_indices', () =>
-    savedObjectsClient.create(
-      APM_INDICES_SAVED_OBJECT_TYPE,
-      removeEmpty(apmIndices),
-      {
-        id: APM_INDICES_SAVED_OBJECT_ID,
-        overwrite: true,
-      }
-    )
+    savedObjectsClient.create(APM_INDICES_SAVED_OBJECT_TYPE, removeEmpty(apmIndices), {
+      id: APM_INDICES_SAVED_OBJECT_ID,
+      overwrite: true,
+    })
   );
 }
 

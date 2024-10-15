@@ -9,22 +9,20 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
 import './mocks';
-import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
+import { FOLLOWER_INDEX_EDIT, FOLLOWER_INDEX_EDIT_NAME } from './helpers/constants';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;
 
 describe('Edit follower index', () => {
-  let server;
+  let httpSetup;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('on component mount', () => {
@@ -35,7 +33,10 @@ describe('Edit follower index', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-      httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
+      httpRequestsMockHelpers.setGetFollowerIndexResponse(
+        FOLLOWER_INDEX_EDIT_NAME,
+        FOLLOWER_INDEX_EDIT
+      );
       ({ component, find } = setup());
 
       await nextTick();
@@ -97,7 +98,10 @@ describe('Edit follower index', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-      httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
+      httpRequestsMockHelpers.setGetFollowerIndexResponse(
+        FOLLOWER_INDEX_EDIT_NAME,
+        FOLLOWER_INDEX_EDIT
+      );
 
       await act(async () => {
         testBed = await setup();
@@ -117,26 +121,23 @@ describe('Edit follower index', () => {
 
       await nextTick(); // Make sure the Request went through
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const requestBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-      // Verify the API endpoint called: method, path and payload
-      expect(latestRequest.method).toBe('PUT');
-      expect(latestRequest.url).toBe(
-        `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT.name}`
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT_NAME}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            maxReadRequestOperationCount: 7845,
+            maxOutstandingReadRequests: 16,
+            maxReadRequestSize: '64mb',
+            maxWriteRequestOperationCount: 2456,
+            maxWriteRequestSize: '1048b',
+            maxOutstandingWriteRequests: 69,
+            maxWriteBufferCount: 123456,
+            maxWriteBufferSize: '256mb',
+            maxRetryDelay: '10s',
+            readPollTimeout: '2m',
+          }),
+        })
       );
-      expect(requestBody).toEqual({
-        maxReadRequestOperationCount: 7845,
-        maxOutstandingReadRequests: 16,
-        maxReadRequestSize: '64mb',
-        maxWriteRequestOperationCount: 2456,
-        maxWriteRequestSize: '1048b',
-        maxOutstandingWriteRequests: 69,
-        maxWriteBufferCount: 123456,
-        maxWriteBufferSize: '256mb',
-        maxRetryDelay: '10s',
-        readPollTimeout: '2m',
-      });
     });
   });
 
@@ -151,7 +152,10 @@ describe('Edit follower index', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([
         { name: 'new-york', seeds: ['localhost:123'], isConnected: false },
       ]);
-      httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
+      httpRequestsMockHelpers.setGetFollowerIndexResponse(
+        FOLLOWER_INDEX_EDIT_NAME,
+        FOLLOWER_INDEX_EDIT
+      );
       ({ component, find, exists, actions, form } = setup());
 
       await nextTick();

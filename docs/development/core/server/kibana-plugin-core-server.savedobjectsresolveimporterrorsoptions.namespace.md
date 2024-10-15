@@ -6,7 +6,7 @@
 
 if specified, will import in given namespace
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespace?: string;

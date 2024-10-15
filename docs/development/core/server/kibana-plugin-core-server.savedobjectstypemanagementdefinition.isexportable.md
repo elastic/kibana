@@ -10,7 +10,7 @@ If specified, `isExportable` will be called during export for each of this type'
 
 When implementing both `isExportable` and `onExport`<!-- -->, it is mandatory that `isExportable` returns the same value for an object before and after going though the export transform. E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isExportable?: SavedObjectsExportablePredicate<Attributes>;

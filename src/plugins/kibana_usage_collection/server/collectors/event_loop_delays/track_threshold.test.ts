@@ -18,7 +18,7 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
   const mockEventLoopCounter = mockUsageCountersSetup.createUsageCounter('testCounter');
   const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
 
-  beforeAll(() => jest.useFakeTimers('modern'));
+  beforeAll(() => jest.useFakeTimers());
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => stopMonitoringEventLoop$.next());
 

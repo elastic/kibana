@@ -6,7 +6,7 @@
 
 The ID of the object to update
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: string;

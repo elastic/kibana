@@ -6,7 +6,7 @@
 
 References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 inboundReferences: Array<{

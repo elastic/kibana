@@ -6,7 +6,7 @@
 
 To define custom logic to perform for incoming requests before server performs a route lookup.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerOnPreRouting: (handler: OnPreRoutingHandler) => void;

@@ -47,10 +47,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const CreatingInApmFromInventory: Story<Args> = ({
-  alertParams,
-  metadata,
-}) => {
+export const CreatingInApmFromInventory: Story<Args> = ({ alertParams, metadata }) => {
   const [params, setParams] = useState<AlertParams>(alertParams);
 
   function setAlertParams(property: string, value: any) {
@@ -76,10 +73,7 @@ CreatingInApmFromInventory.args = {
   },
 };
 
-export const CreatingInApmFromService: Story<Args> = ({
-  alertParams,
-  metadata,
-}) => {
+export const CreatingInApmFromService: Story<Args> = ({ alertParams, metadata }) => {
   const [params, setParams] = useState<AlertParams>(alertParams);
 
   function setAlertParams(property: string, value: any) {
@@ -105,10 +99,7 @@ CreatingInApmFromService.args = {
   },
 };
 
-export const EditingInStackManagement: Story<Args> = ({
-  alertParams,
-  metadata,
-}) => {
+export const EditingInStackManagement: Story<Args> = ({ alertParams, metadata }) => {
   const [params, setParams] = useState<AlertParams>(alertParams);
 
   function setAlertParams(property: string, value: any) {
@@ -135,10 +126,7 @@ EditingInStackManagement.args = {
   metadata: undefined,
 };
 
-export const CreatingInStackManagement: Story<Args> = ({
-  alertParams,
-  metadata,
-}) => {
+export const CreatingInStackManagement: Story<Args> = ({ alertParams, metadata }) => {
   const [params, setParams] = useState<AlertParams>(alertParams);
 
   function setAlertParams(property: string, value: any) {

@@ -15,8 +15,12 @@ import type {
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { patchElasticsearchClient } from './patch_client';
 
 const noop = () => undefined;
+
+// Apply ES client patches on module load
+patchElasticsearchClient();
 
 export const configureClient = (
   config: ElasticsearchClientConfig,

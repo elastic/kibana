@@ -201,7 +201,6 @@ function FieldListItemComponent(
   return (
     <li
       className={classNames('mappingsEditor__fieldsListItem', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
       data-test-subj={`fieldsListItem ${dataTestSubj}`}
@@ -210,17 +209,13 @@ function FieldListItemComponent(
       <div
         style={{ paddingLeft: `${indent}px` }}
         className={classNames('mappingsEditor__fieldsListItem__field', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
         <div
           className={classNames('mappingsEditor__fieldsListItem__wrapper', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__fieldsListItem__wrapper--indent':
               treeDepth === 0 && maxNestedDepth === 0,
           })}
@@ -229,11 +224,8 @@ function FieldListItemComponent(
             gutterSize="s"
             alignItems="center"
             className={classNames('mappingsEditor__fieldsListItem__content', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--indent':
                 !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
             })}

@@ -6,7 +6,7 @@
 
 The current "level" of availability of a service.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 ServiceStatusLevels: Readonly<{

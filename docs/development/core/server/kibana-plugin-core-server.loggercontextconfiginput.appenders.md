@@ -4,7 +4,7 @@
 
 ## LoggerContextConfigInput.appenders property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;

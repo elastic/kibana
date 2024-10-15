@@ -6,7 +6,7 @@
 
 Additional data to extend a response when rendering a new body
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreResponseRender 
@@ -14,8 +14,8 @@ export interface OnPreResponseRender
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body](./kibana-plugin-core-server.onpreresponserender.body.md) | string | the body to use in the response |
-|  [headers?](./kibana-plugin-core-server.onpreresponserender.headers.md) | ResponseHeaders | <i>(Optional)</i> additional headers to attach to the response |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body](./kibana-plugin-core-server.onpreresponserender.body.md) |  | string | the body to use in the response |
+|  [headers?](./kibana-plugin-core-server.onpreresponserender.headers.md) |  | ResponseHeaders | _(Optional)_ additional headers to attach to the response |
 

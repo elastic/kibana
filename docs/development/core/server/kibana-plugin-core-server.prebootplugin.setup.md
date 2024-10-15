@@ -4,7 +4,7 @@
 
 ## PrebootPlugin.setup() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setup(core: CorePreboot, plugins: TPluginsSetup): TSetup;
@@ -17,7 +17,7 @@ setup(core: CorePreboot, plugins: TPluginsSetup): TSetup;
 |  core | CorePreboot |  |
 |  plugins | TPluginsSetup |  |
 
-<b>Returns:</b>
+**Returns:**
 
 TSetup
 

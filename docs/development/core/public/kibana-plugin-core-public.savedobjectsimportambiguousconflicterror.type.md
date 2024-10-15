@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportAmbiguousConflictError.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: 'ambiguous_conflict';

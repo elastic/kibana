@@ -6,7 +6,7 @@
 
 The query string for an HTTP request. See [HttpFetchQuery](./kibana-plugin-core-public.httpfetchquery.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 query?: HttpFetchQuery;

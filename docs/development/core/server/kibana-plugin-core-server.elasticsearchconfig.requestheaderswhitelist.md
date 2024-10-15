@@ -6,7 +6,7 @@
 
 List of Kibana client-side headers to send to Elasticsearch when request scoped cluster client is used. If this is an empty array then \*no\* client-side will be sent.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly requestHeadersWhitelist: string[];

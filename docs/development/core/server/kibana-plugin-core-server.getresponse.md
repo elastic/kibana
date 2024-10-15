@@ -5,7 +5,7 @@
 ## GetResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface GetResponse<T> 
@@ -13,15 +13,15 @@ export interface GetResponse<T>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [\_id](./kibana-plugin-core-server.getresponse._id.md) | string |  |
-|  [\_index](./kibana-plugin-core-server.getresponse._index.md) | string |  |
-|  [\_primary\_term](./kibana-plugin-core-server.getresponse._primary_term.md) | number |  |
-|  [\_routing?](./kibana-plugin-core-server.getresponse._routing.md) | string | <i>(Optional)</i> |
-|  [\_seq\_no](./kibana-plugin-core-server.getresponse._seq_no.md) | number |  |
-|  [\_source](./kibana-plugin-core-server.getresponse._source.md) | T |  |
-|  [\_type](./kibana-plugin-core-server.getresponse._type.md) | string |  |
-|  [\_version](./kibana-plugin-core-server.getresponse._version.md) | number |  |
-|  [found](./kibana-plugin-core-server.getresponse.found.md) | boolean |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [\_id](./kibana-plugin-core-server.getresponse._id.md) |  | string |  |
+|  [\_index](./kibana-plugin-core-server.getresponse._index.md) |  | string |  |
+|  [\_primary\_term](./kibana-plugin-core-server.getresponse._primary_term.md) |  | number |  |
+|  [\_routing?](./kibana-plugin-core-server.getresponse._routing.md) |  | string | _(Optional)_ |
+|  [\_seq\_no](./kibana-plugin-core-server.getresponse._seq_no.md) |  | number |  |
+|  [\_source](./kibana-plugin-core-server.getresponse._source.md) |  | T |  |
+|  [\_type](./kibana-plugin-core-server.getresponse._type.md) |  | string |  |
+|  [\_version](./kibana-plugin-core-server.getresponse._version.md) |  | number |  |
+|  [found](./kibana-plugin-core-server.getresponse.found.md) |  | boolean |  |
 

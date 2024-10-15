@@ -41,5 +41,4 @@ export interface CorrelationsServerParams {
   includeFrozen?: boolean;
 }
 
-export type CorrelationsParams = CorrelationsClientParams &
-  CorrelationsServerParams;
+export type CorrelationsParams = CorrelationsClientParams & CorrelationsServerParams;

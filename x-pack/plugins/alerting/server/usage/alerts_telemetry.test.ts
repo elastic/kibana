@@ -7,7 +7,10 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
+
+const mockLogger = loggingSystemMock.create().get();
 
 describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
@@ -35,7 +38,7 @@ describe('alerts telemetry', () => {
       })
     );
 
-    const telemetry = await getTotalCountInUse(mockEsClient, 'test');
+    const telemetry = await getTotalCountInUse(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -48,6 +51,25 @@ Object {
   },
   "countNamespaces": 1,
   "countTotal": 4,
+}
+`);
+  });
+
+  test('getTotalCountInUse should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCountInUse(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getTotalCountInUse - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {},
+  "countNamespaces": 0,
+  "countTotal": 0,
 }
 `);
   });
@@ -83,7 +105,7 @@ Object {
       })
     );
 
-    const telemetry = await getTotalCountAggregations(mockEsClient, 'test');
+    const telemetry = await getTotalCountAggregations(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -119,6 +141,50 @@ Object {
   "throttle_time_number_s": Object {
     "avg": 30,
     "max": 60,
+    "min": 0,
+  },
+}
+`);
+  });
+
+  test('getTotalCountAggregations should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCountAggregations(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getTotalCountAggregations - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "connectors_per_alert": Object {
+    "avg": 0,
+    "max": 0,
+    "min": 0,
+  },
+  "count_by_type": Object {},
+  "count_rules_namespaces": 0,
+  "count_total": 0,
+  "schedule_time": Object {
+    "avg": "0s",
+    "max": "0s",
+    "min": "0s",
+  },
+  "schedule_time_number_s": Object {
+    "avg": 0,
+    "max": 0,
+    "min": 0,
+  },
+  "throttle_time": Object {
+    "avg": "0s",
+    "max": "0s",
+    "min": "0s",
+  },
+  "throttle_time_number_s": Object {
+    "avg": 0,
+    "max": 0,
     "min": 0,
   },
 }

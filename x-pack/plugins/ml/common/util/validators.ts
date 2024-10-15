@@ -116,7 +116,7 @@ export function numberValidator(conditions?: { min?: number; max?: number }) {
   }
 
   return (value: number): NumberValidationResult | null => {
-    const result = {} as NumberValidationResult;
+    const result = Object.create(null) as NumberValidationResult;
     if (conditions?.min !== undefined && value < conditions.min) {
       result.min = true;
     }

@@ -6,7 +6,7 @@
 
 Returns the [registry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) containing all registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTypeRegistry: () => ISavedObjectTypeRegistry;

@@ -43,15 +43,15 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return a transform preview', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/transform/transforms/_preview')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send(getTransformPreviewConfig())
-        .expect(200);
+        .send(getTransformPreviewConfig());
+      transform.api.assertResponseStatusCode(200, status, body);
 
       expect(body.preview).to.have.length(expected.apiTransformTransformsPreview.previewItemCount);
       expect(typeof body.generated_dest_index).to.eql(
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return a correct error for transform preview', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/transform/transforms/_preview`)
         .auth(
           USER.TRANSFORM_POWERUSER,
@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
               '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
             },
           },
-        })
-        .expect(400);
+        });
+      transform.api.assertResponseStatusCode(400, status, body);
 
       expect(body.message).to.contain(
         '[parsing_exception] Unknown aggregation type [value_countt] did you mean [value_count]?, with line=1 & col=43'
@@ -84,15 +84,15 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 403 for transform view-only user', async () => {
-      await supertest
+      const { body, status } = await supertest
         .post(`/api/transform/transforms/_preview`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send(getTransformPreviewConfig())
-        .expect(403);
+        .send(getTransformPreviewConfig());
+      transform.api.assertResponseStatusCode(403, status, body);
     });
   });
 };

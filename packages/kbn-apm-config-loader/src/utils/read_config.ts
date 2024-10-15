@@ -10,10 +10,16 @@ import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 
 import { set } from '@elastic/safer-lodash-set';
+import { ensureDeepObject } from '@kbn/std';
 import { isPlainObject } from 'lodash';
-import { ensureDeepObject } from './ensure_deep_object';
 
-const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
+const readYaml = (path: string) => {
+  try {
+    return safeLoad(readFileSync(path, 'utf8'));
+  } catch (e) {
+    /* tslint:disable:no-empty */
+  }
+};
 
 function replaceEnvVarRefs(val: string) {
   return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {

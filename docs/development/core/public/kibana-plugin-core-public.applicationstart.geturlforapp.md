@@ -10,7 +10,7 @@ By default, it returns the absolute path of the application (e.g `/basePath/app/
 
 Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getUrlForApp(appId: string, options?: {
@@ -25,9 +25,9 @@ getUrlForApp(appId: string, options?: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | string |  |
-|  options | { path?: string; absolute?: boolean; deepLinkId?: string; } |  |
+|  options | { path?: string; absolute?: boolean; deepLinkId?: string; } | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

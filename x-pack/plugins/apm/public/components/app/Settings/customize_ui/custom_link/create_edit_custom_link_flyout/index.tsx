@@ -57,9 +57,7 @@ export function CreateEditCustomLinkFlyout({
   const isFormValid = !!label && !!url;
 
   const onSubmit = async (
-    event:
-      | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
+    event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
     setIsSaving(true);
@@ -80,25 +78,19 @@ export function CreateEditCustomLinkFlyout({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.flyout.title',
-                {
-                  defaultMessage: 'Create link',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.title', {
+                defaultMessage: 'Create link',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiText>
             <p>
-              {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.flyout.label',
-                {
-                  defaultMessage:
-                    'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
-                }
-              )}{' '}
+              {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.label', {
+                defaultMessage:
+                  'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
+              })}{' '}
               <Documentation
                 label={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
@@ -112,12 +104,7 @@ export function CreateEditCustomLinkFlyout({
 
           <EuiSpacer size="l" />
 
-          <LinkSection
-            label={label}
-            onChangeLabel={setLabel}
-            url={url}
-            onChangeUrl={setUrl}
-          />
+          <LinkSection label={label} onChangeLabel={setLabel} url={url} onChangeUrl={setUrl} />
 
           <EuiSpacer size="l" />
 

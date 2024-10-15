@@ -22,23 +22,12 @@ import { BackendDetailDependenciesTable } from './backend_detail_dependencies_ta
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
 import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
-import {
-  getKueryBarBoolFilter,
-  kueryBarPlaceholder,
-} from '../../../../common/backends';
+import { getKueryBarBoolFilter, kueryBarPlaceholder } from '../../../../common/backends';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 export function BackendDetailOverview() {
   const {
-    query: {
-      backendName,
-      rangeFrom,
-      rangeTo,
-      refreshInterval,
-      refreshPaused,
-      environment,
-      kuery,
-    },
+    query: { backendName, rangeFrom, rangeTo, refreshInterval, refreshPaused, environment, kuery },
   } = useApmParams('/backends/overview');
 
   const apmRouter = useApmRouter();
@@ -88,10 +77,7 @@ export function BackendDetailOverview() {
         kueryBarBoolFilter={kueryBarBoolFilter}
       />
       <ChartPointerEventContextProvider>
-        <EuiFlexGroup
-          direction={largeScreenOrSmaller ? 'column' : 'row'}
-          gutterSize="s"
-        >
+        <EuiFlexGroup direction={largeScreenOrSmaller ? 'column' : 'row'} gutterSize="s">
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <EuiTitle size="xs">
@@ -108,10 +94,9 @@ export function BackendDetailOverview() {
             <EuiPanel hasBorder={true}>
               <EuiTitle size="xs">
                 <h2>
-                  {i18n.translate(
-                    'xpack.apm.backendDetailThroughputChartTitle',
-                    { defaultMessage: 'Throughput' }
-                  )}
+                  {i18n.translate('xpack.apm.backendDetailThroughputChartTitle', {
+                    defaultMessage: 'Throughput',
+                  })}
                 </h2>
               </EuiTitle>
               <BackendThroughputChart height={200} />
@@ -121,10 +106,9 @@ export function BackendDetailOverview() {
             <EuiPanel hasBorder={true}>
               <EuiTitle size="xs">
                 <h2>
-                  {i18n.translate(
-                    'xpack.apm.backendDetailFailedTransactionRateChartTitle',
-                    { defaultMessage: 'Failed transaction rate' }
-                  )}
+                  {i18n.translate('xpack.apm.backendDetailFailedTransactionRateChartTitle', {
+                    defaultMessage: 'Failed transaction rate',
+                  })}
                 </h2>
               </EuiTitle>
               <BackendFailedTransactionRateChart height={200} />

@@ -5,16 +5,16 @@
 ## SavedObjectsRemoveReferencesToResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions 
 ```
-<b>Extends:</b> SavedObjectsBaseOptions
+**Extends:** SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [updated](./kibana-plugin-core-server.savedobjectsremovereferencestoresponse.updated.md) | number | The number of objects that have been updated by this operation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [updated](./kibana-plugin-core-server.savedobjectsremovereferencestoresponse.updated.md) |  | number | The number of objects that have been updated by this operation |
 

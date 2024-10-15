@@ -6,7 +6,7 @@
 
 UI element type to represent the settings.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';

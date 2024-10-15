@@ -6,7 +6,7 @@
 
 Gets the read-only capabilities.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 capabilities: RecursiveReadonly<Capabilities>;

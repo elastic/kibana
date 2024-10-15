@@ -6,7 +6,7 @@
 
 Set the banner that will appear on top of the chrome header.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setHeaderBanner(headerBanner?: ChromeUserBanner): void;
@@ -16,9 +16,9 @@ setHeaderBanner(headerBanner?: ChromeUserBanner): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  headerBanner | ChromeUserBanner |  |
+|  headerBanner | ChromeUserBanner | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

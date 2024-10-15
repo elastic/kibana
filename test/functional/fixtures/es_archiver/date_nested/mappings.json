@@ -1,6 +1,8 @@
 {
   "type": "index",
   "value": {
+    "aliases": {
+    },
     "index": "date-nested",
     "mappings": {
       "properties": {
@@ -8,6 +10,11 @@
           "type": "text"
         },
         "nested": {
+          "properties": {
+            "timestamp": {
+              "type": "date"
+            }
+          },
           "type": "nested"
         }
       }

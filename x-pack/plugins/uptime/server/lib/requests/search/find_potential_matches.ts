@@ -51,6 +51,8 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
   }
 
+  filters.push({ exists: { field: 'summary' } });
+
   const body = {
     size: 0,
     query: {

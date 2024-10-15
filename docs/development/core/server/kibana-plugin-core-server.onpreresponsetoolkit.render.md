@@ -6,7 +6,7 @@
 
 To override the response with a different body
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 render: (responseRender: OnPreResponseRender) => OnPreResponseResult;

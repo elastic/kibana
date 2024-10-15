@@ -13,6 +13,30 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.24>>
+* <<release-notes-7.17.23>>
+* <<release-notes-7.17.22>>
+* <<release-notes-7.17.21>>
+* <<release-notes-7.17.20>>
+* <<release-notes-7.17.19>>
+* <<release-notes-7.17.18>>
+* <<release-notes-7.17.17>>
+* <<release-notes-7.17.16>>
+* <<release-notes-7.17.15>>
+* <<release-notes-7.17.14>>
+* <<release-notes-7.17.13>>
+* <<release-notes-7.17.12>>
+* <<release-notes-7.17.11>>
+* <<release-notes-7.17.10>>
+* <<release-notes-7.17.9>>
+* <<release-notes-7.17.8>>
+* <<release-notes-7.17.7>>
+* <<release-notes-7.17.6>>
+* <<release-notes-7.17.5>>
+* <<release-notes-7.17.4>>
+* <<release-notes-7.17.3>>
+* <<release-notes-7.17.2>>
+* <<release-notes-7.17.1>>
 * <<release-notes-7.17.0>>
 //* <<release-notes-7.16.3>>
 //* <<release-notes-7.16.2>>
@@ -71,20 +95,702 @@ Review important information about the {kib} 7.17.x releases.
 
 --
 
+[[release-notes-7.17.24]]
+== {kib} 7.17.24
+
+The 7.17.24 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.24]]
+=== Bug fixes
+
+Machine Learning::
+* Improving empty object creation ({kibana-pull}191836[#191836]).
+* Improving empty object creation ({kibana-pull}191518[#191518]).
+
+Observability::
+* Change infra plugin feature name from Metrics to Infrastructure ({kibana-pull}189432[#189432]).
+
+[float]
+[[deprecations-7.17.24]]
+=== Deprecations
+
+* Removes support for Heartbeat browser monitor screenshots for lower versions of Heartbeat. Please upgrade to Heartbeat 7.17.24 to continue using Heartbeat browser monitor screenshots. ({kibana-pull}189911[#189911])
+
+[[release-notes-7.17.23]]
+== {kib} 7.17.23
+
+The 7.17.23 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-v7.17.23]]
+=== Known issues
+
+[discrete]
+[[known-187823]]
+.Connectors require update due to Microsoft Teams product retirement
+[%collapsible]
+====
+*Details* +
+The original method for configuring incoming webhooks in Microsoft Teams is being retired.
+Refer to https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/[Retirement of Office 365 connectors within Microsoft Teams] and {kibana-issue}187823[#187823].
+
+*Impact* +
+If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook URL for a <<teams-action-type,Microsoft Teams connector>>, it will stop working in December 2024.
+
+*Workaround* +
+Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
+Update your Microsoft Teams connector to use the new URL before the end of December 2024.
+====
+
+[float]
+[[fixes-v7.17.23]]
+=== Bug Fixes
+Machine Learning::
+* Fixes an issue with empty object creation ({kibana-pull}186821[#186821]).
+* Removes the use of the **RE2** library ({kibana-pull}186104[#186104]).
+
+Platform::
+* Fixes a race condition that could cause intermittent upgrade migration failures when Kibana connects to a single-node Elasticsearch cluster ({kibana-pull}158182[#158182]).
+
+Security::
+* Updates node spawn process hardening ({kibana-pull}186786[#186786]).
+
+[[release-notes-7.17.22]]
+== {kib} 7.17.22
+
+[float]
+[[fixes-v7.17.22]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 7.17.22 release.
+
+[[release-notes-7.17.21]]
+== {kib} 7.17.21
+
+[float]
+[[fixes-v7.17.21]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 7.17.21 release.
+
+[[release-notes-7.17.20]]
+== {kib} 7.17.20
+
+[float]
+[[fixes-v7.17.20]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 7.17.20 release.
+
+[[release-notes-7.17.19]]
+== {kib} 7.17.19
+
+The 7.17.19 release includes the following enhancements.
+
+[float]
+[[fixes-v7.17.19]]
+=== Enhancements
+Discover::
+* Improves the performance of `getFieldsToShow` for large data views ({kibana-pull}144672[#144672]).
+
+[[release-notes-7.17.18]]
+== {kib} 7.17.18
+
+[float]
+[[fixes-v7.17.18]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 7.17.18 release. 
+
+[[release-notes-7.17.17]]
+== {kib} 7.17.17
+
+The 7.17.17 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.17]]
+=== Bug Fixes
+Reporting::
+* Fixes the handling of content stream errors in reports before deletion ({kibana-pull}173792[#173792]).
+
+[[release-notes-7.17.16]]
+== {kib} 7.17.16
+
+Review the following information about the {kib} 7.17.16 release.
+
+[float]
+[[security-update-v7.17.16]]
+=== Security updates
+
+* The 7.17.16 patch release contains a fix for a potential security vulnerability. https://discuss.elastic.co/c/announcements/security-announcements/31[Please see our security advisory for more details].
+
+[float]
+[[fixes-v7.17.16]]
+=== Bug Fixes
+Discover::
+* Fixes support for nested field columns in CSV reports {kibana-pull}172240[#172240].
+
+[[release-notes-7.17.15]]
+== {kib} 7.17.15
+
+Review the following information about the {kib} 7.17.15 release.
+
+[float]
+[[security-update-v7.17.15]]
+=== Security updates
+
+* An issue was discovered by Elastic whereby sensitive information is recorded
+in {kib} logs in the event of an error. The error message recorded in the log
+may contain account credentials for the `kibana_system` user, API Keys, and
+credentials of {kib} end users.
++
+--
+**Nov 15, 2023 Update:** After additional investigation, it has been determined
+that {kib} 7.x versions are not affected by this issue. We previously
+reported this issue impacted {kib} versions before 7.17.15.
+
+For more information, see our related
+https://discuss.elastic.co/t/8-11-1-7-17-15-security-update-esa-2023-25/347149[security
+announcement].
+--
+
+[float]
+[[breaking-changes-v7.17.15]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.17.15, review the breaking changes, then mitigate the impact to your application.
+
+[discrete]
+[[breaking-167831]]
+.Less version updated for TSVB
+[%collapsible]
+====
+*Details*  +
+TSVB has been updated to use the most recent version of Less (from v2.7.3 to v4.2.0), which could result in markdowns displaying incorrect styling. For more information, refer to {kibana-pull}167831[#167831].
+====
+
+[[release-notes-7.17.14]]
+== {kib} 7.17.14
+
+Review the following information about the {kib} 7.17.14 release.
+
+[float]
+[[security-update-7.17.14]]
+=== Security update
+
+* **Kibana heap buffer overflow vulnerability**
++
+On Sept 11, 2023, Google Chrome announced CVE-2023-4863, described as “Heap buffer overflow in libwebp in Google Chrome prior to 116.0.5845.187 and libwebp 1.3.2 allowed a remote attacker to perform an out of bounds memory write via a crafted HTML page”. Kibana includes a bundled version of headless Chromium that is only used for Kibana’s reporting capabilities and which is affected by this vulnerability. An exploit for Kibana has not been identified, however as a resolution, the bundled version of Chromium is updated in this release.
++
+The issue is resolved in 7.17.14.
++
+For more information, see our related
+https://discuss.elastic.co/t/kibana-8-10-3-7-17-14-security-update/344735[security
+announcement].
+
+[[release-notes-7.17.13]]
+== {kib} 7.17.13
+
+The 7.17.13 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.13]]
+=== Bug Fixes
+
+Uptime::
+* Fixes an issue with editing an ML rule in Uptime {kibana-pull}163357[#163357].
+
+[[release-notes-7.17.12]]
+== {kib} 7.17.12
+
+Review the following information about the {kib} 7.17.12 release. 
+
+[float]
+[[fixes-v7.17.12]]
+=== Bug Fixes
+
+Dashboard::
+* Fixes an issue with PDF reports not displaying full chart data when taken from the Dashboard app that use the "optimize-for-print" option {kibana-pull}161293[#161293]
+
+Lens & Visualizations::
+* Fixes an issue where when creating a table in *Lens*, if no data was returned, an error displayed instead of the no data view {kibana-pull}161953[#161953]
+
+[[release-notes-7.17.11]]
+== {kib} 7.17.11
+
+Review the following information about the {kib} 7.17.11 release.
+
+[float]
+[[fixes-v7.17.11]]
+=== Bug Fixes
+
+Operations::
+* Adjust CLI to treat extra options consistently {kibana-pull}158257[#158257]
+
+Platform::
+* Fixes a bug causing the latest timezone changes to not be taken into account for date formatting (e.g Mexico 2023) {kibana-pull}155832[#155832]
+* Upgrade Puppeteer dependency to v20.1.0 {kibana-pull}156766[#156766]
+
+[[release-notes-7.17.10]]
+== {kib} 7.17.10
+
+Review the following information about the {kib} 7.17.10 release.
+
+[float]
+[[breaking-changes-v7.17.10]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.10 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.10]]
+=== Bug fixes
+Dashboard::
+Fixes `z-index` of `embPanel__header--floater` {kibana-pull}136463[#136463]
+
+Infrastructure::
+* Kubernetes Pods now correctly show Network chart {kibana-pull}153631[#153631]
+* Fixes streaming (amend logic for isScrollLocked) {kibana-pull}150559[#150559]
+
+Lens & Visualizations::
+Gracefully handle JS Object method names as field names in *Lens* {kibana-pull}148118[#148118]
+
+Reporting::
+Fixes a bug where the `id` field with a high numeric value lost precision in *Discover* CSV exports {kibana-pull}143807[#143807]
+
+[[release-notes-7.17.9]]
+== {kib} 7.17.9
+
+Review the following information about the 7.17.9 release.
+
+[float]
+[[breaking-changes-v7.17.9]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.9 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.9]]
+=== Bug fix
+Machine Learning::
+* Fixes for errors when loading data views which are missing index {kibana-pull}147916[#147916]
+
+[[release-notes-7.17.8]]
+== {kib} 7.17.8
+
+Review the following information about the 7.17.8 release.
+
+[float]
+[[breaking-changes-v7.17.8]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.8 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[security-update-v7.17.8]]
+=== Security update
+
+The 7.17.8 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/7-17-8-8-5-0-security-update/320920[Security announcements].
+
+[float]
+[[enhancement-v7.17.8]]
+=== Enhancements
+Reporting::
+Upgraded the bundled Chromium browser to version 107, which can cause a minor increase in time to generate PNG and PDF reports {kibana-pull}143485[#143485]
+
+Security::
+Adds a `Content-Security-Policy` header to all `/api/*` responses, so now any Kibana HTTP endpoints that start with `/api/*` share the same header as the regular Kibana HTTP routes {kibana-pull}144902[#144902]
+
+[float]
+[[fixes-v7.17.8]]
+=== Bug fixes
+APM::
+Fixes the environment filter in the metadata API {kibana-pull}144474[#144474]
+
+Discover::
+Improves the performance for getFieldsToShow {kibana-pull}144672[#144672]
+
+Machine Learning::
+Adds maxRetries:0 to relevant API calls for transforms {kibana-pull}144603[#144603]
+
+[[release-notes-7.17.7]]
+== {kib} 7.17.7
+
+Review the following information about the 7.17.7 release.
+
+[float]
+[[breaking-changes-v7.17.7]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.7 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.17.7]]
+=== Enhancement
+Security::
+When you start {kib}, the hashed saved object encryption key is now logged to help you solve conflicting `xpack.encryptedSavedObjects.encryptionKey` configurations {kibana-pull}139874[#139874]
+
+[float]
+[[fixes-v7.17.7]]
+=== Bug fixes
+Alerting::
+Set .alerts-* auto-expand replicas to 0-1 {kibana-pull}140335[#140335]
+
+Machine Learning::
+* Fixes Open in Single Metric Viewer links not reflecting custom time range for Anomaly chart embeddables {kibana-pull}141007[#141007]
+* Fixes Anomaly charts time and query not being added to dashboard and case {kibana-pull}140147[#140147]
+
+Platform::
+Fixes a bug where savedObjects 'export' and 'copy to space' sometimes caused {kib} to crash for complex object graphs {kibana-pull}142078[#142078]
+
+Uptime::
+Handle index not found errors {kibana-pull}142685[#142685]
+
+[[release-notes-7.17.6]]
+== {kib} 7.17.6
+
+Review the following information about the 7.17.6 release.
+
+[float]
+[[breaking-changes-v7.17.6]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.6 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.6]]
+=== Bug fixes
+APM::
+Upgrades package version to 7.17.0 for APM Fleet migration {kibana-pull}137104[#137104]
+
+Connectors::
+Should trim values before validation in UI and API {kibana-pull}136840[#136840]
+
+Dashboard::
+Transfer state when drilldown is opened in a new tab {kibana-pull}124770[#124770]
+
+Discover::
+Fixes objects formatting when discover:searchFieldsFromSource in Advanced settings is enabled {kibana-pull}136473[#136473]
+
+Fleet::
+Invalidate api keys in agents `default_api_key_history` on force unenroll {kibana-pull}135910[#135910]
+
+Machine Learning::
+Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}136813[#136813]
+
+Security::
+Wrap long role and user names in the roles and users tables {kibana-pull}136067[#136067]
+
+[[release-notes-7.17.5]]
+== {kib} 7.17.5
+
+
+Review the following information about the 7.17.5 release.
+
+[float]
+[[breaking-changes-v7.17.5]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.5 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.5]]
+=== Bug fixes
+Discover::
+* Fixes context page when there's a special character in data view id {kibana-pull}133222[#133222]
+* Fixes CSV export with relative time filter from Discover main view {kibana-pull}123206[#123206]
+
+Elastic Security::
+For the Elastic Security 7.17.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+Bulk reassign kuery optimize {kibana-pull}134673[#134673]
+
+Machine Learning::
+Fixes actual and typical formatting for the `time_of_week` function {kibana-pull}134353[#134353]
+
+Observability::
+Renders the monitor downtime history histogram for all monitors indexed in `synthetics-*` {kibana-pull}134856[#134856]
+
+Platform::
+Fixes an issue in PDF/PNG reporting where visualization panels could sometimes appear blank {kibana-pull}131877[#131877]
+
+[[release-notes-7.17.4]]
+== {kib} 7.17.4
+
+Review the following information about the 7.17.4 release.
+
+[float]
+[[breaking-changes-v7.17.4]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.4 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.17.4]]
+=== Enhancements
+Alerting::
+Adds the `xpack.actions.email.domain_allowlist` configuration setting for the `actions` plugin {kibana-pull}129001[#129001]
+
+Monitoring::
+* Adds the ability to collect Telemetry {kibana-pull}130498[#130498]
+* Adds the ability to report dashboard panels by type {kibana-pull}130166[#130166]
+
+[float]
+[[fixes-v7.17.4]]
+=== Bug fixes
+Cases::
+Revert back the support of preconfigured connectors for Cases {kibana-pull}130372[#130372]
+
+Observability::
+Resolves a bug where "mark as.." for a single alert would redirect to security solution route {kibana-pull}130609[#130609]
+
+[[release-notes-7.17.3]]
+== {kib} 7.17.3
+
+Review the following information about the 7.17.3 release.
+
+[float]
+[[security-update-v7.17.3]]
+=== Security update
+
+The 7.17.3 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/kibana-7-17-3-and-8-1-3-security-update/302826[Security Announcements].
+
+[float]
+[[breaking-changes-v7.17.3]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.3 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.17.3]]
+=== Enhancements
+Management::
+Compress mappings response size for autocomplete {kibana-pull}120456[#120456]
+
+Monitoring::
+Define configuration to expose to the browser {kibana-pull}128938[#128938]
+
+[float]
+[[fixes-v7.17.3]]
+=== Bug fixes
+Dashboard::
+* Explicitly hide panel titles migration {kibana-pull}129540[#129540]
+* Fixes removal of blank string titles in *Lens* and *Maps* {kibana-pull}129404[#129404]
+
+Elastic Security::
+For the Elastic Security 7.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Platform::
+Fixes an issue that prevented Gold license users from accessing PDF and PNG reporting features when using {kib} roles {kibana-pull}129374[#129374]
+
+[[release-notes-7.17.2]]
+== {kib} 7.17.2
+
+Review the following information about the 7.17.2 release.
+
+[float]
+[[known-issues-v7.17.2]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.17.2. 
+
+For the known issues in the previous releases, refer to the <<known-issue-7.17.0, known issues in 7.17.0>.
+
+[float]
+[[breaking-changes-v7.17.2]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.2 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.2]]
+=== Bug Fixes
+Dashboard::
+Use debounce instead of async url update to remove app state from URL {kibana-pull}127083[#127083]
+
+Discover::
+Improves doc viewer source tab performance by limiting height {kibana-pull}127439[#127439]
+
+Elastic Security::
+For the Elastic Security 7.17.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Use validated fields for `default_fields` index setting {kibana-pull}128094[#128094]
+* Fixes links to Agent logs for apm, endpoint, synthetics, osquery {kibana-pull}127480[#127480]
+* Makes input IDs unique in agent policy yaml {kibana-pull}127343[#127343]
+
+Machine Learning::
+Anomaly Detection: Update annotation directly using the index it is stored in {kibana-pull}126573[#126573]
+
+Management::
+* Resolves errors seen when creating a runtime field with a user that has access to a limit set of indices {kibana-pull}127523[#127523]
+* Fixes field format color editor crash on invalid color value {kibana-pull}127292[#127292]
+* Adds deprecation logging as step on overview page of Upgrade Assistant {kibana-pull}126277[#126277]
+* Upgrade Assistant will show a reindex warning if Elasticsearch is low on disk space {kibana-pull}125572[#125572]
+
+Observability::
+* Fixes pings over time histogram when filters are defined {kibana-pull}127757[#127757]
+* Checks for latest Snapshot count document {kibana-pull}127676[#127676]
+* Optimization for Metric Threshold Rule for 7.17 {kibana-pull}126545[#126545]
+
+[[release-notes-7.17.1]]
+== {kib} 7.17.1
+
+Review the following information about the 7.17.1 release.
+
+[float]
+[[known-issue-v7.17.1]]
+=== Known issue
+
+Lens & visualizations::
+A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767]. 
+
+For the known issues in the previous releases, refer to the <<known-issue-7.17.0, known issues in 7.17.0>.
+
+[float]
+[[breaking-changes-v7.17.1]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.1 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.1]]
+=== Bug fixes
+Elastic Security::
+For the Elastic Security 7.17.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Removes tabify performance issue {kibana-pull}124931[#124931]
+* Fixes an issue where shard failures were not reported in *TSVB* {kibana-pull}123474[#123474]
+Machine Learning::
+* Fixes anomaly detector jobs list filter delay {kibana-pull}124328[#124328]
+Management::
+* You can now use the search bar in the snapshots list of the Snapshot & Restore app with date strings {kibana-pull}125234[#125234]
+* Adds warning when remote clusters are configured {kibana-pull}125138[#125138]
+* Updates logic for handling reindex failures {kibana-pull}124571[#124571]
+* Fixes redirect to the wizard {kibana-pull}124337[#124337]
+* Fixes cross cluster search when using the `fields` search request parameter for versions of {es} prior to 7.0 {kibana-pull}123267[#123267]
+Maps::
+Fixes an issue where layers from WMS capabilities for a specific URL were unable to load {kibana-pull}123386[#123386]
+Security::
+* Prevents repeated calls to extend session when Kibana is unavailable {kibana-pull}125973[#125973]
+* Changed deprecation warning for elasticsearch.username {kibana-pull}124717[#124717]
+
 [[release-notes-7.17.0]]
 == {kib} 7.17.0
 
-coming::[7.17.0]
-
 Review the following information about the 7.17.0 release.
+
+[float]
+[[known-issue-7.17.0]]
+=== Known issue
+
+Before you upgrade, review the known issue, then mitigate the impact to your application.
+
+.Hidden dashboard titles now appear
+[%collapsible]
+====
+*Details*  +
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
+*Impact* +
+Upgrade to {kib} 7.17.3 or later.
+====
 
 [float]
 [[breaking-changes-v7.17.0]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.0 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
@@ -305,6 +1011,8 @@ Use the following supported browsers:
 The legacy aggregation-based data table and `vis_type_table.legacyVisEnabled` setting are no longer supported. For more information, refer to {kibana-pull}111339[#111339].
 
 *Impact* +
+When you upgrade to 7.16.0, {kib} automatically uses the new data table. 
+
 To auto-fit the table row height, create an {kibana-ref}/add-aggregation-based-visualization-panels.html#create-aggregation-based-panel[aggregation-based data table], click *Options*, then select *Auto fit rows to content*.
 ====
       
@@ -317,7 +1025,7 @@ To auto-fit the table row height, create an {kibana-ref}/add-aggregation-based-v
 The legacy aggregation-based area, bar, and line charts are no longer supported. For more information, refer to {kibana-pull}110786[#110786].
 
 *Impact* +
-When you upgrade to 7.16.0, you are only able to create area, bar, and line charts using the new implementation.
+When you upgrade to 7.16.0, {kib} automatically uses the new area, bar, and line charts.
 ====
       
 [discrete]

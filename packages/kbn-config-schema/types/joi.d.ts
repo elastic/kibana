@@ -24,14 +24,6 @@ declare module 'joi' {
     entries(key: AnySchema, value: AnySchema): this;
   }
 
-  interface ErrorReport {
-    // missing from the typedef
-    // see https://github.com/sideway/joi/blob/master/lib/errors.js
-    local?: Record<string, any>;
-
-    toString(): string;
-  }
-
   export type JoiRoot = Joi.Root & {
     bytes: () => BytesSchema;
     duration: () => AnySchema;

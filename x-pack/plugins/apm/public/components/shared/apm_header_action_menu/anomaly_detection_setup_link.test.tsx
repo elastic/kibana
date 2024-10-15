@@ -25,9 +25,7 @@ async function renderTooltipAnchor({
     anomalyDetectionJobsRefetch: () => {},
   });
 
-  const { baseElement, container } = render(
-    <MissingJobsAlert environment={environment} />
-  );
+  const { baseElement, container } = render(<MissingJobsAlert environment={environment} />);
 
   // hover tooltip anchor if it exists
   const toolTipAnchor = container.querySelector('.euiToolTipAnchor') as any;
@@ -36,14 +34,12 @@ async function renderTooltipAnchor({
 
     // wait for tooltip text to be in the DOM
     await waitFor(() => {
-      const toolTipText =
-        baseElement.querySelector('.euiToolTipPopover')?.textContent;
+      const toolTipText = baseElement.querySelector('.euiToolTipPopover')?.textContent;
       expect(toolTipText).not.toBe(undefined);
     });
   }
 
-  const toolTipText =
-    baseElement.querySelector('.euiToolTipPopover')?.textContent;
+  const toolTipText = baseElement.querySelector('.euiToolTipPopover')?.textContent;
 
   return { toolTipText, toolTipAnchor };
 }
@@ -56,9 +52,7 @@ describe('MissingJobsAlert', () => {
       });
 
       expect(toolTipAnchor).toBeInTheDocument();
-      expect(toolTipText).toBe(
-        'Anomaly detection is not yet enabled. Click to continue setup.'
-      );
+      expect(toolTipText).toBe('Anomaly detection is not yet enabled. Click to continue setup.');
     });
   });
 

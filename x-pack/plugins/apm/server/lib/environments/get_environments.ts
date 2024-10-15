@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
@@ -34,9 +31,7 @@ export async function getEnvironments({
   start: number;
   end: number;
 }) {
-  const operationName = serviceName
-    ? 'get_environments_for_service'
-    : 'get_environments';
+  const operationName = serviceName ? 'get_environments_for_service' : 'get_environments';
 
   const { apmEventClient } = setup;
 
@@ -51,9 +46,7 @@ export async function getEnvironments({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForAggregatedTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],

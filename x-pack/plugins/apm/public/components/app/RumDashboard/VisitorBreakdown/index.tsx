@@ -51,20 +51,14 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart
-            options={data?.browsers}
-            loading={status !== 'success'}
-          />
+          <VisitorBreakdownChart options={data?.browsers} loading={status !== 'success'} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart
-            options={data?.os}
-            loading={status !== 'success'}
-          />
+          <VisitorBreakdownChart options={data?.os} loading={status !== 'success'} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

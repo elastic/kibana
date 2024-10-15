@@ -6,7 +6,7 @@
 
 Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-server.savedobjectattribute.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;

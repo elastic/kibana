@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isNotAuthorizedError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isNotAuthorizedError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isNotAuthorizedError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

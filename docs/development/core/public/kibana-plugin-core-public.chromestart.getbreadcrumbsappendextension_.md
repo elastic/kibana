@@ -6,12 +6,12 @@
 
 Get an observable of the current extension appended to breadcrumbs
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;ChromeBreadcrumbsAppendExtension \| undefined&gt;
 

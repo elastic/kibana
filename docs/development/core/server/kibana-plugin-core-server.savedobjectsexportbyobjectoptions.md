@@ -6,16 +6,16 @@
 
 Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions 
 ```
-<b>Extends:</b> SavedObjectExportBaseOptions
+**Extends:** SavedObjectExportBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) | Array&lt;{ id: string; type: string; }&gt; | optional array of objects to export. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) |  | Array&lt;{ id: string; type: string; }&gt; | optional array of objects to export. |
 

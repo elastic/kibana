@@ -15,7 +15,7 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 
 describe('test fetchAll', () => {
-  test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
+  test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', (done) => {
     const subjects = {
       main$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),

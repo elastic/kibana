@@ -6,7 +6,7 @@
 
 Describes the factory used to create instances of the Saved Objects Client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsClientFactory = ({ request, includedHiddenTypes, }: {

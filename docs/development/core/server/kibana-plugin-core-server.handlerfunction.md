@@ -6,7 +6,7 @@
 
 A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;

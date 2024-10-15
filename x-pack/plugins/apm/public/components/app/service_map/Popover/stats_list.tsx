@@ -11,11 +11,7 @@ import { isNumber } from 'lodash';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NodeStats } from '../../../../../common/service_map';
-import {
-  asDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
+import { asDuration, asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 
 export const ItemRow = euiStyled.tr`
   line-height: 2;
@@ -32,11 +28,7 @@ export const ItemDescription = euiStyled.td`
 
 function LoadingSpinner() {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      style={{ height: 170 }}
-    >
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: 170 }}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexGroup>
   );
@@ -83,23 +75,15 @@ export function StatsList({ data, isLoading }: StatsListProps) {
 
   const items = [
     {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgTransDurationPopoverStat',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      ),
-      description: isNumber(avgTransactionDuration)
-        ? asDuration(avgTransactionDuration)
-        : null,
+      title: i18n.translate('xpack.apm.serviceMap.avgTransDurationPopoverStat', {
+        defaultMessage: 'Latency (avg.)',
+      }),
+      description: isNumber(avgTransactionDuration) ? asDuration(avgTransactionDuration) : null,
     },
     {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
-        {
-          defaultMessage: 'Throughput (avg.)',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceMap.avgReqPerMinutePopoverMetric', {
+        defaultMessage: 'Throughput (avg.)',
+      }),
       description: asTransactionRate(avgRequestsPerMinute),
     },
     {

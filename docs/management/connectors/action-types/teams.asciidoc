@@ -5,7 +5,7 @@
 <titleabbrev>Microsoft Teams</titleabbrev>
 ++++
 
-The Microsoft Teams connector uses https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook[Incoming Webhooks].
+The Microsoft Teams connector uses a webhook to send notifications.
 
 [float]
 [[teams-connector-configuration]]
@@ -13,8 +13,8 @@ The Microsoft Teams connector uses https://docs.microsoft.com/en-us/microsofttea
 
 Microsoft Teams connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Webhook URL::   The URL of the incoming webhook. See https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook#add-an-incoming-webhook-to-a-teams-channel[Add Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Name::      The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+Webhook URL::   The URL of the incoming webhook. Refer to <<configuring-teams>>. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 
 [float]
 [[teams-connector-networking-configuration]]
@@ -65,17 +65,38 @@ Message::   The message	text, converted to the `text` field in the Webhook JSON 
 [[configuring-teams]]
 ==== Configure a Microsoft Teams account
 
-You need a https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook[Microsoft Teams webhook URL] to 
-configure a Microsoft Teams action. To create a webhook
-URL, add the **Incoming Webhook App** through the Microsoft Teams console:
+Microsoft 365 connectors are being https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/[retired]; you must use the *Workflows* app to create a webhook URL.
+For example:
 
-. Log in to http://teams.microsoft.com[teams.microsoft.com] as a team administrator.
-. Navigate to the Apps directory, search for and select the *Incoming Webhook* app.
-. Choose _Add to team_ and select a team and channel for the app.
-. Enter a name for your webhook and (optionally) upload a custom icon.
+. Go to the *Workflows* app in Teams and select the *Create* tab.
+. Create a workflow from a blank template.
 +
-image::images/teams-add-webhook-integration.png[]
-. Click *Create*.
-. Copy the generated webhook URL so you can paste it into your Teams connector form.
+--
+NOTE: You cannot use the "Post to a channel when a webhook request is received" template; it does not work with the Microsoft Teams connector.
+--
+. Add a trigger as the first step in the workflow. Search for webhook triggers and select *When a Teams webhook request is received*. Set *Who can trigger the flow?* to `Anyone`.
+. Add *Post message in a chat or channel* as the second step in the workflow.
+.. Set *Post as* to `Flow bot`.
+.. Set *Post in* to `Channel`.
+.. Set *Team* and *Channel* to the appropriate values for where you want the message displayed.
 +
-image::images/teams-copy-webhook-url.png[]
+--
+NOTE: Per https://learn.microsoft.com/en-us/power-automate/teams/send-a-message-in-teams#known-issues-and-limitations, you cannot use a private channel.
+--
+.. Set the *Message* to `@{triggerBody()?['text']}`.
++
+--
+Alternatively, you can add a *Parse JSON* step before the *Post message in a chat or channel* step in the workflow. Set the *Content* to `Body` and the *Schema* to the following value:
+
+```json
+{
+    "type": "object",
+    "properties": {
+        "text": {
+            "type": "string"
+        }
+    }
+}
+```
+--
+. Save the workflow and copy the HTTP POST URL from the first step. This is the URL required by the Microsoft Teams connector.

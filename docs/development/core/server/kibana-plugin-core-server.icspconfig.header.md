@@ -6,7 +6,7 @@
 
 The CSP rules in a formatted directives string for use in a `Content-Security-Policy` header.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly header: string;

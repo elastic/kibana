@@ -5,17 +5,17 @@
 ## HttpInterceptorResponseError interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpInterceptorResponseError extends HttpResponse 
 ```
-<b>Extends:</b> HttpResponse
+**Extends:** HttpResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.httpinterceptorresponseerror.error.md) | Error \| IHttpFetchError |  |
-|  [request](./kibana-plugin-core-public.httpinterceptorresponseerror.request.md) | Readonly&lt;Request&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [error](./kibana-plugin-core-public.httpinterceptorresponseerror.error.md) |  | Error \| IHttpFetchError |  |
+|  [request](./kibana-plugin-core-public.httpinterceptorresponseerror.request.md) |  | Readonly&lt;Request&gt; |  |
 

@@ -60,6 +60,16 @@ describe('#setup()', () => {
       );
     });
 
+    it('throws an error if app is registered with an invalid id', () => {
+      const { register } = service.setup(setupDeps);
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'invalid&app' }))
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid application id: it can only be composed of alphanum chars, '-' and '_'"`
+      );
+    });
+
     it('throws error if additional apps are registered after setup', async () => {
       const { register } = service.setup(setupDeps);
 
@@ -825,7 +835,8 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+      const flushPromises = () =>
+        new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
@@ -1129,7 +1140,7 @@ describe('#stop()', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {

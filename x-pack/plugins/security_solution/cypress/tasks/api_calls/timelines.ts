@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { TimelineResponse } from '../../../common/types/timeline';
 import { CompleteTimeline } from '../../objects/timeline';
+import { rootRequest } from '../common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
-  cy.request({
+  rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -52,7 +54,7 @@ export const createTimeline = (timeline: CompleteTimeline) =>
   });
 
 export const createTimelineTemplate = (timeline: CompleteTimeline) =>
-  cy.request({
+  rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -98,7 +100,7 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
   });
 
 export const deleteTimeline = (timelineId: string) => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -109,14 +111,14 @@ export const deleteTimeline = (timelineId: string) => {
 };
 
 export const getTimelineById = (timelineId: string) =>
-  cy.request({
+  rootRequest({
     method: 'GET',
     url: `api/timeline?id=${timelineId}`,
     headers: { 'kbn-xsrf': 'timeline-by-id' },
   });
 
 export const loadPrepackagedTimelineTemplates = () =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -133,7 +135,7 @@ export const favoriteTimeline = ({
   templateTimelineId?: string;
   templateTimelineVersion?: number;
 }) =>
-  cy.request({
+  rootRequest({
     method: 'PATCH',
     url: 'api/timeline/_favorite',
     body: {

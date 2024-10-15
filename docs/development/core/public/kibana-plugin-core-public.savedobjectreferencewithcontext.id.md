@@ -6,7 +6,7 @@
 
 The ID of the referenced object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id: string;

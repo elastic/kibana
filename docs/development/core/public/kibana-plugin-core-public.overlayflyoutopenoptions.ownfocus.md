@@ -4,7 +4,7 @@
 
 ## OverlayFlyoutOpenOptions.ownFocus property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 ownFocus?: boolean;

@@ -6,7 +6,7 @@
 
 The type of the referenced object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: string;

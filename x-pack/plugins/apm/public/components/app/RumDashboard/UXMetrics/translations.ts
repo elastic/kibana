@@ -8,43 +8,31 @@
 import { i18n } from '@kbn/i18n';
 import { I18LABELS } from '../translations';
 
-export const DATA_UNDEFINED_LABEL = i18n.translate(
-  'xpack.apm.rum.coreVitals.dataUndefined',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+export const DATA_UNDEFINED_LABEL = i18n.translate('xpack.apm.rum.coreVitals.dataUndefined', {
+  defaultMessage: 'N/A',
+});
 
 export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
   defaultMessage: 'First contentful paint',
 });
 
-export const FCP_TOOLTIP = i18n.translate(
-  'xpack.apm.rum.coreVitals.fcpTooltip',
-  {
-    defaultMessage:
-      'First contentful paint (FCP) focusses on the initial rendering and measures the time from when the page starts loading to when any part of the page’s content is displayed on the screen.',
-  }
-);
+export const FCP_TOOLTIP = i18n.translate('xpack.apm.rum.coreVitals.fcpTooltip', {
+  defaultMessage:
+    'First contentful paint (FCP) focusses on the initial rendering and measures the time from when the page starts loading to when any part of the page’s content is displayed on the screen.',
+});
 
 export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
   defaultMessage: 'Total blocking time',
 });
 
-export const TBT_TOOLTIP = i18n.translate(
-  'xpack.apm.rum.coreVitals.tbtTooltip',
-  {
-    defaultMessage:
-      'Total blocking time (TBT) is the sum of the blocking time (duration above 50 ms) for each long task that occurs between the First contentful paint and the time when the transaction is completed.',
-  }
-);
+export const TBT_TOOLTIP = i18n.translate('xpack.apm.rum.coreVitals.tbtTooltip', {
+  defaultMessage:
+    'Total blocking time (TBT) is the sum of the blocking time (duration above 50 ms) for each long task that occurs between the First contentful paint and the time when the transaction is completed.',
+});
 
-export const NO_OF_LONG_TASK = i18n.translate(
-  'xpack.apm.rum.uxMetrics.noOfLongTasks',
-  {
-    defaultMessage: 'No. of long tasks',
-  }
-);
+export const NO_OF_LONG_TASK = i18n.translate('xpack.apm.rum.uxMetrics.noOfLongTasks', {
+  defaultMessage: 'No. of long tasks',
+});
 
 export const NO_OF_LONG_TASK_TOOLTIP = i18n.translate(
   'xpack.apm.rum.uxMetrics.noOfLongTasksTooltip',
@@ -54,12 +42,9 @@ export const NO_OF_LONG_TASK_TOOLTIP = i18n.translate(
   }
 );
 
-export const LONGEST_LONG_TASK = i18n.translate(
-  'xpack.apm.rum.uxMetrics.longestLongTasks',
-  {
-    defaultMessage: 'Longest long task duration',
-  }
-);
+export const LONGEST_LONG_TASK = i18n.translate('xpack.apm.rum.uxMetrics.longestLongTasks', {
+  defaultMessage: 'Longest long task duration',
+});
 
 export const LONGEST_LONG_TASK_TOOLTIP = i18n.translate(
   'xpack.apm.rum.uxMetrics.longestLongTasksTooltip',
@@ -69,12 +54,9 @@ export const LONGEST_LONG_TASK_TOOLTIP = i18n.translate(
   }
 );
 
-export const SUM_LONG_TASKS = i18n.translate(
-  'xpack.apm.rum.uxMetrics.sumLongTasks',
-  {
-    defaultMessage: 'Total long tasks duration',
-  }
-);
+export const SUM_LONG_TASKS = i18n.translate('xpack.apm.rum.uxMetrics.sumLongTasks', {
+  defaultMessage: 'Total long tasks duration',
+});
 
 export const SUM_LONG_TASKS_TOOLTIP = i18n.translate(
   'xpack.apm.rum.uxMetrics.sumLongTasksTooltip',

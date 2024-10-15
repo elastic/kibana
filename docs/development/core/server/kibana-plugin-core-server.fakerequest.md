@@ -6,7 +6,7 @@
 
 Fake request object created manually by Kibana plugins.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface FakeRequest 
@@ -14,7 +14,7 @@ export interface FakeRequest
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [headers](./kibana-plugin-core-server.fakerequest.headers.md) | Headers | Headers used for authentication against Elasticsearch |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [headers](./kibana-plugin-core-server.fakerequest.headers.md) |  | Headers | Headers used for authentication against Elasticsearch |
 

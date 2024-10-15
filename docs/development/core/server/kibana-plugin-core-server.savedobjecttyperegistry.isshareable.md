@@ -6,7 +6,7 @@
 
 Returns whether the type is multi-namespace (shareable); resolves to `false` if the type is not registered
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isShareable(type: string): boolean;
@@ -18,7 +18,7 @@ isShareable(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

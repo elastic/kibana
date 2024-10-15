@@ -33,10 +33,7 @@ export async function getServiceDependencies({
     start,
     end,
     numBuckets,
-    filter: [
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...environmentQuery(environment),
-    ],
+    filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...environmentQuery(environment)],
     offset,
     collapseBy: 'downstream',
   });

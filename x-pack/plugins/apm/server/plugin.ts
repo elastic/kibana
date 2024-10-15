@@ -23,21 +23,14 @@ import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
+import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
-import type {
-  ApmPluginRequestHandlerContext,
-  APMRouteHandlerResources,
-} from './routes/typings';
-import {
-  APMPluginSetup,
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from './types';
+import type { ApmPluginRequestHandlerContext, APMRouteHandlerResources } from './routes/typings';
+import { APMPluginSetup, APMPluginSetupDependencies, APMPluginStartDependencies } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
 import {
@@ -49,13 +42,7 @@ import {
 import { tutorialProvider } from './tutorial';
 
 export class APMPlugin
-  implements
-    Plugin<
-      APMPluginSetup,
-      void,
-      APMPluginSetupDependencies,
-      APMPluginStartDependencies
-    >
+  implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
@@ -63,10 +50,7 @@ export class APMPlugin
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup<APMPluginStartDependencies>,
-    plugins: Omit<APMPluginSetupDependencies, 'core'>
-  ) {
+  public setup(core: CoreSetup<APMPluginStartDependencies>, plugins: APMPluginSetupDependencies) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
 
@@ -96,8 +80,7 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const getCoreStart = () =>
-      core.getStartServices().then(([coreStart]) => coreStart);
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const { ruleDataService } = plugins.ruleRegistry;
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -135,9 +118,7 @@ export class APMPlugin
         start: () =>
           core.getStartServices().then((services) => {
             const [, pluginsStartContracts] = services;
-            return pluginsStartContracts[
-              key as keyof APMPluginStartDependencies
-            ];
+            return pluginsStartContracts[key as keyof APMPluginStartDependencies];
           }),
       };
     }) as APMRouteHandlerResources['plugins'];
@@ -160,9 +141,7 @@ export class APMPlugin
     });
 
     const telemetryUsageCounter =
-      resourcePlugins.usageCollection?.setup.createUsageCounter(
-        APM_SERVER_FEATURE_ID
-      );
+      resourcePlugins.usageCollection?.setup.createUsageCounter(APM_SERVER_FEATURE_ID);
 
     registerRoutes({
       core: {
@@ -213,7 +192,7 @@ export class APMPlugin
 
         const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-        return createApmEventClient({
+        return new APMEventClient({
           debug: debug ?? false,
           esClient,
           request,

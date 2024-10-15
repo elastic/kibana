@@ -181,6 +181,25 @@ exports.Cluster = class Cluster {
         throw createCliError('ES exited without starting');
       }),
     ]);
+
+    if (options.onEarlyExit) {
+      this._outcome
+        .then(
+          () => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly`);
+            }
+          },
+          (error) => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`failure handling early exit: ${error.stack}`);
+        });
+    }
   }
 
   /**
@@ -252,6 +271,7 @@ exports.Cluster = class Cluster {
     const esArgs = [
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled

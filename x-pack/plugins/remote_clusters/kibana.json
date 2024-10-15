@@ -6,7 +6,7 @@
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
-  "requiredPlugins": ["licensing", "management", "indexManagement", "features"],
+  "requiredPlugins": ["licensing", "management", "indexManagement", "features", "share"],
   "optionalPlugins": ["usageCollection", "cloud"],
   "server": true,
   "ui": true,

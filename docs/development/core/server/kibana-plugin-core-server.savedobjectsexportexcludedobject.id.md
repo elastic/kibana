@@ -6,7 +6,7 @@
 
 id of the excluded object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id: string;

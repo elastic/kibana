@@ -4,7 +4,7 @@
 
 ## SavedObjectsCollectMultiNamespaceReferencesResponse.objects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 objects: SavedObjectReferenceWithContext[];

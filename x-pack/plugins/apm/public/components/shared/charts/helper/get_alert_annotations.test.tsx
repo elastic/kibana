@@ -29,9 +29,7 @@ import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/p
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAlertAnnotations } from './get_alert_annotations';
 
-type Alert = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
->;
+type Alert = ValuesType<APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']>;
 
 const euiColorDanger = 'red';
 const euiColorWarning = 'yellow';
@@ -62,11 +60,10 @@ const alert: Alert = {
   [ALERT_RULE_CATEGORY]: ['Latency threshold'],
 };
 const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
-const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
-  () => () => ({
-    link: '/',
-    reason: 'a good reason',
-  });
+const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
+  link: '/',
+  reason: 'a good reason',
+});
 const selectedAlertId = undefined;
 const setSelectedAlertId = jest.fn();
 
@@ -128,8 +125,7 @@ describe('getAlertAnnotations', () => {
 
     describe('with no formatter', () => {
       it('uses the rule type', () => {
-        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
-          () => undefined;
+        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => undefined;
 
         expect(
           getAlertAnnotations({

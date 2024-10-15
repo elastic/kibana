@@ -18,7 +18,7 @@ let ruleTypeRegistryParams: ConstructorOptions;
 const taskManager = taskManagerMock.createSetup();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
     taskManager,
@@ -76,16 +76,18 @@ describe('register()', () => {
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
     for (const char of invalidCharacters) {
-      expect(() => registry.register({ ...alertType, id: `${alertType.id}${char}` })).toThrowError(
-        new Error(`expected AlertType Id not to include invalid character: ${char}`)
+      expect(() =>
+        registry.register({ ...alertType, id: `${alertType.id}${char}` })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"expected AlertType Id not to include invalid character: ${char}"`
       );
     }
 
     const [first, second] = invalidCharacters;
     expect(() =>
       registry.register({ ...alertType, id: `${first}${alertType.id}${second}` })
-    ).toThrowError(
-      new Error(`expected AlertType Id not to include invalid characters: ${first}, ${second}`)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"expected AlertType Id not to include invalid characters: ${first}, ${second}"`
     );
   });
 
@@ -107,8 +109,8 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
-      new Error(`expected value of type [string] but got [number]`)
+    expect(() => registry.register(alertType)).toThrowErrorMatchingInlineSnapshot(
+      `"expected value of type [string] but got [number]"`
     );
   });
 

@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
@@ -34,6 +35,11 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await security.testUser.setRoles(['manage_rollups_role']);
       await PageObjects.common.navigateToApp('rollupJob');
+
+      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
     });
 
     it('create new rollup job', async () => {
@@ -70,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       //Delete all data indices that were created.
-      await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
+      await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern, MOCK_ROLLUP_INDEX_NAME]);
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });

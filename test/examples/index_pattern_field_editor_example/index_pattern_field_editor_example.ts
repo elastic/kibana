@@ -11,14 +11,19 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  describe('', () => {
+  describe('index pattern field editor example', () => {
     it('finds an index pattern', async () => {
-      await testSubjects.existOrFail('indexPatternTitle');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('indexPatternTitle');
+      });
     });
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
-      await testSubjects.existOrFail('flyoutTitle');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('flyoutTitle');
+      });
     });
   });
 }

@@ -12,13 +12,7 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { toQuery } from '../../components/shared/Links/url_helpers';
-import {
-  getDateRange,
-  removeUndefinedProps,
-  toBoolean,
-  toNumber,
-  toString,
-} from './helpers';
+import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
 import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<
@@ -87,9 +81,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    comparisonEnabled: comparisonEnabled
-      ? toBoolean(comparisonEnabled)
-      : undefined,
+    comparisonEnabled: comparisonEnabled ? toBoolean(comparisonEnabled) : undefined,
     comparisonType: comparisonType as TimeRangeComparisonType | undefined,
     // ui filters
     ...localUIFilters,

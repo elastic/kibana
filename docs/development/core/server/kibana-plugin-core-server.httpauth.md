@@ -5,7 +5,7 @@
 ## HttpAuth interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpAuth 
@@ -13,8 +13,8 @@ export interface HttpAuth
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [get](./kibana-plugin-core-server.httpauth.get.md) | GetAuthState | Gets authentication state for a request. Returned by <code>auth</code> interceptor. [GetAuthState](./kibana-plugin-core-server.getauthstate.md) |
-|  [isAuthenticated](./kibana-plugin-core-server.httpauth.isauthenticated.md) | IsAuthenticated | Returns authentication status for a request. [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [get](./kibana-plugin-core-server.httpauth.get.md) |  | GetAuthState | Gets authentication state for a request. Returned by <code>auth</code> interceptor. [GetAuthState](./kibana-plugin-core-server.getauthstate.md) |
+|  [isAuthenticated](./kibana-plugin-core-server.httpauth.isauthenticated.md) |  | IsAuthenticated | Returns authentication status for a request. [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) |
 

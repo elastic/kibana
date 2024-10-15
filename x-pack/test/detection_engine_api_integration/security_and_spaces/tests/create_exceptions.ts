@@ -719,7 +719,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no signals when a value list exception is added for a query rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryCreateSchema = {
               name: 'Simple Rule Query',
@@ -751,7 +751,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no signals when a value list exception is added for a threat match rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThreatMatchCreateSchema = {
               description: 'Detecting root and admin users',

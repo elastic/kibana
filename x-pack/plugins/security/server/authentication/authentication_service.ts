@@ -115,7 +115,7 @@ export class AuthenticationService {
       // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
         this.logger.debug(
-          'Current license does not support any security features, authentication is not needed.'
+          'Authentication is not required, as security features are disabled in Elasticsearch.'
         );
         return t.authenticated();
       }

@@ -11,7 +11,7 @@
 
 The route path for configuring navigation to the application. This string should not include the base path from HTTP.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appBasePath: string;

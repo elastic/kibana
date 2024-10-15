@@ -24,12 +24,8 @@ export function ApmHeaderActionMenu() {
   const { basePath } = http;
   const { capabilities } = application;
   const canAccessML = !!capabilities.ml?.canAccessML;
-  const {
-    isAlertingAvailable,
-    canReadAlerts,
-    canSaveAlerts,
-    canReadAnomalies,
-  } = getAlertingCapabilities(plugins, capabilities);
+  const { isAlertingAvailable, canReadAlerts, canSaveAlerts, canReadAnomalies } =
+    getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
