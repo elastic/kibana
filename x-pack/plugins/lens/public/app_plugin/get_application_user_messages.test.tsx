@@ -21,6 +21,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { LensPublicCallbacks } from '../react_embeddable/types';
+import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
@@ -167,15 +168,9 @@ describe('application-level user messages', () => {
         visualization: {} as Visualization,
         visualizationState: { activeId: 'foo', state: {} },
       };
+      const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(
-        <I18nProvider>
-          {
-            getApplicationUserMessages({
-              ...props,
-              ...propsOverrides,
-            })[0].longMessage as React.ReactNode
-          }
-        </I18nProvider>
+        <I18nProvider>{firstMessage && getLongMessage(firstMessage)}</I18nProvider>
       );
       return rtlRender;
     };

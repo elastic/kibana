@@ -3155,9 +3155,7 @@ describe('IndexPattern Data Source', () => {
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 1
-                    </React.Fragment>,
+                    "wrappedMessage": "error 1",
                   }
                 }
               />,
@@ -3178,9 +3176,7 @@ describe('IndexPattern Data Source', () => {
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 2
-                    </React.Fragment>,
+                    "wrappedMessage": "error 2",
                   }
                 }
               />,

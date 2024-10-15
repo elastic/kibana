@@ -8,15 +8,8 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { noop } from 'lodash';
 import { UserMessage } from '../../types';
-
-const handleLongMessage = (longMessage: UserMessage['longMessage']) => {
-  if (typeof longMessage === 'function') {
-    return longMessage(noop);
-  }
-  return longMessage;
-};
+import { getLongMessage } from '../../user_messages_utils';
 
 export function VisualizationErrorPanel({
   errors,
@@ -40,7 +33,7 @@ export function VisualizationErrorPanel({
           <>
             {errors.length ? (
               <>
-                <p>{handleLongMessage(errors[0].longMessage) || errors[0].shortMessage}</p>
+                <p>{getLongMessage(errors[0]) || errors[0].shortMessage}</p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage

@@ -16,18 +16,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
 import React, { Fragment } from 'react';
 import { useState } from 'react';
 import type { UserMessage } from '../../types';
 import './info_badges.scss';
-
-const handleLongMessage = (longMessage: UserMessage['longMessage']) => {
-  if (typeof longMessage === 'function') {
-    return longMessage(noop);
-  }
-  return longMessage;
-};
+import { getLongMessage } from '../../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -109,8 +102,8 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
                 <ul className="lnsPanelFeatureList">
-                  {messageGroup.map(({ longMessage }, i) => (
-                    <Fragment key={`${uniqueId}-${i}`}>{handleLongMessage(longMessage)}</Fragment>
+                  {messageGroup.map((message, i) => (
+                    <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}
                 </ul>
               </aside>
