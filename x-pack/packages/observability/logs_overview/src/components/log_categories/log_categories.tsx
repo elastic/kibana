@@ -14,6 +14,11 @@ import {
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
+import {
+  categoryDetailsService,
+  createCategoryDetailsServiceImplementations,
+} from '../../services/category_details_service';
+import { LogCategory } from '../../types';
 import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
@@ -21,11 +26,6 @@ import {
   LogCategoriesResultContent,
   LogCategoriesResultContentDependencies,
 } from './log_categories_result_content';
-import {
-  categoryDetailsService,
-  createCategoryDetailsServiceImplementations,
-} from '../../services/category_details_service';
-import { LogCategory } from '../../types';
 
 export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;
