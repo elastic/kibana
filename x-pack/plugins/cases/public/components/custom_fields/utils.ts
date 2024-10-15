@@ -8,6 +8,7 @@
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { isString } from 'lodash';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 export const customFieldSerializer = (
   field: CustomFieldConfiguration
@@ -16,6 +17,11 @@ export const customFieldSerializer = (
 
   if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
     return otherProperties;
+  }
+  // what if defaultValue === undefined but type is number
+  if (field.type === CustomFieldTypes.NUMBER && !Number.isNaN(defaultValue)) {
+    // do we need this check or add it to validation only?
+    return { ...field, defaultValue: Number(defaultValue) };
   }
 
   return field;

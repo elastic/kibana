@@ -13,7 +13,7 @@ import type {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ConnectorTypeFields } from '../../common/types/domain';
-import { ConnectorTypes } from '../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
@@ -234,9 +234,17 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (value: string | boolean) => {
+export const convertCustomFieldValue = (
+  value: string | number | boolean,
+  type: CustomFieldTypes
+) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
+  }
+
+  if (type === CustomFieldTypes.NUMBER && !Number.isNaN(value)) {
+    // do we need this check or add it to validation only?
+    return Number(value);
   }
 
   return value;
@@ -300,10 +308,11 @@ export const customFieldsFormSerializer = (
   for (const [key, value] of Object.entries(customFields)) {
     const configCustomField = selectedCustomFieldsConfiguration.find((item) => item.key === key);
     if (configCustomField) {
+      // transform the whole thing in one function
       transformedCustomFields.push({
         key: configCustomField.key,
         type: configCustomField.type,
-        value: convertCustomFieldValue(value),
+        value: convertCustomFieldValue(value, configCustomField.type),
       } as CaseUICustomField);
     }
   }

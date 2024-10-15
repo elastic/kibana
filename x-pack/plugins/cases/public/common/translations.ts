@@ -300,6 +300,18 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
       'The length of the {field} is too long. The maximum length is {length} characters.',
   });
 
+export const INFINITE_NUMBER_ERROR = (field: string) =>
+  i18n.translate('xpack.cases.customFields.infiniteNumberError', {
+    values: { field },
+    defaultMessage: 'The number of the {field} restricted to finite values.',
+  });
+
+export const TOO_MANY_DECIMAL_PLACES_ERROR = (field: string) =>
+  i18n.translate('xpack.cases.customFields.tooManyDecimalPlacesError', {
+    values: { field },
+    defaultMessage: 'The number of the {field} has too many decimal places',
+  });
+
 export const MAX_TAGS_ERROR = (length: number) =>
   i18n.translate('xpack.cases.createCase.maxTagsError', {
     values: { length },

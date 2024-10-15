@@ -15,14 +15,13 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
   width: '250px',
   render: (customField: CaseCustomField) => {
     return (
-      <></>
-      // <p
-      //   className="eui-textTruncate"
-      //   data-test-subj={`text-custom-field-column-view-${customField.key}`}
-      // >
-      //   {customField.value}
-      // </p>
+      <p
+        className="eui-textNumber"
+        data-test-subj={`number-custom-field-column-view-${customField.key}`}
+      >
+        {customField.value}
+      </p>
     );
   },
-  'data-test-subj': 'text-custom-field-column',
+  'data-test-subj': 'number-custom-field-column',
 });
