@@ -11,13 +11,6 @@ import React, { useCallback } from 'react';
 import { LogCategory } from '../../types';
 import { getCellContext } from './log_categories_grid_cell';
 
-const buttonLabel = i18n.translate(
-  'xpack.observabilityLogsOverview.logCategoriesGrid.controlColumns.toggleFlyout',
-  {
-    defaultMessage: 'Toggle flyout with details',
-  }
-);
-
 interface CreateLogCategoriesGridExpandButtonProps {
   expandedRowIndex: number | null;
   onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
@@ -69,3 +62,10 @@ const ExpandButton: React.FC<ExpandButtonProps> = ({ isCurrentRowExpanded, onCli
     </EuiToolTip>
   );
 };
+
+const buttonLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.logCategoriesGrid.controlColumns.toggleFlyout',
+  {
+    defaultMessage: 'Toggle flyout with details',
+  }
+);
