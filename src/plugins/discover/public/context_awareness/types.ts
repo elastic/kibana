@@ -100,6 +100,7 @@ export interface DefaultAppStateExtension {
    * * 1-20: number of lines to display
    */
   rowHeight?: number;
+  breakdownField?: DefaultAppStateColumn;
 }
 
 /**
