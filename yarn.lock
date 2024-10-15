@@ -1753,10 +1753,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@97.0.0":
-  version "97.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.0.0.tgz#b7828b8818de1328e47b4c47024d8455a5795f23"
-  integrity sha512-ha7oer/0ou0MnZMgwZzqKE97tx/IPhQtb04nNLZvwOiBAH+ANtUqohYSM/3VxLuJT13cxbsLC2CLT0Ktcibo4w==
+"@elastic/eui@97.0.0-backport.0":
+  version "97.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.0.0-backport.0.tgz#cababac6e5937b14ce0e836240fc4817e2e41920"
+  integrity sha512-gefYh5ZgjFraGWOTy8f8RO5DAfOJB3S/PAlM9dvi6mNlNJ5T1CelNafBwdrD8Hdut//BxmexQD7aBZ+36GTaOg==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -3639,7 +3639,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture-common":
+"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
@@ -3651,7 +3651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture":
+"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
@@ -5147,6 +5147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
@@ -6027,6 +6031,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
@@ -6384,6 +6392,10 @@
   uid ""
 
 "@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-authorization-core-common@link:x-pack/packages/security/authorization_core_common":
   version "0.0.0"
   uid ""
 
@@ -10846,11 +10858,6 @@
     "@types/node" "*"
     "@types/webpack" "^4"
 
-"@types/lodash@^4.14.159":
-  version "4.14.159"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
-  integrity sha512-gF7A72f7WQN33DpqOWw9geApQPh4M3PxluMtaHxWHXEGSN12/WbcEk/eNSqWNQcQhF66VSZ06vCF94CrHwXJDg==
-
 "@types/lodash@^4.14.167":
   version "4.14.184"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.184.tgz#23f96cd2a21a28e106dc24d825d4aa966de7a9fe"
@@ -10860,6 +10867,11 @@
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.0.tgz#d774355e41f372d5350a4d0714abb48194a489c3"
   integrity sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==
+
+"@types/lodash@^4.17.10":
+  version "4.17.10"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.10.tgz#64f3edf656af2fe59e7278b73d3e62404144a6e6"
+  integrity sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==
 
 "@types/long@^4.0.1":
   version "4.0.2"

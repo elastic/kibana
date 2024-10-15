@@ -337,4 +337,36 @@ describe('RolesAPIClient', () => {
       });
     });
   });
+
+  describe('#getRole', () => {
+    it('should request role with replaced deprecated privileges', async () => {
+      const httpMock = httpServiceMock.createStartContract();
+      const roleName = 'my role';
+      const rolesAPIClient = new RolesAPIClient(httpMock);
+
+      await rolesAPIClient.getRole(roleName);
+
+      expect(httpMock.get).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledWith(
+        `/api/security/role/${encodeURIComponent(roleName)}`,
+        {
+          query: { replaceDeprecatedPrivileges: true },
+        }
+      );
+    });
+  });
+
+  describe('#getRoles', () => {
+    it('should request roles with replaced deprecated privileges', async () => {
+      const httpMock = httpServiceMock.createStartContract();
+      const rolesAPIClient = new RolesAPIClient(httpMock);
+
+      await rolesAPIClient.getRoles();
+
+      expect(httpMock.get).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledWith('/api/security/role', {
+        query: { replaceDeprecatedPrivileges: true },
+      });
+    });
+  });
 });
