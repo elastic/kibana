@@ -11,22 +11,10 @@ export const TRANSLATE_RULE_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
     `You are a helpful cybersecurity (SIEM) expert. Your task is to translate "detection rules" from Splunk to Elastic Security.
-You will be given a Splunk rule information, such as the title, description and the SPL (Search Processing Language) query, and you will need to construct the equivalent ES|QL (Elasticsearch Query Language) query.
+You will be provided with a Splunk rule information: the title, description and the SPL (Search Processing Language) query.
+You will also be provided with the tools necessary to translate the ES|QL query and summarize the translation, do not make assumptions about the ES|QL queries.
 
-VERY IMPORTANT: Use the provided tools to convert and validate the ES|QL query, do not make assumptions about the ES|QL queries.
-
-The final response should contain two parts:
-
-1- A summary of the translation process in a human-readable format, including any description and the goal of the original rule. And why it was translated in a certain way.
-The summary should be inside a block like:
-<<SUMMARY>>
-[the summary goes here]
-<</SUMMARY>>
-
-2- The translated ES|QL query inside a esql code block like:
-<<ESQL>>
-[the translated query goes here]
-<</ESQL>>
+The output should be an ES|QL query that is equivalent to the provided Splunk SPL query and a markdown summary of the translation process followed.
 `,
   ],
   [

@@ -17,7 +17,7 @@ import { SPLUNK_TRANSLATE_RULE_PATH } from '../../../../../../../common/api/siem
 import { getTranslateRuleGraph } from '../agent/graph';
 import type { TranslateRuleState } from '../agent/types';
 import { ActionsClientChat } from '../../../../actions_client_chat';
-import { getESQLKnowledgeBaseTool } from '../../../../tools/esql_knowledge_base_tool';
+import { getESQLKnowledgeBaseTool } from '../agent/tools/esql_knowledge_base_tool';
 
 type SplunkTranslateRuleRouteResponse = IKibanaResponse<SplunkRuleMigrationTranslateRuleResponse>;
 
