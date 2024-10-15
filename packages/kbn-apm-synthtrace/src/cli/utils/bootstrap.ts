@@ -16,6 +16,7 @@ import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
 import { getAssetsEsClient } from './get_assets_es_client';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
@@ -68,6 +69,11 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
     concurrency: runOptions.concurrency,
   });
+  const otelEsClient = getOtelSynthtraceEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
 
   if (runOptions.clean) {
     await apmEsClient.clean();
@@ -75,6 +81,7 @@ export async function bootstrap(runOptions: RunOptions) {
     await infraEsClient.clean();
     await assetsEsClient.clean();
     await syntheticsEsClient.clean();
+    await otelEsClient.clean();
   }
 
   return {
@@ -84,6 +91,7 @@ export async function bootstrap(runOptions: RunOptions) {
     infraEsClient,
     assetsEsClient,
     syntheticsEsClient,
+    otelEsClient,
     version,
     kibanaUrl,
     esUrl,
