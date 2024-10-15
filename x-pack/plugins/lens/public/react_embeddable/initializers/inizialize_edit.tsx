@@ -57,7 +57,7 @@ export function initializeEditApi(
   startDependencies: LensEmbeddableStartServices,
   parentApi?: unknown
 ): {
-  api: HasSupportedTriggers & HasEditCapabilities;
+  api: HasSupportedTriggers & HasEditCapabilities & { uuid: string };
   comparators: {};
   serialize: () => {};
   cleanup: () => void;
@@ -140,6 +140,7 @@ export function initializeEditApi(
     serialize: emptySerializer,
     cleanup: noop,
     api: {
+      uuid,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
           defaultMessage: 'Lens',
