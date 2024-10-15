@@ -95,6 +95,23 @@ export function createRootWithSettings(
     pkg
   );
 
+  if (getFips() === 1) {
+    settings = {
+      ...settings,
+
+      xpack: {
+        ...settings.xpack,
+        security: {
+          experimental: {
+            fipsMode: {
+              enabled: true,
+            },
+          },
+        },
+      },
+    };
+  }
+
   return new Root(
     {
       getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
@@ -145,9 +162,8 @@ export function createRootWithCorePlugins(
 
   // createRootWithSettings sets default value to "true", so undefined should be treated as "true".
   const isExplicitlyNotOss = cliArgs.oss === false;
-  const isFipsEnabled = getFips() === 1;
 
-  if (isExplicitlyNotOss || isFipsEnabled) {
+  if (isExplicitlyNotOss) {
     xpackSettings = { xpack: {} };
     if (isExplicitlyNotOss) {
       xpackSettings = {
@@ -156,22 +172,6 @@ export function createRootWithCorePlugins(
           ...xpackSettings.xpack,
           // reporting loads headless browser, that prevents Node.js process from exiting and causes test flakiness
           reporting: { enabled: false },
-        },
-      };
-    }
-
-    if (isFipsEnabled) {
-      xpackSettings = {
-        ...xpackSettings,
-        xpack: {
-          ...xpackSettings.xpack,
-          security: {
-            experimental: {
-              fipsMode: {
-                enabled: true,
-              },
-            },
-          },
         },
       };
     }
