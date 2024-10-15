@@ -12,12 +12,15 @@ import apm from 'elastic-apm-node';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
-import { UsageMetricsResponseSchemaBody } from '../../common/rest_types';
+import {
+  UsageMetricsAutoOpsResponseSchemaBody,
+  UsageMetricsRequestBody,
+} from '../../common/rest_types';
 import { appContextService } from '../app_context';
 import { AutoOpsConfig } from '../types';
 
-class AutoOpsAPIService {
-  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsResponseSchemaBody) {
+export class AutoOpsAPIService {
+  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
     const logger = appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
@@ -78,7 +81,7 @@ class AutoOpsAPIService {
       },
     };
 
-    const response = await axios<UsageMetricsResponseSchemaBody>(requestConfig).catch(
+    const response = await axios<UsageMetricsAutoOpsResponseSchemaBody>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           logger.error(
