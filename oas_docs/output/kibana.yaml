@@ -4598,6 +4598,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Mute all alerts
       tags:
         - alerting
@@ -4629,6 +4635,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Unmute all alerts
       tags:
         - alerting
@@ -11848,6 +11860,56 @@ paths:
                     type: boolean
           description: Successful response
       summary: Stop an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/list:
@@ -40578,7 +40640,20 @@ paths:
   /api/security/role:
     get:
       operationId: '%2Fapi%2Fsecurity%2Frole#0'
-      parameters: []
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
       responses: {}
       summary: Get all roles
       tags:
@@ -40629,6 +40704,11 @@ paths:
           schema:
             minLength: 1
             type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
       responses: {}
       summary: Get a role
       tags:
@@ -56657,6 +56737,20 @@ components:
                 #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
           required:
             - criticality_level
+    Security_Entity_Analytics_API_EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
@@ -56680,6 +56774,8 @@ components:
         - installing
         - started
         - stopped
+        - updating
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
