@@ -28,7 +28,7 @@ import type {
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
-import { buildUserMessagesHelper } from './user_messages/methods';
+import { buildUserMessagesHelpers } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
@@ -59,25 +59,23 @@ export function loadEmbeddableData(
     ? parentApi
     : ({} as LensPublicCallbacks);
 
-  const { getUserMessages, addUserMessages, resetRuntimeMessages } = buildUserMessagesHelper(
+  // Some convenience user messages methods
+  const {
+    getUserMessages,
+    addUserMessage,
+    updateMessages,
+    updateBlockingErrors,
+    updateWarnings,
+    resetMessages,
+  } = buildUserMessagesHelpers(
+    api,
+    internalApi,
     getVisualizationContext,
     services,
     onBeforeBadgesRender,
     services.spaces,
     metaInfo
   );
-
-  function updateBlockingErrors(blockingMessages: UserMessage[]) {
-    api.blockingError.next(
-      blockingMessages.length
-        ? new Error(
-            typeof blockingMessages[0].longMessage === 'string'
-              ? blockingMessages[0].longMessage
-              : blockingMessages[0].shortMessage
-          )
-        : undefined
-    );
-  }
 
   const onRenderComplete = () => {
     internalApi.dispatchRenderComplete();
@@ -101,8 +99,7 @@ export function loadEmbeddableData(
   });
 
   async function reload() {
-    resetRuntimeMessages();
-    internalApi.resetAllMessages();
+    resetMessages();
     // reset the render on reload
     internalApi.dispatchRenderStart();
     // notify about data loading
@@ -144,6 +141,8 @@ export function loadEmbeddableData(
       // The third argument here is an observable to let the
       // consumer to be notified on data change
       onLoad?.(false, adapters, api.dataLoading);
+
+      updateWarnings();
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -173,7 +172,7 @@ export function loadEmbeddableData(
         abortController: internalApi.expressionAbortController$.getValue(),
         getExecutionContext,
         logError: getLogError(getExecutionContext, onRenderComplete),
-        addUserMessages,
+        addUserMessage,
         onRender,
         onData,
         handleEvent,
@@ -242,8 +241,6 @@ export function loadEmbeddableData(
   }
 
   return {
-    getUserMessages,
-    addUserMessages,
     cleanup: () => {
       for (const subscription of subscriptions) {
         subscription.unsubscribe();

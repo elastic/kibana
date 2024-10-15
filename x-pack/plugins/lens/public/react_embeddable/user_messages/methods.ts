@@ -14,7 +14,6 @@ import {
 import { getDatasourceLayers } from '../../state_management/utils';
 import {
   UserMessagesGetter,
-  AddUserMessages,
   UserMessage,
   FramePublicAPI,
   SharingSavedObjectProps,
@@ -31,6 +30,7 @@ import {
   VisualizationContextHelper,
 } from '../types';
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
+import { getSearchWarningMessages } from '../../utils';
 
 function getUpdatedState(
   getVisualizationContext: VisualizationContextHelper['getVisualizationContext'],
@@ -67,23 +67,59 @@ function getUpdatedState(
   };
 }
 
-export function buildUserMessagesHelper(
+function getWarningMessages(
+  { activeDatasource, activeDatasourceId, activeDatasourceState },
+  adapters,
+  data
+) {
+  if (!activeDatasource || !activeDatasourceId || !adapters?.requests) {
+    return [];
+  }
+
+  const requestWarnings = getSearchWarningMessages(
+    adapters.requests,
+    activeDatasource,
+    activeDatasourceState,
+    {
+      searchService: data.search,
+    }
+  );
+
+  return requestWarnings;
+}
+
+export function buildUserMessagesHelpers(
+  api: LensApi,
+  internalApi: LensInternalApi,
   getVisualizationContext: () => VisualizationContext,
-  { coreStart, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
+  { coreStart, data, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
   spaces?: SpacesApi,
   metaInfo?: SharingSavedObjectProps
 ): {
   getUserMessages: UserMessagesGetter;
-  addUserMessages: AddUserMessages;
-  resetRuntimeMessages: () => void;
+  addUserMessages: (messages: UserMessage[]) => void;
+  updateWarnings: () => void;
+  updateMessages: (messages: UserMessage[]) => void;
+  resetMessages: () => void;
+  updateBlockingErrors: (blockingMessages: UserMessage[]) => void;
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
+  const addUserMessages = (messages: UserMessage[]) => {
+    for (const message of messages) {
+      runtimeUserMessages[message.uniqueId] = message;
+    }
+    internalApi.updateMessages(internalApi.messages$.getValue().concat(messages));
+  };
+
+  const resetMessages = () => {
+    runtimeUserMessages = {};
+    internalApi.resetAllMessages();
+  };
 
   return {
-    resetRuntimeMessages: () => {
-      runtimeUserMessages = {};
-    },
+    addUserMessages,
+    resetMessages,
     getUserMessages: (locationId, filters) => {
       const {
         doc,
@@ -173,28 +209,29 @@ export function buildUserMessagesHelper(
         onBeforeBadgesRender
       );
     },
-    addUserMessages: (messages) => {
-      const newMessageMap: Record<string, UserMessage> = {
-        ...runtimeUserMessages,
-      };
-
-      const addedMessageIds: string[] = [];
-      messages.forEach((message) => {
-        if (!newMessageMap[message.uniqueId]) {
-          addedMessageIds.push(message.uniqueId);
-          newMessageMap[message.uniqueId] = message;
-        }
-      });
-
-      if (addedMessageIds.length) {
-        runtimeUserMessages = newMessageMap;
-      }
-
-      return () => {
-        messages.forEach(({ uniqueId }) => {
-          delete runtimeUserMessages[uniqueId];
-        });
-      };
+    updateMessages: (messages: UserMessage[]) => {
+      internalApi.updateMessages(messages);
+    },
+    updateBlockingErrors: (blockingMessages: UserMessage[]) => {
+      api.blockingError.next(
+        blockingMessages.length
+          ? new Error(
+              typeof blockingMessages[0].longMessage === 'string'
+                ? blockingMessages[0].longMessage
+                : blockingMessages[0].shortMessage
+            )
+          : undefined
+      );
+      internalApi.updateBlockingMessages(blockingMessages);
+    },
+    updateWarnings: () => {
+      addUserMessages(
+        getWarningMessages(
+          getUpdatedState(getVisualizationContext, visualizationMap, datasourceMap),
+          api.adapters$.getValue(),
+          data
+        )
+      );
     },
   };
 }
