@@ -138,7 +138,7 @@ export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };
 
-export const removeExternalLinkText = (str: string) => str.replace(/\(external[^)]*\)/g, '');
+export const removeExternalLinkText = (str: string) => str.replace(/\([^)]+\)/g, '');
 
 export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
