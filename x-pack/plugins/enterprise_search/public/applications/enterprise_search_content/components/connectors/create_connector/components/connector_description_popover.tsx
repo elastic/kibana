@@ -24,7 +24,7 @@ import connectorLogo from '../../../../../../assets/images/connector_logo_networ
 const nativePopoverPanels = [
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionBadge.native.chooseADataSourceLabel',
+      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon type="documents" />],
@@ -32,7 +32,7 @@ const nativePopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionBadge.native.configureConnectorLabel',
+      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
     icons: [<EuiIcon type={connectorLogo} />, <EuiIcon type="logoElastic" />],
@@ -43,7 +43,7 @@ const nativePopoverPanels = [
 const connectorClientPopoverPanels = [
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionBadge.client.chooseADataSourceLabel',
+      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon type="documents" />],
@@ -51,7 +51,7 @@ const connectorClientPopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionBadge.client.configureConnectorLabel',
+      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.configureConnectorLabel',
       {
         defaultMessage:
           'Deploy connector code on your own infrastructure by running from source or using Docker',
@@ -66,7 +66,7 @@ const connectorClientPopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionBadge.client.enterDetailsLabel',
+      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.enterDetailsLabel',
       {
         defaultMessage: 'Enter access and connection details for your data source',
       }
