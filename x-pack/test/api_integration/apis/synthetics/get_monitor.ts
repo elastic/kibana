@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(moment(updatedAt).isValid()).to.be(true);
         });
 
-        expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
+        expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at', 'spaceId'))).eql(
           expected.map((expectedMon) =>
             omit(expectedMon, ['updated_at', 'created_at', ...secretKeys])
           )

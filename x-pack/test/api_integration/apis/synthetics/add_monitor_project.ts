@@ -177,7 +177,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           expect(decryptedCreatedMonitor.rawBody).to.eql({
-            spaceId: 'default',
             __ui: {
               script_source: {
                 file_name: '',
@@ -440,7 +439,6 @@ export default function ({ getService }: FtrProviderContext) {
             labels: {},
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
-            spaceId: 'default',
           });
         }
       } finally {
@@ -564,7 +562,6 @@ export default function ({ getService }: FtrProviderContext) {
             labels: {},
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
-            spaceId: 'default',
           });
         }
       } finally {

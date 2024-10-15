@@ -30,28 +30,14 @@ export const editMonitorAPIHelper = async (
   expect(result.status).eql(statusCode, JSON.stringify(result.body));
 
   if (statusCode === 200) {
-    const {
-      created_at: createdAt,
-      updated_at: updatedAt,
-      id,
-      config_id: configId,
-      spaceId,
-    } = result.body;
+    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
     expect(id).not.empty();
     expect(configId).not.empty();
-    expect(spaceId).not.empty();
     expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
     return {
       rawBody: result.body,
       body: {
-        ...omit(result.body, [
-          'created_at',
-          'updated_at',
-          'id',
-          'config_id',
-          'form_monitor_type',
-          'spaceId',
-        ]),
+        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
       },
     };
   }
