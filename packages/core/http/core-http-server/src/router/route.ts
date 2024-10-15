@@ -315,8 +315,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @note Unless you need this setting for a special case, rather use the
    *       {@link HttpResources} service exposed to plugins directly.
    *
-   * @note This is not a security feature. It may affect superficial aspects of
-   *       the HTTP response like headers.
+   * @note This is not a security feature. It may affect aspects of the HTTP
+   *       response like headers.
    *
    * @default false
    */
