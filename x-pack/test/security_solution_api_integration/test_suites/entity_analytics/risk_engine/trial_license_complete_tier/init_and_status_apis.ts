@@ -19,7 +19,7 @@ import {
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const expectTaskIsNotRunning = (taskStatus: string) => {
+const expectTaskIsNotRunning = (taskStatus?: string) => {
   expect(['idle', 'claiming']).contain(taskStatus);
 };
 
