@@ -26,18 +26,20 @@ export const useEntitiesListFilters = ({
   const { filterQuery: globalQuery } = useGlobalFilterQuery();
 
   return useMemo(() => {
-    const criticalityFilter: QueryDslQueryContainer[] = [
-      {
-        bool: {
-          should: selectedCriticalities.map((value) => ({
-            term: {
-              'asset.criticality': value,
+    const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.length
+      ? [
+          {
+            bool: {
+              should: selectedCriticalities.map((value) => ({
+                term: {
+                  'asset.criticality': value,
+                },
+              })),
+              minimum_should_match: 1,
             },
-          })),
-          minimum_should_match: 1,
-        },
-      },
-    ];
+          },
+        ]
+      : [];
 
     const sourceFilter: QueryDslQueryContainer[] = selectedSources.map((value) => ({
       term: {
@@ -45,18 +47,27 @@ export const useEntitiesListFilters = ({
       },
     }));
 
-    const severityFilter: QueryDslQueryContainer[] = [
-      {
-        bool: {
-          should: selectedSeverities.map((value) => ({
-            term: {
-              'host.risk.calculated_level': value,
+    const severityFilter: QueryDslQueryContainer[] = selectedSeverities.length
+      ? [
+          {
+            bool: {
+              should: selectedSeverities.flatMap((value) => [
+                {
+                  term: {
+                    'host.risk.calculated_level': value,
+                  },
+                },
+                {
+                  term: {
+                    'user.risk.calculated_level': value,
+                  },
+                },
+              ]),
+              minimum_should_match: 1,
             },
-          })),
-          minimum_should_match: 1,
-        },
-      },
-    ];
+          },
+        ]
+      : [];
 
     const filterList: QueryDslQueryContainer[] = [
       ...severityFilter,
