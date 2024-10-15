@@ -844,7 +844,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: boolean; readonly assistantModelEvaluation: boolean; readonly assistantBedrockChat: boolean; }"
+          "{ readonly assistantKnowledgeBaseByDefault: boolean; readonly assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -2574,7 +2574,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; assistantBedrockChat: boolean; }"
+          "{ assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -3413,7 +3413,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "{ elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }"
+          "{ elser_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -4522,7 +4522,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; readonly assistantBedrockChat: true; }"
+          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -4987,7 +4987,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantBedrockChat: Zod.ZodBoolean; assistantKnowledgeBaseByDefault: Zod.ZodBoolean; assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; assistantBedrockChat: boolean; }, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; assistantBedrockChat: boolean; }>"
+          "Zod.ZodObject<{ assistantKnowledgeBaseByDefault: Zod.ZodBoolean; assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -5692,7 +5692,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; esql_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_available: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }>"
+          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_available: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,

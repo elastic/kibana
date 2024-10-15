@@ -17,6 +17,8 @@ import {
   DocumentDetailsRightPanelKey,
   DocumentDetailsAnalyzerPanelKey,
 } from '../constants/panel_keys';
+import { Flyouts } from '../constants/flyouts';
+import { isTimelineScope } from '../../../../helpers';
 
 export interface UseNavigateToAnalyzerParams {
   /**
@@ -56,7 +58,11 @@ export const useNavigateToAnalyzer = ({
 }: UseNavigateToAnalyzerParams): UseNavigateToAnalyzerResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openPreviewPanel, openFlyout } = useExpandableFlyoutApi();
-  const key = useWhichFlyout() ?? 'memory';
+  let key = useWhichFlyout() ?? 'memory';
+
+  if (!isFlyoutOpen) {
+    key = isTimelineScope(scopeId) ? Flyouts.timeline : Flyouts.securitySolution;
+  }
 
   const right: FlyoutPanelProps = useMemo(
     () => ({

@@ -41,6 +41,7 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": [
         "actions/checkout",
+        "actions/github-script",
         "elastic/github-actions/project-assigner",
         "hmarr/auto-approve-action",
         "octokit/graphql-action",
@@ -530,6 +531,24 @@
     {
       "groupName": "@mswjs/http-middleware",
       "matchPackageNames": ["@mswjs/http-middleware"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@xyflow/react",
+      "matchPackageNames": ["@xyflow/react"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@dagrejs/dagre",
+      "matchPackageNames": ["@dagrejs/dagre"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],

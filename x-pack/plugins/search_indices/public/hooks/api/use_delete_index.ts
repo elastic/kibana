@@ -28,8 +28,9 @@ export const useDeleteIndex = (indexName: string) => {
       );
       return response.acknowledged;
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries([QueryKeys.FetchIndex, indexName]);
+      queryClient.invalidateQueries([QueryKeys.SearchDocuments, indexName]);
     },
   });
   return { ...result };

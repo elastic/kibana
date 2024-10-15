@@ -6,104 +6,72 @@
  */
 
 import expect from '@kbn/expect';
-import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { cleanEngines } from '../../utils';
+import { EntityStoreUtils, elasticAssetCheckerFactory } from '../../utils';
+import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const es = getService('es');
+  const supertest = getService('supertest');
+  const {
+    expectTransformExists,
+    expectTransformNotFound,
+    expectEnrichPolicyExists,
+    expectEnrichPolicyNotFound,
+    expectComponentTemplateExists,
+    expectComponentTemplateNotFound,
+    expectIngestPipelineExists,
+    expectIngestPipelineNotFound,
+  } = elasticAssetCheckerFactory(getService);
 
-  const initEntityEngineForEntityType = async (entityType: EntityType) => {
-    return api
-      .initEntityEngine({
-        params: { entityType },
-        body: {},
-      })
-      .expect(200);
-  };
+  const utils = EntityStoreUtils(getService);
 
-  const expectTransformExists = async (transformId: string) => {
-    return expectTransformStatus(transformId, true);
-  };
+  // TODO: unskip once permissions issue is resolved
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+    const dataView = dataViewRouteHelpersFactory(supertest);
 
-  const expectTransformNotFound = async (transformId: string, attempts: number = 5) => {
-    return expectTransformStatus(transformId, false);
-  };
-
-  const expectTransformStatus = async (
-    transformId: string,
-    exists: boolean,
-    attempts: number = 5,
-    delayMs: number = 2000
-  ) => {
-    let currentAttempt = 1;
-    while (currentAttempt <= attempts) {
-      try {
-        await es.transform.getTransform({ transform_id: transformId });
-        if (!exists) {
-          throw new Error(`Expected transform ${transformId} to not exist, but it does`);
-        }
-        return; // Transform exists, exit the loop
-      } catch (e) {
-        if (currentAttempt === attempts) {
-          if (exists) {
-            throw new Error(`Expected transform ${transformId} to exist, but it does not: ${e}`);
-          } else {
-            return; // Transform does not exist, exit the loop
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-        currentAttempt++;
-      }
-    }
-  };
-
-  const expectTransformsExist = async (transformIds: string[]) =>
-    Promise.all(transformIds.map((id) => expectTransformExists(id)));
-
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
     before(async () => {
-      await cleanEngines({ getService });
+      await utils.cleanEngines();
+      await dataView.create('security-solution');
+    });
+
+    after(async () => {
+      await dataView.delete('security-solution');
     });
 
     describe('init', () => {
       afterEach(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       it('should have installed the expected user resources', async () => {
-        await initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityType('user');
 
-        const expectedTransforms = [
-          'entities-v1-history-ea_default_user_entity_store',
-          'entities-v1-latest-ea_default_user_entity_store',
-        ];
-
-        await expectTransformsExist(expectedTransforms);
+        await expectTransformExists('entities-v1-latest-ea_default_user_entity_store');
+        await expectEnrichPolicyExists('entity_store_field_retention_user_default_v1');
+        await expectComponentTemplateExists(`ea_default_user_entity_store-latest@platform`);
+        await expectIngestPipelineExists(`ea_default_user_entity_store-latest@platform`);
       });
 
       it('should have installed the expected host resources', async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
 
-        const expectedTransforms = [
-          'entities-v1-history-ea_default_host_entity_store',
-          'entities-v1-latest-ea_default_host_entity_store',
-        ];
-
-        await expectTransformsExist(expectedTransforms);
+        await expectTransformExists('entities-v1-latest-ea_default_host_entity_store');
+        await expectEnrichPolicyExists('entity_store_field_retention_host_default_v1');
+        await expectComponentTemplateExists(`ea_default_host_entity_store-latest@platform`);
+        await expectIngestPipelineExists(`ea_default_host_entity_store-latest@platform`);
       });
     });
 
     describe('get and list', () => {
       before(async () => {
         await Promise.all([
-          initEntityEngineForEntityType('host'),
-          initEntityEngineForEntityType('user'),
+          utils.initEntityEngineForEntityType('host'),
+          utils.initEntityEngineForEntityType('user'),
         ]);
       });
 
       after(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       describe('get', () => {
@@ -117,9 +85,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'host',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
 
@@ -133,9 +101,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'user',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
       });
@@ -151,16 +119,16 @@ export default ({ getService }: FtrProviderContext) => {
             {
               status: 'started',
               type: 'host',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
             {
               status: 'started',
               type: 'user',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
           ]);
         });
@@ -169,11 +137,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
       });
 
       after(async () => {
-        await cleanEngines({ getService });
+        await utils.cleanEngines();
       });
 
       it('should stop the entity engine', async () => {
@@ -211,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityType('host');
 
         await api
           .deleteEntityEngine({
@@ -220,12 +188,14 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-history-ea_host_entity_store');
-        await expectTransformNotFound('entities-v1-latest-ea_host_entity_store');
+        await expectTransformNotFound('entities-v1-latest-ea_default_host_entity_store');
+        await expectEnrichPolicyNotFound('entity_store_field_retention_host_default_v1');
+        await expectComponentTemplateNotFound(`ea_default_host_entity_store-latest@platform`);
+        await expectIngestPipelineNotFound(`ea_default_host_entity_store-latest@platform`);
       });
 
       it('should delete the user entity engine', async () => {
-        await initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityType('user');
 
         await api
           .deleteEntityEngine({
@@ -234,8 +204,52 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-history-ea_user_entity_store');
-        await expectTransformNotFound('entities-v1-latest-ea_user_entity_store');
+        await expectTransformNotFound('entities-v1-latest-ea_default_user_entity_store');
+        await expectEnrichPolicyNotFound('entity_store_field_retention_user_default_v1');
+        await expectComponentTemplateNotFound(`ea_default_user_entity_store-latest@platform`);
+        await expectIngestPipelineNotFound(`ea_default_user_entity_store-latest@platform`);
+      });
+    });
+
+    describe('apply_dataview_indices', () => {
+      before(async () => {
+        await utils.initEntityEngineForEntityType('host');
+      });
+
+      after(async () => {
+        await utils.cleanEngines();
+      });
+
+      afterEach(async () => {
+        await dataView.delete('security-solution');
+        await dataView.create('security-solution');
+      });
+
+      it("should not update the index patten when it didn't change", async () => {
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({ success: true, result: [{ type: 'host', changes: {} }] });
+      });
+
+      it('should update the index pattern when the data view changes', async () => {
+        await dataView.updateIndexPattern('security-solution', 'test-*');
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({
+          success: true,
+          result: [
+            {
+              type: 'host',
+              changes: {
+                indexPatterns: [
+                  'test-*',
+                  '.asset-criticality.asset-criticality-default',
+                  'risk-score.risk-score-latest-default',
+                ],
+              },
+            },
+          ],
+        });
       });
     });
   });

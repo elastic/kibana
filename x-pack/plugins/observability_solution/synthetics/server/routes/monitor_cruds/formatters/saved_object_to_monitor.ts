@@ -7,6 +7,7 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { mergeWith, omit, omitBy } from 'lodash';
+import { LocationsMap } from '../../../synthetics_service/project_monitor/normalizers/common_fields';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -38,11 +39,14 @@ type Result = MonitorFieldsResult & {
   ssl: Record<string, any>;
   response: Record<string, any>;
   check: Record<string, any>;
+  locations: string[];
+  private_locations: string[];
 };
 
 export const transformPublicKeys = (result: Result) => {
   let formattedResult = {
     ...result,
+    ...formatLocations(result),
     [ConfigKey.PARAMS]: formatParams(result),
     retest_on_failure: (result[ConfigKey.MAX_ATTEMPTS] ?? 1) > 1,
     ...(result[ConfigKey.HOSTS] && { host: result[ConfigKey.HOSTS] }),
@@ -66,8 +70,7 @@ export const transformPublicKeys = (result: Result) => {
 
   return omitBy(
     res,
-    (value, key) =>
-      key.startsWith('response.') || key.startsWith('ssl.') || key.startsWith('check.')
+    (_, key) => key.startsWith('response.') || key.startsWith('ssl.') || key.startsWith('check.')
   );
 };
 
@@ -103,6 +106,24 @@ const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key !== ConfigKey.METADATA) {
     return srcValue;
   }
+};
+
+const formatLocations = (config: MonitorFields) => {
+  const locMap = Object.entries(LocationsMap);
+  const locations = config[ConfigKey.LOCATIONS]
+    ?.filter((location) => location.isServiceManaged)
+    .map((location) => {
+      return locMap.find(([_key, value]) => value === location.id)?.[0] ?? location.id;
+    });
+
+  const privateLocations = config[ConfigKey.LOCATIONS]
+    ?.filter((location) => !location.isServiceManaged)
+    .map((location) => location.id);
+
+  return {
+    ...(locations && { locations }),
+    ...(privateLocations && { private_locations: privateLocations }),
+  };
 };
 
 const formatParams = (config: MonitorFields) => {

@@ -40,13 +40,9 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE) {
-    return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
-  }
-
-  return { 'rule.benchmark.posture_type': { value: CSPM_POLICY_TEMPLATE, negate: true } };
-};
+export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => ({
+  'rule.benchmark.posture_type': policyTemplate,
+});
 
 export const SummarySection = ({
   dashboardType,

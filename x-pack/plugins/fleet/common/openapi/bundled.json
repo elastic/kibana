@@ -222,6 +222,17 @@
                   },
                   "additional_yaml_config": {
                     "type": "string"
+                  },
+                  "delete_unenrolled_agents": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 }
               }
@@ -6187,6 +6198,17 @@
           },
           "prerelease_integrations_enabled": {
             "type": "boolean"
+          },
+          "delete_unenrolled_agents": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "is_preconfigured": {
+                "type": "boolean"
+              }
+            }
           }
         },
         "required": [
@@ -6700,7 +6722,12 @@
             "type": "string"
           },
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "integration",
+              "input",
+              "content"
+            ]
           },
           "categories": {
             "type": "array",
@@ -6853,6 +6880,83 @@
                 }
               }
             }
+          },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "github": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "elastic",
+                  "partner",
+                  "community"
+                ]
+              }
+            },
+            "required": [
+              "github"
+            ]
+          },
+          "agent": {
+            "type": "object",
+            "properties": {
+              "privileges": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "asset_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "asset_types": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "asset_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          },
+          "discovery": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                }
+              }
+            }
           }
         },
         "required": [
@@ -6866,7 +6970,8 @@
           "assets",
           "format_version",
           "download",
-          "path"
+          "path",
+          "owner"
         ]
       },
       "package_usage_stats": {

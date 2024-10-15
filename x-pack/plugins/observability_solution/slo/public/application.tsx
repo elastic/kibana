@@ -82,8 +82,6 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
-  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
-
   const unregisterPrompts = plugins.observabilityAIAssistant?.service.setScreenContext({
     starterPrompts: [
       {
@@ -109,50 +107,45 @@ export const renderApp = ({
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PresentationContextProvider>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
                   isServerless,
+                  appMountParameters,
+                  ObservabilityPageTemplate,
+                  observabilityRuleTypeRegistry,
+                  experimentalFeatures,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    isServerless,
-                    appMountParameters,
-                    ObservabilityPageTemplate,
-                    observabilityRuleTypeRegistry,
-                    experimentalFeatures,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <PerformanceContextProvider>
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                          </QueryClientProvider>
-                        </PerformanceContextProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
-      </PresentationContextProvider>
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <PerformanceContextProvider>
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                        </QueryClientProvider>
+                      </PerformanceContextProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>,
     element
   );

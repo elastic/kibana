@@ -15,7 +15,6 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -67,6 +66,9 @@ dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
   });
 }) as ISearchGeneric;
 
+// Replace mock to support tests for `use_index_data`.
+coreSetup.http.post = jest.fn().mockResolvedValue([]);
+
 const appDependencies: AppDependencies = {
   analytics: coreStart.analytics,
   application: coreStart.application,
@@ -85,7 +87,6 @@ const appDependencies: AppDependencies = {
   theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
-  savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),

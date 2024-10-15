@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
   const SERVERLESS_OBSERVABILITY_DOCS = `${SERVERLESS_DOCS}observability/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
+  const SEARCH_LABS_BLOG = `${ELASTIC_WEBSITE_URL}search-labs/blog/`;
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
@@ -143,6 +144,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
       relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
       resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
+      searchLabsEvolutionBlog: `${SEARCH_LABS_BLOG}evolution-app-search-elasticsearch`,
       searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
       security: `${APP_SEARCH_DOCS}security-and-users.html`,
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
@@ -157,7 +159,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       behavioralAnalytics: `${ELASTICSEARCH_DOCS}behavioral-analytics-overview.html`,
       behavioralAnalyticsCORS: `${ELASTICSEARCH_DOCS}behavioral-analytics-cors.html`,
       behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
-      buildConnector: `${ENTERPRISE_SEARCH_DOCS}build-connector.html`,
+      buildConnector: `${ELASTICSEARCH_DOCS}es-build-connector.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ELASTICSEARCH_DOCS}es-connectors.html`,
@@ -258,6 +260,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html`,
       privateSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
+      searchLabsEvolutionBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
       serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
       sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
@@ -476,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
       threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
       endpointArtifacts: `${SECURITY_SOLUTION_DOCS}endpoint-artifacts.html`,
+      eventMerging: `${SECURITY_SOLUTION_DOCS}endpoint-data-volume.html`,
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,

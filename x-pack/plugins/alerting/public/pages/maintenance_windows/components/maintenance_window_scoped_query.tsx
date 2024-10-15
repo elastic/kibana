@@ -90,7 +90,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               http={http}
               toasts={toasts}
               unifiedSearchBar={SearchBar}
-              dataViewsService={data.dataViews}
+              dataService={data}
             />
           </EuiFormRow>
         </EuiFlexItem>
