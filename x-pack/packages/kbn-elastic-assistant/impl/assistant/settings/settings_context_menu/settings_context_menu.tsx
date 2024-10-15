@@ -103,20 +103,20 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           {i18n.AI_ASSISTANT_SETTINGS}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          aria-label={'anonymization'}
-          onClick={handleNavigateToAnonymization}
-          icon={'eye'}
-          data-test-subj={'anonymization'}
-        >
-          {i18n.ANONYMIZATION}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
           aria-label={'knowledge-base'}
           onClick={handleNavigateToKnowledgeBase}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
         >
           {i18n.KNOWLEDGE_BASE}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          aria-label={'anonymization'}
+          onClick={handleNavigateToAnonymization}
+          icon={'eye'}
+          data-test-subj={'anonymization'}
+        >
+          {i18n.ANONYMIZATION}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
