@@ -87,13 +87,12 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
               <h2 id={flyoutTitleId}>
                 <FormattedMessage
                   id="xpack.observabilityLogsOverview.logCategoryDetailsFlyout.title"
-                  defaultMessage="Preview for {pattern} logs"
-                  values={{
-                    pattern: <LogCategoryPattern logCategory={logCategory} />,
-                  }}
+                  defaultMessage="Category details"
                 />
               </h2>
             </EuiTitle>
+            <EuiSpacer size="s" />
+            <LogCategoryPattern logCategory={logCategory} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
