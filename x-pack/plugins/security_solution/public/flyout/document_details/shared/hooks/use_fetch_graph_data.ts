@@ -12,7 +12,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { useHttp } from '../../../../common/lib/kibana';
 
-export const useFetchGraphData = (req: GraphRequest) => {
+export const useFetchGraphData = (req: GraphRequest, options?: { enabled?: boolean }) => {
   const { actorIds, eventIds, start, end } = req.query;
   const http = useHttp();
 
@@ -23,7 +23,8 @@ export const useFetchGraphData = (req: GraphRequest) => {
         version: '1',
         body: JSON.stringify(req),
       });
-    }
+    },
+    options
   );
 
   return {

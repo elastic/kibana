@@ -8,27 +8,21 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../../shared/context';
-import { GraphPreview } from './graph_preview';
+import { GraphPreview, type GraphPreviewProps } from './graph_preview';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 
-jest.mock('../../shared/hooks/use_fetch_graph_data', () => ({
-  useFetchGraphData: jest.fn(),
-}));
-const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
-
-const renderGraphPreview = (contextValue: DocumentDetailsContext) =>
+const renderGraphPreview = (contextValue: DocumentDetailsContext, props: GraphPreviewProps) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={contextValue}>
-        <GraphPreview />
+        <GraphPreview {...props} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
-const NO_DATA_MESSAGE = 'An error is preventing this alert from being visualized.';
+const ERROR_MESSAGE = 'An error is preventing this alert from being visualized.';
 
 describe('<GraphPreview />', () => {
   beforeEach(() => {
@@ -36,38 +30,36 @@ describe('<GraphPreview />', () => {
   });
 
   it('shows graph preview correctly when data is loaded', () => {
-    mockUseFetchGraphData.mockReturnValue({
+    const graphProps = {
       isLoading: false,
       isError: false,
       data: { nodes: [], edges: [] },
-    });
+    };
 
-    const { getByTestId } = renderGraphPreview(mockContextValue);
+    const { getByTestId } = renderGraphPreview(mockContextValue, graphProps);
 
     expect(getByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows loading when data is loading', () => {
-    mockUseFetchGraphData.mockReturnValue({
+    const graphProps = {
       isLoading: true,
       isError: false,
-      data: null,
-    });
+    };
 
-    const { getByTestId } = renderGraphPreview(mockContextValue);
+    const { getByTestId } = renderGraphPreview(mockContextValue, graphProps);
 
     expect(getByTestId(GRAPH_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows error message when there is an error', () => {
-    mockUseFetchGraphData.mockReturnValue({
+    const graphProps = {
       isLoading: false,
       isError: true,
-      data: null,
-    });
+    };
 
-    const { getByText } = renderGraphPreview(mockContextValue);
+    const { getByText } = renderGraphPreview(mockContextValue, graphProps);
 
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
 });
