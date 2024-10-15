@@ -30,7 +30,8 @@
       "lens",
       "maps",
       "uiActions",
-      "logsDataAccess"
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "actions",
