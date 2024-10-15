@@ -22,7 +22,6 @@ export const NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT =
   'nav-to-findings-by-host-name-from-entity-flyout';
 export const NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT =
   'nav-to-findings-by-rule-name-from-entity-flyout';
-
 export const CREATE_DETECTION_RULE_FROM_FLYOUT = 'create-detection-rule-from-flyout';
 export const CREATE_DETECTION_FROM_TABLE_ROW_ACTION = 'create-detection-from-table-row-action';
 export const VULNERABILITIES_FLYOUT_VISITS = 'vulnerabilities-flyout-visits';
