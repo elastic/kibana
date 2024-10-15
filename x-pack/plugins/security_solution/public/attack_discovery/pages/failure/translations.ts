@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DETAILS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.failure.detailsAccordionButton',
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.failure.learnMoreLink',
   {
-    defaultMessage: 'Details',
+    defaultMessage: 'Learn more about Attack discovery',
   }
 );
 
@@ -18,12 +18,5 @@ export const FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.failure.title',
   {
     defaultMessage: 'Attack discovery generation failed',
-  }
-);
-
-export const LEARN_MORE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.failure.learnMoreLink',
-  {
-    defaultMessage: 'Learn more about Attack discovery',
   }
 );
