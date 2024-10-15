@@ -69,7 +69,7 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
       // icon only buttons are not supported by EuiHeaderLink
-      <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom">
+      <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom" delay="long">
         <EuiButtonIcon
           size="s"
           {...{
