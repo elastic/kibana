@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 
-export const useConnectors = () => {
+export const useGetApiKeys = () => {
   const { http } = useKibanaServices();
   return useQuery({
-    queryKey: ['fetchConnectors'],
+    queryKey: ['apiKey'],
     queryFn: () =>
-      http.fetch<{
-        connectors: Connector[];
-        canManageConnectors: boolean;
-        canReadConnectors: boolean;
-      }>('/internal/serverless_search/connectors'),
+      http.fetch<{ apiKeys: ApiKey[]; canManageOwnApiKey: boolean }>(
+        '/internal/serverless_search/api_keys'
+      ),
   });
 };
