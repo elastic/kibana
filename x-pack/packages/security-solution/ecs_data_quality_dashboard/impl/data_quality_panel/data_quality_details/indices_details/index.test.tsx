@@ -117,7 +117,7 @@ describe('IndicesDetails', () => {
         await waitFor(() => expect(screen.queryByTestId('historicalResultsTour')).toBeNull());
 
         expect(localStorage.getItem(HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY)).toEqual(
-          'false'
+          'true'
         );
       });
     });
