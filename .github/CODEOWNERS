@@ -1327,6 +1327,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 /.devcontainer/ @elastic/kibana-operations
+/.eslintrc.js @elastic/kibana-operations
+/.eslintignore @elastic/kibana-operations
 
 # Appex QA
 /x-pack/test_serverless/tsconfig.json @elastic/appex-qa
