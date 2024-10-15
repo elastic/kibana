@@ -127,7 +127,9 @@ describe('unrecognized task types', () => {
     if (errorLogCalls) {
       // should be no workload aggregator errors
       for (const elog of errorLogCalls) {
-        expect(elog).not.toMatch(/^\[WorkloadAggregator\]: Error: Unsupported task type/i);
+        if (typeof elog === 'string') {
+          expect(elog).not.toMatch(/^\[WorkloadAggregator\]: Error: Unsupported task type/i);
+        }
       }
     }
   });

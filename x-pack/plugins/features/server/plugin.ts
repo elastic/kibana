@@ -135,6 +135,7 @@ export class FeaturesPlugin
     }
 
     this.featureRegistry.lockRegistration();
+    this.featureRegistry.validateFeatures();
 
     this.capabilities = uiCapabilitiesForFeatures(
       this.featureRegistry.getAllKibanaFeatures(),
