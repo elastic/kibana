@@ -108,9 +108,7 @@ jest.mock('../../../../../util/index_utils', () => {
           savedSearch: null,
         };
       }),
-    isCcsIndexPattern: (a: string) => {
-      return isCCSRemoteIndexName(a);
-    },
+    isCcsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 
