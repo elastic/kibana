@@ -41,6 +41,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
 
+      // Wait for new row to gets displayed
+      await pageObjects.common.sleep(250);
+
       const databasesList = await pageObjects.ingestPipelines.getGeoipDatabases();
       const databaseExists = Boolean(
         databasesList.find((databaseRow) => databaseRow.includes(maxMindDatabaseName))
