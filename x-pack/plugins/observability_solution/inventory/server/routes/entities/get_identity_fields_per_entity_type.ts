@@ -13,7 +13,7 @@ export type IdentityFieldsPerEntityType = Map<EntityType, string[]>;
 export const getIdentityFieldsPerEntityType = (entities: Entity[]) => {
   const identityFieldsPerEntityType: IdentityFieldsPerEntityType = new Map();
 
-  entities.map((entity) =>
+  entities.forEach((entity) =>
     identityFieldsPerEntityType.set(entity[ENTITY_TYPE], [entity[ENTITY_IDENTITY_FIELDS]].flat())
   );
 
