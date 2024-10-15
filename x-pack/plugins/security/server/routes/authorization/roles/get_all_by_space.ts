@@ -19,7 +19,7 @@ export function defineGetAllRolesBySpaceRoutes({
   getFeatures,
   logger,
   buildFlavor,
-  config,
+  subFeaturePrivilegeIterator,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -49,14 +49,17 @@ export function defineGetAllRolesBySpaceRoutes({
                 return acc;
               }
 
-              const role = transformElasticsearchRoleToRole(
+              const role = transformElasticsearchRoleToRole({
                 features,
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
-                roleName,
-                authz.applicationName,
-                logger
-              );
+                name: roleName,
+                application: authz.applicationName,
+                logger,
+                subFeaturePrivilegeIterator,
+                // For the internal APIs we always transform deprecated privileges.
+                replaceDeprecatedKibanaPrivileges: true,
+              });
 
               const includeRoleForSpace = role.kibana.some((privilege) => {
                 const privilegeInSpace =
