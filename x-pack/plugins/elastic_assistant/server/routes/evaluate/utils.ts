@@ -21,7 +21,7 @@ export const fetchLangSmithDataset = async (
   logger: Logger,
   langSmithApiKey?: string
 ): Promise<Example[]> => {
-  if (datasetName === undefined || (langSmithApiKey == null && !isLangSmithEnabled())) {
+  if (datasetName === undefined || !isLangSmithEnabled()) {
     throw new Error('LangSmith dataset name not provided or LangSmith not enabled');
   }
 
