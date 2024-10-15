@@ -173,9 +173,9 @@ export async function createAgentPolicyWithPackages({
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
   // Create the agentless agent
-  if (agentPolicy.supports_agentless) {
-    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-  }
+  // if (agentPolicy.supports_agentless) {
+  //   await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+  // }
 
   return agentPolicy;
 }

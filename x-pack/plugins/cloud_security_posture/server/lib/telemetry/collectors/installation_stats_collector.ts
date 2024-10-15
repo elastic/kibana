@@ -100,10 +100,10 @@ const getInstalledPackagePolicies = (
   const installationStats = packagePolicies.flatMap(
     (packagePolicy: PackagePolicy): CloudSecurityInstallationStats[] =>
       packagePolicy.policy_ids.map((agentPolicyId) => {
-        const agentCounts =
-          agentPolicies?.find((agentPolicy) => agentPolicy?.id === agentPolicyId)?.agents ?? 0;
+        const agentPolicy = agentPolicies?.find((agentPolicy) => agentPolicy?.id === agentPolicyId);
 
-        const isAgentless = agentPolicyId === AGENTLESS_POLICY_ID;
+        const agentCounts = agentPolicy?.agents ?? 0;
+        const isAgentless = agentPolicy?.supports_agentless ?? false;
 
         const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
 
