@@ -9,7 +9,7 @@
 
 import { run } from '../../lib/spawn.mjs';
 import External from '../../lib/external_packages.js';
-import { buildWebpackBundles } from '../../lib/webpack.mjs';
+import { buildPackage } from '../../lib/webpack.mjs';
 
 import {
   haveNodeModulesBeenManuallyDeleted,
@@ -60,9 +60,7 @@ export const command = {
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
-    // Force install is set in case a flag is passed into yarn kbn bootstrap or
-    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
-    // tracking mechanism is no longer valid
+    // Force install is set in case a flag is passed into yarn kbn bootstrap, or node_modules have been removed
     const forceInstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
@@ -96,7 +94,10 @@ export const command = {
 
     await time('pre-build webpack bundles for packages', async () => {
       const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
-      await buildWebpackBundles(packageNames, log, { quiet });
+      for (const pkg of packageNames) {
+        await buildPackage(pkg, { quiet });
+      }
+      log.success('build required webpack bundles for packages');
     });
 
     await Promise.all([
