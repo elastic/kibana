@@ -27,8 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search index detail page', () => {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
-    });
-    beforeEach(async () => {
       await pageObjects.svlApiKeys.deleteAPIKeys();
     });
     after(async () => {
@@ -53,6 +51,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('should have connection details', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
+      });
+
+      it('should show api key', async () => {
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
       });
 
       it('should have quick stats', async () => {
@@ -89,12 +93,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.openConsoleCodeExample();
         await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
-      });
-
-      it('should show api key', async () => {
-        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
       });
 
       it('back to indices button should redirect to list page', async () => {
