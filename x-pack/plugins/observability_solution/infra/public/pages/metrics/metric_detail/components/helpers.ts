@@ -70,7 +70,7 @@ export const getChartName = (
  * just returns null if the color doesn't exists in the overrides.
  */
 export const getChartColor = (seriesOverrides: SeriesOverrides | undefined, seriesId: string) => {
-  const rawColor: string | null = seriesOverrides
+  const rawColor: string | null | undefined = seriesOverrides
     ? get(seriesOverrides, [seriesId, 'color'])
     : null;
   if (!rawColor) {
