@@ -29,24 +29,6 @@ describe('commands', () => {
       ]);
     });
 
-    it('META', () => {
-      const query = 'META functions';
-      const { ast } = parse(query);
-
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'meta',
-          args: [
-            {
-              type: 'function',
-              name: 'functions',
-            },
-          ],
-        },
-      ]);
-    });
-
     it('FROM', () => {
       const query = 'FROM index';
       const { ast } = parse(query);

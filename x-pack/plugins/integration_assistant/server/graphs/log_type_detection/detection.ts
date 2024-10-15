@@ -26,7 +26,7 @@ export async function handleLogFormatDetection({
 
   const logFormatDetectionResult = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
-    log_samples: samples,
+    log_samples: samples.join('\n'),
     package_title: state.packageTitle,
     datastream_title: state.dataStreamTitle,
   });

@@ -46,6 +46,7 @@ interface ConnectorConfigurationProps {
   isDisabled?: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
@@ -92,6 +93,7 @@ export const ConnectorConfigurationComponent: FC<
   isDisabled,
   isLoading,
   saveConfig,
+  saveAndSync,
   subscriptionLink,
   stackManagementLink,
 }) => {
@@ -168,6 +170,12 @@ export const ConnectorConfigurationComponent: FC<
                 saveConfig(config);
                 setIsEditing(false);
               }}
+              {...(saveAndSync && {
+                saveAndSync: (config) => {
+                  saveAndSync(config);
+                  setIsEditing(false);
+                },
+              })}
             />
           ) : (
             uncategorizedDisplayList.length > 0 && (
