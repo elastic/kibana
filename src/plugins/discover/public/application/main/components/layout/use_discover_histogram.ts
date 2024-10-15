@@ -61,8 +61,7 @@ export const useDiscoverHistogram = ({
   hideChart,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
-  const savedSearchData$ = stateContainer.dataState.data$;
-  const savedSearchHits$ = savedSearchData$.totalHits$;
+  const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -154,7 +153,7 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const setTotalHitsError = useMemo(() => sendErrorTo(savedSearchHits$), [savedSearchHits$]);
+  const setTotalHitsError = useMemo(() => sendErrorTo(totalHits$), [totalHits$]);
 
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
@@ -170,7 +169,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { result: totalHitsResult } = savedSearchHits$.getValue();
+        const { result: totalHitsResult } = totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -186,7 +185,7 @@ export const useDiscoverHistogram = ({
 
         // Do not sync the loading state since it's already handled by fetchAll
         if (fetchStatus !== FetchStatus.LOADING) {
-          savedSearchHits$.next({
+          totalHits$.next({
             fetchStatus,
             result,
           });
@@ -197,7 +196,7 @@ export const useDiscoverHistogram = ({
         }
 
         // Check the hits count to set a partial or no results state
-        checkHitCount(savedSearchData$.main$, result);
+        checkHitCount(main$, result);
       }
     );
 
@@ -206,8 +205,8 @@ export const useDiscoverHistogram = ({
     };
   }, [
     isEsqlMode,
-    savedSearchData$.main$,
-    savedSearchHits$,
+    main$,
+    totalHits$,
     setTotalHitsError,
     stateContainer.appState,
     unifiedHistogram?.state$,
@@ -236,7 +235,7 @@ export const useDiscoverHistogram = ({
 
   const [initialEsqlProps] = useState(() =>
     getUnifiedHistogramPropsForEsql({
-      documentsValue: savedSearchData$.documents$.getValue(),
+      documentsValue: documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
     })
   );
