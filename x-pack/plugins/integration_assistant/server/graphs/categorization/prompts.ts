@@ -161,7 +161,7 @@ You ALWAYS follow these guidelines when writing your response:
 - If the error complains about having event.type or event.category not in the allowed values , fix the corresponding append processors to use the allowed values mentioned in the error.
 - If the error is about event.type not compatible with any event.category, please refer to the 'compatible_types' in the context to fix the corresponding append processors to use valid combination of event.type and event.category
 - If resolving the validation removes the last remaining processor object, respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
-- Reminder: you can access nested dictionaries with the ctx?.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
+- Reminder: you can access nested dictionaries with the ctx.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
 - Do not respond with anything except the complete updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 
