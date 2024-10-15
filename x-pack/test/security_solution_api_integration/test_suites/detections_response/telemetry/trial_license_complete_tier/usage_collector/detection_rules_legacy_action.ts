@@ -21,13 +21,13 @@ import {
   fetchRule,
   getRuleWithWebHookAction,
   getSimpleMlRule,
-  getSimpleRule,
   getSimpleThreatMatch,
   getStats,
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
   updateRule,
   deleteAllEventLogExecutionEvents,
+  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createRule,
@@ -408,7 +408,7 @@ export default ({ getService }: FtrProviderContext) => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, false);
+        const newRuleToUpdate = getCustomQueryRuleParams({ rule_id: immutableRule.rule_id });
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
 
@@ -429,7 +429,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
-            rule_name: 'Simple Rule Query',
+            rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: false,
             elastic_rule: true,
@@ -465,7 +465,10 @@ export default ({ getService }: FtrProviderContext) => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, true);
+        const newRuleToUpdate = getCustomQueryRuleParams({
+          rule_id: immutableRule.rule_id,
+          enabled: true,
+        });
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
 
@@ -486,7 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
-            rule_name: 'Simple Rule Query',
+            rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: true,
             elastic_rule: true,
