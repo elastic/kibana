@@ -18,6 +18,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   addLayerColumn,
@@ -51,8 +52,8 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     hideEndzones: true,
     preferredSeriesType: 'line',
     valueLabels: 'hide',
-    emphasizeFitting: config?.emphasizeFitting ?? false,
-    fittingFunction: config?.fittingFunction ?? 'None',
+    emphasizeFitting: config?.emphasizeFitting ?? true,
+    fittingFunction: config?.fittingFunction ?? FittingFunctions.LINEAR,
     yLeftExtent: {
       mode: config.yBounds?.mode ?? 'full',
       lowerBound: config.yBounds?.lowerBound,
