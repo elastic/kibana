@@ -190,7 +190,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   const handlePerformEvaluation = useCallback(async () => {
     const evaluatorConnectorId =
       selectedEvaluatorModel[0]?.key != null
-        ? { evaluatorConnectorId: selectedEvaluatorModel[0]?.key }
+        ? { evaluatorConnectorId: selectedEvaluatorModel[0].key }
         : {};
 
     const langSmithApiKey = isEmpty(traceOptions.langSmithApiKey)
