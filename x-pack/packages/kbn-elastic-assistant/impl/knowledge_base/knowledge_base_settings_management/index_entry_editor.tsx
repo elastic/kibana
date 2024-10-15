@@ -16,7 +16,7 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
