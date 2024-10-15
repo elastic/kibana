@@ -9,30 +9,33 @@ import { BehaviorSubject, defer, from, map, of, shareReplay, switchMap } from 'r
 
 import type { CoreStart } from '@kbn/core/public';
 
-import type { SolutionView } from '../../../common';
-import { SHOW_SPACE_SOLUTION_TOUR_SETTING } from '../../../common/constants';
+import type { Space } from '../../../common';
+import {
+  DEFAULT_SPACE_ID,
+  SHOW_SPACE_SOLUTION_TOUR_SETTING,
+  SOLUTION_VIEW_CLASSIC,
+} from '../../../common/constants';
 import type { SpacesManager } from '../../spaces_manager';
 
 export function initTour(core: CoreStart, spacesManager: SpacesManager) {
   const showTourUiSettingValue = core.settings.globalClient.get(SHOW_SPACE_SOLUTION_TOUR_SETTING);
-  const hasValueInUiSettings = showTourUiSettingValue !== undefined;
   const showTour$ = new BehaviorSubject(showTourUiSettingValue ?? true);
 
   const allSpaces$ = defer(() => from(spacesManager.getSpaces())).pipe(shareReplay(1));
 
-  const hasMultipleSpaces = (spaces: Array<{ solution?: SolutionView }>) => {
+  const hasMultipleSpaces = (spaces: Space[]) => {
     return spaces.length > 1;
   };
 
-  const isDefaultSpaceOnClassic = (spaces: Array<{ id: string; solution?: SolutionView }>) => {
-    const defaultSpace = spaces.find((space) => space.id === 'default');
+  const isDefaultSpaceOnClassic = (spaces: Space[]) => {
+    const defaultSpace = spaces.find((space) => space.id === DEFAULT_SPACE_ID);
 
     if (!defaultSpace) {
       // Don't show the tour if the default space doesn't exist (this should never happen)
       return true;
     }
 
-    if (!defaultSpace.solution || defaultSpace.solution === 'classic') {
+    if (!defaultSpace.solution || defaultSpace.solution === SOLUTION_VIEW_CLASSIC) {
       return true;
     }
   };
@@ -59,7 +62,7 @@ export function initTour(core: CoreStart, spacesManager: SpacesManager) {
     });
   };
 
-  if (!hasValueInUiSettings) {
+  if (showTourUiSettingValue !== false) {
     allSpaces$.subscribe((spaces) => {
       if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) {
         // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,

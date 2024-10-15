@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SolutionView } from '../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 
 const tourLearnMoreLink = 'https://ela.st/left-nav';
 
@@ -44,7 +45,7 @@ interface Props extends PropsWithChildren<{}> {
 }
 
 export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, onFinishTour }) => {
-  const solutionLabel = solution && solution !== 'classic' ? solutionMap[solution] : '';
+  const solutionLabel = solution && solution !== SOLUTION_VIEW_CLASSIC ? solutionMap[solution] : '';
   if (!solutionLabel) {
     return children;
   }

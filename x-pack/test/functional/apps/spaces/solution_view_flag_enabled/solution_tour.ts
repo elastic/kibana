@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
       });
 
-      it('does now show the solution tour after updating the default space from classic to solution', async () => {
+      it('does not show the solution tour after updating the default space from classic to solution', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
         await PageObjects.common.sleep(500);
         await browser.refresh();
@@ -104,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
       });
 
-      it('does now show the solution tour after deleting spaces and leave only the default', async () => {
+      it('does not show the solution tour after deleting spaces and leave only the default', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
 
         await spacesService.create({

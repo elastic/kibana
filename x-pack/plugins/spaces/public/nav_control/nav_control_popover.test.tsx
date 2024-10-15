@@ -324,7 +324,7 @@ describe('NavControlPopover', () => {
   });
 
   it('should show the solution view tour', async () => {
-    jest.useFakeTimers(); // the unerlying EUI tour component has a timeout that needs to be flushed for the test to pass
+    jest.useFakeTimers(); // the underlying EUI tour component has a timeout that needs to be flushed for the test to pass
 
     const spaces: Space[] = [
       {
