@@ -263,7 +263,9 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State, layerId?: string) {
-    const dataLayer = state.layers.find((l) => l.layerId === layerId) ?? state.layers[0];
+    const dataLayer = layerId
+      ? state.layers.find((l) => l.layerId === layerId)
+      : state.layers.at(0);
     if (dataLayer && !isDataLayer(dataLayer)) {
       throw new Error('Cannot switch series type for non-data layer');
     }
