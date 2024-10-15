@@ -62,10 +62,11 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
+    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
-      esClient: this.options.esClient,
+      esClient: secondaryAuthClient,
       includeState: true,
     });
 
@@ -89,12 +90,12 @@ export class EntityClient {
       definition,
       definitionUpdate,
       soClient: this.options.soClient,
-      esClient: this.options.esClient,
+      esClient: secondaryAuthClient,
       logger: this.options.logger,
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(this.options.esClient, updatedDefinition, this.options.logger);
+      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
     }
     return updatedDefinition;
   }
