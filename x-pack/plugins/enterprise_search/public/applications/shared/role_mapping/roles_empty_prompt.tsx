@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { EnterpriseSearchDeprecationCallout } from '../deprecation_callout/deprecation_callout';
 import { KibanaLogic } from '../kibana/kibana_logic';
 import { ProductName } from '../types';
 
@@ -38,42 +39,61 @@ export const RolesEmptyPrompt: React.FC<Props> = ({ onEnable, docsLink, productN
     </EuiText>
   );
 
+  const [showDeprecationCallout, setShowDeprecationCallout] = React.useState(
+    !sessionStorage.getItem('appSearchHideDeprecationCallout')
+  );
+
+  const onDismissDeprecationCallout = () => {
+    setShowDeprecationCallout(false);
+    sessionStorage.setItem('appSearchHideDeprecationCallout', 'true');
+  };
+
   if (!currentUser) {
     return null;
   }
 
   return (
-    <EuiEmptyPrompt
-      iconType="lockOpen"
-      title={<h2>{ROLES_DISABLED_TITLE}</h2>}
-      body={
-        <>
-          <p>{ROLES_DISABLED_DESCRIPTION(productName)}</p>
-          <p>{ROLES_DISABLED_NOTE}</p>
-        </>
-      }
-      actions={[
-        <EuiButton
-          data-test-subj="enterpriseSearchRolesEmptyPromptButton"
-          disabled={!isSuperUser}
-          key="enableRolesButton"
-          fill
-          onClick={onEnable}
-        >
-          {ENABLE_ROLES_BUTTON}
-        </EuiButton>,
-        rbacDisabledLabel,
-        <EuiSpacer key="spacer" size="xs" />,
-        <EuiLink
-          data-test-subj="enterpriseSearchRolesEmptyPromptLink"
-          key="enableRolesLink"
-          href={docsLink}
-          target="_blank"
-          external
-        >
-          {ENABLE_ROLES_LINK}
-        </EuiLink>,
-      ]}
-    />
+    <>
+      {showDeprecationCallout ? (
+        <EnterpriseSearchDeprecationCallout
+          onDismissAction={onDismissDeprecationCallout}
+          restrictWidth
+        />
+      ) : (
+        <></>
+      )}
+      <EuiEmptyPrompt
+        iconType="lockOpen"
+        title={<h2>{ROLES_DISABLED_TITLE}</h2>}
+        body={
+          <>
+            <p>{ROLES_DISABLED_DESCRIPTION(productName)}</p>
+            <p>{ROLES_DISABLED_NOTE}</p>
+          </>
+        }
+        actions={[
+          <EuiButton
+            data-test-subj="enterpriseSearchRolesEmptyPromptButton"
+            disabled={!isSuperUser}
+            key="enableRolesButton"
+            fill
+            onClick={onEnable}
+          >
+            {ENABLE_ROLES_BUTTON}
+          </EuiButton>,
+          rbacDisabledLabel,
+          <EuiSpacer key="spacer" size="xs" />,
+          <EuiLink
+            data-test-subj="enterpriseSearchRolesEmptyPromptLink"
+            key="enableRolesLink"
+            href={docsLink}
+            target="_blank"
+            external
+          >
+            {ENABLE_ROLES_LINK}
+          </EuiLink>,
+        ]}
+      />
+    </>
   );
 };

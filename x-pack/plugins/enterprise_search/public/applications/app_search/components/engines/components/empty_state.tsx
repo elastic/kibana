@@ -39,7 +39,10 @@ export const EmptyState: React.FC = () => {
   return (
     <>
       {showDeprecationCallout ? (
-        <EnterpriseSearchDeprecationCallout onDismissAction={onDismissDeprecationCallout} />
+        <EnterpriseSearchDeprecationCallout
+          onDismissAction={onDismissDeprecationCallout}
+          restrictWidth
+        />
       ) : (
         <></>
       )}
