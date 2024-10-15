@@ -83,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
+          spaceId: 'default',
           locations: [localLoc],
           name: 'https://www.google.com',
         })
@@ -195,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...defaultFields,
           ...monitor,
           ...updates,
+          spaceId: 'default',
           locations: [localLoc],
           revision: 2,
           url: 'https://www.google.com',
@@ -215,6 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
+          spaceId: 'default',
           locations: [localLoc],
           name: 'https://www.google.com',
         })
@@ -254,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
+          spaceId: 'default',
           revision: 3,
           url: 'https://www.google.com',
           locations: [localLoc, pvtLoc],
@@ -268,6 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
+          spaceId: 'default',
           revision: 4,
           url: 'https://www.google.com',
           locations: [localLoc, pvtLoc],
@@ -286,6 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
+          spaceId: 'default',
           revision: 5,
           url: 'https://www.google.com',
           locations: [localLoc],
