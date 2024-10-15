@@ -86,7 +86,7 @@ describe('parseSearchParams', () => {
     expect(searchParams).toEqual({
       term: 'hello multiword',
       filters: {
-        types: ['canvas workpad', 'enterprise search', 'not', 'canvas-workpad'],
+        types: ['canvas workpad', 'enterprise search', 'not'],
       },
     });
   });
@@ -109,6 +109,20 @@ describe('parseSearchParams', () => {
     const mockSearchableMultiwordTypes = ['canvas-workpad'];
     const searchParams = parseSearchParams(
       'type:   canvas workpad hello type:  dashboard',
+      mockSearchableMultiwordTypes
+    );
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        types: ['canvas workpad', 'dashboard'],
+      },
+    });
+  });
+
+  it('dedupes duplicate types', () => {
+    const mockSearchableMultiwordTypes = ['canvas-workpad'];
+    const searchParams = parseSearchParams(
+      'type:canvas workpad hello type:dashboard type:canvas-workpad type:canvas workpad type:dashboard',
       mockSearchableMultiwordTypes
     );
     expect(searchParams).toEqual({

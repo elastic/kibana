@@ -43,6 +43,10 @@ const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]):
   return modifiedTerm;
 };
 
+const dedupeTypes = (types: FilterValues<string>): FilterValues<string> => [
+  ...new Set(types.map((item) => item.replace(/[-\s]+/g, ' ').trim())),
+];
+
 export const parseSearchParams = (term: string, searchableTypes: string[]): ParsedSearchParams => {
   const recognizedFields = knownFilters.concat(...Object.values(aliasMap));
   let query: Query;
@@ -79,7 +83,7 @@ export const parseSearchParams = (term: string, searchableTypes: string[]): Pars
     term: searchTerm,
     filters: {
       tags: tags ? valuesToString(tags) : undefined,
-      types: types ? valuesToString(types) : undefined,
+      types: types ? dedupeTypes(valuesToString(types)) : undefined,
     },
   };
 };
