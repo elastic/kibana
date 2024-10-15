@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EntityDataStreamType, EntityFields } from '.';
+import { Serializable } from '../serializable';
+
+class ContainerEntity extends Serializable<EntityFields> {
+  constructor(fields: EntityFields) {
+    super({
+      ...fields,
+      'entity.type': 'container',
+      'entity.definitionId': 'latest',
+    });
+  }
+}
+
+export function containerEntity({
+  agentName,
+  dataStreamType,
+  dataStreamDataset,
+  containerId,
+  entityId,
+}: {
+  agentName: string[];
+  dataStreamType: EntityDataStreamType[];
+  dataStreamDataset: string;
+  containerId: string;
+  entityId: string;
+}) {
+  return new ContainerEntity({
+    'source_data_stream.type': dataStreamType,
+    'source_data_stream.dataset': dataStreamDataset,
+    'agent.name': agentName,
+    'container.id': containerId,
+    'entity.id': entityId,
+  });
+}
