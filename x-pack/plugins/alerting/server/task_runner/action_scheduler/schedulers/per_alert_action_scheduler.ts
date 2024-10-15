@@ -111,8 +111,8 @@ export class PerAlertActionScheduler<
     }> = [];
     const results: ActionsToSchedule[] = [];
 
-    const activeCurrentAlertsArray = Object.values(activeCurrentAlerts);
-    const recoveredCurrentAlertsArray = Object.values(recoveredCurrentAlerts);
+    const activeCurrentAlertsArray = Object.values(activeCurrentAlerts || {});
+    const recoveredCurrentAlertsArray = Object.values(recoveredCurrentAlerts || {});
 
     for (const action of this.actions) {
       let summarizedAlerts = null;

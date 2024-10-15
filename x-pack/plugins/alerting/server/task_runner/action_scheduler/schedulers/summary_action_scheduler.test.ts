@@ -13,7 +13,13 @@ import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/aler
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
 import { SummaryActionScheduler } from './summary_action_scheduler';
-import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
+import {
+  getRule,
+  getRuleType,
+  getDefaultSchedulerContext,
+  generateAlert,
+  generateRecoveredAlert,
+} from '../test_fixtures';
 import { RuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
@@ -165,6 +171,7 @@ describe('Summary Action Scheduler', () => {
   describe('getActionsToSchedule', () => {
     const newAlert1 = generateAlert({ id: 1 });
     const newAlert2 = generateAlert({ id: 2 });
+    const recoveredAlert = generateRecoveredAlert({ id: 3 });
     const alerts = { ...newAlert1, ...newAlert2 };
 
     const summaryActionWithAlertFilter: RuleAction = {
@@ -219,7 +226,6 @@ describe('Summary Action Scheduler', () => {
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -272,7 +278,6 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -317,7 +322,6 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -354,7 +358,6 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = { '444-444': { date: '1969-12-31T13:00:00.000Z' } };
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -392,7 +395,6 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -458,7 +460,7 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
+        recoveredCurrentAlerts: recoveredAlert,
         throttledSummaryActions,
       });
 
@@ -473,7 +475,7 @@ describe('Summary Action Scheduler', () => {
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(
-        `(1) alert has been filtered out for: test:333-333`
+        `(2) alerts have been filtered out for: test:333-333`
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
@@ -506,7 +508,6 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions,
       });
 
@@ -537,7 +538,6 @@ describe('Summary Action Scheduler', () => {
       try {
         await scheduler.getActionsToSchedule({
           activeCurrentAlerts: alerts,
-          recoveredCurrentAlerts: {},
           throttledSummaryActions: {},
         });
       } catch (err) {
@@ -567,7 +567,6 @@ describe('Summary Action Scheduler', () => {
       });
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -625,7 +624,6 @@ describe('Summary Action Scheduler', () => {
       });
       const results = await scheduler.getActionsToSchedule({
         activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
