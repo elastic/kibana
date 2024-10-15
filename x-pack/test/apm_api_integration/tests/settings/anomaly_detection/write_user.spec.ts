@@ -35,7 +35,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
-    (['writeUser', 'apmAllPrivilegesWithoutWriteSettingsUser'] as ApmApiClientKey[]).forEach(
+    (['writeUser', 'apmReadPrivilegesWithWriteSettingsUser'] as ApmApiClientKey[]).forEach(
       (user) => {
         describe(`when ${user} has write access to ML`, () => {
           before(async () => {
