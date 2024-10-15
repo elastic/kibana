@@ -16,7 +16,7 @@ export const ENABLE_ENTITY_STORE_TITLE = i18n.translate(
 export const ENABLE_RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.title.risk',
   {
-    defaultMessage: 'Enable Risk Score',
+    defaultMessage: 'Enable entity risk score',
   }
 );
 export const ENABLE_ALL_TITLE = i18n.translate(
