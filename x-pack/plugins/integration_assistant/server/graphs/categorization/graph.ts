@@ -18,6 +18,8 @@ import { handleInvalidCategorization } from './invalid';
 import { handleReview } from './review';
 import type { CategorizationBaseNodeParams, CategorizationGraphParams } from './types';
 import { handleCategorizationValidation } from './validate';
+import { handleUpdateStableSamples } from './stable';
+import { MAX_CATEGORIZATION_REVIEW_CYCLES } from '../../../common/constants';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -56,13 +58,13 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
-  reviewed: {
-    value: (x: boolean, y?: boolean) => y ?? x,
-    default: () => false,
+  stableSamples: {
+    value: (x: number[], y: number[]) => y ?? x,
+    default: () => [],
   },
-  hasTriedOnce: {
-    value: (x: boolean, y?: boolean) => y ?? x,
-    default: () => false,
+  reviewCount: {
+    value: (x: number, y: number) => y ?? x,
+    default: () => 0,
   },
   errors: {
     value: (x: object, y?: object) => y ?? x,
@@ -75,6 +77,14 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   pipelineResults: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [{}],
+  },
+  previousPipelineResults: {
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [{}],
+  },
+  lastReviewedSamples: {
+    value: (x: number[], y: number[]) => y ?? x,
+    default: () => [],
   },
   currentPipeline: {
     value: (x: object, y?: object) => y ?? x,
@@ -121,8 +131,7 @@ function modelInput({ state }: CategorizationBaseNodeParams): Partial<Categoriza
     ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
     samples,
     initialPipeline,
-    finalized: false,
-    reviewed: false,
+    stableSamples: [],
     lastExecutedChain: 'modelInput',
   };
 }
@@ -140,7 +149,7 @@ function modelOutput({ state }: CategorizationBaseNodeParams): Partial<Categoriz
 
 function validationRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
-    if (state.hasTriedOnce || state.reviewed) {
+    if (state.stableSamples.length === state.pipelineResults.length) {
       return 'modelOutput';
     }
     return 'categorization';
@@ -150,24 +159,27 @@ function validationRouter({ state }: CategorizationBaseNodeParams): string {
 
 function chainRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
-    if (state.hasTriedOnce || state.reviewed) {
+    if (state.stableSamples.length === state.pipelineResults.length) {
       return 'modelOutput';
     }
   }
+
   if (Object.keys(state.errors).length > 0) {
     return 'errors';
   }
+
   if (Object.keys(state.invalidCategorization).length > 0) {
     return 'invalidCategorization';
   }
-  if (!state.reviewed) {
+
+  if (
+    state.stableSamples.length < state.pipelineResults.length &&
+    state.reviewCount < MAX_CATEGORIZATION_REVIEW_CYCLES
+  ) {
     return 'review';
   }
-  if (!state.finalized) {
-    return 'modelOutput';
-  }
 
-  return END;
+  return 'modelOutput';
 }
 
 export async function getCategorizationGraph({ client, model }: CategorizationGraphParams) {
@@ -181,6 +193,9 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     )
     .addNode('handleValidatePipeline', (state: CategorizationState) =>
       handleValidatePipeline({ state, client })
+    )
+    .addNode('handleUpdateStableSamples', (state: CategorizationState) =>
+      handleUpdateStableSamples({ state })
     )
     .addNode('handleCategorizationValidation', (state: CategorizationState) =>
       handleCategorizationValidation({ state })
@@ -197,8 +212,9 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
+    .addEdge('handleValidatePipeline', 'handleUpdateStableSamples')
     .addConditionalEdges(
-      'handleValidatePipeline',
+      'handleUpdateStableSamples',
       (state: CategorizationState) => validationRouter({ state }),
       {
         modelOutput: 'modelOutput',

@@ -51,9 +51,11 @@ export interface CategorizationState {
   errors: object;
   previousError: string;
   pipelineResults: object[];
+  previousPipelineResults: object[];
+  lastReviewedSamples: number[]; // Filled when reviewing.
+  stableSamples: number[]; // Samples that did not change due to a review.
+  reviewCount: number;
   finalized: boolean;
-  reviewed: boolean;
-  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];

@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const MAX_SAMPLES_TO_CATEGORIZE = 50;
-export const MAX_SAMPLES_TO_REVIEW = 50;
-
 export const ECS_CATEGORIES = {
   api: 'Covers events from API calls, including those from OS and network protocols. Allowed event.type combinations: access, admin, allowed, change, creation, deletion, denied, end, info, start, user',
   authentication:
