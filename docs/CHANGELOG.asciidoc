@@ -94,7 +94,7 @@ Dashboards::
 Discover::
 * Fixes an issue with the document viewer panel not opening in focus mode ({kibana-pull}191039[#191039]).
 Elastic Observability solution::
-* Fixes the OpenTelemetry guided onboarding for Mac OS with x86_64 architectures ({kibana-pull}194915[#194915]).
+* Fixes the OpenTelemetry guided onboarding for MacOS with x86_64 architectures ({kibana-pull}194915[#194915]).
 * Fixes a bug where the SLO creation form was allowing multiple values for timestamp fields ({kibana-pull}194311[#194311]).
 Elastic Search solution::
 * Fixes a bug with the https://www.elastic.co/guide/en/enterprise-search/8.15/connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with Drive Type: Linux selected.
