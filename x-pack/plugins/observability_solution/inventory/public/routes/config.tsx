@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
@@ -28,12 +27,12 @@ const inventoryRoutes = {
         t.type({
           sortField: entityColumnIdsRt,
           sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-          pageIndex: toNumberRt,
         }),
         t.partial({
+          groupPagination: t.string,
           entityTypes: entityTypesRt,
           kuery: t.string,
-          grouping: t.union([t.literal('none'), t.literal('type')]),
+          grouping: t.string,
         }),
       ]),
     }),
@@ -41,7 +40,6 @@ const inventoryRoutes = {
       query: {
         sortField: defaultEntitySortField,
         sortDirection: 'desc',
-        pageIndex: '0',
       },
     },
     children: {
