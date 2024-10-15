@@ -65,6 +65,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useUiSetting$: () => mockUseUiSetting(),
   };
 });
+jest.mock('../hooks/use_graph_preview');
+jest.mock('../../shared/hooks/use_fetch_graph_data', () => ({
+  useFetchGraphData: jest.fn(),
+}));
 
 const panelContextValue = {
   ...mockContextValue,
