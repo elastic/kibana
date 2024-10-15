@@ -56,7 +56,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
     case 'SET_HAS_CEL_INPUT':
-      return { ...state, isGenerating: action.payload };
+      return { ...state, hasCelInput: action.payload };
     case 'SET_GENERATED_RESULT':
       return {
         ...state,
