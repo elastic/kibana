@@ -10,6 +10,7 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import { SaveTimelineButton } from '../../../../timelines/components/modal/actions/save_timeline_button';
@@ -76,10 +77,9 @@ export const AttachToActiveTimeline = memo(
     const timeline = useSelector((state: State) =>
       timelineSelectors.selectTimelineById(state, TimelineId.active)
     );
-    const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
     const isTimelineSaved: boolean = useMemo(
-      () => timelineSavedObjectId.length > 0,
-      [timelineSavedObjectId]
+      () => timeline.status === TimelineStatusEnum.active,
+      [timeline.status]
     );
 
     const onCheckboxChange = useCallback(
@@ -93,7 +93,7 @@ export const AttachToActiveTimeline = memo(
     return (
       <EuiCallOut
         title={ATTACH_TO_TIMELINE_CALLOUT_TITLE}
-        color={'primary'}
+        color={isTimelineSaved ? 'primary' : 'warning'}
         iconType="iInCircle"
         data-test-subj={ATTACH_TO_TIMELINE_CALLOUT_TEST_ID}
         css={css`
@@ -120,6 +120,7 @@ export const AttachToActiveTimeline = memo(
               <SaveTimelineButton
                 timelineId={TimelineId.active}
                 buttonText={SAVE_TIMELINE_BUTTON}
+                buttonColor="warning"
                 data-test-subj={SAVE_TIMELINE_BUTTON_TEST_ID}
               />
             )}

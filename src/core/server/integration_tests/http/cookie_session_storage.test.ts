@@ -49,6 +49,7 @@ const configService = createConfigService({
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    restrictInternalApis: false,
   } as any,
 });
 const contextSetup = contextServiceMock.createSetupContract();

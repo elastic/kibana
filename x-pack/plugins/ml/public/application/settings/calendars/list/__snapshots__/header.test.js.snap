@@ -82,7 +82,7 @@ exports[`CalendarListsHeader renders header 1`] = `
             Object {
               "br": <br />,
               "learnMoreLink": <EuiLink
-                href="jest-metadata-mock-url"
+                href={[MockFunction]}
                 target="_blank"
               >
                 <Memo(MemoizedFormattedMessage)

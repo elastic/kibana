@@ -19,6 +19,8 @@ import { z } from '@kbn/zod';
 import {
   PackageName,
   DataStreamName,
+  PackageTitle,
+  DataStreamTitle,
   LogSamples,
   Connector,
   LangSmithOptions,
@@ -29,6 +31,8 @@ export type AnalyzeLogsRequestBody = z.infer<typeof AnalyzeLogsRequestBody>;
 export const AnalyzeLogsRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
+  packageTitle: PackageTitle,
+  dataStreamTitle: DataStreamTitle,
   logSamples: LogSamples,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

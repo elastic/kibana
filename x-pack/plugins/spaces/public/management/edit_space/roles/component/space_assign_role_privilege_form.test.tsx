@@ -27,7 +27,11 @@ import {
 
 import { PrivilegesRolesForm } from './space_assign_role_privilege_form';
 import type { Space } from '../../../../../common';
-import { FEATURE_PRIVILEGES_ALL, FEATURE_PRIVILEGES_READ } from '../../../../../common/constants';
+import {
+  FEATURE_PRIVILEGES_ALL,
+  FEATURE_PRIVILEGES_CUSTOM,
+  FEATURE_PRIVILEGES_READ,
+} from '../../../../../common/constants';
 import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
 import {
   createPrivilegeAPIClientMock,
@@ -160,6 +164,32 @@ describe('PrivilegesRolesForm', () => {
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
   });
 
+  it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    const roles: Role[] = [
+      createRole('test_role_1', [{ base: [], feature: {}, spaces: [space.id] }]),
+    ];
+
+    renderPrivilegeRolesForm({
+      preSelectedRoles: roles,
+    });
+
+    await waitFor(() => null);
+
+    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+      'aria-pressed',
+      String(false)
+    );
+
+    expect(
+      screen.getByTestId('space-assign-role-privilege-customization-form')
+    ).toBeInTheDocument();
+
+    expect(screen.getByTestId('space-update-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
   it('preselects the privilege of the selected role when one is provided', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -290,9 +320,83 @@ describe('PrivilegesRolesForm', () => {
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
       expect(
         screen.getByTestId('space-assign-role-privilege-customization-form')
       ).toBeInTheDocument();
+
+      expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      expect(screen.getByTestId(`${featureIds[0]}_all`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+    });
+
+    it('allows modifying individual features after selecting a base privilege within the customize table', async () => {
+      const user = userEvent.setup();
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featureIds: string[] = kibanaFeatures.map((kibanaFeature) => kibanaFeature.id);
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await waitFor(() => null);
+
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      // By default all features are set to the none privilege
+      expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      await user.click(screen.getByTestId('changeAllPrivilegesButton'));
+
+      // change all privileges to read
+      await user.click(screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`));
+
+      featureIds.forEach((_, idx) => {
+        // verify that all features are set to read
+        expect(screen.queryByTestId(`${featureIds[idx]}_read`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        );
+      });
+
+      // change a single feature to all
+      await user.click(screen.getByTestId(`${featureIds[0]}_all`));
 
       expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
         'aria-pressed',

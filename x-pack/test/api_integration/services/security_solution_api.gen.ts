@@ -155,6 +155,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -270,7 +277,7 @@ If asset criticality records already exist for the specified entities, those rec
       return supertest
         .delete(routeWithNamespace('/api/risk_score/engine/dangerously_delete_data', kibanaSpace))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**

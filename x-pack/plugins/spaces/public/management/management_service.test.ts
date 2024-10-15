@@ -50,6 +50,7 @@ describe('ManagementService', () => {
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
+        isServerless: false,
       });
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
@@ -73,6 +74,7 @@ describe('ManagementService', () => {
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
+        isServerless: false,
       });
     });
   });
@@ -97,6 +99,7 @@ describe('ManagementService', () => {
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
+        isServerless: false,
       });
 
       service.stop();

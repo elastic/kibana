@@ -20,6 +20,9 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
+    async expectUseInPlaygroundLinkExists() {
+      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
+    },
     async expectBackToIndicesButtonExists() {
       await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
     },
@@ -82,7 +85,20 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectMoreOptionsOverviewMenuIsShown() {
       await testSubjects.existOrFail('moreOptionsContextMenu');
     },
-    async expectDeleteIndexButtonExists() {
+    async expectPlaygroundButtonExistsInMoreOptions() {
+      await testSubjects.existOrFail('moreOptionsPlayground');
+    },
+    async expectToNavigateToPlayground(indexName: string) {
+      await testSubjects.click('moreOptionsPlayground');
+      expect(await browser.getCurrentUrl()).contain(
+        `/search_playground/chat?default-index=${indexName}`
+      );
+      await testSubjects.existOrFail('chatPage');
+    },
+    async expectAPIReferenceDocLinkExistsInMoreOptions() {
+      await testSubjects.existOrFail('moreOptionsApiReference', { timeout: 2000 });
+    },
+    async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
     },
     async clickDeleteIndexButton() {
@@ -163,6 +179,32 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
         apiKey
       );
+    },
+
+    async clickFirstDocumentDeleteAction() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      await testSubjects.click('deleteDocumentButton');
+    },
+
+    async expectDeleteDocumentActionNotVisible() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
+      const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+      await indexList[indexOfRow].click();
+      await retry.waitFor('index details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+      });
+    },
+
+    async expectSearchIndexDetailsTabsExists() {
+      await testSubjects.existOrFail('dataTab');
+      await testSubjects.existOrFail('mappingsTab');
+      await testSubjects.existOrFail('settingsTab');
     },
   };
 }

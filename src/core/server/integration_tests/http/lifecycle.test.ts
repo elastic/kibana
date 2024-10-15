@@ -1019,11 +1019,9 @@ describe('Auth', () => {
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn[1]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "onPreResponseHandler rewrote a response header [www-authenticate].",
-        ],
+        "onPreResponseHandler rewrote a response header [www-authenticate].",
       ]
     `);
   });
@@ -1054,6 +1052,9 @@ describe('Auth', () => {
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
+        Array [
+          "Access to uri [/] with method [get] is deprecated",
+        ],
         Array [
           "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
@@ -1288,11 +1289,9 @@ describe('OnPreResponse', () => {
 
     await supertest(innerServer.listener).get('/').expect(200);
 
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn[1]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "onPreResponseHandler rewrote a response header [x-kibana-header].",
-        ],
+        "onPreResponseHandler rewrote a response header [x-kibana-header].",
       ]
     `);
   });

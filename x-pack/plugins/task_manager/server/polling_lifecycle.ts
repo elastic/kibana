@@ -44,6 +44,7 @@ import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
 import { TaskPartitioner } from './lib/task_partitioner';
+import { TaskPoller } from './polling/task_poller';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -86,7 +87,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
+  private poller: TaskPoller<string, TimedFillPoolResult>;
+
   public pool: TaskPool;
+
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
 
@@ -170,7 +174,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
     }
 
-    const poller = createTaskPoller<string, TimedFillPoolResult>({
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
@@ -192,14 +196,17 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       work: this.pollForWork,
     });
 
-    this.subscribeToPoller(poller.events$);
+    this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
-        poller.start();
+        this.poller.start();
       } else if (!areESAndSOAvailable) {
-        poller.stop();
+        this.logger.info(
+          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
+        );
+        this.poller.stop();
         this.pool.cancelRunningTasks();
       }
     });
@@ -207,6 +214,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
+  }
+
+  public stop() {
+    this.poller.stop();
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {
@@ -285,7 +296,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
                 mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
               );
             }
-            this.logger.error(error.message);
+            this.logger.error(error.message, { error: { stack_trace: error.stack } });
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy

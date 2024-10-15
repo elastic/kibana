@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 export async function addIntegrationToLogIndexTemplate({
   esClient,
@@ -50,5 +51,37 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
         managed_by: undefined,
       },
     },
+  });
+}
+
+function getCurrentDateFormatted() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}.${month}.${day}`;
+}
+
+export function createBackingIndexNameWithoutVersion({
+  type,
+  dataset,
+  namespace = 'default',
+}: {
+  type: string;
+  dataset: string;
+  namespace: string;
+}) {
+  return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
+}
+
+export async function setDataStreamSettings(
+  esClient: Client,
+  name: string,
+  settings: IndicesIndexSettings
+) {
+  return esClient.indices.putSettings({
+    index: name,
+    settings,
   });
 }
