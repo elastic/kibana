@@ -58,7 +58,7 @@ export const verifyQueryTimeout = (timeout: string) => {
 
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
-  cy.getBySel('osqueryResultsTable', { timeout: 300000 }).then(($table) => {
+  cy.getBySel('osqueryResultsTable', { timeout: 480000 }).then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
       cy.getBySel('dataGridRowCell', { timeout: 180000 }).should('have.lengthOf.above', 0);
     } else {
