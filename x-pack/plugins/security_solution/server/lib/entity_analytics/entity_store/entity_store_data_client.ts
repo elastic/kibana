@@ -151,7 +151,7 @@ export class EntityStoreDataClient {
       filter,
       pipelineDebugMode
     ).catch((error) => {
-      logger.error('There was an error during Async setup for Entity Store', error);
+      logger.error('There was an error during async setup of the Entity Store', error);
     });
 
     return descriptor;
