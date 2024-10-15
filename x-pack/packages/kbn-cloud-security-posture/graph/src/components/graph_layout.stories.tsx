@@ -14,7 +14,7 @@ import type { EdgeViewModel, LabelNodeViewModel, NodeViewModel } from '.';
 import { Graph } from '.';
 
 export default {
-  title: 'Components/Graph Components/Dagree Layout Graph',
+  title: 'Components/Graph Components/Graph Layout',
   description: 'CDR - Graph visualization',
 };
 

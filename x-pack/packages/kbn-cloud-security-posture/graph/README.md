@@ -108,7 +108,7 @@ export default App;
 
 ### Storybook Example
 
-You can also see how the `Graph` component is used in the Storybook file `dagree_layout_graph.stories.tsx`. 
+You can also see how the `Graph` component is used in the Storybook file `graph_layout.stories.tsx`. 
 
 ### Extras
 
