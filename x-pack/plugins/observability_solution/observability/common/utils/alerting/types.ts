@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { connectorModelVersions } from './connector_model_versions';
-export { connectorTokenModelVersions } from './connector_token_model_versions';
-export { actionTaskParamsModelVersions } from './action_task_params_model_versions';
+import { ALERT_GROUP, TAGS } from '@kbn/rule-data-utils';
+import { Group } from '../../typings';
+
+export interface ObservabilityFields {
+  [ALERT_GROUP]?: Group[];
+  [TAGS]?: string[];
+}
