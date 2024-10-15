@@ -86,9 +86,6 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
   /**
    * Downloads the agent and stores it locally. Reuses existing downloads if available.
-   * version is returned instead
-   * @param agentDownloadUrl
-   * @param agentFileName
    */
   public async downloadAndStore(
     agentDownloadUrl: string,
@@ -202,7 +199,11 @@ export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
 }
 
 /**
- * Downloads the agent file from the provided URL. Reuses cached versions if available.
+ * Downloads the agent file provided via the input URL to a local folder on disk. If the file
+ * already exists on disk, then no download is actually done - the information about the cached
+ * version is returned instead
+ * @param agentDownloadUrl
+ * @param agentFileName
  */
 export const downloadAndStoreAgent = async (
   agentDownloadUrl: string,
