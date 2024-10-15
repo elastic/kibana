@@ -21,14 +21,15 @@ import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useAlertsDataView } from './use_alerts_data_view';
 
 jest.mock('../apis/fetch_alerts_index_names');
-const mockFetchAlertsIndexNames = jest
-  .mocked(fetchAlertsIndexNames)
-  .mockResolvedValue([
+const mockFetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames).mockResolvedValue({
+  indexName: [
     '.alerts-observability.uptime.alerts-*',
     '.alerts-observability.metrics.alerts-*',
     '.alerts-observability.logs.alerts-*',
     '.alerts-observability.apm.alerts-*',
-  ]);
+  ],
+  hasReadIndexPrivilege: false,
+});
 
 jest.mock('../apis/fetch_alerts_fields');
 const mockFetchAlertsFields = jest
@@ -116,7 +117,7 @@ describe('useAlertsDataView', () => {
     await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
   });
 
-  it('does not fetch anything if siem and other feature ids are mixed together', async () => {
+  it('does not fetch alerts fields if siem and other feature ids are mixed together', async () => {
     const { result, waitFor } = renderHook(
       () =>
         useAlertsDataView({
@@ -134,7 +135,6 @@ describe('useAlertsDataView', () => {
         dataView: undefined,
       })
     );
-    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 

@@ -28,7 +28,10 @@ const mockFetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames);
 
 describe('useFetchAlertsIndexNamesQuery', () => {
   beforeEach(() => {
-    mockFetchAlertsIndexNames.mockResolvedValue(['test-index']);
+    mockFetchAlertsIndexNames.mockResolvedValue({
+      indexName: ['test-index'],
+      hasReadIndexPrivilege: false,
+    });
   });
 
   afterEach(() => {
