@@ -94,7 +94,7 @@ const EntityStoreDashboardPanelsComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.entityStore.enablement.initializing.description"
-                defaultMessage="It can take up to 5 minutes"
+                defaultMessage="This can take up to 5 minutes."
               />
             </p>
           }
