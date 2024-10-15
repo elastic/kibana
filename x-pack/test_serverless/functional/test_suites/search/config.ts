@@ -21,7 +21,6 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
     `--xpack.cloud.serverless.project_name=ES3_FTR_TESTS`,
-    `--xpack.cloud.serverless.project_type=elasticsearch`,
     `--xpack.cloud.deployment_url=/projects/elasticsearch/fakeprojectid`,
   ],
   apps: {

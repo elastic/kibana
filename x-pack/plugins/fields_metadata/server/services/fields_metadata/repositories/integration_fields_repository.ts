@@ -9,14 +9,17 @@ import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { FieldMetadata, IntegrationFieldName } from '../../../../common';
 import {
+  ExtractedIntegration,
   ExtractedIntegrationFields,
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
+  IntegrationListExtractor,
   IntegrationName,
 } from './types';
 import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {
   integrationFieldsExtractor: IntegrationFieldsExtractor;
+  integrationListExtractor: IntegrationListExtractor;
 }
 
 type DatasetFieldsMetadata = Record<string, FieldMetadata>;
@@ -24,15 +27,28 @@ type IntegrationFieldsMetadataTree = Record<IntegrationName, DatasetFieldsMetada
 
 export class IntegrationFieldsRepository {
   private cache: HashedCache<IntegrationFieldsSearchParams, IntegrationFieldsMetadataTree>;
+  private integrationsMap: Map<string, ExtractedIntegration>;
 
-  private constructor(private readonly fieldsExtractor: IntegrationFieldsExtractor) {
+  private constructor(
+    private readonly integrationFieldsExtractor: IntegrationFieldsExtractor,
+    private readonly integrationListExtractor: IntegrationListExtractor
+  ) {
     this.cache = new HashedCache();
+    this.integrationsMap = new Map();
+
+    this.extractIntegrationList();
   }
 
   async getByName(
     fieldName: IntegrationFieldName,
-    { integration, dataset }: IntegrationFieldsSearchParams
+    params: Partial<IntegrationFieldsSearchParams>
   ): Promise<FieldMetadata | undefined> {
+    const { integration, dataset } = this.extractIntegrationFieldsSearchParams(fieldName, params);
+
+    if (!integration || !this.integrationsMap.has(integration)) {
+      return undefined;
+    }
+
     let field = this.getCachedField(fieldName, { integration, dataset });
 
     if (!field) {
@@ -48,8 +64,29 @@ export class IntegrationFieldsRepository {
     return field;
   }
 
-  public static create({ integrationFieldsExtractor }: IntegrationFieldsRepositoryDeps) {
-    return new IntegrationFieldsRepository(integrationFieldsExtractor);
+  public static create({
+    integrationFieldsExtractor,
+    integrationListExtractor,
+  }: IntegrationFieldsRepositoryDeps) {
+    return new IntegrationFieldsRepository(integrationFieldsExtractor, integrationListExtractor);
+  }
+
+  private extractIntegrationFieldsSearchParams(
+    fieldName: IntegrationFieldName,
+    params: Partial<IntegrationFieldsSearchParams>
+  ) {
+    const parts = fieldName.split('.');
+
+    if (parts.length < 3) {
+      return params;
+    }
+
+    const [extractedIntegration, extractedDataset] = parts;
+
+    return {
+      integration: params.integration ?? extractedIntegration,
+      dataset: params.dataset ?? [extractedIntegration, extractedDataset].join('.'),
+    };
   }
 
   private async extractFields({
@@ -63,9 +100,15 @@ export class IntegrationFieldsRepository {
       return undefined;
     }
 
-    return this.fieldsExtractor({ integration, dataset })
+    return this.integrationFieldsExtractor({ integration, dataset })
       .then(this.mapExtractedFieldsToFieldMetadataTree)
       .then((fieldMetadataTree) => this.storeFieldsInCache(cacheKey, fieldMetadataTree));
+  }
+
+  private extractIntegrationList(): void {
+    void this.integrationListExtractor()
+      .then(this.mapExtractedIntegrationListToMap)
+      .then((integrationsMap) => (this.integrationsMap = integrationsMap));
   }
 
   private getCachedField(
@@ -113,7 +156,19 @@ export class IntegrationFieldsRepository {
     }
   };
 
-  private getCacheKey = (params: IntegrationFieldsSearchParams) => params;
+  private getCacheKey = ({ integration, dataset }: IntegrationFieldsSearchParams) => {
+    const integrationDetails = this.integrationsMap.get(integration);
+
+    if (integrationDetails) {
+      return {
+        dataset,
+        integration,
+        version: integrationDetails.version,
+      };
+    }
+
+    return { integration, dataset };
+  };
 
   private mapExtractedFieldsToFieldMetadataTree = (extractedFields: ExtractedIntegrationFields) => {
     const datasetGroups = Object.entries(extractedFields);
@@ -131,5 +186,9 @@ export class IntegrationFieldsRepository {
 
       return integrationGroup;
     }, {} as IntegrationFieldsMetadataTree);
+  };
+
+  private mapExtractedIntegrationListToMap = (extractedIntegrations: ExtractedIntegration[]) => {
+    return new Map(extractedIntegrations.map((integration) => [integration.name, integration]));
   };
 }
