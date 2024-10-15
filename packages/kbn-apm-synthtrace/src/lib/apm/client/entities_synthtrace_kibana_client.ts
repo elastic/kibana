@@ -34,14 +34,14 @@ export class EntitiesSynthtraceKibanaClient {
     });
     const entityDefinition: EntityDefinitionResponse = await response.json();
 
-    const hasServiceEntityDefinition = entityDefinition.definitions.find(
+    const hasEntityDefinitionsInstalled = entityDefinition.definitions.find(
       (definition) => definition.type === 'service'
     )?.state.installed;
 
-    if (hasServiceEntityDefinition === true) {
-      this.logger.debug('Service Entity is already defined');
+    if (hasEntityDefinitionsInstalled === true) {
+      this.logger.debug('Entity definitions are already defined');
     } else {
-      this.logger.debug('Installing Service Entity definition');
+      this.logger.debug('Installing Entity definitions');
       const entityEnablementUrl = `${this.target}/internal/entities/managed/enablement?installOnly=true`;
       await fetch(entityEnablementUrl, {
         method: 'PUT',
