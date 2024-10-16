@@ -44,10 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('get and list', () => {
       before(async () => {
-        await Promise.all([
-          utils.initEntityEngineForEntityTypeAndWait('host'),
-          utils.initEntityEngineForEntityTypeAndWait('user'),
-        ]);
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
 
       after(async () => {
