@@ -1,5 +1,5 @@
 summary: Feature privileges in a space
-description:  Grant full access to all features in the default space.
+description: Grant full access to all features in the default space.
 value:
   metadata:
     version: 1
