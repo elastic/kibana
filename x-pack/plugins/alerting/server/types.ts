@@ -26,7 +26,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
-// import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -43,28 +42,14 @@ import {
   Rule,
   RuleTypeParams,
   RuleTypeState,
-  // RuleActionParams,
-  // RuleExecutionStatuses,
-  // RuleExecutionStatusErrorReasons,
-  // RuleExecutionStatusWarningReasons,
-  // RuleNotifyWhenType,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
-  // RuleMonitoring,
-  // MappedParams,
-  // RuleSnooze,
-  // IntervalSchedule,
-  // RuleLastRun,
   SanitizedRule,
-  // AlertsFilter,
-  // AlertsFilterTimeframe,
   RuleAlertData,
-  // AlertDelay,
-  // Flapping,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
