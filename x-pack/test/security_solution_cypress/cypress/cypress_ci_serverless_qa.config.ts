@@ -20,8 +20,7 @@ export default defineCypressConfig({
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-    grepTags: '@testhere',
-    // grepTags: '@serverless --@skipInServerless --@skipInServerlessMKI',
+    grepTags: '@serverless --@skipInServerless --@skipInServerlessMKI',
   },
   execTimeout: 300000,
   pageLoadTimeout: 300000,
