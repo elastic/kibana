@@ -285,10 +285,7 @@ export class DashboardPanelActionsService extends FtrService {
   async panelActionExistsByTitle(testSubject: string, title = '') {
     this.log.debug(`panelActionExists(${testSubject}) on "${title}"`);
     const wrapper = await this.getPanelWrapper(title);
-
-    return wrapper
-      ? await this.testSubjects.descendantExists(testSubject, wrapper)
-      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+    return await this.panelActionExists(testSubject, wrapper);
   }
 
   async expectExistsPanelAction(testSubject: string, title = '') {
@@ -296,7 +293,7 @@ export class DashboardPanelActionsService extends FtrService {
 
     const wrapper = await this.getPanelWrapper(title);
 
-    const exists = this.panelActionExists(testSubject, wrapper);
+    const exists = await this.panelActionExists(testSubject, wrapper);
 
     if (!exists) {
       await this.openContextMenu(wrapper);
@@ -333,7 +330,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug('expectMissingPanelAction', testSubject, title);
     const wrapper = await this.getPanelWrapper(title);
 
-    const exists = this.panelActionExists(testSubject, wrapper);
+    const exists = await this.panelActionExists(testSubject, wrapper);
 
     if (!exists) {
       await this.openContextMenu(wrapper);
@@ -427,8 +424,6 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     }
-    await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
-    await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
     if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
   }
 
@@ -441,8 +436,6 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
     }
-    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
   }
 }
