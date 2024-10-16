@@ -93,8 +93,16 @@ export const getTabs = ({
     },
   ];
 
+  /*
+   * config.roleManagementEnabled is an offering-based config. In serverless, the value will be true or false.
+   * In stateful, role management is enabled but the config setting is expected to be undefined.
+   */
+  const isRoleManagementEnabled = Boolean(
+    authz &&
+      (typeof authz.isRoleManagementEnabled() === 'undefined' || authz.isRoleManagementEnabled())
+  );
+
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
-  const isRoleManagementEnabled = authz && authz.isRoleManagementEnabled() !== false;
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
 
   if (canUserViewRoles && isRoleManagementEnabled) {
