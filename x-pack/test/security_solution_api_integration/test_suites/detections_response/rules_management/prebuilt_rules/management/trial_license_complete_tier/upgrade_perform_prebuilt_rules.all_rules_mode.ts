@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it.only('upgrades all upgreadeable rules fields to their MERGED versions', async () => {
+      it('upgrades all upgreadeable rules fields to their MERGED versions', async () => {
         // Install base prebuilt detection rule
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, basePrebuiltAssets);
         await installPrebuiltRules(es, supertest);
