@@ -4217,6 +4217,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Mute all alerts
       tags:
         - alerting
@@ -4248,6 +4254,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Unmute all alerts
       tags:
         - alerting
@@ -8419,6 +8431,56 @@ paths:
                     type: boolean
           description: Successful response
       summary: Stop an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/list:
@@ -23652,7 +23714,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
-      description: Generate Logstash API keyy
+      description: Generate Logstash API key
       operationId: '%2Fapi%2Ffleet%2Flogstash_api_keys#0'
       parameters:
         - description: The version of the API to use
@@ -33283,6 +33345,17 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      delete_unenrolled_agents:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
@@ -33314,7 +33387,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - prerelease_integrations_enabled
                       - id
                 required:
                   - item
@@ -33376,6 +33448,17 @@ paths:
               properties:
                 additional_yaml_config:
                   type: string
+                delete_unenrolled_agents:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    is_preconfigured:
+                      type: boolean
+                  required:
+                    - enabled
+                    - is_preconfigured
                 fleet_server_hosts:
                   items:
                     format: uri
@@ -33404,6 +33487,17 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      delete_unenrolled_agents:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          enabled:
+                            type: boolean
+                          is_preconfigured:
+                            type: boolean
+                        required:
+                          - enabled
+                          - is_preconfigured
                       fleet_server_hosts:
                         items:
                           type: string
@@ -33435,7 +33529,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - prerelease_integrations_enabled
                       - id
                 required:
                   - item
@@ -35165,6 +35258,11 @@ paths:
             type: string
         - in: query
           name: filter
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: userFilter
           schema:
             nullable: true
             type: string
@@ -47878,6 +47976,20 @@ components:
                 #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
           required:
             - criticality_level
+    Security_Entity_Analytics_API_EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
@@ -47901,6 +48013,8 @@ components:
         - installing
         - started
         - stopped
+        - updating
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:

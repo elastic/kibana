@@ -14,7 +14,6 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -77,7 +76,6 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -138,7 +136,6 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
