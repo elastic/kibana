@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { BareNote, Note } from '../../../common/api/timeline';
+import type {
+  BareNote,
+  DeleteNoteResponse,
+  GetNotesResponse,
+  PersistNoteRouteResponse,
+} from '../../../common/api/timeline';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';
 
@@ -16,16 +21,18 @@ import { NOTE_URL } from '../../../common/constants';
  */
 export const createNote = async ({ note }: { note: BareNote }) => {
   try {
-    const response = await KibanaServices.get().http.patch<{
-      data: { persistNote: { code: number; message: string; note: Note } };
-    }>(NOTE_URL, {
+    const response = await KibanaServices.get().http.patch<PersistNoteRouteResponse>(NOTE_URL, {
       method: 'PATCH',
       body: JSON.stringify({ note }),
       version: '2023-10-31',
     });
-    return response.data.persistNote.note;
+    const noteResponse = response.data.persistNote;
+    if (noteResponse.code !== 200) {
+      throw new Error(noteResponse.message);
+    }
+    return noteResponse.note;
   } catch (err) {
-    throw new Error(`Failed to stringify query: ${JSON.stringify(err)}`);
+    throw new Error(('message' in err && err.message) || 'Request failed');
   }
 };
 
@@ -35,6 +42,7 @@ export const fetchNotes = async ({
   sortField,
   sortOrder,
   filter,
+  userFilter,
   search,
 }: {
   page: number;
@@ -42,22 +50,21 @@ export const fetchNotes = async ({
   sortField: string;
   sortOrder: string;
   filter: string;
+  userFilter: string;
   search: string;
 }) => {
-  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
-    NOTE_URL,
-    {
-      query: {
-        page,
-        perPage,
-        sortField,
-        sortOrder,
-        filter,
-        search,
-      },
-      version: '2023-10-31',
-    }
-  );
+  const response = await KibanaServices.get().http.get<GetNotesResponse>(NOTE_URL, {
+    query: {
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+      filter,
+      userFilter,
+      search,
+    },
+    version: '2023-10-31',
+  });
   return response;
 };
 
@@ -65,13 +72,10 @@ export const fetchNotes = async ({
  * Fetches all the notes for an array of document ids
  */
 export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
-  const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
-    NOTE_URL,
-    {
-      query: { documentIds },
-      version: '2023-10-31',
-    }
-  );
+  const response = await KibanaServices.get().http.get<GetNotesResponse>(NOTE_URL, {
+    query: { documentIds },
+    version: '2023-10-31',
+  });
   return response;
 };
 
@@ -79,13 +83,10 @@ export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
  * Fetches all the notes for an array of saved object ids
  */
 export const fetchNotesBySaveObjectIds = async (savedObjectIds: string[]) => {
-  const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
-    NOTE_URL,
-    {
-      query: { savedObjectIds },
-      version: '2023-10-31',
-    }
-  );
+  const response = await KibanaServices.get().http.get<GetNotesResponse>(NOTE_URL, {
+    query: { savedObjectIds },
+    version: '2023-10-31',
+  });
   return response;
 };
 
@@ -93,7 +94,7 @@ export const fetchNotesBySaveObjectIds = async (savedObjectIds: string[]) => {
  * Deletes multiple notes
  */
 export const deleteNotes = async (noteIds: string[]) => {
-  const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
+  const response = await KibanaServices.get().http.delete<DeleteNoteResponse>(NOTE_URL, {
     body: JSON.stringify({ noteIds }),
     version: '2023-10-31',
   });
