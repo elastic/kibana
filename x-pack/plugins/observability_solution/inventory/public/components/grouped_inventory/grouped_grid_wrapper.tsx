@@ -10,7 +10,7 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import { EntityType } from '../../../common/entities';
+import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -80,7 +80,7 @@ export function GroupedGridWrapper({ entityType }: Props) {
       path: {},
       query: {
         ...query,
-        sortField: sorting.id,
+        sortField: sorting.id as EntityColumnIds,
         sortDirection: sorting.direction,
       },
     });
