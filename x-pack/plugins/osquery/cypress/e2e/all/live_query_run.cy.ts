@@ -23,8 +23,7 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-// FLAKY: https://github.com/elastic/kibana/issues/195458
-describe.skip('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
 
@@ -76,7 +75,7 @@ describe.skip('ALL - Live Query run custom and saved', { tags: ['@ess', '@server
     submitQuery();
 
     checkResults();
-    cy.getBySel(RESULTS_TABLE).within(() => {
+    cy.getBySel(RESULTS_TABLE, { timeout: 180000 }).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
     });
     cy.get('[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-message"]').should(

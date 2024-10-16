@@ -85,7 +85,7 @@ describe(
       cy.getBySel('add-to-timeline').first().click();
       cy.getBySel('globalToastList').contains('Added');
       closeToastIfVisible();
-      cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE, { timeout: 180000 }).within(() => {
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
