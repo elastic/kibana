@@ -16,6 +16,7 @@ import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 import { Explore } from './explore';
 import { Kubernetes } from './kubernetes';
+import { Onboarding } from './onboarding';
 import { Overview } from './overview';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
@@ -39,6 +40,7 @@ const subPluginClasses = {
   Exceptions,
   Explore,
   Kubernetes,
+  Onboarding,
   Overview,
   Rules,
   Timelines,
