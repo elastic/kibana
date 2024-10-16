@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EntityDefinitionWithState, EntityDefintionResponse } from '@kbn/entities-schema';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiStat,
+  EuiText,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { Badges } from '../../../../components/badges';
@@ -24,8 +34,12 @@ interface ListingProps {
 function Listing({ definition }: ListingProps) {
   const {
     http: { basePath },
+    entityClient,
   } = useKibana().services;
+  const [isPopoverOpen, setPopover] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const entityDetailUrl = basePath.prepend(paths.entitieDetail(definition.id));
+  const { refetch: refetchDefinitions } = useFetchEntityDefinitions();
 
   const checkpointDuration = definition.resources.transforms.reduce(
     (acc, transformState) => {
@@ -75,11 +89,55 @@ function Listing({ definition }: ListingProps) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
-          <EuiButtonIcon
-            data-test-subj="entityManagerListingButton"
-            iconType="boxesVertical"
-            color="text"
-          />
+          <EuiPopover
+            id={`${definition.id}-context-menu-popover`}
+            button={
+              <EuiButtonIcon
+                data-test-subj="entityManagerListingButton"
+                iconType="boxesVertical"
+                color="text"
+                onClick={() => setPopover(!isPopoverOpen)}
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={() => setPopover(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel
+              size="s"
+              items={[
+                <EuiContextMenuItem
+                  key="delete"
+                  icon="trash"
+                  color="danger"
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    try {
+                      setIsDeleting(true);
+
+                      await entityClient.repositoryClient(
+                        'DELETE /internal/entities/definition/{id}',
+                        {
+                          params: {
+                            path: { id: definition.id },
+                            query: { deleteData: true },
+                          },
+                        }
+                      );
+
+                      refetchDefinitions();
+                    } finally {
+                      setIsDeleting(false);
+                      setPopover(false);
+                    }
+                  }}
+                >
+                  Delete
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -94,9 +152,10 @@ interface Props {
 export function DefinitionListing() {
   const { data } = useFetchEntityDefinitions();
   if (!data) return null;
-  const defintions = data?.map((definition) => {
+
+  const definitions = data?.map((definition) => {
     return <Listing definition={definition} key={definition.id} />;
   });
 
-  return <EuiFlexGroup direction="column">{defintions}</EuiFlexGroup>;
+  return <EuiFlexGroup direction="column">{definitions}</EuiFlexGroup>;
 }

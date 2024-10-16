@@ -20,6 +20,7 @@ export function CreateEntityDefinitionBtn() {
     <EuiButton
       color="primary"
       data-test-subj="entityManagerCreateDefinitionButton"
+      iconType="plusInCircle"
       fill
       href={basePath.prepend(paths.entitiesCreate)}
     >

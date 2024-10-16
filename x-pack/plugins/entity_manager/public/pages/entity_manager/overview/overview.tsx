@@ -22,7 +22,7 @@ export function EntityManagerOverviewPage() {
     http: { basePath },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const [selectedTabId, setSelectedTabId] = useState('entities');
+  const [selectedTabId, setSelectedTabId] = useState('definitions');
 
   useBreadcrumbs([
     {
@@ -35,18 +35,18 @@ export function EntityManagerOverviewPage() {
   const tabs = useMemo(
     () => [
       {
-        id: 'entities',
-        name: i18n.translate('xpack.entityManager.overview.entitiesTabLabel', {
-          defaultMessage: 'Entities',
-        }),
-        content: <EntitiesListing defaultPerPage={20} />,
-      },
-      {
         id: 'definitions',
         name: i18n.translate('xpack.entityManager.overview.definitionTabLabel', {
           defaultMessage: 'Definitions',
         }),
         content: <DefinitionListing />,
+      },
+      {
+        id: 'entities',
+        name: i18n.translate('xpack.entityManager.overview.entitiesTabLabel', {
+          defaultMessage: 'Entities',
+        }),
+        content: <EntitiesListing defaultPerPage={20} />,
       },
     ],
     []
