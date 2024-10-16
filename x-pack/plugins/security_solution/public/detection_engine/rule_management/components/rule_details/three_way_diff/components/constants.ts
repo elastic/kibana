@@ -10,10 +10,4 @@ import type { DiffableAllFields } from '../../../../../../../common/api/detectio
 type NonEditableFields = Readonly<Set<keyof DiffableAllFields>>;
 
 /* These fields are not visible in the comparison UI and are not editable */
-export const HIDDEN_FIELDS: NonEditableFields = new Set([
-  'alert_suppression',
-  'author',
-  'rule_id',
-  'license',
-  'version',
-]);
+export const HIDDEN_FIELDS: NonEditableFields = new Set(['rule_id', 'version']);
