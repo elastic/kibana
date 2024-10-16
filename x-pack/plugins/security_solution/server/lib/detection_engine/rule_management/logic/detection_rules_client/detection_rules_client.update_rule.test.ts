@@ -498,5 +498,26 @@ describe('DetectionRulesClient.updateRule', () => {
         })
       );
     });
+
+    it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+      // Mock the existing rule
+      const existingRule = {
+        ...getRulesSchemaMock(),
+        rule_source: { type: 'external', is_customized: true },
+      };
+
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule update
+      const ruleUpdate = { ...getCreateRulesSchemaMock(), author: ['new user'] };
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
+      rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+      await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
+        'Cannot update "author" field for prebuilt rules'
+      );
+    });
   });
 });
