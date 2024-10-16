@@ -17,13 +17,15 @@ export interface DistributionBarProps {
   hideLastTooltip?: boolean;
   /** data-test-subj used for querying the component in tests */
   ['data-test-subj']?: string;
+  /** hide or show Cursor as Pointer */
+  isCursorSetToPointer?: boolean;
 }
 
 export interface EmptyBarProps {
   ['data-test-subj']?: string;
 }
 
-const useStyles = () => {
+const useStyles = (isCursorSetToPointer = false) => {
   const { euiTheme } = useEuiTheme();
 
   return {
@@ -57,7 +59,7 @@ const useStyles = () => {
         &:hover {
           height: 7px;
           border-radius: 3px;
-          cursor: pointer;
+          cursor: ${isCursorSetToPointer ? 'unset' : 'pointer'};
 
           .euiBadge {
             cursor: unset;
@@ -137,8 +139,13 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
 export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
   props
 ) {
-  const styles = useStyles();
-  const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
+  const {
+    stats,
+    'data-test-subj': dataTestSubj,
+    hideLastTooltip,
+    isCursorSetToPointer = false,
+  } = props;
+  const styles = useStyles(isCursorSetToPointer);
   const parts = stats.map((stat) => {
     const partStyle = [
       styles.part.base,
