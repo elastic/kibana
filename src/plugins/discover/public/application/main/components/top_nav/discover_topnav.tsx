@@ -194,7 +194,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
-      className: 'dscTopNav',
+      className: 'dscTopNav', // FIXME: Delete the scss file and pass `gutterSize="xxs"` instead (after next Eui release)
     };
   }, [
     setHeaderActionMenu,
