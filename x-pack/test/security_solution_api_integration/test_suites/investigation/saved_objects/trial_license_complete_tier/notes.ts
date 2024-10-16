@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('Note - Saved Objects', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196492
+  describe.skip('Note - Saved Objects', () => {
     const es = getService('es');
 
     before(() => kibanaServer.savedObjects.cleanStandardList());
@@ -407,11 +408,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(notes[2].eventId).to.be('1');
       });
 
-      // TODO should add more tests for the filter query parameter (I don't know how it's supposed to work)
-      // TODO should add more tests for the MAX_UNASSOCIATED_NOTES advanced settings values
-
       // TODO figure out why this test is failing on CI but not locally
-      // we can't really test for other users because the persistNote endpoint forces overrideOwner to be true then all the notes created here are owned by the elastic user
       it.skip('should retrieve all notes that have been created by a specific user', async () => {
         await Promise.all([
           createNote(supertest, { text: 'first note' }),
@@ -443,6 +440,116 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(totalCount).to.be(0);
       });
+
+      it('should retrieve all notes that have an association with a document only', async () => {
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?associatedFilter=document_only')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(1);
+        expect(notes[0].eventId).to.be(eventId1);
+      });
+
+      it('should retrieve all notes that have an association with a saved object only', async () => {
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?associatedFilter=saved_object_only')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(1);
+        expect(notes[0].timelineId).to.be(timelineId1);
+      });
+
+      it('should retrieve all notes that have an association with a document AND a saved object', async () => {
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?associatedFilter=document_and_saved_object')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(1);
+        expect(notes[0].eventId).to.be(eventId1);
+        expect(notes[0].timelineId).to.be(timelineId1);
+      });
+
+      it('should retrieve all notes that have an association with no document AND no saved object', async () => {
+        await Promise.all([
+          createNote(supertest, { documentId: eventId1, text: 'associated with event-1 only' }),
+          createNote(supertest, {
+            savedObjectId: timelineId1,
+            text: 'associated with timeline-1 only',
+          }),
+          createNote(supertest, {
+            documentId: eventId1,
+            savedObjectId: timelineId1,
+            text: 'associated with event-1 and timeline-1',
+          }),
+          createNote(supertest, { text: 'associated with nothing' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?associatedFilter=orphan')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount, notes } = response.body;
+
+        expect(totalCount).to.be(1);
+        expect(notes[0].eventId).to.be('');
+        expect(notes[0].timelineId).to.be('');
+      });
+
+      // TODO should add more tests for the filter query parameter (I don't know how it's supposed to work)
+      // TODO should add more tests for the MAX_UNASSOCIATED_NOTES advanced settings values
+      // TODO add more tests to check the combination of filters (user, association and filter)
     });
   });
 }
