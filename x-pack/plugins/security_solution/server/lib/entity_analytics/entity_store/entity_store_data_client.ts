@@ -358,6 +358,7 @@ export class EntityStoreDataClient {
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient,
+        logger,
       });
 
       if (deleteData) {
