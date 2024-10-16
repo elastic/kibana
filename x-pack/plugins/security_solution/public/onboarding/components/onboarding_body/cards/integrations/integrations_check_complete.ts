@@ -25,17 +25,11 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     }
   );
 
-  let agentsData;
-  let errorFetchAgentsData;
-  try {
-    agentsData = await lastValueFrom(
-      services.data.search.search({
-        params: { index: AGENT_INDEX, body: { size: 1 } },
-      })
-    );
-  } catch (e) {
-    errorFetchAgentsData = e;
-  }
+  const agentsData = await lastValueFrom(
+    services.data.search.search({
+      params: { index: AGENT_INDEX, body: { size: 1 } },
+    })
+  );
 
   const installed = packageData?.items?.filter(
     (pkg) =>
@@ -70,7 +64,6 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     metadata: {
       installedIntegrationsCount: installed.length,
       isAgentRequired,
-      errorFetchAgentsData,
     },
   };
 };

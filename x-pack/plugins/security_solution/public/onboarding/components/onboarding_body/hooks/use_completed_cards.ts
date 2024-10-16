@@ -118,6 +118,15 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
     [setCardComplete, setCardCheckCompleteResult]
   );
 
+  const displayErrorToast = useCallback(
+    (cardTitle: string, error: Error) => {
+      toasts.addError(error, {
+        title: getErrorMessage(cardTitle),
+      });
+    },
+    [toasts]
+  );
+
   const checkCardComplete = useCallback(
     (cardId: OnboardingCardId) => {
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);
@@ -126,18 +135,18 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
         cardConfig
           .checkComplete?.(services)
           .catch((e: Error) => {
-            toasts.addError(e, {
-              title: getErrorMessage(cardConfig.title),
-            });
+            displayErrorToast(cardConfig.title, e);
+            return {
+              isComplete: false,
+              checkCompleteError: e,
+            };
           })
           .then((checkCompleteResult) => {
-            if (checkCompleteResult) {
-              processCardCheckCompleteResult(cardId, checkCompleteResult);
-            }
+            processCardCheckCompleteResult(cardId, checkCompleteResult);
           });
       }
     },
-    [cardsWithAutoCheck, processCardCheckCompleteResult, services, toasts]
+    [cardsWithAutoCheck, displayErrorToast, processCardCheckCompleteResult, services]
   );
 
   useEffect(() => {
@@ -150,17 +159,17 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
       card
         .checkComplete?.(services)
         .catch((e: Error) => {
-          toasts.addError(e, {
-            title: getErrorMessage(card.title),
-          });
+          displayErrorToast(card.title, e);
+          return {
+            isComplete: false,
+            checkCompleteError: e,
+          };
         })
         .then((checkCompleteResult) => {
-          if (checkCompleteResult) {
-            processCardCheckCompleteResult(card.id, checkCompleteResult);
-          }
+          processCardCheckCompleteResult(card.id, checkCompleteResult);
         })
     );
-  }, [cardsWithAutoCheck, processCardCheckCompleteResult, services, toasts]);
+  }, [cardsWithAutoCheck, displayErrorToast, processCardCheckCompleteResult, services, toasts]);
 
   return {
     isCardComplete,

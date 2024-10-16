@@ -13,19 +13,16 @@ import { CenteredLoadingSpinner } from '../../../../../common/components/centere
 import type { IntegrationCardMetadata } from './types';
 
 export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> = React.memo(
-  ({ checkCompleteMetadata }) => {
-    if (!checkCompleteMetadata) {
+  ({ checkCompleteMetadata, checkCompleteError }) => {
+    if (!checkCompleteMetadata && !checkCompleteError) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
     }
-    const { installedIntegrationsCount, isAgentRequired, errorFetchAgentsData } =
-      checkCompleteMetadata;
 
     return (
       <OnboardingCardContentPanel>
         <IntegrationsCardGridTabs
-          isAgentRequired={isAgentRequired}
-          installedIntegrationsCount={installedIntegrationsCount}
-          errorFetchAgentsData={errorFetchAgentsData}
+          isAgentRequired={checkCompleteMetadata?.isAgentRequired}
+          installedIntegrationsCount={checkCompleteMetadata?.installedIntegrationsCount}
         />
       </OnboardingCardContentPanel>
     );

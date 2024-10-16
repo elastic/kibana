@@ -16,18 +16,20 @@ import { EndpointCallout } from './endpoint_callout';
 
 export const IntegrationCardTopCallout = React.memo(
   ({
-    errorFetchAgentsData,
     installedIntegrationsCount,
     isAgentRequired,
     selectedTabId,
   }: {
-    errorFetchAgentsData: Error | undefined;
-    installedIntegrationsCount: number;
-    isAgentRequired: boolean;
+    installedIntegrationsCount?: number;
+    isAgentRequired?: boolean;
     selectedTabId: IntegrationTabId;
   }) => {
     const { isAgentlessAvailable$ } = useOnboardingService();
     const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
+
+    if (isAgentRequired == null || installedIntegrationsCount == null) {
+      return null;
+    }
 
     const showAgentlessCallout =
       isAgentlessAvailable &&
@@ -43,7 +45,6 @@ export const IntegrationCardTopCallout = React.memo(
         {showAgentlessCallout && <AgentlessAvailableCallout />}
         {showInstalledCallout && (
           <InstalledIntegrationsCallout
-            errorFetchAgentsData={errorFetchAgentsData}
             isAgentRequired={isAgentRequired}
             installedIntegrationsCount={installedIntegrationsCount}
           />

@@ -75,6 +75,7 @@ export const OnboardingBody = React.memo(() => {
                           isCardComplete={isCardComplete}
                           setExpandedCardId={setExpandedCardId}
                           checkCompleteMetadata={cardCheckCompleteResult?.metadata}
+                          checkCompleteError={cardCheckCompleteResult?.checkCompleteError}
                         />
                       </Suspense>
                     </OnboardingCardPanel>
