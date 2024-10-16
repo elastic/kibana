@@ -28,10 +28,8 @@ export type FilterItems = Array<{
 
 export const useChartsFilter = ({
   filterOptions,
-  searchString,
 }: {
   filterOptions: ChartsFilterProps['filterOptions'];
-  searchString: string;
 }): {
   areDataStreamsSelectedOnMount: boolean;
   items: FilterItems;
@@ -83,7 +81,11 @@ export const useChartsFilter = ({
           key: filterOption,
           label: filterOption,
           append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
-          checked: 'on',
+          checked: !!filterOptions.selectedOptions?.length
+            ? filterOptions.selectedOptions.includes(filterOption)
+              ? 'on'
+              : undefined
+            : 'on',
           'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : []

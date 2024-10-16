@@ -31,6 +31,7 @@ export interface ChartsFilterProps {
     filterName: FilterName;
     options: string[];
     appendOptions?: Record<string, number>;
+    selectedOptions?: string[];
     onChangeFilterOptions: (selectedOptions: string[]) => void;
     isFilterLoading?: boolean;
   };
@@ -39,7 +40,14 @@ export interface ChartsFilterProps {
 
 export const ChartsFilter = memo<ChartsFilterProps>(
   ({
-    filterOptions: { filterName, options, appendOptions, onChangeFilterOptions, isFilterLoading },
+    filterOptions: {
+      filterName,
+      options,
+      appendOptions,
+      selectedOptions,
+      onChangeFilterOptions,
+      isFilterLoading,
+    },
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -57,7 +65,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     }, [setIsPopoverOpen]);
 
     // search string state
-    const [searchString, setSearchString] = useState('');
+    // const [searchString, setSearchString] = useState('');
     const {
       areDataStreamsSelectedOnMount,
       items,
@@ -69,8 +77,14 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       setUrlDataStreamsFilter,
       setUrlMetricTypesFilter,
     } = useChartsFilter({
-      filterOptions: { filterName, options, appendOptions, onChangeFilterOptions, isFilterLoading },
-      searchString,
+      filterOptions: {
+        filterName,
+        options,
+        appendOptions,
+        selectedOptions,
+        onChangeFilterOptions,
+        isFilterLoading,
+      },
     });
 
     // track popover state to pin selected options
@@ -172,7 +186,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
           searchProps={{
             placeholder: getSearchPlaceholder(filterName),
             compressed: true,
-            onChange: (searchValue) => setSearchString(searchValue.trim()),
+            // onChange: (searchValue) => setSearchString(searchValue.trim()),
           }}
         >
           {(list, search) => {

@@ -14,21 +14,13 @@ import type {
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
 import { DateRangePickerValues, UsageMetricsDateRangePicker } from './date_picker';
-import { ChartsFilter } from './charts_filter';
+import { ChartsFilter, ChartsFilterProps } from './charts_filter';
 import { FilterName } from '../../hooks';
 
 export interface ChartFiltersProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
-  filterOptions: Record<
-    FilterName,
-    {
-      filterName: FilterName;
-      options: string[];
-      onChangeFilterOptions: (selectedOptions: string[]) => void;
-      isFilterLoading?: boolean;
-    }
-  >;
+  filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
   onTimeChange: ({ start, end }: DurationRange) => void;

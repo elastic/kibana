@@ -9,7 +9,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const DataStreamsRequestSchema = {
   query: schema.object({
-    selected: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    selected: schema.oneOf([
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      schema.string(),
+    ]),
   }),
 };
 

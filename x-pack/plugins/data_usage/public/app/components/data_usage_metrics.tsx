@@ -44,12 +44,14 @@ export const DataUsageMetrics = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const { data: dataStreams, isFetching: isFetchingDataStreams } = useGetDataUsageDataStreams({
-    selectedDataStreams: dataStreamsFromUrl,
-    options: {
-      enabled: true,
+  const { data: dataStreams, isFetching: isFetchingDataStreams } = useGetDataUsageDataStreams(
+    {
+      selected: dataStreamsFromUrl ?? [''],
     },
-  });
+    {
+      enabled: true,
+    }
+  );
 
   const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestBody>({
     metricTypes: [...DEFAULT_METRIC_TYPES],
@@ -129,17 +131,30 @@ export const DataUsageMetrics = () => {
   );
 
   const filterOptions: ChartFiltersProps['filterOptions'] = useMemo(() => {
-    const dataStreamsOptions = dataStreams?.reduce<Record<string, number>>((acc, ds) => {
-      acc[ds.name] = ds.storageSizeBytes;
-      return acc;
-    }, {});
+    const dataStreamsOptions = dataStreams?.reduce<{
+      appendOptions: Record<string, number>;
+      selectedOptions: string[];
+    }>(
+      (acc, ds) => {
+        acc.appendOptions[ds.name] = ds.storageSizeBytes;
+        if (ds.selected) {
+          acc.selectedOptions.push(ds.name);
+        }
+        return acc;
+      },
+      { appendOptions: {}, selectedOptions: [] }
+    );
 
     return {
       dataStreams: {
         filterName: 'dataStreams',
-        options: dataStreamsOptions ? Object.keys(dataStreamsOptions) : metricsFilters.dataStreams,
-        appendOptions: dataStreamsOptions,
-        selectedOptions: metricsFilters.dataStreams,
+        options: dataStreamsOptions
+          ? Object.keys(dataStreamsOptions.appendOptions)
+          : metricsFilters.dataStreams,
+        appendOptions: dataStreamsOptions?.appendOptions,
+        selectedOptions: dataStreamsOptions
+          ? dataStreamsOptions.selectedOptions
+          : metricsFilters.dataStreams,
         onChangeFilterOptions: onChangeDataStreamsFilter,
         isFilterLoading: isFetchingDataStreams,
       },
