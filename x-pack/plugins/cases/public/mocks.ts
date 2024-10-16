@@ -50,6 +50,8 @@ const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
     push: false,
     connectors: false,
     settings: false,
+    createComment: false,
+    reopenCase: false,
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),

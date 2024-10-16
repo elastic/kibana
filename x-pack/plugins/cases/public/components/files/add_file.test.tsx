@@ -109,7 +109,7 @@ describe('AddFile', () => {
 
   it('AddFile is not rendered if user has no create permission', async () => {
     appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ create: false, createComment: false }),
+      permissions: buildCasesPermissions({ createComment: false }),
     });
 
     appMockRender.render(<AddFile caseId={'foobar'} />);
