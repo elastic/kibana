@@ -62,6 +62,7 @@ export const useDiscoverHistogram = ({
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
+  const savedSearchHits$ = savedSearchData$.totalHits$;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -153,18 +154,11 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const setTotalHitsError = useMemo(
-    () => sendErrorTo(savedSearchData$.totalHits$),
-    [savedSearchData$.totalHits$]
-  );
+  const setTotalHitsError = useMemo(() => sendErrorTo(savedSearchHits$), [savedSearchHits$]);
 
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
-        if (isEsqlMode) {
-          // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
-          return;
-        }
 
         if (result instanceof Error) {
           // Set totalHits$ to an error state
@@ -172,7 +166,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+        const { result: totalHitsResult } = savedSearchHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -184,11 +178,15 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        // Sync the totalHits$ observable with the unified histogram state
-        savedSearchData$.totalHits$.next({
-          fetchStatus: status.toString() as FetchStatus,
-          result,
-        });
+        const fetchStatus = status.toString() as FetchStatus;
+
+        // Do not sync the loading state since it's already handled by the saved search
+        if (fetchStatus !== FetchStatus.LOADING) {
+          savedSearchHits$.next({
+            fetchStatus,
+            result,
+          });
+        }
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
           return;
@@ -205,7 +203,7 @@ export const useDiscoverHistogram = ({
   }, [
     isEsqlMode,
     savedSearchData$.main$,
-    savedSearchData$.totalHits$,
+    savedSearchHits$,
     setTotalHitsError,
     stateContainer.appState,
     unifiedHistogram?.state$,
