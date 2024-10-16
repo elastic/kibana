@@ -24,10 +24,12 @@ interface RouterProps {
   history: History;
 }
 
+const ownerApp = [APP_ID];
+
 const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const userCasesPermissions = cases.helpers.canUseCases(ownerApp);
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -46,7 +48,7 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
         <RouteCapture>
           <Routes>
             <Route path="/">
-              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+              <CasesContext owner={ownerApp} permissions={userCasesPermissions}>
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>
