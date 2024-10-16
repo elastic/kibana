@@ -13,6 +13,7 @@ export const INDEX_NAME_PLACEHOLDER = 'index_name';
 // Paths
 export const BASE_CONNECTORS_PATH = 'connectors';
 export const EDIT_CONNECTOR_PATH = `${BASE_CONNECTORS_PATH}/:id`;
+export const ELASTIC_MANAGED_CONNECTOR_PATH = '/elastic_managed';
 export const FILE_UPLOAD_PATH = '/app/ml/filedatavisualizer';
 
 export const CRAWLER = {

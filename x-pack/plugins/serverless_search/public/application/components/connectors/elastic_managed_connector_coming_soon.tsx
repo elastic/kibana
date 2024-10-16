@@ -13,25 +13,27 @@ import {
   EuiIcon,
   EuiTitle,
   EuiText,
-  EuiLink,
   EuiButton,
   EuiToolTip,
   EuiBadge,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
+  EuiButtonEmpty,
+  EuiFormRow,
+  EuiTextArea,
+  EuiLink,
+  EuiForm,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { css } from '@emotion/react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
-import { CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
+import { BACK_LABEL } from '../../../../common/i18n_string';
 
-export const EmptyConnectorsPrompt: React.FC = () => {
+export const ElasticManagedConnectorCommingSoon: React.FC = () => {
   const connectorTypes = useConnectorTypes();
   const allConnectors = connectorTypes ? connectorTypes.map((connectorType) => connectorType) : [];
 
@@ -58,16 +60,10 @@ export const EmptyConnectorsPrompt: React.FC = () => {
 
   const [connectorExample1, connectorExample2, connectorExample3, connectorExample4] =
     randomConnectors;
-  const { createConnector, isLoading } = useCreateConnector();
 
   const assetBasePath = useAssetBasePath();
   const connectorsPath = assetBasePath + '/connectors.svg';
   const horizontalSteps: EuiStepsHorizontalProps['steps'] = [
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
     {
       title: '',
       status: 'incomplete',
@@ -90,24 +86,39 @@ export const EmptyConnectorsPrompt: React.FC = () => {
             gutterSize="l"
           >
             <EuiFlexItem>
+              <EuiButtonEmpty
+                data-test-subj="serverlessSearchElasticManagedConnectorEmptyBackButton"
+                iconType="arrowLeft"
+                onClick={() => navigateToUrl(`./`)}
+              >
+                {BACK_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
               <EuiIcon size="xxl" type={connectorsPath} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle>
                 <h2>
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.title', {
-                    defaultMessage: 'Set up a new connector',
+                  {i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
+                    defaultMessage: 'Elastic managed connectors',
                   })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
+              <EuiBadge color="accent">Coming soon</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem>
               <EuiText textAlign="center" color="subdued">
                 <p>
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.description', {
-                    defaultMessage:
-                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Elasticsearch serverless UI. The high level process looks like this:",
-                  })}
+                  {i18n.translate(
+                    'xpack.serverlessSearch.elasticManagedConnectorEmpty.description',
+                    {
+                      defaultMessage:
+                        "We're actively developing Elastic managed connectors, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. This new workflow will have two steps:",
+                    }
+                  )}
                 </p>
               </EuiText>
             </EuiFlexItem>
@@ -199,72 +210,12 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                           <EuiText>
                             <p>
                               {i18n.translate(
-                                'xpack.serverlessSearch.connectorsEmpty.guideOneDescription',
+                                'xpack.serverlessSearch.elasticManagedConnectorEmpty.guideOneDescription',
                                 {
                                   defaultMessage:
                                     "Choose from over +30 third-party data sources you'd like to sync",
                                 }
                               )}
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiFlexGroup
-                        justifyContent="flexStart"
-                        alignItems="center"
-                        direction="column"
-                      >
-                        <EuiFlexGroup
-                          gutterSize="s"
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon color="primary" size="l" type={connectorsPath} />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiIcon size="m" type="sortRight" />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiIcon color="primary" size="l" type="launch" />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiFlexItem>
-                          <EuiText>
-                            <p>
-                              <FormattedMessage
-                                id="xpack.serverlessSearch.connectorsEmpty.guideTwoDescription"
-                                defaultMessage="Deploy connector code on your own infrastructure by running from {source}, or using {docker}"
-                                values={{
-                                  source: (
-                                    <EuiLink
-                                      target="_blank"
-                                      data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                      href={CONNECTORS.github_repo}
-                                    >
-                                      {i18n.translate(
-                                        'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
-                                        { defaultMessage: 'source' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                  docker: (
-                                    <EuiLink
-                                      target="_blank"
-                                      data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                      href="https://github.com/elastic/connectors/blob/main/scripts/stack/README.md"
-                                    >
-                                      {i18n.translate(
-                                        'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
-                                        { defaultMessage: 'Docker' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                }}
-                              />
                             </p>
                           </EuiText>
                         </EuiFlexItem>
@@ -284,16 +235,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                             justifyContent="center"
                           >
                             <EuiFlexItem>
-                              <EuiIcon color="primary" size="l" type="documents" />
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiIcon size="m" type="sortRight" />
-                            </EuiFlexItem>
-                            <EuiFlexItem>
                               <EuiIcon color="primary" size="l" type={connectorsPath} />
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiIcon size="m" type="sortRight" />
                             </EuiFlexItem>
                             <EuiFlexItem>
                               <EuiIcon color="primary" size="l" type="logoElastic" />
@@ -304,10 +246,10 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                           <EuiText>
                             <p>
                               {i18n.translate(
-                                'xpack.serverlessSearch.connectorsEmpty.guideThreeDescription',
+                                'xpack.serverlessSearch.elasticManagedConnectorEmpty.guideThreeDescription',
                                 {
                                   defaultMessage:
-                                    'Enter access and connection details for your data source and run your first sync',
+                                    'Enter access and connection details for your data source and run your first sync using the Kibana UI',
                                 }
                               )}
                             </p>
@@ -319,43 +261,101 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <EuiSpacer size="xs" /> */}
+            <EuiFlexItem>
+              <EuiText textAlign="center" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.serverlessSearch.elasticManagedConnectorEmpty.subDescription',
+                    {
+                      defaultMessage:
+                        'We value your feedback! Please share your ideas and suggestions as we develop this new feature.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiForm component="form" fullWidth>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.Label',
+                  {
+                    defaultMessage:
+                      'Would you like to share any ideas or suggestions about Elastic managed connectors?',
+                  }
+                )}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiTextArea
+                      data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonTextArea"
+                      onChange={(e) => {
+                        // setAdditionalFeedback(e.target.value);
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText color="subdued" size="xs">
+                      <FormattedMessage
+                        id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.description"
+                        defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
+                      using the details you provide above. See {privacyStatementLink} for more
+                      details or to opt-out at any time."
+                        values={{
+                          contact: (
+                            <EuiLink
+                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonContactYouLink"
+                              href={'docLinks.workplaceSearchGatedFormDataUse'}
+                            >
+                              <FormattedMessage
+                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.contact"
+                                defaultMessage="contact you"
+                              />
+                            </EuiLink>
+                          ),
+                          privacyStatementLink: (
+                            <EuiLink
+                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonElasticsPrivacyStatementLink"
+                              href={'docLinks.workplaceSearchGatedFormPrivacyStatement'}
+                            >
+                              <FormattedMessage
+                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.readDataPrivacyStatementLink"
+                                defaultMessage="Elastic’s Privacy Statement"
+                              />
+                            </EuiLink>
+                          ),
+                          termsOfService: (
+                            <EuiLink
+                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonTermsOfServiceLink"
+                              href={'docLinks.workplaceSearchGatedFormTermsOfService'}
+                            >
+                              <FormattedMessage
+                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.readTermsOfService"
+                                defaultMessage="Terms of Service"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiForm>
             <EuiFlexGroup direction="row" gutterSize="m">
               <EuiFlexItem>
                 <EuiButton
-                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
+                  data-test-subj="serverlessSearchElasticManagedConnectorEmptysubmitFormButton"
                   fill
-                  iconType="plusInCircle"
-                  onClick={() => createConnector()}
-                  isLoading={isLoading}
+                  type="submit"
+                  // onClick={() => ()}
                 >
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.selfManagedButton', {
-                    defaultMessage: 'Self-managed connector',
-                  })}
+                  {i18n.translate(
+                    'xpack.serverlessSearch.elasticManagedConnectorEmpty.submitFormButton',
+                    {
+                      defaultMessage: 'Submit',
+                    }
+                  )}
                 </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiButton
-                      data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
-                      isLoading={isLoading}
-                      onClick={() =>
-                        navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
-                      }
-                    >
-                      {i18n.translate(
-                        'xpack.serverlessSearch.connectorsEmpty.elasticManagedButton',
-                        {
-                          defaultMessage: 'Elastic managed connector',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="accent">Coming soon</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             {/* <EuiSpacer size="m" /> */}
