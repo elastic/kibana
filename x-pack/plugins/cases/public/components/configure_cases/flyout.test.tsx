@@ -575,40 +575,40 @@ describe('CommonFlyout ', () => {
 
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
-      // await waitFor(() => {
-      expect(props.onSaveField).toBeCalledWith({
-        key: 'random_key',
-        name: 'Template 1',
-        description: 'test description',
-        tags: [],
-        caseFields: {
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: '.none',
-            fields: null,
-          },
-          settings: {
-            syncAlerts: true,
-          },
-          customFields: [
-            {
-              key: 'test_key_1',
-              type: 'text',
-              value: 'this is a sample text!',
+      await waitFor(() => {
+        expect(props.onSaveField).toBeCalledWith({
+          key: 'random_key',
+          name: 'Template 1',
+          description: 'test description',
+          tags: [],
+          caseFields: {
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: '.none',
+              fields: null,
             },
-            ...customFieldsConfigurationMock
-              .slice(1)
-              .map(({ key, type, defaultValue, required }) => ({
-                key,
-                type,
-                value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
-              })),
-          ],
-        },
+            settings: {
+              syncAlerts: true,
+            },
+            customFields: [
+              {
+                key: 'test_key_1',
+                type: 'text',
+                value: 'this is a sample text!',
+              },
+              ...customFieldsConfigurationMock
+                .slice(1)
+                .map(({ key, type, defaultValue, required }) => ({
+                  key,
+                  type,
+                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
+                })),
+            ],
+          },
+        });
       });
     });
-    // });
 
     it('calls onSaveField form with connector fields correctly', async () => {
       useGetChoicesMock.mockReturnValue(useGetChoicesResponse);

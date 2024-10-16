@@ -815,49 +815,53 @@ describe('ConfigureCases', () => {
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
-      // await waitFor(() => {
-      expect(persistCaseConfigure).toHaveBeenCalledWith({
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        closureType: 'close-by-user',
-        customFields: [
-          ...customFieldsConfigurationMock,
-          {
-            key: expect.anything(),
-            label: 'New custom field',
-            type: CustomFieldTypes.TEXT as const,
-            required: true,
-            defaultValue: 'This is a default value',
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
           },
-        ],
-        templates: [
-          {
-            key: 'test_template_4',
-            name: 'Fourth test template',
-            caseFields: {
-              customFields: [
-                ...customFieldsConfigurationMock.map(({ key, type, defaultValue, required }) => ({
-                  key,
-                  type,
-                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
-                })),
-                {
-                  key: expect.anything(),
-                  type: CustomFieldTypes.TEXT as const,
-                  value: 'This is a default value',
-                },
-              ],
+          closureType: 'close-by-user',
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: expect.anything(),
+              label: 'New custom field',
+              type: CustomFieldTypes.TEXT as const,
+              required: true,
+              defaultValue: 'This is a default value',
             },
-          },
-        ],
-        id: '',
-        version: '',
+          ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                customFields: [
+                  ...customFieldsConfigurationMock.map(({ key, type, defaultValue, required }) => ({
+                    key,
+                    type,
+                    value: required
+                      ? defaultValue
+                      : type === CustomFieldTypes.TOGGLE
+                      ? false
+                      : null,
+                  })),
+                  {
+                    key: expect.anything(),
+                    type: CustomFieldTypes.TEXT as const,
+                    value: 'This is a default value',
+                  },
+                ],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
       });
-      // });
     });
 
     it('updates a custom field correctly', async () => {
@@ -1035,47 +1039,51 @@ describe('ConfigureCases', () => {
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
-      // await waitFor(() => {
-      expect(persistCaseConfigure).toHaveBeenCalledWith({
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        closureType: 'close-by-user',
-        customFields: customFieldsConfigurationMock,
-        templates: [
-          {
-            key: expect.anything(),
-            name: 'Template name',
-            description: 'Template description',
-            tags: [],
-            caseFields: {
-              title: 'Case using template',
-              connector: {
-                id: 'none',
-                name: 'none',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-              settings: {
-                syncAlerts: true,
-              },
-              customFields: customFieldsConfigurationMock.map(
-                ({ key, type, defaultValue, required }) => ({
-                  key,
-                  type,
-                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
-                })
-              ),
-            },
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
           },
-        ],
-        id: '',
-        version: '',
+          closureType: 'close-by-user',
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: expect.anything(),
+              name: 'Template name',
+              description: 'Template description',
+              tags: [],
+              caseFields: {
+                title: 'Case using template',
+                connector: {
+                  id: 'none',
+                  name: 'none',
+                  type: ConnectorTypes.none,
+                  fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
+                },
+                customFields: customFieldsConfigurationMock.map(
+                  ({ key, type, defaultValue, required }) => ({
+                    key,
+                    type,
+                    value: required
+                      ? defaultValue
+                      : type === CustomFieldTypes.TOGGLE
+                      ? false
+                      : null,
+                  })
+                ),
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
       });
-      // });
 
       expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
