@@ -101,7 +101,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
-      scope: AssistantScope;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -217,11 +217,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(this.dependencies.scope),
+                applicationInstructions: functionClient.getInstructions(this.dependencies.scopes),
                 userInstructions,
                 adHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions({ scope: this.dependencies.scope })
+                  .getFunctions({ scopes: this.dependencies.scopes })
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -301,7 +301,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                scope: this.dependencies.scope,
+                scopes: this.dependencies.scopes,
                 useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );

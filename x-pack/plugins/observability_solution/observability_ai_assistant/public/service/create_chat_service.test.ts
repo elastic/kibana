@@ -71,7 +71,7 @@ describe('createChatService', () => {
       apiClient: clientSpy,
       registrations: [],
       signal: new AbortController().signal,
-      scope$: new BehaviorSubject<AssistantScope>('observability'),
+      scope$: new BehaviorSubject<AssistantScope[]>(['observability']),
     });
   });
 
@@ -85,7 +85,7 @@ describe('createChatService', () => {
         signal,
         messages: [],
         connectorId: '',
-        scope: 'observability',
+        scopes: ['observability'],
       });
     }
 

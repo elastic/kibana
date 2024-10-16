@@ -110,8 +110,12 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(scope: AssistantScope): InstructionOrCallback[] {
-    return this.instructions.filter(filterScopes(scope)).map((i) => i.instruction);
+  getInstructions(scopes: AssistantScope[]): InstructionOrCallback[] {
+    // for instructions we only want to use those explicitly assigned to one of the current scopes
+    // 'all' does not override scopes for instructions
+    return this.instructions
+      .filter((instructions) => instructions.scopes.some((scope) => scopes.includes(scope)))
+      .map((i) => i.instruction);
   }
 
   hasAction(name: string) {
@@ -120,13 +124,13 @@ export class ChatFunctionClient {
 
   getFunctions({
     filter,
-    scope,
+    scopes,
   }: {
     filter?: string;
-    scope?: AssistantScope;
+    scopes?: AssistantScope[];
   } = {}): FunctionHandler[] {
     const allFunctions = Array.from(this.functionRegistry.values())
-      .filter(filterScopes(scope))
+      .filter(filterScopes(scopes))
       .map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);

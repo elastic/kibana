@@ -144,7 +144,7 @@ class ChatService {
   private renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>>;
   private abortSignal: AbortSignal;
   private apiClient: ObservabilityAIAssistantAPIClient;
-  public scope$: BehaviorSubject<AssistantScope>;
+  public scope$: BehaviorSubject<AssistantScope[]>;
   private analytics: AnalyticsServiceStart;
   private registrations: ChatRegistrationRenderFunction[];
   private systemMessage: string;
@@ -159,7 +159,7 @@ class ChatService {
   }: {
     abortSignal: AbortSignal;
     apiClient: ObservabilityAIAssistantAPIClient;
-    scope$: BehaviorSubject<AssistantScope>;
+    scope$: BehaviorSubject<AssistantScope[]>;
     analytics: AnalyticsServiceStart;
     registrations: ChatRegistrationRenderFunction[];
   }) {
@@ -186,15 +186,22 @@ class ChatService {
 
   async initialize() {
     this.functionRegistry = new Map();
-    const [{ functionDefinitions, systemMessage }] = await Promise.all([
+    const systemMessages: string[] = [];
+    const scopePromises = this.scope$.value.map((scope) =>
       this.apiClient('GET /internal/observability_ai_assistant/{scope}/functions', {
         signal: this.abortSignal,
         params: {
           path: {
-            scope: this.getScope(),
+            scope,
           },
         },
-      }),
+      }).then(({ functionDefinitions, systemMessage }) => {
+        functionDefinitions.forEach((fn) => this.functionRegistry.set(fn.name, fn));
+        systemMessages.push(systemMessage);
+      })
+    );
+    await Promise.all([
+      ...scopePromises,
       ...this.registrations.map((registration) => {
         return registration({
           registerRenderFunction: (name, renderFn) => {
@@ -204,10 +211,7 @@ class ChatService {
       }),
     ]);
 
-    functionDefinitions.forEach((fn) => {
-      this.functionRegistry.set(fn.name, fn);
-    });
-    this.systemMessage = systemMessage;
+    this.systemMessage = systemMessages.join('\n');
 
     this.functions$.next(this.getFunctions());
   }
@@ -251,7 +255,8 @@ class ChatService {
       definitions: Array.from(this.functionRegistry.values()),
     }).filter((value) => {
       return value.scopes
-        ? value.scopes?.includes(this.getScope()) || value.scopes?.includes('all')
+        ? value.scopes?.some((scope) => this.getScopes().includes(scope)) ||
+            value.scopes?.includes('all')
         : true;
     });
   };
@@ -301,7 +306,7 @@ class ChatService {
           connectorId,
           functionCall,
           functions: functions ?? [],
-          scope: this.getScope(),
+          scopes: this.getScopes(),
         },
       },
       signal,
@@ -334,7 +339,7 @@ class ChatService {
         signal,
         client: this.getClient(),
         instructions,
-        scope: this.getScope(),
+        scopes: this.getScopes(),
       },
       ({ params }) => {
         return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
@@ -345,7 +350,7 @@ class ChatService {
     );
   };
 
-  public getScope() {
+  public getScopes() {
     return this.scope$.value;
   }
 }
@@ -361,7 +366,7 @@ export async function createChatService({
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
   apiClient: ObservabilityAIAssistantAPIClient;
-  scope$: BehaviorSubject<AssistantScope>;
+  scope$: BehaviorSubject<AssistantScope[]>;
 }): Promise<ObservabilityAIAssistantChatService> {
   return new ChatService({
     analytics,

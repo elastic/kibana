@@ -249,10 +249,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
-    scope,
+    scopes,
   }: {
     request: KibanaRequest;
-    scope?: AssistantScope;
+    scopes?: AssistantScope[];
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -291,7 +291,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
-      scope: scope || 'all',
+      scopes: scopes || ['all'],
     });
   }
 
