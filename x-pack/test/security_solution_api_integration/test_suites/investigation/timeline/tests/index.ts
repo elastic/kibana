@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
-  // Failed in serverless: https://github.com/elastic/kibana/issues/183645
-  describe('@ess @serverless @skipInServerless SecuritySolution Timeline', () => {
+  describe('@ess @serverless SecuritySolution Timeline', () => {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_migrations'));
+    loadTestFile(require.resolve('./import_timelines'));
+    loadTestFile(require.resolve('./install_prepackaged_timelines'));
   });
 }
