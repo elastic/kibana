@@ -328,7 +328,7 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     options = { deleteData: false, deleteEngine: true }
   ) {
-    const { namespace, logger, esClient, appClient, dataViewsService } = this.options;
+    const { namespace, logger, appClient, dataViewsService } = this.options;
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
