@@ -33,13 +33,13 @@ import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
-import { CoreVersionedRouter } from './versioned_router';
+import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
-import { prepareRouteConfigValidation } from './util';
+import { getVersionHeader, injectVersionHeader, prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
 import { InternalRouteConfig } from './route';
@@ -149,6 +149,7 @@ export interface RouterOptions {
 export interface InternalRegistrarOptions {
   isVersioned: boolean;
 }
+
 /** @internal */
 export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
   RouteConfig<P, Q, B, M>,
@@ -171,6 +172,7 @@ export interface InternalRouterRoute extends RouterRoute {
 
 /** @internal */
 interface InternalGetRoutesOptions {
+  /** @default false */
   excludeVersionedRoutes?: boolean;
 }
 
@@ -200,10 +202,15 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        internalOptions: { isVersioned: boolean } = { isVersioned: false }
+        { isVersioned }: InternalRegistrarOptions = { isVersioned: false }
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
+        const isPublicUnversionedApi =
+          !isVersioned &&
+          route.options?.access === 'public' &&
+          // We do not consider HTTP resource routes as APIs
+          route.options?.httpResource !== true;
 
         this.routes.push({
           handler: async (req, responseToolkit) =>
@@ -211,18 +218,18 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
               routeSchemas,
               request: req,
               responseToolkit,
+              isPublicUnversionedApi,
               handler: this.enhanceWithContext(handler),
             }),
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
           // For the versioned route security is validated in the versioned router
-          security: internalOptions.isVersioned
+          security: isVersioned
             ? route.security
             : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
-          /** Below is added for introspection */
           validationSchemas: route.validate,
-          isVersioned: internalOptions.isVersioned,
+          isVersioned,
         });
       };
 
@@ -266,10 +273,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     routeSchemas,
     request,
     responseToolkit,
+    isPublicUnversionedApi,
     handler,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
+    isPublicUnversionedApi: boolean;
     handler: RequestHandlerEnhanced<
       P,
       Q,
@@ -290,11 +299,21 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
-      return hapiResponseAdapter.toBadRequest(error.message);
+      const response = hapiResponseAdapter.toBadRequest(error.message);
+      if (isPublicUnversionedApi) {
+        response.output.headers = {
+          ...response.output.headers,
+          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+        };
+      }
+      return response;
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
+      if (isPublicUnversionedApi) {
+        injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
+      }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,

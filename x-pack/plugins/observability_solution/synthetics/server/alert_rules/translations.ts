@@ -124,6 +124,24 @@ export const commonMonitorStateI18: Array<{
       }
     ),
   },
+  {
+    name: 'serviceName',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.serviceName',
+      {
+        defaultMessage: 'Service name associated with the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'labels',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.labels',
+      {
+        defaultMessage: 'Labels associated with the monitor.',
+      }
+    ),
+  },
 ];
 
 export const commonStateTranslations = [

@@ -32,6 +32,7 @@ export class DatatableVisualization {
         '../../async_services'
       );
       const palettes = await charts.palettes.getPalettes();
+
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
@@ -44,7 +45,10 @@ export class DatatableVisualization {
         })
       );
 
-      return getDatatableVisualization({ paletteService: palettes, kibanaTheme: core.theme });
+      return getDatatableVisualization({
+        paletteService: palettes,
+        kibanaTheme: core.theme,
+      });
     });
   }
 }

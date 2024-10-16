@@ -16,7 +16,7 @@ import {
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
-  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_3RD_PARTY_RETENTION_POLICY,
   buildMutedRulesFilter,
 } from '@kbn/cloud-security-posture-common';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
@@ -115,6 +115,72 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
+ * Get runtime mappings for the given group field
+ * Some fields require additional runtime mappings to aggregate additional information
+ * Fallback to keyword type to support custom fields grouping
+ */
+const getRuntimeMappingsByGroupField = (
+  field: string
+): Record<string, { type: 'keyword' }> | undefined => {
+  switch (field) {
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+      return {
+        [FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME]: {
+          type: 'keyword',
+        },
+        'resource.id': {
+          type: 'keyword',
+        },
+        'resource.sub_type': {
+          type: 'keyword',
+        },
+        'resource.type': {
+          type: 'keyword',
+        },
+      };
+    case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
+      return {
+        [FINDINGS_GROUPING_OPTIONS.RULE_NAME]: {
+          type: 'keyword',
+        },
+        'rule.benchmark.version': {
+          type: 'keyword',
+        },
+      };
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return {
+        [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
+          type: 'keyword',
+        },
+        'rule.benchmark.name': {
+          type: 'keyword',
+        },
+        'rule.benchmark.id': {
+          type: 'keyword',
+        },
+      };
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+      return {
+        [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: {
+          type: 'keyword',
+        },
+        'rule.benchmark.name': {
+          type: 'keyword',
+        },
+        'rule.benchmark.id': {
+          type: 'keyword',
+        },
+      };
+    default:
+      return {
+        [field]: {
+          type: 'keyword',
+        },
+      };
+  }
+};
+
+/**
  * Type Guard for checking if the given source is a FindingsRootGroupingAggregation
  */
 export const isFindingsRootGroupingAggregation = (
@@ -183,12 +249,18 @@ export const useLatestFindingsGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+    runtimeMappings: {
+      ...getRuntimeMappingsByGroupField(currentSelectedGroup),
+      'result.evaluation': {
+        type: 'keyword',
+      },
+    },
     rootAggregations: [
       {
         failedFindings: {
