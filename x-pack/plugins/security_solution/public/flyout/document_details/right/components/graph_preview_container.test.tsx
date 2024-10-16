@@ -38,8 +38,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const NO_GRAPH_MESSAGE = 'Missing data message.';
-
 const renderGraphPreview = (context = mockContextValue) =>
   render(
     <TestProviders>
@@ -61,7 +59,9 @@ describe('<GraphPreviewContainer />', () => {
       data: { nodes: [], edges: [] },
     });
 
-    (useGraphPreview as jest.Mock).mockReturnValue(true);
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      isAuditLog: true,
+    });
 
     const { getByTestId, queryByTestId } = renderGraphPreview();
 
@@ -81,9 +81,6 @@ describe('<GraphPreviewContainer />', () => {
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toHaveTextContent(NO_GRAPH_MESSAGE);
   });
 
   it('should render error message and text in header', () => {
@@ -93,15 +90,14 @@ describe('<GraphPreviewContainer />', () => {
       data: undefined,
     });
 
-    (useGraphPreview as jest.Mock).mockReturnValue(false);
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      isAuditLog: false,
+    });
 
     const { getByTestId } = renderGraphPreview();
 
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
-    expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))).toHaveTextContent(
-      NO_GRAPH_MESSAGE
-    );
   });
 });
