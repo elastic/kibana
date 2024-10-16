@@ -783,6 +783,7 @@ export function getExpressionType(
     return 'time_literal';
   }
 
+  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
   if (isInlineCastItem(root)) {
     switch (root.castType) {
       case 'int':
@@ -790,6 +791,8 @@ export function getExpressionType(
       case 'bool':
         return 'boolean';
       case 'string':
+        return 'keyword';
+      case 'text':
         return 'keyword';
       case 'datetime':
         return 'date';
