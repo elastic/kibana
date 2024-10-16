@@ -25,7 +25,7 @@ export function InventoryPage() {
 
   const { grouping } = query;
   const [inventoryState, setInventoryState] = useState<InventoryState | undefined>(() =>
-    grouping ? (decode(grouping) as unknown as InventoryState) : undefined
+    grouping ? (decode(grouping) as InventoryState) : undefined
   );
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function InventoryPage() {
         });
       }
     }
-    // Only run the effect on a change for `grouping`. Other deps cause this to refire too many times.
+    // Only run the effect on a change for `inventoryState`. Other deps cause this to refire too many times.
     // Probably a better way of doing this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inventoryState]);
