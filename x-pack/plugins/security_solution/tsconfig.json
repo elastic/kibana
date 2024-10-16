@@ -229,5 +229,7 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-security-server-mocks",
+    "@kbn/serverless",
+    "@kbn/core-user-profile-browser",
   ]
 }
