@@ -16,6 +16,7 @@ import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../..';
+import { prettifyCommandLine } from '../prettify_command_line';
 
 const dateNow = Date.now.bind(Date);
 
@@ -91,14 +92,25 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .filter((node) => node.pending || !results.find((result) => result.node === node))
       .map((node) => ({ skipped: true, node }));
 
-    const builder = xmlBuilder.create(
+    const commandLine = prettifyCommandLine(process.argv);
+
+    const root = xmlBuilder.create(
       'testsuites',
       { encoding: 'utf-8' },
       {},
       { skipNullAttributes: true }
     );
 
-    const testsuitesEl = builder.ele('testsuite', {
+    root.att({
+      name: 'ftr',
+      time: getDuration(stats),
+      tests: allTests.length + failedHooks.length,
+      failures: failures.length,
+      skipped: skippedResults.length,
+      'command-line': commandLine,
+    });
+
+    const testsuitesEl = root.ele('testsuite', {
       name: reportName,
       timestamp: new Date(stats.startTime).toISOString().slice(0, -5),
       time: getDuration(stats),
@@ -106,6 +118,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       failures: failures.length,
       skipped: skippedResults.length,
       'metadata-json': JSON.stringify(metadata ?? {}),
+      'command-line': commandLine,
     });
 
     function addTestcaseEl(node) {
@@ -134,7 +147,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     });
 
     const reportPath = getUniqueJunitReportPath(rootDirectory, reportName);
-    const reportXML = builder.end();
+    const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   });

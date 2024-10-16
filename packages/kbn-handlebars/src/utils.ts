@@ -61,7 +61,9 @@ export function transformLiteralToPath(node: { path: hbs.AST.PathExpression | hb
 
 export function allowUnsafeEval() {
   try {
-    new Function();
+    // Do not remove the `kbnUnsafeEvalTest` parameter.
+    // It is used for filtering out expected CSP failures, and must be the first piece of content in this function.
+    new Function('kbnUnsafeEvalTest', 'return true;');
     return true;
   } catch (e) {
     return false;

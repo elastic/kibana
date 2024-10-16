@@ -26,13 +26,13 @@ import {
 } from '../screens/entity_analytics_management';
 import { visitWithTimeRange } from './navigation';
 import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
-import { LOADING_SPINNER } from '../screens/loading';
+import { REFRESH_BUTTON } from '../screens/security_header';
 
 export const updateDashboardTimeRange = () => {
   // eslint-disable-next-line cypress/no-force
   cy.get(GET_DATE_PICKER_APPLY_BUTTON(GLOBAL_FILTERS_CONTAINER)).click({ force: true }); // Force to fix global timerange flakiness
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(REFRESH_BUTTON).click();
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 
 export const waitForAnomaliesToBeLoaded = () => {

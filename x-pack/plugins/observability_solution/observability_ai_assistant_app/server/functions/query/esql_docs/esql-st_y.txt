@@ -1,15 +1,26 @@
-ST_Y
+## ST_Y
 
+The `ST_Y` function extracts the y coordinate from the supplied point. If the points is of type `geo_point` this is equivalent to extracting the latitude value.
 
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-Syntax
-Parameters
-point
-Expression of type geo_point or cartesian_point. If null, the function returns null.
-DescriptionExtracts the y coordinate from the supplied point.
-If the points is of type geo_point this is equivalent to extracting the latitude value.Supported types
-Example
+### Syntax
+
+`ST_Y(point)`
+
+### Parameters
+
+- `point`: Expression of type `geo_point` or `cartesian_point`. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `ST_Y` function in ES|QL queries:
+
 ```esql
 ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
-| EVAL x =  ST_X(point), y = ST_Y(point)
+| EVAL y = ST_Y(point)
+```
+
+```esql
+FROM geo_data
+| EVAL latitude = ST_Y(location)
+| WHERE latitude > 50
 ```

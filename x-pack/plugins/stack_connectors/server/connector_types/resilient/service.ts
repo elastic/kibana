@@ -15,6 +15,7 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   ExternalServiceCredentials,
   ExternalService,
@@ -115,7 +116,7 @@ export const createExternalService = (
   const incidentTypesUrl = `${incidentFieldsUrl}/incident_type_ids`;
   const severityUrl = `${incidentFieldsUrl}/severity_code`;
   const axiosInstance = axios.create({
-    auth: { username: apiKeyId, password: apiKeySecret },
+    headers: getBasicAuthHeader({ username: apiKeyId, password: apiKeySecret }),
   });
 
   const getIncidentViewURL = (key: string) => {

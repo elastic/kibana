@@ -1,83 +1,65 @@
-WHERE
+## WHERE
 
-Syntax
-WHERE expression
-Parameters
-expression
-A boolean expression.
-DescriptionThe WHERE processing command produces a table that contains all the rows from
-the input table for which the provided condition evaluates to true.Examples
-```esql
+The `WHERE` command in ES|QL is a processing command that produces a table containing all the rows from the input table for which the provided condition evaluates to true. This command is particularly useful in filtering data based on specific conditions. 
+
+The `WHERE` command supports various functions and operators, including date math for retrieving data from a specific time range, `LIKE` and `RLIKE` for filtering data based on string patterns, and the `IN` operator for testing whether a field or expression equals an element in a list of literals, fields, or expressions.
+
+However, it's important to note that the `WHERE` command has certain limitations. For instance, it does not support configurations where the `_source` field is disabled. Also, full-text search is not yet supported because of the way ES|QL treats `text` values.
+
+### Syntax:
+
+`WHERE expression`
+
+#### Parameters:
+
+- `expression`: A boolean expression.
+
+### Examples:
+
+Here are some examples of how the `WHERE` command can be used in different scenarios:
+
+1. Filtering employees who are still hired:
+
+    ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 ```
 
-Which, if still_hired is a boolean field, can be simplified to:
-```esql
-FROM employees
-| KEEP first_name, last_name, still_hired
-| WHERE still_hired
-```
+2. Retrieving the last hour of logs:
 
-Use date math to retrieve data from a specific time range. For example, to
-retrieve the last hour of logs:
-```esql
+    ```esql
 FROM sample_data
 | WHERE @timestamp > NOW() - 1 hour
 ```
 
-WHERE supports various functions. For example the
-LENGTH function:
-```esql
+3. Filtering employees based on the length of their first name:
+
+    ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | WHERE LENGTH(first_name) < 4
 ```
 
-For a complete list of all functions, refer to Functions overview.For NULL comparison, use the IS NULL and IS NOT NULL predicates:
-```esql
-FROM employees
-| WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
-```
+4. Filtering data based on string patterns using `LIKE`:
 
-```esql
-FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS COUNT(emp_no)
-```
-
-Use LIKE to filter data based on string patterns using wildcards. LIKE
-usually acts on a field placed on the left-hand side of the operator, but it can
-also act on a constant (literal) expression. The right-hand side of the operator
-represents the pattern.The following wildcard characters are supported:
-* matches zero or more characters.
-? matches one character.
-Supported types
-```esql
+    ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
 | KEEP first_name, last_name
 ```
 
-Use RLIKE to filter data based on string patterns using using
-regular expressions. RLIKE usually acts on a field placed on
-the left-hand side of the operator, but it can also act on a constant (literal)
-expression. The right-hand side of the operator represents the pattern.Supported types
-```esql
+5. Filtering data based on string patterns using `RLIKE`:
+
+    ```esql
 FROM employees
 | WHERE first_name RLIKE ".leja.*"
 | KEEP first_name, last_name
 ```
 
-The IN operator allows testing whether a field or expression equals
-an element in a list of literals, fields or expressions:
-```esql
+6. Using the `IN` operator to test whether a field or expression equals an element in a list:
+
+    ```esql
 ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
-
-For a complete list of all operators, refer to Operators.

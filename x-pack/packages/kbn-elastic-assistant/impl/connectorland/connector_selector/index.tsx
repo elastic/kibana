@@ -161,7 +161,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     return (
       <>
-        {isFlyoutMode && !connectorExists ? (
+        {isFlyoutMode && !connectorExists && !connectorOptions.length ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"

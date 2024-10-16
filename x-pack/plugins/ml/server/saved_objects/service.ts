@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import RE2 from 're2';
 import { memoize } from 'lodash';
 import type {
   KibanaRequest,
@@ -329,7 +328,7 @@ export function mlSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return jobIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replace('*', '.*'));
       return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }
@@ -641,7 +640,7 @@ export function mlSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return modelIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replace('*', '.*'));
       return modelIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }

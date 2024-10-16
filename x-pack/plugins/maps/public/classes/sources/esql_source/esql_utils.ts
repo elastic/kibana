@@ -8,11 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
-import {
-  ESQL_LATEST_VERSION,
-  getESQLAdHocDataview,
-  getIndexPatternFromESQLQuery,
-} from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
@@ -90,7 +86,6 @@ export function getFieldType(column: ESQLColumn) {
 async function getColumns(esql: string) {
   const params = {
     query: esql + ' | limit 0',
-    version: ESQL_LATEST_VERSION,
   };
 
   try {

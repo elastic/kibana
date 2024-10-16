@@ -23,6 +23,12 @@ export interface UnifiedDataTableSettings {
 
 export interface UnifiedDataTableSettingsColumn {
   width?: number;
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
+  display?: string;
 }
 
 export type ValueToStringConverter = (

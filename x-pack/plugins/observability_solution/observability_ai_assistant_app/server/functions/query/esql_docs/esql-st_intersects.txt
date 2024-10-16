@@ -1,22 +1,30 @@
-ST_INTERSECTS
+## ST_INTERSECTS
 
+The `ST_INTERSECTS` function returns `true` if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons). This is the inverse of the `ST_DISJOINT` function. In mathematical terms: `ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅`.
 
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-Syntax
-Parameters
-geomA
-Expression of type geo_point, cartesian_point, geo_shape or cartesian_shape. If null, the function returns null.
-geomB
-Expression of type geo_point, cartesian_point, geo_shape or cartesian_shape. If null, the function returns null.
-The second parameter must also have the same coordinate system as the first.
-This means it is not possible to combine geo_* and cartesian_* parameters.
-DescriptionReturns true if two geometries intersect.
-They intersect if they have any point in common, including their interior points
-(points along lines or within polygons).
-This is the inverse of the ST_DISJOINT function.
-In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅Supported types
-Example
+### Syntax
+
+`ST_INTERSECTS(geomA, geomB)`
+
+#### Parameters
+
+- `geomA`: Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`.
+- `geomB`: Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_*` and `cartesian_*` parameters.
+
+### Examples
+
+Here are a couple of examples of how to use the `ST_INTERSECTS` function in ES|QL queries:
+
 ```esql
 FROM airports
 | WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
 ```
+
+In this example, the `ST_INTERSECTS` function is used to find airports that are located within a specific polygon.
+
+```esql
+FROM geo_shapes
+| WHERE ST_INTERSECTS(shape_field, TO_GEOSHAPE("POINT(42 14)"))
+```
+
+In this second example, the `ST_INTERSECTS` function is used to find geo shapes that intersect with a specific point.

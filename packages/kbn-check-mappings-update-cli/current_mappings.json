@@ -1505,6 +1505,19 @@
       }
     }
   },
+  "fleet-setup-lock": {
+    "properties": {
+      "started_at": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "uuid": {
+        "type": "text"
+      }
+    }
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {

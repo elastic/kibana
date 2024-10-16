@@ -185,6 +185,9 @@ export const crossClusterApiKeySchema = restApiKeySchema.extends({
         schema.arrayOf(
           schema.object({
             names: schema.arrayOf(schema.string()),
+            query: schema.maybe(schema.any()),
+            field_security: schema.maybe(schema.any()),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
           })
         )
       ),

@@ -1,12 +1,29 @@
-TANH
+## TANH
 
-Syntax
-Parameters
-angle
-An angle, in radians. If null, the function returns null.
-DescriptionReturns the Tangent hyperbolic function of an angle.Supported types
-Example
+The `TANH` function in ES|QL returns the Tangent hyperbolic function of an angle. The angle should be provided in radians. If the angle is null, the function will return null.
+
+### Syntax
+
+`TANH(angle)`
+
+#### Parameters
+
+- `angle`: An angle, in radians. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how to use the `TANH` function in ES|QL:
+
 ```esql
 ROW a=1.8
-| EVAL tanh=TANH(a)
+| EVAL tanh = TANH(a)
 ```
+
+In this example, the `TANH` function is used to calculate the Tangent hyperbolic function of the angle `1.8` radians.
+
+```esql
+ROW a=3.14
+| EVAL tanh_result = TANH(a)
+```
+
+In this second example, the `TANH` function is used to calculate the Tangent hyperbolic function of the angle `3.14` radians. The result is stored in the `tanh_result` variable.

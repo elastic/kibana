@@ -331,24 +331,18 @@ export const getIncompleteCountQuery = (isCrawler?: boolean) => {
   }
   return {
     bool: {
-      should: [
-        {
-          bool: {
-            must_not: {
-              terms: {
-                status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
-              },
-            },
+      must_not: {
+        terms: {
+          status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
+        },
+      },
+      must: {
+        range: {
+          last_seen: {
+            lt: moment().subtract(30, 'minutes').toISOString(),
           },
         },
-        {
-          range: {
-            last_seen: {
-              lt: moment().subtract(30, 'minutes').toISOString(),
-            },
-          },
-        },
-      ],
+      },
       filter: [
         {
           bool: {

@@ -21,7 +21,7 @@ import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { newTelemetryLogger } from './helpers';
+import { copyLicenseFields, newTelemetryLogger } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
@@ -281,6 +281,14 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       } else {
         additional = {
           cluster_uuid: clusterInfo?.cluster_uuid,
+        };
+      }
+
+      if (event.channel === TelemetryChannel.ENDPOINT_ALERTS) {
+        const licenseInfo = this.telemetryReceiver?.getLicenseInfo();
+        additional = {
+          ...additional,
+          ...(licenseInfo ? { license: copyLicenseFields(licenseInfo) } : {}),
         };
       }
 

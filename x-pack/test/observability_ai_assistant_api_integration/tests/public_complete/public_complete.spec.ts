@@ -72,6 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             format,
           })
           .set('kbn-xsrf', 'foo')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             messages,
             connectorId,
@@ -83,13 +84,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             if (err) {
               return reject(err);
             }
+            if (response.status !== 200) {
+              return reject(new Error(`${response.status}: ${JSON.stringify(response.body)}`));
+            }
             return resolve(response);
           });
       });
 
-      const [conversationSimulator, titleSimulator] = await Promise.all([
-        conversationInterceptor.waitForIntercept(),
-        titleInterceptor.waitForIntercept(),
+      const [conversationSimulator, titleSimulator] = await Promise.race([
+        Promise.all([
+          conversationInterceptor.waitForIntercept(),
+          titleInterceptor.waitForIntercept(),
+        ]),
+        // make sure any request failures (like 400s) are properly propagated
+        responsePromise.then(() => []),
       ]);
 
       await titleSimulator.status(200);

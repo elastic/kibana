@@ -170,14 +170,23 @@ export async function reportFailuresToFile(
         <p><strong>${escape(failure.name)}</strong></p>
         <p>
           <small>
-            <strong>Failures in tracked branches</strong>: <span class="badge rounded-pill bg-danger">${
-              failure.failureCount || 0
-            }</span>
+            ${
+              failure.commandLine
+                ? `<div>
+                     <strong>Command Line</strong>:
+                     <pre>${escape(failure.commandLine)}</pre>
+                   </div>`
+                : ''
+            }
+            <div>
+                <strong>Failures in tracked branches</strong>:
+                    <span class="badge rounded-pill bg-danger">${failure.failureCount || 0}</span>
+            </div>
             ${
               failure.githubIssue
-                ? `<br /><a href="${escape(failure.githubIssue)}">${escape(
-                    failure.githubIssue
-                  )}</a>`
+                ? `<div>
+                     <a href="${escape(failure.githubIssue)}">${escape(failure.githubIssue)}</a>
+                   </div>`
                 : ''
             }
           </small>

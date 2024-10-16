@@ -37,6 +37,8 @@ export interface TestSuite {
     skipped: string;
     /* optional JSON encoded metadata */
     'metadata-json'?: string;
+    /* the command that ran this suite */
+    'command-line'?: string;
   };
   testcase?: TestCase[];
 }
@@ -51,6 +53,8 @@ export interface TestCase {
     time: string;
     /* optional JSON encoded metadata */
     'metadata-json'?: string;
+    /* the command that ran this suite */
+    'command-line'?: string;
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;

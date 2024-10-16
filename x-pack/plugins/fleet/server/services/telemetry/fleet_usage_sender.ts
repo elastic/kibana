@@ -24,7 +24,7 @@ const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.4';
+  private taskVersion = '1.1.6';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -136,7 +136,9 @@ export class FleetUsageSender {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService
+        .getLogger()
+        .info(`Task ${this.taskId} scheduled with interval ${this.interval}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,

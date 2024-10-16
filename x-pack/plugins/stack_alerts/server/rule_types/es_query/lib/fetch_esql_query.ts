@@ -6,7 +6,6 @@
  */
 
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
@@ -91,7 +90,6 @@ export const getEsqlQuery = (
 
   const query = {
     query: alertLimit ? `${params.esqlQuery.esql} | limit ${alertLimit}` : params.esqlQuery.esql,
-    version: ESQL_LATEST_VERSION,
     filter: {
       bool: {
         filter: rangeFilter,

@@ -103,7 +103,9 @@ export async function _installPackage({
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
         MAX_TIME_COMPLETE_INSTALL;
-      logger.debug(`Package install - Install status ${installedPkg.attributes.install_status}`);
+      logger.debug(
+        `Package install - Install status ${pkgName}-${pkgVersion}: ${installedPkg.attributes.install_status}`
+      );
 
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
@@ -142,7 +144,7 @@ export async function _installPackage({
         });
       }
     } else {
-      logger.debug(`Package install - Create installation`);
+      logger.debug(`Package install - Create installation ${pkgName}-${pkgVersion}`);
       await createInstallation({
         savedObjectsClient,
         packageInfo,

@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
+import { useEuiTheme } from '@elastic/eui';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 import { AutocompleteField } from './autocomplete_field';
 
@@ -59,6 +60,8 @@ export function RuleFlyoutKueryBar({
     }
   }, [value]);
 
+  const { euiTheme } = useEuiTheme();
+
   const handleChange = (query: string) => {
     setValidation(validateQuery(query));
     setDraftQuery(query);
@@ -86,6 +89,7 @@ export function RuleFlyoutKueryBar({
           placeholder={placeholder}
           suggestions={suggestions}
           value={draftQuery}
+          theme={euiTheme}
         />
       )}
     </WithKueryAutocompletion>

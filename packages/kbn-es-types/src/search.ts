@@ -688,7 +688,6 @@ export interface ESQLSearchParams {
   // https://github.com/elastic/elasticsearch/pull/102767
   // time_zone?: string;
   query: string;
-  version: string;
   filter?: unknown;
   locale?: string;
   dropNullColumns?: boolean;

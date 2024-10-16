@@ -60,6 +60,7 @@ export enum AlertStates {
 // Types for the executor
 export interface CustomThresholdSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
 }
 
 export interface ThresholdParams {

@@ -114,7 +114,7 @@ export const bulkUpdateConversations = async (
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           update: conversationsToUpdate,
           create: conversationsToCreate,

@@ -21,6 +21,10 @@ export const muteAlertRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/alert/{alert_id}/_mute`,
+      options: {
+        access: 'public',
+        description: `Mute an alert`,
+      },
       validate: {
         params: muteAlertParamsSchemaV1,
       },

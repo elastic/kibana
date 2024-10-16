@@ -1,12 +1,21 @@
-TO_GEOSHAPE
+## TO_GEOSHAPE
 
-Syntax
-Parameters
-field
-Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input value to a geo_shape value. A string will only be successfully converted if it respects the WKT format.Supported types
-Example
+The `TO_GEOSHAPE` function in ES|QL is used to convert an input value to a `geo_shape` value. The conversion will be successful only if the input string respects the Well-Known Text (WKT) format.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TO_GEOSHAPE` function in your ES|QL queries:
+
 ```esql
 ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
 | EVAL geom = TO_GEOSHAPE(wkt)
 ```
+
+In this example, the `TO_GEOSHAPE` function is used to convert a WKT representation of a polygon into a `geo_shape` value.
+
+```esql
+ROW wkt = "POINT (30 10)"
+| EVAL geom = TO_GEOSHAPE(wkt)
+```
+
+In this second example, the `TO_GEOSHAPE` function is used to convert a WKT representation of a point into a `geo_shape` value.

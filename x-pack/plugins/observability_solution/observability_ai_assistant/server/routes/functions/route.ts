@@ -65,7 +65,16 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        queries: t.array(nonEmptyStringRt),
+        queries: t.array(
+          t.intersection([
+            t.type({
+              text: t.string,
+            }),
+            t.partial({
+              boost: t.number,
+            }),
+          ])
+        ),
       }),
       t.partial({
         categories: t.array(t.string),

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlyout,
   EuiTitle,
@@ -16,10 +15,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SavedQuerySOFormData, SavedQueryFormData } from './form/use_saved_query_form';
@@ -51,6 +51,13 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
     },
     [createSavedQueryMutation, onClose, serializer]
   );
+  const { euiTheme } = useEuiTheme();
+
+  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    [euiTheme.levels.flyout]
+  );
 
   return (
     <EuiPortal>
@@ -60,6 +67,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
+        maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">

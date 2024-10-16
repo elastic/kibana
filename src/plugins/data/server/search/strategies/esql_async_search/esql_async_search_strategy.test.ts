@@ -8,7 +8,6 @@
 
 import { firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -67,7 +66,6 @@ describe('ES|QL async search strategy', () => {
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
         const params = {
           query: 'from logs* | limit 10',
-          version: ESQL_LATEST_VERSION,
         };
         await esSearch
           .search(
@@ -91,7 +89,6 @@ describe('ES|QL async search strategy', () => {
 
         const params = {
           query: 'from logs* | limit 10',
-          version: ESQL_LATEST_VERSION,
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
@@ -111,7 +108,6 @@ describe('ES|QL async search strategy', () => {
           query: 'from logs* | limit 10',
           wait_for_completion_timeout: '10s',
           keep_alive: '5m',
-          version: ESQL_LATEST_VERSION,
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
@@ -127,7 +123,7 @@ describe('ES|QL async search strategy', () => {
       it('sets transport options on POST requests', async () => {
         const transportOptions = { maxRetries: 1 };
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = { query: 'from logs', version: ESQL_LATEST_VERSION };
+        const params = { query: 'from logs' };
         const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await firstValueFrom(
@@ -144,7 +140,6 @@ describe('ES|QL async search strategy', () => {
               wait_for_completion_timeout: '100ms',
               keep_on_completion: false,
               query: 'from logs',
-              version: ESQL_LATEST_VERSION,
             },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
@@ -155,7 +150,6 @@ describe('ES|QL async search strategy', () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
         const params = {
           query: 'from logs* | limit 10',
-          version: ESQL_LATEST_VERSION,
         };
         const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
@@ -181,7 +175,6 @@ describe('ES|QL async search strategy', () => {
 
         const params = {
           query: 'from logs* | limit 10',
-          version: ESQL_LATEST_VERSION,
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
@@ -204,7 +197,6 @@ describe('ES|QL async search strategy', () => {
 
         const params = {
           query: 'from logs* | limit 10',
-          version: ESQL_LATEST_VERSION,
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
         const abortController = new AbortController();
@@ -238,7 +230,6 @@ describe('ES|QL async search strategy', () => {
 
       const params = {
         query: 'from logs* | limit 10',
-        version: ESQL_LATEST_VERSION,
       };
       const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
@@ -262,7 +253,6 @@ describe('ES|QL async search strategy', () => {
 
       const params = {
         query: 'from logs* | limit 10',
-        version: ESQL_LATEST_VERSION,
       };
       const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 

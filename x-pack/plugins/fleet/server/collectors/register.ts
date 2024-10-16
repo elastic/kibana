@@ -10,6 +10,8 @@ import type { CoreSetup } from '@kbn/core/server';
 
 import type { FleetConfigType } from '..';
 
+import { appContextService } from '../services';
+
 import { getIsAgentsEnabled } from './config_collectors';
 import { getAgentUsage, getAgentData } from './agent_collectors';
 import type { AgentUsage, AgentData } from './agent_collectors';
@@ -61,6 +63,8 @@ export const fetchFleetUsage = async (
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
+    license_issued_to: (await esClient.license.get()).license.issued_to,
+    deployment_id: appContextService.getCloud()?.deploymentId,
   };
   return usage;
 };
@@ -83,6 +87,8 @@ export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType)
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
+    license_issued_to: (await esClient.license.get()).license.issued_to,
+    deployment_id: appContextService.getCloud()?.deploymentId,
   };
   return usage;
 };
@@ -191,6 +197,18 @@ export function registerFleetUsageCollector(
           type: 'long',
           _meta: {
             description: 'The total number of enrolled Fleet Server agents currently offline',
+          },
+        },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled Fleet Server agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of unenrolled Fleet Server agents',
           },
         },
         num_host_urls: {

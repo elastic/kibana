@@ -1,21 +1,30 @@
-DATE_TRUNC
+## DATE_TRUNC
 
-Syntax
-Parameters
-interval
-Interval; expressed using the timespan literal syntax.
-date
-Date expression
-DescriptionRounds down a date to the closest interval.Supported types
-Examples
+The `DATE_TRUNC` function in ES|QL rounds down a date to the closest interval. This can be useful for creating date histograms or calculating rates over specific time intervals.
+
+### Syntax
+
+`DATE_TRUNC(interval, date)`
+
+#### Parameters
+
+- `interval`: Interval; expressed using the timespan literal syntax.
+- `date`: Date expression
+
+### Examples
+
+Here are a couple of examples of how you can use the `DATE_TRUNC` function in ES|QL queries:
+
+1. To round down the hire date of employees to the closest year and keep the first name, last name, and hire date:
+
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-Combine DATE_TRUNC with STATS ... BY to create date histograms. For
-example, the number of hires per year:
+2. To create a date histogram showing the number of hires per year:
+
 ```esql
 FROM employees
 | EVAL year = DATE_TRUNC(1 year, hire_date)
@@ -23,11 +32,12 @@ FROM employees
 | SORT year
 ```
 
-Or an hourly error rate:
+3. To calculate an hourly error rate:
+
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) by hour
+| STATS error_rate = AVG(error) BY hour
 | SORT hour
 ```

@@ -218,6 +218,14 @@
       "warning": []
     },
     {
+      "query": "from `index`",
+      "error": [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'"
+      ],
+      "warning": []
+    },
+    {
       "query": "from index, other_index",
       "error": [],
       "warning": []
@@ -944,36 +952,23 @@
       "warning": []
     },
     {
-      "query": "row var = date_format(now(), \"a\")",
+      "query": "row var = date_format(\"a\", now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "row date_format(now(), \"a\")",
+      "query": "row date_format(\"a\", now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = date_parse(\"a\", \"a\")",
+      "query": "row var = date_format(now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "row date_parse(\"a\", \"a\")",
+      "query": "row date_format(now())",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_parse(to_string(\"a\"), to_string(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_parse(5, 5)",
-      "error": [
-        "Argument of [date_parse] must be [string], found value [5] type [number]",
-        "Argument of [date_parse] must be [string], found value [5] type [number]"
-      ],
       "warning": []
     },
     {
@@ -8826,66 +8821,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_format(dateField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_format(dateField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_format(to_datetime(stringField), to_string(stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_format(stringField, numberField)",
-      "error": [
-        "Argument of [date_format] must be [date], found value [stringField] type [string]",
-        "Argument of [date_format] must be [string], found value [numberField] type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_format(dateField, stringField, extraArg)",
-      "error": [
-        "Error: [date_format] function expects no more than 2 arguments, got 3."
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_parse(stringField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_parse(stringField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_parse(to_string(stringField), to_string(stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_parse(numberField, numberField)",
-      "error": [
-        "Argument of [date_parse] must be [string], found value [numberField] type [number]",
-        "Argument of [date_parse] must be [string], found value [numberField] type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_parse(stringField, stringField, extraArg)",
-      "error": [
-        "Error: [date_parse] function expects exactly 2 arguments, got 3."
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = date_trunc(1 year, dateField)",
       "error": [],
       "warning": []
@@ -9483,7 +9418,7 @@
     {
       "query": "from a_index | eval mv_zip(stringField, stringField, stringField, extraArg)",
       "error": [
-        "Error: [mv_zip] function expects exactly 3 arguments, got 4."
+        "Error: [mv_zip] function expects no more than 3 arguments, got 4."
       ],
       "warning": []
     },
@@ -11033,7 +10968,7 @@
     {
       "query": "from a_index | eval substring(stringField, numberField, numberField, extraArg)",
       "error": [
-        "Error: [substring] function expects exactly 3 arguments, got 4."
+        "Error: [substring] function expects no more than 3 arguments, got 4."
       ],
       "warning": []
     },
@@ -16350,7 +16285,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | sort date_format(dateField, stringField)",
+      "query": "from a_index | sort date_format(stringField, dateField)",
       "error": [],
       "warning": []
     },

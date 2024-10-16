@@ -1,0 +1,30 @@
+## REPEAT
+
+The `REPEAT` function in ES|QL is used to construct a string by concatenating a given string with itself a specified number of times.
+
+### Syntax
+
+`REPEAT(string, number)`
+
+#### Parameters
+
+- `string`: The string expression that you want to repeat.
+- `number`: The number of times you want to repeat the string.
+
+### Examples
+
+Here are a couple of examples of how you can use the `REPEAT` function in ES|QL:
+
+```esql
+ROW a = "Hello!"
+| EVAL triple_a = REPEAT(a, 3)
+```
+
+In this example, the string "Hello!" is repeated 3 times, resulting in "Hello!Hello!Hello!".
+
+```esql
+ROW b = "ES|QL "
+| EVAL five_b = REPEAT(b, 5)
+```
+
+In this example, the string "ES|QL " is repeated 5 times, resulting in "ES|QL ES|QL ES|QL ES|QL ES|QL ".

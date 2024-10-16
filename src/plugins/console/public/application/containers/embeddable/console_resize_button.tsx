@@ -26,11 +26,26 @@ export interface EmbeddedConsoleResizeButtonProps {
   setConsoleHeight: React.Dispatch<React.SetStateAction<number>>;
 }
 
+const parseOrDefaultValue = (value: string, defaultValue: number): number => {
+  try {
+    const result = parseInt(value, 10);
+    if (!isNaN(result) && result >= 0) {
+      return result;
+    }
+  } catch {
+    // ignore bad values
+  }
+  return defaultValue;
+};
+
 export function getCurrentConsoleMaxSize(euiTheme: EuiThemeComputed<{}>) {
-  const euiBaseSize = parseInt(euiTheme.size.base, 10);
+  const euiBaseSize = parseOrDefaultValue(euiTheme.size.base, 16);
   const winHeight = window.innerHeight;
-  const bodyStyle = getComputedStyle(document.body);
-  const headerOffset = parseInt(bodyStyle.getPropertyValue('--euiFixedHeadersOffset') ?? '0px', 10);
+  const bodyStyle = window.getComputedStyle(document.body);
+  const headerOffset = parseOrDefaultValue(
+    bodyStyle.getPropertyValue('--euiFixedHeadersOffset') ?? '0px',
+    0
+  );
 
   // We leave a buffer of baseSize to allow room for the user to hover on the top border for resizing
   return Math.max(winHeight - headerOffset - euiBaseSize, CONSOLE_MIN_HEIGHT);

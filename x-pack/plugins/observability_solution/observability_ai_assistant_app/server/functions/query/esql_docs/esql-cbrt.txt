@@ -1,0 +1,29 @@
+## CBRT
+
+The `CBRT` function in ES|QL is used to calculate the cube root of a number. The input can be any numeric value and the return value is always a double. If the input is an infinity, the function returns null.
+
+### Syntax
+
+`CBRT(number)`
+
+#### Parameters
+
+- `number`: A numeric expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how to use the `CBRT` function in ES|QL:
+
+```esql
+ROW d = 27.0
+| EVAL c = CBRT(d)
+```
+
+In this example, the `CBRT` function is used to calculate the cube root of 27. The result would be 3.
+
+```esql
+ROW d = 64.0
+| EVAL c = CBRT(d)
+```
+
+In this example, the `CBRT` function is used to calculate the cube root of 64. The result would be 4.

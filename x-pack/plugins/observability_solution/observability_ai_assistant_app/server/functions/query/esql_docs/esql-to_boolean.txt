@@ -1,12 +1,29 @@
-TO_BOOLEAN
+## TO_BOOLEAN
 
-Syntax
-Parameters
-field
-Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input value to a boolean value. A string value of true will be case-insensitive converted to the Boolean true. For anything else, including the empty string, the function will return false. The numerical value of 0 will be converted to false, anything else will be converted to true.Supported types
-Example
+The `TO_BOOLEAN` function converts an input value to a boolean value. A string value of true will be case-insensitive converted to the Boolean true. For anything else, including the empty string, the function will return false. The numerical value of 0 will be converted to false, anything else will be converted to true.
+
+### Syntax
+
+`TO_BOOLEAN(field)`
+
+#### Parameters
+
+- `field`: Input value. The input can be a single- or multi-valued column or an expression.
+
+### Examples
+
+Here are a couple of examples of full ES|QL queries using the `TO_BOOLEAN` function:
+
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
 ```
+
+In this example, the `TO_BOOLEAN` function is used to convert a list of string values to boolean. The resulting `bool` column will contain boolean values corresponding to the input strings.
+
+```esql
+ROW str = ["0", "1", "2", "-1", "0.5"]
+| EVAL bool = TO_BOOLEAN(str)
+```
+
+In this second example, the `TO_BOOLEAN` function is used to convert a list of numeric strings to boolean. The resulting `bool` column will contain boolean values corresponding to the input strings.

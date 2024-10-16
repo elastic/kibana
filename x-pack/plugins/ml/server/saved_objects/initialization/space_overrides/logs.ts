@@ -6,7 +6,6 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import RE2 from 're2';
 import { mlLog } from '../../../lib/log';
 
 const GROUP = 'logs-ui';
@@ -42,7 +41,7 @@ export async function logJobsSpaces({
 }
 
 function findLogJobSpaceFactory() {
-  const reg = new RE2(`${MODULE_PREFIX}-(.+)-(${SOURCES.join('|')})-(${JOB_IDS.join('|')})`);
+  const reg = new RegExp(`${MODULE_PREFIX}-(.+)-(${SOURCES.join('|')})-(${JOB_IDS.join('|')})`);
 
   return (jobId: string) => {
     const result = reg.exec(jobId);

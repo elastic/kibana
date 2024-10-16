@@ -24,7 +24,7 @@ Index settings in the APM app take precedence over those set in `kibana.yml`.
 
 Starting in version 8.2.0, APM indices are {kib} Spaces-aware;
 Changes to APM index settings will only apply to the currently enabled space.
-See <<apm-spaces>> for more information.
+// See <<apm-spaces>> for more information.
 
 [role="screenshot"]
 image::settings/images/apm-settings.png[APM app settings in Kibana]

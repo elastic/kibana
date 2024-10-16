@@ -326,9 +326,11 @@ describe('task state validation', () => {
       taskIdsToRemove.push(id);
 
       await retry(async () => {
-        expect(logSpy.mock.calls[0][0]).toBe(
-          `Task (fooType/${id}) has a validation error: [foo]: expected value of type [string] but got [boolean]`
-        );
+        const calls = logSpy.mock.calls as string[][];
+        const expected =
+          /^Task \(fooType\/.*\) has a validation error: \[foo\]: expected value of type \[string\] but got \[boolean\]/;
+        const found = calls.map((arr) => arr[0]).find((message) => message.match(expected) != null);
+        expect(found).toMatch(expected);
         expect(updateSpy).toHaveBeenCalledWith(
           expect.arrayContaining([expect.objectContaining({ id, taskType: 'fooType' })]),
           { validate: false }

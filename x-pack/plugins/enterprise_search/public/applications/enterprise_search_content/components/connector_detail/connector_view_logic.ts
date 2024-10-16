@@ -30,6 +30,8 @@ import {
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
+
 import {
   ConnectorNameAndDescriptionLogic,
   ConnectorNameAndDescriptionActions,
@@ -53,7 +55,6 @@ export interface ConnectorViewActions {
 }
 
 export interface ConnectorViewValues {
-  updateConnectorConfigurationStatus: Status;
   connector: Connector | undefined;
   connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
@@ -81,6 +82,7 @@ export interface ConnectorViewValues {
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
+  updateConnectorConfigurationStatus: Status;
 }
 
 export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
@@ -158,13 +160,12 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     connectorId: [() => [selectors.connector], (connector) => connector?.id],
     error: [
       () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
-    ],
-    indexName: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => {
-        return connector?.index_name || undefined;
-      },
+      (connector: Connector | undefined) =>
+        connector?.error ||
+        connector?.last_sync_error ||
+        connector?.last_access_control_sync_error ||
+        (connector && isLastSeenOld(connector) && getConnectorLastSeenError(connector)) ||
+        null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -200,6 +201,12 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    indexName: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => {
+        return connector?.index_name || undefined;
+      },
     ],
     isLoading: [
       () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],

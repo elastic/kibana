@@ -54,6 +54,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   revision: number;
   agents?: number;
   is_protected: boolean;
+  version?: string;
 }
 
 export interface FullAgentPolicyInputStream {

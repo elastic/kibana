@@ -1,10 +1,29 @@
-TO_BASE64
+## TO_BASE64
 
-Syntax
-Parameters
-string
-A string.
-DescriptionEncode a string to a base64 string.Supported types
-Example
-row a = "elastic"
-| eval e = to_base64(a)
+The `TO_BASE64` function in ES|QL is used to encode a string to a base64 string.
+
+### Syntax
+
+`TO_BASE64(string)`
+
+#### Parameters
+
+- `string`: The string you want to encode.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TO_BASE64` function in ES|QL:
+
+```esql
+ROW a = "elastic"
+| EVAL e = TO_BASE64(a)
+```
+
+In this example, the string "elastic" is encoded to a base64 string.
+
+```esql
+ROW b = "Elasticsearch Query Language"
+| EVAL encoded = TO_BASE64(b)
+```
+
+In this example, the string "Elasticsearch Query Language" is encoded to a base64 string.

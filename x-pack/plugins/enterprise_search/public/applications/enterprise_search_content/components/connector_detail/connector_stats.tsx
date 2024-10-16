@@ -122,10 +122,8 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color={connectorStatusToColor(connector?.status, !!connector?.index_name)}
-                >
-                  {connectorStatusToText(connector?.status, !!connector?.index_name)}
+                <EuiBadge color={connectorStatusToColor(connector)}>
+                  {connectorStatusToText(connector)}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
