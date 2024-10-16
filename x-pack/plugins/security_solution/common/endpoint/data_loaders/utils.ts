@@ -192,7 +192,6 @@ export const fetchActiveSpaceId = memoize(async (kbnClient: KbnClient): Promise<
     .request<Space>({
       method: 'GET',
       path: `/internal/spaces/_active_space`,
-      headers: { 'elastic-api-version': '2023-10-31' },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data.id);
