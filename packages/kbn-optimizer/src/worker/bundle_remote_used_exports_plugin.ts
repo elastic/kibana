@@ -64,7 +64,10 @@ export class BundleRemoteUsedExportsPlugin {
               moduleGraph.getExportsInfo(module).setAllKnownExportsUsed();
               // @ts-ignore
               moduleGraph.getExportsInfo(module).setUsedInUnknownWay();
-              moduleGraph.addExtraReason(module, `BundleRemoteUsedExportsPlugin/namespace#=>${module.resource}`);
+              moduleGraph.addExtraReason(
+                module,
+                `BundleRemoteUsedExportsPlugin/namespace#=>${module.resource}`
+              );
             } else {
               Array.from(exportsInfo.exports).forEach((exportInfo) => {
                 if (exportInfo.name) {
