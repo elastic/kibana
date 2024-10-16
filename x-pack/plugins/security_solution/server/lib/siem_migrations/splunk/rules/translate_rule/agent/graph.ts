@@ -41,10 +41,12 @@ export function getTranslateRuleGraph({ model, tools }: TranslateRuleGraphParams
   if (model.bindTools === undefined) {
     throw new Error(`The ${model.name} model does not support tools`);
   }
-  model.bindTools(tools);
+  const modelWithTools = model.bindTools(tools);
 
   const translateRuleGraph = new StateGraph(translateRuleState)
-    .addNode('callModel', (state: TranslateRuleState) => callModel({ state, model }))
+    .addNode('callModel', (state: TranslateRuleState) =>
+      callModel({ state, model: modelWithTools })
+    )
     .addNode('tools', new ToolNode<TranslateRuleState>(tools))
     .addEdge(START, 'callModel')
     .addConditionalEdges('callModel', toolConditionalEdge)

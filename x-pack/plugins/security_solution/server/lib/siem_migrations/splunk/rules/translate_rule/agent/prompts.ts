@@ -14,7 +14,7 @@ export const TRANSLATE_RULE_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
 You will be provided with a Splunk rule information: the title, description and the SPL (Search Processing Language) query.
 Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
 
-IMPORTANT: Use the tools provided to translate the ES|QL query and summarize the translation, rather than making assumptions about how the ES|QL language works.
+IMPORTANT: Always use the tools provided to translate the ES|QL query and summarize the translation, rather than making assumptions about how the ES|QL language works.
 
 The output should contain:
 - First, the ES|QL query inside an \`\`\`esql code block.

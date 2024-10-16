@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { naturalLanguageToEsql, type InferenceClient } from '@kbn/inference-plugin/server';
 import type { StructuredTool } from '@langchain/core/tools';
-import { tool } from '@langchain/core/tools';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import { lastValueFrom } from 'rxjs';
 import { z } from '@kbn/zod';
 
@@ -76,13 +76,17 @@ export const getEsqlTranslatorTool = ({
     );
   };
 
-  const esqlTool = tool<Schema>(async (input) => {
-    const generateEvent = await callNaturalLanguageToEsql(input);
-    const answer = generateEvent.content ?? 'An error occurred in the tool';
+  const esqlTool = new DynamicStructuredTool<Schema>({
+    ...toolParams,
+    responseFormat: 'markdown',
+    func: async (input) => {
+      const generateEvent = await callNaturalLanguageToEsql(input);
+      const answer = generateEvent.content ?? 'An error occurred in the tool';
 
-    logger.debug(`Received response from NL to ESQL tool: ${answer}`);
-    return answer;
-  }, toolParams);
+      logger.debug(`Received response from NL to ESQL tool: ${answer}`);
+      return answer;
+    },
+  });
 
   return esqlTool;
 };
