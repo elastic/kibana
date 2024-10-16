@@ -7,28 +7,26 @@
 
 import { assign } from 'lodash';
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { ProductLine, ProductTier } from '../../common/product';
-
-import { usageReportingService } from '../common/services';
 import type { ServerlessSecurityConfig } from '../config';
 import type { SecurityUsageReportingTaskSetupContract, UsageRecord } from '../types';
 
+import { ProductLine, ProductTier } from '../../common/product';
 import { SecurityUsageReportingTask } from './usage_reporting_task';
 import { endpointMeteringService } from '../endpoint/services';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { USAGE_SERVICE_USAGE_URL } from '../constants';
 
 describe('SecurityUsageReportingTask', () => {
   const TITLE = 'test-task-title';
@@ -45,7 +43,7 @@ describe('SecurityUsageReportingTask', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let reportUsageSpy: jest.SpyInstance;
+  let reportUsageMock: jest.Mock;
   let meteringCallbackMock: jest.Mock;
   let taskArgs: SecurityUsageReportingTaskSetupContract;
   let usageRecord: UsageRecord;
@@ -118,10 +116,23 @@ describe('SecurityUsageReportingTask', () => {
         taskTitle: TITLE,
         version: VERSION,
         meteringCallback: meteringCallbackMock,
+        usageReportingService: {
+          reportUsage: reportUsageMock,
+        },
       },
       overrides
     );
   }
+
+  const USAGE_API_CONFIG = {
+    enabled: true,
+    url: 'https://usage-api-url',
+    tls: {
+      certificate: '',
+      key: '',
+      ca: '',
+    },
+  };
 
   async function runTask(taskInstance = buildMockTaskInstance(), callNum: number = 0) {
     const mockTaskManagerStart = tmStartMock();
@@ -138,7 +149,7 @@ describe('SecurityUsageReportingTask', () => {
       .asInternalUser as jest.Mocked<ElasticsearchClient>;
     mockTaskManagerSetup = tmSetupMock();
     usageRecord = buildUsageRecord();
-    reportUsageSpy = jest.spyOn(usageReportingService, 'reportUsage');
+    reportUsageMock = jest.fn();
   }
 
   describe('meteringCallback integration', () => {
@@ -150,7 +161,7 @@ describe('SecurityUsageReportingTask', () => {
           productTypes: [
             { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
           ],
-          usageApi: { url: USAGE_SERVICE_USAGE_URL },
+          usageApi: USAGE_API_CONFIG,
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
@@ -199,9 +210,9 @@ describe('SecurityUsageReportingTask', () => {
 
         await runTasksUntilNoRunAt();
 
-        expect(reportUsageSpy).toHaveBeenCalledTimes(3);
+        expect(reportUsageMock).toHaveBeenCalledTimes(3);
         batches.forEach((batch, i) => {
-          expect(reportUsageSpy).toHaveBeenNthCalledWith(
+          expect(reportUsageMock).toHaveBeenNthCalledWith(
             i + 1,
             expect.arrayContaining(
               batch.map(({ _source }) =>
@@ -209,8 +220,7 @@ describe('SecurityUsageReportingTask', () => {
                   id: `endpoint-${_source.agent.id}-2021-09-01T00:00:00.000Z`,
                 })
               )
-            ),
-            USAGE_SERVICE_USAGE_URL
+            )
           );
         });
       });
@@ -227,7 +237,7 @@ describe('SecurityUsageReportingTask', () => {
       });
       taskArgs = buildTaskArgs({
         config: {
-          usageApi: { url: USAGE_SERVICE_USAGE_URL },
+          usageApi: USAGE_API_CONFIG,
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
@@ -273,7 +283,7 @@ describe('SecurityUsageReportingTask', () => {
 
       it('should report metering records', async () => {
         await runTask();
-        expect(reportUsageSpy).toHaveBeenCalledWith(
+        expect(reportUsageMock).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({
               creation_timestamp: usageRecord.creation_timestamp,
@@ -286,8 +296,7 @@ describe('SecurityUsageReportingTask', () => {
               usage: { period_seconds: 3600, quantity: 1, type: USAGE_TYPE },
               usage_timestamp: usageRecord.usage_timestamp,
             }),
-          ]),
-          USAGE_SERVICE_USAGE_URL
+          ])
         );
       });
 
@@ -296,12 +305,12 @@ describe('SecurityUsageReportingTask', () => {
 
         expect(result).toEqual(getDeleteTaskRunResult());
 
-        expect(reportUsageSpy).not.toHaveBeenCalled();
+        expect(reportUsageMock).not.toHaveBeenCalled();
         expect(meteringCallbackMock).not.toHaveBeenCalled();
       });
       describe('lastSuccessfulReport', () => {
         it('should set lastSuccessfulReport correctly if report success', async () => {
-          reportUsageSpy.mockResolvedValueOnce({ status: 201 });
+          reportUsageMock.mockResolvedValueOnce({ status: 201 });
           const taskInstance = buildMockTaskInstance();
           const task = await runTask(taskInstance);
           const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
@@ -320,7 +329,7 @@ describe('SecurityUsageReportingTask', () => {
 
         describe('and response is NOT 201', () => {
           beforeEach(() => {
-            reportUsageSpy.mockResolvedValueOnce({ status: 500 });
+            reportUsageMock.mockResolvedValueOnce({ status: 500 });
           });
 
           it('should set lastSuccessfulReport correctly', async () => {

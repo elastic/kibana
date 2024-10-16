@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,
@@ -176,7 +176,7 @@ export const getPolicySettingsFormTestSubjects = (
 export const expectIsViewOnly = (elem: HTMLElement): void => {
   elem
     .querySelectorAll(
-      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
+      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"], [data-test-subj="euiDismissCalloutButton"]),input,select,textarea'
     )
     .forEach((inputElement) => {
       expect(inputElement).toHaveAttribute('disabled');
