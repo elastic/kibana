@@ -30,6 +30,10 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
+const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
+const OTEL_KUBE_STACK_VERSION = '0.3.0';
+const OTEL_KUBE_STACK_VALUES_FILE_URL =
+  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/main/resources/kubernetes/operator/helm/values.yaml';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
@@ -48,10 +52,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   }
 
   const namespace = 'opentelemetry-operator-system';
-  const valuesFile =
-    'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/main/resources/kubernetes/operator/helm/values.yaml';
-
-  const addRepoCommand = `helm repo add open-telemetry 'https://open-telemetry.github.io/opentelemetry-helm-charts' --force-update`;
+  const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data
     ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
@@ -60,8 +61,8 @@ kubectl create secret generic elastic-secret-otel \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --create-namespace \\
-  --values '${valuesFile}'`
+  --values '${OTEL_KUBE_STACK_VALUES_FILE_URL}' \\
+  --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
   return (
@@ -143,7 +144,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       iconType="download"
-                      href={valuesFile}
+                      href={OTEL_KUBE_STACK_VALUES_FILE_URL}
                       flush="left"
                       target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
@@ -218,7 +219,7 @@ kind: Pod
 metadata:
   name: my-app
   annotations:
-    instrumentation.opentelemetry.io/inject-${idSelected}: "true"
+    instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
 spec:
   containers:
   - name: my-app
