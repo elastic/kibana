@@ -35,8 +35,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Create a MaxMind database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
       await pageObjects.ingestPipelines.fillAddDatabaseForm(
-        'maxmind',
-        maxMindDatabaseName,
+        'maxMindOption',
+        'geoIpAnonymousOption',
         '123456'
       );
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Create an IPInfo database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
-      await pageObjects.ingestPipelines.fillAddDatabaseForm('ipinfo', 'asn');
+      await pageObjects.ingestPipelines.fillAddDatabaseForm('ipInfoOption', 'asnOption');
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
 
       // Wait for new row to gets displayed

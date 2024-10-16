@@ -132,7 +132,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string) {
-      await testSubjects.setValue('databaseTypeSelect', databaseType);
+      await testSubjects.click('databaseTypeSelect');
+      await pageObjects.common.sleep(1000);
+      await testSubjects.click(databaseType);
 
       // Wait for the rest of the fields to get displayed
       await pageObjects.common.sleep(1000);
@@ -141,7 +143,10 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       if (maxmind) {
         await testSubjects.setValue('maxmindField', maxmind);
       }
-      await testSubjects.setValue('databaseNameSelect', databaseName);
+
+      await testSubjects.click('databaseNameSelect');
+      await pageObjects.common.sleep(1000);
+      await testSubjects.click(databaseName);
     },
 
     async clickAddDatabaseButton() {
