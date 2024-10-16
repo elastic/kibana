@@ -14585,6 +14585,110 @@ paths:
       summary: ''
       tags:
         - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/outputs:
+    get:
+      description: Get list of outputs associated with agent policy by policy id
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        type: string
+                      data:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          integrations:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                integrationPolicyName:
+                                  type: string
+                                name:
+                                  type: string
+                                pkgName:
+                                  type: string
+                            type: array
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                      monitoring:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                    required:
+                      - monitoring
+                      - data
+                required:
+                  - item
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
       description: Delete agent policy by ID
@@ -14636,6 +14740,114 @@ paths:
                 required:
                   - id
                   - name
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
+  /api/fleet/agent_policies/outputs:
+    get:
+      description: Get list of outputs associated with agent policies
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: ids
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentPolicyId:
+                          type: string
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            integrations:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  integrationPolicyName:
+                                    type: string
+                                  name:
+                                    type: string
+                                  pkgName:
+                                    type: string
+                              type: array
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                        monitoring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                      required:
+                        - monitoring
+                        - data
+                    type: array
+                required:
+                  - items
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
