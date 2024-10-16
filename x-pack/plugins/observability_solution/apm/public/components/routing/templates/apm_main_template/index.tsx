@@ -94,9 +94,14 @@ export function ApmMainTemplate({
     [application?.capabilities.savedObjectsManagement.edit]
   );
 
-  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
-    location.pathname.includes(path)
-  );
+  const hasLogsData = serviceEntitySummary?.dataStreamTypes
+    ? serviceEntitySummary?.dataStreamTypes?.length > 0 &&
+      isLogsSignal(serviceEntitySummary.dataStreamTypes)
+    : false;
+
+  const shouldBypassNoDataScreen =
+    bypassNoDataScreenPaths.some((path) => location.pathname.includes(path)) ||
+    (isEntityCentricExperienceEnabled && hasLogsData);
 
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
     (callApmApi) => {
@@ -111,10 +116,6 @@ export function ApmMainTemplate({
     status === FETCH_STATUS.LOADING || fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
 
   const hasApmData = !!data?.hasData;
-  const hasLogsData =
-    serviceEntitySummary?.dataStreamTypes &&
-    serviceEntitySummary?.dataStreamTypes?.length > 0 &&
-    isLogsSignal(serviceEntitySummary.dataStreamTypes);
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
 
   const noDataConfig = getNoDataConfig({
@@ -165,11 +166,7 @@ export function ApmMainTemplate({
   return (
     <EnvironmentsContextProvider>
       <ObservabilityPageTemplate
-        noDataConfig={
-          shouldBypassNoDataScreen || (isEntityCentricExperienceEnabled && hasLogsData)
-            ? undefined
-            : noDataConfig
-        }
+        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
         isPageDataLoaded={isLoading === false}
         pageHeader={{
           rightSideItems,
