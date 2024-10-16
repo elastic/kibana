@@ -242,7 +242,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized`);
+      logger.info(`Entity store initialized for ${entityType}`);
 
       return updated;
     } catch (err) {
