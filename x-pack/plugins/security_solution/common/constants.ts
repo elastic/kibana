@@ -124,6 +124,8 @@ export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
+export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
+  `/entity_analytics_entity_store` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -193,9 +195,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
 /** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
-export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
 
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
