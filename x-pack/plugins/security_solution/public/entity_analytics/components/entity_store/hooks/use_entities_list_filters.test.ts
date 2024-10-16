@@ -22,7 +22,7 @@ describe('useEntitiesListFilters', () => {
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: null });
   });
 
-  it('should return empty array when no filters are selected', () => {
+  it('should return empty filter when no filters are selected', () => {
     const { result } = renderHook(() =>
       useEntitiesListFilters({
         selectedSeverities: [],
@@ -49,13 +49,6 @@ describe('useEntitiesListFilters', () => {
           should: [
             { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
             { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        bool: {
-          should: [
             { term: { 'host.risk.calculated_level': RiskSeverity.High } },
             { term: { 'user.risk.calculated_level': RiskSeverity.High } },
           ],
@@ -77,8 +70,23 @@ describe('useEntitiesListFilters', () => {
     );
 
     const expectedFilters: QueryDslQueryContainer[] = [
-      { term: { 'asset.criticality': CriticalityLevels.EXTREME_IMPACT } },
-      { term: { 'asset.criticality': CriticalityLevels.MEDIUM_IMPACT } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              term: {
+                'asset.criticality': CriticalityLevels.EXTREME_IMPACT,
+              },
+            },
+            {
+              term: {
+                'asset.criticality': CriticalityLevels.MEDIUM_IMPACT,
+              },
+            },
+          ],
+        },
+      },
     ];
 
     expect(result.current).toEqual(expectedFilters);
@@ -138,7 +146,12 @@ describe('useEntitiesListFilters', () => {
           minimum_should_match: 1,
         },
       },
-      { term: { 'asset.criticality': CriticalityLevels.HIGH_IMPACT } },
+      {
+        bool: {
+          should: [{ term: { 'asset.criticality': CriticalityLevels.HIGH_IMPACT } }],
+          minimum_should_match: 1,
+        },
+      },
       { term: { 'entity.source': EntitySource.CSV_UPLOAD } },
       globalQuery,
     ];

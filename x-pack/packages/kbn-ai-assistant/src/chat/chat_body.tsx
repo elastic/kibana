@@ -45,6 +45,7 @@ import { SimulatedFunctionCallingCallout } from './simulated_function_calling_ca
 import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
+import { deserializeMessage } from '../utils/deserialize_message';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -226,9 +227,11 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
+    const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
+
     const content = JSON.stringify({
       title: initialTitle,
-      messages: conversation.value?.messages ?? messages,
+      messages: deserializedMessages,
     });
 
     navigator.clipboard?.writeText(content || '');
