@@ -11,7 +11,7 @@
  * */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
 import { useAssistantContext } from '../../..';
@@ -24,7 +24,10 @@ interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
 }
-const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const KnowledgeBaseTourComp: React.FC<{
+  children?: EuiTourStepProps['children'];
+  isKbSettingsPage: boolean;
+}> = ({ children, isKbSettingsPage = false }) => {
   const {
     navigateToApp,
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
@@ -34,7 +37,6 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
     NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE,
     tourConfig
   );
-  const pageName = 'TODO';
 
   const advanceToVideoStep = useCallback(
     () =>
@@ -46,10 +48,10 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
   );
 
   useEffect(() => {
-    if (tourState?.isTourActive && pageName === 'SecurityPageName.knowledgeBase') {
+    if (tourState?.isTourActive && isKbSettingsPage) {
       advanceToVideoStep();
     }
-  }, [advanceToVideoStep, tourState?.isTourActive]);
+  }, [advanceToVideoStep, isKbSettingsPage, tourState?.isTourActive]);
 
   const finishTour = useCallback(
     () =>
@@ -93,14 +95,6 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
     // @ts-ignore
     window.Cypress != null || // TODO: temporary workaround to disable the tour when running in Cypress, because the tour breaks other projects Cypress tests
     navigator.webdriver === true; // TODO: temporary workaround to disable the tour when running in the FTR, because the tour breaks other projects FTR tests
-  console.log('tour conditions', {
-    con: !enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive,
-    con1: !enableKnowledgeBaseByDefault,
-    con2: isTestAutomation,
-    con3: !tourState?.isTourActive,
-    tourState,
-    children,
-  });
 
   const [isTimerExhausted, setIsTimerExhausted] = useState(false);
 
@@ -127,14 +121,13 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
       panelProps={{
         'data-test-subj': `knowledgeBase-tour-step-1`,
       }}
-      // repositionOnScroll
       step={1}
       stepsTotal={1}
       title={knowledgeBaseTourStepOne.title}
     >
       {children}
     </EuiTourStep>
-  ) : pageName === 'SecurityPageName.knowledgeBase' ? (
+  ) : isKbSettingsPage ? (
     <VideoToast onClose={finishTour} />
   ) : (
     children ?? null

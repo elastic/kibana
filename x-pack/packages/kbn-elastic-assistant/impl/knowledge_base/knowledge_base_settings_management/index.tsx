@@ -30,6 +30,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useAssistantContext } from '../../assistant_context';
@@ -295,7 +296,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </>
     );
   }
-  // TODO tour step 2 here
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -412,6 +412,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
         </EuiConfirmModal>
       )}
+      <KnowledgeBaseTour isKbSettingsPage />
     </>
   );
 });
