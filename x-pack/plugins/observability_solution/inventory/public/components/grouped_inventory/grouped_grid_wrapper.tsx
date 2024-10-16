@@ -30,7 +30,7 @@ export function GroupedGridWrapper({ entityType }: Props) {
   const { query } = useInventoryParams('/');
   const { kuery, sortField, sortDirection } = query;
   const inventoryRoute = useInventoryRouter();
-  const pageIndex = (entityType ? pagination[entityType] : pagination.none) ?? 0;
+  const pageIndex = (entityType ? pagination?.[entityType] : pagination?.none) ?? 0;
 
   useEffectOnce(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
