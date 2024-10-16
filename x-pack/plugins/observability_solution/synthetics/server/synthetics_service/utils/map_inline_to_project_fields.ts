@@ -57,9 +57,9 @@ export async function mapInlineToProjectFields({
  *
  * See https://github.com/elastic/kibana/issues/169963 for more information.
  */
-export const dropInlineScriptForTransmission = (monitor: MonitorFields) => {
+export const dropInlineScriptForTransmission = (monitor: MonitorFields): MonitorFields => {
   if ((monitor as MonitorFields)[ConfigKey.SOURCE_PROJECT_CONTENT]) {
-    return omit(monitor, ConfigKey.SOURCE_INLINE);
+    return omit(monitor, ConfigKey.SOURCE_INLINE) as MonitorFields;
   }
   return monitor;
 };
