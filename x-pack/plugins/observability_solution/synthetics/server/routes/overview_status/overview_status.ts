@@ -38,7 +38,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
   const { syntheticsEsClient, savedObjectsClient } = context;
 
-  const { query, scopeStatusByLocation = true } = params;
+  const { query, scopeStatusByLocation = true, showFromAllSpaces } = params;
 
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
@@ -54,6 +54,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
 
   const allMonitors = await getAllMonitors({
     soClient: savedObjectsClient,
+    showFromAllSpaces,
     search: query ? `${query}*` : undefined,
     filter: filtersStr,
     fields: [
