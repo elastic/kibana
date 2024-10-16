@@ -92,6 +92,22 @@
           },
           {
             "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBarProps.hideLastTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideLastTooltip",
+            "description": [
+              "hide the label above the bar at first render"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/distribution_bar/src/distribution_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
             "id": "def-public.DistributionBarProps.datatestsubj",
             "type": "string",
             "tags": [],

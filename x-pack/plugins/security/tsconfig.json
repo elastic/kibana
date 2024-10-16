@@ -51,7 +51,6 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
-    "@kbn/web-worker-stub",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-base-server-internal",
@@ -93,6 +92,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
     "@kbn/management-settings-components-form",
+    "@kbn/security-authorization-core-common",
   ],
   "exclude": [
     "target/**/*",

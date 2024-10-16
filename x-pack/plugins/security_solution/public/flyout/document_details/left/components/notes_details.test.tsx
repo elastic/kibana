@@ -23,8 +23,12 @@ import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { TimelineId } from '../../../../../common/types';
 import { ReqStatus } from '../../../../notes';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import type { State } from '../../../../common/store';
 
 jest.mock('../../shared/hooks/use_which_flyout');
+jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -47,8 +51,10 @@ jest.mock('react-redux', () => {
 
 const panelContextValue = {
   eventId: 'event id',
+  dataFormattedForFieldBrowser: [],
 } as unknown as DocumentDetailsContext;
-const mockGlobalStateWithSavedTimeline = {
+
+const mockGlobalStateWithSavedTimeline: State = {
   ...mockGlobalState,
   timeline: {
     ...mockGlobalState.timeline,
@@ -57,6 +63,7 @@ const mockGlobalStateWithSavedTimeline = {
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.test],
         savedObjectId: 'savedObjectId',
+        status: TimelineStatusEnum.active,
         pinnedEventIds: {},
       },
     },
@@ -80,6 +87,7 @@ describe('NotesDetails', () => {
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
+    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
   });
 
   it('should fetch notes for the document id', () => {
@@ -110,7 +118,7 @@ describe('NotesDetails', () => {
     expect(getByTestId(NOTES_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render no data message if no notes are present', () => {
+  it('should render no data message for alerts if no notes are present', () => {
     const store = createMockStore({
       ...mockGlobalStateWithSavedTimeline,
       notes: {
@@ -130,7 +138,31 @@ describe('NotesDetails', () => {
       </TestProviders>
     );
 
-    expect(getByText(NO_NOTES)).toBeInTheDocument();
+    expect(getByText(NO_NOTES(true))).toBeInTheDocument();
+  });
+
+  it('should render no data message for events if no notes are present', () => {
+    const store = createMockStore({
+      ...mockGlobalStateWithSavedTimeline,
+      notes: {
+        ...mockGlobalStateWithSavedTimeline.notes,
+        status: {
+          ...mockGlobalStateWithSavedTimeline.notes.status,
+          fetchNotesByDocumentIds: ReqStatus.Succeeded,
+        },
+      },
+    });
+    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
+
+    const { getByText } = render(
+      <TestProviders store={store}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <NotesDetails />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByText(NO_NOTES(false))).toBeInTheDocument();
   });
 
   it('should render error toast if fetching notes fails', () => {

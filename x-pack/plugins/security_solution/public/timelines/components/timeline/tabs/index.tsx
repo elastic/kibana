@@ -11,6 +11,7 @@ import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
@@ -42,6 +43,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -255,6 +257,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     'securitySolutionNotesEnabled'
   );
 
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
   const shouldShowESQLTab = useMemo(() => {
@@ -409,16 +415,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               {showTimeline && <EqlEventsCountBadge />}
             </StyledEuiTab>
           )}
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
-            onClick={setGraphAsActiveTab}
-            isSelected={activeTab === TimelineTabs.graph}
-            disabled={!graphEventId}
-            key={TimelineTabs.graph}
-          >
-            {i18n.ANALYZER_TAB}
-          </EuiTab>
-          {isEnterprisePlus && (
+          {!visualizationInFlyoutEnabled && (
+            <EuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
+              onClick={setGraphAsActiveTab}
+              isSelected={activeTab === TimelineTabs.graph}
+              disabled={!graphEventId}
+              key={TimelineTabs.graph}
+            >
+              {i18n.ANALYZER_TAB}
+            </EuiTab>
+          )}
+          {isEnterprisePlus && !visualizationInFlyoutEnabled && (
             <EuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.session}`}
               onClick={setSessionAsActiveTab}
