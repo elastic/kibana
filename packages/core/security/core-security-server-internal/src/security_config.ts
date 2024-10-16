@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { SecurityService } from './src/security_service';
-export { config } from './src/security_config';
-export { CoreSecurityRouteHandlerContext } from './src/security_route_handler_context';
-export type {
-  InternalSecurityServiceSetup,
-  InternalSecurityServiceStart,
-} from './src/internal_contracts';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const config = {
+  path: 'xpack.security',
+  schema: schema.object({
+    experimental: schema.maybe(
+      schema.object({
+        fipsMode: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+        }),
+      })
+    ),
+  }),
+};
+
+export type SecurityConfigType = TypeOf<typeof config.schema>;

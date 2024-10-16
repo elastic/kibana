@@ -50,7 +50,7 @@ export async function ensureValidConfiguration(
     return !ignoredPaths.some((ignoredPath) => unusedPath.startsWith(ignoredPath));
   });
 
-  if (unusedConfigKeys.length > 0 && stripUnknownKeys) {
+  if (unusedConfigKeys.length > 0 && !stripUnknownKeys) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys
       .map((key) => `"${key}"`)
       .join(', ')}. Check for spelling errors and ensure that expected plugins are installed.`;

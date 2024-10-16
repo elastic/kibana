@@ -268,7 +268,7 @@ export class Server {
     });
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
-    const securitySetup = this.security.setup();
+    const securitySetup = await this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
     const httpSetup = await this.http.setup({

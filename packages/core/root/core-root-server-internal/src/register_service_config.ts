@@ -29,6 +29,7 @@ import {
   savedObjectsMigrationConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
+import { config as securityConfig } from '@kbn/core-security-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
 import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
@@ -62,6 +63,7 @@ export function registerServiceConfig(configService: ConfigService) {
     savedObjectsConfig,
     savedObjectsMigrationConfig,
     serverlessConfig,
+    securityConfig,
     statusConfig,
     uiSettingsConfig,
     permissionsPolicyConfig,
