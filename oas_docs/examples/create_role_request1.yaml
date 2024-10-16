@@ -1,5 +1,5 @@
 summary: Feature privileges in multiple spaces
-description:  Grant access to various features in some spaces.
+description: Grant access to various features in some spaces.
 value:
   description: Grant full access to discover and dashboard features in the default space. Grant read access in the marketing, and sales spaces.
   metadata:
