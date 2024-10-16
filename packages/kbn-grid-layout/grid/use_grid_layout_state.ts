@@ -17,7 +17,6 @@ import {
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
-import { pick } from 'lodash';
 
 export const useGridLayoutState = ({
   getCreationOptions,
@@ -28,7 +27,7 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+  // const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
@@ -45,7 +44,7 @@ export const useGridLayoutState = ({
     return {
       rowRefs,
       gridLayout$,
-      dragPreviewRef,
+      // dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
@@ -62,25 +61,6 @@ export const useGridLayoutState = ({
         element.style.top = `${draggedRect.top}px`;
         element.style.width = `${draggedRect.right - draggedRect.left}px`;
         element.style.height = `${draggedRect.bottom - draggedRect.top}px`;
-
-        if (!dragPreviewRef.current) return;
-        // console.log('dragPreviewRef.current', dragPreviewRef.current);
-
-        // dragPreviewRef.current.style.opacity = '1';
-        // dragPreviewRef.current.style.left = `${draggedRect.left}px`;
-        // dragPreviewRef.current.style.top = `${draggedRect.top}px`;
-        // dragPreviewRef.current.style.width = `${Math.max(
-        //   draggedRect.right - draggedRect.left,
-        //   runtimeSettings$.value.columnPixelWidth
-        // )}px`;
-        // dragPreviewRef.current.style.height = `${Math.max(
-        //   draggedRect.bottom - draggedRect.top,
-        //   runtimeSettings$.value.rowHeight
-        // )}px`;
-      },
-      hideDragPreview: () => {
-        if (!dragPreviewRef.current) return;
-        dragPreviewRef.current.style.opacity = '0';
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

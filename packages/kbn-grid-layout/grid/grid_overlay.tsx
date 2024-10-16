@@ -118,17 +118,17 @@ export const GridOverlay = ({
       >
         <ScrollOnHover hide={!interactionEvent} direction="up" />
         <ScrollOnHover hide={!interactionEvent} direction="down" />
-        <div
-        //   ref={gridLayoutStateManager.dragPreviewRef}
-        //   css={css`
-        //     pointer-events: none;
-        //     z-index: ${euiThemeVars.euiZModal};
-        //     border-radius: ${euiThemeVars.euiBorderRadius};
-        //     background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
-        //     transition: opacity 100ms linear;
-        //     position: absolute;
-        //   `}
-        // />
+        {/* <div
+          ref={gridLayoutStateManager.dragPreviewRef}
+          css={css`
+            pointer-events: none;
+            z-index: ${euiThemeVars.euiZModal};
+            border-radius: ${euiThemeVars.euiBorderRadius};
+            background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+            transition: opacity 100ms linear;
+            position: absolute;
+          `}
+        /> */}
       </div>
     </EuiPortal>
   );
