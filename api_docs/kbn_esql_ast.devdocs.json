@@ -17667,10 +17667,6 @@
               {
                 "plugin": "@kbn/esql-validation-autocomplete",
                 "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-validation-autocomplete",
-                "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts"
               }
             ]
           }
