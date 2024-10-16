@@ -58,11 +58,12 @@ export function EnableEntityModelButton({ onSuccess }: { onSuccess: () => void }
         data-test-subj="inventoryInventoryPageTemplateFilledButton"
         fill
         onClick={handleEnablement}
+        iconType={() => <TechnicalPreviewBadge />}
+        iconSide="right"
       >
         {i18n.translate('xpack.inventory.noData.card.button', {
           defaultMessage: 'Enable',
         })}
-        <TechnicalPreviewBadge style={{ marginTop: '4px' }} />
       </EuiButton>
       {showModal ? <Unauthorized onClose={() => setModalVisible(false)} /> : null}
     </>
