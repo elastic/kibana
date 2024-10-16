@@ -19,7 +19,6 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
   createRawKibanaPrivileges,
@@ -38,7 +37,6 @@ import { createPrivilegeAPIClientMock } from '../../../privilege_api_client.mock
 import { createRolesAPIClientMock } from '../../../roles_api_client.mock';
 import { EditSpaceProvider } from '../../provider';
 
-const { authz } = securityMock.createSetup();
 const rolesAPIClient = createRolesAPIClientMock();
 const privilegeAPIClient = createPrivilegeAPIClientMock();
 const http = httpServiceMock.createStartContract();
@@ -87,7 +85,6 @@ const renderPrivilegeRolesForm = ({
       <EditSpaceProvider
         {...{
           logger,
-          authz,
           i18n,
           http,
           theme,
@@ -98,6 +95,7 @@ const renderPrivilegeRolesForm = ({
           getUrlForApp: jest.fn((_) => _),
           navigateToUrl: jest.fn(),
           license: licenseMock,
+          isRoleManagementEnabled: true,
           capabilities: {
             navLinks: {},
             management: {},

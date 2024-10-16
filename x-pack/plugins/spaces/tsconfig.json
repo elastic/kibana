@@ -50,8 +50,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/logging",
     "@kbn/core-logging-browser-mocks",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/security-plugin"
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [
     "target/**/*",

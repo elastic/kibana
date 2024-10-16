@@ -11,7 +11,6 @@ import React from 'react';
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { AuthorizationServiceStart } from '@kbn/security-plugin-types-public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
@@ -26,9 +25,9 @@ export interface EditSpaceTab {
 }
 
 export interface GetTabsProps {
-  authz: AuthorizationServiceStart | false;
   space: Space;
   rolesCount: number;
+  isRoleManagementEnabled: boolean;
   features: KibanaFeature[];
   history: ScopedHistory;
   capabilities: Capabilities & {
@@ -63,12 +62,12 @@ const SuspenseEditSpaceContentTab = withSuspense(
 );
 
 export const getTabs = ({
-  authz,
   space,
   features,
   history,
   capabilities,
   rolesCount,
+  isRoleManagementEnabled,
   ...props
 }: GetTabsProps): EditSpaceTab[] => {
   const reloadWindow = () => {
@@ -93,18 +92,8 @@ export const getTabs = ({
     },
   ];
 
-  /*
-   * config.roleManagementEnabled is an offering-based config. In serverless, the value will be true or false.
-   * In stateful, role management is enabled but the config setting is expected to be undefined.
-   */
-  const isRoleManagementEnabled = Boolean(
-    authz &&
-      (typeof authz.isRoleManagementEnabled() === 'undefined' || authz.isRoleManagementEnabled())
-  );
-
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
-
   if (canUserViewRoles && isRoleManagementEnabled) {
     tabsDefinition.push({
       id: TAB_ID_ROLES,

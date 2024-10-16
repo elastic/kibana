@@ -17,7 +17,6 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { EditSpaceContentTab } from './edit_space_content_tab';
 import { EditSpaceProviderRoot } from './provider';
@@ -34,7 +33,6 @@ const spacesManager = spacesManagerMock.create();
 const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
 
-const { authz } = securityMock.createSetup();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
@@ -46,7 +44,6 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <IntlProvider locale="en">
       <EditSpaceProviderRoot
-        authz={authz}
         capabilities={{
           navLinks: {},
           management: {},
@@ -61,6 +58,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         http={http}
         notifications={notifications}
         overlays={overlays}
+        getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
         getPrivilegesAPIClient={getPrivilegeAPIClient}
         getSecurityLicense={getSecurityLicenseMock}
         theme={theme}

@@ -19,7 +19,6 @@ import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
   SecurityLicense,
-  SecurityPluginStart,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -35,6 +34,7 @@ export interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   logger: Logger;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
@@ -50,6 +50,7 @@ export const spacesManagementApp = Object.freeze({
     config,
     logger,
     eventTracker,
+    getIsRoleManagementEnabled,
     getRolesAPIClient,
     getPrivilegesAPIClient,
     isServerless,
@@ -76,14 +77,6 @@ export const spacesManagementApp = Object.freeze({
           import('./create_space'),
           import('./edit_space'),
         ]);
-
-        /*
-         * Spaces plugin can not directly depend on Security plugin due to cyclic dependency, so we use the
-         * async core plugin contract resolver. This will be resolved when Security APIs are moved into Core.
-         */
-        const { security } = await coreStart.plugins.onStart<{ security: SecurityPluginStart }>(
-          'security'
-        );
 
         const spacesFirstBreadcrumb = {
           text: title,
@@ -164,7 +157,6 @@ export const spacesManagementApp = Object.freeze({
               getSecurityLicense={getSecurityLicense}
               serverBasePath={http.basePath.serverBasePath}
               getFeatures={features.getFeatures}
-              authz={security.found && security.contract.authz}
               http={http}
               overlays={overlays}
               notifications={notifications}
@@ -176,6 +168,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               selectedTabId={selectedTabId}
+              getIsRoleManagementEnabled={getIsRoleManagementEnabled}
               getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}

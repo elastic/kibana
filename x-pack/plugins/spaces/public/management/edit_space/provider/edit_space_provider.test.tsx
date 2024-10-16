@@ -19,7 +19,6 @@ import {
 } from '@kbn/core/public/mocks';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import {
   EditSpaceProviderRoot,
@@ -31,7 +30,6 @@ import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../../security_license.mock';
 
-const { authz } = securityMock.createSetup();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
@@ -55,7 +53,6 @@ const SUTProvider = ({
       <EditSpaceProviderRoot
         {...{
           logger,
-          authz,
           i18n,
           http,
           theme,
@@ -64,6 +61,7 @@ const SUTProvider = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: (_) => _,
+          getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           getSecurityLicense: getSecurityLicenseMock,

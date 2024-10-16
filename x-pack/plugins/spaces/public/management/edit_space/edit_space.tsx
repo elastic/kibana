@@ -68,8 +68,14 @@ export const EditSpace: FC<PageProps> = ({
 }) => {
   const { state, dispatch } = useEditSpaceStore();
   const { invokeClient } = useEditSpaceServices();
-  const { authz, spacesManager, capabilities, serverBasePath, logger, notifications } =
-    useEditSpaceServices();
+  const {
+    spacesManager,
+    capabilities,
+    serverBasePath,
+    logger,
+    notifications,
+    isRoleManagementEnabled,
+  } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -78,9 +84,9 @@ export const EditSpace: FC<PageProps> = ({
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
   const [tabs, selectedTabContent] = useTabs({
-    authz,
     space,
     features,
+    isRoleManagementEnabled,
     rolesCount: state.roles.size,
     capabilities,
     history,
