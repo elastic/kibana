@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "a4cf452c1e0375c3d4412cb550ad1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": ".entities.v1.latest.ea_default_user_entity_store",
+    "index": ".entities.v1.latest.security_user_default",
     "source": {
       "event": {
         "ingested": "2024-09-11T11:26:49.706875Z"
@@ -26,7 +26,7 @@
         ],
         "id": "LBQAgKHGmpup0Kg9nlKmeQ==",
         "type": "node",
-        "definition_id": "ea_default_user_entity_store"
+        "definition_id": "security_user_default"
       }
     }
   }
@@ -36,7 +36,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
-    "index": ".entities.v1.latest.ea_default_host_entity_store",
+    "index": ".entities.v1.latest.security_host_default",
     "source": {
       "event": {
         "ingested": "2024-09-11T11:26:49.641707Z"
@@ -76,7 +76,7 @@
         ],
         "id": "ZXKm6GEcUJY6NHkMgPPmGQ==",
         "type": "node",
-        "definition_id": "ea_default_host_entity_store"
+        "definition_id": "security_host_default"
       }
     }
   }
