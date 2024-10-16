@@ -36,3 +36,11 @@ export enum GenerationErrorCode {
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
   UNPARSEABLE_CSV_DATA = 'unparseable-csv-data',
 }
+
+// Size limits
+export const FRONTEND_SAMPLE_ROWS = 100;
+export const LOG_FORMAT_DETECTION_SAMPLE_ROWS = 5;
+export const CATEGORIZATION_INITIAL_BATCH_SIZE = 60;
+export const CATEROGIZATION_REVIEW_BATCH_SIZE = 40;
+export const CATEGORIZATION_REVIEW_MAX_CYCLES = 5;
+export const CATEGORIZATION_RECURSION_LIMIT = 50;
