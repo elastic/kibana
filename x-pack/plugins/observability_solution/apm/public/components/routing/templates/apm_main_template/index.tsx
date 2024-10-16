@@ -12,7 +12,6 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { useEntityManager } from '../../../../hooks/use_entity_manager';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { isLogsSignal } from '../../../../utils/get_signal_type';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
@@ -76,7 +75,6 @@ export function ApmMainTemplate({
   const { config } = useApmPluginContext();
   const { serviceEntitySummary } = useApmServiceContext();
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
-  const { isEntityManagerEnabled } = useEntityManager();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -99,8 +97,6 @@ export function ApmMainTemplate({
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)
   );
-
-  const isEntityExperienceFullyEnabled = isEntityCentricExperienceEnabled && isEntityManagerEnabled;
 
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
     (callApmApi) => {
@@ -170,7 +166,7 @@ export function ApmMainTemplate({
     <EnvironmentsContextProvider>
       <ObservabilityPageTemplate
         noDataConfig={
-          shouldBypassNoDataScreen || (isEntityExperienceFullyEnabled && hasLogsData)
+          shouldBypassNoDataScreen || (isEntityCentricExperienceEnabled && hasLogsData)
             ? undefined
             : noDataConfig
         }
