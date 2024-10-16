@@ -2,12 +2,12 @@
 
 ## Motivation
 
-The idea behind this package is to have a reusable graph component, embedding the features available to alerts flyout in
+The idea behind this package is to have a reusable graph component, embedding the features available to the alert's flyout in
 security solution plugin.
 
 ## How to use this
 
-Standalone examples will follow. In the meantime checkout storybook to view the graphs progress.
+Standalone examples will follow. In the meantime check out storybook to view the graph's progress.
 
 ## The most important public api members
 

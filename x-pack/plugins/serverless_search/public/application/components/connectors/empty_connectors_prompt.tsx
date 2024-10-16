@@ -20,13 +20,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../common/doc_links';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useConnectors } from '../../hooks/api/use_connectors';
 
 export const EmptyConnectorsPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
   const { createConnector, isLoading } = useCreateConnector();
+  const { data } = useConnectors();
 
   const assetBasePath = useAssetBasePath();
   const connectorsPath = assetBasePath + '/connectors.svg';
@@ -94,7 +97,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                 source: (
                                   <EuiLink
                                     data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                    href="TODO TODO TODO"
+                                    href={docLinks.connectorsRunFromSource}
                                   >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
@@ -105,7 +108,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                 docker: (
                                   <EuiLink
                                     data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                    href="TODO TODO TODO"
+                                    href={docLinks.connectorsRunWithDocker}
                                   >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
@@ -167,6 +170,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
             <EuiFlexItem>
               <EuiButton
                 data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
+                disabled={!data?.canManageConnectors}
                 fill
                 iconType="plusInCircleFilled"
                 onClick={() => createConnector()}

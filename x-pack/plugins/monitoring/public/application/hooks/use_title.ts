@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 // TODO: verify that works for all pages
 export function useTitle(cluster: string, suffix: string) {
   const { services } = useKibana();
-  let clusterName = get(cluster, 'cluster_name');
+  let clusterName: string | undefined = get(cluster, 'cluster_name');
   clusterName = clusterName ? `- ${clusterName}` : '';
   suffix = suffix ? `- ${suffix}` : '';
 

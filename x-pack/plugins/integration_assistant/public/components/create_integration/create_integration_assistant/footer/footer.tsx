@@ -45,11 +45,12 @@ AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
 interface FooterProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
+  hasCelInput: State['hasCelInput'];
   isNextStepEnabled?: boolean;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ currentStep, isGenerating, isNextStepEnabled = false }) => {
+  ({ currentStep, isGenerating, hasCelInput, isNextStepEnabled = false }) => {
     const telemetry = useTelemetry();
     const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
@@ -77,18 +78,18 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 3) {
         return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 4 && !isGenerateCelEnabled) {
+      if (currentStep === 4 && (!isGenerateCelEnabled || !hasCelInput)) {
         return i18n.ADD_TO_ELASTIC;
       }
-      if (currentStep === 5 && isGenerateCelEnabled) {
+      if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
         return <AnalyzeCelButtonText isGenerating={isGenerating} />;
       }
       if (currentStep === 6 && isGenerateCelEnabled) {
         return i18n.ADD_TO_ELASTIC;
       }
-    }, [currentStep, isGenerating, isGenerateCelEnabled]);
+    }, [currentStep, isGenerating, hasCelInput, isGenerateCelEnabled]);
 
-    if (currentStep === 7 || (currentStep === 5 && !isGenerateCelEnabled)) {
+    if (currentStep === 7 || (currentStep === 5 && (!isGenerateCelEnabled || !hasCelInput))) {
       return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (
