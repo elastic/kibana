@@ -63,6 +63,7 @@ import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
@@ -154,6 +155,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       features,
       globalSearch,
       logsShared,
+      customIntegrations,
       ml,
       licensing,
       guidedOnboarding,
@@ -178,6 +180,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       SEARCH_RELEVANCE_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
+
+    if (customIntegrations) {
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        isCloud
+      );
+    }
 
     /*
      * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
