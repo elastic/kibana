@@ -228,7 +228,7 @@ spec:
                 <EuiSpacer />
                 <CopyToClipboardButton
                   textToCopy={`annotations:
-    instrumentation.opentelemetry.io/inject-${idSelected}: "true"`}
+    instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"`}
                   data-test-subj={`observabilityOnboardingOtelKubernetesInstrumentApplicationCopyToClipboard-${idSelected}`}
                 />
                 <EuiSpacer />
