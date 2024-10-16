@@ -1830,7 +1830,7 @@
     "swagger-ui-express": "^5.0.1",
     "table": "^6.8.1",
     "tape": "^5.0.1",
-    "terser": "^5.34.0",
+    "terser": "^5.34.1",
     "terser-webpack-plugin": "^4.2.3",
     "tough-cookie": "^5.0.0",
     "tree-kill": "^1.2.2",
