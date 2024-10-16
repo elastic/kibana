@@ -26,12 +26,26 @@ export interface TopNavMenuData {
   fill?: boolean;
   color?: string;
   isLoading?: boolean;
-  iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  /**
+   * iconType places an icon to the side of the item label.
+   *
+   * On mobile, the label will be replaced with a button icon using this type, unless mobileIconType is specified.
+   * (requires the TopNavMenu prop useMobileIconTypes=true)
+   */
+  iconType?: string;
+  /**
+   * mobileIconType replaces the item label with an icon for mobile.
+   * (requires the TopNavMenu prop useMobileIconTypes=true)
+   */
+  mobileIconType?: string;
 }
+
+type TopNavMenuDataIconType = { mobileIconType: string } | { iconType: string };
+export type TopNavMenuDataWithIconType = TopNavMenuData & TopNavMenuDataIconType;
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;
