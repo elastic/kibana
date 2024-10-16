@@ -8,7 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { tasks } from './tasks';
-import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
@@ -101,7 +101,7 @@ describe('data telemetry collection tasks', () => {
         // a fixed date range.
         .mockReturnValueOnce({
           hits: {
-            hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            hits: [{ fields: { [AT_TIMESTAMP]: [new Date().toISOString()] } }],
           },
           total: {
             value: 1,
@@ -314,7 +314,7 @@ describe('data telemetry collection tasks', () => {
             ? { hits: { total: { value: 1 } } }
             : {
                 hits: {
-                  hits: [{ _source: { '@timestamp': 1 } }],
+                  hits: [{ fields: { [AT_TIMESTAMP]: [1] } }],
                 },
               }
         );
