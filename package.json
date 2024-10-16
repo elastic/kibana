@@ -1292,6 +1292,7 @@
     "xstate": "^4.38.2",
     "xstate5": "npm:xstate@^5.18.1",
     "xterm": "^5.1.0",
+    "yaml": "^2.5.1",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
     "zod": "^3.22.3"
@@ -1631,7 +1632,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/react-syntax-highlighter": "^15.4.0",
     "@types/react-test-renderer": "^17.0.2",
-    "@types/react-virtualized": "^9.21.22",
+    "@types/react-virtualized": "^9.21.30",
     "@types/react-window": "^1.8.8",
     "@types/react-window-infinite-loader": "^1.0.9",
     "@types/redux-actions": "^2.6.1",
