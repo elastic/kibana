@@ -208,16 +208,16 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         log.debug(`Deleting role '${CUSTOM_ROLE}'`);
         const adminCookieHeader = await getAdminCredentials();
 
+        // Resetting descriptors for the custom role, even if role deletion fails
+        supportedRoleDescriptors.set(CUSTOM_ROLE, null);
+        log.debug(`'${CUSTOM_ROLE}' descriptors  were reset`);
+
         const { status } = await supertestWithoutAuth
           .delete(`/api/security/role/${CUSTOM_ROLE}`)
           .set(INTERNAL_REQUEST_HEADERS)
           .set(adminCookieHeader);
 
         expect(status).to.be(204);
-
-        // Resetting descriptors for the custom role
-        supportedRoleDescriptors.set(CUSTOM_ROLE, null);
-        log.debug(`'${CUSTOM_ROLE}' descriptors  were reset`);
       }
     },
 
