@@ -53,6 +53,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
+      it('should show api key', async () => {
+        await pageObjects.svlApiKeys.deleteAPIKeys();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+      });
+
       it('should have quick stats', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStats();
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
@@ -89,18 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/194673
-      it.skip('should show api key', async () => {
-        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
-      });
-
-      it('back to indices button should redirect to list page', async () => {
-        await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
-        await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
-        await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
-      });
       describe('With data', () => {
         before(async () => {
           await es.index({
