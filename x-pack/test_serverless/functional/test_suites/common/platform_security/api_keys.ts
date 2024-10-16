@@ -30,8 +30,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('API keys', function () {
-    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="apiKeysCreatePromptButton"]) Wait timed out after 10028ms
-    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
     });
