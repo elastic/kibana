@@ -26,9 +26,9 @@ import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -61,7 +61,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
             ruleAssetsClient,
             ruleObjectsClient,
           });
-          const { upgradeableRules } = getVersionBuckets(ruleVersionsMap);
+          const { upgradeableRules } = getRuleGroups(ruleVersionsMap);
 
           const ruleDiffCalculationResults = upgradeableRules.map(({ current }) => {
             const ruleVersions = ruleVersionsMap.get(current.rule_id);

@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:apm",
                 "api:apm_write",
                 "api:rac",
+                "api:apm_settings_write",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -97,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:apm/save",
                 "ui:apm/alerting:show",
                 "ui:apm/alerting:save",
+                "ui:apm/settings:save",
                 "alerting:apm.error_rate/apm/rule/get",
                 "alerting:apm.error_rate/apm/rule/getRuleState",
                 "alerting:apm.error_rate/apm/rule/getAlertSummary",
@@ -2841,6 +2843,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "alerting:apm.anomaly/observability/alert/find",
                 "alerting:apm.anomaly/observability/alert/getAuthorizedAlertsIndices",
                 "alerting:apm.anomaly/observability/alert/getAlertSummary",
+              ],
+              "settings_save": Array [
+                "login:",
+                "api:apm_settings_write",
+                "ui:apm/settings:save",
               ],
             },
             "dashboard": Object {

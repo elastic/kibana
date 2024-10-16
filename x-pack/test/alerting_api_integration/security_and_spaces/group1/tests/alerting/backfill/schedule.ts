@@ -233,9 +233,15 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the ad hoc run SO was created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(
+                adHocRunSO1,
+                'ad_hoc_run_params'
+              ) as unknown as AdHocRunSO;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(
+                adHocRunSO2,
+                'ad_hoc_run_params'
+              ) as unknown as AdHocRunSO;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');
@@ -436,11 +442,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the ad hoc run SO was created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
               const adHocRunSO3 = (await getAdHocRunSO(result[2].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
+              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params')!;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');
@@ -941,11 +947,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the expected ad hoc run SOs were created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
               const adHocRunSO3 = (await getAdHocRunSO(result[5].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
+              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params')!;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');

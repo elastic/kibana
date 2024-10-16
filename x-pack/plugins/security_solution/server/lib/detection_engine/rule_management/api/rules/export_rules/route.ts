@@ -15,7 +15,10 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
-import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';
+import {
+  getNonPackagedRulesCount,
+  getRulesCount,
+} from '../../../logic/search/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -57,6 +60,8 @@ export const exportRulesRoute = (
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
+        const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
+
         try {
           const exportSizeLimit = config.maxRuleImportExportSize;
           if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
@@ -65,10 +70,19 @@ export const exportRulesRoute = (
               body: `Can't export more than ${exportSizeLimit} rules`,
             });
           } else {
-            const nonPackagedRulesCount = await getNonPackagedRulesCount({
-              rulesClient,
-            });
-            if (nonPackagedRulesCount > exportSizeLimit) {
+            let rulesCount = 0;
+
+            if (prebuiltRulesCustomizationEnabled) {
+              rulesCount = await getRulesCount({
+                rulesClient,
+                filter: '',
+              });
+            } else {
+              rulesCount = await getNonPackagedRulesCount({
+                rulesClient,
+              });
+            }
+            if (rulesCount > exportSizeLimit) {
               return siemResponse.error({
                 statusCode: 400,
                 body: `Can't export more than ${exportSizeLimit} rules`,
@@ -84,14 +98,16 @@ export const exportRulesRoute = (
                   request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
-                  actionsClient
+                  actionsClient,
+                  prebuiltRulesCustomizationEnabled
                 )
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
                   actionsExporter,
                   request,
-                  actionsClient
+                  actionsClient,
+                  prebuiltRulesCustomizationEnabled
                 );
 
           const responseBody = request.query.exclude_export_details

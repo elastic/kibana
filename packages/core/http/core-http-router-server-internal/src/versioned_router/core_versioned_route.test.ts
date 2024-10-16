@@ -138,6 +138,9 @@ describe('Versioned route', () => {
         tags: ['access:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
+        excludeFromOAS: true,
+        httpResource: true,
+        summary: `test`,
       },
     };
 

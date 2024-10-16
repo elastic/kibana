@@ -31,7 +31,8 @@ export const getAlertsPageTableConfiguration = (
   config: ConfigSchema,
   dataViews: DataViewsServicePublic,
   http: HttpSetup,
-  notifications: NotificationsStart
+  notifications: NotificationsStart,
+  id?: string
 ): AlertsTableConfigurationRegistry => {
   const renderCustomActionsRow = (props: RenderCustomActionsRowArgs) => {
     return (
@@ -43,7 +44,7 @@ export const getAlertsPageTableConfiguration = (
     );
   };
   return {
-    id: ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
+    id: id ?? ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
     cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
     columns: getColumns({ showRuleName: true }),
     getRenderCellValue,
@@ -63,7 +64,7 @@ export const getAlertsPageTableConfiguration = (
     },
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
     usePersistentControls: getPersistentControlsHook({
-      groupingId: ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
+      groupingId: id ?? ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
       ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
       services: {
         dataViews,
