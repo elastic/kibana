@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 import { KnowledgeBaseConfig } from '../../types';
 import { AlertsRange } from '../../../knowledge_base/alerts_range';
 import * as i18n from '../../../knowledge_base/translations';
 
-export const MIN_LATEST_ALERTS = 50;
-export const MAX_LATEST_ALERTS = 500;
-export const TICK_INTERVAL = 50;
+export const MIN_LATEST_ALERTS = 10;
+export const MAX_LATEST_ALERTS = 100;
+export const TICK_INTERVAL = 10;
 export const RANGE_CONTAINER_WIDTH = 600; // px
+const LABEL_WRAPPER_MIN_WIDTH = 95; // px
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
@@ -25,30 +27,52 @@ interface Props {
 const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiFormRow
+        display="columnCompressedSwitch"
+        label={i18n.ALERTS_LABEL}
+        css={css`
+          .euiFormRow__labelWrapper {
+            min-width: ${LABEL_WRAPPER_MIN_WIDTH}px !important;
+          }
+        `}
+      >
+        <></>
+      </EuiFormRow>
 
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <p>
-            <EuiText color="subdued" size="s" component="span">
-              {i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(knowledgeBase.latestAlerts)}
-            </EuiText>{' '}
-            <EuiText color="subdued" size="s" component="span">
-              {i18n.YOUR_ANONYMIZATION_SETTINGS}
-            </EuiText>{' '}
-            <EuiText color="subdued" size="s" component="span">
-              {i18n.SELECT_FEWER_ALERTS}
-            </EuiText>
-          </p>
-        </EuiFlexItem>
+      <EuiSpacer size="xs" />
 
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem
+          css={css`
+            width: ${RANGE_CONTAINER_WIDTH}px;
+          `}
+          grow={false}
+        >
           <EuiSpacer size="xs" />
           <AlertsRange
             knowledgeBase={knowledgeBase}
             setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+            value={knowledgeBase.latestAlerts}
           />
           <EuiSpacer size="s" />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(knowledgeBase.latestAlerts)}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.YOUR_ANONYMIZATION_SETTINGS}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.SELECT_FEWER_ALERTS}</span>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
