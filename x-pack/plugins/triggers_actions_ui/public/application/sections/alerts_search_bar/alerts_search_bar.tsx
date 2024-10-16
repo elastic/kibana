@@ -17,19 +17,16 @@ import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { TriggersAndActionsUiServices } from '../../..';
-import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
-const EMPTY_RULE_TYPE_IDS: string[] = [];
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 // Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
-  ruleTypeIds = EMPTY_RULE_TYPE_IDS,
-  ruleTypeId,
+  ruleTypeIds,
   query,
   filters,
   quickFilters = [],
@@ -58,33 +55,38 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    ruleTypeIds,
+    ruleTypeIds: ruleTypeIds ?? [],
     http,
     dataViewsService,
     toasts,
   });
-  const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns = useMemo(() => {
-    if (ruleTypeId && aadFields?.length) {
-      return [{ title: ruleTypeId, fields: aadFields }];
+    if (ruleTypeIds && dataView?.fields?.length) {
+      return [{ title: ruleTypeIds.join(','), fields: dataView.fields }];
     }
+
     if (dataView) {
       return [dataView];
     }
+
     return null;
-  }, [aadFields, dataView, ruleTypeId]);
+  }, [dataView, ruleTypeIds]);
 
   const ruleType = useLoadRuleTypesQuery({
-    filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
-    enabled: ruleTypeId !== undefined,
+    filteredRuleTypes: ruleTypeIds ?? [],
+    enabled: Boolean(ruleTypeIds?.length),
   });
 
-  const isSecurity =
-    (ruleTypeIds && ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0])) ||
-    (ruleType &&
-      ruleTypeId &&
-      ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
+  const allProducers = new Set(
+    ruleTypeIds
+      ?.map((ruleTypeId) => ruleType.ruleTypesState.data.get(ruleTypeId)?.producer)
+      .filter((ruleTypeId): ruleTypeId is string => Boolean(ruleTypeId)) ?? []
+  );
+
+  const hasSiemRuleTypes = ruleTypeIds?.some(isSiemRuleType) ?? false;
+  const isSiemProducer = allProducers.has(AlertConsumers.SIEM);
+  const isSecurity = hasSiemRuleTypes || isSiemProducer;
 
   const onSearchQuerySubmit = useCallback(
     (
@@ -174,7 +176,7 @@ export function AlertsSearchBar({
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-      indexPatterns={!indexPatterns || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
+      indexPatterns={!indexPatterns ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}

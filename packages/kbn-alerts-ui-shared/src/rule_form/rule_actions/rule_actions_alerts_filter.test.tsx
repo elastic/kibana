@@ -241,7 +241,6 @@ describe('ruleActionsAlertsFilter', () => {
         })}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
       />
     );
 

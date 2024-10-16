@@ -14,6 +14,8 @@ import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { DataViewBase } from '@kbn/es-query';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import { BrowserFields } from '@kbn/alerting-types';
 import { useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
@@ -53,7 +55,7 @@ const resolveDataView = ({
   isError: boolean;
   virtualDataView?: DataView;
   indexNames?: string[];
-  fields?: { fields: FieldSpec[] };
+  fields?: { browserFields: BrowserFields; fields: FieldDescriptor[] };
 }) => {
   if (isError) {
     return;
@@ -120,7 +122,7 @@ export const useAlertsDataView = ({
   } = useFetchAlertsFieldsQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch fields when featureIds includes Security Solution
+      // Don't fetch fields when ruleTypeIds includes Security Solution
       enabled: !!ruleTypeIds.length && !includesSecurity,
     }
   );

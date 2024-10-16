@@ -98,6 +98,8 @@ export const RuleActionsAlertsFilter = ({
     [updateQuery]
   );
 
+  const ruleTypeIds = useMemo(() => (ruleTypeId != null ? [ruleTypeId] : []), [ruleTypeId]);
+
   return (
     <>
       <EuiSwitch
@@ -120,7 +122,7 @@ export const RuleActionsAlertsFilter = ({
             unifiedSearchBar={unifiedSearch.ui.SearchBar}
             dataService={data}
             appName={appName}
-            ruleTypeId={ruleTypeId}
+            ruleTypeIds={ruleTypeIds}
             disableQueryLanguageSwitcher={true}
             query={query.kql}
             filters={query.filters ?? []}

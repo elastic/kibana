@@ -12,7 +12,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { useLoadRuleTypesQuery, useRuleAADFields, useAlertsDataView } from '../common/hooks';
+import { useLoadRuleTypesQuery, useAlertsDataView } from '../common/hooks';
 import { AlertsSearchBar } from '.';
 import { HttpStart } from '@kbn/core-http-browser';
 
@@ -49,11 +49,6 @@ jest.mocked(useLoadRuleTypesQuery).mockReturnValue({
   isSuccess: false,
 });
 
-jest.mocked(useRuleAADFields).mockReturnValue({
-  aadFields: [],
-  loading: false,
-});
-
 const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
   <button
     data-test-subj="querySubmitButton"
@@ -83,7 +78,6 @@ describe('AlertsSearchBar', () => {
         onQuerySubmit={jest.fn()}
         onFiltersUpdated={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
@@ -108,7 +102,6 @@ describe('AlertsSearchBar', () => {
         http={httpMock}
         dataService={mockDataPlugin}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -157,7 +150,6 @@ describe('AlertsSearchBar', () => {
         http={httpMock}
         dataService={mockDataPlugin}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 

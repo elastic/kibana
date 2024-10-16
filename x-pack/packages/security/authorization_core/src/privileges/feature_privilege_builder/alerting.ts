@@ -67,7 +67,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
   ): string[] {
     const getAlertingPrivilege = (
       operations: string[],
-      privileges: Array<{ ruleTypeId: string; consumers: string[] }>,
+      privileges: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>,
       alertingEntity: string
     ) =>
       privileges.flatMap(({ ruleTypeId, consumers }) =>

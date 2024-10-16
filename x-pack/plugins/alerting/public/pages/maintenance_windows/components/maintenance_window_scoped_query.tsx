@@ -75,7 +75,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
           <EuiFormRow fullWidth isInvalid={errors.length !== 0} error={errors[0]}>
             <AlertsSearchBar
               appName={PLUGIN.getI18nName(i18n)}
-              ruleTypeId={ruleTypeIds[0]}
+              ruleTypeIds={ruleTypeIds}
               disableQueryLanguageSwitcher={true}
               query={query}
               filters={filters}

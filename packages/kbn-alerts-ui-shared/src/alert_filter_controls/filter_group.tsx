@@ -44,7 +44,6 @@ import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
-    featureIds,
     dataViewId,
     onFiltersChange,
     timeRange,

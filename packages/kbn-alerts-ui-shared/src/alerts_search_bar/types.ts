@@ -26,7 +26,7 @@ export interface AlertsSearchBarProps {
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;
-  ruleTypeId?: string;
+  ruleTypeIds?: string[];
   onQueryChange?: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;

@@ -13,13 +13,11 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
-import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { AlertsSearchBar } from './alerts_search_bar';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('../../hooks/use_load_rule_types_query');
-jest.mock('../../hooks/use_rule_aad_fields');
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -53,11 +51,6 @@ jest.mocked(useLoadRuleTypesQuery).mockReturnValue({
   authorizedRuleTypes: [],
   authorizedToCreateAnyRules: false,
   isSuccess: false,
-});
-
-jest.mocked(useRuleAADFields).mockReturnValue({
-  aadFields: [],
-  loading: false,
 });
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -100,7 +93,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
     expect(await screen.findByTestId('querySubmitButton')).toBeInTheDocument();
@@ -119,7 +111,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -176,7 +167,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
