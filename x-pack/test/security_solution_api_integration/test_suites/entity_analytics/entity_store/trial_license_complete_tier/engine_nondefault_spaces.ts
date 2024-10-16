@@ -42,12 +42,12 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should have installed the expected user resources', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypeAndWait('user');
         await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypeAndWait('host');
         await utils.expectEngineAssetsExist('host');
       });
     });
@@ -55,8 +55,8 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
     describe('get and list', () => {
       before(async () => {
         await Promise.all([
-          utils.initEntityEngineForEntityType('host'),
-          utils.initEntityEngineForEntityType('user'),
+          utils.initEntityEngineForEntityTypeAndWait('host'),
+          utils.initEntityEngineForEntityTypeAndWait('user'),
         ]);
       });
 
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypeAndWait('host');
       });
 
       after(async () => {
@@ -187,7 +187,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypeAndWait('host');
 
         await api
           .deleteEntityEngine(
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should delete the user entity engine', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypeAndWait('user');
 
         await api
           .deleteEntityEngine(

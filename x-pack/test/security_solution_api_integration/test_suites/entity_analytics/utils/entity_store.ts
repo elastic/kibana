@@ -26,6 +26,8 @@ export const EntityStoreUtils = (
     expectComponentTemplateNotFound,
     expectIngestPipelineExists,
     expectIngestPipelineNotFound,
+    expectEntitiesIndexExists,
+    expectEntitiesIndexNotFound,
   } = elasticAssetCheckerFactory(getService);
 
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
@@ -68,6 +70,31 @@ export const EntityStoreUtils = (
     expect(res.status).to.eql(200);
   };
 
+  const initEntityEngineForEntityTypeAndWait = async (entityType: EntityType) => {
+    await initEntityEngineForEntityType(entityType);
+
+    let attempts = 10;
+    let lastBody: any = null;
+    const delayMs = 2000;
+
+    while (attempts > 0) {
+      const { body } = await api.getEntityEngine({ params: { entityType } }, namespace).expect(200);
+      lastBody = body;
+      if (body.status === 'started') {
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempts--;
+    }
+
+    throw new Error(
+      `Engine for entity type ${entityType} did not start after multiple attempts, last status: ${JSON.stringify(
+        lastBody
+      )}`
+    );
+  };
+
   const expectTransformStatus = async (
     transformId: string,
     exists: boolean,
@@ -101,6 +128,7 @@ export const EntityStoreUtils = (
     await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_${namespace}_v1`);
     await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexExists(entityType, namespace);
   };
 
   const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
@@ -108,11 +136,13 @@ export const EntityStoreUtils = (
     await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_${namespace}_v1`);
     await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
   return {
     cleanEngines,
     initEntityEngineForEntityType,
+    initEntityEngineForEntityTypeAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
