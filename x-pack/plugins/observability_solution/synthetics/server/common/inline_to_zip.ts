@@ -33,6 +33,9 @@ export async function inlineToProjectZip(
       archive.pipe(mWriter);
       archive.append(wrapInlineInProject(inlineJourney), {
         name: 'inline.journey.ts',
+        // Date is fixed to Unix epoch so the file metadata is
+        // not modified everytime when files are bundled
+        date: new Date('1970-01-01'),
       });
       return archive.finalize();
     });
