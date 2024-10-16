@@ -9,14 +9,14 @@ import { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { isQuery } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, isQuery } from '@kbn/data-plugin/public';
 
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import {
   isDefaultSearchQuery,
   type AiOpsIndexBasedAppState,
 } from '../application/url_state/common';
-import { createMergedEsQuery } from '../application/utils/search_utils';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
@@ -66,7 +66,12 @@ export const useSearch = (
         (isDefaultSearchQuery(searchQuery) || searchQuery === undefined) &&
         isQuery(query)
       ) {
-        searchQuery = createMergedEsQuery(query, aiopsListState.filters, dataView, uiSettings);
+        searchQuery = buildEsQuery(
+          dataView,
+          query,
+          aiopsListState.filters ?? [],
+          uiSettings ? getEsQueryConfig(uiSettings) : undefined
+        );
       }
 
       return {
