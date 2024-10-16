@@ -71,7 +71,7 @@ describe('SyncAlertsSwitch', () => {
     expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
   });
 
-  it('does not call onStatusChanged if selection is same as current status', async () => {
+  it('does not render the button at all if the status cannot change', async () => {
     const wrapper = mount(
       <TestProviders>
         <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
@@ -79,7 +79,9 @@ describe('SyncAlertsSwitch', () => {
     );
 
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-    wrapper.find(`[data-test-subj="case-view-status-dropdown-open"] button`).simulate('click');
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown-open"] button`)).toHaveLength(
+      0
+    );
 
     expect(onStatusChanged).not.toHaveBeenCalled();
   });

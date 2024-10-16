@@ -36,7 +36,8 @@ export const readCasesPermissions = () =>
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noCreateCommentCasesPermissions = () =>
   buildCasesPermissions({ createComment: false });
-export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
+export const noUpdateCasesPermissions = () =>
+  buildCasesPermissions({ update: false, reopenCase: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
 export const noReopenCasesPermissions = () => buildCasesPermissions({ reopenCase: false });

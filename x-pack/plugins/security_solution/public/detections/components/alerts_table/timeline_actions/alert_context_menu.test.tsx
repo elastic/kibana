@@ -88,6 +88,8 @@ jest.mock('../../../../common/lib/kibana', () => {
               update: true,
               delete: true,
               push: true,
+              createComment: true,
+              reopenCase: true,
             }),
             getRuleIdFromEvent: jest.fn(),
           },
