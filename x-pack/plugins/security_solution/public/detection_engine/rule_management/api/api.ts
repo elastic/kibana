@@ -243,7 +243,7 @@ export const fetchRulesSnoozeSettings = async ({
     {
       method: 'POST',
       body: JSON.stringify({
-        rule_type_ids: ids,
+        filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
       }),

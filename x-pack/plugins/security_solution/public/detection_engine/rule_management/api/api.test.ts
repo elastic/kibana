@@ -854,7 +854,7 @@ describe('Detections Rules API', () => {
         Array [
           "/internal/alerting/rules/_find",
           Object {
-            "body": "{\\"rule_type_ids\\":[\\"id1\\",\\"id2\\"],\\"fields\\":\\"[\\\\\\"muteAll\\\\\\",\\\\\\"activeSnoozes\\\\\\",\\\\\\"isSnoozedUntil\\\\\\",\\\\\\"snoozeSchedule\\\\\\"]\\",\\"per_page\\":2}",
+            "body": "{\\"filter\\":\\"alert.id:\\\\\\"alert:id1\\\\\\" or alert.id:\\\\\\"alert:id2\\\\\\"\\",\\"fields\\":\\"[\\\\\\"muteAll\\\\\\",\\\\\\"activeSnoozes\\\\\\",\\\\\\"isSnoozedUntil\\\\\\",\\\\\\"snoozeSchedule\\\\\\"]\\",\\"per_page\\":2}",
             "method": "POST",
             "signal": undefined,
           },
