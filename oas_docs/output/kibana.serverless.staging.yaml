@@ -35261,6 +35261,11 @@ paths:
           schema:
             nullable: true
             type: string
+        - in: query
+          name: userFilter
+          schema:
+            nullable: true
+            type: string
       responses:
         '200':
           content:
@@ -48009,6 +48014,7 @@ components:
         - started
         - stopped
         - updating
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:

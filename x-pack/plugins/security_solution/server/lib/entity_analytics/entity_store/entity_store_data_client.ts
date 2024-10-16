@@ -16,17 +16,15 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
-import type { EngineDataviewUpdateResult } from '../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type { AppClient } from '../../..';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
+  Entity,
+  EngineDataviewUpdateResult,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
-} from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-import type {
   EntityType,
   InspectQuery,
-} from '../../../../common/api/entity_analytics/entity_store/common.gen';
+} from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
@@ -120,7 +118,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger, esClient, namespace, taskManager, appClient, dataViewsService } = this.options;
+    const { logger } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -135,8 +133,6 @@ export class EntityStoreDataClient {
     logger.info(
       `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
     );
-    const debugLog = (message: string) =>
-      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
     const descriptor = await this.engineClient.init(entityType, {
       filter,
@@ -144,9 +140,34 @@ export class EntityStoreDataClient {
       indexPattern,
     });
     logger.debug(`Initialized engine for ${entityType}`);
-    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
+
+    this.asyncSetup(
+      entityType,
+      fieldHistoryLength,
+      this.options.taskManager,
+      indexPattern,
+      filter,
+      pipelineDebugMode
+    ).catch((error) => {
+      logger.error('There was an error during async setup of the Entity Store', error);
+    });
+
+    return descriptor;
+  }
+
+  private async asyncSetup(
+    entityType: EntityType,
+    fieldHistoryLength: number,
+    taskManager: TaskManagerStartContract,
+    indexPattern: string,
+    filter: string,
+    pipelineDebugMode: boolean
+  ) {
+    const { esClient, logger, namespace, appClient, dataViewsService } = this.options;
+    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+
     const unitedDefinition = getUnitedEntityDefinition({
       indexPatterns,
       entityType,
@@ -155,66 +176,84 @@ export class EntityStoreDataClient {
     });
     const { entityManagerDefinition } = unitedDefinition;
 
-    await this.entityClient.createEntityDefinition({
-      definition: {
-        ...entityManagerDefinition,
-        filter,
-        indexPatterns: indexPattern
-          ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
-          : entityManagerDefinition.indexPatterns,
-      },
-      installOnly: true,
-    });
-    debugLog(`Created entity definition`);
+    const debugLog = (message: string) =>
+      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
-    // the index must be in place with the correct mapping before the enrich policy is created
-    // this is because the enrich policy will fail if the index does not exist with the correct fields
-    await createEntityIndexComponentTemplate({
-      unitedDefinition,
-      esClient,
-    });
-    debugLog(`Created entity index component template`);
-    await createEntityIndex({
-      entityType,
-      esClient,
-      namespace,
-      logger,
-    });
-    debugLog(`Created entity index`);
+    try {
+      // clean up any existing entity store
+      await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 
-    // we must create and execute the enrich policy before the pipeline is created
-    // this is because the pipeline will fail if the enrich index does not exist
-    await createFieldRetentionEnrichPolicy({
-      unitedDefinition,
-      esClient,
-    });
-    debugLog(`Created field retention enrich policy`);
-    await executeFieldRetentionEnrichPolicy({
-      unitedDefinition,
-      esClient,
-      logger,
-    });
-    debugLog(`Executed field retention enrich policy`);
-    await createPlatformPipeline({
-      debugMode: pipelineDebugMode,
-      unitedDefinition,
-      logger,
-      esClient,
-    });
-    debugLog(`Created @platform pipeline`);
+      // set up the entity manager definition
+      await this.entityClient.createEntityDefinition({
+        definition: {
+          ...entityManagerDefinition,
+          filter,
+          indexPatterns: indexPattern
+            ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
+            : entityManagerDefinition.indexPatterns,
+        },
+        installOnly: true,
+      });
+      debugLog(`Created entity definition`);
 
-    // finally start the entity definition now that everything is in place
-    const updated = await this.start(entityType, { force: true });
-    debugLog(`Started entity definition`);
+      // the index must be in place with the correct mapping before the enrich policy is created
+      // this is because the enrich policy will fail if the index does not exist with the correct fields
+      await createEntityIndexComponentTemplate({
+        unitedDefinition,
+        esClient,
+      });
+      debugLog(`Created entity index component template`);
+      await createEntityIndex({
+        entityType,
+        esClient,
+        namespace,
+        logger,
+      });
+      debugLog(`Created entity index`);
 
-    // the task will execute the enrich policy on a schedule
-    await startEntityStoreFieldRetentionEnrichTask({
-      namespace,
-      logger,
-      taskManager,
-    });
-    logger.info(`Entity store initialized`);
-    return { ...descriptor, ...updated };
+      // we must create and execute the enrich policy before the pipeline is created
+      // this is because the pipeline will fail if the enrich index does not exist
+      await createFieldRetentionEnrichPolicy({
+        unitedDefinition,
+        esClient,
+      });
+      debugLog(`Created field retention enrich policy`);
+      await executeFieldRetentionEnrichPolicy({
+        unitedDefinition,
+        esClient,
+        logger,
+      });
+      debugLog(`Executed field retention enrich policy`);
+      await createPlatformPipeline({
+        debugMode: pipelineDebugMode,
+        unitedDefinition,
+        logger,
+        esClient,
+      });
+      debugLog(`Created @platform pipeline`);
+
+      // finally start the entity definition now that everything is in place
+      const updated = await this.start(entityType, { force: true });
+      debugLog(`Started entity definition`);
+
+      // the task will execute the enrich policy on a schedule
+      await startEntityStoreFieldRetentionEnrichTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      logger.info(`Entity store initialized`);
+
+      return updated;
+    } catch (err) {
+      this.options.logger.error(
+        `Error initializing entity store for ${entityType}: ${err.message}`
+      );
+
+      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
+
+      await this.delete(entityType, taskManager, { deleteData: true, deleteEngine: false });
+    }
   }
 
   public async getExistingEntityDefinition(entityType: EntityType) {
@@ -284,9 +323,10 @@ export class EntityStoreDataClient {
   public async delete(
     entityType: EntityType,
     taskManager: TaskManagerStartContract,
-    deleteData: boolean
+    options = { deleteData: false, deleteEngine: true }
   ) {
     const { namespace, logger, esClient, appClient, dataViewsService } = this.options;
+    const { deleteData, deleteEngine } = options;
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     const unitedDefinition = getUnitedEntityDefinition({
@@ -328,6 +368,10 @@ export class EntityStoreDataClient {
           logger,
         });
       }
+
+      if (descriptor && deleteEngine) {
+        await this.engineClient.delete(entityType);
+      }
       // if the last engine then stop the task
       const { engines } = await this.engineClient.list();
       if (engines.length === 0) {
@@ -336,10 +380,6 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
-      }
-
-      if (descriptor) {
-        await this.engineClient.delete(entityType);
       }
 
       return { deleted: true };
