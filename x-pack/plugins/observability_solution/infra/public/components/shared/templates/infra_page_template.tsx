@@ -65,7 +65,9 @@ export const InfraPageTemplate = ({
   const hasLogsData = isLogsSignal(dataStreams);
   const noDataConfig = getNoDataConfig({
     hasData,
-    loading: isPending(status),
+    hasLogsData,
+    isEntityCentricExperienceEnabled,
+    loading: isPending(status) || isPending(entitySummaryStatus),
     onboardingFlow,
     docsLink: docLinks.links.observability.guide,
     locators: share.url.locators,
@@ -130,22 +132,10 @@ export const InfraPageTemplate = ({
     />;
   }
 
-  const evaluateNoDataConfig = () => {
-    if (entitySummaryStatus === 'failure') {
-      return noDataConfig;
-    }
-
-    if (entitySummaryStatus !== 'success') {
-      return undefined;
-    }
-
-    return isEntityCentricExperienceEnabled && hasLogsData ? undefined : noDataConfig;
-  };
-
   return (
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
-      noDataConfig={evaluateNoDataConfig()}
+      noDataConfig={noDataConfig}
       {...pageTemplateProps}
     />
   );

@@ -101,18 +101,22 @@ const getNoDataConfigDetails = ({
 
 export const getNoDataConfig = ({
   hasData,
+  hasLogsData,
   loading,
   locators,
   onboardingFlow,
   docsLink,
+  isEntityCentricExperienceEnabled,
 }: {
   hasData: boolean;
+  hasLogsData?: boolean;
   loading: boolean;
   onboardingFlow: OnboardingFlow;
   locators: LocatorClient;
   docsLink?: string;
+  isEntityCentricExperienceEnabled?: boolean;
 }): NoDataConfig | undefined => {
-  if (hasData || loading) {
+  if (hasData || loading || (isEntityCentricExperienceEnabled && hasLogsData)) {
     return;
   }
 
