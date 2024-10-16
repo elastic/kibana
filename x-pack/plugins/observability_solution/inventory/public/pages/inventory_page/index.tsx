@@ -37,7 +37,7 @@ export function InventoryPage() {
           path: {},
           query: {
             ...query,
-            grouping: encode(inventoryState),
+            grouping: encodedGrouping,
           },
         });
       }
