@@ -10,6 +10,7 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
@@ -30,6 +31,7 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = cases.helpers.canUseCases(ownerApp);
+  const queryClient = useQueryClient();
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -48,7 +50,11 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
         <RouteCapture>
           <Routes>
             <Route path="/">
-              <CasesContext owner={ownerApp} permissions={userCasesPermissions}>
+              <CasesContext
+                owner={ownerApp}
+                permissions={userCasesPermissions}
+                queryClient={queryClient}
+              >
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>
