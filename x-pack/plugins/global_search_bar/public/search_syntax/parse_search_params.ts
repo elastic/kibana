@@ -16,19 +16,16 @@ const aliasMap = {
   type: ['types'],
 };
 
-// Converts multi word types to phrases by wrapping them in quotes. Example: type:canvas workpad -> type:"canvas workpad"
-const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]): string => {
-  if (multiWordTypes.length === 0) {
-    // If there are no multiword types, only clean whitespace
-    const simpleTypeReplaceRegex = /(type:|types:)\s*([^"']*?)\b([^"'\s]+)/g;
-    const modifiedTerm = term.replace(
-      simpleTypeReplaceRegex,
-      (_, typeKeyword, whitespace, typeValue) => {
-        const trimmedTypeKeyword = `${typeKeyword}${whitespace.trim()}`;
-        return `${trimmedTypeKeyword}"${typeValue}"`;
-      }
+// Converts multiword types to phrases by wrapping them in quotes and trimming whitespace after type keyword. Example: type:  canvas workpad -> type:"canvas workpad". If the type is already wrapped in quotes or is a single word, it will only trim whitespace after type keyword.
+const convertMultiwordTypesToPhrasesAndTrimWhitespace = (
+  term: string,
+  multiWordTypes: string[]
+): string => {
+  if (!multiWordTypes.length) {
+    return term.replace(
+      /(type:|types:)\s*([^"']*?)\b([^"'\s]+)/gi,
+      (_, typeKeyword, whitespace, typeValue) => `${typeKeyword}${whitespace.trim()}${typeValue}`
     );
-    return modifiedTerm;
   }
 
   const typesPattern = multiWordTypes.join('|');
@@ -37,19 +34,14 @@ const convertMultiwordTypesToPhrases = (term: string, multiWordTypes: string[]):
     'gi'
   );
 
-  const modifiedTerm = term.replace(termReplaceRegex, (_, typeKeyword, whitespace, typeValue) => {
+  return term.replace(termReplaceRegex, (_, typeKeyword, whitespace, typeValue) => {
     const trimmedTypeKeyword = `${typeKeyword}${whitespace.trim()}`;
 
-    // Check if the term is already quoted and if so, return it as is
-    if (/['"]/.test(typeValue)) {
-      return `${trimmedTypeKeyword}${typeValue}`;
-    }
-
-    // Wrap the multiword type in quotes
-    return `${trimmedTypeKeyword}"${typeValue}"`;
+    // If the type value is already wrapped in quotes, leavy it as is
+    return /['"]/.test(typeValue)
+      ? `${trimmedTypeKeyword}${typeValue}`
+      : `${trimmedTypeKeyword}"${typeValue}"`;
   });
-
-  return modifiedTerm;
 };
 
 const dedupeTypes = (types: FilterValues<string>): FilterValues<string> => [
@@ -65,7 +57,7 @@ export const parseSearchParams = (term: string, searchableTypes: string[]): Pars
     .filter((item) => /[ -]/.test(item))
     .map((item) => item.replace(/-/g, ' '));
 
-  const modifiedTerm = convertMultiwordTypesToPhrases(
+  const modifiedTerm = convertMultiwordTypesToPhrasesAndTrimWhitespace(
     term,
     multiWordSearchableTypesWhitespaceSeperated
   );
