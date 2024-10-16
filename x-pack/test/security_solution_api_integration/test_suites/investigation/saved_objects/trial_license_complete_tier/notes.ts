@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('Note - Saved Objects', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196492
+  describe.skip('Note - Saved Objects', () => {
     const es = getService('es');
 
     before(() => kibanaServer.savedObjects.cleanStandardList());
