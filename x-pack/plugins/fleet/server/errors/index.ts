@@ -29,6 +29,7 @@ export class RegistryResponseError extends RegistryError {
 
 // Package errors
 
+export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
