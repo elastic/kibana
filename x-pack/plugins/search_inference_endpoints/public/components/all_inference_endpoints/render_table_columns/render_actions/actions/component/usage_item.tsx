@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTextTruncate,
   EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -42,7 +43,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
   };
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="usageItem">
+    <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="usageItem">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -58,7 +59,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={handleNavigateToIndex}>
+            <EuiLink data-test-subj="navigateToIndexPage" onClick={handleNavigateToIndex}>
               <EuiIcon size="s" type="popout" />
             </EuiLink>
           </EuiFlexItem>
@@ -66,6 +67,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
