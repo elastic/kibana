@@ -11,6 +11,7 @@ import { EuiSideNavItemType } from '@elastic/eui';
 
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
+import { ReactRouterProps } from '../types';
 
 import { letBrowserHandleEvent, createHref } from '.';
 
@@ -22,14 +23,6 @@ import { letBrowserHandleEvent, createHref } from '.';
  *
  * but separated out from EuiLink portion as we use this for multiple EUI components
  */
-
-export interface ReactRouterProps {
-  to: string;
-  onClick?(): void;
-  // Used to navigate outside of the React Router plugin basename but still within Kibana,
-  // e.g. if we need to go from Enterprise Search to App Search
-  shouldNotCreateHref?: boolean;
-}
 
 export type GeneratedReactRouterProps<T> = Required<
   Pick<EuiSideNavItemType<T>, 'href' | 'onClick'>
