@@ -19,7 +19,6 @@ export function FieldLimitDocLink() {
     <EuiLink
       data-test-subj="datasetQualityManualMitigationsPipelineLink"
       href={docLinks.links.elasticsearch.mappingSettingsLimit}
-      external
       target="_blank"
       className="eui-displayBlock eui-textRight"
     >

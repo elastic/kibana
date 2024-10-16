@@ -40,15 +40,17 @@ function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
 
-  const componentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl(
-    isIntegration
-      ? {
-          componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
-            dataStreamSettings?.indexTemplate ?? name
-          )}@custom`,
-        }
-      : { indexTemplate: dataStreamSettings?.indexTemplate }
-  );
+  const customComponentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({
+    componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
+      dataStreamSettings?.indexTemplate ?? name
+    )}@custom`,
+  });
+
+  const indexTemplateUrl = locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ indexTemplate: dataStreamSettings?.indexTemplate });
+
+  const componentTemplateUrl = isIntegration ? customComponentTemplateUrl : indexTemplateUrl;
 
   return (
     <EuiPanel hasBorder grow={false}>

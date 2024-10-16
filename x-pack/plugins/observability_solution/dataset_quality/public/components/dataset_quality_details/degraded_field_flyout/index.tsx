@@ -157,8 +157,12 @@ export default function DegradedFieldFlyout() {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <DegradedFieldInfo fieldList={fieldList} />
-        <EuiSpacer size="s" />
-        {isUserViewingTheIssueOnLatestBackingIndex && <PossibleMitigations />}
+        {isUserViewingTheIssueOnLatestBackingIndex && (
+          <>
+            <EuiSpacer size="s" />
+            <PossibleMitigations />
+          </>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

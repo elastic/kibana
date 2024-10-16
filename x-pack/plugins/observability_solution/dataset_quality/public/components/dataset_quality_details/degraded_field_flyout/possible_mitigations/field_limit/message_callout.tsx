@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiCallOut, EuiFlexItem } from '@elastic/eui';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import {
   fieldLimitMitigationFailedMessage,
   fieldLimitMitigationFailedMessageDescription,
@@ -39,63 +38,68 @@ export function MessageCallout() {
 
 export function SuccessCallout() {
   const {
-    services: { application },
+    services: {
+      application,
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibanaContextForPlugin();
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
 
+  const componentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({
+    componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
+      dataStreamSettings?.indexTemplate ?? name
+    )}@custom`,
+  });
+
   const onClickHandler = useCallback(async () => {
-    await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: `/data/index_management/component_templates/${getComponentTemplatePrefixFromIndexTemplate(
-        dataStreamSettings?.indexTemplate ?? name
-      )}@custom`,
-      openInNewTab: true,
-    });
-  }, [application, dataStreamSettings?.indexTemplate, name]);
+    if (componentTemplateUrl) {
+      await application.navigateToUrl(componentTemplateUrl);
+    }
+  }, [application, componentTemplateUrl]);
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiCallOut
-        title={fieldLimitMitigationSuccessMessage}
+    <EuiCallOut
+      title={fieldLimitMitigationSuccessMessage}
+      color="success"
+      iconType="checkInCircleFilled"
+    >
+      <EuiButton
+        data-test-subj="datasetQualityNewLimitSetCheckComponentTemplate"
+        onClick={onClickHandler}
+        iconType="popout"
+        size="s"
+        title={fieldLimitMitigationSuccessComponentTemplateLinkText}
         color="success"
-        iconType="checkInCircleFilled"
+        target="_blank"
       >
-        <EuiButton
-          data-test-subj="datasetQualityNewLimitSetCheckComponentTemplate"
-          onClick={onClickHandler}
-          iconType="popout"
-          size="s"
-          title={fieldLimitMitigationSuccessComponentTemplateLinkText}
-          color="success"
-        >
-          {fieldLimitMitigationSuccessComponentTemplateLinkText}
-        </EuiButton>
-      </EuiCallOut>
-    </EuiFlexItem>
+        {fieldLimitMitigationSuccessComponentTemplateLinkText}
+      </EuiButton>
+    </EuiCallOut>
   );
 }
 
 export function ManualRolloverCallout() {
   const { triggerRollover } = useDegradedFields();
   return (
-    <EuiFlexItem grow={false}>
-      <EuiCallOut
-        title={fieldLimitMitigationFailedMessage}
+    <EuiCallOut
+      title={fieldLimitMitigationFailedMessage}
+      color="danger"
+      iconType="checkInCircleFilled"
+    >
+      <p>{fieldLimitMitigationFailedMessageDescription}</p>
+      <EuiButton
+        data-test-subj="datasetQualityNewLimitSetManualRollover"
+        onClick={triggerRollover}
+        iconType="popout"
+        size="s"
+        title={fieldLimitMitigationRolloverButton}
         color="danger"
-        iconType="checkInCircleFilled"
       >
-        <p>{fieldLimitMitigationFailedMessageDescription}</p>
-        <EuiButton
-          data-test-subj="datasetQualityNewLimitSetManualRollover"
-          onClick={triggerRollover}
-          iconType="popout"
-          size="s"
-          title={fieldLimitMitigationRolloverButton}
-          color="danger"
-        >
-          {fieldLimitMitigationRolloverButton}
-        </EuiButton>
-      </EuiCallOut>
-    </EuiFlexItem>
+        {fieldLimitMitigationRolloverButton}
+      </EuiButton>
+    </EuiCallOut>
   );
 }
