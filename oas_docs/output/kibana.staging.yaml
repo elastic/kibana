@@ -41623,6 +41623,8 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '404':
+          description: Indicates that the request failed.
       summary: Delete a space
       tags:
         - spaces

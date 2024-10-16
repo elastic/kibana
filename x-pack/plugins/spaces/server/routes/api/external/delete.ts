@@ -43,9 +43,9 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
             204: {
               description: 'Indicates a successful call.',
             },
-          },
-          404: {
-            description: 'Indicates that the request failed.',
+            404: {
+              description: 'Indicates that the request failed.',
+            },
           },
         },
       },
