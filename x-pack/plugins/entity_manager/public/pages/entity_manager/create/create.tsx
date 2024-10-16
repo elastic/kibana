@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
@@ -43,6 +44,7 @@ export function EntityManagerCreatePage() {
     http: { basePath },
     entityClient,
   } = useKibana().services;
+  const history = useHistory();
   const [isCreating, setIsCreating] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -70,12 +72,14 @@ export function EntityManagerCreatePage() {
     setIsCreating(true);
 
     try {
-      await entityClient.repositoryClient('POST /internal/entities/definition', {
+      const definition = await entityClient.repositoryClient('POST /internal/entities/definition', {
         params: {
           query: { installOnly: false },
           body: data,
         },
       });
+
+      history.replace({ pathname: `/${definition.id}` });
     } catch (err) {
       if (isHttpFetchError(err) && err.body?.message) {
         setErrors([err.body.message]);
