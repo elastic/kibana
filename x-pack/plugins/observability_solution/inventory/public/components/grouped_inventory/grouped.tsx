@@ -17,9 +17,32 @@ import { groupCountCss, groupingContainerCss } from './styles';
 import { InventoryGroupPanel } from './inventory_group_panel';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { GroupedGridWrapper } from './grouped_grid_wrapper';
+import { EntityGroup } from '../../../common/entities';
 
 export interface GroupedInventoryPageProps {
   setGroupSelected: (selected: string) => void;
+}
+
+function InventoryGroupAccordion({ group, groupBy }: { group: EntityGroup; groupBy: string }) {
+  const field = group[groupBy];
+  const id = `inventory-group-${groupBy}-${field}`;
+
+  return (
+    <>
+      <EuiAccordion
+        className="inventoryGroupAccordion"
+        data-test-subj={id}
+        id={id}
+        buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
+        buttonElement="div"
+        buttonProps={{ paddingSize: 'm' }}
+        paddingSize="m"
+      >
+        <GroupedGridWrapper entityType={field} />
+      </EuiAccordion>
+      <EuiSpacer size="s" />
+    </>
+  );
 }
 
 export function GroupedInventoryPage() {
@@ -96,27 +119,9 @@ export function GroupedInventoryPage() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {value.groups.map((group, index) => {
-        const field = group[value.groupBy];
-
-        return (
-          <>
-            <EuiAccordion
-              className="inventoryGroupAccordion"
-              data-test-subj={`inventory-grouping-accordion-${index}`}
-              key={field}
-              id={field}
-              buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
-              buttonElement="div"
-              buttonProps={{ paddingSize: 'm' }}
-              paddingSize="m"
-            >
-              <GroupedGridWrapper entityType={field} />
-            </EuiAccordion>
-            <EuiSpacer size="s" />
-          </>
-        );
-      })}
+      {value.groups.map((group) => (
+        <InventoryGroupAccordion key={group[value.groupBy]} group={group} groupBy={value.groupBy} />
+      ))}
     </div>
   );
 }
