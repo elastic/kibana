@@ -41777,7 +41777,7 @@
           }
         },
         "responses": {},
-        "summary": "Copy saved objects to spaces",
+        "summary": "Copy saved objects between spaces",
         "tags": [
           "spaces"
         ]
@@ -41998,6 +41998,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "createNewCopy": {
+                            "description": "Creates new copies of the saved objects, regenerates each object ID, and resets the origin.",
                             "type": "boolean"
                           },
                           "destinationId": {
@@ -42422,7 +42423,7 @@
             }
           },
           {
-            "description": "The space identifier.",
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,

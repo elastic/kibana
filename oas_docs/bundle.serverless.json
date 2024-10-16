@@ -41272,7 +41272,7 @@
             }
           },
           {
-            "description": "The space identifier.",
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,

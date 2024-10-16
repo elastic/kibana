@@ -229,7 +229,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                       },
                     })
                   ),
-                  createNewCopy: schema.maybe(schema.boolean({ meta: { description: 'Creates new copies of the saved objects, regenerates each object ID, and resets the origin'}})),
+                  createNewCopy: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'Creates new copies of the saved objects, regenerates each object ID, and resets the origin.',
+                      },
+                    })
+                  ),
                   ignoreMissingReferences: schema.maybe(
                     schema.boolean({
                       meta: {

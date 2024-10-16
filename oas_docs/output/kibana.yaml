@@ -41187,7 +41187,7 @@ paths:
                 - spaces
                 - objects
       responses: {}
-      summary: Copy saved objects to spaces
+      summary: Copy saved objects between spaces
       tags:
         - spaces
   /api/spaces/_disable_legacy_url_aliases:
@@ -41347,6 +41347,9 @@ paths:
                       type: object
                       properties:
                         createNewCopy:
+                          description: >-
+                            Creates new copies of the saved objects, regenerates
+                            each object ID, and resets the origin.
                           type: boolean
                         destinationId:
                           description: >-
@@ -41664,7 +41667,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The space identifier.
+        - description: >-
+            The space identifier. You are unable to change the ID with the
+            update operation.
           in: path
           name: id
           required: true
