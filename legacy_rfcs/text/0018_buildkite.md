@@ -243,6 +243,7 @@ The [Buildkite features](https://buildkite.com/features) page is a great overvie
 
 For some public instances of Buildkite in action, see:
 
+- [Bazel](https://buildkite.com/bazel)
 - [Rails](https://buildkite.com/rails)
 - [Chef](https://buildkite.com/chef-oss)
 
