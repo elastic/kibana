@@ -31,7 +31,6 @@ export class DataUsagePlugin
 {
   private readonly logger: Logger;
   private dataUsageContext: DataUsageContext;
-  private dataUsageService: DataUsageService;
 
   constructor(context: PluginInitializerContext<DataUsageConfigType>) {
     const serverConfig = createConfig(context);
@@ -54,7 +53,7 @@ export class DataUsagePlugin
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
     this.logger.debug('data usage plugin setup');
-    this.dataUsageService = new DataUsageService(this.dataUsageContext);
+    const dataUsageService = new DataUsageService(this.dataUsageContext);
 
     pluginsSetup.features.registerElasticsearchFeature({
       id: PLUGIN_ID,
@@ -69,7 +68,7 @@ export class DataUsagePlugin
       ],
     });
     const router = coreSetup.http.createRouter<DataUsageRequestHandlerContext>();
-    registerDataUsageRoutes(router, this.dataUsageService);
+    registerDataUsageRoutes(router, dataUsageService);
 
     return {};
   }
