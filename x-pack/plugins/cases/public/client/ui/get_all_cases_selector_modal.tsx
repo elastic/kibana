@@ -31,6 +31,7 @@ export const getAllCasesSelectorModalLazy = ({
   hiddenStatuses,
   onRowClick,
   onClose,
+  queryClient,
 }: GetAllCasesSelectorModalPropsInternal) => (
   <CasesProvider
     value={{
@@ -39,6 +40,7 @@ export const getAllCasesSelectorModalLazy = ({
       getFilesClient,
       owner,
       permissions,
+      queryClient,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

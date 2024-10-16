@@ -29,6 +29,7 @@ export const getRecentCasesLazy = ({
   owner,
   permissions,
   maxCasesToShow,
+  queryClient,
 }: GetRecentCasesPropsInternal) => (
   <CasesProvider
     value={{
@@ -37,6 +38,7 @@ export const getRecentCasesLazy = ({
       getFilesClient,
       owner,
       permissions,
+      queryClient,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

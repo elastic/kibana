@@ -102,8 +102,8 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
               owner,
               permissions,
               getFilesClient,
+              queryClient,
             }}
-            queryClient={queryClient}
           >
             <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
           </CasesProvider>
@@ -184,8 +184,8 @@ export const createAppMockRenderer = ({
               permissions,
               releasePhase,
               getFilesClient,
+              queryClient,
             }}
-            queryClient={queryClient}
           >
             {children}
           </CasesProvider>

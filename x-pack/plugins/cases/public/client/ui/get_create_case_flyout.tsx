@@ -33,6 +33,7 @@ export const getCreateCaseFlyoutLazy = ({
   onClose,
   onSuccess,
   attachments,
+  queryClient,
 }: GetCreateCaseFlyoutPropsInternal) => (
   <CasesProvider
     value={{
@@ -42,6 +43,7 @@ export const getCreateCaseFlyoutLazy = ({
       owner,
       permissions,
       features,
+      queryClient,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

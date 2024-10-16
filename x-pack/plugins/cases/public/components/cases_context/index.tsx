@@ -45,6 +45,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  queryClient?: QueryClient;
 }
 
 export interface CasesContextProps
@@ -54,6 +55,7 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
+    | 'queryClient'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -66,7 +68,6 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 export const CasesProvider: FC<
   PropsWithChildren<{
     value: CasesContextProps;
-    queryClient?: QueryClient;
   }>
 > = ({
   children,
@@ -79,11 +80,10 @@ export const CasesProvider: FC<
     features = {},
     releasePhase = 'ga',
     getFilesClient,
+    queryClient,
   },
-  queryClient = casesQueryClient,
 }) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
-
   const value: CasesContextValue = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry,
@@ -111,6 +111,7 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      queryClient,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -152,7 +153,7 @@ export const CasesProvider: FC<
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={value.queryClient || casesQueryClient}>
       <CasesStateContext.Provider value={state}>
         <CasesContext.Provider value={value}>
           {applyFilesContext(
