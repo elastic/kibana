@@ -13,8 +13,9 @@ import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
 import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
+import { errorHandler } from '../utils/error_handler';
 
-export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies) => {
+export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/indices',
@@ -26,7 +27,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const core = await context.core;
       const client = core.elasticsearch.client.asCurrentUser;
       const user = core.security.authc.getCurrentUser();
@@ -47,7 +48,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.get(
@@ -59,7 +60,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const result = await client.indices.get({
@@ -74,7 +75,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.get(
@@ -86,7 +87,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const body = await fetchIndex(client.asCurrentUser, request.params.indexName);
       return body
@@ -95,7 +96,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
             headers: { 'content-type': 'application/json' },
           })
         : response.notFound();
-    }
+    })
   );
 
   router.post(
@@ -119,7 +120,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const indexName = decodeURIComponent(request.params.index_name);
       const searchQuery = request.body.searchQuery;
@@ -134,7 +135,7 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 };
 
