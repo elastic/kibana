@@ -24,7 +24,8 @@ export interface IOnEsqlChangeParams {
 
 interface Props {
   esql: string;
-  onESQLChange: (IOnEsqlChangeParams) => void;
+  onESQLChange: (onEsqlChangeParams: IOnEsqlChangeParams) => void;
+  verifyColumns: (columns: ESQLColumn[]) => void; // should throw if invalid
 }
 
 export function ESQLEditor(props: Props) {
@@ -62,7 +63,7 @@ export function ESQLEditor(props: Props) {
               return;
             }
             console.log('VERIFY GEOMETRY COLUMN', esqlMeta);
-            verifyGeometryColumn(esqlMeta.columns);
+            props.verifyColumns(esqlMeta.columns);
             if (esqlMeta.columns.length >= 6) {
               setWarning(
                 i18n.translate('xpack.maps.esqlSource.tooManyColumnsWarning', {

@@ -22,7 +22,7 @@ import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from '../../../components/esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { getFields } from '../../../components/esql_utils';
+import { getFields, verifyGeometryColumn } from '../../../components/esql_utils';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
@@ -76,6 +76,7 @@ export function UpdateSourceEditor(props: Props) {
 
         <EuiSkeletonText lines={3} isLoading={!isInitialized}>
           <ESQLEditor
+            verifyColumns={verifyGeometryColumn}
             esql={props.sourceDescriptor.esql}
             onESQLChange={(change) => {
               setDateFields(change.dateFields);

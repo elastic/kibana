@@ -24,7 +24,7 @@ import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from '../../../components/esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from '../../../components/esql_utils';
+import {ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE, verifyGeometryColumn} from '../../../components/esql_utils';
 
 interface Props {
   mostCommonDataViewId?: string;
@@ -164,6 +164,7 @@ export function CreateSourceEditor(props: Props) {
     <EuiPanel>
       <EuiSkeletonText lines={3} isLoading={!isInitialized}>
         <ESQLEditor
+          verifyColumns={verifyGeometryColumn}
           esql={esql}
           onESQLChange={(change) => {
             setAdhocDataViewId(change.adhocDataViewId);

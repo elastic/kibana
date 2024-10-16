@@ -59,7 +59,15 @@ export function ESQLJoinPopoverContent(props: Props) {
     if (!props.leftValue) {
       return null;
     }
-    return <ESQLEditor onESQLChange={onEsqlChange} esql={props.sourceDescriptor.esql || ''} />;
+    return (
+      <ESQLEditor
+        verifyColumns={(columns) => {
+          console.log('verify these columns', columns);
+        }}
+        onESQLChange={onEsqlChange}
+        esql={props.sourceDescriptor.esql || ''}
+      />
+    );
   }
 
   console.log('render opopuver!');
