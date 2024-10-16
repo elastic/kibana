@@ -8,7 +8,7 @@
 import type { RuleVersions } from '../diff/calculate_rule_diff';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import type { IPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
-import type { RuleVersionSpecifier } from '../../model/rule_versions/rule_version_specifier';
+import type { RuleVersionSpecifier } from './rule_version_specifier';
 import { zipRuleVersions } from './zip_rule_versions';
 
 interface GetRuleVersionsMapArgs {
