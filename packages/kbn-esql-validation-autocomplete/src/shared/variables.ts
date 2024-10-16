@@ -138,9 +138,7 @@ function addVariableFromAssignment(
 function addVariableFromExpression(
   expressionOperation: ESQLFunction,
   queryString: string,
-  variables: Map<string, ESQLVariable[]>,
-  ast: ESQLAst,
-  fields: Map<string, ESQLRealField>
+  variables: Map<string, ESQLVariable[]>
 ) {
   if (!expressionOperation.text.includes(EDITOR_MARKER)) {
     const expressionText = queryString.substring(
@@ -185,7 +183,7 @@ export function collectVariables(
       if (ctx.node.name === '=') {
         addVariableFromAssignment(ctx.node, variables, fields);
       } else {
-        addVariableFromExpression(ctx.node, queryString, variables, ast, fields);
+        addVariableFromExpression(ctx.node, queryString, variables);
       }
     })
     .on('visitCommandOption', (ctx) => {
