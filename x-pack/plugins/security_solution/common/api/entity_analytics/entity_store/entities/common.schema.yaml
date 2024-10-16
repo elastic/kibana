@@ -87,9 +87,7 @@ components:
             name: 
               type: string
             source:
-              type: array
-              items:
-                type: string
+              type: string
         host:
           type: object
           properties:
