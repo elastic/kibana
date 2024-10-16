@@ -7,6 +7,8 @@
 
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
+import { getEntitiesIndexName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/utils';
+import _ from 'lodash';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
@@ -162,6 +164,76 @@ export const EntityStoreUtils = (
     await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
+  const scheduleTransformNow = async (entityType: EntityType) => {
+    const transformId = `entities-v1-latest-security_${entityType}_${namespace}`;
+
+    await es.transform.scheduleNowTransform({
+      transform_id: transformId,
+    });
+  };
+
+  const waitForEntity = async ({
+    name,
+    entityType,
+    expectedFields,
+    attempts = 5,
+    delayMs = 2000,
+  }: {
+    name: string;
+    entityType: EntityType;
+    expectedFields: string[];
+    attempts?: number;
+    delayMs?: number;
+  }) => {
+    let currentAttempt = 1;
+    let entity: any;
+    while (currentAttempt <= attempts) {
+      try {
+        const res = await es.search({
+          index: getEntitiesIndexName(entityType, namespace),
+          body: {
+            query: {
+              match: {
+                'entity.name': name,
+              },
+            },
+          },
+        });
+
+        if (res?.hits?.hits?.[0]?._source) {
+          entity = res.hits.hits[0]._source;
+
+          if (expectedFields.length > 0) {
+            if (expectedFields.every((field) => _.has(entity, field))) {
+              return entity;
+            }
+          } else {
+            return entity;
+          }
+        }
+      } catch (e) {
+        if (currentAttempt === attempts) {
+          throw new Error(`Failed to get entity ${name} of type ${entityType}: ${e}`);
+        }
+        scheduleTransformNow(entityType);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        currentAttempt++;
+      }
+    }
+
+    if (!entity) {
+      throw new Error(`Failed to get entity ${name} of type ${entityType}`);
+    }
+
+    if (expectedFields.length > 0) {
+      throw new Error(
+        `Failed to get entity ${name} of type ${entityType} with expected fields: ${expectedFields.join(
+          ', '
+        )}, last entity found: ${JSON.stringify(entity)}`
+      );
+    }
+  };
+
   return {
     cleanEngines,
     initEntityEngineForEntityType,
@@ -170,5 +242,6 @@ export const EntityStoreUtils = (
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    waitForEntity,
   };
 };

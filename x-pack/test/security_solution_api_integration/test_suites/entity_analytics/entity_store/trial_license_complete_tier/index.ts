@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./engine_crud'));
     loadTestFile(require.resolve('./field_retention_operators'));
     loadTestFile(require.resolve('./engine_crud_nondefault_spaces'));
+    loadTestFile(require.resolve('./engine_entities'));
   });
 }
