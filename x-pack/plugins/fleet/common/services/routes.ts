@@ -201,6 +201,10 @@ export const agentPolicyRouteService = {
   getInfoOutputsPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_OUTPUTS_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
+
+  getListOutputsPath: () => {
+    return AGENT_POLICY_API_ROUTES.LIST_OUTPUTS_PATTERN;
+  },
 };
 
 export const dataStreamRouteService = {

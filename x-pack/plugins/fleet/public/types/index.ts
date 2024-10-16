@@ -148,6 +148,8 @@ export type {
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
   GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
+  GetListAgentPolicyOutputsResponse,
 } from '../../common/types';
 export {
   entries,

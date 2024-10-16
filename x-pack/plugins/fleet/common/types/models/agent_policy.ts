@@ -272,6 +272,7 @@ export interface IntegrationsOutput {
   name?: string;
   id?: string | null;
   pkgName?: string;
+  integrationPolicyName?: string;
 }
 
 export interface OutputsForAgentPolicy {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
+import { chunk, groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
@@ -87,6 +87,7 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
   AgentlessPolicyExistsRequestError,
+  OutputNotFoundError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -1786,6 +1787,28 @@ class AgentPolicyService {
   ) {
     const logger = appContextService.getLogger();
 
+    const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
+      outputService.getDefaultDataOutputId(soClient),
+      outputService.getDefaultMonitoringOutputId(soClient),
+    ]);
+
+    if (!defaultDataOutputId) {
+      throw new OutputNotFoundError('Default output is not setup');
+    }
+
+    const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
+    const monitoringOutputId =
+      agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
+
+    const outputIds = uniq([dataOutputId, monitoringOutputId]);
+
+    const fetchedOutputs = await outputService.bulkGet(outputIds, {
+      ignoreNotFound: true,
+    });
+
+    const dataOutput = fetchedOutputs.find((output) => output.id === dataOutputId);
+    const monitoringOutput = fetchedOutputs.find((output) => output.id === monitoringOutputId);
+
     let integrationsDataOutputs: IntegrationsOutput[] = [];
     if (agentPolicy?.package_policies) {
       const integrationsWithOutputs = agentPolicy.package_policies.filter(
@@ -1800,7 +1823,7 @@ class AgentPolicyService {
               return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
             } catch (error) {
               logger.error(
-                `error while retrieving output with id ${pkgPolicy.output_id}: ${error}`
+                `error while retrieving output with id "${pkgPolicy.output_id}": ${error}`
               );
             }
           }
@@ -1810,39 +1833,6 @@ class AgentPolicyService {
           concurrency: 20,
         }
       );
-    }
-    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
-    let dataOutput;
-    let monitoringOutput;
-
-    let dataOutputId;
-    let monitoringOutputId;
-    try {
-      // get the data output
-      if (agentPolicy && agentPolicy?.data_output_id) {
-        dataOutputId = agentPolicy?.data_output_id;
-      } else {
-        if (defaultOutputId) {
-          dataOutputId = defaultOutputId;
-        }
-      }
-      dataOutput = await outputService.get(soClient, dataOutputId);
-    } catch (error) {
-      logger.error(`error while retrieving data output with id "${dataOutputId}": ${error}`);
-    }
-
-    try {
-      // get the monitoring output
-      if (agentPolicy && agentPolicy?.monitoring_output_id) {
-        monitoringOutputId = agentPolicy?.monitoring_output_id;
-      } else {
-        if (defaultOutputId) {
-          monitoringOutputId = defaultOutputId;
-        }
-        monitoringOutput = await outputService.get(soClient, monitoringOutputId);
-      }
-    } catch (error) {
-      logger.error(`error while retrieving monitoring output with id "${dataOutputId}": ${error}`);
     }
     const outputs: OutputsForAgentPolicy = {
       monitoring: {

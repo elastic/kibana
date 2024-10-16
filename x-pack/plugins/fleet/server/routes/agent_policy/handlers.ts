@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
-import { inputsFormat } from '../../../common/constants';
+import { SO_SEARCH_LIMIT, inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -720,10 +720,11 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const { page, perPage } = request.query;
 
+    // fix or remove this query
     const { items: agentPolicies } = await agentPolicyService.list(soClient, {
       esClient,
-      page,
-      perPage,
+      page: page ? page : 1,
+      perPage: perPage ? perPage : SO_SEARCH_LIMIT,
       withPackagePolicies: true,
     });
 

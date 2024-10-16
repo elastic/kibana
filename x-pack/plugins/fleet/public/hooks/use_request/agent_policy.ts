@@ -24,6 +24,8 @@ import type {
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
@@ -200,6 +202,15 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
     method: 'post',
     body: JSON.stringify({}),
     version: API_VERSIONS.internal.v1,
+  });
+};
+
+export const useGetListOutputsForPolicies = (query?: GetListAgentPolicyOutputsRequest['query']) => {
+  return useRequest<GetListAgentPolicyOutputsResponse>({
+    path: agentPolicyRouteService.getListOutputsPath(),
+    method: 'get',
+    query,
+    version: API_VERSIONS.public.v1,
   });
 };
 

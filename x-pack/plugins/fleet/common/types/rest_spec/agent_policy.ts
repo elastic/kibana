@@ -104,3 +104,10 @@ export interface GetAgentPolicyOutputsResponse {
 export interface GetListAgentPolicyOutputsResponse {
   items: OutputsForAgentPolicy[];
 }
+
+export interface GetListAgentPolicyOutputsRequest {
+  query: {
+    page?: number;
+    perPage?: number;
+  };
+}

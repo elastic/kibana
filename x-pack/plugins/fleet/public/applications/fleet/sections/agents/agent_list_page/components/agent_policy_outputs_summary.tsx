@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useGetInfoOutputsForPolicy, useLink } from '../../../../hooks';
+import { useLink } from '../../../../hooks';
+import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 const TruncatedEuiLink = styled(EuiLink)`
   overflow: hidden;
@@ -30,17 +31,15 @@ const TruncatedEuiLink = styled(EuiLink)`
 `;
 
 export const AgentPolicyOutputsSummary: React.FC<{
-  agentPolicyId: string;
+  outputs?: OutputsForAgentPolicy;
   isMonitoring?: boolean;
-}> = ({ agentPolicyId, isMonitoring }) => {
+}> = ({ outputs, isMonitoring }) => {
   const { getHref } = useLink();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const outputRes = useGetInfoOutputsForPolicy(agentPolicyId);
-
-  const monitoring = outputRes?.data?.item.monitoring;
-  const data = outputRes?.data?.item.data;
+  const monitoring = outputs?.monitoring;
+  const data = outputs?.data;
 
   const listItems: EuiListGroupItemProps[] = useMemo(() => {
     if (!data?.integrations) return [];

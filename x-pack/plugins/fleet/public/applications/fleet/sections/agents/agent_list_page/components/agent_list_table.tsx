@@ -24,12 +24,12 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion } from '../../../../hooks';
+import { useAgentVersion, useGetListOutputsForPolicies } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics } from '../../../../../../../common/types';
+import type { AgentMetrics, OutputsForAgentPolicy } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
@@ -107,6 +107,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
+  const allOutputs = useGetListOutputsForPolicies({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+  });
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
@@ -294,10 +298,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Output for integrations',
       }),
       width: '180px',
-      render: (policyId: string, agent: Agent) => {
-        return agent?.policy_id ? (
-          <AgentPolicyOutputsSummary agentPolicyId={agent.policy_id} />
-        ) : null;
+      render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
+        if (!agent?.policy_id) return null;
+
+        const outputsForPolicy = allOutputs?.data?.items.find(
+          (item) => item.agentPolicyId === agent?.policy_id
+        );
+        return <AgentPolicyOutputsSummary outputs={outputsForPolicy} />;
       },
     },
     {
@@ -308,10 +315,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Output for monitoring',
       }),
       width: '180px',
-      render: (policyId: string, agent: Agent) => {
-        return agent?.policy_id ? (
-          <AgentPolicyOutputsSummary agentPolicyId={agent.policy_id} isMonitoring={true} />
-        ) : null;
+      render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
+        if (!agent?.policy_id) return null;
+
+        const outputsForPolicy = allOutputs?.data?.items.find(
+          (item) => item.agentPolicyId === agent?.policy_id
+        );
+        return <AgentPolicyOutputsSummary outputs={outputsForPolicy} isMonitoring={true} />;
       },
     },
     {
