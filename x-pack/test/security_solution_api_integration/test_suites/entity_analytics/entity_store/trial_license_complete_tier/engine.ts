@@ -14,7 +14,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196526
+  describe.skip('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
