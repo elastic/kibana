@@ -11,6 +11,7 @@ import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_up
 import { DescriptionEdit, descriptionSchema } from './fields/description';
 import { NameEdit, nameSchema } from './fields/name';
 import { TagsEdit, tagsSchema } from './fields/tags';
+import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -22,6 +23,14 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       return <FieldFormWrapper component={DescriptionEdit} fieldFormSchema={descriptionSchema} />;
     case 'name':
       return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+    case 'references':
+      return (
+        <FieldFormWrapper
+          component={ReferencesEdit}
+          fieldFormSchema={referencesSchema}
+          serializer={referencesSerializer}
+        />
+      );
     case 'tags':
       return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
     default:
