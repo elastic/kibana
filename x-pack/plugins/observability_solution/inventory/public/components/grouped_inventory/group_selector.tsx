@@ -8,8 +8,18 @@
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StyledContextMenu, StyledEuiButtonEmpty } from './styles';
 import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
+
+const GROUP_LABELS: Record<string, string> = {
+  none: i18n.translate('xpack.inventory.groupedInventoryPage.noneLabel', {
+    defaultMessage: 'None',
+  }),
+  type: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
+    defaultMessage: 'Type',
+  }),
+};
 
 export interface GroupedSelectorProps {
   groupSelected: string;
@@ -32,13 +42,13 @@ export function GroupSelector() {
       items: [
         {
           'data-test-subj': 'panel-none',
-          name: 'None',
+          name: GROUP_LABELS.none,
           icon: isGroupSelected('none') ? 'check' : 'empty',
           onClick: () => onGroupChange('none'),
         },
         {
           'data-test-subj': 'panel-type',
-          name: 'Type',
+          name: GROUP_LABELS.type,
           icon: isGroupSelected('type') ? 'check' : 'empty',
           onClick: () => onGroupChange('type'),
         },
@@ -58,12 +68,14 @@ export function GroupSelector() {
       iconSize="s"
       iconType="arrowDown"
       onClick={onButtonClick}
-      title={i18n.translate('xpack.inventory.groupedInventoryPage.styledEuiButtonEmpty.noneLabel', {
-        defaultMessage: 'none',
-      })}
+      title={GROUP_LABELS[grouping]}
       size="s"
     >
-      {`Group entities by: ${grouping}`}
+      <FormattedMessage
+        id="xpack.inventory.groupedInventoryPage.groupedByLabel"
+        defaultMessage={`Group entities by: {grouping}`}
+        values={{ grouping: GROUP_LABELS[grouping] }}
+      />
     </StyledEuiButtonEmpty>
   );
 
