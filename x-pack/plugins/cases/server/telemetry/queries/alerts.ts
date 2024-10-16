@@ -7,7 +7,11 @@
 
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
-import { getCountsAndMaxData, getOnlyAlertsCommentsFilter } from './utils';
+import {
+  getCountsAndMaxData,
+  getOnlyAlertsCommentsFilter,
+  getUniqueAlertCommentsCountQuery,
+} from './utils';
 
 export const getAlertsTelemetryData = async ({
   savedObjectsClient,
@@ -16,7 +20,16 @@ export const getAlertsTelemetryData = async ({
     savedObjectsClient,
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
     filter: getOnlyAlertsCommentsFilter(),
+    additionalAggs: getUniqueAlertCommentsCountQuery(),
   });
 
-  return res;
+  const totalAlerts = res.all.uniqueAlertCommentsCount?.value ?? 0;
+
+  return {
+    ...res,
+    all: {
+      ...res.all,
+      total: totalAlerts,
+    },
+  };
 };
