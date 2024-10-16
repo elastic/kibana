@@ -37,7 +37,7 @@ const convertMultiwordTypesToPhrasesAndTrimWhitespace = (
   return term.replace(termReplaceRegex, (_, typeKeyword, whitespace, typeValue) => {
     const trimmedTypeKeyword = `${typeKeyword}${whitespace.trim()}`;
 
-    // If the type value is already wrapped in quotes, leavy it as is
+    // If the type value is already wrapped in quotes, leave it as is
     return /['"]/.test(typeValue)
       ? `${trimmedTypeKeyword}${typeValue}`
       : `${trimmedTypeKeyword}"${typeValue}"`;
