@@ -44,16 +44,18 @@ export const summarizeDocument = async ({
   functionCalling?: FunctionCallingMode;
 }): Promise<SummarizeDocumentResponse> => {
   const result = await lastValueFrom(
-    outputAPI('extract_relevant_chunks', {
+    outputAPI('summarize_document', {
       connectorId,
       functionCalling,
-      system: `You are an Elastic assistant in charge of helping answering the user question.
+      system: `You are an helpful Elastic assistant, and your current task is to help answering the user question.
 
       Given a question and a document, please provide a condensed version of the document
       that can be used to answer the question.
-      - All useful information should be included in the condensed version.
-      - If you think the document isn't relevant at all to answer the question, return an empty text.
-      `,
+      - Please try to limit the length of the output to approximately 4000 characters, or 800 words.
+      - Try to include all relevant information that could be used to answer the question in the condensed version. If this
+        can't be done without exceeding the 4000chars/800words requirement, please only include the information that you think
+        are the most relevant and the most helpful to answer the question.
+      - If you think the document isn't relevant at all to answer the question, just return an empty text`,
       input: `
       ## User question
 

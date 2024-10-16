@@ -15,13 +15,7 @@ import {
 } from '@kbn/product-doc-common';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
-import {
-  downloadToDisk,
-  openZipArchive,
-  loadManifestFile,
-  loadMappingFile,
-  type ZipArchive,
-} from './utils';
+import { downloadToDisk, openZipArchive, loadMappingFile, type ZipArchive } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
@@ -160,7 +154,6 @@ export class PackageInstaller {
 
       validateArtifactArchive(zipArchive);
 
-      const manifest = await loadManifestFile(zipArchive);
       const mappings = await loadMappingFile(zipArchive);
 
       const indexName = getProductDocIndexName(productName);

@@ -12,8 +12,8 @@ import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
 import { summarizeDocument } from './summarize_document';
 
-// if content length greater, then we'll trigger the summary task
-const MIN_TOKENS_TO_SUMMARIZE = 500;
+// if document content length greater, then we'll trigger the summary task
+const MIN_TOKENS_TO_SUMMARIZE = 750;
 // maximum token length of generated summaries - will truncate if greater
 const MAX_SUMMARY_TOKEN_LENGTH = 1000;
 

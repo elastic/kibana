@@ -97,7 +97,7 @@ export class ProductDocBasePlugin
       logger: this.logger.get('search-service'),
     });
 
-    // TODO: see if we should be using taskManager for that.
+    // should we use taskManager for this?
     this.packageInstaller.ensureUpToDate({}).catch((err) => {
       this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
     });
