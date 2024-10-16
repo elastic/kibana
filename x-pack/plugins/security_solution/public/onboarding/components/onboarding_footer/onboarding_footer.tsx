@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { footerItems } from './footer_items';
 import { trackOnboardingLinkClick } from '../../common/lib/telemetry';
@@ -57,7 +66,17 @@ const LinkItem = React.memo<LinkItemProps>(({ id, title, icon, description, link
       <EuiText size="xs">{description}</EuiText>
       <EuiSpacer size="m" />
       <EuiText size="xs">
-        <EuiLink onClick={onClickWithReport}>{link.title}</EuiLink>
+        <EuiLink onClick={onClickWithReport}>
+          {link.title}
+          <EuiIcon
+            css={css`
+              margin-left: 4px;
+            `}
+            size="s"
+            type="popout"
+            color="primary"
+          />
+        </EuiLink>
       </EuiText>
     </EuiFlexItem>
   );
