@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import {
   fieldLimitMitigationFailedMessage,
   fieldLimitMitigationFailedMessageDescription,
@@ -39,7 +39,6 @@ export function MessageCallout() {
 export function SuccessCallout() {
   const {
     services: {
-      application,
       share: {
         url: { locators },
       },
@@ -54,29 +53,20 @@ export function SuccessCallout() {
     )}@custom`,
   });
 
-  const onClickHandler = useCallback(async () => {
-    if (componentTemplateUrl) {
-      await application.navigateToUrl(componentTemplateUrl);
-    }
-  }, [application, componentTemplateUrl]);
-
   return (
     <EuiCallOut
       title={fieldLimitMitigationSuccessMessage}
       color="success"
       iconType="checkInCircleFilled"
     >
-      <EuiButton
+      <EuiLink
         data-test-subj="datasetQualityNewLimitSetCheckComponentTemplate"
-        onClick={onClickHandler}
-        iconType="popout"
-        size="s"
-        title={fieldLimitMitigationSuccessComponentTemplateLinkText}
-        color="success"
+        href={componentTemplateUrl}
         target="_blank"
+        color="success"
       >
         {fieldLimitMitigationSuccessComponentTemplateLinkText}
-      </EuiButton>
+      </EuiLink>
     </EuiCallOut>
   );
 }

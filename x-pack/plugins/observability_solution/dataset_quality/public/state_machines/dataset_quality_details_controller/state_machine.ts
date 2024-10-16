@@ -377,9 +377,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               },
             },
             mitigations: {
-              initial: 'pending',
               states: {
-                pending: {},
                 savingNewFieldLimit: {
                   invoke: {
                     src: 'saveNewFieldLimit',
@@ -668,7 +666,8 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
             dataStream:
               context.showCurrentQualityIssues &&
               'dataStreamSettings' in context &&
-              context.dataStreamSettings
+              context.dataStreamSettings &&
+              context.dataStreamSettings.lastBackingIndexName
                 ? context.dataStreamSettings.lastBackingIndexName
                 : context.dataStream,
             start,
