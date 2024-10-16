@@ -23,7 +23,7 @@ export function getArgValueSuggestions() {
       // index argument not provided
       return;
     }
-    const indexPatternTitle = get(indexPatternArg, 'value.text');
+    const indexPatternTitle = get(indexPatternArg, 'value.text', '');
 
     return (await indexPatterns.find(indexPatternTitle, 1)).find(
       (index) => index.title === indexPatternTitle
