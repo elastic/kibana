@@ -39,9 +39,11 @@ export function getEntityManagerEnablement({
                 <EuiLink
                   data-test-subj="inventoryNoDataCardInventoryLink"
                   href="https://ela.st/docs-entity-inventory"
+                  external
+                  target="_blank"
                 >
                   {i18n.translate('xpack.inventory.noData.card.description.inventory', {
-                    defaultMessage: 'inventory',
+                    defaultMessage: 'Inventory',
                   })}
                 </EuiLink>
               ),
