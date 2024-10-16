@@ -25,6 +25,8 @@ export const routeToConnectors = `/connectors`;
 export const routeToConnectorEdit = `/connectors/:connectorId`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
+export const routeToCreateRule = '/rules/create';
+export const routeToEditRule = '/rules/edit';
 export const legacyRouteToAlerts = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 

@@ -13,22 +13,26 @@ import {
   CONNECTORS_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
   NEW_CONNECTOR_PATH,
+  NEW_CONNECTOR_FLOW_PATH,
   CONNECTOR_DETAIL_PATH,
 } from '../../routes';
 import { ConnectorDetailRouter } from '../connector_detail/connector_detail_router';
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
 import { Connectors } from './connectors';
-import { SelectConnector } from './select_connector/select_connector';
+import { CreateConnector } from './create_connector';
 
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
       <Route path={NEW_INDEX_SELECT_CONNECTOR_PATH}>
-        <SelectConnector />
+        <CreateConnector />
       </Route>
       <Route path={NEW_CONNECTOR_PATH}>
         <NewSearchIndexPage type="connector" />
+      </Route>
+      <Route path={NEW_CONNECTOR_FLOW_PATH}>
+        <CreateConnector />
       </Route>
       <Route path={CONNECTORS_PATH} exact>
         <Connectors isCrawler={false} />
