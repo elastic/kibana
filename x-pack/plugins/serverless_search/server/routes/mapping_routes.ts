@@ -7,8 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../plugin';
+import { errorHandler } from '../utils/error_handler';
 
-export const registerMappingRoutes = ({ router }: RouteDependencies) => {
+export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/mappings/{index_name}',
@@ -18,7 +19,7 @@ export const registerMappingRoutes = ({ router }: RouteDependencies) => {
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const mapping = await client.asCurrentUser.indices.getMapping({
         expand_wildcards: ['open'],
@@ -28,6 +29,6 @@ export const registerMappingRoutes = ({ router }: RouteDependencies) => {
         body: mapping[request.params.index_name],
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 };
