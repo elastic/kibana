@@ -23,7 +23,7 @@ The `kibana_admin` role or equivalent is required to manage **Spaces**.
 === Create a space
 
 [[spaces-control-feature-visibility]]
-You can create as many spaces as you like. 
+You can have up to 100 spaces. 
 
 . Select *Create space* and provide a name, description, and URL identifier.
 +
