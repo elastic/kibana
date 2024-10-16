@@ -16,6 +16,10 @@ interface FalsePositivesReadOnlyProps {
 }
 
 export function FalsePositivesReadOnly({ falsePositives }: FalsePositivesReadOnlyProps) {
+  if (falsePositives.length === 0) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

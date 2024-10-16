@@ -9,15 +9,21 @@ import React from 'react';
 import { FieldFormWrapper } from './field_form_wrapper';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { DescriptionEdit, descriptionSchema } from './fields/description';
-import { NameEdit, nameSchema } from './fields/name';
-import { TagsEdit, tagsSchema } from './fields/tags';
-import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
 import {
   FalsePositivesEdit,
   falsePositivesSchema,
   falsePositivesSerializer,
   falsePositivesDeserializer,
 } from './fields/false_positives';
+import {
+  InvestigationFieldsEdit,
+  investigationFieldsSchema,
+  investigationFieldsDeserializer,
+  investigationFieldsSerializer,
+} from './fields/investigation_fields';
+import { NameEdit, nameSchema } from './fields/name';
+import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
+import { TagsEdit, tagsSchema } from './fields/tags';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -34,6 +40,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={falsePositivesSchema}
           serializer={falsePositivesSerializer}
           deserializer={falsePositivesDeserializer}
+        />
+      );
+    case 'investigation_fields':
+      return (
+        <FieldFormWrapper
+          component={InvestigationFieldsEdit}
+          fieldFormSchema={investigationFieldsSchema}
+          serializer={investigationFieldsSerializer}
+          deserializer={investigationFieldsDeserializer}
         />
       );
     case 'name':
