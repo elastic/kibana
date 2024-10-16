@@ -171,6 +171,15 @@ export const getUpdateScript = ({
     if (params.assignEmpty == true || params.containsKey('text')) {
       ctx._source.text = params.text;
     }
+    if (params.assignEmpty == true || params.containsKey('description')) {
+      ctx._source.description = params.description;
+    }
+    if (params.assignEmpty == true || params.containsKey('field')) {
+      ctx._source.field = params.field;
+    }
+    if (params.assignEmpty == true || params.containsKey('index')) {
+      ctx._source.index = params.index;
+    }
     ctx._source.updated_at = params.updated_at;
     ctx._source.updated_by = params.updated_by;
   `,
