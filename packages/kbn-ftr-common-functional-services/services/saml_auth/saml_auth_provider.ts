@@ -179,7 +179,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       if (!isCustomRoleEnabled) {
         throw new Error(`Custom roles are not supported for the current deployment`);
       }
-      log.debug(`Updating role ${CUSTOM_ROLE}`);
+      log.debug(`Updating role '${CUSTOM_ROLE}'`);
       const adminCookieHeader = await getAdminCredentials();
 
       const customRoleDescriptors = {
@@ -197,6 +197,28 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       // Update descriptors for custome role, it will be used to create API key
       supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
+    },
+
+    async deleteCustomRole() {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
+
+      if (supportedRoleDescriptors.get(CUSTOM_ROLE)) {
+        log.debug(`Deleting role '${CUSTOM_ROLE}'`);
+        const adminCookieHeader = await getAdminCredentials();
+
+        const { status } = await supertestWithoutAuth
+          .delete(`/api/security/role/${CUSTOM_ROLE}`)
+          .set(INTERNAL_REQUEST_HEADERS)
+          .set(adminCookieHeader);
+
+        expect(status).to.be(204);
+
+        // Resetting descriptors for the custom role
+        supportedRoleDescriptors.set(CUSTOM_ROLE, null);
+        log.debug(`'${CUSTOM_ROLE}' descriptors  were reset`);
+      }
     },
 
     getCommonRequestHeader() {
