@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { upperFirst, isFunction } from 'lodash';
+import { upperFirst, isFunction, omit } from 'lodash';
 import React, { MouseEvent } from 'react';
 import {
   EuiToolTip,
@@ -72,10 +72,7 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
       <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom" delay="long">
         <EuiButtonIcon
           size="s"
-          {...{
-            ...commonButtonProps,
-            iconSide: undefined,
-          }}
+          {...omit(commonButtonProps, 'iconSide')}
           iconType={props.iconType}
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}
