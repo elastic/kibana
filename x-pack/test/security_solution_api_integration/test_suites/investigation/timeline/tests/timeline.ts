@@ -60,16 +60,20 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         ).to.equal(0);
       });
     });
+    /**
+     * Migration of saved object not working to current serverless version
+     * https://github.com/elastic/kibana/issues/196483
+     * */
     describe.skip('resolve timeline', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timelines/8.8.0'
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timelines/8.8.0'
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
         );
       });
 

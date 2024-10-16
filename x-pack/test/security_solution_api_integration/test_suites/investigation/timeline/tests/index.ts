@@ -8,8 +8,7 @@
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
-  // Failed in serverless: https://github.com/elastic/kibana/issues/183645
-  describe('@ess @serverless SecuritySolution Timeline - Trial', () => {
+  describe('@ess @serverless SecuritySolution Timeline', () => {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./timeline'));
