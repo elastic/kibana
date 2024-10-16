@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   Background,
   Controls,
@@ -68,9 +68,10 @@ const edgeTypes = {
  */
 export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
   const [layoutCalled, setLayoutCalled] = useState(false);
+  const [isGraphLocked, setIsGraphLocked] = useState(interactive);
   const { initialNodes, initialEdges } = useMemo(
-    () => processGraph(nodes, edges, interactive),
-    [nodes, edges, interactive]
+    () => processGraph(nodes, edges, isGraphLocked),
+    [nodes, edges, isGraphLocked]
   );
 
   const [nodesState, _setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -80,6 +81,16 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
     layoutGraph(nodesState, edgesState);
     setLayoutCalled(true);
   }
+
+  const onInteractiveStateChange = useCallback(
+    (interactiveStatus: boolean): void => {
+      setIsGraphLocked(interactiveStatus);
+      nodesState.forEach((node) => {
+        node.data.interactive = interactiveStatus;
+      });
+    },
+    [nodesState]
+  );
 
   return (
     <div {...rest}>
@@ -96,13 +107,14 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         proOptions={{ hideAttribution: true }}
-        panOnDrag={interactive}
-        zoomOnScroll={interactive}
-        zoomOnPinch={interactive}
-        zoomOnDoubleClick={interactive}
-        preventScrolling={interactive}
+        panOnDrag={isGraphLocked}
+        zoomOnScroll={isGraphLocked}
+        zoomOnPinch={isGraphLocked}
+        zoomOnDoubleClick={isGraphLocked}
+        preventScrolling={isGraphLocked}
+        nodesDraggable={interactive && isGraphLocked}
       >
-        {interactive && <Controls />}
+        {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
         <Background />
       </ReactFlow>
     </div>
@@ -126,7 +138,6 @@ const processGraph = (
       id: nodeData.id,
       type: nodeData.shape,
       data: { ...nodeData, interactive },
-      draggable: interactive,
       position: { x: 0, y: 0 }, // Default position, should be updated later
     };
 
