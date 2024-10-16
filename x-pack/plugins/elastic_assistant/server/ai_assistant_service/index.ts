@@ -392,6 +392,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
+      manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
     });
   }
 
