@@ -27,6 +27,21 @@ describe('deleteInferenceEndpoint', () => {
     expect(mockClient.inference.delete).toHaveBeenCalledWith({
       inference_id: id,
       task_type: type,
+      force: true,
+    });
+  });
+
+  it('should call the Inference Delete API to return list of usages', async () => {
+    const type = 'rerank';
+    const id = 'model-id-123';
+    const scanUsage = true;
+
+    await deleteInferenceEndpoint(mockClient, type, id, scanUsage);
+
+    expect(mockClient.inference.delete).toHaveBeenCalledWith({
+      inference_id: id,
+      task_type: type,
+      dry_run: true,
     });
   });
 });

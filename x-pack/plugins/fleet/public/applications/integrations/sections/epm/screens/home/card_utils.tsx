@@ -65,6 +65,7 @@ export interface IntegrationCardItem {
   titleLineClamp?: number;
   url: string;
   version: string;
+  type?: string;
 }
 
 export const mapToCard = ({
@@ -114,7 +115,7 @@ export const mapToCard = ({
   const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
 
   let extraLabelsBadges: React.ReactNode[] | undefined;
-  if (item.type === 'integration') {
+  if (item.type === 'integration' || item.type === 'content') {
     extraLabelsBadges = getIntegrationLabels(item);
   }
 
@@ -128,6 +129,7 @@ export const mapToCard = ({
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name : item.id,
     version,
+    type: item.type,
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
     isReauthorizationRequired,
