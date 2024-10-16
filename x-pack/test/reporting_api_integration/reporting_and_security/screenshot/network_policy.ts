@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
    * The tests server config implements a network policy that is designed to disallow the following Canvas worksheet
    */
   // Failing: See https://github.com/elastic/kibana/issues/193433
-  describe.skip('Network Policy', () => {
+  describe.only('Network Policy', () => {
     before(async () => {
       await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
