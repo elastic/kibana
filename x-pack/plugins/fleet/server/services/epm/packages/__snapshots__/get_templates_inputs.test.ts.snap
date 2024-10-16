@@ -42,7 +42,7 @@ exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
         metricsets:
           - key
         hosts:
-          - 127.0.0.1:6379
+          - '127.0.0.1:6379'
         idle_timeout: 20s
         key.patterns:
           - limit: 20
