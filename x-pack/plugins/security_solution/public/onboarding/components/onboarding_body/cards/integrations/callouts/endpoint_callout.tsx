@@ -20,7 +20,7 @@ export const EndpointCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
   const onClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
       window.open(docLinks.links.securitySolution.responseActions, '_blank');
       trackOnboardingLinkClick(TELEMETRY_ENDPOINT_LEARN_MORE);

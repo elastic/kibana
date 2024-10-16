@@ -21,7 +21,7 @@ export const AgentlessAvailableCallout = React.memo(() => {
   const { docLinks } = useKibana().services;
 
   const onClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
       trackOnboardingLinkClick(TELEMETRY_AGENTLESS_LEARN_MORE);
       /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/

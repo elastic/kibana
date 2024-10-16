@@ -19,7 +19,7 @@ export const ManageIntegrationsCallout = React.memo(
     const { href: integrationUrl, onClick: onAddIntegrationClicked } = useAddIntegrationsUrl();
 
     const onClick = useCallback(
-      (e) => {
+      (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         trackOnboardingLinkClick(TELEMETRY_MANAGE_INTEGRATIONS);
         onAddIntegrationClicked(e);
