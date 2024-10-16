@@ -8,11 +8,11 @@
 import expect from '@kbn/expect';
 import { SavedTimeline, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   createBasicTimeline,
   createBasicTimelineTemplate,
-} from '../../../saved_objects/trial_license_complete_tier/helpers';
+} from '../../saved_objects/tests/helpers';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const supertest = getService('supertest');
@@ -60,7 +60,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         ).to.equal(0);
       });
     });
-    describe('resolve timeline', () => {
+    /**
+     * Migration of saved object not working to current serverless version
+     * https://github.com/elastic/kibana/issues/196483
+     * */
+    describe.skip('resolve timeline', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
