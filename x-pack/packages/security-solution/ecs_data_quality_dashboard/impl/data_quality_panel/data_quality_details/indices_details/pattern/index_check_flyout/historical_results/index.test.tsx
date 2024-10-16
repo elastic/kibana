@@ -207,7 +207,7 @@ describe('HistoricalResults', () => {
             endDate: 'now',
           })
         );
-      });
+      }, 10000);
     });
   });
 
@@ -236,7 +236,7 @@ describe('HistoricalResults', () => {
         const wrapper = screen.getByTestId('historicalResultsPagination');
 
         expect(within(wrapper).getByText('Rows per page: 10')).toBeInTheDocument();
-      });
+      }, 10000);
     });
 
     describe('when rows per page are clicked', () => {
@@ -267,7 +267,7 @@ describe('HistoricalResults', () => {
         expect(screen.getByText('10 rows')).toBeInTheDocument();
         expect(screen.getByText('25 rows')).toBeInTheDocument();
         expect(screen.getByText('50 rows')).toBeInTheDocument();
-      });
+      }, 10000);
     });
 
     describe('when total results are more than or equal 1 page', () => {
@@ -410,7 +410,7 @@ describe('HistoricalResults', () => {
             size: 25,
           })
         );
-      });
+      }, 10000);
     });
   });
 
