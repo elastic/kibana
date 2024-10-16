@@ -57,6 +57,7 @@ export enum APIRoutes {
 export enum LLMs {
   openai = 'openai',
   openai_azure = 'openai_azure',
+  openai_other = 'openai_other',
   bedrock = 'bedrock',
   gemini = 'gemini',
 }

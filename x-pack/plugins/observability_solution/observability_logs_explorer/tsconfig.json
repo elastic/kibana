@@ -50,6 +50,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/react-hooks",
     "@kbn/logs-data-access-plugin",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*"

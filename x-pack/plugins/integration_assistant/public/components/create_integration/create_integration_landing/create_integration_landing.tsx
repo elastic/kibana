@@ -54,7 +54,10 @@ export const CreateIntegrationLanding = React.memo(() => {
                           defaultMessage="If you have an existing integration package, {link}"
                           values={{
                             link: (
-                              <EuiLink onClick={() => navigate(Page.upload)}>
+                              <EuiLink
+                                onClick={() => navigate(Page.upload)}
+                                data-test-subj="uploadPackageLink"
+                              >
                                 <FormattedMessage
                                   id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageLink"
                                   defaultMessage="upload it as a .zip"

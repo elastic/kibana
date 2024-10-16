@@ -51,7 +51,7 @@ fi
 if is_pr_with_label "ci:cloud-redeploy"; then
   echo "--- Shutdown Previous Deployment"
   CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-  if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+  if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" == "null" ]; then
     echo "No deployment to remove"
   else
     echo "Shutting down previous deployment..."

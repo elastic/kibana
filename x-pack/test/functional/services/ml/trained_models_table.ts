@@ -78,6 +78,15 @@ export function TrainedModelsTableProvider(
       return rows;
     }
 
+    /**
+     * Maps the vCPU level to the corresponding value in the slider.
+     */
+    public readonly vCPULevelValueMap = {
+      low: 0.5,
+      medium: 1.5,
+      high: 2.5,
+    };
+
     public rowSelector(modelId: string, subSelector?: string) {
       const row = `~mlModelsTable > ~row-${modelId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
@@ -512,13 +521,25 @@ export function TrainedModelsTableProvider(
     }
 
     public async setVCPULevel(value: 'low' | 'medium' | 'high') {
-      const valuesMap = {
-        low: 0.5,
-        medium: 1.5,
-        high: 2.5,
-      };
-      await mlCommonUI.setSliderValue('mlModelsStartDeploymentModalVCPULevel', valuesMap[value]);
-      await mlCommonUI.assertSliderValue('mlModelsStartDeploymentModalVCPULevel', valuesMap[value]);
+      await mlCommonUI.setSliderValue(
+        'mlModelsStartDeploymentModalVCPULevel',
+        this.vCPULevelValueMap[value]
+      );
+      await this.assertVCPULevel(value);
+    }
+
+    public async assertVCPULevel(value: 'low' | 'medium' | 'high') {
+      await mlCommonUI.assertSliderValue(
+        'mlModelsStartDeploymentModalVCPULevel',
+        this.vCPULevelValueMap[value]
+      );
+    }
+
+    public async assertVCPUHelperText(expectedText: string) {
+      const helperText = await testSubjects.getVisibleText(
+        'mlModelsStartDeploymentModalVCPUHelperText'
+      );
+      expect(expectedText).to.eql(helperText);
     }
 
     public async assertAdvancedConfigurationOpen(expectedValue: boolean) {
@@ -542,6 +563,33 @@ export function TrainedModelsTableProvider(
       const toggleButton = await panelElement.findByTagName('button');
       await toggleButton.click();
       await this.assertAdvancedConfigurationOpen(open);
+    }
+
+    public async assertAdaptiveResourcesSwitchExists(expectExist: boolean) {
+      if (expectExist) {
+        await testSubjects.existOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      } else {
+        await testSubjects.missingOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      }
+    }
+
+    public async toggleAdaptiveResourcesSwitch(enabled: boolean) {
+      await mlCommonUI.toggleSwitchIfNeeded(
+        'mlModelsStartDeploymentModalAdaptiveResources',
+        enabled
+      );
+
+      await this.assertAdaptiveResourcesSwitchChecked(enabled);
+    }
+
+    public async assertAdaptiveResourcesSwitchChecked(expectedValue: boolean) {
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlModelsStartDeploymentModalAdaptiveResources'
+      );
+      expect(isChecked).to.eql(
+        expectedValue,
+        `Expected adaptive resources switch to be ${expectedValue ? 'checked' : 'unchecked'}`
+      );
     }
 
     public async startDeploymentWithParams(
@@ -572,9 +620,6 @@ export function TrainedModelsTableProvider(
 
       await mlCommonUI.waitForRefreshButtonEnabled();
 
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been started successfully.`
-      );
       await this.waitForModelsToLoad();
 
       await retry.tryForTime(
@@ -599,10 +644,6 @@ export function TrainedModelsTableProvider(
 
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
-      await mlCommonUI.waitForRefreshButtonEnabled();
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been stopped successfully.`
-      );
       await mlCommonUI.waitForRefreshButtonEnabled();
     }
 

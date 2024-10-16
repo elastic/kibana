@@ -4903,6 +4903,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Mute all alerts",
@@ -4950,6 +4959,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Unmute all alerts",
@@ -19096,6 +19114,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19484,7 +19523,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -19561,6 +19601,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19949,7 +20010,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -21537,6 +21599,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -21965,7 +22048,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -22097,6 +22181,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22525,7 +22630,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23047,6 +23153,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -23475,7 +23602,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23595,6 +23723,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -24023,7 +24172,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -25786,7 +25936,7 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
-        "description": "Generate Logstash API keyy",
+        "description": "Generate Logstash API key",
         "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
         "parameters": [
           {
@@ -39895,6 +40045,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -39941,7 +40107,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"
@@ -40040,6 +40205,22 @@
                   "additional_yaml_config": {
                     "type": "string"
                   },
+                  "delete_unenrolled_agents": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "is_preconfigured"
+                    ],
+                    "type": "object"
+                  },
                   "fleet_server_hosts": {
                     "items": {
                       "format": "uri",
@@ -40079,6 +40260,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -40125,7 +40322,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"
@@ -40568,7 +40764,28 @@
     "/api/security/role": {
       "get": {
         "operationId": "%2Fapi%2Fsecurity%2Frole#0",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {},
         "summary": "Get all roles",
         "tags": [
@@ -40640,6 +40857,14 @@
             "schema": {
               "minLength": 1,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],

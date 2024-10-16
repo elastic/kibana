@@ -42,8 +42,17 @@ const DEFAULT_UDT_ROW_HEIGHT = 34;
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const { Cell, visibleColumns, visibleRowData, rows, rowHeight, enabledRowRenderers, refetch } =
-      props;
+    const {
+      Cell,
+      headerRow,
+      footerRow,
+      visibleColumns,
+      visibleRowData,
+      rows,
+      rowHeight,
+      enabledRowRenderers,
+      refetch,
+    } = props;
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -52,6 +61,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 
     return (
       <>
+        {headerRow}
         {visibleRows.map((row, rowIndex) => {
           return (
             <CustomDataGridSingleRow
@@ -66,6 +76,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
             />
           );
         })}
+        {footerRow}
       </>
     );
   }
