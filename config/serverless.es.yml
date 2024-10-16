@@ -10,7 +10,7 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.observabilityAIAssistant.enabled: false
+xpack.fleet.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
@@ -121,3 +121,10 @@ xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east
 
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: false
+
+# AI Assistant config
+xpack.observabilityAIAssistant.enabled: true
+xpack.searchAssistant.enabled: true
+xpack.observabilityAIAssistant.scope: "search"
+xpack.observabilityAIAssistant.enableKnowledgeBase: false
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
