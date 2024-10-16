@@ -75,7 +75,8 @@ export interface AppMenuActionPrimary extends AppMenuActionBase {
  * A horizontal rule between menu items
  */
 export interface AppMenuActionSubmenuHorizontalRule extends AppMenuActionBase {
-  type: AppMenuActionType.submenuHorizontalRule;
+  readonly type: AppMenuActionType.submenuHorizontalRule;
+  readonly testId?: TopNavMenuData['testId'];
 }
 
 /**

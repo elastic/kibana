@@ -60,7 +60,7 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
 
   const items = appMenuItem.actions.map((action) => {
     if (action.type === AppMenuActionType.submenuHorizontalRule) {
-      return <EuiHorizontalRule key={action.id} margin="none" />;
+      return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
     }
 
     const controlProps = action.controlProps;
