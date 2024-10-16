@@ -146,6 +146,7 @@ describe('initAPIAuthorization', () => {
       {
         security,
         kibanaPrivilegesResponse,
+        kibanaCurrentUserResponse,
         kibanaPrivilegesRequestActions,
         asserts,
       }: {
@@ -155,6 +156,7 @@ describe('initAPIAuthorization', () => {
           hasAllRequested?: boolean;
         };
         kibanaPrivilegesRequestActions?: string[];
+        kibanaCurrentUserResponse?: { operator: boolean };
         asserts: {
           forbidden?: boolean;
           authzResult?: Record<string, boolean>;
@@ -185,6 +187,7 @@ describe('initAPIAuthorization', () => {
         const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
         const mockCheckPrivileges = jest.fn().mockReturnValue(kibanaPrivilegesResponse);
+        mockAuthz.getCurrentUser.mockReturnValue(kibanaCurrentUserResponse);
         mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
         mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
           // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -356,28 +359,52 @@ describe('initAPIAuthorization', () => {
     );
 
     testSecurityConfig(
-      `protected route returns forbidden if user has allRequired AND NONE of anyRequired privileges requested`,
+      `protected route returns "authzResult" if user has operator privileges requested and user is operator`,
       {
         security: {
           authz: {
-            requiredPrivileges: [
-              {
-                allRequired: ['privilege1'],
-                anyRequired: ['privilege2', 'privilege3'],
-              },
-            ],
+            requiredPrivileges: [ReservedPrivilegesSet.operator],
           },
         },
-        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        kibanaCurrentUserResponse: { operator: true },
+        asserts: {
+          authzResult: {
+            operator: true,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" if user has anyRequired privileges requested and user is operator`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [{ anyRequired: [ReservedPrivilegesSet.operator, 'privilege1'] }],
+          },
+        },
+        kibanaCurrentUserResponse: { operator: true },
         kibanaPrivilegesResponse: {
-          privileges: {
-            kibana: [
-              { privilege: 'api:privilege1', authorized: true },
-              { privilege: 'api:privilege2', authorized: false },
-              { privilege: 'api:privilege3', authorized: false },
-            ],
+          privileges: { kibana: [{ privilege: 'api:privilege1', authorized: false }] },
+        },
+        asserts: {
+          authzResult: {
+            [ReservedPrivilegesSet.operator]: true,
+            privilege1: false,
           },
         },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden if user has operator privileges requested and user is not operator`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [ReservedPrivilegesSet.operator],
+          },
+        },
+        kibanaCurrentUserResponse: { operator: false },
         asserts: {
           forbidden: true,
         },

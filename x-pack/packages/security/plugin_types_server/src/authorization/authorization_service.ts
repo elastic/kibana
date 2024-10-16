@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import type { Actions } from './actions';
 import type { CheckPrivilegesWithRequest } from './check_privileges';
 import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
@@ -25,4 +28,5 @@ export interface AuthorizationServiceSetup {
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
