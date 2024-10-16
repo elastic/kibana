@@ -67,7 +67,7 @@ describe('SecurityNavControl', () => {
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
-    expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
+    expect(wrapper.find('EuiPopover').prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
         aria-expanded={false}
@@ -121,7 +121,7 @@ describe('SecurityNavControl', () => {
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
-    expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
+    expect(wrapper.find('EuiPopover').prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
         aria-expanded={false}
@@ -153,11 +153,11 @@ describe('SecurityNavControl', () => {
     );
 
     act(() => {
-      wrapper.prop<ReactElement>('button').props.onClick();
+      wrapper.find('EuiPopover').prop<ReactElement>('button').props.onClick();
       wrapper.update();
     });
 
-    expect(wrapper.prop<boolean>('isOpen')).toEqual(true);
+    expect(wrapper.find('EuiPopover').prop<boolean>('isOpen')).toEqual(true);
   });
 
   it('should not open popover while loading', () => {
@@ -178,11 +178,11 @@ describe('SecurityNavControl', () => {
     );
 
     act(() => {
-      wrapper.prop<ReactElement>('button').props.onClick();
+      wrapper.find('EuiPopover').prop<ReactElement>('button').props.onClick();
       wrapper.update();
     });
 
-    expect(wrapper.prop<boolean>('isOpen')).toEqual(false);
+    expect(wrapper.find('EuiPopover').prop<boolean>('isOpen')).toEqual(false);
   });
 
   it('should render additional user menu links registered by other plugins and should render the default Edit Profile link as the first link when no custom profile link is provided', async () => {
@@ -210,7 +210,7 @@ describe('SecurityNavControl', () => {
       />
     );
 
-    expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
+    expect(wrapper.find('EuiPopover').find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
       Array [
         Object {
           "content": <ContextMenuContent
@@ -282,6 +282,18 @@ describe('SecurityNavControl', () => {
                     defaultMessage="Log out"
                     id="xpack.security.navControlComponent.logoutLinkText"
                   />,
+                },
+                Object {
+                  "icon": <EuiIcon
+                    onClick={[Function]}
+                    size="m"
+                    type="gear"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Advanced settings"
+                    id="xpack.security.navControlComponent.settingsLinkText"
+                  />,
+                  "onClick": [Function],
                 },
               ]
             }
@@ -363,6 +375,18 @@ describe('SecurityNavControl', () => {
                     id="xpack.security.navControlComponent.logoutLinkText"
                   />,
                 },
+                Object {
+                  "icon": <EuiIcon
+                    onClick={[Function]}
+                    size="m"
+                    type="gear"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Advanced settings"
+                    id="xpack.security.navControlComponent.settingsLinkText"
+                  />,
+                  "onClick": [Function],
+                },
               ]
             }
           />,
@@ -428,6 +452,18 @@ describe('SecurityNavControl', () => {
                     id="xpack.security.navControlComponent.closeProjectLinkText"
                   />,
                 },
+                Object {
+                  "icon": <EuiIcon
+                    onClick={[Function]}
+                    size="m"
+                    type="gear"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Advanced settings"
+                    id="xpack.security.navControlComponent.settingsLinkText"
+                  />,
+                  "onClick": [Function],
+                },
               ]
             }
           />,
@@ -478,6 +514,18 @@ describe('SecurityNavControl', () => {
                     defaultMessage="Log in"
                     id="xpack.security.navControlComponent.loginLinkText"
                   />,
+                },
+                Object {
+                  "icon": <EuiIcon
+                    onClick={[Function]}
+                    size="m"
+                    type="gear"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Advanced settings"
+                    id="xpack.security.navControlComponent.settingsLinkText"
+                  />,
+                  "onClick": [Function],
                 },
               ]
             }
