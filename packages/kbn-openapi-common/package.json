@@ -8,3 +8,4 @@
     "openapi:generate": "node scripts/openapi_generate"
   }
 }
+
