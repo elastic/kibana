@@ -101,6 +101,10 @@ export const createGettingStartedMonitor = async ({
   });
 };
 
-export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {
-  return await apiService.get(SYNTHETICS_API_URLS.FILTERS);
+export const fetchMonitorFilters = async ({
+  showFromAllSpaces = false,
+}: {
+  showFromAllSpaces: boolean;
+}): Promise<MonitorFiltersResult> => {
+  return await apiService.get(SYNTHETICS_API_URLS.FILTERS, { showFromAllSpaces });
 };

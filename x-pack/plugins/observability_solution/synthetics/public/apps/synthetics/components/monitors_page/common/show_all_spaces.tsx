@@ -60,6 +60,11 @@ const SelectablePopover = () => {
           showFromAllSpaces: showFromAllSpacesVal,
         })
       );
+      dispatch(
+        updateManagementPageStateAction({
+          showFromAllSpaces: showFromAllSpacesVal,
+        })
+      );
     }
   }, [dispatch, showFromAllSpacesVal]);
 
