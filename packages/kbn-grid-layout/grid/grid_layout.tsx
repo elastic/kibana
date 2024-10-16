@@ -63,7 +63,6 @@ export const GridLayout = ({
                 setInteractionEvent={(nextInteractionEvent) => {
                   // console.log('nextInteractionEvent', nextInteractionEvent);
                   if (nextInteractionEvent?.type === 'drop') {
-                    // gridLayoutStateManager.hideDragPreview();
                     gridLayoutStateManager.interactionEvent$.next(undefined);
                   } else {
                     gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);

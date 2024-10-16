@@ -36,8 +36,6 @@ export const useGridLayoutEvents = ({
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
       if (!interactionEvent$.value) return;
-      console.log('calculateUserEvent');
-      // console.log('calculateUserEvent', interactionEvent$.value);
       e.preventDefault();
       e.stopPropagation();
 
@@ -170,26 +168,14 @@ export const useGridLayoutEvents = ({
         }
       }
     };
-
-    // const onMouseUp = (e: MouseEvent) => {
-    //   if (!interactionEvent$.value) return;
-    //   e.preventDefault();
-    //   e.stopPropagation();
-
-    //   interactionEvent$.next(undefined);
-    //   gridLayoutStateManager.hideDragPreview();
-    // };
-
     const onMouseMove = (e: MouseEvent) => {
       mouseClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
     };
 
-    // document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      // document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
     };

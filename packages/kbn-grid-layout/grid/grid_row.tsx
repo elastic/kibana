@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useMemo, useRef } from 'react';
 import { GridPanel } from './grid_panel';
 import { GridRowData, PanelInteractionEvent, RuntimeGridSettings } from './types';
 
@@ -54,6 +54,7 @@ export const GridRow = forwardRef<
   ) => {
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
     const isGridTargeted = activePanelId && targetRowIndex === rowIndex;
+    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -121,6 +122,27 @@ export const GridRow = forwardRef<
                 }}
               />
             ))}
+
+            {activePanelId && rowData.panels[activePanelId] && (
+              <div
+                ref={dragPreviewRef}
+                css={css`
+                  pointer-events: none;
+                  border-radius: ${euiThemeVars.euiBorderRadius};
+                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+                  transition: opacity 100ms linear;
+
+                  grid-column-start: ${rowData.panels[activePanelId].column + 1};
+                  grid-column-end: ${rowData.panels[activePanelId].column +
+                  1 +
+                  rowData.panels[activePanelId].width};
+                  grid-row-start: ${rowData.panels[activePanelId].row + 1};
+                  grid-row-end: ${rowData.panels[activePanelId].row +
+                  1 +
+                  rowData.panels[activePanelId].height};
+                `}
+              />
+            )}
           </div>
         )}
       </>
