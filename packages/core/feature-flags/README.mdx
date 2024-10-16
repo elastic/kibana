@@ -32,7 +32,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export const featureFlags: FeatureFlagDefinitions = [
   {
-    key: 'my-cool-feature',
+    key: 'myPlugin.myCoolFeature',
     name: 'My cool feature',
     description: 'Enables the cool feature to auto-hide the navigation bar',
     tags: ['my-plugin', 'my-service', 'ui'],
@@ -118,7 +118,7 @@ async (context, request, response) => {
   const { featureFlags } = await context.core;
   return response.ok({
     body: {
-      number: await featureFlags.getNumberValue('example-number', 1),
+      number: await featureFlags.getNumberValue('myPlugin.exampleNumber', 1),
     },
   });
 }
@@ -142,7 +142,7 @@ provider. In the `kibana.yml`, the following config sets the overrides:
 
 ```yaml
 feature_flags.overrides:
-  my-feature-flag: 'my-forced-value'
+  myPlugin.myFeatureFlag: 'my-forced-value'
 ```
 
 > [!WARNING]  
