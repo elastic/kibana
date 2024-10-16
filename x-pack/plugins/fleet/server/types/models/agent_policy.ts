@@ -406,14 +406,21 @@ const IntegrationsOutputSchema = schema.arrayOf(
   })
 );
 
-export const GetAgentPolicyOutputsResponseSchema = schema.object({
-  item: schema.object({
-    monitoring: schema.object({
-      output: MinimalOutputSchema,
-    }),
-    data: schema.object({
-      output: MinimalOutputSchema,
-      integrations: schema.maybe(IntegrationsOutputSchema),
-    }),
+const OutputsForAgentPolicySchema = schema.object({
+  agentPolicyId: schema.maybe(schema.string()),
+  monitoring: schema.object({
+    output: MinimalOutputSchema,
   }),
+  data: schema.object({
+    output: MinimalOutputSchema,
+    integrations: schema.maybe(IntegrationsOutputSchema),
+  }),
+});
+
+export const GetAgentPolicyOutputsResponseSchema = schema.object({
+  item: OutputsForAgentPolicySchema,
+});
+
+export const GetListAgentPolicyOutputsResponseSchema = schema.object({
+  items: schema.arrayOf(OutputsForAgentPolicySchema),
 });

@@ -34,6 +34,7 @@ import type {
   AgentPolicy,
   FleetRequestHandlerContext,
   GetAgentPolicyOutputsRequestSchema,
+  GetListAgentPolicyOutputsRequestSchema,
 } from '../../types';
 
 import type {
@@ -49,6 +50,7 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsResponse,
 } from '../../../common/types';
 import {
   defaultFleetErrorHandler,
@@ -695,26 +697,42 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const { dataOutput, monitoringOutput, integrationsDataOutputs } =
-      await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
+    const outputs = await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
 
     const body: GetAgentPolicyOutputsResponse = {
-      item: {
-        monitoring: {
-          output: {
-            name: monitoringOutput?.name ?? '',
-            id: monitoringOutput?.id ?? '',
-          },
-        },
-        data: {
-          output: {
-            name: dataOutput?.name ?? '',
-            id: dataOutput?.id ?? '',
-          },
-          integrations: integrationsDataOutputs ?? [],
-        },
-      },
+      item: outputs,
     };
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetListAgentPolicyOutputsRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const coreContext = await context.core;
+    const soClient = coreContext.savedObjects.client;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const { page, perPage } = request.query;
+
+    const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+      esClient,
+      page,
+      perPage,
+      withPackagePolicies: true,
+    });
+
+    const outputsList = await agentPolicyService.listAllOutputsForPolicies(soClient, agentPolicies);
+
+    const body: GetListAgentPolicyOutputsResponse = {
+      items: outputsList,
+    };
+
     return response.ok({
       body,
     });

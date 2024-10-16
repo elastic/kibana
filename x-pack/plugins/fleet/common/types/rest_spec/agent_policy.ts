@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  FullAgentPolicy,
+  OutputsForAgentPolicy,
+} from '../models';
 
 import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 
@@ -94,23 +99,8 @@ export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kue
 };
 
 export interface GetAgentPolicyOutputsResponse {
-  item: {
-    monitoring: {
-      output: MinimalOutput;
-    };
-    data: {
-      output: MinimalOutput;
-      integrations?: IntegrationsOutput[];
-    };
-  };
+  item: OutputsForAgentPolicy;
 }
-
-export interface MinimalOutput {
-  name?: string;
-  id?: string;
-}
-export interface IntegrationsOutput {
-  name?: string;
-  id?: string | null;
-  integrationPolicyName?: string;
+export interface GetListAgentPolicyOutputsResponse {
+  items: OutputsForAgentPolicy[];
 }

@@ -61,6 +61,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
+  OutputsForAgentPolicy,
 } from '../types';
 import {
   AGENT_POLICY_INDEX,
@@ -1778,10 +1779,13 @@ class AgentPolicyService {
     });
   }
 
+  // Get all the outputs per agent policy
   public async getAllOutputsForPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy
   ) {
+    const logger = appContextService.getLogger();
+
     let integrationsDataOutputs: IntegrationsOutput[] = [];
     if (agentPolicy?.package_policies) {
       const integrationsWithOutputs = agentPolicy.package_policies.filter(
@@ -1791,8 +1795,14 @@ class AgentPolicyService {
         integrationsWithOutputs,
         async (pkgPolicy) => {
           if (pkgPolicy?.output_id) {
-            const output = await outputService.get(soClient, pkgPolicy.output_id);
-            return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
+            try {
+              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
+            } catch (error) {
+              logger.error(
+                `error while retrieving output with id ${pkgPolicy.output_id}: ${error}`
+              );
+            }
           }
           return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id };
         },
@@ -1802,26 +1812,65 @@ class AgentPolicyService {
       );
     }
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
-
     let dataOutput;
     let monitoringOutput;
-    // get the data output
-    if (agentPolicy && agentPolicy?.data_output_id) {
-      dataOutput = await outputService.get(soClient, agentPolicy?.data_output_id);
-    } else {
-      if (defaultOutputId) {
-        dataOutput = await outputService.get(soClient, defaultOutputId);
+
+    let dataOutputId;
+    let monitoringOutputId;
+    try {
+      // get the data output
+      if (agentPolicy && agentPolicy?.data_output_id) {
+        dataOutputId = agentPolicy?.data_output_id;
+      } else {
+        if (defaultOutputId) {
+          dataOutputId = defaultOutputId;
+        }
       }
+      dataOutput = await outputService.get(soClient, dataOutputId);
+    } catch (error) {
+      logger.error(`error while retrieving data output with id "${dataOutputId}": ${error}`);
     }
-    // get the monitoring output
-    if (agentPolicy && agentPolicy?.monitoring_output_id) {
-      monitoringOutput = await outputService.get(soClient, agentPolicy?.monitoring_output_id);
-    } else {
-      if (defaultOutputId) {
-        monitoringOutput = await outputService.get(soClient, defaultOutputId);
+
+    try {
+      // get the monitoring output
+      if (agentPolicy && agentPolicy?.monitoring_output_id) {
+        monitoringOutputId = agentPolicy?.monitoring_output_id;
+      } else {
+        if (defaultOutputId) {
+          monitoringOutputId = defaultOutputId;
+        }
+        monitoringOutput = await outputService.get(soClient, monitoringOutputId);
       }
+    } catch (error) {
+      logger.error(`error while retrieving monitoring output with id "${dataOutputId}": ${error}`);
     }
-    return { dataOutput, monitoringOutput, integrationsDataOutputs };
+    const outputs: OutputsForAgentPolicy = {
+      monitoring: {
+        output: {
+          name: monitoringOutput?.name ?? '',
+          id: monitoringOutput?.id ?? '',
+        },
+      },
+      data: {
+        output: {
+          name: dataOutput?.name ?? '',
+          id: dataOutput?.id ?? '',
+        },
+        integrations: integrationsDataOutputs ?? [],
+      },
+    };
+    return outputs;
+  }
+
+  public async listAllOutputsForPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicies: AgentPolicy[]
+  ) {
+    const allOutputs: OutputsForAgentPolicy[] = await pMap(agentPolicies, async (agentPolicy) => {
+      const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+      return { agentPolicyId: agentPolicy.id, ...output };
+    });
+    return allOutputs;
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
