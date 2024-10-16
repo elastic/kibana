@@ -30,27 +30,26 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
   getDefaultPipeline(
     {
       includeSerialization,
-      versionOverride,
     }: {
       includeSerialization?: boolean;
-      versionOverride?: string;
     } = { includeSerialization: true }
   ) {
-    return otelPipeline(this.logger, includeSerialization);
+    return otelPipeline(includeSerialization);
   }
 }
 
-function otelPipeline(logger: Logger, includeSerialization: boolean = true) {
+function otelPipeline(includeSerialization: boolean = true) {
   const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
   return (base: Readable) => {
     return pipeline(
+      // @ts-expect-error see apm_pipeline.ts
       base,
       ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),
-      (err) => {
+      (err: unknown) => {
         if (err) {
-          logger.error(err);
+          throw err;
         }
       }
     );
