@@ -16,6 +16,7 @@ export const ENTERPRISE_SEARCH_APPSEARCH_APP_ID = 'appSearch';
 export const ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID = 'workplaceSearch';
 export const SERVERLESS_ES_APP_ID = 'serverlessElasticsearch';
 export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
+export const SERVERLESS_ES_WEB_CRAWLERS_ID = 'serverlessWebCrawlers';
 export const SERVERLESS_ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID = 'searchInferenceEndpoints';
 export const SEARCH_HOMEPAGE = 'searchHomepage';

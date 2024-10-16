@@ -45,51 +45,55 @@ export const ConnectorsOverview = () => {
         })}
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
-        rightSideItems={[
-          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                justifyContent="flexEnd"
-                direction="row"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    size="s"
-                    type={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/github.svg`)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <EuiLink
-                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
-                      target="_blank"
-                      href={CONNECTORS.github_repo}
+        rightSideItems={
+          connectorsLoading || (data?.connectors || []).length > 0
+            ? [
+                <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+                  <EuiFlexItem>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      justifyContent="flexEnd"
+                      direction="row"
                     >
-                      {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
-                        defaultMessage: 'elastic/connectors',
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          size="s"
+                          type={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/github.svg`)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <EuiLink
+                            data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                            target="_blank"
+                            href={CONNECTORS.github_repo}
+                          >
+                            {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
+                              defaultMessage: 'elastic/connectors',
+                            })}
+                          </EuiLink>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
+                      isLoading={isLoading}
+                      fill
+                      iconType="plusInCircleFilled"
+                      onClick={() => createConnector()}
+                    >
+                      {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
+                        defaultMessage: 'Create connector',
                       })}
-                    </EuiLink>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
-                isLoading={isLoading}
-                fill
-                iconType="plusInCircleFilled"
-                onClick={() => createConnector()}
-              >
-                {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
-                  defaultMessage: 'Create connector',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-        ]}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+              ]
+            : undefined
+        }
       >
         <EuiText>
           <p>

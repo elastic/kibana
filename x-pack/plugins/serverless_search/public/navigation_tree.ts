@@ -11,7 +11,7 @@ import type {
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { CONNECTORS_LABEL } from '../common/i18n_string';
+import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
   id: 'gettingStarted',
@@ -72,6 +72,10 @@ export const navigationTree = (
             {
               title: CONNECTORS_LABEL,
               link: 'serverlessConnectors',
+            },
+            {
+              title: WEB_CRAWLERS_LABEL,
+              link: 'serverlessWebCrawlers',
             },
           ],
         },
