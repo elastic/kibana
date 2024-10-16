@@ -26,7 +26,7 @@ interface TourState {
 }
 const KnowledgeBaseTourComp: React.FC<{
   children?: EuiTourStepProps['children'];
-  isKbSettingsPage: boolean;
+  isKbSettingsPage?: boolean;
 }> = ({ children, isKbSettingsPage = false }) => {
   const {
     navigateToApp,
