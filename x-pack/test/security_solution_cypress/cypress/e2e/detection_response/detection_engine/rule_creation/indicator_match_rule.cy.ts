@@ -503,8 +503,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
       });
 
       it('Investigate alert in timeline', () => {
-        const accessibilityText = `Press enter for options, or press space to begin dragging.`;
-
         loadPrepackagedTimelineTemplates();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
           (rule) => visitRuleDetailsPage(rule.body.id)
