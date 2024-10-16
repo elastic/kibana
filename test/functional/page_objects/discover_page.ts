@@ -164,6 +164,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 
