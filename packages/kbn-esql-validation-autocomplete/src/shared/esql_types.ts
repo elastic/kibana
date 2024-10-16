@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLDecimalLiteral, ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
+import { ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
 import { FunctionParameterType } from '../definitions/types';
 
 export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
@@ -27,15 +27,6 @@ export const ESQL_NUMBER_TYPES = [
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
 export const ESQL_DATE_TYPES = ['datetime', 'date_period'] as const;
 
-/**
- *
- * @param type
- * @returns
- */
-export function isStringType(type: unknown) {
-  return typeof type === 'string' && ['keyword', 'text'].includes(type);
-}
-
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   return (
     typeof type === 'string' &&
@@ -43,20 +34,14 @@ export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   );
 }
 
-export function isNumericDecimalType(type: unknown): type is ESQLDecimalLiteral {
-  return (
-    typeof type === 'string' &&
-    ESQL_NUMERIC_DECIMAL_TYPES.includes(type as (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number])
-  );
-}
-
 /**
  * Compares two types, taking into account literal types
  * @TODO strengthen typing here (remove `string`)
+ * @TODO — clean up time duration and date period
  */
 export const compareTypesWithLiterals = (
-  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval',
-  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval'
+  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string,
+  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string
 ) => {
   if (a === b) {
     return true;

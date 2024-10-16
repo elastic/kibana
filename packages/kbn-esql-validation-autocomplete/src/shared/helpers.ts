@@ -805,6 +805,10 @@ export function getExpressionType(
     return column.type;
   }
 
+  if (root.type === 'list') {
+    return getExpressionType(root.values[0], fields, variables);
+  }
+
   if (isFunctionItem(root)) {
     const fnDefinition = getFunctionDefinition(root.name);
     if (!fnDefinition) {

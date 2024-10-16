@@ -101,6 +101,7 @@ describe('getExpressionType', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
       { expectedType: 'boolean', expression: '"true"::bool' },
       { expectedType: 'boolean', expression: '"false"::boolean' },
+      { expectedType: 'boolean', expression: '"false"::BooLEAN' },
       { expectedType: 'cartesian_point', expression: '""::cartesian_point' },
       { expectedType: 'cartesian_shape', expression: '""::cartesian_shape' },
       { expectedType: 'date_nanos', expression: '1::date_nanos' },
@@ -119,6 +120,7 @@ describe('getExpressionType', () => {
       { expectedType: 'time_duration', expression: '1::time_duration' },
       { expectedType: 'unsigned_long', expression: '1::unsigned_long' },
       { expectedType: 'version', expression: '"1.2.3"::version' },
+      { expectedType: 'version', expression: '"1.2.3"::VERSION' },
     ];
     test.each(cases)(
       'detects a casted literal of type $expectedType ($expression)',
@@ -307,5 +309,36 @@ describe('getExpressionType', () => {
     });
   });
 
-  describe('lists', () => {});
+  describe('lists', () => {
+    const cases: Array<{ expression: string; expectedType: SupportedDataType | 'unknown' }> = [
+      {
+        expression: '["foo", "bar"]',
+        expectedType: 'keyword',
+      },
+      {
+        expression: '[1, 2]',
+        expectedType: 'integer',
+      },
+      {
+        expression: '[1., 2.]',
+        expectedType: 'double',
+      },
+      {
+        expression: '[null, null, null]',
+        expectedType: 'null',
+      },
+      {
+        expression: '[true, false]',
+        expectedType: 'boolean',
+      },
+    ];
+
+    test.each(cases)(
+      'reports the type of $expression as $expectedType',
+      ({ expression, expectedType }) => {
+        const ast = getASTForExpression(expression);
+        expect(getExpressionType(ast)).toBe(expectedType);
+      }
+    );
+  });
 });
