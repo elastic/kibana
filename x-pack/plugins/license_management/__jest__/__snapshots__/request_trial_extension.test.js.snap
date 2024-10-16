@@ -40,13 +40,12 @@ exports[`RequestTrialExtension component should display when enterprise license 
                 <span
                   class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
-                >
-                  External link
-                </span>
+                  role="presentation"
+                />
                 <span
                   class="emotion-euiScreenReaderOnly"
                 >
-                  (opens in a new tab or window)
+                  (external, opens in a new tab or window)
                 </span>
               </a>
               , request an extension now.
@@ -116,13 +115,12 @@ exports[`RequestTrialExtension component should display when license is active a
                 <span
                   class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
-                >
-                  External link
-                </span>
+                  role="presentation"
+                />
                 <span
                   class="emotion-euiScreenReaderOnly"
                 >
-                  (opens in a new tab or window)
+                  (external, opens in a new tab or window)
                 </span>
               </a>
               , request an extension now.
@@ -192,13 +190,12 @@ exports[`RequestTrialExtension component should display when license is not acti
                 <span
                   class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
-                >
-                  External link
-                </span>
+                  role="presentation"
+                />
                 <span
                   class="emotion-euiScreenReaderOnly"
                 >
-                  (opens in a new tab or window)
+                  (external, opens in a new tab or window)
                 </span>
               </a>
               , request an extension now.
@@ -268,13 +265,12 @@ exports[`RequestTrialExtension component should display when platinum license is
                 <span
                   class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
-                >
-                  External link
-                </span>
+                  role="presentation"
+                />
                 <span
                   class="emotion-euiScreenReaderOnly"
                 >
-                  (opens in a new tab or window)
+                  (external, opens in a new tab or window)
                 </span>
               </a>
               , request an extension now.

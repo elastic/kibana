@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { RootSchema } from '@kbn/core/public';
-import type { StepLinkId } from '../../../../components/landing_page/onboarding/step_links/types';
 import type { TelemetryEventTypes } from '../../constants';
 
 export type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
@@ -22,7 +21,7 @@ export interface OnboardingHubStepOpen {
 
 export interface OnboardingHubStepLinkClickedParams {
   originStepId: string;
-  stepLinkId: StepLinkId;
+  stepLinkId: string;
 }
 
 export interface OnboardingHubStepLinkClicked {
@@ -34,7 +33,7 @@ export type OnboardingHubStepFinishedTrigger = 'auto_check' | 'click';
 
 export interface OnboardingHubStepFinishedParams {
   stepId: string;
-  stepLinkId?: StepLinkId;
+  stepLinkId?: string;
   trigger: OnboardingHubStepFinishedTrigger;
 }
 
