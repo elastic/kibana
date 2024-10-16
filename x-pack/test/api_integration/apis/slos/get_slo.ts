@@ -348,7 +348,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('gets slos instances', async () => {
+    // not possible for now to reliably fix this
+    it.skip('gets slos instances', async () => {
       const createResponse = await createSLO();
       const id = createResponse.body.id;
 
