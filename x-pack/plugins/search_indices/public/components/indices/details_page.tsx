@@ -88,7 +88,7 @@ export const SearchIndexDetailsPage = () => {
           text: i18n.translate('xpack.searchIndices.indexBreadcrumbLabel', {
             defaultMessage: 'Index Management',
           }),
-          href: '#/management/elasticsearch/index_management',
+          href: '/app/management/data/index_management/indices',
         },
         {
           text: indexName,
