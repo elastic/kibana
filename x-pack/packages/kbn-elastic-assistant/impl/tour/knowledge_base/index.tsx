@@ -24,8 +24,7 @@ interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
 }
-
-const KnowledgeBaseTourComp = ({ children }: { children?: React.ReactNode }) => {
+const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const {
     navigateToApp,
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
@@ -47,8 +46,7 @@ const KnowledgeBaseTourComp = ({ children }: { children?: React.ReactNode }) => 
   );
 
   useEffect(() => {
-    if (tourState?.isTourActive) {
-      // } && pageName === SecurityPageName.knowledgeBase) {
+    if (tourState?.isTourActive && pageName === 'SecurityPageName.knowledgeBase') {
       advanceToVideoStep();
     }
   }, [advanceToVideoStep, tourState?.isTourActive]);
@@ -91,25 +89,25 @@ const KnowledgeBaseTourComp = ({ children }: { children?: React.ReactNode }) => 
     [advanceToVideoStep, nextStep]
   );
 
-  const isElementAtCurrentStepMounted = useIsElementMounted(knowledgeBaseTourStepOne?.anchor);
-
   const isTestAutomation =
     // @ts-ignore
     window.Cypress != null || // TODO: temporary workaround to disable the tour when running in Cypress, because the tour breaks other projects Cypress tests
     navigator.webdriver === true; // TODO: temporary workaround to disable the tour when running in the FTR, because the tour breaks other projects FTR tests
-
-  if (
-    !enableKnowledgeBaseByDefault ||
-    isTestAutomation ||
-    !tourState?.isTourActive ||
-    (tourState?.currentTourStep === 1 && !isElementAtCurrentStepMounted)
-  ) {
-    return null;
+  console.log('tour conditions', {
+    con: !enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive,
+    con1: !enableKnowledgeBaseByDefault,
+    con2: isTestAutomation,
+    con3: !tourState?.isTourActive,
+    tourState,
+    children,
+  });
+  if (!enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive) {
+    return children ?? null;
   }
 
   return tourState?.currentTourStep === 1 && children ? (
     <EuiTourStep
-      anchor={`#${knowledgeBaseTourStepOne.anchor}`}
+      anchorPosition={'downRight'}
       content={knowledgeBaseTourStepOne.content}
       footerAction={footerAction}
       isStepOpen
@@ -118,7 +116,7 @@ const KnowledgeBaseTourComp = ({ children }: { children?: React.ReactNode }) => 
       panelProps={{
         'data-test-subj': `knowledgeBase-tour-step-1`,
       }}
-      repositionOnScroll
+      // repositionOnScroll
       step={1}
       stepsTotal={1}
       title={knowledgeBaseTourStepOne.title}
@@ -127,7 +125,9 @@ const KnowledgeBaseTourComp = ({ children }: { children?: React.ReactNode }) => 
     </EuiTourStep>
   ) : pageName === 'SecurityPageName.knowledgeBase' ? (
     <VideoToast onClose={finishTour} />
-  ) : null;
+  ) : (
+    children ?? null
+  );
 };
 
 export const KnowledgeBaseTour = React.memo(KnowledgeBaseTourComp);

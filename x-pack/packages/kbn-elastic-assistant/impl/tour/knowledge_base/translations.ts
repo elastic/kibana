@@ -8,51 +8,50 @@
 import { i18n } from '@kbn/i18n';
 
 export const KNOWLEDGE_BASE_TOUR_KNOWLEDGE_BASE_TITLE = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.navStep.title',
+  'xpack.elasticAssistant.knowledgeBase.tour.navStep.title',
   {
     defaultMessage: 'Introducing knowledge base',
   }
 );
 
 export const KNOWLEDGE_BASE_TOUR_KNOWLEDGE_BASE_DESC = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.navStep.desc',
+  'xpack.elasticAssistant.knowledgeBase.tour.navStep.desc',
   {
-    defaultMessage:
-      'Leverage Generative AI to find relationships among your alerts and describe attack chains.',
+    defaultMessage: 'Leverage custom knowledge base entries.',
   }
 );
 
 export const KNOWLEDGE_BASE_TOUR_VIDEO_STEP_TITLE = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.videoStep.title',
+  'xpack.elasticAssistant.knowledgeBase.tour.videoStep.title',
   {
-    defaultMessage: 'Start discovering attacks',
+    defaultMessage: 'Start knowledge basing',
   }
 );
 
 export const KNOWLEDGE_BASE_TOUR_VIDEO_STEP_DESC = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.videoStep.desc',
+  'xpack.elasticAssistant.knowledgeBase.tour.videoStep.desc',
   {
     defaultMessage:
-      'Dive into data-driven attack discoveries and streamline your workflow with our intuitive AI technology, designed to elevate your productivity instantly.',
+      'Dive into knowledge base entries with our intuitive AI technology, designed to elevate your productivity instantly.',
   }
 );
 
 export const KNOWLEDGE_BASE_TOUR_EXIT = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.exit',
+  'xpack.elasticAssistant.knowledgeBase.tour.exit',
   {
     defaultMessage: 'Close',
   }
 );
 
 export const KNOWLEDGE_BASE_TRY_IT = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.tryIt',
+  'xpack.elasticAssistant.knowledgeBase.tour.tryIt',
   {
     defaultMessage: 'Try it',
   }
 );
 
 export const WATCH_OVERVIEW_VIDEO = i18n.translate(
-  'xpack.securitySolution.knowledgeBase.tour.video',
+  'xpack.elasticAssistant.knowledgeBase.tour.video',
   {
     defaultMessage: 'Watch overview video',
   }
