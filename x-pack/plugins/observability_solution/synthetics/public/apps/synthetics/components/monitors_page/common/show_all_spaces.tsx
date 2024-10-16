@@ -13,9 +13,10 @@ import {
   EuiButtonEmpty,
   EuiContextMenu,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { clearOverviewStatusState } from '../../../state/overview_status';
 import {
   selectOverviewState,
@@ -46,13 +47,28 @@ export const ShowAllSpaces: React.FC = () => {
 const SelectablePopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { space } = useKibanaSpace();
+  const [showFromAllSpacesVal, setShowFromAllSpacesVal] = useSessionStorage(
+    'SyntheticsShowFromAllSpaces',
+    false
+  );
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (showFromAllSpacesVal !== undefined) {
+      dispatch(
+        setOverviewPageStateAction({
+          showFromAllSpaces: showFromAllSpacesVal,
+        })
+      );
+    }
+  }, [dispatch, showFromAllSpacesVal]);
 
   const {
     pageState: { showFromAllSpaces },
   } = useSelector(selectOverviewState);
-  const dispatch = useDispatch();
 
   const updateState = (val: boolean) => {
+    setShowFromAllSpacesVal(val);
     dispatch(clearOverviewStatusState());
     dispatch(
       setOverviewPageStateAction({
