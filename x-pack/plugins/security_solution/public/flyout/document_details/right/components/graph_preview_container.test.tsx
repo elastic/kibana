@@ -38,6 +38,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const mockGraph = () => <div data-test-subj={GRAPH_PREVIEW_TEST_ID} />;
+
+jest.mock('@kbn/cloud-security-posture-graph', () => {
+  return { Graph: mockGraph };
+});
+
 const renderGraphPreview = (context = mockContextValue) =>
   render(
     <TestProviders>
@@ -52,7 +58,7 @@ describe('<GraphPreviewContainer />', () => {
     jest.clearAllMocks();
   });
 
-  it('should render component and link in header', () => {
+  it('should render component and link in header', async () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -63,9 +69,10 @@ describe('<GraphPreviewContainer />', () => {
       isAuditLog: true,
     });
 
-    const { getByTestId, queryByTestId } = renderGraphPreview();
+    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
 
-    expect(getByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();

@@ -13,6 +13,12 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { GraphPreview, type GraphPreviewProps } from './graph_preview';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 
+const mockGraph = () => <div data-test-subj={GRAPH_PREVIEW_TEST_ID} />;
+
+jest.mock('@kbn/cloud-security-posture-graph', () => {
+  return { Graph: mockGraph };
+});
+
 const renderGraphPreview = (contextValue: DocumentDetailsContext, props: GraphPreviewProps) =>
   render(
     <TestProviders>
@@ -29,16 +35,17 @@ describe('<GraphPreview />', () => {
     jest.clearAllMocks();
   });
 
-  it('shows graph preview correctly when data is loaded', () => {
+  it('shows graph preview correctly when data is loaded', async () => {
     const graphProps = {
       isLoading: false,
       isError: false,
       data: { nodes: [], edges: [] },
     };
 
-    const { getByTestId } = renderGraphPreview(mockContextValue, graphProps);
+    const { findByTestId } = renderGraphPreview(mockContextValue, graphProps);
 
-    expect(getByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows loading when data is loading', () => {
