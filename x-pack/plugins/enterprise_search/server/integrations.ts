@@ -6,7 +6,6 @@
  */
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '.';
 
@@ -15,7 +14,6 @@ export const registerEnterpriseSearchIntegrations = (
   customIntegrations: CustomIntegrationsPluginSetup,
   isCloud: boolean
 ) => {
-  const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
