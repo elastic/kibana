@@ -109,7 +109,7 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
       setIsTimerExhausted(true);
     }, 1000);
 
-    return () => clearTimeout(timer); // Cleanup the timer on unmount
+    return () => clearTimeout(timer);
   }, []);
 
   if (!enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive) {
