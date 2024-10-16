@@ -91,6 +91,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
+  const http = kibana.services.http;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
@@ -336,6 +337,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
+      http,
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
@@ -385,6 +387,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     query.esql,
+    http,
     memoizedSources,
     dataSourcesCache,
     dataViews,
