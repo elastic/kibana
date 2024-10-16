@@ -89,7 +89,7 @@ export const getCasesKibanaFeatureV2 = (): KibanaFeatureConfig => {
             privileges: [
               {
                 api: apiTags.delete,
-                id: 'cases_delete_v2',
+                id: 'cases_delete',
                 name: i18n.translate('xpack.cases.features.deleteSubFeatureDetails', {
                   defaultMessage: 'Delete cases and comments',
                 }),
@@ -116,7 +116,7 @@ export const getCasesKibanaFeatureV2 = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                id: 'cases_settings_v2',
+                id: 'cases_settings',
                 name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureDetails', {
                   defaultMessage: 'Edit case settings',
                 }),

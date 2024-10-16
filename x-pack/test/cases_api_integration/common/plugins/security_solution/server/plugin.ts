@@ -77,7 +77,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               privileges: [
                 {
                   name: 'Delete cases and comments',
-                  id: 'cases_delete_v2',
+                  id: 'cases_delete',
                   includeIn: 'all',
                   cases: {
                     delete: ['securitySolutionFixture'],
@@ -100,7 +100,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               privileges: [
                 {
                   name: 'Edit case settings',
-                  id: 'cases_settings_v2',
+                  id: 'cases_settings',
                   includeIn: 'all',
                   cases: {
                     settings: ['securitySolutionFixture'],

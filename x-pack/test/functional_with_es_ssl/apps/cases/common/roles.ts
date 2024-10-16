@@ -25,7 +25,7 @@ export const casesReadDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['minimal_read', 'cases_delete_v2'],
+          generalCasesV2: ['minimal_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

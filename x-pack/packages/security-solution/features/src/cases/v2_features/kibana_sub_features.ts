@@ -41,7 +41,7 @@ export const getCasesSubFeaturesMapV2 = ({
         privileges: [
           {
             api: apiTags.delete,
-            id: 'cases_delete_v2',
+            id: 'cases_delete',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
               {
@@ -75,7 +75,7 @@ export const getCasesSubFeaturesMapV2 = ({
         groupType: 'independent',
         privileges: [
           {
-            id: 'cases_settings_v2',
+            id: 'cases_settings',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails',
               {

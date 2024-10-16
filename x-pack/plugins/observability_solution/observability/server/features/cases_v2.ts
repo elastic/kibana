@@ -68,7 +68,7 @@ export const getCasesFeatureV2 = (
           privileges: [
             {
               api: casesApiTags.delete,
-              id: 'cases_delete_v2',
+              id: 'cases_delete',
               name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureDetails', {
                 defaultMessage: 'Delete cases and comments',
               }),
@@ -95,7 +95,7 @@ export const getCasesFeatureV2 = (
           groupType: 'independent',
           privileges: [
             {
-              id: 'cases_settings_v2',
+              id: 'cases_settings',
               name: i18n.translate(
                 'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
                 {

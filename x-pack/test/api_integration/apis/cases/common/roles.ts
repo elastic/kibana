@@ -26,7 +26,7 @@ export const secAllCasesOnlyDelete: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['cases_delete_v2'],
+          securitySolutionCasesV2: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -51,7 +51,7 @@ export const secAllCasesOnlyReadDelete: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['read', 'cases_delete_v2'],
+          securitySolutionCasesV2: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -302,7 +302,7 @@ export const casesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['cases_delete_v2'],
+          generalCasesV2: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -326,7 +326,7 @@ export const casesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['read', 'cases_delete_v2'],
+          generalCasesV2: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -426,7 +426,7 @@ export const obsCasesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['cases_delete_v2'],
+          observabilityCasesV2: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -450,7 +450,7 @@ export const obsCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['read', 'cases_delete_v2'],
+          observabilityCasesV2: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
