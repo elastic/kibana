@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { kibanaService } from '../../../../utils/kibana_service';
 import { UpsertMonitorRequest } from '..';
 import { UpsertMonitorResponse } from '../monitor_management/api';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -61,29 +59,14 @@ export const fetchDeleteMonitor = async ({
   spaceId?: string;
 }): Promise<void> => {
   const baseUrl = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
-  if (spaceId) {
-    const basePath = kibanaService.coreSetup.http.basePath;
-    const url = addSpaceIdToPath(basePath.serverBasePath, spaceId, baseUrl);
 
-    return await apiService.delete(
-      url,
-      { version: INITIAL_REST_VERSION },
-      {
-        ids: configIds,
-      },
-      {
-        prependBasePath: false,
-      }
-    );
-  } else {
-    return await apiService.delete(
-      baseUrl,
-      { version: INITIAL_REST_VERSION },
-      {
-        ids: configIds,
-      }
-    );
-  }
+  return await apiService.delete(
+    baseUrl,
+    { version: INITIAL_REST_VERSION, spaceId },
+    {
+      ids: configIds,
+    }
+  );
 };
 
 export const fetchUpsertMonitor = async ({

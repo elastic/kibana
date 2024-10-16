@@ -258,6 +258,7 @@ export const OverviewGrid = memo(() => {
           id={flyoutConfig.id}
           location={flyoutConfig.location}
           locationId={flyoutConfig.locationId}
+          spaceId={flyoutConfig.spaceId}
           onClose={hideFlyout}
           onEnabledChange={forceRefreshCallback}
           onLocationChange={setFlyoutConfigCallback}

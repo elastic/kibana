@@ -25,7 +25,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
       }),
       query: schema.object({
-        spaceId: schema.maybe(schema.string()),
         internal: schema.maybe(
           schema.boolean({
             defaultValue: false,
@@ -61,15 +60,18 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           encryptedSavedObjectsClient,
           spaceId,
         });
-        return mapSavedObjectToMonitor({ monitor, internal });
+        return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
       } else {
-        return mapSavedObjectToMonitor({
-          monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-            syntheticsMonitorType,
-            monitorId
-          ),
-          internal,
-        });
+        return {
+          ...mapSavedObjectToMonitor({
+            monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+              syntheticsMonitorType,
+              monitorId
+            ),
+            internal,
+          }),
+          spaceId,
+        };
       }
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {

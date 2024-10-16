@@ -6,8 +6,6 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { kibanaService } from '../../../../utils/kibana_service';
 import type { ProjectAPIKeyResponse } from '../../../../../server/routes/monitor_cruds/get_api_key';
 import { apiService } from '../../../../utils/api_service';
 import {
@@ -57,32 +55,11 @@ export const updateMonitorAPI = async ({
   spaceId?: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  if (spaceId) {
-    const basePath = kibanaService.coreSetup.http.basePath;
-    const url = addSpaceIdToPath(
-      basePath.serverBasePath,
-      spaceId,
-      SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
-    );
-
-    return await apiService.put(
-      `${url}/${id}`,
-      monitor,
-      null,
-      {
-        internal: true,
-        version: INITIAL_REST_VERSION,
-      },
-      {
-        prependBasePath: false,
-      }
-    );
-  } else {
-    return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
-      internal: true,
-      version: INITIAL_REST_VERSION,
-    });
-  }
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+    spaceId,
+    internal: true,
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const fetchProjectAPIKey = async (

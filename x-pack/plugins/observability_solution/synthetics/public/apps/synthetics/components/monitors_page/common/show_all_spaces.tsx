@@ -16,6 +16,7 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import { clearOverviewStatusState } from '../../../state/overview_status';
 import {
   selectOverviewState,
   setOverviewPageStateAction,
@@ -51,6 +52,21 @@ const SelectablePopover = () => {
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
 
+  const updateState = (val: boolean) => {
+    dispatch(clearOverviewStatusState());
+    dispatch(
+      setOverviewPageStateAction({
+        showFromAllSpaces: val,
+      })
+    );
+    dispatch(
+      updateManagementPageStateAction({
+        showFromAllSpaces: val,
+      })
+    );
+    setIsPopoverOpen(false);
+  };
+
   const button = (
     <EuiButtonEmpty
       data-test-subj="syntheticsClickMeToLoadAContextMenuButton"
@@ -76,39 +92,21 @@ const SelectablePopover = () => {
         panels={[
           {
             id: 0,
-            title: 'Show monitors from',
+            title: SHOW_MONITORS_FROM,
             items: [
               {
-                name: 'Current space',
+                name: `${CURRENT_SPACE_LABEL} - ${space?.name || space?.id}`,
                 onClick: () => {
-                  dispatch(
-                    setOverviewPageStateAction({
-                      showFromAllSpaces: false,
-                    })
-                  );
-                  dispatch(
-                    updateManagementPageStateAction({
-                      showFromAllSpaces: false,
-                    })
-                  );
-                  setIsPopoverOpen(false);
+                  updateState(false);
                 },
+                icon: showFromAllSpaces ? 'empty' : 'check',
               },
               {
                 name: ALL_SPACES_LABEL,
                 onClick: () => {
-                  dispatch(
-                    setOverviewPageStateAction({
-                      showFromAllSpaces: true,
-                    })
-                  );
-                  dispatch(
-                    updateManagementPageStateAction({
-                      showFromAllSpaces: true,
-                    })
-                  );
-                  setIsPopoverOpen(false);
+                  updateState(true);
                 },
+                icon: showFromAllSpaces ? 'check' : 'empty',
               },
             ],
           },
@@ -120,4 +118,12 @@ const SelectablePopover = () => {
 
 const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.showAllSpaces.allSpacesLabel', {
   defaultMessage: 'All permitted spaces',
+});
+
+const CURRENT_SPACE_LABEL = i18n.translate('xpack.synthetics.showAllSpaces.currentSpaceLabel', {
+  defaultMessage: 'Current space',
+});
+
+const SHOW_MONITORS_FROM = i18n.translate('xpack.synthetics.showAllSpaces.showMonitorsFrom', {
+  defaultMessage: 'Show monitors from',
 });

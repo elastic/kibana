@@ -13,17 +13,22 @@ import { EuiButton } from '@elastic/eui';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { useGetUrlParams } from '../../../hooks';
 
 export const EditMonitorLink = () => {
   const { basePath } = useSyntheticsSettingsContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
-
+  const { spaceId } = useGetUrlParams();
   const canEditSynthetics = useCanEditSynthetics();
   const isLinkDisabled = !canEditSynthetics;
   const linkProps = isLinkDisabled
     ? { disabled: true }
-    : { href: `${basePath}/app/synthetics/edit-monitor/${monitorId}` };
+    : {
+        href:
+          `${basePath}/app/synthetics/edit-monitor/${monitorId}` +
+          (spaceId ? `?spaceId=${spaceId}` : ''),
+      };
 
   return (
     <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
