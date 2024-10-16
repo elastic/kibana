@@ -8,4 +8,3 @@
  */
 
 export const PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType';
-export const AI_ASSISTANT_DEFAULT_SCOPE_KEY = 'aiAssistant:defaultScope';

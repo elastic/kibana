@@ -18,14 +18,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
-import { AI_ASSISTANT_DEFAULT_SCOPE_KEY } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const settingsKeys = [
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
-  AI_ASSISTANT_DEFAULT_SCOPE_KEY,
 ];
 
 export function UISettings() {
