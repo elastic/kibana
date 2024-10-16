@@ -6,10 +6,7 @@
  */
 
 import { apm, entities, log, timerange } from '@kbn/apm-synthtrace-client';
-import {
-  generateLongIdWithSeed,
-  generateShortId,
-} from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 
 const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateLongIdWithSeed('service');
 const HOST_SERVER_1_LOGS_ENTITY_ID = generateLongIdWithSeed('host');
