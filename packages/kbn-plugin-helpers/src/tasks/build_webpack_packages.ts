@@ -13,7 +13,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { TaskContext } from '../task_context';
 
-export async function buildWebpackPackages({ log, quiet }: TaskContext) {
+export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
   log.info('building required artifacts for the optimizer');
 
   const packagesToBuild = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
@@ -22,7 +22,8 @@ export async function buildWebpackPackages({ log, quiet }: TaskContext) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
       ? ['ignore', 'pipe', 'pipe']
       : ['inherit', 'inherit', 'inherit'];
-    await execa('yarn', ['build'], {
+
+    await execa('yarn', ['build', '--quiet', ...(dist ? ['--dist'] : [])], {
       cwd: path.resolve(REPO_ROOT, 'packages', packageName),
       stdio: stdioOptions,
     });

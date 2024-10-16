@@ -78,9 +78,6 @@ it('builds a generated plugin into a viable archive', async () => {
     "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
      info deleting the build and target directories
      info building required artifacts for the optimizer
-     info building packages/@kbn/ui-shared-deps-npm
-     info building packages/@kbn/ui-shared-deps-src
-     info building packages/@kbn/monaco
      succ required artifacts were created
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public

@@ -109,7 +109,7 @@ export const BuildPackages: Task = {
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles(log, { quiet: false });
+    await buildWebpackBundles(log, { quiet: false, dist: true });
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
@@ -305,12 +305,16 @@ export const BuildPackages: Task = {
   },
 };
 
-export async function buildWebpackBundles(log: ToolingLog, { quiet }: { quiet: boolean }) {
+export async function buildWebpackBundles(
+  log: ToolingLog,
+  { quiet, dist }: { quiet: boolean; dist: boolean }
+) {
   async function buildPackage(packageName: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
       ? ['ignore', 'pipe', 'pipe']
       : ['inherit', 'inherit', 'inherit'];
-    await execa('yarn', ['build'], {
+
+    await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
       cwd: path.resolve(REPO_ROOT, 'packages', packageName),
       stdio: stdioOptions,
     });

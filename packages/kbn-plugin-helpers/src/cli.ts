@@ -83,6 +83,7 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
