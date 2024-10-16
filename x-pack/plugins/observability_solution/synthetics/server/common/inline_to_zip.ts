@@ -10,7 +10,7 @@ import archiver from 'archiver';
 import { MemWritable } from './mem_writable';
 
 function wrapInlineInProject(inlineJourney: string) {
-  return `import { journey, step, expect } from '@elastic/synthetics';
+  return `import { journey, step, expect, mfa } from '@elastic/synthetics';
 
 journey('inline', ({ page, context, browser, params, request }) => {
 ${inlineJourney}
