@@ -79,6 +79,7 @@ export const SearchPanelContent = ({
         queryManager.filterManager.getFilters() ?? [],
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
+
       // Additional call because the search bar doesn't call onQueryChange when the query is cleared from filters
       onQueryChange?.(mergedQuery.query);
       setSearchParams({
@@ -129,7 +130,6 @@ export const SearchPanelContent = ({
       isClearable={true}
       customSubmitButton={<div />}
       onQueryChange={({ query }) => {
-        // console.log('On query change called', query);
         debouncedOnQueryChange?.(query?.query);
       }}
     />
