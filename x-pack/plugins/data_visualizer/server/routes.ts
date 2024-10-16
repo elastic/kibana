@@ -86,8 +86,17 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const { endpoints } = await esClient.asCurrentUser.inference.get({
             inference_id: '_all',
           });
+          const { trained_model_stats: stats } =
+            await esClient.asCurrentUser.ml.getTrainedModelsStats();
 
-          return response.ok({ body: endpoints });
+          const runningInferenceServices = endpoints.filter((endpoint) => {
+            const endpointStats = stats.find(
+              (stat) => stat.model_id === endpoint.service_settings.model_id
+            );
+            return endpointStats?.deployment_stats?.state === 'started';
+          });
+
+          return response.ok({ body: runningInferenceServices });
         } catch (e) {
           return response.customError(wrapError(e));
         }
