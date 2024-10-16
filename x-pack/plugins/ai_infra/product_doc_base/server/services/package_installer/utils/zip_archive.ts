@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { buffer } from 'stream/consumers';
 import yauzl from 'yauzl';
 
 export interface ZipArchive {
@@ -23,7 +22,7 @@ export const openZipArchive = async (archivePath: string): Promise<ZipArchive> =
         return reject(err ?? 'No zip file');
       }
 
-      zipFile!.on('entry', function (entry) {
+      zipFile!.on('entry', (entry) => {
         entries.push(entry);
         zipFile.readEntry();
       });
@@ -72,18 +71,20 @@ class ZipArchiveImpl implements ZipArchive {
 
 const getZipEntryContent = async (zipFile: yauzl.ZipFile, entry: yauzl.Entry): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
-    zipFile.openReadStream(entry, function (err, readStream) {
+    zipFile.openReadStream(entry, (err, readStream) => {
       if (err) {
         return reject(err);
       } else {
-        buffer(readStream!).then(
-          (result) => {
-            resolve(result);
-          },
-          (error) => {
-            reject(error);
-          }
-        );
+        const chunks: Buffer[] = [];
+        readStream!.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+        readStream!.on('end', () => {
+          resolve(Buffer.concat(chunks));
+        });
+        readStream!.on('error', () => {
+          reject();
+        });
       }
     });
   });

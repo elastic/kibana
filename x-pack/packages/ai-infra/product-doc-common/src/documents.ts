@@ -26,6 +26,6 @@ export interface ProductDocumentationAttributes {
   version: string;
   ai_subtitle: SemanticTextField;
   ai_summary: SemanticTextField;
-  ai_questions_answered: SemanticTextArrayField[];
+  ai_questions_answered: SemanticTextArrayField;
   ai_tags: string[];
 }
