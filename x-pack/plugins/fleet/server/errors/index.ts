@@ -29,6 +29,7 @@ export class RegistryResponseError extends RegistryError {
 
 // Package errors
 
+export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -73,6 +74,7 @@ export class BundledPackageLocationNotFoundError extends FleetError {}
 export class PackagePolicyRequestError extends FleetError {}
 export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
 export class PackagePolicyOutputError extends FleetError {}
+export class PackagePolicyContentPackageError extends FleetError {}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
@@ -100,6 +102,7 @@ export class OutputUnauthorizedError extends FleetError {}
 export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
+export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
 
 // Not found errors
 export class AgentNotFoundError extends FleetNotFoundError<{ agentId: string }> {}

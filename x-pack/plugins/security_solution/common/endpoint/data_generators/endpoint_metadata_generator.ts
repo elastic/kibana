@@ -8,7 +8,8 @@
 /* eslint-disable max-classes-per-file */
 
 import type { DeepPartial } from 'utility-types';
-import { merge, set } from 'lodash';
+import { merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { gte } from 'semver';
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { EndpointCapabilities } from '../service/response_actions/constants';

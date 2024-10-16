@@ -692,6 +692,7 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
   params?: Array<Record<string, string | undefined>>;
 }
