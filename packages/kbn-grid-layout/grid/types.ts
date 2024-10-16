@@ -47,8 +47,8 @@ export interface GridSettings {
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
 export interface GridLayoutStateManager {
-  hideDragPreview: () => void;
-  updatePreviewElement: (rect: {
+  // hideDragPreview: () => void;
+  updateDraggedElement: (rect: {
     top: number;
     left: number;
     bottom: number;
@@ -59,7 +59,7 @@ export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
-  dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;
+  // dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 }
 
@@ -70,7 +70,7 @@ export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize';
+  type: 'drag' | 'resize' | 'drop';
 
   /**
    * The id of the panel being interacted with.

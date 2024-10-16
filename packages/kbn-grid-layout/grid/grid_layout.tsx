@@ -15,6 +15,9 @@ import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const GridLayout = ({
   getCreationOptions,
@@ -58,10 +61,13 @@ export const GridLayout = ({
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
-                  if (!nextInteractionEvent) {
-                    gridLayoutStateManager.hideDragPreview();
+                  // console.log('nextInteractionEvent', nextInteractionEvent);
+                  if (nextInteractionEvent?.type === 'drop') {
+                    // gridLayoutStateManager.hideDragPreview();
+                    gridLayoutStateManager.interactionEvent$.next(undefined);
+                  } else {
+                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                   }
-                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}
                 ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
               />
@@ -69,10 +75,10 @@ export const GridLayout = ({
           })}
         </div>
       </GridHeightSmoother>
-      <GridOverlay
+      {/* <GridOverlay
         interactionEvent={interactionEvent}
         gridLayoutStateManager={gridLayoutStateManager}
-      />
+      /> */}
     </>
   );
 };

@@ -34,10 +34,14 @@ export const GridPanel = ({
   const thisPanelActive = activePanelId === panelData.id;
 
   const interactionStart = useCallback(
-    (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      if (!panelRef.current) return;
+    (type: PanelInteractionEvent['type'], e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      // console.log('panelRef.current', panelRef.current);
       e.preventDefault();
       e.stopPropagation();
+      if (!panelRef.current) return;
+
+      console.log('interactionStart');
+
       const panelRect = panelRef.current.getBoundingClientRect();
       setInteractionEvent({
         type,
@@ -54,14 +58,18 @@ export const GridPanel = ({
     [panelData.id, setInteractionEvent]
   );
 
+  const panelGridPosition = css`
+    grid-column-start: ${panelData.column + 1};
+    grid-column-end: ${panelData.column + 1 + panelData.width};
+    grid-row-start: ${panelData.row + 1};
+    grid-row-end: ${panelData.row + 1 + panelData.height};
+  `;
+
   return (
     <div
       ref={panelRef}
       css={css`
-        grid-column-start: ${panelData.column + 1};
-        grid-column-end: ${panelData.column + 1 + panelData.width};
-        grid-row-start: ${panelData.row + 1};
-        grid-row-end: ${panelData.row + 1 + panelData.height};
+        ${thisPanelActive ? 'position: fixed;' : panelGridPosition}
       `}
     >
       <EuiPanel
@@ -87,6 +95,9 @@ export const GridPanel = ({
           className="dragHandle"
           css={css`
             opacity: 0;
+            &:active {
+              opacity: 1 !important;
+            }
             display: flex;
             cursor: move;
             position: absolute;
@@ -100,8 +111,23 @@ export const GridPanel = ({
             border: 1px solid ${euiThemeVars.euiBorderColor};
             background-color: ${euiThemeVars.euiColorEmptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+            &:hover {
+              cursor: grab;
+            }
           `}
-          onMouseDown={(e) => interactionStart('drag', e)}
+          onMouseDown={(e) => {
+            console.log('on mouse down', e);
+            interactionStart('drag', e);
+
+            // e.target.addEventListener('mouseup', () => {
+            //   console.log('MOUSE UP TWO');
+            //   e.target.removeEventListener('mouseup');
+            // });
+          }}
+          onMouseUp={(e) => {
+            console.log('on mouse up', e);
+            interactionStart('drop', e);
+          }}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>

@@ -17,6 +17,7 @@ import {
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
+import { pick } from 'lodash';
 
 export const useGridLayoutState = ({
   getCreationOptions,
@@ -48,24 +49,34 @@ export const useGridLayoutState = ({
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
-      updatePreviewElement: (previewRect: {
+      updateDraggedElement: (draggedRect: {
         top: number;
         bottom: number;
         left: number;
         right: number;
       }) => {
+        const element = interactionEvent$.value?.panelDiv;
+        if (!element) return;
+
+        element.style.left = `${draggedRect.left}px`;
+        element.style.top = `${draggedRect.top}px`;
+        element.style.width = `${draggedRect.right - draggedRect.left}px`;
+        element.style.height = `${draggedRect.bottom - draggedRect.top}px`;
+
         if (!dragPreviewRef.current) return;
-        dragPreviewRef.current.style.opacity = '1';
-        dragPreviewRef.current.style.left = `${previewRect.left}px`;
-        dragPreviewRef.current.style.top = `${previewRect.top}px`;
-        dragPreviewRef.current.style.width = `${Math.max(
-          previewRect.right - previewRect.left,
-          runtimeSettings$.value.columnPixelWidth
-        )}px`;
-        dragPreviewRef.current.style.height = `${Math.max(
-          previewRect.bottom - previewRect.top,
-          runtimeSettings$.value.rowHeight
-        )}px`;
+        // console.log('dragPreviewRef.current', dragPreviewRef.current);
+
+        // dragPreviewRef.current.style.opacity = '1';
+        // dragPreviewRef.current.style.left = `${draggedRect.left}px`;
+        // dragPreviewRef.current.style.top = `${draggedRect.top}px`;
+        // dragPreviewRef.current.style.width = `${Math.max(
+        //   draggedRect.right - draggedRect.left,
+        //   runtimeSettings$.value.columnPixelWidth
+        // )}px`;
+        // dragPreviewRef.current.style.height = `${Math.max(
+        //   draggedRect.bottom - draggedRect.top,
+        //   runtimeSettings$.value.rowHeight
+        // )}px`;
       },
       hideDragPreview: () => {
         if (!dragPreviewRef.current) return;
