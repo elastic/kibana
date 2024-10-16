@@ -160,7 +160,7 @@ describe('System Action Scheduler', () => {
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -202,7 +202,7 @@ describe('System Action Scheduler', () => {
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -240,7 +240,7 @@ describe('System Action Scheduler', () => {
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -265,7 +265,7 @@ describe('System Action Scheduler', () => {
       const scheduler = new SystemActionScheduler(getSchedulerContext());
 
       try {
-        await scheduler.getActionsToSchedule({ alerts });
+        await scheduler.getActionsToSchedule({});
       } catch (err) {
         expect(err.message).toEqual(`no alerts for you`);
         expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
@@ -299,7 +299,7 @@ describe('System Action Scheduler', () => {
           },
         },
       });
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
@@ -361,7 +361,7 @@ describe('System Action Scheduler', () => {
           },
         },
       });
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
@@ -416,7 +416,7 @@ describe('System Action Scheduler', () => {
         ...defaultContext,
         rule: { ...rule, systemActions: [differentSystemAction] },
       });
-      const results = await scheduler.getActionsToSchedule({ alerts });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
