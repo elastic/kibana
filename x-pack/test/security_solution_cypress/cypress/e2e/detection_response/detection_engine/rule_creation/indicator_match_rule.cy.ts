@@ -502,7 +502,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.risk_score);
       });
 
-      it.only('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
