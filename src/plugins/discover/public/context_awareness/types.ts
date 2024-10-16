@@ -319,6 +319,11 @@ export interface Profile {
 
   /**
    * Supports extending the app menu with additional actions
+   * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+   * The extension also provides the essential params like current dataView, services etc when defining a custom action implementation.
+   * And it supports opening custom flyouts and any other modals on the click.
+   * `getAppMenu` can be configured in both root and data source profiles.
+   * Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */

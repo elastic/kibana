@@ -78,50 +78,67 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         },
       };
     },
+    /**
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+     * The extension also provides the essential params like current dataView, services etc when defining a custom action implementation.
+     * And it supports opening custom flyouts and any other modals on the click.
+     * `getAppMenu` can be configured in both root and data source profiles.
+     * @param prev
+     */
     getAppMenu: (prev) => (params) => {
       const prevValue = prev(params);
 
-      // what is available via params:
+      // This is what is available via params:
       // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
 
       return {
         appMenuRegistry: (registry) => {
-          registry.registerCustomAction({
-            id: 'example-custom-submenu1',
-            type: AppMenuActionType.custom,
-            label: 'Data source submenu',
-            actions: [
-              {
-                id: 'example-custom-action1',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom 1',
-                  onClick: () => {
-                    alert('Example custom action 11 clicked');
-                  },
-                },
-              },
-              {
-                id: 'example-custom-action2',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom 2',
-                  onClick: () => {
-                    alert('Example custom action 12 clicked');
-                  },
-                },
-              },
-            ],
-          });
+          // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
+          // Can be a on-click action, link or a submenu with an array of actions and horizontal rules
           registry.registerCustomAction({
-            id: 'example-custom-action3',
+            id: 'example-custom-action',
             type: AppMenuActionType.custom,
             controlProps: {
               label: 'Custom action',
+              testId: 'example-custom-action',
               onClick: ({ onFinishAction }) => {
-                // This is an example of a custom action that opens a flyout or any other custom modal
-                // To do so, simply return a React element and call onFinishAction when you're done
+                alert('Example Custom action clicked');
+                onFinishAction(); // This allows to return focus back to the app menu DOM node
+              },
+            },
+            // In case of a submenu, you can add actions to it under `actions`
+            // actions: [
+            //   {
+            //     id: 'example-custom-action-1-1',
+            //     type: AppMenuActionType.custom,
+            //     controlProps: {
+            //       label: 'Custom action',
+            //       onClick: ({ onFinishAction }) => {
+            //         alert('Example Custom action clicked');
+            //         onFinishAction();
+            //       },
+            //     },
+            //   },
+            //   {
+            //     id: 'example-custom-action-1-2',
+            //     type: AppMenuActionType.submenuHorizontalRule
+            //   },
+            //   ...
+            // ],
+          });
+
+          // This example shows how to add a custom action under the Alerts submenu
+          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+            id: 'example-custom-action4',
+            type: AppMenuActionType.custom,
+            order: 101,
+            controlProps: {
+              label: 'Custom flyout under Alerts',
+              testId: 'example-custom-action-under-alerts',
+              onClick: ({ onFinishAction }) => {
+                // This is an example of a custom action that opens a flyout or any other custom modal.
+                // To do so, simply return a React element and call onFinishAction when you're done.
                 return (
                   <EuiFlyout onClose={onFinishAction}>
                     <div>Example custom action clicked</div>
@@ -131,22 +148,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             },
           });
 
-          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
-            id: 'example-custom-action4',
-            type: AppMenuActionType.custom,
-            order: 101,
-            controlProps: {
-              label: 'Custom action under Alerts',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Custom action under Alerts clicked');
-                onFinishAction();
-              },
-            },
-          });
-
           // This submenu was defined in the root profile example_root_pofile/profile.tsx
-          // and we can add actions to it from the data source profile here
-          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu1', {
+          // And we can still add actions to it from the data source profile here.
+          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu', {
             id: 'example-custom-action5',
             type: AppMenuActionType.custom,
             controlProps: {
