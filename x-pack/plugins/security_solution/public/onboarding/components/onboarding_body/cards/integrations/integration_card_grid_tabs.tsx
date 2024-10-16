@@ -47,7 +47,6 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id

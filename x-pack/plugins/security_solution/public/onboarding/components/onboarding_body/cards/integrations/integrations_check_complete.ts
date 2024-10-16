@@ -17,7 +17,6 @@ import type { IntegrationCardMetadata } from './types';
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  // Card wouldn't even render if the user doesn't have access to package data
   const packageData = await services.http.get<GetPackagesResponse>(
     EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
     {
