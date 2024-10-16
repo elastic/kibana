@@ -69,7 +69,7 @@ export function prefixIndexPatternWithCcs(
  */
 export function parseCrossClusterPrefix(indexName: string): string | null {
   const isCcs = isCCSRemoteIndexName(indexName);
-  if (isCcs) {
+  if (!isCcs) {
     return null;
   }
 
