@@ -8,13 +8,14 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
-import type { UserProfileData } from '../types';
+import { i18n } from '@kbn/i18n';
+
 import { useUserProfiles } from '../services';
+import type { UserProfileData } from '../types';
 
 interface Props {
   notificationSuccess?: {
