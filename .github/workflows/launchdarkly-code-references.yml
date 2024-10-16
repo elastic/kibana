@@ -5,11 +5,6 @@ on:
     branches:
       - 'main'
 
-# cancel in-flight workflow run if another push was triggered
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   launchDarklyCodeReferences:
     name: LaunchDarkly Code References
