@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { PRECONFIGURED_ENDPOINTS } from '../../../common/constants';
 import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
@@ -97,9 +98,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           ),
         },
         {
-          render: (inferenceEndpoint: InferenceEndpointUI) => (
-            <DeleteAction selectedEndpoint={inferenceEndpoint} />
-          ),
+          render: (inferenceEndpoint: InferenceEndpointUI) => {
+            return PRECONFIGURED_ENDPOINTS.includes(inferenceEndpoint.endpoint) ? (
+              <DeleteAction preconfiguredEndpoint={true} selectedEndpoint={inferenceEndpoint} />
+            ) : (
+              <DeleteAction preconfiguredEndpoint={false} selectedEndpoint={inferenceEndpoint} />
+            );
+          },
         },
       ],
       width: '165px',

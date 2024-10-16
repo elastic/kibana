@@ -10,3 +10,5 @@ export const PLUGIN_NAME = 'Inference Endpoints';
 
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+
+export const PRECONFIGURED_ENDPOINTS = ['.elser-2', '.multi-e5-small'];
