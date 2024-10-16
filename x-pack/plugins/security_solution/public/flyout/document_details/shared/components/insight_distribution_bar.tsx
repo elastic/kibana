@@ -17,7 +17,6 @@ import {
   type EuiFlexGroupProps,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { FormattedCount } from '../../../../common/components/formatted_number';
 
 export interface InsightDistributionBarProps {
   /**
@@ -31,7 +30,7 @@ export interface InsightDistributionBarProps {
   /**
    * Count to be displayed in the badge
    */
-  count: number;
+  count: React.ReactNode;
   /**
    * Flex direction of the component
    */
@@ -75,9 +74,7 @@ export const InsightDistributionBar: React.FC<InsightDistributionBarProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-badge`}>
-            <EuiBadge color="hollow">
-              <FormattedCount count={count} />
-            </EuiBadge>
+            <EuiBadge color="hollow">{count}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
