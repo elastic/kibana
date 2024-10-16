@@ -32,12 +32,13 @@ export const generateReactRouterProps = ({
   to,
   onClick,
   shouldNotCreateHref = false,
+  shouldNotPrepend = false,
 }: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(to, { history, http }, { shouldNotCreateHref });
+  const href = createHref(to, { history, http }, { shouldNotCreateHref, shouldNotPrepend });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -47,7 +48,7 @@ export const generateReactRouterProps = ({
     event.preventDefault();
 
     // Perform SPA navigation.
-    navigateToUrl(to, { shouldNotCreateHref });
+    navigateToUrl(to, { shouldNotCreateHref, shouldNotPrepend });
   };
 
   return { href, onClick: reactRouterLinkClick };

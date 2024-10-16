@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN, APPLICATIONS_PLUGIN } from '../../../../common/constants';
@@ -19,7 +19,11 @@ import { useIndicesNav } from '../../enterprise_search_content/components/search
 
 import { KibanaLogic } from '../kibana';
 import { LicensingLogic } from '../licensing';
-import { ClassicNavItem } from '../types';
+import {
+  ClassicNavItem,
+  GenerateNavLinkParameters,
+  GenerateNavLinkFromDeepLinkParameters,
+} from '../types';
 
 import { buildBaseClassicNavItems } from './base_nav';
 import { generateNavLink } from './nav_link_helpers';
@@ -31,16 +35,23 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess, getNavLinks } = useValues(KibanaLogic);
 
   const { hasEnterpriseLicense } = useValues(LicensingLogic);
 
   const indicesNavItems = useIndicesNav();
 
+  const deepLinks = useMemo(() => {
+    return getNavLinks().reduce((links, link) => {
+      links[link.id] = link;
+      return links;
+    }, {} as Record<string, ChromeNavLink | undefined>);
+  }, []);
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
     const baseNavItems = buildBaseClassicNavItems({ hasEnterpriseLicense, productAccess });
-    return generateSideNavItems(baseNavItems, { search_indices: indicesNavItems });
-  }, [hasEnterpriseLicense, productAccess, indicesNavItems]);
+
+    return generateSideNavItems(baseNavItems, deepLinks, { search_indices: indicesNavItems });
+  }, [hasEnterpriseLicense, productAccess, indicesNavItems, deepLinks]);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -209,6 +220,7 @@ export const useEnterpriseSearchAnalyticsNav = (
 
 export const generateSideNavItems = (
   navItems: ClassicNavItem[],
+  deepLinks: Record<string, ChromeNavLink | undefined>,
   subItemsMap: Record<string, Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined> = {}
 ): Array<EuiSideNavItemTypeEnhanced<unknown>> => {
   const sideNavItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [];
@@ -222,20 +234,23 @@ export const generateSideNavItems = (
     if (items || subItems) {
       sideNavChildItems = [];
       if (items) {
-        sideNavChildItems.push(...generateSideNavItems(items, subItemsMap));
+        sideNavChildItems.push(...generateSideNavItems(items, deepLinks, subItemsMap));
       }
       if (subItems) {
         sideNavChildItems.push(...subItems);
       }
     }
     if (navLink) {
-      sideNavItems.push({
-        ...rest,
-        ...generateNavLink({
-          ...navLink,
-          items: sideNavChildItems,
-        }),
-      });
+      const navLinkParams = getNavLinkParameters(navLink, deepLinks);
+      if (navLinkParams !== undefined) {
+        sideNavItems.push({
+          ...rest,
+          ...generateNavLink({
+            ...navLinkParams,
+            items: sideNavChildItems,
+          }),
+        });
+      }
     } else {
       sideNavItems.push({
         ...rest,
@@ -246,3 +261,27 @@ export const generateSideNavItems = (
 
   return sideNavItems;
 };
+
+const getNavLinkParameters = (
+  navLink: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters,
+  deepLinks: Record<string, ChromeNavLink | undefined>
+): GenerateNavLinkParameters | undefined => {
+  if (isGenerateNavLinkParameters(navLink)) {
+    return navLink;
+  }
+  const { link, ...navLinkProps } = navLink;
+  const deepLink = deepLinks[link];
+  if (!deepLink || !deepLink.url) return undefined;
+  return {
+    ...navLinkProps,
+    shouldNotPrepend: true,
+    shouldNotCreateHref: true,
+    to: deepLink.url,
+  };
+};
+
+function isGenerateNavLinkParameters(
+  navLink: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters
+): navLink is GenerateNavLinkParameters {
+  return Object.hasOwn(navLink, 'to');
+}
