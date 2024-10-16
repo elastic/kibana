@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
@@ -25,6 +26,7 @@ import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
+import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
@@ -34,6 +36,8 @@ export const ConnectorsOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+
+  const canManageConnectors = !data || data.canManageConnectors;
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -76,6 +80,7 @@ export const ConnectorsOverview = () => {
             <EuiFlexItem>
               <EuiButton
                 data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
+                disabled={!canManageConnectors}
                 isLoading={isLoading}
                 fill
                 iconType="plusInCircleFilled"
@@ -100,7 +105,7 @@ export const ConnectorsOverview = () => {
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
                     external
                     target="_blank"
-                    href={'TODO TODO'}
+                    href={docLinks.connectors}
                   >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
@@ -110,15 +115,14 @@ export const ConnectorsOverview = () => {
           </p>
         </EuiText>
       </EuiPageTemplate.Header>
-      {connectorsLoading || (data?.connectors || []).length > 0 ? (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
+      <EuiPageTemplate.Section restrictWidth color="subdued">
+        <ConnectorPrivilegesCallout />
+        {connectorsLoading || (data?.connectors || []).length > 0 ? (
           <ConnectorsTable />
-        </EuiPageTemplate.Section>
-      ) : (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
+        ) : (
           <EmptyConnectorsPrompt />
-        </EuiPageTemplate.Section>
-      )}
+        )}
+      </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
   );

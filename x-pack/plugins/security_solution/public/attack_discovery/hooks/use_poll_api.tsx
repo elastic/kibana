@@ -106,7 +106,9 @@ export const usePollApi = ({
             ...attackDiscovery,
             id: attackDiscovery.id ?? uuid.v4(),
             detailsMarkdown: replaceNewlineLiterals(attackDiscovery.detailsMarkdown),
-            entitySummaryMarkdown: replaceNewlineLiterals(attackDiscovery.entitySummaryMarkdown),
+            entitySummaryMarkdown: replaceNewlineLiterals(
+              attackDiscovery.entitySummaryMarkdown ?? ''
+            ),
             summaryMarkdown: replaceNewlineLiterals(attackDiscovery.summaryMarkdown),
           })),
         };
@@ -123,7 +125,7 @@ export const usePollApi = ({
       const rawResponse = await http.fetch(
         `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
         {
-          method: 'PUT',
+          method: 'POST',
           version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         }
       );
