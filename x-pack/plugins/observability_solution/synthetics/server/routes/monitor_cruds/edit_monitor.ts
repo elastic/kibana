@@ -226,20 +226,21 @@ export const refreshInlineZip = async (
   previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   server: SyntheticsServerSetup
 ) => {
-  return omit(
+  const projectFields = await mapInlineToProjectFields({
+    monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+    monitor: normalizedMonitor,
+    logger: server.logger,
+    includeInlineScript: false,
+  });
+  return Object.assign(
+    {},
+    normalizedMonitor,
     {
-      ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
         normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
       [ConfigKey.CONFIG_ID]: previousMonitor.id,
-      ...(await mapInlineToProjectFields({
-        monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
-        monitor: normalizedMonitor,
-        logger: server.logger,
-        includeInlineScript: false,
-      })),
     },
-    ConfigKey.SOURCE_INLINE
+    projectFields
   );
 };
 
