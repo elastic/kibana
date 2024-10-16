@@ -4,7 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-  # Add an introduction to spaces
+# Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces
     update:
@@ -24,7 +24,7 @@ actions:
             If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
             To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
-  # Add some tag descriptions and displayNames
+# Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="alerting")]'
     description: Change tag description and displayName
     update:
@@ -95,3 +95,39 @@ actions:
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
     remove: true
+# Add some examples that do not apply to serverless
+  - target: "$.paths['/api/security/role/{name}']['put']"
+    description: "Add examples to create role API"
+    update: 
+      requestBody:
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createRoleRequest1:
+                $ref: "../examples/create_role_request1.yaml"
+              createRoleRequest2:
+                $ref: "../examples/create_role_request2.yaml"
+              createRoleRequest3:
+                $ref: "../examples/create_role_request3.yaml"
+              createRoleRequest4:
+                $ref: "../examples/create_role_request4.yaml"
+  - target: "$.paths['/api/security/role/{name}']['get']"
+    description: "Add example to get role API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRoleResponse1:
+                  $ref: '../examples/get_role_response1.yaml'
+  - target: "$.paths['/api/security/role']['get']"
+    description: "Add example to get roles API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRolesResponse1:
+                  $ref: '../examples/get_roles_response1.yaml'
