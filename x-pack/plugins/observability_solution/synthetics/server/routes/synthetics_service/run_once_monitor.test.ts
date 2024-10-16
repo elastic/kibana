@@ -58,7 +58,7 @@ describe('runOnceSyntheticsMonitorRoute', () => {
     expect(monitor[ConfigKey.SOURCE_INLINE]).toBeUndefined();
     expect(monitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeDefined();
     expect(await unzipFile(monitor[ConfigKey.SOURCE_PROJECT_CONTENT])).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
+      "import { journey, step, expect, mfa } from '@elastic/synthetics';
 
       journey('inline', ({ page, context, browser, params, request }) => {
       step(\\"goto\\", () => page.goto(\\"http://example.com\\"))

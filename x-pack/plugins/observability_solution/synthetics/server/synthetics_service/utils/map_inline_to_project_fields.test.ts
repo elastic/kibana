@@ -121,7 +121,7 @@ describe('mapInlineToProjectFields', () => {
       );
       expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT] ?? ''))
         .toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
+      "import { journey, step, expect, mfa } from '@elastic/synthetics';
 
       journey('inline', ({ page, context, browser, params, request }) => {
       step('goto', () => page.goto('https://elastic.co'))

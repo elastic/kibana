@@ -18,7 +18,7 @@ step('throw error', () => { throw new Error('error'); });
 
     expect(result.length).toBeGreaterThan(0);
     expect(await unzipFile(result)).toEqual(
-      `import { journey, step, expect } from '@elastic/synthetics';
+      `import { journey, step, expect, mfa } from '@elastic/synthetics';
 
 journey('inline', ({ page, context, browser, params, request }) => {
 
