@@ -20,7 +20,7 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 1. [End-to-End Tests](../../test/cloud_security_posture_functional/config.ts)
 1. [Serverless API Integration tests](../../test_serverless/api_integration/test_suites/security/config.ts)
 1. [Serverless End-to-End Tests](../../test_serverless/functional/test_suites/security/config.ts)
-1. [Cypress End-to-End Tests (Temporary location)](../../test/security_solution_cypress/cypress/e2e/explore/hosts)
+1. [Cypress End-to-End Tests (Temporary location)](../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
 
 ### Tools

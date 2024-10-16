@@ -13,4 +13,4 @@ cd x-pack/plugins/security_solution
 
 set +e
 
-yarn cypress:run:qa:serverless:cloud_security_posture; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:cloud_security_posture:run:serverless; status=$?; yarn junit:merge || :; exit $status
