@@ -125,12 +125,17 @@ export class ChatFunctionClient {
   getFunctions({
     filter,
     scopes,
+    requiredFunctions,
   }: {
     filter?: string;
     scopes?: AssistantScope[];
+    requiredFunctions?: string[];
   } = {}): FunctionHandler[] {
     const allFunctions = Array.from(this.functionRegistry.values())
-      .filter(filterScopes(scopes))
+      .filter(
+        (value) =>
+          requiredFunctions?.includes(value.handler.definition.name) || filterScopes(scopes)
+      )
       .map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);

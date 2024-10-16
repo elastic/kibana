@@ -15,10 +15,11 @@ import { createObservabilityAIAssistantServerRoute } from '../create_observabili
 import { assistantScopeType } from '../runtime_types';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/{scope}/functions',
+  endpoint: 'GET /internal/observability_ai_assistant/functions',
   params: t.type({
-    path: t.type({
-      scope: assistantScopeType,
+    query: t.partial({
+      scopes: t.union([t.array(assistantScopeType), assistantScopeType]),
+      requiredFunctions: t.union([t.string, t.array(t.string)]),
     }),
   }),
   options: {
@@ -34,9 +35,16 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       service,
       request,
       params: {
-        path: { scope },
+        query: { scopes: inputScopes, requiredFunctions: inputFunctions },
       },
     } = resources;
+
+    const scopes = inputScopes ? (Array.isArray(inputScopes) ? inputScopes : [inputScopes]) : [];
+    const requiredFunctions = inputFunctions
+      ? Array.isArray(inputFunctions)
+        ? inputFunctions
+        : [inputFunctions]
+      : [];
 
     const controller = new AbortController();
     request.events.aborted$.subscribe(() => {
@@ -57,7 +65,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     ]);
 
     const functionDefinitions = functionClient
-      .getFunctions({ scopes: [scope] })
+      .getFunctions({ scopes, requiredFunctions })
       .map((fn) => fn.definition);
 
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
@@ -65,7 +73,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     return {
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
-        applicationInstructions: functionClient.getInstructions([scope]),
+        applicationInstructions: functionClient.getInstructions(scopes),
         userInstructions,
         adHocInstructions: [],
         availableFunctionNames,

@@ -58,7 +58,14 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ analytics, apiClient, signal, registrations, scope$ });
+      return await mod.createChatService({
+        analytics,
+        apiClient,
+        signal,
+        registrations,
+        scope$,
+        screenContexts$,
+      });
     },
     callApi: apiClient,
     getScreenContexts,
