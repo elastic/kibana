@@ -99,7 +99,7 @@ describe(
           submitCommand();
           cy.wait('@scanAction');
 
-          cy.contains('Scan complete', { timeout: 180000 }).click();
+          cy.contains('Scan complete').click();
         });
       });
 

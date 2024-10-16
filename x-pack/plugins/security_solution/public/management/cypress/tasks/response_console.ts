@@ -60,7 +60,7 @@ export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommand
   const actionPendingMessage =
     command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
   cy.contains(actionPendingMessage).should('exist');
-  cy.contains(actionResultMessage, { timeout: 300000 }).should('exist');
+  cy.contains(actionResultMessage, { timeout: 120000 }).should('exist');
 };
 
 export const performCommandInputChecks = (command: string) => {

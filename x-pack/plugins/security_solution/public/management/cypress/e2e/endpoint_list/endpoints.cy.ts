@@ -97,7 +97,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     // using TABLE_ROW_ACTIONS be.visible as a delay since it loads last on the row
     cy.get('@endpointRow').findByTestSubj(TABLE_ROW_ACTIONS).should('be.visible');
     cy.get('@endpointRow').findByTestSubj('policyNameCellLink').should('be.visible').click();
-    cy.location('pathname', { timeout: 40000 }).should(
+    cy.location('pathname', { timeout: 20000 }).should(
       'match',
       /^\/app\/security\/administration\/policy\/[a-f0-9-]+\/settings$/
     );

@@ -19,7 +19,7 @@ export interface CyIndexEndpointHosts {
 export const indexEndpointHosts = (
   options: IndexEndpointHostsCyTaskOptions = {}
 ): Cypress.Chainable<CyIndexEndpointHosts> => {
-  return cy.task('indexEndpointHosts', options, { timeout: 300000 }).then((indexHosts) => {
+  return cy.task('indexEndpointHosts', options, { timeout: 24000 }).then((indexHosts) => {
     return {
       data: indexHosts,
       cleanup: () => {
