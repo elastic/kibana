@@ -41,6 +41,7 @@ export const getNavLinkActive = ({
   shouldShowActiveForSubroutes = false,
   items = [],
   shouldNotCreateHref = false,
+  shouldNotPrepend = false,
 }: GenerateNavLinkParameters): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
   const currentPath = stripTrailingSlash(pathname);
@@ -48,7 +49,7 @@ export const getNavLinkActive = ({
     shouldNotCreateHref: false,
     to: currentPath,
   });
-  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, to });
+  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, shouldNotPrepend, to });
 
   if (currentPathHref === toHref) return true;
 

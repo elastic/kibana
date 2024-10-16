@@ -11,26 +11,11 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ANALYTICS_PLUGIN,
-  APPLICATIONS_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
-  SEARCH_RELEVANCE_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-
-import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from '../../applications/routes';
-import {
-  CONNECTORS_PATH,
-  CRAWLERS_PATH,
-  SEARCH_INDICES_PATH,
-} from '../../enterprise_search_content/routes';
-import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
@@ -52,9 +37,8 @@ export const buildBaseClassicNavItems = ({
       </EuiText>
     ),
     navLink: {
-      shouldNotCreateHref: true,
+      link: 'enterpriseSearch',
       shouldShowActiveForSubroutes: true,
-      to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
     },
   });
 
@@ -70,9 +54,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Indices',
         }),
         navLink: {
-          shouldNotCreateHref: true,
+          link: 'enterpriseSearchContent:searchIndices',
           shouldShowActiveForSubroutes: true,
-          to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
         },
       },
       {
@@ -82,9 +65,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Connectors',
         }),
         navLink: {
-          shouldNotCreateHref: true,
+          link: 'enterpriseSearchContent:connectors',
           shouldShowActiveForSubroutes: true,
-          to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CONNECTORS_PATH,
         },
       },
       {
@@ -94,9 +76,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Web crawlers',
         }),
         navLink: {
-          shouldNotCreateHref: true,
+          link: 'enterpriseSearchContent:webCrawlers',
           shouldShowActiveForSubroutes: true,
-          to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
         },
       },
     ],
@@ -117,9 +98,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Playground',
         }),
         navLink: {
-          shouldNotCreateHref: true,
+          link: 'enterpriseSearchApplications:playground',
           shouldShowActiveForSubroutes: true,
-          to: APPLICATIONS_PLUGIN.URL + PLAYGROUND_PATH,
         },
       },
       {
@@ -129,8 +109,7 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Search Applications',
         }),
         navLink: {
-          shouldNotCreateHref: true,
-          to: APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH,
+          link: 'enterpriseSearchApplications:searchApplications',
         },
       },
       {
@@ -140,8 +119,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Behavioral Analytics',
         }),
         navLink: {
+          link: 'enterpriseSearchAnalytics',
           shouldNotCreateHref: true,
-          to: ANALYTICS_PLUGIN.URL,
         },
       },
     ],
@@ -163,9 +142,8 @@ export const buildBaseClassicNavItems = ({
             defaultMessage: 'Inference Endpoints',
           }),
           navLink: {
-            shouldNotCreateHref: true,
+            link: 'enterpriseSearchRelevance:inferenceEndpoints',
             shouldShowActiveForSubroutes: true,
-            to: SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
           },
         },
       ],
@@ -236,8 +214,7 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'App Search',
         }),
         navLink: {
-          shouldNotCreateHref: true,
-          to: APP_SEARCH_PLUGIN.URL,
+          link: 'appSearch:engines',
         },
       });
     }
@@ -249,8 +226,7 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Workplace Search',
         }),
         navLink: {
-          shouldNotCreateHref: true,
-          to: WORKPLACE_SEARCH_PLUGIN.URL,
+          link: 'workplaceSearch',
         },
       });
     }
