@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import React from 'react';
+import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { BulkOperations } from './bulk_operations';
 import { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 
@@ -22,7 +23,7 @@ export const MonitorListHeader = ({
 }) => {
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
         <span>{recordRangeLabel}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -30,6 +31,9 @@ export const MonitorListHeader = ({
           selectedItems={selectedItems}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ShowAllSpaces />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

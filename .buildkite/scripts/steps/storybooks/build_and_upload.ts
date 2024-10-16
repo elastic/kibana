@@ -43,6 +43,7 @@ const STORYBOOKS = [
   'lists',
   'observability',
   'observability_ai_assistant',
+  'observability_inventory',
   'observability_shared',
   'presentation',
   'security_solution',
