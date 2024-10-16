@@ -107,7 +107,6 @@ export interface GetListAgentPolicyOutputsResponse {
 
 export interface GetListAgentPolicyOutputsRequest {
   query: {
-    page?: number;
-    perPage?: number;
+    ids?: string;
   };
 }

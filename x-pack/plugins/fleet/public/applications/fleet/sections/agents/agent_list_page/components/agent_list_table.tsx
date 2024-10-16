@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { type CriteriaWithPagination } from '@elastic/eui';
 import {
@@ -107,19 +107,34 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
+
+  const isAgentSelectable = useCallback(
+    (agent: Agent) => {
+      if (!agent.active) return false;
+      if (!agent.policy_id) return true;
+
+      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const isHosted = agentPolicy?.is_managed === true;
+      return !isHosted;
+    },
+    [agentPoliciesIndexedById]
+  );
+
+  const agentsShown = useMemo(() => {
+    return totalAgents
+      ? showUpgradeable
+        ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
+        : agents
+      : [];
+  }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
+
+  // get the policyIds of the agents shown on the page
+  const policyIds = useMemo(() => {
+    return agentsShown.map((agent) => agent.policy_id);
+  }, [agentsShown]);
   const allOutputs = useGetListOutputsForPolicies({
-    page: pagination.currentPage,
-    perPage: pagination.pageSize,
+    ids: !!policyIds ? policyIds : [],
   });
-
-  const isAgentSelectable = (agent: Agent) => {
-    if (!agent.active) return false;
-    if (!agent.policy_id) return true;
-
-    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isHosted = agentPolicy?.is_managed === true;
-    return !isHosted;
-  };
 
   const noItemsMessage =
     isLoading && isCurrentRequestIncremented ? (
@@ -371,13 +386,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
       noItemsMessage={noItemsMessage}
-      items={
-        totalAgents
-          ? showUpgradeable
-            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
-            : agents
-          : []
-      }
+      items={agentsShown}
       itemId="id"
       columns={columns}
       pagination={{

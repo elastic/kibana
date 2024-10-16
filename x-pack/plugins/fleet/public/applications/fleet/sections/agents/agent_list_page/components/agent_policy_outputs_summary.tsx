@@ -83,7 +83,7 @@ export const AgentPolicyOutputsSummary: React.FC<{
         </EuiFlexItem>
       )}
 
-      {data?.integrations && data?.integrations.length > 1 && !isMonitoring && (
+      {data?.integrations && data?.integrations.length >= 1 && !isMonitoring && (
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="hollow"
@@ -91,7 +91,7 @@ export const AgentPolicyOutputsSummary: React.FC<{
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             onClickAriaLabel="Open output hosts popover"
           >
-            +{data?.integrations.length - 1}
+            +{data?.integrations.length}
           </EuiBadge>
           <EuiPopover
             data-test-subj="outputHostsPopover"

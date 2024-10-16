@@ -154,7 +154,6 @@ export const GetAgentPolicyOutputsRequestSchema = {
 
 export const GetListAgentPolicyOutputsRequestSchema = {
   query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1 })),
-    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+    ids: schema.maybe(schema.arrayOf(schema.string())),
   }),
 };

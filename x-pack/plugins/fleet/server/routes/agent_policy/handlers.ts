@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
-import { SO_SEARCH_LIMIT, inputsFormat } from '../../../common/constants';
+import { inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -717,14 +717,14 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   try {
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const { page, perPage } = request.query;
+    const { ids } = request.query;
 
-    // fix or remove this query
-    const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-      esClient,
-      page: page ? page : 1,
-      perPage: perPage ? perPage : SO_SEARCH_LIMIT,
+    if (!ids) {
+      return response.ok({
+        body: { items: [] },
+      });
+    }
+    const agentPolicies = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies: true,
     });
 
