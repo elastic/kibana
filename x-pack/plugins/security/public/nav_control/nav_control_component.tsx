@@ -8,58 +8,26 @@
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
 
 import { SettingsFlyout } from './settings_flyout';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
-
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & { content?: ReactNode };
-
-interface ContextMenuProps {
-  items: ContextMenuItem[];
-}
-
-const ContextMenuContent = ({ items }: ContextMenuProps) => {
-  return (
-    <>
-      <EuiContextMenuPanel>
-        {items.map((item, i) => {
-          if (item.content) {
-            return <Fragment key={i}>{item.content}</Fragment>;
-          }
-          return (
-            <EuiContextMenuItem
-              key={i}
-              icon={item.icon}
-              size="s"
-              href={item.href}
-              data-test-subj={item['data-test-subj']}
-            >
-              {item.name}
-            </EuiContextMenuItem>
-          );
-        })}
-      </EuiContextMenuPanel>
-    </>
-  );
-};
 
 interface SecurityNavControlProps {
   editProfileUrl: string;
@@ -77,6 +45,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = useState(false);
+
+  const kibana = useKibana();
+  const canShowSettings = kibana.services.application?.capabilities.advancedSettings.show;
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
@@ -110,17 +81,20 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const items: ContextMenuItem[] = [];
+  const items: EuiContextMenuPanelItemDescriptor[] = [];
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, content }: UserMenuLink) => ({
-        name: label,
-        icon: <EuiIcon type={iconType} size="m" />,
-        href,
-        'data-test-subj': `userMenuLink__${label}`,
-        content,
-      }));
+      .map(
+        ({ label, iconType, href, content }: UserMenuLink) =>
+          ({
+            name: label,
+            icon: <EuiIcon type={iconType} size="m" />,
+            href,
+            'data-test-subj': `userMenuLink__${label}`,
+            content,
+          } as EuiContextMenuPanelItemDescriptor)
+      );
     items.push(...userMenuLinkMenuItems);
   }
 
@@ -169,28 +143,21 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     'data-test-subj': 'logoutLink',
   });
 
-  items.push({
-    name: (
-      <FormattedMessage
-        id="xpack.security.navControlComponent.settingsLinkText"
-        defaultMessage="Advanced settings"
-      />
-    ),
-    icon: (
-      <EuiIcon
-        type="gear"
-        size="m"
-        onClick={() => {
-          setIsPopoverOpen(false);
-          setIsSettingsFlyoutOpen(true);
-        }}
-      />
-    ),
-    onClick: () => {
-      setIsPopoverOpen(false);
-      setIsSettingsFlyoutOpen(true);
-    },
-  });
+  if (canShowSettings) {
+    items.push({
+      name: (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.settingsLinkText"
+          defaultMessage="Advanced settings"
+        />
+      ),
+      icon: <EuiIcon type="gear" size="m" />,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        setIsSettingsFlyoutOpen(true);
+      },
+    });
+  }
 
   return (
     <>
@@ -212,7 +179,28 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
             {
               id: 0,
               title: displayName,
-              content: <ContextMenuContent items={items} />,
+              items,
+              // content: (
+              //   <EuiContextMenuPanel>
+              //     {items.map((item, i) => {
+              //       if (item.content) {
+              //         return <Fragment key={i}>{item.content}</Fragment>;
+              //       }
+              //       return (
+              //         <EuiContextMenuItem
+              //           key={i}
+              //           icon={item.icon}
+              //           size="s"
+              //           href={item.href}
+              //           onClick={item.onClick}
+              //           data-test-subj={item['data-test-subj']}
+              //         >
+              //           {item.name}
+              //         </EuiContextMenuItem>
+              //       );
+              //     })}
+              //   </EuiContextMenuPanel>
+              // ),
             },
           ]}
           data-test-subj="userMenu"
