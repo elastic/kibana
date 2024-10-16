@@ -31,8 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityEngineStatus } from '../components/entity_store/hooks/use_entity_engine_status';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
-import { useUiSetting$, useKibana } from '../../common/lib/kibana';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
 import { useHasSecurityCapability } from '../../helper_hooks';
@@ -50,7 +49,6 @@ const entityStoreInstallingStatuses = ['installing', 'loading'];
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const {
     data: assetCriticalityPrivileges,
     error: assetCriticalityPrivilegesError,
@@ -110,10 +108,7 @@ export const EntityStoreManagementPage = () => {
     const errorMessage = assetCriticalityPrivilegesError?.body.message ?? (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-        defaultMessage='Please enable "{ENABLE_ASSET_CRITICALITY_SETTING}" in advanced settings to access this functionality.'
-        values={{
-          ENABLE_ASSET_CRITICALITY_SETTING,
-        }}
+        defaultMessage="The don't have privileges to access Asset Criticality feature. Contact your administrator for further assistance."
       />
     );
 
@@ -218,7 +213,6 @@ export const EntityStoreManagementPage = () => {
   const FileUploadSection: React.FC = () => {
     if (
       !hasEntityAnalyticsCapability ||
-      !isAssetCriticalityEnabled ||
       assetCriticalityPrivilegesError?.body.status_code === 403
     ) {
       return <AssetCriticalityIssueCallout />;
