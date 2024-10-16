@@ -21,6 +21,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-tabbed-modal",
     "@kbn/core-theme-browser",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

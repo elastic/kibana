@@ -491,7 +491,7 @@ For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key
 `xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
 An API key secret that varies by connector:
 
-`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
+`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson`::
 For an <<gemini-action-type,{gemini} connector>>, specifies the GCP service account credentials JSON file for authentication.
 +
 --

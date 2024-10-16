@@ -6,16 +6,16 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_BASE_PREFIX } from '../../common/constants_entities';
+import { ENTITY_LATEST_BASE_PREFIX } from '../../common/constants_entities';
 
-export const entitiesIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: 'entities_v1_index_template',
+export const entitiesLatestIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
+  name: 'entities_v1_latest_index_template',
   _meta: {
     description: 'The entities index template',
     ecs_version: '8.0.0',
   },
-  composed_of: ['entities_v1_base', 'entities_v1_event', 'entities_v1_entity'],
-  index_patterns: [`${ENTITY_BASE_PREFIX}.*`],
+  composed_of: ['entities_v1_latest_base', 'entities_v1_event', 'entities_v1_entity'],
+  index_patterns: [`${ENTITY_LATEST_BASE_PREFIX}.*`],
   priority: 1,
   template: {
     mappings: {

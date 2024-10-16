@@ -21,10 +21,10 @@ import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { DATA_VIEW_FIELD, IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
+import { TimestampFieldSelector } from '../common/timestamp_field_selector';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
@@ -40,7 +40,7 @@ export function CustomMetricIndicatorTypeForm() {
     dataViewId,
   });
 
-  const timestampFields = dataView?.fields.filter((field) => field.type === 'date');
+  const timestampFields = dataView?.fields.filter((field) => field.type === 'date') ?? [];
   const metricFields = dataView?.fields.filter((field) =>
     SUPPORTED_METRIC_FIELD_TYPES.includes(field.type)
   );
@@ -62,18 +62,10 @@ export function CustomMetricIndicatorTypeForm() {
             <IndexSelection />
           </EuiFlexItem>
           <EuiFlexItem>
-            <IndexFieldSelector
-              indexFields={timestampFields ?? []}
-              name="indicator.params.timestampField"
-              label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
-                defaultMessage: 'Timestamp field',
-              })}
-              placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
-                defaultMessage: 'Select a timestamp field',
-              })}
+            <TimestampFieldSelector
+              fields={timestampFields}
               isLoading={!!index && isIndexFieldsLoading}
               isDisabled={!index}
-              isRequired
             />
           </EuiFlexItem>
         </EuiFlexGroup>

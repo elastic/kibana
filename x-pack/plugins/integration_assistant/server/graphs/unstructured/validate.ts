@@ -6,7 +6,7 @@
  */
 
 import type { UnstructuredLogState } from '../../types';
-import type { GrokResult, HandleUnstructuredNodeParams } from './types';
+import type { HandleUnstructuredNodeParams, LogResult } from './types';
 import { testPipeline } from '../../util';
 import { onFailure } from './constants';
 import { createGrokProcessor } from '../../util/processors';
@@ -18,9 +18,11 @@ export async function handleUnstructuredValidate({
   const grokPatterns = state.grokPatterns;
   const grokProcessor = createGrokProcessor(grokPatterns);
   const pipeline = { processors: grokProcessor, on_failure: [onFailure] };
+  const packageName = state.packageName;
+  const dataStreamName = state.dataStreamName;
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
-    pipelineResults: GrokResult[];
+    pipelineResults: LogResult[];
     errors: object[];
   };
 
@@ -28,7 +30,10 @@ export async function handleUnstructuredValidate({
     return { errors, lastExecutedChain: 'unstructuredValidate' };
   }
 
-  const jsonSamples: string[] = pipelineResults.map((entry) => JSON.stringify(entry));
+  const jsonSamples = pipelineResults
+    .map((log) => log[packageName])
+    .map((log) => log[dataStreamName])
+    .map((log) => JSON.stringify(log));
   const additionalProcessors = state.additionalProcessors;
   additionalProcessors.push(grokProcessor[0]);
 

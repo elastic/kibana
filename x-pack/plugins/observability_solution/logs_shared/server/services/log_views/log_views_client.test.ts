@@ -254,7 +254,7 @@ describe('LogViewsClient class', () => {
           "deleteFieldFormat": [Function],
           "deleteScriptedFieldInternal": [Function],
           "etag": undefined,
-          "fieldAttrs": Object {},
+          "fieldAttrs": Map {},
           "fieldFormatMap": Object {},
           "fieldFormats": Object {
             "deserialize": [MockFunction],

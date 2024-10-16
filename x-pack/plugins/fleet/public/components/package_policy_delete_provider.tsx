@@ -10,10 +10,15 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices, sendDeletePackagePolicy, useConfig } from '../hooks';
+import {
+  useStartServices,
+  sendDeletePackagePolicy,
+  useConfig,
+  useMultipleAgentPolicies,
+  sendGetAgents,
+} from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
-import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -189,6 +194,22 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {hasMultipleAgentPolicies && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
+                  defaultMessage="This integration is shared by multiple agent policies."
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {isLoadingAgentsCount ? (
           <FormattedMessage
             id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
@@ -196,21 +217,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            {hasMultipleAgentPolicies && (
-              <>
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  title={
-                    <FormattedMessage
-                      id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
-                      defaultMessage="This integration is shared by multiple agent policies."
-                    />
-                  }
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
             <EuiCallOut
               color="danger"
               title={

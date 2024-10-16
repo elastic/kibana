@@ -8,46 +8,27 @@
 name: oblt-github-commands
 
 on:
-  pull_request_target:
+  pull_request:
     types:
-      - opened
+      - labeled
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
-  comment-if-oblt-member:
+  comment:
+    if: ${{ github.event.label.name == 'ci:project-deploy-observability' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          url: ${{ secrets.OBLT_VAULT_ADDR }}
-          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
-          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
-
-      - id: is_team_member
-        name: Check if user is member of the Elastic org and Observability team
-        run: |
-          if gh api -H "Accept: application/vnd.github+json" \
-            /orgs/elastic/teams/observability/memberships/${{ github.actor }} ; then
-            echo "result=true" >> $GITHUB_OUTPUT
-          else
-            echo "result=false" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
-
-      - if: ${{ steps.is_team_member.outputs.result == 'true' }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const body = `
               ### :robot: GitHub comments
-
               <details><summary>Expand to view the GitHub comments</summary>
               <p>
-
               Just comment with:
               - \`/oblt-deploy\` : Deploy a Kibana instance using the Observability test environments.
               - \`run\` \`docs-build\` : Re-trigger the docs validation. (use unformatted text in the comment!)

@@ -47,7 +47,7 @@ describe('createFieldMapping', () => {
 `;
 
     expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
     expect(Utils.createSync).toHaveBeenCalledWith(
@@ -63,7 +63,7 @@ describe('createFieldMapping', () => {
 `;
 
     expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
     expect(Utils.createSync).toHaveBeenCalledWith(

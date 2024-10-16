@@ -29,7 +29,6 @@ type EmbedProps = Pick<
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'isEmbedded'
   | 'embedUrlParamExtensions'
   | 'objectType'
 > & {
@@ -51,7 +50,6 @@ export const EmbedContent = ({
   embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
-  isEmbedded,
   objectType,
   setIsNotSaved,
 }: EmbedProps) => {
@@ -67,6 +65,17 @@ export const EmbedContent = ({
   useEffect(() => {
     if (objectType !== 'dashboard') setIsNotSaved();
   }, [url, setIsNotSaved, objectType]);
+
+  const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return tempUrl.replace('?', `${embedParam}&`);
+    }
+
+    return `${tempUrl}${embedParam}`;
+  }, []);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -89,10 +98,11 @@ export const EmbedContent = ({
 
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
+      tempUrl = makeUrlEmbeddable(tempUrl);
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       return tempUrl;
     },
-    [getUrlParamExtensions, urlParams]
+    [makeUrlEmbeddable, getUrlParamExtensions, urlParams]
   );
 
   const getSnapshotUrl = useCallback(
@@ -179,16 +189,14 @@ export const EmbedContent = ({
       tempUrl = addUrlAnonymousAccessParameters(tempUrl!);
     }
 
-    if (isEmbedded) {
-      tempUrl = makeIframeTag(tempUrl!);
-    }
+    tempUrl = makeIframeTag(tempUrl!);
+
     setUrl(tempUrl!);
   }, [
     addUrlAnonymousAccessParameters,
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
-    isEmbedded,
     shortUrlCache,
     useShortUrl,
   ]);

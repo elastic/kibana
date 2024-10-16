@@ -23091,6 +23091,14 @@ components:
                 ITSM, ServiveNow SecOps, or Swimlane incident.
               type: object
               properties:
+                additional_fields:
+                  description: >
+                    Additional fields for ServiceNow ITSM and ServiveNow SecOps
+                    connectors. The fields must exist in the Elastic ServiceNow
+                    application and must be specified in JSON format.
+                  maxLength: 20
+                  nullable: true
+                  type: string
                 alertId:
                   description: The alert identifier for Swimlane connectors.
                   type: string
