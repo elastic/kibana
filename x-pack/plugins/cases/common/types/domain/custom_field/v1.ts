@@ -31,7 +31,7 @@ export const CaseCustomFieldToggleRt = rt.strict({
 export const CaseCustomFieldNumberRt = rt.strict({
   key: rt.string,
   type: CustomFieldNumberTypeRt,
-  value: rt.union([rt.number, rt.null]),
+  value: rt.union([rt.Int, rt.null]),
 });
 
 export const CaseCustomFieldRt = rt.union([

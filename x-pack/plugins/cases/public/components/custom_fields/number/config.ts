@@ -9,9 +9,11 @@ import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_for
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   REQUIRED_FIELD,
-  INFINITE_NUMBER_ERROR,
-  TOO_MANY_DECIMAL_PLACES_ERROR,
+  MAX_NUMBER_ERROR,
+  MIN_NUMBER_ERROR,
+  INTEGER_NUMBER_ERROR,
 } from '../translations';
+import { MAX_LONG_NUMBER_LIMIT, MIN_LONG_NUMBER_LIMIT } from '../../../../common/constants';
 
 const { emptyField } = fieldValidators;
 
@@ -41,16 +43,21 @@ export const getNumberFieldConfig = ({
           if (value == null) {
             return;
           }
+          const numericValue = Number(value);
 
-          if (Math.abs(value) > Number.MAX_VALUE) {
+          if (!Number.isInteger(numericValue)) {
+            return { message: INTEGER_NUMBER_ERROR(label) };
+          }
+
+          if (numericValue > MAX_LONG_NUMBER_LIMIT) {
             return {
-              message: INFINITE_NUMBER_ERROR(label),
+              message: MAX_NUMBER_ERROR(label, MAX_LONG_NUMBER_LIMIT),
             };
           }
 
-          if (Math.abs(value) < Number.MIN_VALUE && Math.abs(value) !== 0) {
+          if (numericValue < MIN_LONG_NUMBER_LIMIT) {
             return {
-              message: TOO_MANY_DECIMAL_PLACES_ERROR(label),
+              message: MIN_NUMBER_ERROR(label, MIN_LONG_NUMBER_LIMIT),
             };
           }
         },

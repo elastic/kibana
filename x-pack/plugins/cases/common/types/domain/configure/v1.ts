@@ -60,7 +60,7 @@ export const NumberCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([rt.number, rt.null]),
+      defaultValue: rt.union([rt.Int, rt.null]),
     })
   ),
 ]);

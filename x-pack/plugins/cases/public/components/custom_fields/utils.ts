@@ -19,7 +19,7 @@ export const customFieldSerializer = (
     return otherProperties;
   }
   // what if defaultValue === undefined but type is number
-  if (field.type === CustomFieldTypes.NUMBER && !Number.isNaN(defaultValue)) {
+  if (field.type === CustomFieldTypes.NUMBER && Number.isInteger(Number(defaultValue))) {
     // do we need this check or add it to validation only?
     return { ...field, defaultValue: Number(defaultValue) };
   }

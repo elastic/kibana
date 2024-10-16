@@ -238,13 +238,12 @@ export const convertCustomFieldValue = (
   value: string | number | boolean,
   type: CustomFieldTypes
 ) => {
-  if (typeof value === 'string' && isEmpty(value)) {
-    return null;
+  if (type === CustomFieldTypes.NUMBER && !Number.isNaN(Number(value))) {
+    return Number(value);
   }
 
-  if (type === CustomFieldTypes.NUMBER && !Number.isNaN(value)) {
-    // do we need this check or add it to validation only?
-    return Number(value);
+  if (typeof value === 'string' && isEmpty(value)) {
+    return null;
   }
 
   return value;

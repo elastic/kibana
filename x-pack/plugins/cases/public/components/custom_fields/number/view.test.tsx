@@ -18,7 +18,7 @@ describe('View ', () => {
   const customField = {
     type: CustomFieldTypes.NUMBER as const,
     key: 'test_key_1',
-    value: 123,
+    value: 123 as number,
   };
 
   it('renders correctly', async () => {

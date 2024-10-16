@@ -6,8 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
-import { limitedStringSchema, limitedJSNumberSchema } from '../../../schema';
+import {
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_LONG_NUMBER_LIMIT,
+  MIN_LONG_NUMBER_LIMIT,
+} from '../../../constants';
+import { limitedStringSchema, limitedNumberSchema } from '../../../schema';
 
 export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
   limitedStringSchema({
@@ -17,8 +21,10 @@ export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
   });
 
 export const CaseCustomFieldNumberWithValidationValueRt = ({ fieldName }: { fieldName: string }) =>
-  limitedJSNumberSchema({
+  limitedNumberSchema({
     fieldName,
+    max: MAX_LONG_NUMBER_LIMIT,
+    min: MIN_LONG_NUMBER_LIMIT,
   });
 
 /**
