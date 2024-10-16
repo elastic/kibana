@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
@@ -14,7 +15,6 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
-import {isCCSRemoteIndexName} from "@kbn/es-query";
 
 export interface PValuesResponse {
   failedTransactionsCorrelations: FailedTransactionsCorrelation[];
