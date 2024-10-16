@@ -45,6 +45,11 @@ export const getValueFromMergedVersion = ({
       );
     }
 
+    if (!ruleFieldDiff) {
+      console.log({ fieldName });
+      console.log({ ruleFieldDiff });
+    }
+
     const mergedVersion = ruleFieldDiff.merged_version;
 
     return mapDiffableRuleFieldValueToRuleSchemaFormat(fieldName, mergedVersion);

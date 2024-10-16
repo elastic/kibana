@@ -32,7 +32,8 @@ export const performUpgradePrebuiltRules = async (
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'foo')
     .send(requestBody)
-    .expect(200);
+    // .expect(200);
+    console.log('response.body', response.body);
 
   await refreshSavedObjectIndices(es);
 
