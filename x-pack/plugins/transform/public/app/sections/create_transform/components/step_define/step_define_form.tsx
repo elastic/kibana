@@ -290,7 +290,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   });
 
   const rowCountInfoLabel = i18n.translate('xpack.transform.stepDefineForm.rowCountInfoLabel', {
-    defaultMessage: 'Results are being limited (max {maxRowCount}) for preview purposes',
+    defaultMessage: 'Results are limited to a maximum of {maxRowCount} for preview purposes',
     values: { maxRowCount: MAX_ROW_COUNT },
   });
 
