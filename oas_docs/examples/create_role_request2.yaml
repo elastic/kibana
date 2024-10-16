@@ -1,5 +1,5 @@
 summary: Dashboard privileges in a space
-description:  Grant access to dashboard features in a Marketing space.
+description: Grant access to dashboard features in a Marketing space.
 value:
   description: Grant dashboard access in the Marketing space.
   metadata:
