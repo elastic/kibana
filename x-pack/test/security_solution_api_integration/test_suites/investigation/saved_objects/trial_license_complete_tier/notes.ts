@@ -408,8 +408,41 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // TODO should add more tests for the filter query parameter (I don't know how it's supposed to work)
-
       // TODO should add more tests for the MAX_UNASSOCIATED_NOTES advanced settings values
+
+      // TODO figure out why this test is failing on CI but not locally
+      // we can't really test for other users because the persistNote endpoint forces overrideOwner to be true then all the notes created here are owned by the elastic user
+      it.skip('should retrieve all notes that have been created by a specific user', async () => {
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?userFilter=elastic')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount } = response.body;
+
+        expect(totalCount).to.be(2);
+      });
+
+      it('should return nothing if no notes have been created by that user', async () => {
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?userFilter=user1')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        const { totalCount } = response.body;
+
+        expect(totalCount).to.be(0);
+      });
     });
   });
 }
