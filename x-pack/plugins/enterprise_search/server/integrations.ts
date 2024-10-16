@@ -11,8 +11,7 @@ import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  customIntegrations: CustomIntegrationsPluginSetup,
-  isCloud: boolean
+  customIntegrations: CustomIntegrationsPluginSetup
 ) => {
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({

@@ -184,8 +184,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
         config,
-        customIntegrations,
-        isCloud
+        customIntegrations
       );
     }
 
