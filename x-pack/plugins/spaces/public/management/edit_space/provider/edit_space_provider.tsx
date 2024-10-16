@@ -21,7 +21,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { Logger } from '@kbn/logging';
 import type {
-  AuthorizationServiceSetup,
+  AuthorizationServiceStart,
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
   SecurityLicense,
@@ -37,7 +37,7 @@ import type { SpacesManager } from '../../../spaces_manager';
 export interface EditSpaceProviderRootProps
   extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
   logger: Logger;
-  authz: AuthorizationServiceSetup | false;
+  authz: AuthorizationServiceStart | false;
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];

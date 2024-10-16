@@ -77,6 +77,10 @@ export const spacesManagementApp = Object.freeze({
           import('./edit_space'),
         ]);
 
+        /*
+         * Spaces plugin can not directly depend on Security plugin due to cyclic dependency, so we use the
+         * async core plugin contract resolver. This will be resolved when Security APIs are moved into Core.
+         */
         const { security } = await coreStart.plugins.onStart<{ security: SecurityPluginStart }>(
           'security'
         );

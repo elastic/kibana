@@ -9,13 +9,13 @@ import { useMemo } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/public';
-import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
+import type { AuthorizationServiceStart } from '@kbn/security-plugin-types-public';
 
 import type { Space } from '../../../../common';
 import { type EditSpaceTab, getTabs, type GetTabsProps } from '../edit_space_tabs';
 
 type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
-  authz: AuthorizationServiceSetup | false;
+  authz: AuthorizationServiceStart | false;
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;

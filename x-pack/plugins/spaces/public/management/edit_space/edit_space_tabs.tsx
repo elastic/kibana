@@ -11,7 +11,7 @@ import React from 'react';
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
+import type { AuthorizationServiceStart } from '@kbn/security-plugin-types-public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
@@ -26,7 +26,7 @@ export interface EditSpaceTab {
 }
 
 export interface GetTabsProps {
-  authz: AuthorizationServiceSetup | false;
+  authz: AuthorizationServiceStart | false;
   space: Space;
   rolesCount: number;
   features: KibanaFeature[];
