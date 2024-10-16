@@ -26,18 +26,31 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
     });
     this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*', 'logs-generic.otel*'];
   }
+
+  getDefaultPipeline(
+    {
+      includeSerialization,
+      versionOverride,
+    }: {
+      includeSerialization?: boolean;
+      versionOverride?: string;
+    } = { includeSerialization: true }
+  ) {
+    return otelPipeline(this.logger, includeSerialization);
+  }
 }
 
-function otelPipeline() {
+function otelPipeline(logger: Logger, includeSerialization: boolean = true) {
+  const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
   return (base: Readable) => {
     return pipeline(
       base,
-      getSerializeTransform(),
+      ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),
-      (err: unknown) => {
+      (err) => {
         if (err) {
-          throw err;
+          logger.error(err);
         }
       }
     );
