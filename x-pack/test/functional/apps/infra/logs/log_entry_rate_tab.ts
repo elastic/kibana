@@ -11,9 +11,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security']);
+  const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
 
   describe('Log Entry Rate Tab', function () {
@@ -58,6 +58,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     describe('with a trial license', () => {
+      before(() => logsUi.cleanIndices());
+
       it('shows no data page when indices do not exist', async () => {
         await logsUi.logEntryRatePage.navigateTo();
 
