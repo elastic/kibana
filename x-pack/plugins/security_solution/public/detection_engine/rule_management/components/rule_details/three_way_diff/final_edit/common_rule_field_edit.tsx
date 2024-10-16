@@ -12,6 +12,12 @@ import { DescriptionEdit, descriptionSchema } from './fields/description';
 import { NameEdit, nameSchema } from './fields/name';
 import { TagsEdit, tagsSchema } from './fields/tags';
 import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
+import {
+  FalsePositivesEdit,
+  falsePositivesSchema,
+  falsePositivesSerializer,
+  falsePositivesDeserializer,
+} from './fields/false_positives';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -21,6 +27,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'description':
       return <FieldFormWrapper component={DescriptionEdit} fieldFormSchema={descriptionSchema} />;
+    case 'false_positives':
+      return (
+        <FieldFormWrapper
+          component={FalsePositivesEdit}
+          fieldFormSchema={falsePositivesSchema}
+          serializer={falsePositivesSerializer}
+          deserializer={falsePositivesDeserializer}
+        />
+      );
     case 'name':
       return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
     case 'references':
