@@ -19,12 +19,13 @@ import {
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceContentTab } from './edit_space_content_tab';
-import { EditSpaceProvider } from './provider';
+import { EditSpaceProviderRoot } from './provider';
 import type { Space } from '../../../common';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../security_license.mock';
 
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
@@ -42,7 +43,7 @@ const logger = loggingSystemMock.createLogger();
 const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <IntlProvider locale="en">
-      <EditSpaceProvider
+      <EditSpaceProviderRoot
         capabilities={{
           navLinks: {},
           management: {},
@@ -58,12 +59,13 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         notifications={notifications}
         overlays={overlays}
         getPrivilegesAPIClient={getPrivilegeAPIClient}
+        getSecurityLicense={getSecurityLicenseMock}
         theme={theme}
         i18n={i18n}
         logger={logger}
       >
         {children}
-      </EditSpaceProvider>
+      </EditSpaceProviderRoot>
     </IntlProvider>
   );
 };

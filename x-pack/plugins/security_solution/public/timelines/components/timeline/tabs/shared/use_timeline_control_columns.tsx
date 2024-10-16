@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -21,6 +22,7 @@ import { TimelineControlColumnCellRender } from '../../unified_components/data_t
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { useTimelineColumns } from './use_timeline_columns';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
+import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
 
 interface UseTimelineControlColumnArgs {
   columns: ColumnHeaderOptions[];
@@ -59,6 +61,58 @@ export const useTimelineControlColumn = ({
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const { localColumns } = useTimelineColumns(columns);
 
+  const RowCellRender = useMemo(
+    () =>
+      function TimelineControlColumnCellRenderer(
+        props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
+      ) {
+        const ctx = useTimelineUnifiedDataTableContext();
+
+        useEffect(() => {
+          props.setCellProps({
+            className:
+              ctx.expanded?.id === events[props.rowIndex]?._id
+                ? 'unifiedDataTable__cell--expanded'
+                : '',
+          });
+        });
+
+        /*
+         * In some cases, when number of events is updated
+         * but new table is not yet rendered it can result
+         * in the mismatch between the number of events v/s
+         * the number of rows in the table currently rendered.
+         *
+         * */
+        if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
+        return (
+          <TimelineControlColumnCellRender
+            rowIndex={props.rowIndex}
+            columnId={props.columnId}
+            timelineId={timelineId}
+            ariaRowindex={props.rowIndex}
+            checked={false}
+            columnValues=""
+            data={events[props.rowIndex].data}
+            ecsData={events[props.rowIndex].ecs}
+            loadingEventIds={EMPTY_STRING_ARRAY}
+            eventId={events[props.rowIndex]?._id}
+            index={props.rowIndex}
+            onEventDetailsPanelOpened={noOp}
+            onRowSelected={noOp}
+            refetch={refetch}
+            showCheckboxes={false}
+            setEventsLoading={noOp}
+            setEventsDeleted={noOp}
+            pinnedEventIds={pinnedEventIds}
+            eventIdToNoteIds={eventIdToNoteIds}
+            toggleShowNotes={onToggleShowNotes}
+          />
+        );
+      },
+    [events, timelineId, refetch, pinnedEventIds, eventIdToNoteIds, onToggleShowNotes]
+  );
+
   // We need one less when the unified components are enabled because the document expand is provided by the unified data table
   const UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT = ACTION_BUTTON_COUNT - 1;
   return useMemo(() => {
@@ -84,49 +138,7 @@ export const useTimelineControlColumn = ({
             />
           );
         },
-        rowCellRender: (
-          props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
-        ) => {
-          /*
-           * In some cases, when number of events is updated
-           * but new table is not yet rendered it can result
-           * in the mismatch between the number of events v/s
-           * the number of rows in the table currently rendered.
-           *
-           * */
-          if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
-          props.setCellProps({
-            className:
-              props.expandedEventId === events[props.rowIndex]?._id
-                ? 'unifiedDataTable__cell--expanded'
-                : '',
-          });
-
-          return (
-            <TimelineControlColumnCellRender
-              rowIndex={props.rowIndex}
-              columnId={props.columnId}
-              timelineId={timelineId}
-              ariaRowindex={props.rowIndex}
-              checked={false}
-              columnValues=""
-              data={events[props.rowIndex].data}
-              ecsData={events[props.rowIndex].ecs}
-              loadingEventIds={EMPTY_STRING_ARRAY}
-              eventId={events[props.rowIndex]?._id}
-              index={props.rowIndex}
-              onEventDetailsPanelOpened={noOp}
-              onRowSelected={noOp}
-              refetch={refetch}
-              showCheckboxes={false}
-              setEventsLoading={noOp}
-              setEventsDeleted={noOp}
-              pinnedEventIds={pinnedEventIds}
-              eventIdToNoteIds={eventIdToNoteIds}
-              toggleShowNotes={onToggleShowNotes}
-            />
-          );
-        },
+        rowCellRender: JEST_ENVIRONMENT ? RowCellRender : React.memo(RowCellRender),
       }));
     } else {
       return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
@@ -142,11 +154,7 @@ export const useTimelineControlColumn = ({
     sort,
     activeTab,
     timelineId,
-    refetch,
-    events,
-    pinnedEventIds,
-    eventIdToNoteIds,
-    onToggleShowNotes,
     ACTION_BUTTON_COUNT,
+    RowCellRender,
   ]);
 };

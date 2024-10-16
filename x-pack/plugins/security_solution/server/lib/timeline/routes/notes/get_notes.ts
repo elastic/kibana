@@ -9,8 +9,13 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-import { nodeBuilder } from '@kbn/es-query';
+import type {
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+} from '@kbn/core-saved-objects-api-server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { AssociatedFilter } from '../../../../../common/notes/constants';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { MAX_UNASSOCIATED_NOTES, NOTE_URL } from '../../../../../common/constants';
@@ -21,6 +26,7 @@ import { getAllSavedNote } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
+/* eslint-disable complexity */
 export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
@@ -126,6 +132,71 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
             sortOrder,
             filter,
           };
+
+          // we need to combine the associatedFilter with the filter query
+          // we have to type case here because the filter is a string (from the schema) and that cannot be changed as it would be a breaking change
+          const filterAsKueryNode: KueryNode = (filter || '') as unknown as KueryNode;
+          const filterKueryNodeArray = [filterAsKueryNode];
+
+          // retrieve all the notes created by a specific user
+          const userFilter = queryParams?.userFilter;
+          if (userFilter) {
+            filterKueryNodeArray.push(
+              nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, userFilter)
+            );
+          }
+
+          const associatedFilter = queryParams?.associatedFilter;
+          if (associatedFilter) {
+            // select documents that have or don't have a reference to an empty value
+            // used in combination with hasReference (not associated with a timeline) or hasNoReference (associated with a timeline)
+            const referenceToATimeline: SavedObjectsFindOptionsReference = {
+              type: timelineSavedObjectType,
+              id: '',
+            };
+
+            // select documents that don't have a value in the eventId field (not associated with a document)
+            const emptyDocumentIdFilter: KueryNode = nodeBuilder.is(
+              `${noteSavedObjectType}.attributes.eventId`,
+              ''
+            );
+
+            switch (associatedFilter) {
+              case AssociatedFilter.documentOnly:
+                // select documents that have a reference to an empty saved object id (not associated with a timeline)
+                // and have a value in the eventId field (associated with a document)
+                options.hasReference = referenceToATimeline;
+                filterKueryNodeArray.push(
+                  nodeTypes.function.buildNode('not', emptyDocumentIdFilter)
+                );
+                break;
+              case AssociatedFilter.savedObjectOnly:
+                // select documents that don't have a reference to an empty saved object id (associated with a timeline)
+                // and don't have a value in the eventId field (not associated with a document)
+                options.hasNoReference = referenceToATimeline;
+                filterKueryNodeArray.push(emptyDocumentIdFilter);
+                break;
+              case AssociatedFilter.documentAndSavedObject:
+                // select documents that don't have a reference to an empty saved object id (associated with a timeline)
+                // and have a value in the eventId field (associated with a document)
+                options.hasNoReference = referenceToATimeline;
+                filterKueryNodeArray.push(
+                  nodeTypes.function.buildNode('not', emptyDocumentIdFilter)
+                );
+                break;
+              case AssociatedFilter.orphan:
+                // select documents that have a reference to an empty saved object id (not associated with a timeline)
+                // and don't have a value in the eventId field (not associated with a document)
+                options.hasReference = referenceToATimeline;
+                // TODO we might want to also check for the existence of the eventId field, on top of getting eventId having empty values
+                filterKueryNodeArray.push(emptyDocumentIdFilter);
+                break;
+            }
+          }
+
+          // combine all filters
+          options.filter = nodeBuilder.and(filterKueryNodeArray);
+
           const res = await getAllSavedNote(frameworkRequest, options);
           const body: GetNotesResponse = res ?? {};
           return response.ok({ body });

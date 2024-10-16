@@ -5,7 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "flat_settings": "__flag__",
+      "include_remotes": "__flag__",
       "timeout": [
         "-1",
         "0"

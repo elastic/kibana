@@ -14,8 +14,8 @@
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/update-connector-last-sync-api.html",
     "availability": {
-      "stack": true,
-      "serverless": true
+      "stack": false,
+      "serverless": false
     }
   }
 }

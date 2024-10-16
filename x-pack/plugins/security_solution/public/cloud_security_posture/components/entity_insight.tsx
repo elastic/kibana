@@ -64,14 +64,14 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
       </>
     );
   if (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)
     insightContent.push(
       <>
         <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
       </>
     );
   return (
