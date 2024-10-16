@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
