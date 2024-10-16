@@ -205,13 +205,11 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   public async setNewFieldLimit({
     dataStream,
     newFieldLimit,
-    indexTemplate,
-    lastBackingIndex,
   }: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse> {
     const response = await this.http
       .put<UpdateFieldLimitResponse>(
         `/internal/dataset_quality/data_streams/${dataStream}/update_field_limit`,
-        { body: JSON.stringify({ newFieldLimit, indexTemplate, lastBackingIndex }) }
+        { body: JSON.stringify({ newFieldLimit }) }
       )
       .catch((error) => {
         throw new DatasetQualityError(`Failed to set new Limit": ${error}`, error);

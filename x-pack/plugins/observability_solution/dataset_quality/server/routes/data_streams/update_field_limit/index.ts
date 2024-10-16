@@ -10,19 +10,20 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { updateComponentTemplate } from './update_component_template';
 import { updateLastBackingIndexSettings } from './update_settings_last_backing_index';
 import { UpdateFieldLimitResponse } from '../../../../common/api_types';
+import { getDataStreamSettings } from '../get_data_stream_details';
 
 export async function updateFieldLimit({
   esClient,
-  indexTemplate,
-  lastBackingIndex,
   newFieldLimit,
+  dataStream,
 }: {
   esClient: ElasticsearchClient;
-  indexTemplate: string;
-  lastBackingIndex: string;
   newFieldLimit: number;
+  dataStream: string;
 }): Promise<UpdateFieldLimitResponse> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+  const { lastBackingIndex, indexTemplate } = await getDataStreamSettings({ esClient, dataStream });
 
   const {
     acknowledged: isComponentTemplateUpdated,

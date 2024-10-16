@@ -336,8 +336,6 @@ const updateFieldLimitRoute = createDatasetQualityServerRoute({
     }),
     body: t.type({
       newFieldLimit: t.number,
-      indexTemplate: t.string,
-      lastBackingIndex: t.string,
     }),
   }),
   options: {
@@ -350,9 +348,8 @@ const updateFieldLimitRoute = createDatasetQualityServerRoute({
 
     const updatedLimitResponse = await updateFieldLimit({
       esClient,
-      indexTemplate: params.body.indexTemplate,
-      lastBackingIndex: params.body.lastBackingIndex,
       newFieldLimit: params.body.newFieldLimit,
+      dataStream: params.path.dataStream,
     });
 
     return updatedLimitResponse;

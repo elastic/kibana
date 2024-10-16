@@ -104,6 +104,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
+      it('returns only privileges if matching data stream is not available', async () => {
+        const nonExistentDataSet = 'Non-existent';
+        const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
+        const resp = await callApiAs('datasetQualityMonitorUser', nonExistentDataStream);
+        expect(resp.body).eql(defaultDataStreamPrivileges);
+      });
+
       it('returns "createdOn", "integration" and "lastBackingIndexName" correctly when available', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
           esClient,

@@ -727,16 +727,10 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       saveNewFieldLimit: (context) => {
-        if (
-          'newFieldLimit' in context &&
-          context.newFieldLimit &&
-          'dataStreamSettings' in context
-        ) {
+        if ('newFieldLimit' in context && context.newFieldLimit) {
           return dataStreamDetailsClient.setNewFieldLimit({
             dataStream: context.dataStream,
             newFieldLimit: context.newFieldLimit,
-            indexTemplate: context.dataStreamSettings.indexTemplate,
-            lastBackingIndex: context.dataStreamSettings.lastBackingIndexName,
           });
         }
 
