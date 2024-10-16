@@ -16,7 +16,7 @@ import type {
   GroupNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import type { Writeable } from '@kbn/zod';
+import type { Writable } from '@kbn/utility-types';
 import type { GraphContextServices, GraphContext } from './types';
 
 interface GraphEdge {
@@ -311,7 +311,7 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
       );
 
       edgeLabelsIds.forEach((edgeLabelId) => {
-        (nodesMap[edgeLabelId] as Writeable<LabelNodeDataModel>).parentId = groupNode.id;
+        (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
         connectEntitiesAndLabelNode(
           logger,
           edgesMap,
