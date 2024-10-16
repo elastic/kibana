@@ -200,7 +200,7 @@ class ChatService {
       params: {
         query: {
           scopes: this.getScopes(),
-          requiredFunctions: ['query', 'beer'],
+          requiredFunctions,
         },
       },
     }).then(({ functionDefinitions, systemMessage }) => {
