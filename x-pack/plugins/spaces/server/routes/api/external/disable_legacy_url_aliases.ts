@@ -20,7 +20,7 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_disable_legacy_url_aliases',
       options: {
         access: isServerless ? 'internal' : 'public',
-        summary: `Disable legacy URL aliases`,
+        summary: 'Disable legacy URL aliases',
         tags: ['oas-tag:spaces'],
       },
       validate: {
