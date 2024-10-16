@@ -10,7 +10,7 @@ import React, { PropsWithChildren, createContext, useContext } from 'react';
 interface InventoryPageViewContext {
   grouping: string;
   setGrouping: (value: string) => void;
-  pagination: Record<string, number>;
+  pagination?: Record<string, number>;
   setPagination: (key: string, value: number) => void;
 }
 

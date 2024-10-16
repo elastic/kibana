@@ -33,7 +33,7 @@ export function UngroupedInventoryPage({ entityType }: Props) {
   const { sortDirection, sortField, kuery } = query;
   const { euiTheme } = useEuiTheme();
   const inventoryRoute = useInventoryRouter();
-  const pageIndex = (entityType ? pagination[entityType] : pagination.none) ?? 0;
+  const pageIndex = (entityType ? pagination?.[entityType] : pagination?.none) ?? 0;
 
   const {
     value = { entities: [] },
