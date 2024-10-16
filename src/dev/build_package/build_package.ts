@@ -16,12 +16,37 @@ import globby from 'globby';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 
+const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
+
+const getTargetDirForPackage = (packageFolder: string) => {
+  // TODO: change this to avoid bazel-bin
+  return path.resolve(REPO_ROOT, 'bazel-bin', 'packages', packageFolder);
+};
+
+const getFullOutputPath = (packageFolder: string, commandName: string) => {
+  return path.resolve(getTargetDirForPackage(packageFolder), commandName);
+};
+
+const envOptions = {
+  dist: {
+    NODE_ENV: 'production',
+    NODE_OPTIONS: '--openssl-legacy-provider',
+  },
+  default: {
+    NODE_ENV: 'development',
+    NODE_OPTIONS: '--openssl-legacy-provider',
+  },
+};
+
 let toolingLog: ToolingLog;
 run(
   async ({ log, flagsReader, flags }) => {
     toolingLog = log;
     const packagePath = flagsReader.getPositionals()[0];
     const watch = flagsReader.boolean('watch');
+    const dist = flagsReader.boolean('dist');
+    const taskName = flagsReader.string('task-name') || 'build';
+    const quiet = flags.quiet || flags.silent;
 
     const packageRoot = path.resolve(REPO_ROOT, packagePath);
 
@@ -29,14 +54,17 @@ run(
       throw new Error(`Package not found at ${packageRoot}`);
     }
 
-    await buildPackage({ packageRoot, watch }, log);
+    await buildPackage({ packageRoot, watch, dist, quiet, taskName }, log);
   },
   {
     description: 'Build a package',
     flags: {
-      boolean: ['watch'],
+      boolean: ['watch', 'dist'],
+      string: ['task-name'],
       help: `
+      --task-name A task name, used as a sub-directory for the webpack output
       --watch  Watch for changes and rebuild
+      --dist   Build for production
     `,
     },
   }
@@ -48,7 +76,13 @@ run(
   });
 
 async function buildPackage(
-  { packageRoot, watch }: { packageRoot: string; watch?: boolean },
+  {
+    packageRoot,
+    watch,
+    dist,
+    quiet,
+    taskName,
+  }: { packageRoot: string; watch?: boolean; dist?: boolean; quiet?: boolean; taskName: string },
   log: ToolingLog
 ) {
   const packageConfig = JSON.parse(
@@ -56,43 +90,32 @@ async function buildPackage(
   );
   const packageName = packageConfig.name;
   const packageFolder = path.basename(packageRoot);
-  const buildFile = JSON.parse(fs.readFileSync(path.resolve(packageRoot, 'build.json')).toString());
-  const webpackBuildOptions: any = buildFile.webpack_cli;
-  const webpackArgs: string[] = webpackBuildOptions.args;
-  const commandName: string = webpackBuildOptions.name;
+  const srcs = packageConfig.buildSourcePaths;
 
-  let env = webpackBuildOptions.env.default;
-  if (
+  const outPath = getFullOutputPath(packageFolder, taskName);
+  const webpackArgs = [
+    '--config',
+    path.resolve(packageRoot, 'webpack.config.js'),
+    '--output-path',
+    outPath,
+    '--stats=errors-only',
+  ];
+
+  const isDist =
+    dist ||
     process.env?.NODE_ENV?.toLowerCase()?.match(/^prod/) ||
-    process.env?.DIST?.toLowerCase() === 'true'
-  ) {
-    env = webpackBuildOptions.env.dist;
-  }
-
-  // TODO: this location looks weird, why bazel-bin?
-  const outPath = path.resolve(REPO_ROOT, 'bazel-bin', 'packages', packageFolder, commandName);
-
-  const argsProcessed = webpackArgs.map((arg) => {
-    if (arg.match(/^\$\(location (.*)\)$/)) {
-      return arg.replace(/^\$\(location (.*)\)$/, (substring, ...args) => {
-        return path.resolve(packageRoot, args[0]);
-      });
-    } else if (arg.match(/^\$\(@D\)$/)) {
-      return outPath;
-    } else {
-      return arg;
-    }
-  });
+    process.env?.DIST?.toLowerCase() === 'true';
+  const env = isDist ? envOptions.dist : envOptions.default;
 
   if (watch) {
-    argsProcessed.push('--watch');
+    webpackArgs.push('--watch');
   }
 
   await copySources({
     log,
     root: packageRoot,
-    targetDir: path.resolve(REPO_ROOT, 'bazel-bin', 'packages', packageFolder),
-    files: buildFile.SRCS,
+    targetDir: getTargetDirForPackage(packageFolder),
+    files: srcs,
   });
 
   if (watch) {
@@ -102,8 +125,8 @@ async function buildPackage(
   }
 
   try {
-    await execa('node_modules/.bin/webpack-cli', argsProcessed, {
-      stdio: 'inherit',
+    await execa(PATH_TO_WEBPACK_CLI, webpackArgs, {
+      stdio: quiet ? 'pipe' : 'inherit',
       env: { ...process.env, ...env },
       cwd: REPO_ROOT,
     });

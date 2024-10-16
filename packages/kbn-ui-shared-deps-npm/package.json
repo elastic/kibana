@@ -4,6 +4,26 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "build": "node ../../scripts/build_package.js packages/kbn-ui-shared-deps-npm"
+    "build": "node ../../scripts/build_package.js packages/kbn-ui-shared-deps-npm --task-name shared_built_assets"
+  },
+  "buildSourcePaths": {
+    "include": [
+      "index.js",
+      "src/**/*"
+    ],
+    "exclude": [
+      "**/test_helpers.ts",
+      "**/*.config.js",
+      "**/*.mock.*",
+      "**/*.test.*",
+      "**/*.stories.*",
+      "**/__snapshots__/**",
+      "**/integration_tests/**",
+      "**/mocks/**",
+      "**/scripts/**",
+      "**/storybook/**",
+      "**/test_fixtures/**",
+      "**/test_helpers/**"
+    ]
   }
 }
