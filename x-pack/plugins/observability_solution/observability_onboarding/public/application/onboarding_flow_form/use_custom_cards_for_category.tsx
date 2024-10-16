@@ -184,10 +184,10 @@ export function useCustomCardsForCategory(
               src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
             },
           ],
-          url: isServerless ? otelLogsUrl : otelKubernetesUrl,
+          url: otelKubernetesUrl,
           version: '',
           integration: '',
-          isQuickstart: !isServerless,
+          isQuickstart: true,
         },
       ];
 
