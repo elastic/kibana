@@ -36,11 +36,12 @@ export const useGridLayoutEvents = ({
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
       if (!interactionEvent$.value) return;
+      // console.log('calculateUserEvent', interactionEvent$.value);
       e.preventDefault();
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
-      const previewElement = gridLayoutStateManager.dragPreviewRef.current;
+      // const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -53,7 +54,7 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (!runtimeSettings$.value || !previewElement || !gridRowElements || !currentGridData) {
+      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
         return;
       }
 
@@ -68,7 +69,8 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      gridLayoutStateManager.updatePreviewElement(previewRect);
+      if (interactionEvent.type !== 'resize')
+        gridLayoutStateManager.updateDraggedElement(previewRect);
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -94,12 +96,12 @@ export const useGridLayoutEvents = ({
       const hasChangedGridRow = targetRowIndex !== lastRowIndex;
 
       // re-render when the target row changes
-      if (hasChangedGridRow) {
-        interactionEvent$.next({
-          ...interactionEvent,
-          targetRowIndex,
-        });
-      }
+      // if (hasChangedGridRow) {
+      //   interactionEvent$.next({
+      //     ...interactionEvent,
+      //     targetRowIndex,
+      //   });
+      // }
 
       // calculate the requested grid position
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
@@ -116,6 +118,8 @@ export const useGridLayoutEvents = ({
         ? previewRect.bottom - targetedGridTop
         : previewRect.top - targetedGridTop;
 
+      // gridLayoutStateManager.updateDragPreview(previewRect);
+
       const targetColumn = Math.min(
         Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
         maxColumn
@@ -128,6 +132,33 @@ export const useGridLayoutEvents = ({
       } else {
         requestedGridData.column = targetColumn;
         requestedGridData.row = targetRow;
+      }
+
+      if (previewElement) {
+        previewElement.style.opacity = '1';
+        previewElement.style.left = `${Math.round(
+          requestedGridData.column * runtimeSettings$.value.columnPixelWidth
+        )}`;
+        console.log(
+          requestedGridData.column,
+          runtimeSettings$.value.columnPixelWidth,
+          Math.round(requestedGridData.column * runtimeSettings$.value.columnPixelWidth)
+        );
+        previewElement.style.top = `${requestedGridData.row * runtimeSettings$.value.rowHeight}`;
+        previewElement.style.width = `${
+          requestedGridData.width * runtimeSettings$.value.columnPixelWidth
+        }`;
+        previewElement.style.height = `${
+          requestedGridData.height * runtimeSettings$.value.rowHeight
+        }`;
+        const { opacity, left, top, width, height } = previewElement.style;
+        console.log('previewElement', { opacity, left, top, width, height });
+        // previewElement.style.gridColumnStart = `${requestedGridData.column}`;
+        // previewElement.style.gridColumnEnd = `${
+        //   requestedGridData.column + 1 + requestedGridData.width
+        // }`;
+        // previewElement.style.gridRowStart = `${requestedGridData.row}`;
+        // previewElement.style.gridRowEnd = `${requestedGridData.row + 1 + requestedGridData.height}`;
       }
 
       // resolve the new grid layout
@@ -148,35 +179,37 @@ export const useGridLayoutEvents = ({
         const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedGridData);
         nextLayout[targetRowIndex] = resolvedDestinationGrid;
 
+        console.log('nextLayout', nextLayout);
+
         // resolve origin grid
-        if (hasChangedGridRow) {
-          const originGrid = nextLayout[lastRowIndex];
-          const resolvedOriginGrid = resolveGridRow(originGrid);
-          nextLayout[lastRowIndex] = resolvedOriginGrid;
-        }
-        gridLayout$.next(nextLayout);
+        // if (hasChangedGridRow) {
+        //   const originGrid = nextLayout[lastRowIndex];
+        //   const resolvedOriginGrid = resolveGridRow(originGrid);
+        //   nextLayout[lastRowIndex] = resolvedOriginGrid;
+        // }
+        // gridLayout$.next(nextLayout);
       }
     };
 
-    const onMouseUp = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
-      e.preventDefault();
-      e.stopPropagation();
+    // const onMouseUp = (e: MouseEvent) => {
+    //   if (!interactionEvent$.value) return;
+    //   e.preventDefault();
+    //   e.stopPropagation();
 
-      interactionEvent$.next(undefined);
-      gridLayoutStateManager.hideDragPreview();
-    };
+    //   interactionEvent$.next(undefined);
+    //   gridLayoutStateManager.hideDragPreview();
+    // };
 
     const onMouseMove = (e: MouseEvent) => {
       mouseClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
     };
 
-    document.addEventListener('mouseup', onMouseUp);
+    // document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      document.removeEventListener('mouseup', onMouseUp);
+      // document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
     };
