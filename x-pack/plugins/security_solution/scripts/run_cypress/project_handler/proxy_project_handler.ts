@@ -45,6 +45,9 @@ export class ProxyHandler extends ProjectHandler {
     const qualityGate =
       process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE === '1';
     const override = commit ?? process.env.KIBANA_MKI_IMAGE_COMMIT;
+    this.log.info(`Kibana override commit (KIBANA_MKI_IMAGE_COMMIT):
+      ${process.env.KIBANA_MKI_IMAGE_COMMIT}`);
+    this.log.info(`Override value (override): ${override}`);
     if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);

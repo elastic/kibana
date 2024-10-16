@@ -38,7 +38,8 @@ const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 describe(
   'Detection rules, Indicator Match, Alert Suppression',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@testhere'],
+    // tags: ['@ess', '@serverless'],
   },
   () => {
     const rule = getNewThreatIndicatorRule();
