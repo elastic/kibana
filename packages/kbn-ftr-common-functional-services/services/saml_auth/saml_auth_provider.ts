@@ -33,7 +33,7 @@ export interface KibanaRoleDescriptors {
 }
 
 const throwIfRoleNotSet = (role: string, customRole: string, roleDescriptors: Map<string, any>) => {
-  if (role === customRole && !roleDescriptors.has(customRole)) {
+  if (role === customRole && !roleDescriptors.get(customRole)) {
     throw new Error(
       `Set privileges for '${customRole}' using 'samlAuth.setCustomRole' before authentication.`
     );
