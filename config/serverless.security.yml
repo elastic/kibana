@@ -118,3 +118,8 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Experimental Security Solution features
+
+# This feature is disabled in Serverless until fully performance tested within a Serverless environment
+xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
