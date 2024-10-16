@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditorProps } from '@kbn/esql-editor';
@@ -24,7 +24,13 @@ export const ESQLLangEditor = (props: ESQLEditorProps) => {
   const ESQLEditor = value?.[1]?.default;
   const deps = value?.[0];
 
-  if (loading || !deps || !ESQLEditor) return <EuiLoadingSpinner />;
+  if (loading || !deps || !ESQLEditor)
+    return (
+      <div css={{ margin: '8px', maxWidth: '400px'}}>
+        <EuiSkeletonText lines={3} size="s" contentAriaLabel="Loading ES|QL editor" />
+      </div>
+    )
+  ;
 
   return (
     <KibanaContextProvider

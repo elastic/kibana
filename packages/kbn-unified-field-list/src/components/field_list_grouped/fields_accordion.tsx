@@ -14,8 +14,8 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiAccordion,
-  EuiLoadingSpinner,
   EuiIconTip,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
@@ -131,7 +131,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       );
     }
 
-    return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
+    return <EuiSkeletonRectangle borderRadius="m" data-test-subj={`${id}-countLoading`} />;
   }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
   return (

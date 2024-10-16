@@ -188,6 +188,7 @@ export function Histogram({
     & .lnsExpressionRenderer {
       width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
+      border-radius: 0;
       box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
 

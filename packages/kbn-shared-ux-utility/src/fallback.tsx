@@ -8,20 +8,16 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiProgress, EuiDelayRender } from '@elastic/eui';
 
 /**
  * A simple implementation of `React.Suspense.fallback` that renders a loading spinner.
  */
 export const Fallback = () => {
-  const divCSS = css`
-    text-align: center;
-  `;
 
   return (
-    <div css={divCSS}>
-      <EuiLoadingSpinner />
-    </div>
+    <EuiDelayRender>
+      <EuiProgress size="xs" color="subdued" />
+    </EuiDelayRender>
   );
 };

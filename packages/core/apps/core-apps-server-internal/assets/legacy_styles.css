@@ -57,8 +57,8 @@ body, html {
   display: block;
   font-size: 14px;
   font-family: sans-serif;
-  line-height: 40px !important;
-  height: 40px !important;
+  line-height: 32px !important;
+  height: 32px !important;
   color: #98A2B3;
 }
 
@@ -85,12 +85,14 @@ body, html {
 }
 
 .kbnProgress {
-  display: inline-block;
+  display: block;
   position: relative;
-  width: 32px;
+  width: 100%;
   height: 4px;
   overflow: hidden;
   line-height: 1;
+  border-radius: 4px;
+  margin-top: 8px;
 }
 
 .kbnProgress:before {

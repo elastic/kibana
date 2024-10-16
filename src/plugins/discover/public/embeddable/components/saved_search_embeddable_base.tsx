@@ -47,7 +47,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
       responsive={false}
       data-test-subj={dataTestSubj}
     >
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isLoading && <EuiProgress size="xs" color="subdued" position="absolute" />}
 
       {Boolean(prepend || totalHitCount) && (
         <EuiFlexItem grow={false}>

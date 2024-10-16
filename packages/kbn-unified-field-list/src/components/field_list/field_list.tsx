@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiDelayRender, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const containerStyle = css`
@@ -58,12 +58,14 @@ export const FieldList: FC<PropsWithChildren<FieldListProps>> = ({
       className={className}
     >
       {isProcessing && (
-        <EuiProgress
-          size="xs"
-          color="accent"
-          position="absolute"
-          data-test-subj={`${dataTestSubject}Loading`}
-        />
+        <EuiDelayRender>
+          <EuiProgress
+            size="xs"
+            color="subdued"
+            position="absolute"
+            data-test-subj={`${dataTestSubject}Loading`}
+          />
+        </EuiDelayRender>
       )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
       <EuiFlexItem className="unifiedFieldListSidebar__accordionContainer" grow={true}>
