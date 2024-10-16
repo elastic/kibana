@@ -8,11 +8,12 @@
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { debounce } from 'lodash';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export const SearchPanelContent = ({
@@ -21,11 +22,13 @@ export const SearchPanelContent = ({
   searchQueryLanguage,
   dataView,
   setSearchParams,
+  onQueryChange,
 }: {
   dataView: DataView;
   searchQuery: Query['query'];
   searchString: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
+  onQueryChange?: (query: Query['query'] | undefined) => void;
   setSearchParams({
     searchQuery,
     searchString,
@@ -76,7 +79,8 @@ export const SearchPanelContent = ({
         queryManager.filterManager.getFilters() ?? [],
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
-
+      // Additional call because the search bar doesn't call onQueryChange when the query is cleared from filters
+      onQueryChange?.(mergedQuery.query);
       setSearchParams({
         searchQuery: combinedQuery,
         searchString: mergedQuery.query,
@@ -92,6 +96,18 @@ export const SearchPanelContent = ({
       });
     }
   };
+
+  // Debounce the onQueryChange to prevent race condition when filters are updated and both `onQuerySubmit` and `onQueryChange` are called.
+  const debouncedOnQueryChange = useCallback(
+    (inputQuery: Query['query'] | undefined) => {
+      const debouncedFunction = debounce((debouncedQuery: Query['query'] | undefined) => {
+        onQueryChange?.(debouncedQuery);
+      }, 100);
+
+      return debouncedFunction(inputQuery);
+    },
+    [onQueryChange]
+  );
 
   return (
     <SearchBar
@@ -112,6 +128,10 @@ export const SearchPanelContent = ({
       displayStyle={'inPage'}
       isClearable={true}
       customSubmitButton={<div />}
+      onQueryChange={({ query }) => {
+        // console.log('On query change called', query);
+        debouncedOnQueryChange?.(query?.query);
+      }}
     />
   );
 };
