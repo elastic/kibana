@@ -49,6 +49,10 @@ const requiredPrivilegesSchema = schema.arrayOf(
         }
       });
 
+      if (anyRequired.includes('superuser')) {
+        return 'superuser privileges set cannot be used in anyRequired';
+      }
+
       if (anyRequired.length && allRequired.length) {
         for (const privilege of anyRequired) {
           if (allRequired.includes(privilege)) {

@@ -15,6 +15,7 @@ import {
 
 import { initAPIAuthorization } from './api_authorization';
 import { authorizationMock } from './index.mock';
+import { ReservedPrivilegesSet } from '../../common/types';
 
 describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns false continues`, async () => {
@@ -149,7 +150,10 @@ describe('initAPIAuthorization', () => {
         asserts,
       }: {
         security?: RouteSecurity;
-        kibanaPrivilegesResponse?: Array<{ privilege: string; authorized: boolean }>;
+        kibanaPrivilegesResponse?: {
+          privileges: { kibana: Array<{ privilege: string; authorized: boolean }> };
+          hasAllRequested?: boolean;
+        };
         kibanaPrivilegesRequestActions?: string[];
         asserts: {
           forbidden?: boolean;
@@ -180,11 +184,7 @@ describe('initAPIAuthorization', () => {
         const mockResponse = httpServerMock.createResponseFactory();
         const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-        const mockCheckPrivileges = jest.fn().mockReturnValue({
-          privileges: {
-            kibana: kibanaPrivilegesResponse,
-          },
-        });
+        const mockCheckPrivileges = jest.fn().mockReturnValue(kibanaPrivilegesResponse);
         mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
         mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
           // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -207,11 +207,13 @@ describe('initAPIAuthorization', () => {
           return;
         }
 
-        expect(mockCheckPrivileges).toHaveBeenCalledWith({
-          kibana: kibanaPrivilegesRequestActions!.map((action: string) =>
-            mockAuthz.actions.api.get(action)
-          ),
-        });
+        if (kibanaPrivilegesRequestActions) {
+          expect(mockCheckPrivileges).toHaveBeenCalledWith({
+            kibana: kibanaPrivilegesRequestActions!.map((action: string) =>
+              mockAuthz.actions.api.get(action)
+            ),
+          });
+        }
 
         if (asserts.forbidden) {
           expect(mockResponse.forbidden).toHaveBeenCalled();
@@ -239,11 +241,15 @@ describe('initAPIAuthorization', () => {
             ],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: true },
-          { privilege: 'api:privilege3', authorized: false },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: true },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
         asserts: {
           authzResult: {
@@ -267,10 +273,14 @@ describe('initAPIAuthorization', () => {
             ],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: true },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: true },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
         asserts: {
           authzResult: {
@@ -293,11 +303,15 @@ describe('initAPIAuthorization', () => {
             ],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: false },
-          { privilege: 'api:privilege2', authorized: true },
-          { privilege: 'api:privilege3', authorized: false },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: false },
+              { privilege: 'api:privilege2', authorized: true },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
         asserts: {
           authzResult: {
@@ -317,10 +331,14 @@ describe('initAPIAuthorization', () => {
             requiredPrivileges: ['privilege1', 'privilege2'],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: true },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: true },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
         asserts: {
           authzResult: {
@@ -332,26 +350,18 @@ describe('initAPIAuthorization', () => {
     );
 
     testSecurityConfig(
-      `protected route returns forbidden if user has allRequired AND NONE of anyRequired privileges requested`,
+      `protected route allowed only for superuser access returns "authzResult" if user is superuser`,
       {
         security: {
           authz: {
-            requiredPrivileges: [
-              {
-                allRequired: ['privilege1'],
-                anyRequired: ['privilege2', 'privilege3'],
-              },
-            ],
+            requiredPrivileges: [ReservedPrivilegesSet.Superuser],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: false },
-          { privilege: 'api:privilege3', authorized: false },
-        ],
-        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        kibanaPrivilegesResponse: { privileges: { kibana: [] }, hasAllRequested: true },
         asserts: {
-          forbidden: true,
+          authzResult: {
+            [ReservedPrivilegesSet.Superuser]: true,
+          },
         },
       }
     );
@@ -369,12 +379,16 @@ describe('initAPIAuthorization', () => {
             ],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: false },
-          { privilege: 'api:privilege3', authorized: false },
-          { privilege: 'api:privilege4', authorized: true },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: true },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3', 'privilege4'],
         asserts: {
           forbidden: true,
@@ -390,10 +404,14 @@ describe('initAPIAuthorization', () => {
             requiredPrivileges: ['privilege1', 'privilege2'],
           },
         },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: false },
-        ],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+            ],
+          },
+        },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
         asserts: {
           forbidden: true,
