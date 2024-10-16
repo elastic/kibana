@@ -15,9 +15,9 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
 import { BsearchService } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
-import { getFieldsToRequest, getFilterValue } from '../../../../utils';
+import { getFieldsToRequest, getFilterValue } from '../../../utils';
 
 const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     },
   });
 
-  describe('Timeline', () => {
+  describe('@skipInServerless Timeline', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
 
