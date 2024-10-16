@@ -76,7 +76,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           indexName
         );
         await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
-        await pageObjects.indexManagement.sectionHeadingText('Indices');
+        const headingText = await pageObjects.indexManagement.sectionHeadingText();
+        expect(headingText).to.be('Index Management');
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
       });
 
