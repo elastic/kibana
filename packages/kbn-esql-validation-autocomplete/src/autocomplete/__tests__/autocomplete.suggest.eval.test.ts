@@ -36,6 +36,7 @@ import {
 import { fieldNameFromType } from '../../validation/validation.test';
 import { ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
+import { COMPARISON_OPERATORS } from '../../shared/constants';
 
 const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
   Array.from(new Set(paramDefs.map((p) => p.type))).filter(
@@ -558,9 +559,7 @@ describe('autocomplete.suggest', () => {
 
     test('case', async () => {
       const { assertSuggestions } = await setup();
-      const comparisonOperators = ['==', '!=', '>', '<', '>=', '<=']
-        .map((op) => `${op}`)
-        .concat(',');
+      const comparisonOperators = COMPARISON_OPERATORS.map((op) => `${op}`).concat(',');
 
       // case( / ) suggest any field/eval function in this position as first argument
 
