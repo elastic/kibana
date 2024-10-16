@@ -253,7 +253,14 @@ describe('refreshInlineZip', () => {
     expect((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]).not.toEqual(
       (normalized as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
     );
-    expect((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]).toBeUndefined();
+    expect((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE])
+      .toMatchInlineSnapshot(`
+      "step('goto', ()=> page.goto('https://elastic.co'))
+              step('fail', () => {
+                  // add a comment
+                  throw Error('fail')
+              })"
+    `);
   });
 
   it('does nothing for lightweight monitors', async () => {
