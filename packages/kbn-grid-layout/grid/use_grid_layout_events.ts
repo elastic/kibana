@@ -36,6 +36,7 @@ export const useGridLayoutEvents = ({
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
       if (!interactionEvent$.value) return;
+      console.log('calculateUserEvent');
       // console.log('calculateUserEvent', interactionEvent$.value);
       e.preventDefault();
       e.stopPropagation();
@@ -134,33 +135,6 @@ export const useGridLayoutEvents = ({
         requestedGridData.row = targetRow;
       }
 
-      if (previewElement) {
-        previewElement.style.opacity = '1';
-        previewElement.style.left = `${Math.round(
-          requestedGridData.column * runtimeSettings$.value.columnPixelWidth
-        )}`;
-        console.log(
-          requestedGridData.column,
-          runtimeSettings$.value.columnPixelWidth,
-          Math.round(requestedGridData.column * runtimeSettings$.value.columnPixelWidth)
-        );
-        previewElement.style.top = `${requestedGridData.row * runtimeSettings$.value.rowHeight}`;
-        previewElement.style.width = `${
-          requestedGridData.width * runtimeSettings$.value.columnPixelWidth
-        }`;
-        previewElement.style.height = `${
-          requestedGridData.height * runtimeSettings$.value.rowHeight
-        }`;
-        const { opacity, left, top, width, height } = previewElement.style;
-        console.log('previewElement', { opacity, left, top, width, height });
-        // previewElement.style.gridColumnStart = `${requestedGridData.column}`;
-        // previewElement.style.gridColumnEnd = `${
-        //   requestedGridData.column + 1 + requestedGridData.width
-        // }`;
-        // previewElement.style.gridRowStart = `${requestedGridData.row}`;
-        // previewElement.style.gridRowEnd = `${requestedGridData.row + 1 + requestedGridData.height}`;
-      }
-
       // resolve the new grid layout
       if (
         hasChangedGridRow ||
@@ -182,12 +156,18 @@ export const useGridLayoutEvents = ({
         console.log('nextLayout', nextLayout);
 
         // resolve origin grid
-        // if (hasChangedGridRow) {
-        //   const originGrid = nextLayout[lastRowIndex];
-        //   const resolvedOriginGrid = resolveGridRow(originGrid);
-        //   nextLayout[lastRowIndex] = resolvedOriginGrid;
-        // }
-        // gridLayout$.next(nextLayout);
+        if (hasChangedGridRow) {
+          // debugger;
+          const originGrid = nextLayout[lastRowIndex];
+          const resolvedOriginGrid = resolveGridRow(originGrid);
+          nextLayout[lastRowIndex] = resolvedOriginGrid;
+        }
+
+        console.log('interactionEvent.type');
+        if (!hasChangedGridRow || interactionEvent.type === 'drop') {
+          console.log('UPDATE');
+          gridLayout$.next(nextLayout);
+        }
       }
     };
 
