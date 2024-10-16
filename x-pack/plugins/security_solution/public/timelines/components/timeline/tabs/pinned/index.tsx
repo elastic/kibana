@@ -25,10 +25,7 @@ import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
-import { StatefulBody } from '../../body';
-import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -36,16 +33,8 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
-import { calculateTotalPages } from '../../helpers';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import {
-  FullWidthFlexGroup,
-  ScrollableFlexItem,
-  StyledEuiFlyoutBody,
-  StyledEuiFlyoutFooter,
-} from '../shared/layout';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
@@ -98,9 +87,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
-  );
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -276,92 +262,29 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     );
   }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
 
-  if (!unifiedComponentsInTimelineDisabled) {
-    return (
-      <>
-        {NotesFlyoutMemo}
-        <UnifiedTimelineBody
-          header={<></>}
-          columns={augmentedColumnHeaders}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          itemsPerPage={itemsPerPage}
-          itemsPerPageOptions={itemsPerPageOptions}
-          sort={sort}
-          events={events}
-          refetch={refetch}
-          dataLoadingState={queryLoadingState}
-          totalCount={events.length}
-          onChangePage={loadPage}
-          activeTab={TimelineTabs.pinned}
-          updatedAt={refreshedAt}
-          isTextBasedQuery={false}
-          pageInfo={pageInfo}
-          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-          trailingControlColumns={rowDetailColumn}
-        />
-      </>
-    );
-  }
-
   return (
     <>
       {NotesFlyoutMemo}
-      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
-        <ScrollableFlexItem grow={2}>
-          {timelineFullScreen && setTimelineFullScreen != null && (
-            <ExitFullScreenContainer>
-              <ExitFullScreen
-                fullScreen={timelineFullScreen}
-                setFullScreen={setTimelineFullScreen}
-              />
-            </ExitFullScreenContainer>
-          )}
-          <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody
-              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
-              className="timeline-flyout-body"
-            >
-              <StatefulBody
-                activePage={pageInfo.activePage}
-                browserFields={browserFields}
-                data={events}
-                id={timelineId}
-                refetch={refetch}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                sort={sort}
-                tabType={TimelineTabs.pinned}
-                totalPages={calculateTotalPages({
-                  itemsCount: totalCount,
-                  itemsPerPage,
-                })}
-                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
-                trailingControlColumns={trailingControlColumns}
-              />
-            </StyledEuiFlyoutBody>
-            <StyledEuiFlyoutFooter
-              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-footer`}
-              className="timeline-flyout-footer"
-            >
-              <Footer
-                activePage={pageInfo.activePage}
-                data-test-subj="timeline-footer"
-                updatedAt={refreshedAt}
-                height={footerHeight}
-                id={timelineId}
-                isLive={false}
-                isLoading={isQueryLoading || loadingSourcerer}
-                itemsCount={events.length}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                onChangePage={loadPage}
-                totalCount={totalCount}
-              />
-            </StyledEuiFlyoutFooter>
-          </EventDetailsWidthProvider>
-        </ScrollableFlexItem>
-      </FullWidthFlexGroup>
+      <UnifiedTimelineBody
+        header={<></>}
+        columns={augmentedColumnHeaders}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        dataLoadingState={queryLoadingState}
+        totalCount={events.length}
+        onChangePage={loadPage}
+        activeTab={TimelineTabs.pinned}
+        updatedAt={refreshedAt}
+        isTextBasedQuery={false}
+        pageInfo={pageInfo}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        trailingControlColumns={rowDetailColumn}
+      />
     </>
   );
 };
