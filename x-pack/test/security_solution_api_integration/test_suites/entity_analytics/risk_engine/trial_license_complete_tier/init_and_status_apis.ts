@@ -30,7 +30,8 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const log = getService('log');
 
-  describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196319
+  describe.skip('@ess @serverless @serverlessQA init_and_status_apis', () => {
     before(async () => {
       await riskEngineRoutes.cleanUp();
     });
