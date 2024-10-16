@@ -351,6 +351,7 @@ describe('RolesAPIClient', () => {
         `/api/security/role/${encodeURIComponent(roleName)}`,
         {
           query: { replaceDeprecatedPrivileges: true },
+          version: '2023-10-31',
         }
       );
     });
@@ -366,6 +367,7 @@ describe('RolesAPIClient', () => {
       expect(httpMock.get).toHaveBeenCalledTimes(1);
       expect(httpMock.get).toHaveBeenCalledWith('/api/security/role', {
         query: { replaceDeprecatedPrivileges: true },
+        version: '2023-10-31',
       });
     });
   });
