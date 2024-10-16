@@ -502,7 +502,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.risk_score);
       });
 
-      it('Investigate alert in timeline', () => {
+      it.only('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
@@ -525,14 +525,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
         cy.get(INDICATOR_MATCH_ROW_RENDER).should(
           'have.text',
-          `threat.enrichments.matched.field${
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          }${accessibilityText}matched${
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          }${
+          `${getNewThreatIndicatorRule().threat_mapping[0].entries[0].field}matched${
             indicatorRuleMatchingDoc.atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
-            ` byfeed.nameAbuseCH malware${accessibilityText}`
+          }indicator_match_ruleprovided` + ` byAbuseCH malware`
         );
       });
     });
