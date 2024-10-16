@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { EnableEntityModelButton } from '../entity_enablement/enable_entity_model_button';
 
+// test 1
+
 export function getEntityManagerEnablement({
   enabled,
   loading,

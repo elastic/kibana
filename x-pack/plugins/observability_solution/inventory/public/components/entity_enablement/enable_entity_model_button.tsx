@@ -14,6 +14,8 @@ import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { Unauthorized } from './unauthorized_modal';
 
+// test 2
+
 export function EnableEntityModelButton({ onSuccess }: { onSuccess: () => void }) {
   const {
     services: { entityManager, notifications },
