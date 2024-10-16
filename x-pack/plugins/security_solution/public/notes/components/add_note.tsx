@@ -88,7 +88,7 @@ export const AddNote = memo(
         createNote({
           note: {
             timelineId: timelineId || '',
-            eventId,
+            eventId: eventId || '',
             note: editorValue,
           },
         })

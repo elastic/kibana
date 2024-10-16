@@ -42,6 +42,7 @@ export const fetchNotes = async ({
   sortField,
   sortOrder,
   filter,
+  userFilter,
   search,
 }: {
   page: number;
@@ -49,6 +50,7 @@ export const fetchNotes = async ({
   sortField: string;
   sortOrder: string;
   filter: string;
+  userFilter: string;
   search: string;
 }) => {
   const response = await KibanaServices.get().http.get<GetNotesResponse>(NOTE_URL, {
@@ -58,6 +60,7 @@ export const fetchNotes = async ({
       sortField,
       sortOrder,
       filter,
+      userFilter,
       search,
     },
     version: '2023-10-31',

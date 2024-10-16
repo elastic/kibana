@@ -49,8 +49,15 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
   );
 
   const buttonContent = useMemo(
-    () => <Title isLoading={false} title={attackDiscovery.title} />,
-    [attackDiscovery.title]
+    () => (
+      <Title
+        isLoading={false}
+        replacements={replacements}
+        showAnonymized={showAnonymized}
+        title={attackDiscovery.title}
+      />
+    ),
+    [attackDiscovery.title, replacements, showAnonymized]
   );
 
   return (

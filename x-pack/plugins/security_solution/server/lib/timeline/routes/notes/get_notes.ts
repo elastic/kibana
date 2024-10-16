@@ -11,6 +11,7 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { MAX_UNASSOCIATED_NOTES, NOTE_URL } from '../../../../../common/constants';
@@ -126,6 +127,22 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
             sortOrder,
             filter,
           };
+
+          // retrieve all the notes created by a specific user
+          const userFilter = queryParams?.userFilter;
+          if (userFilter) {
+            // we need to combine the associatedFilter with the filter query
+            // we have to type case here because the filter is a string (from the schema) and that cannot be changed as it would be a breaking change
+            const filterAsKueryNode: KueryNode = (filter || '') as unknown as KueryNode;
+
+            options.filter = nodeBuilder.and([
+              nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, userFilter),
+              filterAsKueryNode,
+            ]);
+          } else {
+            options.filter = filter;
+          }
+
           const res = await getAllSavedNote(frameworkRequest, options);
           const body: GetNotesResponse = res ?? {};
           return response.ok({ body });

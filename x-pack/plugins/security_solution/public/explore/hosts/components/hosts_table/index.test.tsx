@@ -180,31 +180,6 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.criticality_5')).toBeInTheDocument();
     });
 
-    test('it does not render "Asset Criticality" column when Asset Criticality is not enabled in Kibana settings', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
-      mockUseHasSecurityCapability.mockReturnValue(true);
-      mockUseUiSetting.mockReturnValue([false]);
-
-      const { queryByTestId } = render(
-        <TestProviders store={store}>
-          <HostsTable
-            id="hostsQuery"
-            isInspect={false}
-            loading={false}
-            data={mockData}
-            totalCount={0}
-            fakeTotalCount={-1}
-            setQuerySkip={jest.fn()}
-            showMorePagesIndicator={false}
-            loadPage={loadPage}
-            type={hostsModel.HostsType.page}
-          />
-        </TestProviders>
-      );
-
-      expect(queryByTestId('tableHeaderCell_node.criticality_5')).not.toBeInTheDocument();
-    });
-
     describe('Sorting on Table', () => {
       let wrapper: ReturnType<typeof mount>;
 

@@ -7,7 +7,10 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import { BareNote, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
+import {
+  PersistNoteRouteRequestBody,
+  TimelineTypeEnum,
+} from '@kbn/security-solution-plugin/common/api/timeline';
 import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { Client } from '@elastic/elasticsearch';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -58,7 +61,6 @@ export const createNote = async (
   note: {
     documentId?: string;
     savedObjectId?: string;
-    user?: string;
     text: string;
   }
 ) =>
@@ -70,9 +72,9 @@ export const createNote = async (
         eventId: note.documentId || '',
         timelineId: note.savedObjectId || '',
         created: Date.now(),
-        createdBy: note.user || 'elastic',
+        createdBy: 'elastic',
         updated: Date.now(),
-        updatedBy: note.user || 'elastic',
+        updatedBy: 'elastic',
         note: note.text,
-      } as BareNote,
-    });
+      },
+    } as PersistNoteRouteRequestBody);
