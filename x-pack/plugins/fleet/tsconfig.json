@@ -5,6 +5,7 @@
   },
   "exclude": [
     "cypress.config.ts",
+    "cypress.config.space_awareness.ts",
     "target/**/*",
   ],
   "include": [
@@ -17,6 +18,7 @@
     "scripts/**/*",
     "package.json",
     "cypress.config.ts",
+    "cypress.config.space_awareness.ts",
     "../../../typings/**/*"
   ],
   "kbn_references": [

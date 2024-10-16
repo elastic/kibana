@@ -15,7 +15,6 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessDeps, ProcessTreeNode } from '.';
-import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
 
@@ -101,10 +100,10 @@ describe('ProcessTreeNode component', () => {
         current: {
           ...props.scrollerRef.current,
           clientHeight: -500,
-          addEventListener: (_event: string, scrollFn: (() => void) & Cancelable) => {
+          addEventListener: (_event: string, scrollFn: () => void) => {
             scrollFn();
           },
-          removeEventListener: (_event: string, _fn: (() => void) & Cancelable) => {},
+          removeEventListener: (_event: string, _fn: () => void) => {},
         },
       } as RefObject<HTMLDivElement>;
 

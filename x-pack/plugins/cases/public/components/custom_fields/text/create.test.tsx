@@ -14,7 +14,8 @@ import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 
-describe('Create ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/193026
+describe.skip('Create ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {

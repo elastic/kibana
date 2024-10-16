@@ -65,5 +65,17 @@ describe('Utils', () => {
       const isOpenModel = isOpenSourceModel(connector);
       expect(isOpenModel).toEqual(true);
     });
+
+    it('should return `true` when apiProvider of OpenAiProviderType.Other is specified', async () => {
+      const connector = {
+        actionTypeId: '.gen-ai',
+        config: {
+          apiUrl: OPENAI_CHAT_URL,
+          apiProvider: OpenAiProviderType.Other,
+        },
+      } as unknown as Connector;
+      const isOpenModel = isOpenSourceModel(connector);
+      expect(isOpenModel).toEqual(true);
+    });
   });
 });

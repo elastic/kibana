@@ -12,10 +12,11 @@ import {
   DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryUpdateProps,
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
-import { CreateKnowledgeBaseEntrySchema } from './types';
+import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
   esClient: ElasticsearchClient;
@@ -75,6 +76,120 @@ export const createKnowledgeBaseEntry = async ({
     );
     throw err;
   }
+};
+
+interface TransformToUpdateSchemaProps {
+  user: AuthenticatedUser;
+  updatedAt: string;
+  entry: KnowledgeBaseEntryUpdateProps;
+  global?: boolean;
+}
+
+export const transformToUpdateSchema = ({
+  user,
+  updatedAt,
+  entry,
+  global = false,
+}: TransformToUpdateSchemaProps): UpdateKnowledgeBaseEntrySchema => {
+  const base = {
+    id: entry.id,
+    updated_at: updatedAt,
+    updated_by: user.profile_uid ?? 'unknown',
+    name: entry.name,
+    type: entry.type,
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
+  };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return {
+    ...base,
+    kb_resource: entry.kbResource,
+    required: entry.required ?? false,
+    source: entry.source,
+    text: entry.text,
+    vector: undefined,
+  };
+};
+
+export const getUpdateScript = ({
+  entry,
+  isPatch,
+}: {
+  entry: UpdateKnowledgeBaseEntrySchema;
+  isPatch?: boolean;
+}) => {
+  return {
+    source: `
+    if (params.assignEmpty == true || params.containsKey('name')) {
+      ctx._source.name = params.name;
+    }
+    if (params.assignEmpty == true || params.containsKey('type')) {
+      ctx._source.type = params.type;
+    }
+    if (params.assignEmpty == true || params.containsKey('users')) {
+      ctx._source.users = params.users;
+    }
+    if (params.assignEmpty == true || params.containsKey('query_description')) {
+      ctx._source.query_description = params.query_description;
+    }
+    if (params.assignEmpty == true || params.containsKey('input_schema')) {
+      ctx._source.input_schema = params.input_schema;
+    }
+    if (params.assignEmpty == true || params.containsKey('output_fields')) {
+      ctx._source.output_fields = params.output_fields;
+    }
+    if (params.assignEmpty == true || params.containsKey('kb_resource')) {
+      ctx._source.kb_resource = params.kb_resource;
+    }
+    if (params.assignEmpty == true || params.containsKey('required')) {
+      ctx._source.required = params.required;
+    }
+    if (params.assignEmpty == true || params.containsKey('source')) {
+      ctx._source.source = params.source;
+    }
+    if (params.assignEmpty == true || params.containsKey('text')) {
+      ctx._source.text = params.text;
+    }
+    if (params.assignEmpty == true || params.containsKey('description')) {
+      ctx._source.description = params.description;
+    }
+    if (params.assignEmpty == true || params.containsKey('field')) {
+      ctx._source.field = params.field;
+    }
+    if (params.assignEmpty == true || params.containsKey('index')) {
+      ctx._source.index = params.index;
+    }
+    ctx._source.updated_at = params.updated_at;
+    ctx._source.updated_by = params.updated_by;
+  `,
+    lang: 'painless',
+    params: {
+      ...entry, // when assigning undefined in painless, it will remove property and wil set it to null
+      // for patch we don't want to remove unspecified value in payload
+      assignEmpty: !(isPatch ?? true),
+    },
+  };
 };
 
 interface TransformToCreateSchemaProps {

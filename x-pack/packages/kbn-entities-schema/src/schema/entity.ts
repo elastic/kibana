@@ -35,7 +35,6 @@ export const entityLatestSchema = z
     entity: entityBaseSchema.merge(
       z.object({
         lastSeenTimestamp: z.string(),
-        firstSeenTimestamp: z.string(),
       })
     ),
   })
