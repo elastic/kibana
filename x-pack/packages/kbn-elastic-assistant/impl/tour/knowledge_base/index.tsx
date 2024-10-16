@@ -10,7 +10,7 @@
  *
  * */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
@@ -101,6 +101,17 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
     tourState,
     children,
   });
+
+  const [isTimerExhausted, setIsTimerExhausted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTimerExhausted(true);
+    }, 1000);
+
+    return () => clearTimeout(timer); // Cleanup the timer on unmount
+  }, []);
+
   if (!enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive) {
     return children ?? null;
   }
@@ -110,7 +121,7 @@ const KnowledgeBaseTourComp: React.FC<{ children?: React.ReactNode }> = ({ child
       anchorPosition={'downRight'}
       content={knowledgeBaseTourStepOne.content}
       footerAction={footerAction}
-      isStepOpen
+      isStepOpen={isTimerExhausted}
       maxWidth={450}
       onFinish={advanceToVideoStep}
       panelProps={{
