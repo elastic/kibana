@@ -6,20 +6,15 @@
  */
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle, EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { i18n } from '@kbn/i18n';
-import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { Configurations } from '../configurations';
 import { cloudPosturePages } from '../../common/navigation/constants';
-import {
-  LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY,
-  LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY,
-} from '../../common/constants';
+import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
 import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
 import { getStatusForIndexName } from '../../../common/utils/helpers';
 import { Vulnerabilities } from '../vulnerabilities';
@@ -64,10 +59,7 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
-  const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
-    LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY
-  );
+
   // restore the users most recent tab selection
   const [lastTabSelected, setLastTabSelected] = useLocalStorage<FindingsTabKey>(
     LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY
@@ -109,26 +101,6 @@ export const Findings = () => {
             </h1>
           </EuiTitle>
           <EuiSpacer />
-          {!userHasDismissedCallout && (
-            <>
-              <EuiCallOut
-                title={i18n.translate('xpack.csp.findings.3pIntegrationsCallout.title', {
-                  defaultMessage:
-                    "New! Ingest your cloud security product's data into Elastic for centralized analytics, hunting, investigations, visualizations, and more",
-                })}
-                iconType="cheer"
-                onDismiss={() => setUserHasDismissedCallout(true)}
-              >
-                <EuiButton href={wizAddIntegrationLink}>
-                  <FormattedMessage
-                    id="xpack.csp.findings.3pIntegrationsCallout.buttonTitle"
-                    defaultMessage="Integrate Wiz"
-                  />
-                </EuiButton>
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
           <EuiTabs size="l">
             <EuiTab
               key="configurations"
