@@ -15,7 +15,7 @@ import { ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
-      <Route path={ELASTIC_MANAGED_CONNECTOR_PATH}>
+      <Route exact path={ELASTIC_MANAGED_CONNECTOR_PATH}>
         <ConnectorsElasticManaged />
       </Route>
       <Route exact path={'/:id'}>

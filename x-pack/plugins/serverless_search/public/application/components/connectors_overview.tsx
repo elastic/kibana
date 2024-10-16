@@ -7,11 +7,13 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +28,7 @@ import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
 
-import { CONNECTORS } from '../constants';
+import { BASE_CONNECTORS_PATH, CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
@@ -36,6 +38,9 @@ export const ConnectorsOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const {
+    application: { navigateToUrl },
+  } = useKibanaServices();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -118,6 +123,29 @@ export const ConnectorsOverview = () => {
       </EuiPageTemplate.Header>
       {connectorsLoading || (data?.connectors || []).length > 0 ? (
         <EuiPageTemplate.Section restrictWidth color="subdued">
+          <EuiCallOut
+            size="m"
+            title="Coming soon Elastic managed connectors."
+            iconType="pin"
+            onDismiss={() => {}}
+          >
+            <p>
+              {i18n.translate('xpack.serverlessSearch.connectorsOverview.calloutDescription', {
+                defaultMessage:
+                  'We´re actively developing Elastic managed connectors, that won´t require any self-managed infrastructure. You´ﬁll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. ',
+              })}
+            </p>
+            <EuiButton
+              data-test-subj="serverlessSearchConnectorsOverviewLinkButtonButton"
+              color="primary"
+              onClick={() =>
+                navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
+              }
+            >
+              Give feedback
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
           <ConnectorsTable />
         </EuiPageTemplate.Section>
       ) : (
