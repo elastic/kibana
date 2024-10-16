@@ -58,7 +58,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       monitorType: decodedMonitor.type,
       monitor: monitorFields,
       logger: server.logger,
-      includeInlineScript: false,
     });
     const monitor = omit(
       Object.assign(monitorFields, zippedProjectFields),

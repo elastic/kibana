@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { omit } from 'lodash';
 import { isEmpty } from 'lodash';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
@@ -230,7 +229,6 @@ export const refreshInlineZip = async (
     monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
     monitor: normalizedMonitor,
     logger: server.logger,
-    includeInlineScript: false,
   });
   return Object.assign(
     {},

@@ -21,7 +21,7 @@ export async function mapInlineToProjectFields({
   monitorType,
   monitor,
   logger,
-  includeInlineScript = true,
+  includeInlineScript,
 }: MapInlineToProjectFieldsArgs) {
   if (monitorType !== 'browser' || !monitor) return {};
   const asBrowserMonitor = monitor as BrowserSimpleFields;
@@ -58,12 +58,8 @@ export async function mapInlineToProjectFields({
  * See https://github.com/elastic/kibana/issues/169963 for more information.
  */
 export const dropInlineScriptForTransmission = (monitor: MonitorFields) => {
-  return (
-    monitor[ConfigKey.MONITOR_TYPE] === 'browser' &&
-    monitor[ConfigKey.MONITOR_SOURCE_TYPE] === 'ui' &&
-    !!(monitor as MonitorFields)[ConfigKey.SOURCE_INLINE] &&
-    !!(monitor as MonitorFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
-      ? omit(monitor, ConfigKey.SOURCE_INLINE)
-      : monitor
-  ) as MonitorFields;
+  if ((monitor as MonitorFields)[ConfigKey.SOURCE_PROJECT_CONTENT]) {
+    return omit(monitor, ConfigKey.SOURCE_INLINE);
+  }
+  return monitor;
 };

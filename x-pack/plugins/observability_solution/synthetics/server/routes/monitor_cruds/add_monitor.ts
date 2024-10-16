@@ -94,7 +94,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           monitorType: validationResult.decodedMonitor?.type,
           monitor: validationResult?.decodedMonitor,
           logger: server.logger,
-          includeInlineScript: false,
         })
       );
 
