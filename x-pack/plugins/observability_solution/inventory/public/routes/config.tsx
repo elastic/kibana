@@ -29,10 +29,9 @@ const inventoryRoutes = {
           sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         t.partial({
-          groupPagination: t.string,
           entityTypes: entityTypesRt,
           kuery: t.string,
-          grouping: t.string,
+          view: t.string,
         }),
       ]),
     }),

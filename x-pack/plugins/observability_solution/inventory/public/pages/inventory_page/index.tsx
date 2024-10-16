@@ -12,7 +12,7 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventoryPageViewContextProvider } from '../../context/inventory_page_view_provider';
 
-const DEFAULT_VIEW = 'none';
+const DEFAULT_VIEW = 'type';
 
 export interface InventoryState {
   grouping?: string;
@@ -23,21 +23,21 @@ export function InventoryPage() {
   const { query } = useInventoryParams('/');
   const inventoryRoute = useInventoryRouter();
 
-  const { grouping } = query;
+  const { view } = query;
   const [inventoryState, setInventoryState] = useState<InventoryState | undefined>(() =>
-    grouping ? (decode(grouping) as InventoryState) : undefined
+    view ? (decode(view) as InventoryState) : undefined
   );
 
   useEffect(() => {
     if (inventoryState) {
-      const encodedGrouping = encode(inventoryState);
+      const encodedView = encode(inventoryState);
 
-      if (encodedGrouping !== grouping) {
+      if (encodedView !== view) {
         inventoryRoute.replace('/', {
           path: {},
           query: {
             ...query,
-            grouping: encodedGrouping,
+            view: encodedView,
           },
         });
       }
