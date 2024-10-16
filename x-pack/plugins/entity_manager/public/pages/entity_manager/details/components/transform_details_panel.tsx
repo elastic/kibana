@@ -39,7 +39,7 @@ export function TransformDetailsPanel({ stats, transform }: TransformDetailsPane
 
   const checkpointStats = [
     {
-      name: 'Last detected chagnes',
+      name: 'Last detected changes',
       value: moment(stats.checkpointing.changes_last_detected_at).format('ll LTS'),
     },
     {

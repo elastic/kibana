@@ -15,6 +15,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { paths } from '../../../../common/locators/paths';
 import { ENTITY_MANAGER_LABEL } from '../../../../common/translations';
 import { IndexPatternInput } from './components/index_pattern';
+import { IdentityFieldsInput } from './components/identity_fields';
+import { MetadataFieldsInput } from './components/metadata';
 
 const PAGE_TITLE = i18n.translate('xpack.entityManager.createPage.title', {
   defaultMessage: 'Create new definition',
@@ -23,7 +25,10 @@ const PAGE_TITLE = i18n.translate('xpack.entityManager.createPage.title', {
 const DEFAULT_VALUES = {
   id: '',
   name: '',
+  type: '',
   indexPatterns: [],
+  identityFields: [{ field: '', optional: false }],
+  metadata: [],
 };
 
 export function EntityManagerCreatePage() {
@@ -50,9 +55,7 @@ export function EntityManagerCreatePage() {
   });
   const { control, handleSubmit } = methods;
 
-  const onSubmit: SubmitHandler<EntityDefinition> = (data) => {
-    console.log(data);
-  };
+  const onSubmit: SubmitHandler<EntityDefinition> = (data) => {};
 
   return (
     <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
@@ -69,6 +72,19 @@ export function EntityManagerCreatePage() {
               </EuiFormRow>
             )}
           />
+
+          <Controller
+            name="type"
+            rules={{ required: true }}
+            defaultValue=""
+            control={control}
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <EuiFormRow label="Type">
+                <EuiFieldText {...field} fullWidth isInvalid={fieldState.invalid} />
+              </EuiFormRow>
+            )}
+          />
+
           <Controller
             name="name"
             rules={{ required: true }}
@@ -80,7 +96,13 @@ export function EntityManagerCreatePage() {
               </EuiFormRow>
             )}
           />
+
           <IndexPatternInput />
+
+          <IdentityFieldsInput control={control} />
+
+          <MetadataFieldsInput control={control} />
+
           <EuiButton onClick={handleSubmit(onSubmit)}>Submit</EuiButton>
         </EuiForm>
       </FormProvider>
