@@ -45,8 +45,8 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
             },
           },
           404: {
-              description: 'Indicates that the request failed.'
-          }
+            description: 'Indicates that the request failed.',
+          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
