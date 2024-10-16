@@ -65,7 +65,7 @@ export async function invokeChatCompleteWithFunctionRequest({
           connectorId,
           persist: false,
           screenContexts: [],
-          scope: 'observability',
+          scopes: ['observability'],
         },
       },
     })
