@@ -77,7 +77,8 @@ export class ReportingAPIClient implements IReportingAPI {
   constructor(
     http: HttpSetup,
     private uiSettings: IUiSettingsClient,
-    private kibanaVersion: string
+    private kibanaVersion: string,
+    private isServerless: boolean
   ) {
     this.http = http;
   }
@@ -264,4 +265,6 @@ export class ReportingAPIClient implements IReportingAPI {
   public migrateReportingIndicesIlmPolicy() {
     return this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY);
   }
+
+  public getIsServerless = () => this.isServerless;
 }

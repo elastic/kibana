@@ -33,6 +33,7 @@ const UNKNOWN = i18n.translate('xpack.reporting.listing.infoPanel.unknownLabel',
 
 interface Props {
   info: Job;
+  isServerless: boolean;
 }
 
 const createDateFormatter = (format: string, tz: string) => (date: string) => {
@@ -40,7 +41,7 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
   return m.isValid() ? m.format(format) : NA;
 };
 
-export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
+export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, isServerless }) => {
   const {
     services: { uiSettings, docLinks },
   } = useKibana();
@@ -49,6 +50,8 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     uiSettings.get('dateFormat:tz') === 'Browser'
       ? moment.tz.guess()
       : uiSettings.get('dateFormat:tz');
+
+  const showKibanaVersion = Boolean(info.version) && !isServerless;
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
   const formatMilliseconds = (millis: number) =>
@@ -74,7 +77,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.prettyStatus,
     },
-    Boolean(info.version) && {
+    showKibanaVersion && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.kibanaVersion', {
         defaultMessage: 'Kibana version',
       }),
