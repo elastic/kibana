@@ -25,6 +25,7 @@ export { Fingerprint } from './fingerprint';
 export { Foreach } from './foreach';
 export { GeoGrid } from './geogrid';
 export { GeoIP } from './geoip';
+export { IpLocation } from './ip_location';
 export { Grok } from './grok';
 export { Gsub } from './gsub';
 export { HtmlStrip } from './html_strip';

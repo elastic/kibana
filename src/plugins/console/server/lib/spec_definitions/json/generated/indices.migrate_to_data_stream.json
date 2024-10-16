@@ -4,7 +4,17 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"

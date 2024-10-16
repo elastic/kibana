@@ -19,10 +19,7 @@ import {
   TIMESTAMP,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import {
-  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
@@ -1702,14 +1699,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('alert enrichment', () => {
-        const kibanaServer = getService('kibanaServer');
-
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
           await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-          await kibanaServer.uiSettings.update({
-            [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-          });
         });
 
         after(async () => {

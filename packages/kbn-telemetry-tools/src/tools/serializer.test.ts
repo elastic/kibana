@@ -105,6 +105,13 @@ describe('getDescriptor', () => {
       mappedTypeWithOneInlineProp: {
         prop3: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
       },
+      mappedTypeWithLiteralTemplates: {
+        prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        // ideally, it'd be `templated_prop/@@INDEX@@` to be more explicit. But we're going with the fuzzier approach
+        // for now as it may require more changes downstream that are not worth it.
+        '@@INDEX@@': { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      },
     });
   });
 

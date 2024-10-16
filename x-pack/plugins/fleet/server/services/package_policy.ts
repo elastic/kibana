@@ -233,6 +233,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const basePkgInfo =
+      options?.packageInfo ??
+      (packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -245,7 +256,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Creating new package policy`);
 
     this.keepPolicyIdInSync(packagePolicy);
-    await preflightCheckPackagePolicy(soClient, packagePolicy);
+    await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -448,6 +459,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   }> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicies) {
+      const basePkgInfo = packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
@@ -458,7 +478,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
-      await preflightCheckPackagePolicy(soClient, packagePolicy);
+      await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     }
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));

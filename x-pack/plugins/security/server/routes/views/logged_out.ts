@@ -20,7 +20,7 @@ export function defineLoggedOutRoutes({
     {
       path: '/security/logged_out',
       validate: false,
-      options: { authRequired: false },
+      options: { authRequired: false, excludeFromOAS: true },
     },
     async (context, request, response) => {
       // Authentication flow isn't triggered automatically for this route, so we should explicitly

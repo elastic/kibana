@@ -6,4 +6,4 @@ image:images/view-details-dashboards-8.16.0.png[View details icon in the list of
 
 These details include a graph showing the total number of views during the last 90 days.
 
-image:images/dashboard-usage-count.png[Graph showing the number of views during the last 90 days]
+image:images/dashboard-usage-count.png[Graph showing the number of views during the last 90 days, width="50%"]

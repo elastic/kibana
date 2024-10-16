@@ -28,14 +28,14 @@ describe('CloudPostureThirdPartySupportCallout', () => {
 
     render(<CloudPostureThirdPartySupportCallout packageInfo={mockPackageInfo} />);
 
-    expect(screen.getByText(/New! Starting from version 1.9/)).toBeInTheDocument();
+    expect(screen.getByText(/New! Starting from version 2.0/)).toBeInTheDocument();
   });
 
   it('does not render callout when package is not wiz', () => {
     const nonWizPackageInfo = { name: 'other' } as PackageInfo;
     render(<CloudPostureThirdPartySupportCallout packageInfo={nonWizPackageInfo} />);
 
-    expect(screen.queryByText(/New! Starting from version 1.9/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/New! Starting from version 2.0/)).not.toBeInTheDocument();
   });
 
   it('does not render callout when it has been dismissed', () => {
@@ -43,6 +43,6 @@ describe('CloudPostureThirdPartySupportCallout', () => {
 
     render(<CloudPostureThirdPartySupportCallout packageInfo={mockPackageInfo} />);
 
-    expect(screen.queryByText(/New! Starting from version 1.9/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/New! Starting from version 2.0/)).not.toBeInTheDocument();
   });
 });

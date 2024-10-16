@@ -13,7 +13,6 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import { AGENTLESS_POLICY_ID } from '@kbn/fleet-plugin/common/constants';
 import type {
   CloudbeatConfigKeyType,
   CloudSecurityInstallationStats,
@@ -100,10 +99,12 @@ const getInstalledPackagePolicies = (
   const installationStats = packagePolicies.flatMap(
     (packagePolicy: PackagePolicy): CloudSecurityInstallationStats[] =>
       packagePolicy.policy_ids.map((agentPolicyId) => {
-        const agentCounts =
-          agentPolicies?.find((agentPolicy) => agentPolicy?.id === agentPolicyId)?.agents ?? 0;
+        const matchedAgentPolicy = agentPolicies?.find(
+          (agentPolicy) => agentPolicy?.id === agentPolicyId
+        );
 
-        const isAgentless = agentPolicyId === AGENTLESS_POLICY_ID;
+        const agentCounts = matchedAgentPolicy?.agents || 0;
+        const isAgentless = !!matchedAgentPolicy?.supports_agentless;
 
         const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
 

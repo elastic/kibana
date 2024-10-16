@@ -84,12 +84,12 @@ const MisconfigurationPreviewScore = ({
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h1>
+            <h3>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
-            size="m"
+            size="xs"
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -225,8 +225,7 @@ export const MisconfigurationsPreview = ({
       header={{
         iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
-          <EuiText
-            size="xs"
+          <EuiTitle
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -235,7 +234,7 @@ export const MisconfigurationsPreview = ({
               id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
               defaultMessage="Misconfigurations"
             />
-          </EuiText>
+          </EuiTitle>
         ),
         link: hasMisconfigurationFindings ? link : undefined,
       }}
