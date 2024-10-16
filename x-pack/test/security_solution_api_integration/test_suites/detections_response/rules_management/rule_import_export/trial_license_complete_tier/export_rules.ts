@@ -411,6 +411,7 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     severity: expect.any(String),
     output_index: expect.any(String),
     author: expect.arrayContaining([]),
+    license: expect.any(String),
     false_positives: expect.arrayContaining([]),
     from: expect.any(String),
     max_signals: expect.any(Number),
