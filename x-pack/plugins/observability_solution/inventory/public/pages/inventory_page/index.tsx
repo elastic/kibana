@@ -61,11 +61,11 @@ export function InventoryPage() {
   );
 
   // If state or grouping itself is `undefined`, fallback to the default view
-  const activeView = !inventoryState?.grouping ? DEFAULT_VIEW : inventoryState.grouping;
+  const activeView = inventoryState?.grouping || DEFAULT_VIEW;
 
   return (
     <InventoryPageViewContextProvider
-      grouping={inventoryState?.grouping || DEFAULT_VIEW}
+      grouping={activeView}
       pagination={inventoryState?.pagination}
       setGrouping={setGrouping}
       setPagination={setPagination}
