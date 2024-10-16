@@ -79,7 +79,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
 
-  const isDisabled = () => {
+  const hasNoChanges = () => {
     const itemTags = item.tags.map((obj) => obj.id).sort();
     const formTags = form.tags.value.slice().sort();
 
@@ -193,7 +193,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={isDisabled()}
+                  disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}
