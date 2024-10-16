@@ -9,7 +9,7 @@ import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { EntityType } from '../../../common/entities';
+import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
@@ -83,7 +83,7 @@ export function UngroupedInventoryPage({ entityType }: Props) {
       path: {},
       query: {
         ...query,
-        sortField: sorting.id,
+        sortField: sorting.id as EntityColumnIds,
         sortDirection: sorting.direction,
       },
     });
