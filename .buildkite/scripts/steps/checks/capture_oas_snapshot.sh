@@ -14,5 +14,10 @@ if [[ $BUILDKITE_PULL_REQUEST != "false" && "$BUILDKITE_PULL_REQUEST_BASE_BRANCH
   cmd="$cmd --no-serverless"
 fi
 
-retry 3 15 "$cmd"
+run_check() {
+  eval "$cmd"
+}
+
+retry 5 15 run_check
+
 check_for_changed_files "$cmd" true
