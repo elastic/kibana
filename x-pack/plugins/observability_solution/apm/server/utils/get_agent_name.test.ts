@@ -17,6 +17,6 @@ describe('getAgentName', () => {
   });
 
   it('returns telemetry agent name if agent name and telemetry sdk are not defined', () => {
-    expect(getAgentName(null, 'go', null)).toBe('otlp/go');
+    expect(getAgentName(null, 'go', null)).toBe('go');
   });
 });
