@@ -23,7 +23,19 @@ export async function updateFieldLimit({
 }): Promise<UpdateFieldLimitResponse> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const { lastBackingIndex, indexTemplate } = await getDataStreamSettings({ esClient, dataStream });
+  const { lastBackingIndexName, indexTemplate } = await getDataStreamSettings({
+    esClient,
+    dataStream,
+  });
+
+  if (!lastBackingIndexName || !indexTemplate) {
+    return {
+      isComponentTemplateUpdated: false,
+      isLatestBackingIndexUpdated: false,
+      customComponentTemplateName: '',
+      error: 'Data stream does not exists',
+    };
+  }
 
   const {
     acknowledged: isComponentTemplateUpdated,
@@ -43,7 +55,7 @@ export async function updateFieldLimit({
   const { acknowledged: isLatestBackingIndexUpdated, error: errorUpdatingBackingIndex } =
     await updateLastBackingIndexSettings({
       datasetQualityESClient,
-      lastBackingIndex,
+      lastBackingIndex: lastBackingIndexName,
       newFieldLimit,
     });
 
