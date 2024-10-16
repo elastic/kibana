@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { EuiButton, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { paths } from '../../../../common/locators/paths';
@@ -27,14 +28,23 @@ const DEFAULT_VALUES = {
   name: '',
   type: '',
   indexPatterns: [],
+  displayNameTemplate: '{{service.name}}',
+  version: '1.0.0',
   identityFields: [{ field: '', optional: false }],
   metadata: [],
+  metrics: [],
+  latest: {
+    timestampField: '@timestamp',
+  },
 };
 
 export function EntityManagerCreatePage() {
   const {
     http: { basePath },
+    entityClient,
   } = useKibana().services;
+  const [isCreating, setIsCreating] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
 
   useBreadcrumbs([
     {
@@ -55,12 +65,30 @@ export function EntityManagerCreatePage() {
   });
   const { control, handleSubmit } = methods;
 
-  const onSubmit: SubmitHandler<EntityDefinition> = (data) => {};
+  const onSubmit: SubmitHandler<EntityDefinition> = async (data) => {
+    setErrors([]);
+    setIsCreating(true);
+
+    try {
+      await entityClient.repositoryClient('POST /internal/entities/definition', {
+        params: {
+          query: { installOnly: false },
+          body: data,
+        },
+      });
+    } catch (err) {
+      if (isHttpFetchError(err) && err.body?.message) {
+        setErrors([err.body.message]);
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
       <FormProvider {...methods}>
-        <EuiForm>
+        <EuiForm isInvalid={errors.length > 0} error={errors}>
           <Controller
             name="id"
             rules={{ required: true }}
@@ -103,7 +131,9 @@ export function EntityManagerCreatePage() {
 
           <MetadataFieldsInput control={control} />
 
-          <EuiButton onClick={handleSubmit(onSubmit)}>Submit</EuiButton>
+          <EuiButton onClick={handleSubmit(onSubmit)} isLoading={isCreating}>
+            {isCreating ? 'Creating...' : 'Create definition'}
+          </EuiButton>
         </EuiForm>
       </FormProvider>
     </ObservabilityPageTemplate>

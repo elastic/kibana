@@ -22,6 +22,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
 import { EntityManagerPluginStart } from './types';
 import { getRoutes } from './routes';
+import { EntityClient } from './lib/entity_client';
 
 function App() {
   const routes = getRoutes();
@@ -81,6 +82,7 @@ export function renderApp({
                   ...core,
                   ...plugins,
                   storage: new Storage(localStorage),
+                  entityClient: new EntityClient(core),
                   isDev,
                   kibanaVersion,
                   isServerless,

@@ -36,18 +36,19 @@ export function IdentityFieldsInput({ control }: { control: Control<EntityDefini
             <Controller
               control={control}
               name={`identityFields.${index}.field`}
-              render={() => (
+              rules={{ required: true }}
+              render={({ fieldState }) => (
                 <>
                   <EuiFlexGroup alignItems="center">
                     <EuiFlexItem>
                       <EuiFieldText
                         key={index}
                         value={item.field}
-                        onChange={(e) => {
-                          e.preventDefault();
-                          identityFormFields.update(index, { ...item, field: e.target.value });
-                        }}
+                        onChange={(e) =>
+                          identityFormFields.update(index, { ...item, field: e.target.value })
+                        }
                         fullWidth
+                        isInvalid={fieldState.invalid}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>

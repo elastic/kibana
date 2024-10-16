@@ -50,9 +50,14 @@ export function MetadataFieldsInput({ control }: { control: Control<EntityDefini
                         key={index}
                         value={item.source}
                         placeholder="source"
-                        onChange={(e) =>
-                          metadataFields.update(index, { ...item, source: e.target.value })
-                        }
+                        onBlur={() => {
+                          if (item.destination.length === 0) {
+                            metadataFields.update(index, { ...item, destination: item.source });
+                          }
+                        }}
+                        onChange={(e) => {
+                          metadataFields.update(index, { ...item, source: e.target.value });
+                        }}
                         fullWidth
                       />
                     </EuiFlexItem>
