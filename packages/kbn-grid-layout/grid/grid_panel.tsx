@@ -135,6 +135,10 @@ export const GridPanel = ({
         <div
           className="resizeHandle"
           onMouseDown={(e) => interactionStart('resize', e)}
+          onMouseUp={(e) => {
+            console.log('on mouse up', e);
+            interactionStart('drop', e);
+          }}
           css={css`
             right: 0;
             bottom: 0;

@@ -68,8 +68,8 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      if (interactionEvent.type !== 'resize')
-        gridLayoutStateManager.updateDraggedElement(previewRect);
+
+      gridLayoutStateManager.updateDraggedElement(previewRect);
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -151,8 +151,6 @@ export const useGridLayoutEvents = ({
         const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedGridData);
         nextLayout[targetRowIndex] = resolvedDestinationGrid;
 
-        console.log('nextLayout', nextLayout);
-
         // resolve origin grid
         if (hasChangedGridRow) {
           // debugger;
@@ -161,11 +159,7 @@ export const useGridLayoutEvents = ({
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
 
-        console.log('interactionEvent.type');
-        if (!hasChangedGridRow || interactionEvent.type === 'drop') {
-          console.log('UPDATE');
-          gridLayout$.next(nextLayout);
-        }
+        gridLayout$.next(nextLayout);
       }
     };
     const onMouseMove = (e: MouseEvent) => {
