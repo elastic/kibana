@@ -20,7 +20,7 @@ describe('VideoToast', () => {
     jest.restoreAllMocks();
   });
   it('should render the video toast', () => {
-    const videoToast = screen.getByTestId('attackDiscovery-tour-step-2');
+    const videoToast = screen.getByTestId('knowledgeBase-tour-step-2');
     expect(videoToast).toBeInTheDocument();
   });
 

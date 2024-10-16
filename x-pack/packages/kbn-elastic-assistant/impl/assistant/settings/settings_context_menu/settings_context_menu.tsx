@@ -167,6 +167,8 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       closeDestroyModal();
       closePopover?.();
     }, [onChatCleared, closeDestroyModal, closePopover]);
+    //
+    // {didMount && <KnowledgeBaseTour />}
 
     return (
       <>

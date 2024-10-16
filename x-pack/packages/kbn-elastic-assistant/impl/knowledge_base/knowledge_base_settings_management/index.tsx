@@ -295,7 +295,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </>
     );
   }
-
+  // TODO tour step 2 here
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
