@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-export {
-  EditSpaceProviderRoot,
-  EditSpaceProvider,
-  useEditSpaceServices,
-  useEditSpaceStore,
-} from './edit_space_provider';
-export type {
-  EditSpaceProviderRootProps,
-  EditSpaceServices,
-  EditSpaceStore,
-} from './edit_space_provider';
+export enum AssociatedFilter {
+  all = 'all',
+  documentOnly = 'document_only',
+  savedObjectOnly = 'saved_object_only',
+  documentAndSavedObject = 'document_and_saved_object',
+  orphan = 'orphan',
+}
