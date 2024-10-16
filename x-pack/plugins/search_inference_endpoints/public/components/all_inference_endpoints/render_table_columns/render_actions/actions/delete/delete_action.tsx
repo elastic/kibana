@@ -14,9 +14,13 @@ import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {
   selectedEndpoint: InferenceEndpointUI;
+  preconfiguredEndpoint: boolean;
 }
 
-export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) => {
+export const DeleteAction: React.FC<DeleteActionProps> = ({
+  selectedEndpoint,
+  preconfiguredEndpoint,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const { mutate: deleteEndpoint } = useDeleteEndpoint(() => setIsModalVisible(false));
@@ -39,6 +43,8 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
           values: { selectedEndpointName: selectedEndpoint.endpoint },
         })}
+        data-test-subj="inferenceUIDeleteAction"
+        disabled={preconfiguredEndpoint}
         key="delete"
         iconType="trash"
         color="danger"
