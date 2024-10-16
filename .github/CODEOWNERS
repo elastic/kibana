@@ -1077,6 +1077,7 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 /x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts @elastic/platform-docs
 
 # Visualizations
+/x-pack/test/accessibility/apps/group3/graph.ts @elastic/kibana-visualizations
 /x-pack/test/accessibility/apps/group2/lens.ts @elastic/kibana-visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/lens @elastic/kibana-visualizations
@@ -1265,7 +1266,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 
 # Presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
-/x-pack/test/accessibility/apps/group3/graph.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/enterprise_search.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_links.ts  @elastic/kibana-presentation
