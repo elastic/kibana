@@ -469,12 +469,8 @@ export function checkFunctionArgMatchesDefinition(
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
-    const lowerArgCastType = arg.castType?.toLowerCase();
-    return (
-      lowerArgType === lowerArgCastType ||
-      // for valid shorthand casts like 321.12::int or "false"::bool
-      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
-    );
+    const castedType = getExpressionType(arg);
+    return castedType === lowerArgType;
   }
 }
 
@@ -765,8 +761,8 @@ export function getParamAtPosition(
  */
 export function getExpressionType(
   root: ESQLAstItem,
-  fields: Map<string, ESQLRealField>,
-  variables: Map<string, ESQLVariable[]>
+  fields?: Map<string, ESQLRealField>,
+  variables?: Map<string, ESQLVariable[]>
 ): SupportedDataType | 'unknown' {
   if (!isSingleItem(root)) {
     if (root.length === 0) {
@@ -801,7 +797,7 @@ export function getExpressionType(
     }
   }
 
-  if (isColumnItem(root)) {
+  if (isColumnItem(root) && fields && variables) {
     const column = getColumnForASTNode(root, { fields, variables });
     if (!column) {
       return 'unknown';
@@ -854,7 +850,7 @@ export function getExpressionType(
       return 'unknown';
     }
 
-    return matchingSignature.returnType;
+    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
   }
 
   return 'unknown';

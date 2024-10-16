@@ -115,7 +115,7 @@ describe('function validation', () => {
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            'Argument of [test] must be [integer], found value [1::DOUBLE] type [DOUBLE]',
+            'Argument of [test] must be [integer], found value [1::DOUBLE] type [double]',
           ]);
 
           // field

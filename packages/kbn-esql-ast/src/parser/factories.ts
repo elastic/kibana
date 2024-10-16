@@ -73,7 +73,7 @@ export const createCommand = (name: string, ctx: ParserRuleContext) =>
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
   Builder.expression.inlineCast(
-    { castType: ctx.dataType().getText() as InlineCastingType, value },
+    { castType: ctx.dataType().getText().toLowerCase() as InlineCastingType, value },
     createParserFields(ctx)
   );
 
@@ -431,7 +431,9 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
       ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
     );
   } else if (ctx instanceof QualifiedNameContext) {
-    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+    parts.push(
+      ...ctx.identifierOrParameter_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
   } else {
     parts.push(sanitizeIdentifierString(ctx));
   }

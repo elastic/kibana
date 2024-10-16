@@ -82,8 +82,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const { startTransaction } = useStartTransaction();
 
-  const isEnterprisePlus = useLicense().isEnterprise();
-
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
@@ -132,7 +130,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopeId: timelineId,
   });
 
-  const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
@@ -292,6 +289,30 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
   );
 
+  // we hide the analyzer icon if the data is not available for the resolver
+  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  const ecsHasDataForAnalyzer = useIsInvestigateInResolverActionEnabled(ecsData);
+  const showAnalyzerIcon = useMemo(() => {
+    return (
+      ecsHasDataForAnalyzer &&
+      (timelineId !== TableId.alertsOnCasePage ||
+        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
+    );
+  }, [ecsHasDataForAnalyzer, timelineId, visualizationInFlyoutEnabled]);
+
+  // we hide the session view icon if the session view is not available
+  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if the user is not on an enterprise license or on the kubernetes page
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const showSessionViewIcon = useMemo(() => {
+    return (
+      sessionViewConfig !== null &&
+      (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) &&
+      (timelineId !== TableId.alertsOnCasePage ||
+        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
+    );
+  }, [sessionViewConfig, isEnterprisePlus, timelineId, visualizationInFlyoutEnabled]);
+
   return (
     <ActionsContainer data-test-subj="actions-container">
       <>
@@ -359,7 +380,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
           refetch={refetch}
         />
-        {isDisabled === false ? (
+        {showAnalyzerIcon ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip
@@ -380,8 +401,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {sessionViewConfig !== null &&
-        (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) ? (
+        {showSessionViewIcon ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

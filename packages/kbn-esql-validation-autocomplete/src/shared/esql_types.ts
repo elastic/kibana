@@ -55,25 +55,12 @@ export function isNumericDecimalType(type: unknown): type is ESQLDecimalLiteral 
  * @TODO strengthen typing here (remove `string`)
  */
 export const compareTypesWithLiterals = (
-  a: ESQLLiteral['literalType'] | FunctionParameterType | string,
-  b: ESQLLiteral['literalType'] | FunctionParameterType | string
+  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval',
+  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval'
 ) => {
   if (a === b) {
     return true;
   }
-  if (a === 'decimal') {
-    return isNumericDecimalType(b);
-  }
-  if (b === 'decimal') {
-    return isNumericDecimalType(a);
-  }
-  if (a === 'string') {
-    return isStringType(b);
-  }
-  if (b === 'string') {
-    return isStringType(a);
-  }
-
   // In Elasticsearch function definitions, time_literal and time_duration are used
   // time_duration is seconds/min/hour interval
   // date_period is day/week/month/year interval
