@@ -22,7 +22,6 @@
     "@kbn/config-schema",
     "@kbn/core-ui-settings-common",
     "@kbn/logs-data-access-plugin",
-    "@kbn/ai-assistant-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }
