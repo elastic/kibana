@@ -46,6 +46,8 @@ import {
   fetchNotesBySavedObjectIds,
   selectNotesBySavedObjectId,
   selectSortedNotesBySavedObjectId,
+  userFilterUsers,
+  selectNotesTableUserFilters,
   userClosedCreateErrorToast,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
@@ -69,7 +71,7 @@ const generateNoteMock = (documentId: string): Note => ({
 const mockNote1 = generateNoteMock('1');
 const mockNote2 = generateNoteMock('2');
 
-const initialNonEmptyState = {
+const initialNonEmptyState: NotesState = {
   entities: {
     [mockNote1.noteId]: mockNote1,
     [mockNote2.noteId]: mockNote2,
@@ -99,6 +101,7 @@ const initialNonEmptyState = {
     direction: 'desc' as const,
   },
   filter: '',
+  userFilter: '',
   search: '',
   selectedIds: [],
   pendingDeleteIds: [],
@@ -501,6 +504,17 @@ describe('notesSlice', () => {
       });
     });
 
+    describe('userFilterUsers', () => {
+      it('should set correct value to filter users', () => {
+        const action = { type: userFilterUsers.type, payload: 'abc' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          userFilter: 'abc',
+        });
+      });
+    });
+
     describe('userSearchedNotes', () => {
       it('should set correct value to search notes', () => {
         const action = { type: userSearchedNotes.type, payload: 'abc' };
@@ -835,6 +849,14 @@ describe('notesSlice', () => {
     it('should select notes table search', () => {
       const state = { ...mockGlobalState, notes: { ...initialNotesState, search: 'test search' } };
       expect(selectNotesTableSearch(state)).toBe('test search');
+    });
+
+    it('should select associated filter', () => {
+      const state = {
+        ...mockGlobalState,
+        notes: { ...initialNotesState, userFilter: 'abc' },
+      };
+      expect(selectNotesTableUserFilters(state)).toBe('abc');
     });
 
     it('should select notes table pending delete ids', () => {
