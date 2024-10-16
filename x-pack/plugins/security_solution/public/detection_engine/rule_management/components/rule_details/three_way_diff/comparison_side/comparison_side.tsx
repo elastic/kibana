@@ -24,7 +24,7 @@ import * as i18n from './translations';
 interface ComparisonSideProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
-  resolvedValue?: DiffableAllFields[FieldName];
+  resolvedValue: DiffableAllFields[FieldName];
 }
 
 export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
@@ -39,6 +39,7 @@ export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
 
   const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldThreeWayDiff, resolvedValue);
+
   const newFieldValue = pickFieldValueForVersion(newVersionType, fieldThreeWayDiff, resolvedValue);
 
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);

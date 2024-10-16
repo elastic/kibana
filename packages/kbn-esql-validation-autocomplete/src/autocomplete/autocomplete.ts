@@ -83,7 +83,7 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
   getAddDateHistogramSnippet,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -324,10 +324,16 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 function workoutBuiltinOptions(
   nodeArg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): { skipAssign: boolean } {
+): { skipAssign: boolean; commandsToInclude?: string[] } {
+  const commandsToInclude =
+    (isSingleItem(nodeArg) && nodeArg.text?.toLowerCase().trim().endsWith('null')) ?? false
+      ? ['and', 'or']
+      : undefined;
+
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
     skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
+    commandsToInclude,
   };
 }
 
@@ -447,7 +453,10 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      return def.params[index].type === extractTypeFromASTArg(a, references);
+      return (
+        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        def.params[index].type === extractTypeFromASTArg(a, references)
+      );
     });
   });
   if (!hasCorrectTypes) {
@@ -1140,11 +1149,12 @@ async function getBuiltinFunctionNextArgument(
   }
   return suggestions.map<SuggestionRawDefinition>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
     return {
       ...s,
       rangeToReplace: {
-        start: overlap.start,
-        end: overlap.end,
+        start: overlap.start + offset,
+        end: overlap.end + offset,
       },
     };
   });
@@ -1215,11 +1225,7 @@ async function getFieldsOrFunctionsSuggestions(
       filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        // remove backticks if present
-        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
-          ? variable.slice(1, variable.length - 1)
-          : variable;
-        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
