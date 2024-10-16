@@ -1,4 +1,4 @@
-summary: Failed copy with conflict errors
+summary: Failed copy response with conflict errors
 description: >
   A response for a failed copy of a dashboard with the my-dashboard ID including all references from the default space to the marketing and sales spaces. In this example, the dashboard has a reference to a visualization and a Canvas workpad and the visualization has a reference to an index pattern.
   The result indicates a successful copy for the marketing space and an unsuccessful copy for the sales space because the data view, visualization, and Canvas workpad each resulted in a conflict error.
