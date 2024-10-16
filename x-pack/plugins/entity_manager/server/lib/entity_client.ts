@@ -21,6 +21,7 @@ import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
 import { findEntities } from './entities/find_entities';
+import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 
@@ -40,19 +41,16 @@ export class EntityClient {
     definition: EntityDefinition;
     installOnly?: boolean;
   }) {
+    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const installedDefinition = await installEntityDefinition({
       definition,
+      esClient: secondaryAuthClient,
       soClient: this.options.soClient,
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
       logger: this.options.logger,
     });
 
     if (!installOnly) {
-      await startTransforms(
-        this.options.clusterClient.asSecondaryAuthUser,
-        installedDefinition,
-        this.options.logger
-      );
+      await startTransforms(secondaryAuthClient, installedDefinition, this.options.logger);
     }
 
     return installedDefinition;
@@ -65,6 +63,7 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
+    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
@@ -92,22 +91,21 @@ export class EntityClient {
       definition,
       definitionUpdate,
       soClient: this.options.soClient,
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
+      esClient: secondaryAuthClient,
       logger: this.options.logger,
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(this.options.clusterClient.asSecondaryAuthUser, updatedDefinition, this.options.logger);
+      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
     }
     return updatedDefinition;
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const [definition] = await findEntityDefinitions({
+    const definition = await findEntityDefinitionById({
       id,
-      perPage: 1,
+      esClient: this.options.clusterClient.asCurrentUser,
       soClient: this.options.soClient,
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
     });
 
     if (!definition) {
@@ -118,11 +116,20 @@ export class EntityClient {
 
     await uninstallEntityDefinition({
       definition,
-      deleteData,
-      soClient: this.options.soClient,
       esClient: this.options.clusterClient.asSecondaryAuthUser,
+      soClient: this.options.soClient,
       logger: this.options.logger,
     });
+
+    if (deleteData) {
+      // delete data with current user as system user does not have
+      // .entities privileges
+      await deleteIndices(
+        this.options.clusterClient.asCurrentUser,
+        definition,
+        this.options.logger
+      );
+    }
   }
 
   async getEntityDefinitions({
