@@ -6,5 +6,4 @@
  */
 
 export { entityDefinition } from './entity_definition';
-export { entityDefinitionWithBackfill } from './entity_definition_with_backfill';
 export { builtInEntityDefinition } from './builtin_entity_definition';

@@ -9,14 +9,18 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
+import { dataViewRouteHelpersFactory } from '../../utils/data_view';
+
 export default ({ getService }: FtrProviderContextWithSpaces) => {
   const api = getService('securitySolutionApi');
   const spaces = getService('spaces');
   const namespace = uuidv4().substring(0, 8);
-
+  const supertest = getService('supertest');
   const utils = EntityStoreUtils(getService, namespace);
 
   describe('@ess Entity Store Engine APIs in non-default space', () => {
+    const dataView = dataViewRouteHelpersFactory(supertest, namespace);
+
     before(async () => {
       await utils.cleanEngines();
       await spaces.create({
@@ -24,9 +28,11 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
         name: namespace,
         disabledFeatures: [],
       });
+      await dataView.create('security-solution');
     });
 
     after(async () => {
+      await dataView.delete('security-solution');
       await spaces.delete(namespace);
     });
 
@@ -37,24 +43,12 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityType('user');
-
-        const expectedTransforms = [
-          `entities-v1-history-ea_${namespace}_user_entity_store`,
-          `entities-v1-latest-ea_${namespace}_user_entity_store`,
-        ];
-
-        await utils.expectTransformsExist(expectedTransforms);
+        await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityType('host');
-
-        const expectedTransforms = [
-          `entities-v1-history-ea_${namespace}_host_entity_store`,
-          `entities-v1-latest-ea_${namespace}_host_entity_store`,
-        ];
-
-        await utils.expectTransformsExist(expectedTransforms);
+        await utils.expectEngineAssetsExist('host');
       });
     });
 
@@ -84,9 +78,9 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'host',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
             filter: '',
+            fieldHistoryLength: 10,
+            indexPattern: '',
           });
         });
 
@@ -103,9 +97,9 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'user',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
             filter: '',
+            fieldHistoryLength: 10,
+            indexPattern: '',
           });
         });
       });
@@ -121,16 +115,16 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             {
               status: 'started',
               type: 'host',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
               filter: '',
+              fieldHistoryLength: 10,
+              indexPattern: '',
             },
             {
               status: 'started',
               type: 'user',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
               filter: '',
+              fieldHistoryLength: 10,
+              indexPattern: '',
             },
           ]);
         });
@@ -205,10 +199,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectTransformNotFound(
-          `entities-v1-history-ea_${namespace}_host_entity_store`
-        );
-        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_host_entity_store`);
+        await utils.expectEngineAssetsDoNotExist('host');
       });
 
       it('should delete the user entity engine', async () => {
@@ -224,10 +215,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectTransformNotFound(
-          `entities-v1-history-ea_${namespace}_user_entity_store`
-        );
-        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_user_entity_store`);
+        await utils.expectEngineAssetsDoNotExist('user');
       });
     });
   });

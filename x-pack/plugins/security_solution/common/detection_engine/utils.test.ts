@@ -250,14 +250,14 @@ describe('Alert Suppression Rules', () => {
     test('should return true for rule type suppression in global availability', () => {
       expect(isSuppressionRuleInGA('saved_query')).toBe(true);
       expect(isSuppressionRuleInGA('query')).toBe(true);
+      expect(isSuppressionRuleInGA('esql')).toBe(true);
+      expect(isSuppressionRuleInGA('threshold')).toBe(true);
+      expect(isSuppressionRuleInGA('threat_match')).toBe(true);
+      expect(isSuppressionRuleInGA('new_terms')).toBe(true);
+      expect(isSuppressionRuleInGA('machine_learning')).toBe(true);
     });
 
     test('should return false for rule type suppression in tech preview', () => {
-      expect(isSuppressionRuleInGA('machine_learning')).toBe(false);
-      expect(isSuppressionRuleInGA('esql')).toBe(false);
-      expect(isSuppressionRuleInGA('threshold')).toBe(false);
-      expect(isSuppressionRuleInGA('threat_match')).toBe(false);
-      expect(isSuppressionRuleInGA('new_terms')).toBe(false);
       expect(isSuppressionRuleInGA('eql')).toBe(false);
     });
   });

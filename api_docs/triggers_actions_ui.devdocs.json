@@ -5355,6 +5355,27 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/rules_app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.data",
             "type": "Object",
             "tags": [],
@@ -6279,7 +6300,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "; }) => JSX.Element | React.ReactNode) | undefined; fieldFormats: ",
+          "; }) => React.ReactNode | JSX.Element) | undefined; fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "public",
@@ -6289,7 +6310,7 @@
           },
           "; } & Partial<Pick<",
           "EuiDataGridProps",
-          ", \"gridStyle\" | \"rowHeightsOptions\">>"
+          ", \"height\" | \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -8119,7 +8140,7 @@
               "section": "def-common.Alert",
               "text": "Alert"
             },
-            "; }) => JSX.Element | React.ReactNode) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
+            "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
             "EuiDataGridProps",
             ">, \"renderCellPopover\"> & ",
             "LazyLoadProps",
@@ -8191,7 +8212,7 @@
                   "section": "def-common.Alert",
                   "text": "Alert"
                 },
-                "; }) => JSX.Element | React.ReactNode) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
+                "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
                 "EuiDataGridProps",
                 ">, \"renderCellPopover\"> & ",
                 "LazyLoadProps"

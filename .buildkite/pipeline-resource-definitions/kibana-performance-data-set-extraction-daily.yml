@@ -47,3 +47,5 @@ spec:
           cronline: 0 3/8 * * * Europe/Berlin
           message: Extract APM traces
           branch: main
+      tags:
+        - kibana

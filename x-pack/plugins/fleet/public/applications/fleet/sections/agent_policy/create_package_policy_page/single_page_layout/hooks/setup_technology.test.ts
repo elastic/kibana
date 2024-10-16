@@ -143,6 +143,7 @@ describe('useSetupTechnology', () => {
     namespace: 'default',
     is_managed: false,
     supports_agentless: false,
+    inactivity_timeout: 3600,
   };
   const packagePolicyMock = createPackagePolicyMock();
 
@@ -169,6 +170,7 @@ describe('useSetupTechnology', () => {
     (generateNewAgentPolicyWithDefaults as MockFn).mockReturnValue({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
+      inactivity_timeout: 3600,
     });
     jest.clearAllMocks();
   });
@@ -266,12 +268,14 @@ describe('useSetupTechnology', () => {
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
+
     waitForNextUpdate();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
+      inactivity_timeout: 3600,
     });
   });
 
@@ -307,6 +311,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      inactivity_timeout: 3600,
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
     });
@@ -325,6 +330,7 @@ describe('useSetupTechnology', () => {
     waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
+        inactivity_timeout: 3600,
         supports_agentless: true,
       });
     });
@@ -505,6 +511,7 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
+        inactivity_timeout: 3600,
       });
     });
 
