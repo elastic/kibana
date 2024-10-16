@@ -12,7 +12,7 @@ import {
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
-import { AssistantScope } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CreateTest } from '../../../common/config';
 
 function decodeEvents(body: Readable | string) {

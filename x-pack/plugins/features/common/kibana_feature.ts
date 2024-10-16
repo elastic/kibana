@@ -164,6 +164,18 @@ export interface KibanaFeatureConfig {
    * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
    */
   scope?: readonly KibanaFeatureScope[];
+
+  /**
+   * If defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces.
+   */
+  readonly deprecated?: Readonly<{
+    /**
+     * The mandatory, localizable, user-facing notice that will be displayed to users whenever we need to explain why a
+     * feature is deprecated and what they should rely on instead. The notice can also include links to more detailed
+     * documentation.
+     */
+    notice: string;
+  }>;
 }
 
 export class KibanaFeature {
@@ -177,6 +189,10 @@ export class KibanaFeature {
 
   public get id() {
     return this.config.id;
+  }
+
+  public get deprecated() {
+    return this.config.deprecated;
   }
 
   public get hidden() {
