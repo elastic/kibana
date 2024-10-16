@@ -815,7 +815,7 @@ export function getExpressionType(
       return 'unknown';
     }
 
-    if (fnDefinition.name === 'case') {
+    if (fnDefinition.name === 'case' && root.args.length) {
       // The CASE function doesn't fit our system of function definitions
       // and needs special handling. This is imperfect, but it's a start because
       // at least we know that the final argument to case will never be a conditional

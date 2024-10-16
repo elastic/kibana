@@ -9648,19 +9648,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"::boolean",
+      "query": "from a_index | eval true AND 0::boolean",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"::bool",
+      "query": "from a_index | eval true AND 0::bool",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"",
+      "query": "from a_index | eval true AND 0",
       "error": [
-        "Argument of [and] must be [boolean], found value [\"false\"] type [keyword]"
+        "Argument of [and] must be [boolean], found value [0] type [integer]"
       ],
       "warning": []
     },

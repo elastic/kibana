@@ -50,7 +50,7 @@ import {
   sourceExists,
   findFinalWord,
 } from '../shared/helpers';
-import { excludeVariablesFromCurrentCommand } from '../shared/variables';
+import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
   allStarConstant,
@@ -114,8 +114,6 @@ import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { countBracketsUnclosed } from '../shared/helpers';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
-
-const collectVariables = () => new Map<string, ESQLVariable[]>();
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -1772,10 +1770,15 @@ async function getOptionArgsSuggestions(
             innerText,
             command,
             option,
-            { type: argDef?.type || 'any' },
+            { type: argDef?.type || 'unknown' },
             nodeArg,
             nodeArgType as string,
-            references,
+            {
+              fields: references.fields,
+              // you can't use a variable defined
+              // in the stats command in the by clause
+              variables: new Map(),
+            },
             getFieldsByType
           ))
         );

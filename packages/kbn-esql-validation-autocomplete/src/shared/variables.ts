@@ -49,7 +49,6 @@ export function excludeVariablesFromCurrentCommand(
   fieldsMap: Map<string, ESQLRealField>,
   queryString: string
 ) {
-  return new Map();
   const anyVariables = collectVariables(commands, fieldsMap, queryString);
   const currentCommandVariables = collectVariables([currentCommand], fieldsMap, queryString);
   const resultVariables = new Map<string, ESQLVariable[]>();

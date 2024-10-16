@@ -1663,11 +1663,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
 
-      testErrorsAndWarnings('from a_index | eval true AND "false"::boolean', []);
-      testErrorsAndWarnings('from a_index | eval true AND "false"::bool', []);
-      testErrorsAndWarnings('from a_index | eval true AND "false"', [
+      testErrorsAndWarnings('from a_index | eval true AND 0::boolean', []);
+      testErrorsAndWarnings('from a_index | eval true AND 0::bool', []);
+      testErrorsAndWarnings('from a_index | eval true AND 0', [
         // just a counter-case to make sure the previous tests are meaningful
-        'Argument of [and] must be [boolean], found value ["false"] type [keyword]',
+        'Argument of [and] must be [boolean], found value [0] type [integer]',
       ]);
 
       // enforces strings for cartesian_point conversion
