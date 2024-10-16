@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { registerDataUsageRoutes } from './routes';
 import { PLUGIN_ID } from '../common';
-import { appContextService } from './app_context';
+import { DataUsageService } from './services';
 
 export class DataUsagePlugin
   implements
@@ -31,6 +31,7 @@ export class DataUsagePlugin
 {
   private readonly logger: Logger;
   private dataUsageContext: DataUsageContext;
+  private dataUsageService: DataUsageService;
 
   constructor(context: PluginInitializerContext<DataUsageConfigType>) {
     const serverConfig = createConfig(context);
@@ -53,6 +54,8 @@ export class DataUsagePlugin
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
     this.logger.debug('data usage plugin setup');
+    this.dataUsageService = new DataUsageService(this.dataUsageContext);
+
     pluginsSetup.features.registerElasticsearchFeature({
       id: PLUGIN_ID,
       management: {
@@ -66,22 +69,12 @@ export class DataUsagePlugin
       ],
     });
     const router = coreSetup.http.createRouter<DataUsageRequestHandlerContext>();
-    registerDataUsageRoutes(router, this.dataUsageContext);
+    registerDataUsageRoutes(router, this.dataUsageService);
 
     return {};
   }
 
   start(_coreStart: CoreStart, _pluginsStart: DataUsageStartDependencies): DataUsageServerStart {
-    appContextService.start({
-      logFactory: this.dataUsageContext.logFactory,
-      configInitialValue: this.dataUsageContext.configInitialValue,
-      serverConfig: this.dataUsageContext.serverConfig,
-      config$: this.dataUsageContext.config$,
-      kibanaVersion: this.dataUsageContext.kibanaVersion,
-      kibanaBranch: this.dataUsageContext.kibanaBranch,
-      kibanaInstanceId: this.dataUsageContext.kibanaInstanceId,
-      cloud: this.dataUsageContext.cloud,
-    });
     return {};
   }
 

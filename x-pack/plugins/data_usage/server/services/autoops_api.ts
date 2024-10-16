@@ -16,12 +16,13 @@ import {
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
 } from '../../common/rest_types';
-import { appContextService } from '../app_context';
+import { AppContextService } from './app_context';
 import { AutoOpsConfig } from '../types';
 
 export class AutoOpsAPIService {
+  constructor(private appContextService: AppContextService) {}
   public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
-    const logger = appContextService.getLogger().get();
+    const logger = this.appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -31,7 +32,7 @@ export class AutoOpsAPIService {
       },
     };
 
-    const autoopsConfig = appContextService.getConfig()?.autoops;
+    const autoopsConfig = this.appContextService.getConfig()?.autoops;
     if (!autoopsConfig) {
       logger.error('[AutoOps API] Missing autoops configuration', errorMetadata);
       throw new Error('missing autoops configuration');
@@ -61,9 +62,9 @@ export class AutoOpsAPIService {
       }),
     };
 
-    const cloudSetup = appContextService.getCloud();
+    const cloudSetup = this.appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.stack_version = this.appContextService.getKibanaVersion();
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -174,5 +175,3 @@ export class AutoOpsAPIService {
     return error.cause;
   };
 }
-
-export const autoopsApiService = new AutoOpsAPIService();

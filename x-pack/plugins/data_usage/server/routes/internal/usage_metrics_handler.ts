@@ -13,8 +13,8 @@ import {
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
-import { AutoOpsAPIService, autoopsApiService } from '../../services/autoops_api';
+import { DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageService } from '../../services';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
@@ -23,9 +23,9 @@ const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes
   typeof value === 'string' ? [value] : value;
 
 export const getUsageMetricsHandler = (
-  dataUsageContext: DataUsageContext
+  dataUsageService: DataUsageService
 ): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
+  const logger = dataUsageService.getLogger('usageMetricsRoute');
 
   return async (context, request, response) => {
     try {
@@ -48,13 +48,11 @@ export const getUsageMetricsHandler = (
           name: requestDsNames,
           expand_wildcards: 'all',
         });
-
-      const metrics = await fetchMetricsFromAutoOps({
+      const metrics = await dataUsageService.getMetrics({
         from,
         to,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
         dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
-        autoOpsAPIService: autoopsApiService,
       });
 
       const body = transformMetricsData(metrics);
@@ -69,28 +67,6 @@ export const getUsageMetricsHandler = (
   };
 };
 
-const fetchMetricsFromAutoOps = async ({
-  from,
-  to,
-  metricTypes,
-  dataStreams,
-  autoOpsAPIService,
-}: {
-  from: string;
-  to: string;
-  metricTypes: MetricTypes[];
-  dataStreams: string[];
-  autoOpsAPIService: AutoOpsAPIService;
-}) => {
-  // Call AutoOpsAPIService to fetch metrics
-  const response = await autoOpsAPIService?.autoOpsUsageMetricsAPI({
-    from,
-    to,
-    metricTypes,
-    dataStreams,
-  });
-  return response.data;
-};
 function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
