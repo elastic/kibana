@@ -36,7 +36,7 @@
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
-    "cypress:cloud_security_posture:run:serverless": "yarn cypress:serverless --spec'./cypress/e2e/cloud_security_posture/**/*.cy.ts'",
+    "cypress:cloud_security_posture:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:burn:serverless": "yarn cypress:serverless --env burn=2",
     "cypress:qa:serverless": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts",
     "cypress:open:qa:serverless": "yarn cypress:qa:serverless open",
