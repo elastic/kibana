@@ -39,7 +39,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
     {
       path: '/internal/spaces/{spaceId}/content_summary',
       options: {
-        tags: ['access:manageSpaces'],
+        tags: ['access:manage_spaces'],
       },
       validate: {
         params: schema.object({

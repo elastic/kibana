@@ -7,7 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import type {
+  EuiComboBoxOptionOption,
+  EuiComboBoxSingleSelectionShape,
+  EuiFormControlLayoutProps,
+} from '@elastic/eui';
 import { EuiInputPopover, htmlIdGenerator, EuiFormControlLayout, EuiFieldText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -18,8 +22,6 @@ import type { DropDownLabel } from './types';
 const MIN_POPOVER_WIDTH = 400;
 
 export const optionCss = css`
-  display: flex;
-  align-items: center;
   .euiComboBoxOption__enterBadge {
     display: none;
   }
@@ -31,7 +33,8 @@ export const optionCss = css`
   }
 `;
 
-interface OptionListWithFieldStatsProps {
+interface OptionListWithFieldStatsProps
+  extends Pick<EuiFormControlLayoutProps, 'prepend' | 'compressed'> {
   options: DropDownLabel[];
   placeholder?: string;
   'aria-label'?: string;
@@ -58,6 +61,8 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   isDisabled,
   isLoading,
   isClearable = true,
+  prepend,
+  compressed,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -68,13 +73,12 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   const comboBoxOptions: DropDownLabel[] = useMemo(
     () =>
       Array.isArray(options)
-        ? options.map(({ isEmpty, hideTrigger: hideInspectButton, ...o }) => ({
+        ? options.map(({ isEmpty, ...o }) => ({
             ...o,
             css: optionCss,
             // Change data-is-empty- because EUI is passing all props to dom element
             // so isEmpty is invalid, but we need this info to render option correctly
             'data-is-empty': isEmpty,
-            'data-hide-inspect': hideInspectButton,
           }))
         : [],
     [options]
@@ -89,6 +93,8 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       id={popoverId}
       input={
         <EuiFormControlLayout
+          prepend={prepend}
+          compressed={compressed}
           fullWidth={fullWidth}
           // Adding classname to make functional tests similar to EuiComboBox
           className={singleSelection ? 'euiComboBox__inputWrap--plainText' : ''}
