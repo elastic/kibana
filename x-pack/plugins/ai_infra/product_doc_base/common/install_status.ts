@@ -9,6 +9,9 @@ import type { ProductName } from '@kbn/product-doc-common';
 
 export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
+/**
+ * DTO representation of the product doc install status SO
+ */
 export interface ProductDocInstallStatus {
   id: string;
   productName: ProductName;

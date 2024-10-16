@@ -55,7 +55,6 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const installer = getInstaller();
 
-      // TODO: use ensureUpToDate with parameter to install non-installed
       await installer.installAll({});
 
       return res.ok<PerformInstallResponse>({

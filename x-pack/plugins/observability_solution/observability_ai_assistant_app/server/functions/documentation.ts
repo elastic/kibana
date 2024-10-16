@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DocumentationProduct } from '@kbn/product-doc-common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -31,11 +32,14 @@ export async function registerDocumentationFunction({
         type: 'object',
         properties: {
           query: {
-            description: 'The query to use to retrieve documentation',
-            type: 'string',
+            description: `The query to use to retrieve documentation
+            Examples:
+            - "How to enable TLS for Elasticsearch?"
+            - "What is Kibana Lens?"`,
+            type: 'string' as const,
           },
           product: {
-            description: `Filter the product to retrieve documentation for
+            description: `If specified, will filter the products to retrieve documentation for
             Possible options are:
             - "kibana": Kibana product
             - "elasticsearch": Elasticsearch product
@@ -44,7 +48,7 @@ export async function registerDocumentationFunction({
             If not specified, will search against all products
             `,
             type: 'string' as const,
-            enum: ['kibana', 'elasticsearch', 'observability', 'security'],
+            enum: Object.values(DocumentationProduct),
           },
         },
         required: ['query'],

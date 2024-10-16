@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { UninstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
@@ -27,7 +27,7 @@ export function useUninstallProductDoc() {
       return productDocBase!.installation.uninstall();
     },
     {
-      onSuccess: (_data) => {
+      onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(
             'xpack.observabilityAiAssistantManagement.kb.uninstallProductDoc.successNotification',
