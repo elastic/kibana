@@ -9,29 +9,31 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-export interface KibanaEvent {
+import { setSearchQuery } from './search_slice';
+
+export interface Action {
   type: string;
   payload: any;
 }
 
 // Create a Subject to act as an event bus
-export const eventBus$ = new BehaviorSubject<KibanaEvent>({
+export const eventBus$ = new BehaviorSubject<Action>({
   type: 'init',
   payload: null,
 });
 
 // Any part of the app can publish an event
-function publishEvent(event: KibanaEvent) {
-  eventBus$.next(event);
+export function dispatch(action: Action) {
+  eventBus$.next(action);
 }
 
 // Plugins or components can subscribe to events
-eventBus$.subscribe((event) => {
-  if (event.type === 'search-query-updated') {
+eventBus$.subscribe((action) => {
+  if (action.type === 'search-query-updated') {
     // eslint-disable-next-line no-console
-    console.log('Received updated search query:', event.payload);
+    console.log('Received updated search query:', action.payload);
   }
 });
 
 // Publishing an event
-publishEvent({ type: 'search-query-updated', payload: 'new search term' });
+dispatch(setSearchQuery('new search term'));
