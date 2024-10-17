@@ -118,7 +118,7 @@ describe('Create ', () => {
     });
   });
 
-  it.only('shows error when number is too big', async () => {
+  it('shows error when number is too big', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
@@ -143,7 +143,7 @@ describe('Create ', () => {
   });
 
   // rewrite;
-  it('shows error when number is too close to 0', async () => {
+  it('shows error when number is too small', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create

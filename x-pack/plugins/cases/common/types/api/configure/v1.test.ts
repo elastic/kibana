@@ -24,6 +24,8 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_LONG_NUMBER_LIMIT,
+  MIN_LONG_NUMBER_LIMIT,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -576,30 +578,26 @@ describe('configure', () => {
       ).toContain('Invalid value "string" supplied');
     });
 
-    it(`throws an error if the default value is more than ${Number.MAX_VALUE}`, () => {
+    it(`throws an error if the default value is more than ${MAX_LONG_NUMBER_LIMIT}`, () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            defaultValue: Number.MAX_VALUE * 2,
+            defaultValue: MAX_LONG_NUMBER_LIMIT * 2,
           })
         )[0]
-      ).toContain(
-        `Absolute value of the defaultValue field cannot be more than ${Number.MAX_VALUE}.`
-      );
+      ).toContain(`The defaultValue field cannot be more than ${MAX_LONG_NUMBER_LIMIT}.`);
     });
 
-    it(`throws an error if the default value is less than ${Number.MIN_VALUE}`, () => {
+    it(`throws an error if the default value is less than ${MIN_LONG_NUMBER_LIMIT}`, () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            defaultValue: Number.MIN_VALUE * 0.5,
+            defaultValue: MIN_LONG_NUMBER_LIMIT * 2,
           })
         )[0]
-      ).toContain(
-        `Absolute value of the defaultValue field cannot be less than ${Number.MIN_VALUE}.`
-      );
+      ).toContain(`The defaultValue field cannot be less than ${MIN_LONG_NUMBER_LIMIT}.`);
     });
   });
 

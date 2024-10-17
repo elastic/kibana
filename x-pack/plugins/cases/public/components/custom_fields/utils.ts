@@ -18,9 +18,12 @@ export const customFieldSerializer = (
   if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
     return otherProperties;
   }
-  // what if defaultValue === undefined but type is number
-  if (field.type === CustomFieldTypes.NUMBER && Number.isInteger(Number(defaultValue))) {
-    // do we need this check or add it to validation only?
+
+  if (
+    field.type === CustomFieldTypes.NUMBER &&
+    defaultValue !== null &&
+    Number.isInteger(Number(defaultValue))
+  ) {
     return { ...field, defaultValue: Number(defaultValue) };
   }
 

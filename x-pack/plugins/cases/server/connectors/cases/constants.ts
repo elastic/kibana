@@ -14,9 +14,9 @@ export const INITIAL_ORACLE_RECORD_COUNTER = 1;
 
 export const VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS: Record<
   CustomFieldTypes,
-  string | boolean | number
+  string | boolean | number | null
 > = {
   [CustomFieldTypes.TEXT]: 'N/A',
   [CustomFieldTypes.TOGGLE]: false,
-  [CustomFieldTypes.NUMBER]: 0,
+  [CustomFieldTypes.NUMBER]: null,
 };

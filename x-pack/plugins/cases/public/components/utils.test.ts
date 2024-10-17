@@ -523,19 +523,30 @@ describe('Utils', () => {
     });
 
     it('returns the string when the value is a non-empty string', async () => {
-      expect(convertCustomFieldValue('my text value')).toMatchInlineSnapshot(`"my text value"`);
+      expect(convertCustomFieldValue('my text value', CustomFieldTypes.TEXT)).toMatchInlineSnapshot(
+        `"my text value"`
+      );
     });
 
     it('returns null when value is empty string', async () => {
-      expect(convertCustomFieldValue('')).toMatchInlineSnapshot('null');
+      expect(convertCustomFieldValue('', CustomFieldTypes.TEXT)).toMatchInlineSnapshot('null');
     });
 
     it('returns value as it is when value is true', async () => {
-      expect(convertCustomFieldValue(true)).toMatchInlineSnapshot('true');
+      expect(convertCustomFieldValue(true, CustomFieldTypes.TOGGLE)).toMatchInlineSnapshot('true');
     });
 
-    it('returns value as it is when value is false', async () => {
-      expect(convertCustomFieldValue(false)).toMatchInlineSnapshot('false');
+    it.only('returns value as it is when value is false', async () => {
+      expect(convertCustomFieldValue(false, CustomFieldTypes.TOGGLE)).toMatchInlineSnapshot(
+        'false'
+      );
+    });
+    it('returns value as integer number when value is integer string', () => {
+      expect(convertCustomFieldValue('123', CustomFieldTypes.NUMBER)).toMatchInlineSnapshot(123);
+    });
+
+    it.only('returns value as integer number when value is float string ', () => {
+      expect(convertCustomFieldValue('0.5', CustomFieldTypes.NUMBER)).toMatchInlineSnapshot(123);
     });
   });
 
@@ -598,6 +609,8 @@ describe('Utils', () => {
           { ...customFieldsMock[1] },
           { ...customFieldsMock[2] },
           { ...customFieldsMock[3] },
+          { ...customFieldsMock[4] },
+          { ...customFieldsMock[5] },
         ],
         `
               Array [
@@ -624,6 +637,16 @@ describe('Utils', () => {
                 Object {
                   "key": "test_key_4",
                   "type": "toggle",
+                  "value": null,
+                },
+                Object {
+                  "key": "test_key_5",
+                  "type": "number",
+                  "value": 1234,
+                },
+                Object {
+                  "key": "test_key_6",
+                  "type": "number",
                   "value": null,
                 },
               ]
@@ -670,6 +693,19 @@ describe('Utils', () => {
                   "type": "toggle",
                 },
                 Object {
+                  "defaultValue": 123,
+                  "key": "test_key_5",
+                  "label": "My test label 5",
+                  "required": true,
+                  "type": "number",
+                },
+                Object {
+                  "key": "test_key_6",
+                  "label": "My test label 6",
+                  "required": false,
+                  "type": "number",
+                },
+                Object {
                   "key": "my_test_key",
                   "label": "my_test_label",
                   "required": true,
@@ -693,6 +729,8 @@ describe('Utils', () => {
           { ...customFieldsConfigurationMock[1] },
           { ...customFieldsConfigurationMock[2] },
           { ...customFieldsConfigurationMock[3] },
+          { ...customFieldsConfigurationMock[4] },
+          { ...customFieldsConfigurationMock[5] },
         ],
         `
               Array [
@@ -721,6 +759,19 @@ describe('Utils', () => {
                   "label": "My test label 4",
                   "required": false,
                   "type": "toggle",
+                },
+                Object {
+                  "defaultValue": 123,
+                  "key": "test_key_5",
+                  "label": "My test label 5",
+                  "required": true,
+                  "type": "number",
+                },
+                Object {
+                  "key": "test_key_6",
+                  "label": "My test label 6",
+                  "required": false,
+                  "type": "number",
                 },
               ]
           `
