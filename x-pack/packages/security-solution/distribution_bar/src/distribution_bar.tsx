@@ -57,7 +57,6 @@ const useStyles = () => {
         &:hover {
           height: 7px;
           border-radius: 3px;
-          cursor: pointer;
 
           .euiBadge {
             cursor: unset;
