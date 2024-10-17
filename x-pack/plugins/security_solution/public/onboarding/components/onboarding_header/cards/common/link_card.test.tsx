@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkCard } from './link_card';
+import { OnboardingHeaderCardId } from '../../../constants';
 
 describe('DataIngestionHubHeaderCardComponent', () => {
   beforeEach(() => {
@@ -17,6 +18,7 @@ describe('DataIngestionHubHeaderCardComponent', () => {
   it('should render the title, description, and icon', () => {
     const { getByTestId, getByText } = render(
       <LinkCard
+        id={OnboardingHeaderCardId.demo}
         icon={'mockIcon.png'}
         title={'Mock Title'}
         description={'Mock Description'}
@@ -32,6 +34,7 @@ describe('DataIngestionHubHeaderCardComponent', () => {
   it('should apply dark mode styles when color mode is DARK', () => {
     const { container } = render(
       <LinkCard
+        id={OnboardingHeaderCardId.demo}
         icon={'mockIcon.png'}
         title={'Mock Title'}
         description={'Mock Description'}
