@@ -173,6 +173,8 @@ describe('Versioned route', () => {
     const opts: Parameters<typeof versionedRouter.post>[0] = {
       path: '/test/{id}',
       access: 'internal',
+      summary: 'test',
+      description: 'test',
       options: {
         authRequired: true,
         tags: ['access:test'],
@@ -180,7 +182,6 @@ describe('Versioned route', () => {
         xsrfRequired: false,
         excludeFromOAS: true,
         httpResource: true,
-        summary: `test`,
       },
     };
 
