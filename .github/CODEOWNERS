@@ -1267,7 +1267,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ### END Observability Plugins
 
 # Presentation
-/x-pack/test/api_integration/apis/file_upload @elastic/kibana-presentation @elastic/ml-ui
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /test/functional/services/dashboard/  @elastic/kibana-presentation
@@ -1278,6 +1277,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
+/x-pack/test/api_integration/apis/file_upload @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
 /x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
