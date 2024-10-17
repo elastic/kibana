@@ -42,6 +42,12 @@ import {
   relatedIntegrationsDeserializer,
   relatedIntegrationsSerializer,
 } from './fields/related_integrations';
+import {
+  RuleNameOverrideEdit,
+  ruleNameOverrideDeserializer,
+  ruleNameOverrideSerializer,
+  ruleNameOverrideSchema,
+} from './fields/rule_name_override';
 import { SetupEdit, setupSchema } from './fields/setup';
 import { TagsEdit, tagsSchema } from './fields/tags';
 
@@ -108,6 +114,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={relatedIntegrationsSchema}
           serializer={relatedIntegrationsSerializer}
           deserializer={relatedIntegrationsDeserializer}
+        />
+      );
+    case 'rule_name_override':
+      return (
+        <FieldFormWrapper
+          component={RuleNameOverrideEdit}
+          fieldFormSchema={ruleNameOverrideSchema}
+          serializer={ruleNameOverrideSerializer}
+          deserializer={ruleNameOverrideDeserializer}
         />
       );
     case 'setup':
