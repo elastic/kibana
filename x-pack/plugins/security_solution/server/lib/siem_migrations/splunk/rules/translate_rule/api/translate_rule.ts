@@ -14,7 +14,7 @@ import type { SplunkRuleMigrationTranslateRuleResponse } from '../../../../../..
 import { SplunkRuleMigrationTranslateRuleRequestBody } from '../../../../../../../common/api/siem_migrations/splunk/rules/translate_rule.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { SPLUNK_TRANSLATE_RULE_PATH } from '../../../../../../../common/api/siem_migrations/splunk/rules/constants';
-import { getTranslateRuleGraph } from '../agent/graph';
+import { getTranslateRuleGraph, getTranslateRuleGraphNew } from '../agent/graph';
 import type { TranslateRuleState } from '../agent/types';
 import { ActionsClientChat } from '../../../../actions_client_chat';
 import { getEsqlTranslatorTool } from '../agent/tools/esql_translator_tool';
@@ -73,7 +73,20 @@ export const registerSplunkTranslateRuleRoute = (
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
-          const graph = getTranslateRuleGraph({ model, tools: [esqlTranslatorTool] });
+          // const graph = getTranslateRuleGraph({
+          //   model,
+          //   tools: [esqlTranslatorTool],
+          //   inferenceClient,
+          //   connectorId,
+          //   logger,
+          // });
+          const graph = getTranslateRuleGraph({
+            model,
+            tools: [esqlTranslatorTool],
+            inferenceClient,
+            connectorId,
+            logger,
+          });
           const translateRuleState = await graph.invoke(parameters, options);
 
           // const { response, messages } = translateRuleState as TranslateRuleState;
@@ -88,7 +101,7 @@ export const registerSplunkTranslateRuleRoute = (
           //   messages,
           // };
 
-          return res.ok({ body: { messages: translateRuleState.messages } });
+          return res.ok({ body: translateRuleState });
         } catch (err) {
           return res.badRequest({
             body: err.message,

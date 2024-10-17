@@ -13,8 +13,8 @@ export const translateRuleState = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
-  splunkRuleTitle: Annotation<string>,
-  splunkRuleDescription: Annotation<string>,
-  splunkRuleQuery: Annotation<string>,
-  response: Annotation<string>,
+  splunkRuleTitle: Annotation<string>(),
+  splunkRuleDescription: Annotation<string>(),
+  splunkRuleQuery: Annotation<string>(),
+  response: Annotation<string>(),
 });

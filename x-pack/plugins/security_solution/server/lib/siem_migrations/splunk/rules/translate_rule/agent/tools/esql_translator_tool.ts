@@ -90,3 +90,26 @@ export const getEsqlTranslatorTool = ({
 
   return esqlTool;
 };
+
+export type EsqlKnowledgeBaseCaller = (input: string) => Promise<string>;
+export const getEsqlKnowledgeBase =
+  ({
+    inferenceClient: client,
+    connectorId,
+    logger,
+  }: GetEsqlTranslatorToolParams): EsqlKnowledgeBaseCaller =>
+  async (input: string) => {
+    const { content } = await lastValueFrom(
+      naturalLanguageToEsql({
+        client,
+        connectorId,
+        input,
+        logger: {
+          debug: (source) => {
+            logger.debug(typeof source === 'function' ? source() : source);
+          },
+        },
+      })
+    );
+    return content;
+  };

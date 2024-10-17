@@ -6,6 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import type { TranslateRuleState } from './types';
 
 export const TRANSLATE_RULE_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -39,3 +40,33 @@ The output should contain:
 `,
   ],
 ]);
+
+export const getEsqlTranslationPrompt = ({
+  splunkRuleTitle,
+  splunkRuleDescription,
+  splunkRuleQuery,
+}: Pick<
+  TranslateRuleState,
+  'splunkRuleTitle' | 'splunkRuleDescription' | 'splunkRuleQuery'
+>): string => `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
+Below you will find Splunk rule information: the title, description and the SPL (Search Processing Language) query.
+Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
+
+The output will be parsed and should contain:
+- First, the ES|QL query inside an \`\`\`esql code block.
+- At the end, the summary of the translation process followed in markdown, starting with "## Migration Summary".
+
+This is the Splunk rule information:
+
+<<SPLUNK_RULE_TITLE>>
+${splunkRuleTitle}
+<</SPLUNK_RULE_TITLE>>
+
+<<SPLUNK_RULE_DESCRIPTION>>
+${splunkRuleDescription}
+<</SPLUNK_RULE_DESCRIPTION>>
+
+<<SPLUNK_RULE_QUERY_SLP>>
+${splunkRuleQuery}
+<</SPLUNK_RULE_QUERY_SLP>>
+`;
