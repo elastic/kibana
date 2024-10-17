@@ -17,15 +17,17 @@ import { LensRuntimeState, LensSerializedState } from './types';
 import type { LensAttributesService } from '../lens_attribute_service';
 
 export function createEmptyLensState(
-  title: LensSerializedState['title'],
-  query: LensSerializedState['query'],
-  filters: LensSerializedState['filters']
+  visualizationType: null | string = null,
+  title?: LensSerializedState['title'],
+  description?: LensSerializedState['description'],
+  query?: LensSerializedState['query'],
+  filters?: LensSerializedState['filters']
 ) {
   return {
     attributes: {
       title: title ?? '',
-      description: '',
-      visualizationType: null,
+      description: description ?? '',
+      visualizationType,
       references: [],
       state: {
         query: query || { query: '', language: 'kuery' },

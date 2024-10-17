@@ -25,6 +25,7 @@ import {
   LensRuntimeState,
   LensSerializedState,
 } from '../types';
+import { createEmptyLensState } from '../helper';
 import { DOC_TYPE } from '../../../common/constants';
 
 const LensApiMock: LensApi = {
@@ -88,23 +89,17 @@ const LensApiMock: LensApi = {
   updateOverrides: jest.fn(),
   getByReferenceState: jest.fn(),
   getByValueState: jest.fn(),
+  blockingError: new BehaviorSubject<Error | undefined>(undefined),
+  panelDescription: new BehaviorSubject<string | undefined>(undefined),
+  setPanelDescription: jest.fn(),
 };
 
-const LensSerializedStateMock: LensSerializedState = {
-  attributes: {
-    title: faker.lorem.words(),
-    description: faker.lorem.text(),
-    visualizationType: 'lnsXY',
-    references: [],
-    state: {
-      query: { query: 'test', language: 'kuery' },
-      filters: [],
-      internalReferences: [],
-      datasourceStates: {},
-      visualization: {},
-    },
-  },
-};
+const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
+  'lnsXY',
+  faker.lorem.words(),
+  faker.lorem.text(),
+  { query: 'test', language: 'kuery' }
+);
 
 export function getLensApiMock(overrides: Partial<LensApi> = {}) {
   return {
