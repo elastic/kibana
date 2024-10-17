@@ -64,8 +64,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       setIsPopoverOpen(false);
     }, [setIsPopoverOpen]);
 
-    // search string state
-    // const [searchString, setSearchString] = useState('');
     const {
       areDataStreamsSelectedOnMount,
       items,
@@ -186,7 +184,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
           searchProps={{
             placeholder: getSearchPlaceholder(filterName),
             compressed: true,
-            // onChange: (searchValue) => setSearchString(searchValue.trim()),
           }}
         >
           {(list, search) => {
