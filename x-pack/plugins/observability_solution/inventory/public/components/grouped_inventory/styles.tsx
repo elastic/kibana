@@ -64,7 +64,6 @@ export const groupingContainerCss = css`
     border-top: ${euiThemeVars.euiBorderThin};
     border-bottom: none;
     border-radius: 6px;
-    min-width: 1090px;
   }
   .inventoryGroupPanel {
     display: table;
