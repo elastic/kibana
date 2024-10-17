@@ -166,7 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_all',
               'minimal_read',
               'update_anonymization',
-              'manage_global_knowledge_base',
             ],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: [
