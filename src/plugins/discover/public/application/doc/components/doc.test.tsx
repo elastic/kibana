@@ -22,6 +22,20 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
+const mockOnInitialRenderCompleteMock = jest.fn();
+const mockUseReportPageRenderComplete = jest.fn((isReady: boolean) => {
+  return mockOnInitialRenderCompleteMock;
+});
+jest.mock('../../../services/telemetry', () => {
+  const originalModule = jest.requireActual('../../../services/telemetry');
+  return {
+    ...originalModule,
+    useReportPageRenderComplete: (isReady: boolean) => {
+      return mockUseReportPageRenderComplete(isReady);
+    },
+  };
+});
+
 const discoverServices = createDiscoverServicesMock();
 const mockSearchApi = jest.fn();
 
@@ -107,12 +121,16 @@ describe('Test of <Doc /> of Discover', () => {
     mockSearchApi.mockImplementation(() => throwError({ status: 404 }));
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-notFound').length).toBe(1);
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   test('renders error msg', async () => {
     mockSearchApi.mockImplementation(() => throwError({ error: 'something else' }));
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   test('renders elasticsearch hit ', async () => {
@@ -121,5 +139,6 @@ describe('Test of <Doc /> of Discover', () => {
     );
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-hit').length).toBe(1);
+    expect(mockOnInitialRenderCompleteMock).toHaveBeenCalled();
   });
 });

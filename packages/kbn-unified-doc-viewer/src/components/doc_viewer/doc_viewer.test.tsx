@@ -130,4 +130,21 @@ describe('<DocViewer />', () => {
 
     mockTestInitialLocalStorageValue = undefined;
   });
+
+  test('should call onInitialRenderComplete', () => {
+    const onInitialRenderComplete = jest.fn();
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Render function', render: jest.fn() });
+
+    render(
+      <DocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onInitialRenderComplete={onInitialRenderComplete}
+      />
+    );
+
+    expect(onInitialRenderComplete).toHaveBeenCalled();
+  });
 });

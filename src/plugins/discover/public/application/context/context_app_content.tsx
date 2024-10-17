@@ -55,6 +55,7 @@ import {
   useProfileAccessor,
 } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -206,6 +207,8 @@ export function ContextAppContent({
     timeRange,
   });
 
+  const onInitialRenderComplete = useReportPageRenderComplete(isLegacy);
+
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -273,6 +276,7 @@ export function ContextAppContent({
               settings={grid}
               onResize={onResize}
               externalCustomRenderers={cellRenderers}
+              onInitialRenderComplete={onInitialRenderComplete}
             />
           </CellActionsProvider>
         </div>

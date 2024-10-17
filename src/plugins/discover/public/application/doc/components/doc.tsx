@@ -20,6 +20,7 @@ import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
+import { useReportPageRenderComplete } from '../../../services/telemetry';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -64,6 +65,10 @@ export function Doc(props: DocProps) {
       rootBreadcrumbPath: props.referrer,
     });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
+
+  useReportPageRenderComplete(
+    ![ElasticRequestState.Loading, ElasticRequestState.Found].includes(reqState)
+  );
 
   return (
     <EuiPage>

@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { CustomMetrics } from './performance_context';
-import { usePerformanceContext } from '../../..';
+import { usePerformanceContext } from './use_performance_context';
 
 export const usePageReady = (state: { customMetrics?: CustomMetrics; isReady: boolean }) => {
   const { onPageReady } = usePerformanceContext();
