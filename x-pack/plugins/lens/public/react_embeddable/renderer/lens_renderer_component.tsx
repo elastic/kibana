@@ -29,6 +29,7 @@ export function LensRenderer({
   syncCursor,
   syncTooltips,
   viewMode,
+  id,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -81,6 +82,7 @@ export function LensRenderer({
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
+      maybeId={id}
       getParentApi={() => ({
         // forward the unified search context
         ...searchApi,
