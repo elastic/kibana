@@ -22,7 +22,8 @@
       "spaces",
       "security",
       "monitoringCollection",
-      "serverless"
+      "serverless",
+      "cloud"
     ],
     "extraPublicDirs": [
       "common"

@@ -42,6 +42,7 @@ import {
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
@@ -112,6 +113,7 @@ import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecur
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
+import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 
 export interface PluginSetupContract {
   registerType<
@@ -184,6 +186,7 @@ export interface ActionsPluginsSetup {
   spaces?: SpacesPluginSetup;
   monitoringCollection?: MonitoringCollectionSetup;
   serverless?: ServerlessPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -218,6 +221,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
+  private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -327,6 +331,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.getInMemoryConnectors,
         eventLogIndex
       );
+
+      this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
+        logger: this.logger,
+        eventLogIndex,
+        core,
+        taskManager: plugins.taskManager,
+        projectId: plugins.cloud.serverless.projectId,
+        config: this.actionsConfig.usage,
+      });
     }
 
     // Usage counter for telemetry
@@ -602,6 +615,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     this.validateEnabledConnectorTypes(plugins);
+
+    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
