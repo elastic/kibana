@@ -16,7 +16,7 @@ interface CommonRuleFieldEditProps {
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'name':
-      return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+      return <FieldFormWrapper component={NameEdit} ruleFieldFormSchema={nameSchema} />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

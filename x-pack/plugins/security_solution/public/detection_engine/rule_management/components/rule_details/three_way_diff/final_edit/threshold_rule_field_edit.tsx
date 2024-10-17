@@ -25,7 +25,7 @@ export function ThresholdRuleFieldEdit({ fieldName }: ThresholdRuleFieldEditProp
       return (
         <FieldFormWrapper
           component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
+          ruleFieldFormSchema={kqlQuerySchema}
           serializer={kqlQuerySerializer}
           deserializer={kqlQueryDeserializer}
         />

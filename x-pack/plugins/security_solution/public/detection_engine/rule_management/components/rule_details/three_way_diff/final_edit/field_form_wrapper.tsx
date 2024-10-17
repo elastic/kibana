@@ -16,14 +16,19 @@ import type {
 import { useFinalSideContext } from '../final_side/final_side_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import * as i18n from '../translations';
-import type { FieldComponentProps } from './field_component_props';
+import type { RuleFieldComponentProps } from './field_component_props';
 
-type FieldComponent = React.ComponentType<FieldComponentProps>;
+type FieldComponent = React.ComponentType<RuleFieldComponentProps>;
+
+export type FieldDeserializerFn = (
+  defaultRuleFieldValue: FormData,
+  finalDiffableRule: DiffableRule
+) => FormData;
 
 interface FieldFormWrapperProps {
   component: FieldComponent;
-  fieldFormSchema: FormSchema;
-  deserializer?: (fieldValue: FormData, finalDiffableRule: DiffableRule) => FormData;
+  ruleFieldFormSchema: FormSchema;
+  deserializer?: FieldDeserializerFn;
   serializer?: (formData: FormData) => FormData;
 }
 
@@ -32,13 +37,13 @@ interface FieldFormWrapperProps {
  *
  * @param {Object} props - Component props.
  * @param {React.ComponentType} props.component - Field component to be wrapped.
- * @param {FormSchema} props.fieldFormSchema - Configuration schema for the field.
+ * @param {FormSchema} props.ruleFieldFormSchema - Configuration schema for the field.
  * @param {Function} props.deserializer - Deserializer prepares initial form data. It converts field value from a DiffableRule format to a format used by the form.
  * @param {Function} props.serializer - Serializer prepares form data for submission. It converts form data back to a DiffableRule format.
  */
 export function FieldFormWrapper({
   component: FieldComponent,
-  fieldFormSchema,
+  ruleFieldFormSchema,
   deserializer,
   serializer,
 }: FieldFormWrapperProps) {
@@ -52,8 +57,8 @@ export function FieldFormWrapper({
       }
 
       const rule = finalDiffableRule as Record<string, unknown>;
-      const fieldValue = rule[fieldName] as FormData;
-      return deserializer(fieldValue, finalDiffableRule);
+      const defaultRuleFieldValue = rule[fieldName] as FormData;
+      return deserializer(defaultRuleFieldValue, finalDiffableRule);
     },
     [deserializer, fieldName, finalDiffableRule]
   );
@@ -75,19 +80,12 @@ export function FieldFormWrapper({
   );
 
   const { form } = useForm({
-    schema: fieldFormSchema,
+    schema: ruleFieldFormSchema,
     defaultValue: getDefaultValue(fieldName, finalDiffableRule),
     deserializer: deserialize,
     serializer,
     onSubmit: handleSubmit,
   });
-
-  const resetField = useCallback(
-    (fieldNameToReset: string, options?: { resetValue?: boolean; defaultValue?: unknown }) => {
-      form.getFields()[fieldNameToReset]?.reset(options);
-    },
-    [form]
-  );
 
   const [validity, setValidity] = useState<boolean | undefined>(undefined);
 
@@ -108,7 +106,7 @@ export function FieldFormWrapper({
           finalDiffableRule={finalDiffableRule}
           setValidity={setValidity}
           setFieldValue={form.setFieldValue}
-          resetField={resetField}
+          resetForm={form.reset}
         />
       </Form>
     </>

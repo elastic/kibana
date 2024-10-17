@@ -25,7 +25,7 @@ export function SavedQueryRuleFieldEdit({ fieldName }: SavedQueryRuleFieldEditPr
       return (
         <FieldFormWrapper
           component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
+          ruleFieldFormSchema={kqlQuerySchema}
           serializer={kqlQuerySerializer}
           deserializer={kqlQueryDeserializer}
         />

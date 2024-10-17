@@ -25,7 +25,7 @@ export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEdit
       return (
         <FieldFormWrapper
           component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
+          ruleFieldFormSchema={kqlQuerySchema}
           serializer={kqlQuerySerializer}
           deserializer={kqlQueryDeserializer}
         />

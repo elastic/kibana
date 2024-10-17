@@ -25,7 +25,7 @@ export function CustomQueryRuleFieldEdit({ fieldName }: CustomQueryRuleFieldEdit
       return (
         <FieldFormWrapper
           component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
+          ruleFieldFormSchema={kqlQuerySchema}
           serializer={kqlQuerySerializer}
           deserializer={kqlQueryDeserializer}
         />
