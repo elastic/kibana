@@ -246,7 +246,7 @@ export class ConnectorUsageReportingTask {
       },
     });
 
-    return (usageResult.aggregations?.total_usage as AggregationsSumAggregate).value || 0;
+    return (usageResult.aggregations?.total_usage as AggregationsSumAggregate)?.value ?? 0;
   };
 
   private createUsageRecord = ({
