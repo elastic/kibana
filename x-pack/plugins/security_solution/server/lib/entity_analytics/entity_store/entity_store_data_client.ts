@@ -53,6 +53,8 @@ import {
   isPromiseFulfilled,
   isPromiseRejected,
 } from './utils';
+import { EntityEngineAuditActions } from './auditing/actions';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -168,7 +170,7 @@ export class EntityStoreDataClient {
     filter: string,
     pipelineDebugMode: boolean
   ) {
-    const { logger, namespace, appClient, dataViewsService } = this.options;
+    const { logger, namespace, appClient, dataViewsService, auditLogger } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
     const unitedDefinition = getUnitedEntityDefinition({
@@ -246,6 +248,15 @@ export class EntityStoreDataClient {
         taskManager,
       });
       logger.info(`Entity store initialized for ${entityType}`);
+      auditLogger?.log({
+        message: `System initialized the entity engine for ${entityType}`,
+        event: {
+          action: EntityEngineAuditActions.ENTITY_ENGINE_INIT,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
 
       return updated;
     } catch (err) {
