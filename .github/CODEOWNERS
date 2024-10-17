@@ -534,6 +534,7 @@ x-pack/plugins/integration_assistant @elastic/security-scalability
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
+x-pack/plugins/observability_solution/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/investigate_app @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
@@ -927,9 +928,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
@@ -1018,6 +1019,13 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 # used for the 'team' designator within Kibana Stats
 
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
+
+# Observability Entities Team (@elastic/obs-entities)
+/x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
+/x-pack/packages/kbn-entities-schema @elastic/obs-entities
+/x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/plugins/entity_manager @elastic/obs-entities
+/x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
 
 # Data Discovery
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
@@ -1405,7 +1413,9 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /x-pack/plugins/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 
 # AppEx Platform Services Security
-x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test/api_integration/apis/es  @elastic/kibana-security
+
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
@@ -1514,6 +1524,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
+/x-pack/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/painless_lab/ @elastic/kibana-management
@@ -1929,6 +1940,7 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/x-pack/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
