@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RawRule } from '../../../types';
 import { RuleDomain } from '../types';
-import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
 import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
-  legacyId: RuleAttributes['legacyId'];
-  paramsWithRefs: RuleAttributes['params'];
-  meta?: RuleAttributes['meta'];
+  legacyId: RawRule['legacyId'];
+  paramsWithRefs: RawRule['params'];
+  meta?: RawRule['meta'];
 }
 
 export const transformRuleDomainToRuleAttributes = ({
@@ -23,7 +23,7 @@ export const transformRuleDomainToRuleAttributes = ({
   actionsWithRefs: DenormalizedAction[];
   rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
   params: TransformRuleToEsParams;
-}): RuleAttributes => {
+}): RawRule => {
   const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
 
@@ -81,5 +81,5 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
-  };
+  } as RawRule;
 };
