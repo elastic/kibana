@@ -20,3 +20,4 @@ export * from './lowercase_string';
 export * from './is_json';
 export * from './number_greater_than';
 export * from './number_smaller_than';
+export * from './is_integer';
