@@ -176,7 +176,7 @@ describe('GroupSelection', () => {
     });
 
     await userEvent.click(screen.getByRole('button', { name: /Aggregation-based/i }));
-    expect(showMainDialog).toHaveBeenCalled();
+    expect(showMainDialog).toHaveBeenCalledWith(false);
   });
 
   it('should only show promoted visualizations in recommended tab', () => {

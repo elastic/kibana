@@ -27,6 +27,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -82,38 +83,49 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
   },
 ];
 
-function GroupSelection({ tab = 'recommended', setTab, ...props }: GroupSelectionProps) {
+const getVisTypesFromGroup = (
+  visTypesRegistry: TypesStart,
+  group: VisGroups
+): Array<BaseVisType | VisTypeAlias> => {
+  return visTypesRegistry.getByGroup(group).filter(({ disableCreate }) => !disableCreate);
+};
+
+function GroupSelection({
+  tab = 'recommended',
+  setTab,
+  visTypesRegistry,
+  ...props
+}: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
   const promotedVisGroups = useMemo(
     () =>
       orderBy(
         [
-          ...props.visTypesRegistry.getAliases(),
-          ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+          ...visTypesRegistry.getAliases(),
+          ...visTypesRegistry.getByGroup(VisGroups.PROMOTED),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
-    [props.visTypesRegistry]
+    [visTypesRegistry]
   );
 
-  const tsvbType = props.visTypesRegistry.getByGroup(VisGroups.LEGACY);
-  const aggBasedTypes = props.visTypesRegistry
-    .getByGroup(VisGroups.AGGBASED)
-    .filter((visDefinition) => !visDefinition.disableCreate);
-  const toolsTypes = props.visTypesRegistry
-    .getByGroup(VisGroups.TOOLS)
-    .filter(({ disableCreate }) => !disableCreate);
+  const aggBasedTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.AGGBASED);
+  const legacyTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.LEGACY);
+  const toolsTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.TOOLS);
 
-  const shouldDisplayLegacyTab =
-    tsvbType.length > 0 || aggBasedTypes.length > 0 || toolsTypes.length > 0;
+  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length + toolsTypes.length > 0;
 
-  const tsvbProps = {
-    visType: { ...tsvbType[0], icon: 'visualizeApp' },
+  const [tsvbProps, ...restLegacyProps] = legacyTypes.map((visType) => ({
+    visType: {
+      ...visType,
+      icon: visType.name === 'metrics' ? 'visualizeApp' : (visType.icon as string),
+    },
     onVisTypeSelected: props.onVisTypeSelected,
-  };
+    key: visType.name,
+  }));
 
   return (
     <>
@@ -158,7 +170,7 @@ function GroupSelection({ tab = 'recommended', setTab, ...props }: GroupSelectio
             </EuiFlexGrid>
           ) : (
             <EuiFlexGrid columns={3} data-test-subj="visNewDialogGroups">
-              <VisGroup {...tsvbProps} />
+              {tsvbProps ? <VisGroup {...tsvbProps} /> : null}
               {
                 <VisGroup
                   visType={{
@@ -180,16 +192,16 @@ function GroupSelection({ tab = 'recommended', setTab, ...props }: GroupSelectio
                   }}
                 />
               }
-              {props.visTypesRegistry
-                .getByGroup(VisGroups.TOOLS)
-                .filter(({ disableCreate }) => !disableCreate)
-                .map((visType) => (
-                  <VisGroup
-                    visType={visType}
-                    key={visType.name}
-                    onVisTypeSelected={props.onVisTypeSelected}
-                  />
-                ))}
+              {restLegacyProps.map((visType) => (
+                <VisGroup {...visType} />
+              ))}
+              {toolsTypes.map((visType) => (
+                <VisGroup
+                  visType={visType}
+                  key={visType.name}
+                  onVisTypeSelected={props.onVisTypeSelected}
+                />
+              ))}
             </EuiFlexGrid>
           )}
 
