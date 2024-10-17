@@ -253,8 +253,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -328,8 +328,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
 
   const numberOfNotes = useMemo(
-    () => (securitySolutionNotesEnabled ? numberOfNotesNewSystem.length : numberOfNotesOldSystem),
-    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesEnabled]
+    () => (securitySolutionNotesDisabled ? numberOfNotesOldSystem : numberOfNotesNewSystem.length),
+    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesDisabled]
   );
 
   const setActiveTab = useCallback(
