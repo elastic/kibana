@@ -888,6 +888,8 @@
       "@kbn/event-annotation-listing-plugin/*": ["src/plugins/event_annotation_listing/*"],
       "@kbn/event-annotation-plugin": ["src/plugins/event_annotation"],
       "@kbn/event-annotation-plugin/*": ["src/plugins/event_annotation/*"],
+      "@kbn/event-bus": ["src/plugins/event_bus"],
+      "@kbn/event-bus/*": ["src/plugins/event_bus/*"],
       "@kbn/event-log-fixture-plugin": ["x-pack/test/plugin_api_integration/plugins/event_log"],
       "@kbn/event-log-fixture-plugin/*": ["x-pack/test/plugin_api_integration/plugins/event_log/*"],
       "@kbn/event-log-plugin": ["x-pack/plugins/event_log"],
