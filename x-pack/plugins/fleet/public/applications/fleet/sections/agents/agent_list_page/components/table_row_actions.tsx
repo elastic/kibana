@@ -29,6 +29,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
+  onExportCSVClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -38,6 +39,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUpgradeClick,
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
+  onExportCSVClick,
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
@@ -116,6 +118,19 @@ export const TableRowActions: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="exportCSVBtn"
+        icon="exportAction"
+        onClick={() => {
+          onExportCSVClick();
+        }}
+        data-test-subj="exportBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.exportCSVButton"
+          defaultMessage="Export as CSV"
         />
       </EuiContextMenuItem>
     );
