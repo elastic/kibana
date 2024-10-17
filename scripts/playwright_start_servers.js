@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch } from './run_elasticsearch';
-export * from './run_ftr';
-export {
-  parseRawFlags,
-  getArgValue,
-  remapPluginPaths,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-} from './kibana_cli_args';
-export { initLogsDir } from './logs_dir';
+require('../src/setup_node_env');
+require('@kbn/ui-tests').startServersCli();
