@@ -40,7 +40,8 @@ export function appendWhereClauseToESQLQuery(
     default:
       operator = '==';
   }
-  let filterValue = typeof value === 'string' ? `"${value.replace(/\"/g, '\\"')}"` : value;
+  let filterValue =
+    typeof value === 'string' ? `"${value.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"` : value;
   // Adding the backticks here are they are needed for special char fields
   let fieldName = `\`${field}\``;
 

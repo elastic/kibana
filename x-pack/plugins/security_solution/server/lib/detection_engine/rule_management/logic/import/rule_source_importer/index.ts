@@ -5,13 +5,5 @@
  * 2.0.
  */
 
-export const cluster = ['monitor'];
-
-export const privileges = ['auto_configure', 'create_doc'];
-
-export const indices = [
-  {
-    names: ['logs-*-*', 'metrics-*-*'],
-    privileges,
-  },
-];
+export * from './rule_source_importer_interface';
+export * from './rule_source_importer';
