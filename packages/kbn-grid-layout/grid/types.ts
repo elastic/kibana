@@ -46,20 +46,21 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface GridLayoutStateManager {
-  draggingPosition$: BehaviorSubject<
-    | {
-        top: number;
-        left: number;
-        bottom: number;
-        right: number;
-      }
-    | undefined
-  >;
+export interface ActivePanel {
+  id: string;
+  position: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  };
+}
 
+export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;

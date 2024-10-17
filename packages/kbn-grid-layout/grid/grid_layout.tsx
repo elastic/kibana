@@ -50,7 +50,6 @@ export const GridLayout = ({
                 key={rowData.title}
                 rowIndex={rowIndex}
                 runtimeSettings={runtimeSettings}
-                activePanelId={interactionEvent?.id}
                 renderPanelContents={renderPanelContents}
                 targetRowIndex={interactionEvent?.targetRowIndex}
                 gridLayoutStateManager={gridLayoutStateManager}
@@ -61,11 +60,9 @@ export const GridLayout = ({
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {
-                    gridLayoutStateManager.draggingPosition$.next(undefined);
-                    gridLayoutStateManager.interactionEvent$.next(undefined);
-                  } else {
-                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+                    gridLayoutStateManager.activePanel$.next(undefined);
                   }
+                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}
                 ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
               />
