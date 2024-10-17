@@ -11,7 +11,7 @@ import { TelemetryService } from './telemetry_service';
 import {
   type EntityInventoryViewedParams,
   type EntityViewClickedParams,
-  type SearchQuerySubmittedParams,
+  type EntityInventorySearchQuerySubmittedParams,
   TelemetryEventTypes,
 } from './types';
 
@@ -56,7 +56,7 @@ describe('TelemetryService', () => {
       const expectedProperties = [
         'reportInventoryAddData',
         'reportEntityInventoryViewed',
-        'reportSearchQuerySbmitted',
+        'reportEntityInventorySearchQuerySubmitted',
         'reportEntityViewClicked',
       ];
       expectedProperties.forEach((property) => {
@@ -106,22 +106,22 @@ describe('TelemetryService', () => {
     });
   });
 
-  describe('#reportSearchQuerySbmitted', () => {
+  describe('#reportEntityInventorySearchQuerySubmitted', () => {
     it('should report search query submitted with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
       const telemetry = service.start();
-      const params: SearchQuerySubmittedParams = {
+      const params: EntityInventorySearchQuerySubmittedParams = {
         kuery_fields: ['_index'],
         timerange: 'now-1y/d - now',
         action: 'submit',
       };
 
-      telemetry.reportSearchQuerySbmitted(params);
+      telemetry.reportEntityInventorySearchQuerySubmitted(params);
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-        TelemetryEventTypes.SEARCH_QUERY_SUBMITTED,
+        TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED,
         params
       );
     });

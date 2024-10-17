@@ -11,7 +11,7 @@ import {
   TelemetryEventTypes,
   type InventoryAddDataParams,
   type EntityInventoryViewedParams,
-  type SearchQuerySubmittedParams,
+  type EntityInventorySearchQuerySubmittedParams,
   type EntityViewClickedParams,
 } from './types';
 
@@ -26,8 +26,10 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_VIEWED, params);
   };
 
-  public reportSearchQuerySbmitted = (params: SearchQuerySubmittedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, params);
+  public reportEntityInventorySearchQuerySubmitted = (
+    params: EntityInventorySearchQuerySubmittedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED, params);
   };
   public reportEntityViewClicked = (params: EntityViewClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_VIEW_CLICKED, params);
