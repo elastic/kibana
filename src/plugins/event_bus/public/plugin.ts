@@ -9,13 +9,13 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { eventBus } from './event_bus';
+import { eventBus$ } from './event_bus';
 import type { EventBusPluginSetup, EventBusPluginStart } from './types';
 
 export class EventBusPlugin implements Plugin<EventBusPluginSetup, EventBusPluginStart> {
   public setup(core: CoreSetup): EventBusPluginSetup {
     return {
-      eventBus,
+      eventBus$,
     };
   }
 
