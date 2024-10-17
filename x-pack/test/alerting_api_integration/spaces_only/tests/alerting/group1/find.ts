@@ -332,7 +332,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     afterEach(() => objectRemover.removeAll());
 
     findTestUtils('public', supertest, objectRemover);
-    findTestUtils('internal', supertest, objectRemover);
 
     describe('legacy', function () {
       this.tags('skipFIPS');

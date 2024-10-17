@@ -12,62 +12,49 @@ import type {
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
 import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_FIND_RULES_PATH,
+} from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
 
-export const findRulesRoute = (
+export const findInternalRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
   usageCounter?: UsageCounter
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${BASE_ALERTING_API_PATH}/rules/_find`,
-      options: {
-        access: 'public',
-        summary: 'Get information about rules',
-        tags: ['oas-tag:alerting'],
-      },
+      path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
+      options: { access: 'internal' },
       validate: {
-        request: {
-          query: findRulesRequestQuerySchemaV1,
-        },
-        response: {
-          200: {
-            body: () => ruleResponseSchemaV1,
-            description: 'Indicates a successful call.',
-          },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
-          },
-          403: {
-            description: 'Indicates that this call is forbidden.',
-          },
-        },
+        body: findRulesRequestQuerySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
 
-        const query: FindRulesRequestQueryV1 = req.query;
+        const body: FindRulesRequestQueryV1 = req.body;
 
         trackLegacyTerminology(
-          [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
+          [req.body.search, req.body.search_fields, req.body.sort_field].filter(
+            Boolean
+          ) as string[],
           usageCounter
         );
 
         const options = transformFindRulesBodyV1({
-          ...query,
-          has_reference: query.has_reference || undefined,
-          search_fields: searchFieldsAsArray(query.search_fields),
+          ...body,
+          has_reference: body.has_reference || undefined,
+          search_fields: searchFieldsAsArray(body.search_fields),
         });
 
-        if (req.query.fields) {
+        if (req.body.fields) {
           usageCounter?.incrementCounter({
             counterName: `alertingFieldsUsage`,
             counterType: 'alertingFieldsUsage',
@@ -77,7 +64,7 @@ export const findRulesRoute = (
 
         const findResult = await rulesClient.find({
           options,
-          excludeFromPublicApi: true,
+          excludeFromPublicApi: false,
           includeSnoozeData: true,
         });
 
