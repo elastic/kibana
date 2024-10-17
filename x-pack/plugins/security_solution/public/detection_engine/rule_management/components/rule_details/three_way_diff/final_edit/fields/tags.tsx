@@ -11,7 +11,7 @@ import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
 import type { RuleTagArray } from '../../../../../../../../common/api/detection_engine';
 
-export const tagsSchema = { tags: schema.tags } as FormSchema<{ name: RuleTagArray }>;
+export const tagsSchema = { tags: schema.tags } as FormSchema<{ tags: RuleTagArray }>;
 
 const componentProps = {
   euiFieldProps: {
