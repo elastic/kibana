@@ -15,7 +15,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./task_based/all_types'));
     loadTestFile(require.resolve('./task_based/detection_rules'));
-    loadTestFile(require.resolve('./task_based/indices_metadata'));
     loadTestFile(require.resolve('./task_based/security_lists'));
   });
 };

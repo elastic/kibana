@@ -8,8 +8,8 @@
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TELEMETRY_DATA_STREAM_EVENT } from '@kbn/security-solution-plugin/server/lib/telemetry/event_based/events';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { waitFor } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { waitFor } from '../../../../common/utils/security_solution';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
 
