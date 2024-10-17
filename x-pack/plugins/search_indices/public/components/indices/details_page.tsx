@@ -71,12 +71,12 @@ export const SearchIndexDetailsPage = () => {
     }
   }, [share, indexName]);
 
-  const [isDocumentsExists, setDocumentsExists] = useState<boolean>(false);
+  const [hasDocuments, setHasDocuments] = useState<boolean>(false);
   const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
   useEffect(() => {
     setDocumentsLoading(isInitialLoading);
-    setDocumentsExists(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
-  }, [indexDocuments, isInitialLoading, setDocumentsExists, setDocumentsLoading]);
+    setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
+  }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
   const usageTracker = useUsageTracker();
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
@@ -201,7 +201,7 @@ export const SearchIndexDetailsPage = () => {
             bottomBorder={false}
             rightSideItems={[
               <EuiFlexGroup gutterSize="m">
-                {isDocumentsExists ? (
+                {hasDocuments ? (
                   <>
                     <EuiFlexItem>
                       <EuiButtonEmpty
@@ -249,7 +249,7 @@ export const SearchIndexDetailsPage = () => {
                 <EuiFlexItem>
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
-                    showApiReference={isDocumentsExists}
+                    showApiReference={hasDocuments}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,
