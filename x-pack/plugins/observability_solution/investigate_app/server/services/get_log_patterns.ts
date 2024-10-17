@@ -137,7 +137,7 @@ async function getPrimaryAndSecondaryCategories({
     timeField: '@timestamp',
     messageField: 'message',
     ignoredCategoryTerms: primaryCategories.categories.map((category) => category.terms),
-    samplingProbability: 0.1,
+    samplingProbability: 1,
     documentFilters,
   });
 

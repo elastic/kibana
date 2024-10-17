@@ -453,6 +453,13 @@ export const createCategorizationRequestParams = ({
           size: maxCategoriesCount,
           categorization_analyzer: {
             tokenizer: 'standard',
+            char_filter: [
+              {
+                type: 'pattern_replace',
+                pattern: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+                replacement: '',
+              },
+            ],
           },
           similarity_threshold: 65,
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
