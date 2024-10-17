@@ -15,7 +15,7 @@ import {
 import TestAgent from 'supertest/lib/agent';
 
 import { BsearchService } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Timeline Details', () => {
+  describe('@skipInServerless Timeline Details', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
     before(async () => {
