@@ -28,7 +28,7 @@ type FilterValue = string | number | NegatedValue;
 
 export type NavFilter = Record<string, FilterValue>;
 
-const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
+export const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
   let negate = false;
   let value = filterValue;
   if (typeof filterValue === 'object') {
@@ -56,8 +56,8 @@ const createFilter = (key: string, filterValue: FilterValue, dataViewId: string)
 };
 const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
   const history = useHistory();
-  const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
 
+  const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
   return useCallback(
     (filterParams: NavFilter = {}, groupBy?: string[]) => {
       const filters = Object.entries(filterParams).map(([key, filterValue]) =>

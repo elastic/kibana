@@ -23,7 +23,8 @@ export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
 
 /** The base path for all cloud security posture pages. */
-export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
+export const CLOUD_SECURITY_POSTURE_PATH = 'cloud_security_posture';
+export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/' + CLOUD_SECURITY_POSTURE_PATH;
 
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
   'security_solution_cdr_latest_misconfigurations';
