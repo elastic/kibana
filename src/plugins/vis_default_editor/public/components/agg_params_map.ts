@@ -18,6 +18,7 @@ const buckets = {
     scaleMetricValues: controls.ScaleMetricsParamEditor,
     interval: controls.TimeIntervalParamEditor,
     drop_partials: controls.DropPartialsParamEditor,
+    min_doc_count: controls.MinDocCountParamEditor,
   },
   [BUCKET_TYPES.DATE_RANGE]: {
     ranges: controls.DateRangesParamEditor,
