@@ -207,6 +207,28 @@ ruleTester.run('no_deprecated_authz_config', rule, {
         router.get({
           path: '/some/path',
           options: {
+            tags: [\`access:\${APP.TEST_ID}\`],
+          },
+        });
+      `,
+      errors: [{ message: "Move 'access' tags to security.authz.requiredPrivileges." }],
+      output: `
+        router.get({
+          path: '/some/path',
+          security: {
+                authz: {
+                  requiredPrivileges: [\`\${APP.TEST_ID}\`],
+                },
+              },
+        });
+      `,
+      name: 'invalid: access tags are template literals, move to security.authz.requiredPrivileges',
+    },
+    {
+      code: `
+        router.get({
+          path: '/some/path',
+          options: {
             tags: ['access:securitySolution', routeTagHelper('someTag')],
           },
         });
