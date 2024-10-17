@@ -12,6 +12,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      "eventBus",
       "charts",
       "data",
       "lens",
