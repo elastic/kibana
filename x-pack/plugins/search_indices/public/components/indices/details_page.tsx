@@ -220,6 +220,7 @@ export const SearchIndexDetailsPage = () => {
                         isLoading={isDocumentsLoading}
                         data-test-subj="useInPlaygroundLink"
                         onClick={navigateToPlayground}
+                        iconType="launch"
                         fill
                       >
                         <FormattedMessage
