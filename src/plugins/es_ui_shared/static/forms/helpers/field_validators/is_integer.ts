@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isInteger as isIntegerLodash } from 'lodash';
 import { ValidationFunc } from '../../hook_form_lib';
 import { ERROR_CODE } from './types';
 
@@ -15,5 +14,12 @@ export const isInteger =
   ({ message }: { message: string }) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
-    return isIntegerLodash(value as number) ? undefined : { code: 'ERR_NOT_INT_NUMBER', message };
+
+    if (value === '') {
+      return;
+    }
+
+    const numValue = typeof value === 'string' ? Number(value) : value;
+
+    return Number.isInteger(numValue) ? undefined : { message, code: 'ERR_NOT_INT_NUMBER' };
   };

@@ -11,17 +11,29 @@ import { ValidationFuncArg } from '../../hook_form_lib';
 import { isInteger } from './is_integer';
 
 describe('isInteger', () => {
-  const message = 'test';
+  const message = 'test error message';
   const code = 'ERR_NOT_INT_NUMBER';
 
   const validate = isInteger({ message });
-  const validator = (value: number) => validate({ value } as ValidationFuncArg<any, any>);
+  const validator = (value: unknown) => validate({ value } as ValidationFuncArg<any, any>);
 
-  test('should return undefined if value is integer', () => {
+  test('should return undefined if value is integer number', () => {
     expect(validator(5)).toBeUndefined();
   });
 
-  test('should return Validation function if value is not integer', () => {
+  test('should return undefined if value string that can be parsed to integer', () => {
+    expect(validator('5')).toBeUndefined();
+  });
+
+  test('should return Validation function if value is not integer number', () => {
     expect(validator(5.3)).toMatchObject({ message, code });
+  });
+
+  test('should return Validation function if value a string that can not be parsed to number but is not an integer', () => {
+    expect(validator('5.3')).toMatchObject({ message, code });
+  });
+
+  test('should return Validation function if value a string that can not be parsed to number', () => {
+    expect(validator('test')).toMatchObject({ message, code });
   });
 });
