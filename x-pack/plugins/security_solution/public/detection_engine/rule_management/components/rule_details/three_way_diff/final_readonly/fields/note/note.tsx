@@ -16,6 +16,10 @@ interface NoteReadOnlyProps {
 }
 
 export function NoteReadOnly({ note }: NoteReadOnlyProps) {
+  if (!note) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

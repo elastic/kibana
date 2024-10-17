@@ -27,15 +27,16 @@ import {
   investigationFieldsDeserializer,
   investigationFieldsSerializer,
 } from './fields/investigation_fields';
-import { NameEdit, nameSchema } from './fields/name';
-import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
-import { TagsEdit, tagsSchema } from './fields/tags';
 import {
   MaxSignalsEdit,
   maxSignalsDeserializer,
   maxSignalsSchema,
   maxSignalsSerializer,
 } from './fields/max_signals';
+import { NameEdit, nameSchema } from './fields/name';
+import { NoteEdit, noteSchema } from './fields/note';
+import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
+import { TagsEdit, tagsSchema } from './fields/tags';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -83,6 +84,8 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       );
     case 'name':
       return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+    case 'note':
+      return <FieldFormWrapper component={NoteEdit} fieldFormSchema={noteSchema} />;
     case 'references':
       return (
         <FieldFormWrapper
