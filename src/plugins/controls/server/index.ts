@@ -13,8 +13,8 @@ export const plugin = async () => {
 };
 
 export {
-  controlGroupSerializedStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSerializedState,
+  controlGroupSavedObjectStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSavedObjectState,
 } from './control_group/control_group_persistence';
 export {
   type ControlGroupTelemetry,

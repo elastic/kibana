@@ -51,7 +51,10 @@ export interface ControlGroupSerializedState
     ControlGroupRuntimeState,
     'chainingSystem' | 'editorConfig' | 'ignoreParentSettings'
   > {
-  panels: Array<ControlPanelState & { id: string }>;
+  // In runtime state, we refer to this property as `initialChildControlState`, but in
+  // the serialized state we transform the state object into an array of state objects
+  // to make it easier for API consumers to add new controls without specifying a uuid key.
+  controls: Array<ControlPanelState & { id?: string }>;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlLabelPosition;

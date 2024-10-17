@@ -9,10 +9,11 @@
 
 import { Serializable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
-import { dashboardAttributesSchema, gridDataSchema } from './v2';
+import { controlGroupInputSchema, dashboardAttributesSchema, gridDataSchema } from './v2';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
+export type ControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
 
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON

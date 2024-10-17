@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.attributes.kibanaSavedObjectMeta).to.eql({});
+      expect(response.body.item.attributes.kibanaSavedObjectMeta.searchSource).to.eql({});
       expect(response.body.item.attributes.panels).to.eql([]);
       expect(response.body.item.attributes.timeRestore).to.be(false);
       expect(response.body.item.attributes.options).to.eql({
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
                   w: 24,
                   h: 15,
                 },
-                embeddableConfig: {},
+                panelConfig: {},
               },
             ],
           },
@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       // panel index is a random uuid when not provided
       expect(response.body.item.attributes.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
       expect(response.body.item.attributes.panels[0].panelIndex).to.eql(
-        response.body.item.attributes.panels[0].embeddableConfig.id
+        response.body.item.attributes.panels[0].panelConfig.id
       );
     });
 
@@ -86,13 +86,13 @@ export default function ({ getService }: FtrProviderContext) {
           attributes: {
             title,
             controlGroupInput: {
-              panels: [
+              controls: [
                 {
                   type: 'optionsListControl',
                   order: 0,
                   width: 'medium',
                   grow: true,
-                  embeddableConfig: {
+                  controlConfig: {
                     title: 'Origin City',
                     fieldName: 'OriginCityName',
                     dataViewId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
       // generates a random saved object id
       expect(response.body.item.id).match(/^[0-9a-f-]{36}$/);
       // saved object stores controls panels as an object, but the API should return as an array
-      expect(response.body.item.attributes.controlGroupInput.panels).to.be.an('array');
+      expect(response.body.item.attributes.controlGroupInput.controls).to.be.an('array');
 
       expect(response.body.item.attributes.controlGroupInput.ignoreParentSettings).to.eql(
         DEFAULT_IGNORE_PARENT_SETTINGS
@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
                   h: 15,
                   i: 'bizz',
                 },
-                embeddableConfig: {},
+                panelConfig: {},
                 panelIndex: 'bizz',
                 panelRefName: 'panel_bizz',
               },
@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.item.attributes.panels).to.be.an('array');
-      expect(response.body.item.attributes.panels[0].embeddableConfig.id).to.eql('bizz');
+      expect(response.body.item.attributes.panels[0].panelConfig.id).to.eql('bizz');
     });
 
     // TODO Move this test to x-pack/test/api_integration/dashboards

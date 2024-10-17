@@ -11,6 +11,7 @@
 export {
   dashboardAttributesSchema as dashboardSavedObjectSchema,
   type DashboardAttributes as DashboardSavedObjectAttributes,
+  type ControlGroupInput as ControlGroupInputSavedObjectAttributes,
   type GridData,
   type SavedDashboardPanel,
 } from './v2';

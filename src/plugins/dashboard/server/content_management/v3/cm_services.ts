@@ -41,6 +41,8 @@ const apiError = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
+// This schema should be provided by the controls plugin. Perhaps we can resolve this with the embeddable registry.
+// See https://github.com/elastic/kibana/issues/192622
 export const controlGroupInputSchema = schema.object({
   controls: schema.arrayOf(
     schema.object(
@@ -418,6 +420,7 @@ export const dashboardItemSchema = schema.object(
     version: schema.maybe(schema.string()),
     createdAt: schema.maybe(schema.string()),
     updatedAt: schema.maybe(schema.string()),
+    // TODO check if we can remove createdBy and updatedBy
     createdBy: schema.maybe(schema.string()),
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),

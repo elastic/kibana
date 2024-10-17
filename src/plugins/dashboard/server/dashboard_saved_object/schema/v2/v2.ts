@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
@@ -34,6 +34,3 @@ export const gridDataSchema = schema.object({
   h: schema.number(),
   i: schema.string(),
 });
-
-export type GridData = TypeOf<typeof gridDataSchema>;
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;

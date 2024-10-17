@@ -243,7 +243,9 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       controlGroupInput: controlGroupInputIn(controlGroupInput) as ControlGroupAttributesV2,
     }),
     description,
-    kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
+    ...(kibanaSavedObjectMeta && {
+      kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
+    }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
     panelsJSON: panels ? panelsIn(panels) : '[]',
     refreshInterval,

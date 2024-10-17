@@ -12,7 +12,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { ControlGroupSerializedState } from '../../common';
 import {
   type SerializableControlGroupState,
-  controlGroupSerializedStateToSerializableRuntimeState,
+  controlGroupSavedObjectStateToSerializableRuntimeState,
   getDefaultControlGroupState,
 } from './control_group_persistence';
 
@@ -113,7 +113,7 @@ export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
   const controlGroupStats = initializeControlGroupTelemetry(stats);
   const controlGroupState = {
     ...getDefaultControlGroupState(),
-    ...controlGroupSerializedStateToSerializableRuntimeState(
+    ...controlGroupSavedObjectStateToSerializableRuntimeState(
       state as unknown as ControlGroupSerializedState
     ),
   };
