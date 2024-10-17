@@ -42,6 +42,9 @@ export const DatePickerField = ({ field, euiFieldProps, idAria, ...rest }: Props
         onChange={(e) => {
           field.setValue(e);
         }}
+        onClear={() => {
+          field.setValue(null);
+        }}
         data-test-subj="input"
         {...euiFieldProps}
       />

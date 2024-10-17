@@ -40,8 +40,8 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldDate>['Configure'] = ()
         config={config}
         componentProps={{
           label: DEFAULT_VALUE,
+          'data-test-subj': 'date-custom-field-default-value',
           euiFieldProps: {
-            'data-test-subj': 'date-custom-field-default-value',
             showTimeSelect: true,
             fullWidth: true,
             locale: i18n.getLocale(),

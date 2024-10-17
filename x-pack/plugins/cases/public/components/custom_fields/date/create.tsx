@@ -35,12 +35,13 @@ const CreateComponent: CustomFieldType<CaseCustomFieldDate>['Create'] = ({
       label={label}
       componentProps={{
         labelAppend: setAsOptional ? OptionalFieldLabel : null,
+        'data-test-subj': `${key}-date-create-custom-field`,
         euiFieldProps: {
-          'data-test-subj': `${key}-date-create-custom-field`,
           fullWidth: true,
           disabled: isLoading,
           isLoading,
           showTimeSelect: true,
+          clearable: true,
           locale: i18n.getLocale(),
         },
       }}

@@ -9,6 +9,7 @@ import { type FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_for
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import moment from 'moment';
 import { REQUIRED_FIELD } from '../translations';
+import { isEmpty } from 'lodash';
 
 const { emptyField } = fieldValidators;
 
@@ -35,13 +36,14 @@ export const getDateFieldConfig = ({
       ...validators,
       {
         validator: ({ value }) => {
-          // if (value == null) {
-          // }
-          // if (value.length > MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH) {
-          //   return {
-          //     message: MAX_LENGTH_ERROR(label, MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH),
-          //   };
-          // }
+          if (value == null || isEmpty(value)) {
+            return;
+          }
+          if (!moment(value, true).isValid()) {
+            return {
+              message: 'Not a valid date',
+            };
+          }
         },
       },
     ],

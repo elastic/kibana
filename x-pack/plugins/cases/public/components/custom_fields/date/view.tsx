@@ -19,7 +19,7 @@ const ViewComponent: CustomFieldType<CaseCustomFieldDate>['View'] = ({ customFie
       className="eui-textBreakWord"
       data-test-subj={`date-custom-field-view-${customField?.key}`}
     >
-      {value ?? '-'}
+      {value}
     </EuiText>
   );
 };

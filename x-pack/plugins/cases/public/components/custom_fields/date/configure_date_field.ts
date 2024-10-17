@@ -25,5 +25,5 @@ export const configureDateCustomFieldFactory: CustomFieldFactory<CaseCustomField
     View,
     Create,
   }),
-  convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
+  // convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
 });
