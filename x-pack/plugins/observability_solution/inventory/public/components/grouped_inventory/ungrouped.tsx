@@ -19,21 +19,17 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { GroupSelector } from './group_selector';
 
-interface Props {
-  entityType?: EntityType;
-}
-
-export function UngroupedInventoryPage({ entityType }: Props) {
+export function UngroupedInventoryPage() {
   const { pagination, setPagination } = useInventoryPageViewContext();
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, kuery } = query;
+  const { sortDirection, sortField, kuery, entityTypes } = query;
   const { euiTheme } = useEuiTheme();
   const inventoryRoute = useInventoryRouter();
-  const pageIndex = (entityType ? pagination?.[entityType] : pagination?.none) ?? 0;
+  const pageIndex = pagination?.none ?? 0;
 
   const {
     value = { entities: [] },
@@ -46,14 +42,14 @@ export function UngroupedInventoryPage({ entityType }: Props) {
           query: {
             sortDirection,
             sortField,
-            entityTypes: entityType?.length ? JSON.stringify([entityType]) : undefined,
+            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
             kuery,
           },
         },
         signal,
       });
     },
-    [entityType, inventoryAPIClient, kuery, sortDirection, sortField]
+    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
   );
 
   useEffectOnce(() => {
@@ -75,7 +71,7 @@ export function UngroupedInventoryPage({ entityType }: Props) {
   });
 
   function handlePageChange(nextPage: number) {
-    setPagination(entityType ?? 'none', nextPage);
+    setPagination('none', nextPage);
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
