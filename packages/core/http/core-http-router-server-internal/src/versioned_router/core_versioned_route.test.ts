@@ -52,6 +52,46 @@ describe('Versioned route', () => {
     jest.clearAllMocks();
   });
 
+  describe('#getRoutes', () => {
+    it('returns the expected metadata', () => {
+      const versionedRouter = CoreVersionedRouter.from({ router });
+      versionedRouter
+        .get({
+          path: '/test/{id}',
+          access: 'public',
+          options: {
+            httpResource: true,
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
+            excludeFromOAS: true,
+            tags: ['1', '2', '3'],
+          },
+          description: 'test',
+          summary: 'test',
+          enableQueryVersion: false,
+        })
+        .addVersion({ version: '2023-10-31', validate: false }, handlerFn);
+
+      expect(versionedRouter.getRoutes()[0].options).toMatchObject({
+        access: 'public',
+        enableQueryVersion: false,
+        description: 'test',
+        summary: 'test',
+        options: {
+          httpResource: true,
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
+          excludeFromOAS: true,
+          tags: ['1', '2', '3'],
+        },
+      });
+    });
+  });
+
   it('can register multiple handlers', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter
