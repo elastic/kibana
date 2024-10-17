@@ -91,14 +91,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           const deployedInferenceEndpoints = endpoints.filter((endpoint) => {
             const modelId = endpoint.service_settings.model_id;
-            const inferenceId = endpoint.inference_id;
             // Check to see if there is a started deployment which
-            // matches the model ID and the inference ID
-            const modelStats = stats.find(
-              (stat) =>
-                modelId === stat.deployment_stats?.model_id &&
-                inferenceId === stat.deployment_stats?.deployment_id
-            );
+            // matches the model ID
+            const modelStats = stats.find((stat) => modelId === stat.deployment_stats?.model_id);
             return modelStats?.deployment_stats?.state === 'started';
           });
 
