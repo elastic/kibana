@@ -5,15 +5,18 @@
  * 2.0.
  */
 import type { AssistantSubFeatureId } from '../product_features_keys';
+import type { SecurityFeatureParams } from '../security/types';
 import type { ProductFeatureParams } from '../types';
 import { getAssistantBaseKibanaFeature } from './kibana_features';
 import {
   getAssistantBaseKibanaSubFeatureIds,
-  assistantSubFeaturesMap,
+  getAssistantSubFeaturesMap,
 } from './kibana_sub_features';
 
-export const getAssistantFeature = (): ProductFeatureParams<AssistantSubFeatureId> => ({
+export const getAssistantFeature = (
+  params: SecurityFeatureParams
+): ProductFeatureParams<AssistantSubFeatureId> => ({
   baseKibanaFeature: getAssistantBaseKibanaFeature(),
   baseKibanaSubFeatureIds: getAssistantBaseKibanaSubFeatureIds(),
-  subFeaturesMap: assistantSubFeaturesMap,
+  subFeaturesMap: getAssistantSubFeaturesMap(params),
 });
