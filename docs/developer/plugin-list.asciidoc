@@ -772,7 +772,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
-|This plugin contains the registry for the knowledge base.
+|This plugin contains the product documentation base service.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
