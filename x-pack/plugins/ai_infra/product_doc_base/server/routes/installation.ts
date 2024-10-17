@@ -28,7 +28,11 @@ export const registerInstallationRoutes = ({
   getInstaller: () => PackageInstaller;
 }) => {
   router.get(
-    { path: INSTALLATION_STATUS_API_PATH, validate: false, options: { access: 'internal' } },
+    {
+      path: INSTALLATION_STATUS_API_PATH,
+      validate: false,
+      options: { access: 'internal', tags: ['access:manage_llm_product_doc'] },
+    },
     async (ctx, req, res) => {
       const installClient = getInstallClient();
       const installStatus = await installClient.getInstallationStatus();
@@ -49,7 +53,8 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        timeout: { idleSocket: 20 * 60 * 1000 }, // 20 minutes, install can take time.
+        tags: ['access:manage_llm_product_doc'],
+        timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
       },
     },
     async (ctx, req, res) => {
@@ -71,6 +76,7 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
+        tags: ['access:manage_llm_product_doc'],
       },
     },
     async (ctx, req, res) => {
