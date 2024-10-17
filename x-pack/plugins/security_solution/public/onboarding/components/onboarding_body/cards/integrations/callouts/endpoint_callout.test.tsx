@@ -12,32 +12,32 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AgentRequiredCallout } from './agent_required_callout';
+import { EndpointCallout } from './endpoint_callout';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { trackOnboardingLinkClick } from '../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../common/lib/telemetry');
 
-describe('AgentRequiredCallout', () => {
+describe('EndpointCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the warning callout when an agent is still required', () => {
-    const { getByTestId, getByText } = render(<AgentRequiredCallout />, { wrapper: TestProviders });
+  it('renders the callout', () => {
+    const { getByTestId, getByText } = render(<EndpointCallout />, { wrapper: TestProviders });
 
     expect(
-      getByText('Elastic Agent is required for one or more of your integrations. Add Elastic Agent')
+      getByText('Orchestrate response across endpoint vendors with bidirectional integrations')
     ).toBeInTheDocument();
-    expect(getByTestId('agentLink')).toBeInTheDocument();
+    expect(getByTestId('endpointLearnMoreLink')).toBeInTheDocument();
   });
 
   it('should track the agent link click', () => {
-    const { getByTestId } = render(<AgentRequiredCallout />, { wrapper: TestProviders });
+    const { getByTestId } = render(<EndpointCallout />, { wrapper: TestProviders });
 
-    getByTestId('agentLink').click();
+    getByTestId('endpointLearnMoreLink').click();
 
-    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('agent_required');
+    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('endpoint_learn_more');
   });
 });
