@@ -52,6 +52,5 @@
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/react-kibana-context-styled"
   ]
 }
