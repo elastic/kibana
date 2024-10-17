@@ -5,10 +5,35 @@
  * 2.0.
  */
 
+import { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 import { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import {
+  generateHistoryIndexTemplateId,
+  generateHistoryIngestPipelineId,
+  generateHistoryTransformId,
+  generateLatestIndexTemplateId,
+  generateLatestIngestPipelineId,
+  generateLatestTransformId,
+} from '../lib/entities/helpers/generate_component_id';
 
 export const SO_ENTITY_DEFINITION_TYPE = 'entity-definition';
+
+export const backfillInstalledComponents: SavedObjectModelDataBackfillFn<
+  EntityDefinition,
+  EntityDefinition
+> = (savedObject) => {
+  const definition = savedObject.attributes;
+  definition.installedComponents = [
+    { type: 'transform', id: generateHistoryTransformId(definition) },
+    { type: 'transform', id: generateLatestTransformId(definition) },
+    { type: 'ingest_pipeline', id: generateHistoryIngestPipelineId(definition) },
+    { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
+    { type: 'template', id: generateHistoryIndexTemplateId(definition) },
+    { type: 'template', id: generateLatestIndexTemplateId(definition) },
+  ];
+  return savedObject;
+};
 
 export const entityDefinition: SavedObjectsType = {
   name: SO_ENTITY_DEFINITION_TYPE,
@@ -61,6 +86,14 @@ export const entityDefinition: SavedObjectsType = {
               },
             };
           },
+        },
+      ],
+    },
+    '3': {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: backfillInstalledComponents,
         },
       ],
     },

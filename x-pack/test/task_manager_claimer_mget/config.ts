@@ -33,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.task_manager.ephemeral_tasks.enabled=false',
         '--xpack.task_manager.ephemeral_tasks.request_capacity=100',
         '--xpack.task_manager.metrics_reset_interval=40000',
-        `--xpack.stack_connectors.enableExperimental=${JSON.stringify(['crowdstrikeConnectorOn'])}`,
+        `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
+          'crowdstrikeConnectorOn',
+          'inferenceConnectorOn',
+        ])}`,
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },

@@ -138,6 +138,18 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
+      async expectOnlyDefinedLinks(navItemIds: string[]) {
+        const navItemIdRegEx = /nav-item-id-[^\s]+/g;
+        const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
+        for (const sideNavItem of allSideNavLinks) {
+          const dataTestSubjs = await sideNavItem.getAttribute('data-test-subj');
+          const navItemIdMatch = dataTestSubjs?.match(navItemIdRegEx);
+          expect(navItemIdMatch).to.be.ok();
+          const navItemId = navItemIdMatch![0].replace('nav-item-id-', '');
+          expect(navItemIds).to.contain(navItemId);
+        }
+        expect(allSideNavLinks.length).to.equal(navItemIds.length);
+      },
       async clickPanelLink(deepLinkId: string) {
         await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
       },
@@ -252,6 +264,17 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
+      },
+      feedbackCallout: {
+        async expectExists() {
+          await testSubjects.existOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+        },
+        async expectMissing() {
+          await testSubjects.missingOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+        },
+        async dismiss() {
+          await testSubjects.click('sideNavfeedbackCallout > euiDismissCalloutButton');
+        },
       },
     },
     breadcrumbs: {

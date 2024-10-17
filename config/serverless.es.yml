@@ -34,6 +34,7 @@ xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
+xpack.searchIndices.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
@@ -56,7 +57,23 @@ xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: true
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        static: 2
+      medium:
+        min: 1
+        max: 32
+        static: 32
+      high:
+        min: 1
+        max: 512
+        static: 512
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false

@@ -36,4 +36,6 @@ When forming the risk matrix, consider some of the following examples and how th
 
 ### For maintainers
 
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://www.elastic.co/guide/en/kibana/master/contributing.html#kibana-release-notes-process)
+- [ ] This was checked for breaking API changes and was [labeled appropriately](https://www.elastic.co/guide/en/kibana/master/contributing.html#_add_your_labels)
+- [ ] This will appear in the **Release Notes** and follow the [guidelines](https://www.elastic.co/guide/en/kibana/master/contributing.html#kibana-release-notes-process)
+

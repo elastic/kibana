@@ -614,7 +614,7 @@
           },
           ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"children\" | \"className\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\"> & ",
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\"> & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -1636,7 +1636,7 @@
           },
           ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"children\" | \"className\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\">"
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

@@ -147,6 +147,11 @@ interface AlertDelayAttributes {
   active: number;
 }
 
+interface FlappingAttributes {
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
 export interface RuleAttributes {
   name: string;
   tags: string[];
@@ -180,4 +185,5 @@ export interface RuleAttributes {
   revision: number;
   running?: boolean | null;
   alertDelay?: AlertDelayAttributes;
+  flapping?: FlappingAttributes | null;
 }
