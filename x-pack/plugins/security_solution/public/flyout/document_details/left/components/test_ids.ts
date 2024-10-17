@@ -43,6 +43,9 @@ export const PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID =
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
 export const USER_DETAILS_LINK_TEST_ID = `${USER_DETAILS_TEST_ID}TitleLink` as const;
+export const USER_DETAILS_ALERT_COUNT_TEST_ID = `${USER_DETAILS_TEST_ID}AlertCount` as const;
+export const USER_DETAILS_MISCONFIGURATIONS_TEST_ID =
+  `${USER_DETAILS_TEST_ID}Misconfigurations` as const;
 export const USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID =
   `${USER_DETAILS_TEST_ID}RelatedHostsTable` as const;
 export const USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID =
@@ -53,6 +56,11 @@ export const USER_DETAILS_INFO_TEST_ID = 'user-overview' as const;
 
 export const HOST_DETAILS_TEST_ID = `${PREFIX}HostsDetails` as const;
 export const HOST_DETAILS_LINK_TEST_ID = `${HOST_DETAILS_TEST_ID}TitleLink` as const;
+export const HOST_DETAILS_ALERT_COUNT_TEST_ID = `${HOST_DETAILS_TEST_ID}AlertCount` as const;
+export const HOST_DETAILS_MISCONFIGURATIONS_TEST_ID =
+  `${HOST_DETAILS_TEST_ID}Misconfigurations` as const;
+export const HOST_DETAILS_VULNERABILITIES_TEST_ID =
+  `${HOST_DETAILS_TEST_ID}Vulnerabilities` as const;
 export const HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID =
   `${HOST_DETAILS_TEST_ID}RelatedUsersTable` as const;
 export const HOST_DETAILS_RELATED_USERS_LINK_TEST_ID =

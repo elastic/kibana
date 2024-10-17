@@ -49,10 +49,10 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       deleteData: z.optional(BooleanFromString).default(false),
     }),
   }),
-  handler: async ({ context, response, params, logger, server }) => {
+  handler: async ({ context, request, response, params, logger, server, getScopedClient }) => {
     try {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const canDisable = await canDisableEntityDiscovery(esClient);
+      const esClientAsCurrentUser = (await context.core).elasticsearch.client.asCurrentUser;
+      const canDisable = await canDisableEntityDiscovery(esClientAsCurrentUser);
       if (!canDisable) {
         return response.forbidden({
           body: {
@@ -62,14 +62,13 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
+      const entityClient = await getScopedClient({ request });
       const soClient = (await context.core).savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
       await uninstallBuiltInEntityDefinitions({
-        soClient,
-        esClient,
-        logger,
+        entityClient,
         deleteData: params.query.deleteData,
       });
 

@@ -143,6 +143,10 @@ export class ServiceAPIClient {
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
       });
+    } else if (!this.server.isDev) {
+      this.logger.warn(
+        'TLS certificate and key are not provided. Falling back to default HTTPS agent.'
+      );
     }
 
     return baseHttpsAgent;

@@ -6,14 +6,13 @@
  */
 
 import {
-  EuiPageSection,
-  EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -34,6 +33,8 @@ import { SearchIndexDetailsMappings } from './details_page_mappings';
 import { SearchIndexDetailsSettings } from './details_page_settings';
 import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item';
 import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
@@ -69,6 +70,7 @@ export const SearchIndexDetailsPage = () => {
     setDocumentsLoading(isInitialLoading);
     setDocumentsExists(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setDocumentsExists, setDocumentsLoading]);
+  const usageTracker = useUsageTracker();
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
@@ -114,9 +116,19 @@ export const SearchIndexDetailsPage = () => {
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {
       history.push(`index_details/${indexName}/${tab.id}`);
+
+      const tabEvent = {
+        [SearchIndexDetailsTabs.DATA]: AnalyticsEvents.indexDetailsNavDataTab,
+        [SearchIndexDetailsTabs.MAPPINGS]: AnalyticsEvents.indexDetailsNavMappingsTab,
+        [SearchIndexDetailsTabs.SETTINGS]: AnalyticsEvents.indexDetailsNavSettingsTab,
+      }[tab.id];
+
+      if (tabEvent) {
+        usageTracker.click(tabEvent);
+      }
     },
 
-    [history, indexName]
+    [history, indexName, usageTracker]
   );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -146,6 +158,7 @@ export const SearchIndexDetailsPage = () => {
   const handleDeleteIndexModal = useCallback(() => {
     setShowDeleteIndexModal(!isShowingDeleteModal);
   }, [isShowingDeleteModal]);
+  const { euiTheme } = useEuiTheme();
 
   if (isInitialLoading || isMappingsInitialLoading) {
     return (
@@ -174,24 +187,13 @@ export const SearchIndexDetailsPage = () => {
         />
       ) : (
         <>
-          <EuiPageSection>
-            <EuiButton
-              data-test-subj="backToIndicesButton"
-              color="text"
-              iconType="arrowLeft"
-              onClick={() => navigateToIndexListPage()}
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.backToIndicesButtonLabel"
-                defaultMessage="Back to indices"
-              />
-            </EuiButton>
-          </EuiPageSection>
           <EuiPageTemplate.Header
+            restrictWidth
             data-test-subj="searchIndexDetailsHeader"
             pageTitle={index?.name}
+            bottomBorder={false}
             rightSideItems={[
-              <EuiFlexGroup gutterSize="none">
+              <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   {!isDocumentsExists ? (
                     <EuiButtonEmpty
@@ -235,23 +237,29 @@ export const SearchIndexDetailsPage = () => {
               </EuiFlexGroup>,
             ]}
           />
-          <EuiPageTemplate.Section grow={false}>
+          <EuiPageTemplate.Section
+            grow={false}
+            restrictWidth
+            css={{ padding: `0 ${euiTheme.size.l} ${euiTheme.size.l}` }}
+          >
             <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup css={{ overflow: 'auto' }}>
-                  <EuiFlexItem css={{ flexShrink: 0 }}>
-                    <ConnectionDetails />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={{ flexShrink: 0 }}>
-                    <ApiKeyForm />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <QuickStats index={index} mappings={mappings} />
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiFlexGroup css={{ overflow: 'auto' }} wrap>
+                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
+                      <ConnectionDetails />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
+                      <ApiKeyForm />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <QuickStats index={index} mappings={mappings} />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTabbedContent
