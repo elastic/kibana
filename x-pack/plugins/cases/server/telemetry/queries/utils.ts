@@ -169,7 +169,7 @@ export const getCountsAndMaxData = async ({
       total: res.total,
       ...getCountsFromBuckets(countsBuckets),
       maxOnACase,
-      ...res.aggregations,
+      ...(additionalAggs && { additionalAggsResult: res.aggregations?.additionalAggsResult }),
     },
   };
 };

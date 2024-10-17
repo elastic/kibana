@@ -51,15 +51,6 @@ describe('alerts', () => {
           weekly: 2,
           monthly: 1,
           maxOnACase: 1,
-          counts: {
-            buckets: [
-              { doc_count: 1, key: 1 },
-              { doc_count: 2, key: 2 },
-              { doc_count: 3, key: 3 },
-            ],
-          },
-          references: { cases: { max: { value: 1 } } },
-          additionalAggsResult: { value: 5 },
         },
       });
     });

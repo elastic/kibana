@@ -28,8 +28,11 @@ export const getAlertsTelemetryData = async ({
   return {
     ...res,
     all: {
-      ...res.all,
       total: totalAlerts,
+      monthly: res.all.monthly,
+      weekly: res.all.weekly,
+      daily: res.all.daily,
+      maxOnACase: res.all.maxOnACase,
     },
   };
 };
