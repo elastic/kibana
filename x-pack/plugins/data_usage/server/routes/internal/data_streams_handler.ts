@@ -28,7 +28,7 @@ const getMeteringStats = (client: ElasticsearchClient) => {
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
-): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
+): RequestHandler<never, never, unknown, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
 
   return async (context, _, response) => {
@@ -44,7 +44,7 @@ export const getDataStreamsHandler = (
         .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
         .map((stat) => ({
           name: stat.name,
-          storageSizeBytes: stat.size_in_bytes,
+          storageSizeBytes: stat.size_in_bytes ?? 0,
         }));
 
       return response.ok({
