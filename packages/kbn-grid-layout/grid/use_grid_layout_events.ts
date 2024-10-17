@@ -171,39 +171,45 @@ export const useGridLayoutEvents = ({
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.draggingPosition$,
     ]).subscribe(([gridLayout, draggingPosition]) => {
-      const event = interactionEvent$.getValue();
+      const currentInteractionEvent = interactionEvent$.getValue();
+
       gridLayout.forEach((currentRow, rowIndex) => {
         Object.keys(currentRow.panels).forEach((key) => {
           const panel = currentRow.panels[key];
           const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
           if (!panelRef) return;
 
-          if (panel.id === event?.id && draggingPosition) {
-            // if the current panel is being dragged, render it with a fixed position
-            panelRef.style.position = 'fixed';
-            panelRef.style.left = `${draggingPosition.left}px`;
-            panelRef.style.top = `${draggingPosition.top}px`;
-            panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-            panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+          const isResize = currentInteractionEvent?.type === 'resize';
+          if (panel.id === currentInteractionEvent?.id && draggingPosition) {
+            if (isResize) {
+              // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+              panelRef.style.width = `${Math.max(
+                draggingPosition.right - draggingPosition.left,
+                runtimeSettings$.value.columnPixelWidth
+              )}px`;
+              panelRef.style.height = `${Math.max(
+                draggingPosition.bottom - draggingPosition.top,
+                runtimeSettings$.value.rowHeight
+              )}px`;
 
-            // undo any "lock to grid" styles
-            panelRef.style.gridColumnStart = ``;
-            panelRef.style.gridColumnEnd = ``;
-            panelRef.style.gridRowStart = ``;
-            panelRef.style.gridRowEnd = ``;
+              // undo any "lock to grid" styles **except** for the top left corner, which stays locked
+              panelRef.style.gridColumnStart = `${panel.column + 1}`;
+              panelRef.style.gridRowStart = `${panel.row + 1}`;
+              panelRef.style.gridColumnEnd = ``;
+              panelRef.style.gridRowEnd = ``;
+            } else {
+              // if the current panel is being dragged, render it with a fixed position + size
+              panelRef.style.position = 'fixed';
+              panelRef.style.left = `${draggingPosition.left}px`;
+              panelRef.style.top = `${draggingPosition.top}px`;
+              panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+              panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
 
-            if (gridLayoutStateManager.dragPreviewRef.current) {
-              // update the position of the drag preview
-              gridLayoutStateManager.dragPreviewRef.current.style.gridColumnStart = `${
-                panel.column + 1
-              }`;
-              gridLayoutStateManager.dragPreviewRef.current.style.gridColumnEnd = `${
-                panel.column + 1 + panel.width
-              }`;
-              gridLayoutStateManager.dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
-              gridLayoutStateManager.dragPreviewRef.current.style.gridRowEnd = `${
-                panel.row + 1 + panel.height
-              }`;
+              // undo any "lock to grid" styles
+              panelRef.style.gridColumnStart = ``;
+              panelRef.style.gridRowStart = ``;
+              panelRef.style.gridColumnEnd = ``;
+              panelRef.style.gridRowEnd = ``;
             }
           } else {
             // if the panel is not being dragged, undo any dragging styles
