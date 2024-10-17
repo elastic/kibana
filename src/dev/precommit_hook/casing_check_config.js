@@ -72,10 +72,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/observability_solution/profiling/Makefile',
 
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
-
   // Buildkite
   '.buildkite/**/*',
 
