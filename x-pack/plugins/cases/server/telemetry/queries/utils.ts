@@ -139,14 +139,14 @@ export const getCountsAndMaxData = async ({
   savedObjectsClient: TelemetrySavedObjectsClient;
   savedObjectType: string;
   filter?: KueryNode;
-  additionalAggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  additionalAggs?: { additionalAggsResult: estypes.AggregationsAggregationContainer };
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
     {
       counts: Buckets;
       references: MaxBucketOnCaseAggregation['references'];
-      additionalAggsResult: Record<string, unknown>;
+      additionalAggsResult: { value: number };
     }
   >({
     page: 0,

@@ -23,7 +23,7 @@ export const getAlertsTelemetryData = async ({
     additionalAggs: getUniqueAlertCommentsCountQuery(),
   });
 
-  const totalAlerts = (res.all.additionalAggsResult as { value?: number })?.value ?? 0;
+  const totalAlerts = res.all.additionalAggsResult?.value ?? 0;
 
   return {
     ...res,
