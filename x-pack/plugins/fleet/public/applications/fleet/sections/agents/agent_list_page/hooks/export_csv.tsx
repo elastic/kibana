@@ -100,18 +100,18 @@ export function useExportCSV() {
       .then(() => {
         notifications.toasts.addSuccess({
           title: i18n.translate(
-            'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+            'xpack.fleet.modalContent.successfullyQueuedReportNotificationTitle',
             { defaultMessage: 'Queued report for CSV' }
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+              id="xpack.fleet.modalContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={apiClient.getManagementLink()}>
                     <FormattedMessage
-                      id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      id="xpack.fleet.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
                       defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
@@ -125,7 +125,7 @@ export function useExportCSV() {
       })
       .catch((error) => {
         notifications.toasts.addError(error, {
-          title: i18n.translate('reporting.share.modalContent.notification.reportingErrorTitle', {
+          title: i18n.translate('xpack.fleet.modalContent.notification.reportingErrorTitle', {
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
