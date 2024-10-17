@@ -13,6 +13,7 @@
     "server": true,
     "configPath": ["xpack", "aiops"],
     "requiredPlugins": [
+      "eventBus",
       "charts",
       "data",
       "lens",

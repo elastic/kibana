@@ -42,6 +42,13 @@ export class AiopsPlugin
         if (cases) {
           registerCases(cases, coreStart, pluginStart);
         }
+
+        if (pluginStart.eventBus) {
+          pluginStart.eventBus.subscribe((action: unknown) => {
+            // eslint-disable-next-line no-console
+            console.log('AIOps Received updated search query:', action);
+          });
+        }
       }
     });
   }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
@@ -32,6 +33,7 @@ export interface AiopsPluginSetupDeps {
 }
 
 export interface AiopsPluginStartDeps {
+  eventBus: EventBusPluginStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;

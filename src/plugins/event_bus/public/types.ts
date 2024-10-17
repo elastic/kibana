@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subject } from 'rxjs';
-
-import type { Action } from './event_bus';
+import type { Action, Subscribe } from './event_bus';
 
 export interface EventBusPluginSetup {
-  eventBus$: Subject<Action>;
+  dispatch: (action: Action) => void;
+  subscribe: Subscribe;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EventBusPluginStart {}
+
+export interface EventBusPluginStart {
+  dispatch: (action: Action) => void;
+  subscribe: Subscribe;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginStartDependencies {}
