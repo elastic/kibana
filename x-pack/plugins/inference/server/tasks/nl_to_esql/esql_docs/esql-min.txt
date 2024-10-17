@@ -1,13 +1,27 @@
-## MIN
+# MIN
 
-The `MIN` function returns the minimum value of a specified field.
+The MIN function calculates the minimum value of a specified field.
 
-### Examples
+## Syntax
+
+`MIN(field)`
+
+### Parameters
+
+#### field
+
+The field for which the minimum value is to be calculated.
+
+## Examples
+
+Calculate the minimum number of languages spoken by employees:
 
 ```esql
 FROM employees
 | STATS MIN(languages)
 ```
+
+The MIN function can be used with inline functions:
 
 ```esql
 FROM employees

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type {
-  DiffableAllFields,
   InlineKqlQuery,
+  RuleDataSource,
 } from '../../../../../../../../../common/api/detection_engine';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
@@ -22,7 +22,7 @@ const i18nLabels = {
 
 export interface ThreatQueryReadOnlyProps {
   threatQuery: InlineKqlQuery;
-  dataSource: DiffableAllFields['data_source'];
+  dataSource?: RuleDataSource;
 }
 
 export const ThreatQueryReadOnly = ({ threatQuery, dataSource }: ThreatQueryReadOnlyProps) => {

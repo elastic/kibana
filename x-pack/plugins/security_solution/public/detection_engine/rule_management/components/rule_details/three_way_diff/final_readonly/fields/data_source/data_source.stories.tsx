@@ -8,12 +8,13 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
   mockDataView,
+  mockCustomQueryRule,
 } from '../../storybook/mocks';
 
 export default {
@@ -22,17 +23,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
-  kibanaServicesMock?: Record<string, unknown>;
+  finalDiffableRule: DiffableRule;
+  kibanaServicesOverrides?: Record<string, unknown>;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FieldReadOnly
-        fieldName="data_source"
-        finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-      />
+    <ThreeWayDiffStorybookProviders
+      kibanaServicesOverrides={args.kibanaServicesOverrides}
+      finalDiffableRule={args.finalDiffableRule}
+    >
+      <FieldReadOnly fieldName="data_source" />
     </ThreeWayDiffStorybookProviders>
   );
 };
@@ -40,18 +41,18 @@ const Template: Story<TemplateProps> = (args) => {
 export const DataSourceWithIndexPatterns = Template.bind({});
 
 DataSourceWithIndexPatterns.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     data_source: dataSourceWithIndexPatterns,
-  },
+  }),
 };
 
 export const DataSourceWithDataView = Template.bind({});
 
 DataSourceWithDataView.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     data_source: dataSourceWithDataView,
-  },
-  kibanaServicesMock: {
+  }),
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),

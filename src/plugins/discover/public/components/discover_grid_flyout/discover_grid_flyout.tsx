@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
@@ -87,6 +88,10 @@ export function DiscoverGridFlyout({
 
     return getDocViewer({ record: actualHit });
   }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
+  }, []);
 
   return (
     <UnifiedDocViewerFlyout

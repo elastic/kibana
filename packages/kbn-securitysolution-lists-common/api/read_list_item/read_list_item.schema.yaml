@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListItem
       x-codegen-enabled: true
-      summary: Gets a list item
+      summary: Get a list item
+      description: Get the details of a list item.
       parameters:
         - name: id
           in: query

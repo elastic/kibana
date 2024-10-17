@@ -6,10 +6,11 @@
  */
 
 import type { StateGraphArgs } from '@langchain/langgraph';
-import { END, START, StateGraph } from '@langchain/langgraph';
+import { StateGraph, END, START } from '@langchain/langgraph';
+import { SamplesFormat } from '../../../common';
 import type { RelatedState } from '../../types';
 import { handleValidatePipeline } from '../../util/graph';
-import { formatSamples, prefixSamples } from '../../util/samples';
+import { prefixSamples } from '../../util/samples';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
 import { handleErrors } from './errors';
 import { handleRelated } from './related';
@@ -28,10 +29,6 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
   samples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  formattedSamples: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
   },
   hasTriedOnce: {
     value: (x: boolean, y?: boolean) => y ?? x,
@@ -89,17 +86,25 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  samplesFormat: {
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'unsupported' }),
+  },
 };
 
 function modelInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
-  const samples = prefixSamples(state);
-  const formattedSamples = formatSamples(samples);
+  let samples: string[];
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    samples = prefixSamples(state);
+  } else {
+    samples = state.rawSamples;
+  }
+
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
     exAnswer: JSON.stringify(RELATED_EXAMPLE_ANSWER, null, 2),
     ecs: JSON.stringify(RELATED_ECS_FIELDS, null, 2),
     samples,
-    formattedSamples,
     initialPipeline,
     finalized: false,
     reviewed: false,
@@ -174,6 +179,6 @@ export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
       }
     );
 
-  const compiledRelatedGraph = workflow.compile();
+  const compiledRelatedGraph = workflow.compile().withConfig({ runName: 'Related' });
   return compiledRelatedGraph;
 }

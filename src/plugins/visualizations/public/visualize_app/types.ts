@@ -53,7 +53,7 @@ import type {
 } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
-import type { createVisEmbeddableFromObject } from '../embeddable';
+import type { createVisEmbeddableFromObject } from '../legacy/embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {

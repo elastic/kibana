@@ -1,29 +1,32 @@
-## DISSECT
+# DISSECT
 
-DISSECT enables you to extract structured data out of a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns. This command is particularly useful for parsing log files, structured text, or any other string data where fields are separated by specific delimiters.
+The DISSECT command is used to extract structured data from a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns.
 
 ### Use Cases
 - **Log Parsing**: Extracting timestamps, log levels, and messages from log entries.
 - **Data Transformation**: Converting unstructured text data into structured columns for further analysis.
 - **Data Cleaning**: Removing or reformatting specific parts of a string to make the data more usable.
 
-### Limitations
-- If a field name conflicts with an existing column, the existing column is dropped.
-- If a field name is used more than once, only the rightmost duplicate creates a column.
-- DISSECT does not support reference keys.
-
-### Syntax
+## Syntax
 
 `DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]`
 
 ### Parameters
-- **input**: The column that contains the string you want to structure. If the column has multiple values, DISSECT will process each value.
-- **pattern**: A dissect pattern.
-- **<separator>**: A string used as the separator between appended values, when using the append modifier.
 
-### Examples
+#### input
 
-#### Example 1: Basic Usage
+The column containing the string you want to structure. If the column has multiple values, DISSECT will process each value.
+
+#### pattern
+
+A dissect pattern. If a field name conflicts with an existing column, the existing column is dropped. If a field name is used more than once, only the rightmost duplicate creates a column.
+
+#### <separator>
+
+A string used as the separator between appended values, when using the append modifier.
+
+## Examples
+
 The following example parses a string that contains a timestamp, some text, and an IP address:
 
 ```esql
@@ -32,7 +35,6 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-#### Example 2: Type Conversion
 By default, DISSECT outputs keyword string columns. To convert to another type, use Type conversion functions:
 
 ```esql
@@ -42,7 +44,6 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | EVAL date = TO_DATETIME(date)
 ```
 
-#### Example 3: Using Append Separator
 In this example, we use the `APPEND_SEPARATOR` to concatenate values with a custom separator:
 
 ```esql
@@ -51,4 +52,7 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-These examples showcase different ways to use the DISSECT command to parse and transform string data in Elasticsearch.
+### Limitations
+- If a field name conflicts with an existing column, the existing column is dropped.
+- If a field name is used more than once, only the rightmost duplicate creates a column.
+- DISSECT does not support reference keys.

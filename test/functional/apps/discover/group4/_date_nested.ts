@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/date_nested.json'
       );
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function unloadMakelogs() {
@@ -32,9 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show an error message', async function () {
-      await PageObjects.discover.selectIndexPattern('date-nested');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.showsErrorCallout();
+      await discover.selectIndexPattern('date-nested');
+      await discover.waitUntilSearchingHasFinished();
+      await discover.showsErrorCallout();
     });
   });
 }

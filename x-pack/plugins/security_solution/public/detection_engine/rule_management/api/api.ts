@@ -150,6 +150,7 @@ export const patchRule = async ({
  */
 export const previewRule = async ({
   rule,
+  enableLoggedRequests,
   signal,
 }: PreviewRulesProps): Promise<RulePreviewResponse> =>
   KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
@@ -157,6 +158,7 @@ export const previewRule = async ({
     version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
+    query: enableLoggedRequests ? { enable_logged_requests: enableLoggedRequests } : undefined,
   });
 
 /**

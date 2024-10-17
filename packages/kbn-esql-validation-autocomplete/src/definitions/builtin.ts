@@ -291,7 +291,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
 ];
 
-const comparisonFunctions: FunctionDefinition[] = [
+export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
@@ -637,6 +637,20 @@ const otherDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
+        returnType: 'void',
+      },
+    ],
+  },
+  {
+    name: 'order-expression',
+    type: 'builtin',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
+      defaultMessage: 'Specify column sorting modifiers',
+    }),
+    supportedCommands: ['sort'],
+    signatures: [
+      {
+        params: [{ name: 'column', type: 'any' }],
         returnType: 'void',
       },
     ],

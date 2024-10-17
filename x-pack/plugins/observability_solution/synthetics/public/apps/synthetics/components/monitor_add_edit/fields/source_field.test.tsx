@@ -76,7 +76,7 @@ describe('<ScriptRecorderFields />', () => {
     const { getByText } = render(
       <WrappedComponent fileName={fileName} type="recorder" script={script} isEdit={true} />
     );
-    userEvent.click(getByText(/Upload new script/));
+    await userEvent.click(getByText(/Upload new script/));
     expect(getByText(fileName)).toBeInTheDocument();
   });
 });

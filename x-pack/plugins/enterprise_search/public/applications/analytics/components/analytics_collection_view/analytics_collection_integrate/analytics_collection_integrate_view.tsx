@@ -90,6 +90,7 @@ http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-L
             )}
           </p>
           <EuiLink
+            data-test-subj="enterpriseSearchCORSStepLearnMoreAboutCorsForBehavioralAnalyticsLink"
             href={docLinks.behavioralAnalyticsCORS}
             data-telemetry-id="entSearchContent-analytics-cors-learnMoreLink"
             external
@@ -130,6 +131,7 @@ const apiKeyStep = (
             }
           )}{' '}
           <EuiLink
+            data-test-subj="enterpriseSearchApiKeyStepLearnMoreAboutApiKeysLink"
             href={docLinks.apiKeys}
             data-telemetry-id="entSearchContent-analytics-apiKey-learnMoreLink"
             external
@@ -148,6 +150,7 @@ const apiKeyStep = (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="enterpriseSearchApiKeyStepCreateApiKeyButton"
             iconSide="left"
             iconType="plusInCircleFilled"
             onClick={openApiKeyModal}
@@ -163,6 +166,7 @@ const apiKeyStep = (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="enterpriseSearchApiKeyStepViewKeysButton"
             iconSide="left"
             iconType="popout"
             data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"

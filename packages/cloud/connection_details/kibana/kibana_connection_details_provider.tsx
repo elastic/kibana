@@ -21,6 +21,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { http, docLinks, analytics } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
+  const elasticsearchConfig = await start.plugins?.cloud?.fetchElasticsearchConfig();
   const result: ConnectionDetailsOpts = {
     ...options,
     navigateToUrl: start.core.application
@@ -35,7 +36,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
     },
     endpoints: {
       id: start.plugins?.cloud?.cloudId,
-      url: start.plugins?.cloud?.elasticsearchUrl,
+      url: elasticsearchConfig?.elasticsearchUrl,
       cloudIdLearMoreLink: docLinks?.links?.cloud?.beatsAndLogstashConfiguration,
       ...options?.endpoints,
     },

@@ -672,7 +672,7 @@ describe('getExecutionLogForRule()', () => {
             action: 'rule_get_execution_log',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'rule-name' } },
         })
       );
     });
@@ -695,6 +695,7 @@ describe('getExecutionLogForRule()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'rule-name',
             },
           },
           error: {

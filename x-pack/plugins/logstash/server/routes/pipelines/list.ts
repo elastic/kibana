@@ -28,6 +28,7 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
     {
       path: '/api/logstash/pipelines',
       options: {
+        access: 'public',
         summary: `Get all managed Logstash pipelines`,
       },
       validate: false,

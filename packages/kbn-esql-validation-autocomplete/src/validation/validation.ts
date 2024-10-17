@@ -47,7 +47,6 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -77,7 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
-import { isStringType } from '../shared/esql_types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -90,7 +89,7 @@ function validateFunctionLiteralArg(
   if (isLiteralItem(actualArg)) {
     if (
       actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -99,7 +98,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
@@ -199,11 +198,7 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (
-      'noNestingFunctions' in parameterDefinition &&
-      parameterDefinition.noNestingFunctions &&
-      fnDef.type === argFn.type
-    ) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
@@ -819,11 +814,6 @@ function validateSource(
     return messages;
   }
 
-  const hasCCS = hasCCSSource(source.name);
-  if (hasCCS) {
-    return messages;
-  }
-
   const commandDef = getCommandDefinition(commandName);
   const isWildcardAndNotSupported =
     hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
@@ -880,10 +870,12 @@ function validateColumnForCommand(
       const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
-          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
-          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
-        });
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
+          ({ innerTypes }) =>
+            innerTypes &&
+            !innerTypes.includes('any') &&
+            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
+        );
         if (hasSomeWrongInnerTypes) {
           const supportedTypes: string[] = columnParamsWithInnerTypes
             .map(({ innerTypes }) => innerTypes)
@@ -1101,6 +1093,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**

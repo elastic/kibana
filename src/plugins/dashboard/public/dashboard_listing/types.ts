@@ -10,7 +10,6 @@
 import type { PropsWithChildren } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { DashboardApplicationService } from '../services/application/types';
 
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
@@ -21,12 +20,6 @@ export type DashboardListingProps = PropsWithChildren<{
   urlStateEnabled?: boolean;
   showCreateDashboardButton?: boolean;
 }>;
-
-// because the type of `application.capabilities.advancedSettings` is so generic, the provider
-// requiring the `save` key to be part of it is causing type issues - so, creating a custom type
-export type TableListViewApplicationService = DashboardApplicationService & {
-  capabilities: { advancedSettings: { save: boolean } };
-};
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   managed?: boolean;

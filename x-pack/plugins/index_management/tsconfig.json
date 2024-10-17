@@ -45,7 +45,7 @@
     "@kbn/monaco",
     "@kbn/console-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/utility-types",
     "@kbn/inference_integration_flyout",
     "@kbn/ml-plugin",

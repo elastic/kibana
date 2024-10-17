@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'header']);
+  const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
@@ -17,62 +17,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens runtime fields', () => {
     it('should be able to add runtime field and use it', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
         await dataViews.clickAddFieldFromSearchBar();
         await fieldEditor.setName('runtimefield');
         await fieldEditor.enableValue();
         await fieldEditor.typeScript("emit('abc')");
         await fieldEditor.save();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.searchField('runtime');
-        await PageObjects.lens.waitForField('runtimefield');
-        await PageObjects.lens.dragFieldToWorkspace('runtimefield');
+        await header.waitUntilLoadingHasFinished();
+        await lens.searchField('runtime');
+        await lens.waitForField('runtimefield');
+        await lens.dragFieldToWorkspace('runtimefield');
       });
-      await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top 5 values of runtimefield'
-      );
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
+      await lens.waitForVisualization();
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
 
     it('should able to filter runtime fields', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-        await PageObjects.lens.waitForVisualization();
-        expect(await PageObjects.lens.isShowingNoResults()).to.equal(true);
+        await lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
+        await lens.waitForVisualization();
+        expect(await lens.isShowingNoResults()).to.equal(true);
       });
       await filterBar.removeAllFilters();
-      await PageObjects.lens.waitForVisualization();
+      await lens.waitForVisualization();
     });
 
     it('should able to edit field', async () => {
-      await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.editField('runtimefield');
+      await lens.clickField('runtimefield');
+      await lens.editField('runtimefield');
       await fieldEditor.setName('runtimefield2', true, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
-      await PageObjects.lens.searchField('runtime');
-      await PageObjects.lens.waitForField('runtimefield2');
-      await PageObjects.lens.dragFieldToDimensionTrigger(
+      await lens.searchField('runtime');
+      await lens.waitForField('runtimefield2');
+      await lens.dragFieldToDimensionTrigger(
         'runtimefield2',
         'lnsDatatable_rows > lns-dimensionTrigger'
       );
-      await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top 5 values of runtimefield2'
-      );
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
+      await lens.waitForVisualization();
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield2');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
 
     it('should able to remove field', async () => {
-      await PageObjects.lens.clickField('runtimefield2');
-      await PageObjects.lens.removeField('runtimefield2');
+      await lens.clickField('runtimefield2');
+      await lens.removeField('runtimefield2');
       await fieldEditor.confirmDelete();
-      await PageObjects.lens.waitForFieldMissing('runtimefield2');
+      await lens.waitForFieldMissing('runtimefield2');
     });
   });
 }

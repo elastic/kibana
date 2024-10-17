@@ -10,6 +10,7 @@
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -26,11 +27,14 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     it('are present', async () => {
-      const response = await supertest.get(FIELDS_PATH).query({
-        pattern: '*',
-        include_unmapped: true,
-        apiVersion: INITIAL_REST_VERSION_INTERNAL,
-      });
+      const response = await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: '*',
+          include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        });
 
       const cacheControlHeader = response.get('cache-control');
 
@@ -44,11 +48,14 @@ export default function ({ getService }: FtrProviderContext) {
     it('no-cache when data_views:cache_max_age set to zero', async () => {
       await kibanaServer.uiSettings.update({ 'data_views:cache_max_age': 0 });
 
-      const response = await supertest.get(FIELDS_PATH).query({
-        pattern: 'b*',
-        include_unmapped: true,
-        apiVersion: INITIAL_REST_VERSION_INTERNAL,
-      });
+      const response = await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'b*',
+          include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        });
 
       const cacheControlHeader = response.get('cache-control');
 
@@ -63,15 +70,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns 304 on matching etag', async () => {
-      const response = await supertest.get(FIELDS_PATH).query({
-        pattern: '*',
-        include_unmapped: true,
-        apiVersion: INITIAL_REST_VERSION_INTERNAL,
-      });
+      const response = await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: '*',
+          include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        });
 
       await supertest
         .get(FIELDS_PATH)
         .set('If-None-Match', response.get('etag')!)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: '*',
           include_unmapped: true,
@@ -81,12 +92,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles empty field lists', async () => {
-      const response = await supertest.get(FIELDS_PATH).query({
-        pattern: 'xyz',
-        include_unmapped: true,
-        apiVersion: INITIAL_REST_VERSION_INTERNAL,
-        allow_no_index: true,
-      });
+      const response = await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'xyz',
+          include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+          allow_no_index: true,
+        });
 
       expect(response.body.fields).to.be.empty();
     });

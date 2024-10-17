@@ -14,6 +14,7 @@ import {
   moduleIdParamSchema,
   moduleFilterSchema,
   optionalModuleIdParamSchema,
+  optionalSizeQuerySchema,
   recognizeModulesSchema,
   setupModuleBodySchema,
   recognizeModulesSchemaResponse,
@@ -82,6 +83,62 @@ export function dataRecognizer(
               compatibleModuleType
             );
             const results = await dr.findMatches(indexPatternTitle, filter);
+
+            return response.ok({ body: results });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/modules/recognize_by_module/{moduleId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+      summary: 'Recognize module',
+      description:
+        'By supplying a module id, discover if any of the data views contain data that is a match for that module.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: moduleIdParamSchema,
+            query: optionalSizeQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { moduleId } = request.params;
+            const { size } = request.query;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewsService = await getDataViewsService();
+
+            const dr = dataRecognizerFactory(
+              client,
+              mlClient,
+              soClient,
+              dataViewsService,
+              mlSavedObjectService,
+              request,
+              compatibleModuleType
+            );
+            const results = await dr.findIndexMatches(moduleId, size);
 
             return response.ok({ body: results });
           } catch (e) {

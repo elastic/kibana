@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setStubDashboardServices } from '@kbn/dashboard-plugin/public/services/mocks';
+import { setStubKibanaServices as setStubDashboardServices } from '@kbn/dashboard-plugin/public/services/mocks';
 import { setStubKibanaServices } from './public/mocks';
 
 setStubKibanaServices();

@@ -15,14 +15,18 @@ import { fetchRuleTypeAadTemplateFields, getDescription } from '../apis';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   enabled: boolean;
+  cacheTime?: number;
 }
 
 export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplateFieldProps) => {
-  const { http, ruleTypeId, enabled } = props;
+  const { http, ruleTypeId, enabled, cacheTime } = props;
 
   const queryFn = () => {
+    if (!ruleTypeId) {
+      return;
+    }
     return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
   };
 
@@ -35,11 +39,12 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
     queryKey: ['useLoadRuleTypeAadTemplateField', ruleTypeId],
     queryFn,
     select: (dataViewFields) => {
-      return dataViewFields.map<ActionVariable>((d) => ({
+      return dataViewFields?.map<ActionVariable>((d) => ({
         name: d.name,
         description: getDescription(d.name, EcsFlat),
       }));
     },
+    cacheTime,
     refetchOnWindowFocus: false,
     enabled,
   });

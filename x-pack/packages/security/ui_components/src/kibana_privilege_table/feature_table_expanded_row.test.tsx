@@ -8,6 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
   kibanaFeatures,
@@ -15,7 +16,6 @@ import {
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {

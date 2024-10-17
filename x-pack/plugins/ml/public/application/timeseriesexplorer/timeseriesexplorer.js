@@ -160,7 +160,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.mlApi = constructorContext.services.mlServices.mlApi;
     this.mlForecastService = forecastServiceFactory(this.mlApi);
     this.mlIndexUtils = indexServiceFactory(this.dataViewsService);
-    this.mlJobService = mlJobServiceFactory(this.toastNotificationService, this.mlApi);
+    this.mlJobService = mlJobServiceFactory(this.mlApi);
     this.mlResultsService = mlResultsServiceProvider(this.mlApi);
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
@@ -1081,6 +1081,7 @@ export class TimeSeriesExplorer extends React.Component {
                   latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
                   setForecastId={this.setForecastId}
                   className="forecast-controls"
+                  selectedForecastId={this.props.selectedForecastId}
                 />
               </EuiFormRow>
             </EuiFlexItem>

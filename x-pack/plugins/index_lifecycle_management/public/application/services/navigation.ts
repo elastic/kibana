@@ -18,6 +18,10 @@ export const getPolicyEditPath = (policyName: string): string => {
   return encodeURI(`/policies/edit/${encodeURIComponent(policyName)}`);
 };
 
+export const getPolicyViewPath = (policyName: string): string => {
+  return encodeURI(`/policies?policy=${encodeURIComponent(policyName)}`);
+};
+
 export const getPolicyCreatePath = () => {
   return ROUTES.create;
 };

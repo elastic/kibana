@@ -6,7 +6,7 @@
  */
 
 import type { EuiButtonProps, EuiLinkProps, PropsForAnchor, PropsForButton } from '@elastic/eui';
-import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
 import * as i18n from './translations';
@@ -18,10 +18,17 @@ export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = n
     : (arg: T) => Promise<void> | void;
 }
 
-export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+type LinkButtonProps = React.FC<
+  (PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>) & { isEmpty?: boolean }
+>;
+
+export const LinkButton: LinkButtonProps = ({ children, isEmpty, ...props }) =>
+  isEmpty ? (
+    <EuiButtonEmpty {...props}>{children}</EuiButtonEmpty>
+  ) : (
+    <EuiButton {...props}>{children}</EuiButton>
+  );
+LinkButton.displayName = 'LinkButton';
 
 // TODO: Fix this manually. Issue #123375
 // eslint-disable-next-line react/display-name
@@ -62,6 +69,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
     </LinkAnchor>
   );
 };
+
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
 
@@ -95,9 +103,10 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
       <LinkButton
         onClick={navigateToConfigureCasesClick}
         href={getConfigureCasesUrl()}
-        iconType="controlsHorizontal"
+        iconType="gear"
         isDisabled={false}
         aria-label={label}
+        isEmpty={true}
         data-test-subj="configure-case-button"
       >
         {label}

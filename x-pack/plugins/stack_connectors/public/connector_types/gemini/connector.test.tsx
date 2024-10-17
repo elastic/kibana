@@ -37,7 +37,7 @@ const geminiConnector = {
     gcpProjectID: 'test-project',
   },
   secrets: {
-    credentialsJSON: JSON.stringify({
+    credentialsJson: JSON.stringify({
       type: 'service_account',
       project_id: '',
       private_key_id: '',
@@ -83,6 +83,10 @@ describe('GeminiConnectorFields renders', () => {
     );
     expect(getAllByTestId('gemini-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('gemini-api-model-doc')[0]).toBeInTheDocument();
+
+    expect(getAllByTestId('secrets.credentialsJson-input')[0]).toHaveValue(
+      geminiConnector.secrets.credentialsJson
+    );
   });
 
   describe('Dashboard link', () => {
@@ -155,7 +159,7 @@ describe('GeminiConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -184,15 +188,14 @@ describe('GeminiConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(res.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });

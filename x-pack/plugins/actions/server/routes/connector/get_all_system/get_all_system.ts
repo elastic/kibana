@@ -21,6 +21,9 @@ export const getAllConnectorsIncludingSystemRoute = (
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connectors`,
       validate: {},
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

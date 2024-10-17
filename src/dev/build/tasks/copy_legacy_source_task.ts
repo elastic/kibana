@@ -38,9 +38,10 @@ export const CopyLegacySource: Task = {
       '!**/jest*',
       '!**/*.{story,stories}.{js,ts}',
       '!**/{test_mocks,stubs}.ts',
-      '!**/*.{scss,console,d.ts,sh,md,mdx,asciidoc,docnav.json}',
+      '!**/*.{scss,console,d.ts,sh,md,mdx,asciidoc,docnav.json,http}',
       '!**/*.{test,test.mocks,mock,mocks,spec}.*',
       '!**/{packages,dev_docs,docs,public,__stories__,storybook,.storybook,ftr_e2e,e2e,scripts,test,tests,test_resources,test_data,__tests__,manual_tests,__jest__,__snapshots__,__mocks__,mock_responses,mocks,fixtures,__fixtures__,cypress,integration_tests}/**',
+      '!**/http-client.env.json',
 
       // explicitly exclude every package directory outside of the root packages dir
       ...getPackages(config.resolveFromRepo('.')).flatMap((p) =>

@@ -17,7 +17,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiSwitch,
   EuiTextArea,
@@ -128,48 +127,46 @@ export const SavedBookEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormControlLayout>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.authorLabel', {
-              defaultMessage: 'Author',
-            })}
-          >
-            <EuiFieldText
-              value={authorName}
-              onChange={(e) => attributesManager.authorName.next(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.titleLabel', {
-              defaultMessage: 'Title',
-            })}
-          >
-            <EuiFieldText
-              value={bookTitle}
-              onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.pagesLabel', {
-              defaultMessage: 'Number of pages',
-            })}
-          >
-            <EuiFieldNumber
-              value={numberOfPages}
-              onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.synopsisLabel', {
-              defaultMessage: 'Synopsis',
-            })}
-          >
-            <EuiTextArea
-              value={synopsis}
-              onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFormControlLayout>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.authorLabel', {
+            defaultMessage: 'Author',
+          })}
+        >
+          <EuiFieldText
+            value={authorName ?? ''}
+            onChange={(e) => attributesManager.authorName.next(e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.titleLabel', {
+            defaultMessage: 'Title',
+          })}
+        >
+          <EuiFieldText
+            value={bookTitle ?? ''}
+            onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.pagesLabel', {
+            defaultMessage: 'Number of pages',
+          })}
+        >
+          <EuiFieldNumber
+            value={numberOfPages ?? ''}
+            onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.synopsisLabel', {
+            defaultMessage: 'Synopsis',
+          })}
+        >
+          <EuiTextArea
+            value={synopsis ?? ''}
+            onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

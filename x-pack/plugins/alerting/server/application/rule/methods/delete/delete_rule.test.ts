@@ -89,12 +89,15 @@ beforeEach(() => {
   (auditLogger.log as jest.Mock).mockClear();
 });
 
+const fakeRuleName = 'fakeRuleName';
+
 describe('delete()', () => {
   let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
+      name: fakeRuleName,
       alertTypeId: 'myType',
       consumer: 'myApp',
       schedule: { interval: '10s' },
@@ -341,7 +344,7 @@ describe('delete()', () => {
             action: 'rule_delete',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: fakeRuleName } },
         })
       );
     });
@@ -360,6 +363,7 @@ describe('delete()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: fakeRuleName,
             },
           },
           error: {

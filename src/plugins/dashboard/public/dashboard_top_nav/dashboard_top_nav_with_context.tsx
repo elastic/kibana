@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { DashboardAPIContext } from '../dashboard_app/dashboard_app';
-import { DashboardContainer } from '../dashboard_container';
 import {
   InternalDashboardTopNav,
   InternalDashboardTopNavProps,
 } from './internal_dashboard_top_nav';
+import { DashboardContext } from '../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../dashboard_api/types';
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
-  dashboardContainer: DashboardContainer;
+  dashboardApi: DashboardApi;
 }
 
 export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
-  <DashboardAPIContext.Provider value={props.dashboardContainer}>
+  <DashboardContext.Provider value={props.dashboardApi}>
     <InternalDashboardTopNav {...props} />
-  </DashboardAPIContext.Provider>
+  </DashboardContext.Provider>
 );
 
 // eslint-disable-next-line import/no-default-export

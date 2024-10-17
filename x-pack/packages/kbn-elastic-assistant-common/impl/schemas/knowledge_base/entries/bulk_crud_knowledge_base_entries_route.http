@@ -1,0 +1,13 @@
+### Empty Bulk Action
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries/_bulk_action
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "delete": {},
+  "create": [],
+  "update": []
+}

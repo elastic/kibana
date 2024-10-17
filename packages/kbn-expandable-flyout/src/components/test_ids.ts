@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const FLYOUT_TEST_ID = 'resizableFlyout';
+
 export const RIGHT_SECTION_TEST_ID = 'rightSection';
 
 export const LEFT_SECTION_TEST_ID = 'leftSection';
@@ -33,3 +35,16 @@ export const SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID =
 
 export const SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID =
   'settingsMenuFlyoutTypeButtonGroupPushOption';
+
+export const SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID = 'settingsMenuFlyoutSizeTitle';
+
+export const SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID =
+  'settingsMenuFlyoutSizeInformationIcon';
+
+export const SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID = 'settingsMenuFlyoutSizeButton';
+
+export const RESIZABLE_LEFT_SECTION_TEST_ID = 'resizableLeftSection';
+
+export const RESIZABLE_RIGHT_SECTION_TEST_ID = 'resizableRightSection';
+
+export const RESIZABLE_BUTTON_TEST_ID = 'resizableButton';

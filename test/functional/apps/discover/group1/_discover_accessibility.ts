@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common } = getPageObjects(['common']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {

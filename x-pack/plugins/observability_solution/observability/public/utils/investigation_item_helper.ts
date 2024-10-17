@@ -22,12 +22,12 @@ const AggMappingForLens: Record<string, string> = {
 const genLensEqForCustomThresholdRule = (criterion: MetricExpression) => {
   const metricNameResolver: Record<string, string> = {};
 
-  criterion.metrics.forEach(
-    (metric: CustomThresholdExpressionMetric) =>
-      (metricNameResolver[metric.name] = `${
-        AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
-      }(${metric.field ? metric.field : metric.filter ? metric.filter : ''})`)
-  );
+  criterion.metrics.forEach((metric: CustomThresholdExpressionMetric) => {
+    const metricFilter = metric.filter ? `kql='${metric.filter}'` : '';
+    metricNameResolver[metric.name] = `${
+      AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
+    }(${metric.field ? metric.field : metricFilter})`;
+  });
 
   let equation = criterion.equation
     ? criterion.equation

@@ -93,7 +93,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
       onChange={[Function]}
     />
     <FooterAction
-      justifyContent="space-between"
+      justifyContent="spaceBetween"
     >
       <EuiFlexItem
         grow={false}

@@ -43,13 +43,16 @@
   .euiDataGridHeaderCell {
     align-items: start;
 
-    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-      height: 100%;
-      align-items: flex-start;
+    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
+      align-self: center;
     }
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
@@ -80,7 +83,6 @@
   }
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
-    padding: 0;
     border-bottom: 0;
   }
 
@@ -93,7 +95,8 @@
   }
 
   .euiDataGridRowCell__content--autoHeight,
-  .euiDataGridRowCell__content--lineCountHeight {
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
   }
 }
@@ -102,25 +105,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,
@@ -140,16 +124,17 @@
 
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
-  margin-top: -$euiSizeXS;
-  .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
-    margin-top: 0;
+  margin-top: -1px;
+
+  // Compact density - 'auto & custom' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) & {
+    margin-top: -2.5px;
   }
 
-  &--size-normal {
-    display: inline-block;
-    width: $euiSizeL;
-    height: $euiSizeL;
-    overflow: hidden;
+  // Compact density - 'single' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight & {
+    align-self: flex-start;
+    margin-top: -3px;
   }
 }
 

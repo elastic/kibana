@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { safeDump } from 'js-yaml';
+import type { dump } from 'js-yaml';
 
 import type { FullAgentPolicy } from '../types';
 
@@ -30,7 +30,7 @@ const POLICY_KEYS_ORDER = [
 
 export const fullAgentPolicyToYaml = (
   policy: FullAgentPolicy,
-  toYaml: typeof safeDump,
+  toYaml: typeof dump,
   apiKey?: string
 ): string => {
   const yaml = toYaml(policy, {

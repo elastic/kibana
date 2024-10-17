@@ -54,9 +54,7 @@ describe('datatable cell renderer', () => {
         <DataContext.Provider
           value={{
             table,
-            alignments: {
-              a: 'right',
-            },
+            alignments: new Map([['a', 'right']]),
             ...wrapperProps,
           }}
         >
@@ -217,7 +215,7 @@ describe('datatable cell renderer', () => {
         {
           wrapper: DataContextProviderWrapper({
             table,
-            minMaxByColumnId: { a: { min: 12, max: 155 } },
+            minMaxByColumnId: new Map([['a', { min: 12, max: 155 }]]),
             ...context,
           }),
         }

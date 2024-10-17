@@ -13,9 +13,14 @@ import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
 import type { ChromeHelpMenuLink, ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
-import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
+import type {
+  ChromeBreadcrumb,
+  ChromeBreadcrumbsAppendExtension,
+  ChromeSetBreadcrumbsParams,
+} from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { PanelSelectedNode } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -83,7 +88,7 @@ export interface ChromeStart {
   /**
    * Override the current set of breadcrumbs
    */
-  setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+  setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
 
   /**
    * Get an observable of the current extension appended to breadcrumbs
@@ -173,10 +178,43 @@ export interface ChromeStart {
    */
   getChromeStyle$(): Observable<ChromeStyle>;
 
-  /**
-   * Get an observable of the current collapsed state of the side nav.
-   */
-  getIsSideNavCollapsed$(): Observable<boolean>;
+  sideNav: {
+    /**
+     * Get an observable of the current collapsed state of the side nav.
+     */
+    getIsCollapsed$(): Observable<boolean>;
+
+    /**
+     * Set the collapsed state of the side nav.
+     * @param isCollapsed The collapsed state of the side nav.
+     */
+    setIsCollapsed(isCollapsed: boolean): void;
+
+    /**
+     * Get an observable of the selected nav node that opens the side nav panel.
+     */
+    getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+
+    /**
+     * Set the selected nav node that opens the side nav panel.
+     *
+     * @param node The selected nav node that opens the side nav panel. If a string is provided,
+     * it will be used as the **id** of the selected nav node. If `null` is provided, the side nav panel
+     * will be closed.
+     */
+    setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+
+    /**
+     * Get an observable of the visibility state of the feedback button in the side nav.
+     */
+    getIsFeedbackBtnVisible$: () => Observable<boolean>;
+
+    /**
+     * Set the visibility state of the feedback button in the side nav.
+     * @param isVisible The visibility state of the feedback button in the side nav.
+     */
+    setIsFeedbackBtnVisible: (isVisible: boolean) => void;
+  };
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.

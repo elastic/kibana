@@ -150,7 +150,7 @@ export class HeadlessChromiumDriverFactory {
             pipe: !this.config.browser.chromium.inspect,
             userDataDir: this.userDataDir,
             executablePath: this.binaryPath,
-            ignoreHTTPSErrors: true,
+            acceptInsecureCerts: true,
             handleSIGHUP: false,
             args: chromiumArgs,
             defaultViewport: viewport,

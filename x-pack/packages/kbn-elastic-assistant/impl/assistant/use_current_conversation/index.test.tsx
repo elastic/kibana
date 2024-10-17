@@ -72,17 +72,31 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook();
 
     expect(result.current.currentConversation).toBeUndefined();
-    expect(result.current.currentSystemPromptId).toBeUndefined();
+    expect(result.current.currentSystemPrompt).toBeUndefined();
   });
 
-  it('should set the current system prompt ID when the prompt selection changes', () => {
-    const { result } = setupHook();
+  it('should set the current system prompt ID when the prompt selection changes', async () => {
+    const conversationId = 'welcome_id';
+    const conversation = mockData.welcome_id;
+    mockUseConversation.getConversation.mockResolvedValue(conversation);
 
-    act(() => {
-      result.current.setCurrentSystemPromptId('prompt-id');
+    const { result } = setupHook({
+      conversationId,
+      conversations: { [conversationId]: conversation },
     });
 
-    expect(result.current.currentSystemPromptId).toBe('prompt-id');
+    await act(async () => {
+      await result.current.setCurrentSystemPromptId('prompt-id');
+    });
+
+    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith({
+      conversation,
+      apiConfig: {
+        ...conversation.apiConfig,
+        defaultSystemPromptId: 'prompt-id',
+      },
+    });
+    expect(defaultProps.refetchCurrentUserConversations).toHaveBeenCalled();
   });
 
   it('should fetch and set the current conversation', async () => {
@@ -136,7 +150,7 @@ describe('useCurrentConversation', () => {
     });
 
     expect(result.current.currentConversation).toEqual(conversation);
-    expect(result.current.currentSystemPromptId).toBe('something-crazy');
+    expect(result.current.currentSystemPrompt?.id).toBe('something-crazy');
   });
 
   it('should non-existing handle conversation selection', async () => {
@@ -169,7 +183,7 @@ describe('useCurrentConversation', () => {
     });
 
     expect(result.current.currentConversation).toEqual(mockData.welcome_id);
-    expect(result.current.currentSystemPromptId).toBe('system-prompt-id');
+    expect(result.current.currentSystemPrompt?.id).toBe('system-prompt-id');
   });
 
   it('should create a new conversation', async () => {
@@ -208,6 +222,115 @@ describe('useCurrentConversation', () => {
     });
 
     expect(mockUseConversation.createConversation).toHaveBeenCalled();
+  });
+
+  it('should create a new conversation using the connector portion of the apiConfig of the current conversation', async () => {
+    const newConversation = {
+      ...mockData.welcome_id,
+      id: 'new-id',
+      title: 'NEW_CHAT',
+      messages: [],
+    } as Conversation;
+    mockUseConversation.createConversation.mockResolvedValue(newConversation);
+
+    const { result } = setupHook({
+      conversations: {
+        'old-id': {
+          ...mockData.welcome_id,
+          id: 'old-id',
+          title: 'Old Chat',
+          messages: [],
+        } as Conversation,
+      },
+      conversationId: 'old-id',
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: {
+          'old-id': {
+            ...mockData.welcome_id,
+            id: 'old-id',
+            title: 'Old Chat',
+            messages: [],
+          } as Conversation,
+          [newConversation.id]: newConversation,
+        },
+      }),
+    });
+
+    await act(async () => {
+      await result.current.handleCreateConversation();
+    });
+    const { defaultSystemPromptId: _, ...everythingExceptSystemPromptId } =
+      mockData.welcome_id.apiConfig;
+
+    expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
+      apiConfig: everythingExceptSystemPromptId,
+      title: 'New chat',
+    });
+  });
+
+  it('should create a new conversation with correct isNewConversationDefault: true system prompt', async () => {
+    const newConversation = {
+      ...mockData.welcome_id,
+      id: 'new-id',
+      title: 'NEW_CHAT',
+      messages: [],
+    } as Conversation;
+    mockUseConversation.createConversation.mockResolvedValue(newConversation);
+
+    const { result } = setupHook({
+      conversations: {
+        'old-id': {
+          ...mockData.welcome_id,
+          id: 'old-id',
+          title: 'Old Chat',
+          messages: [],
+        } as Conversation,
+      },
+      allSystemPrompts: [
+        {
+          timestamp: '2024-09-10T15:52:24.761Z',
+          users: [
+            {
+              id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+              name: 'elastic',
+            },
+          ],
+          content: 'Address the user as Mr Orange in each response',
+          isNewConversationDefault: true,
+          updatedAt: '2024-09-10T22:07:44.915Z',
+          id: 'LBOi3JEBy3uD9EGi1d_G',
+          name: 'Call me Orange',
+          promptType: 'system',
+          consumer: 'securitySolutionUI',
+        },
+      ],
+      conversationId: 'old-id',
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: {
+          'old-id': {
+            ...mockData.welcome_id,
+            id: 'old-id',
+            title: 'Old Chat',
+            messages: [],
+          } as Conversation,
+          [newConversation.id]: newConversation,
+        },
+      }),
+    });
+
+    await act(async () => {
+      await result.current.handleCreateConversation();
+    });
+    const { defaultSystemPromptId: _, ...everythingExceptSystemPromptId } =
+      mockData.welcome_id.apiConfig;
+
+    expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
+      apiConfig: {
+        ...everythingExceptSystemPromptId,
+        defaultSystemPromptId: 'LBOi3JEBy3uD9EGi1d_G',
+      },
+      title: 'New chat',
+    });
   });
 
   it('should delete a conversation', async () => {

@@ -404,7 +404,7 @@ describe('ConnectorsDropdown', () => {
       { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
     );
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
     expect(screen.queryByTestId('dropdown-connector-add-connector')).not.toBeInTheDocument();
   });
 });

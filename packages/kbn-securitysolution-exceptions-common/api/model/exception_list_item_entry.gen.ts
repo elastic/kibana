@@ -60,7 +60,7 @@ export const ExceptionListItemEntryExists = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-const ExceptionListItemEntryNestedEntryItemInternal = z.union([
+export const ExceptionListItemEntryNestedEntryItemInternal = z.union([
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryExists,
@@ -89,7 +89,7 @@ export const ExceptionListItemEntryMatchWildcard = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
+export const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryList,

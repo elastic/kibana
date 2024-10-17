@@ -29,27 +29,27 @@ describe('VideoToast', () => {
     expect(videoGif).toBeInTheDocument();
   });
 
-  it('should open the video in a new tab when the gif is clicked', () => {
+  it('should open the video in a new tab when the gif is clicked', async () => {
     const videoGif = screen.getByTestId('video-gif');
-    userEvent.click(videoGif);
+    await userEvent.click(videoGif);
     expect(window.open).toHaveBeenCalledWith(
       'https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW',
       '_blank'
     );
   });
 
-  it('should open the video in a new tab when the "Watch overview video" button is clicked', () => {
+  it('should open the video in a new tab when the "Watch overview video" button is clicked', async () => {
     const watchVideoButton = screen.getByRole('button', { name: 'Watch overview video' });
-    userEvent.click(watchVideoButton);
+    await userEvent.click(watchVideoButton);
     expect(window.open).toHaveBeenCalledWith(
       'https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW',
       '_blank'
     );
   });
 
-  it('should call the onClose callback when the close button is clicked', () => {
+  it('should call the onClose callback when the close button is clicked', async () => {
     const closeButton = screen.getByTestId('toastCloseButton');
-    userEvent.click(closeButton);
+    await userEvent.click(closeButton);
     expect(onCloseMock).toHaveBeenCalled();
   });
 });

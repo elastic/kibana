@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import {
   CanAddNewPanel,
@@ -26,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
-export type ParentApi = PresentationContainer &
+export type PageApi = PresentationContainer &
   CanAddNewPanel &
   HasExecutionContext &
   HasSaveNotification &
@@ -36,9 +35,7 @@ export type ParentApi = PresentationContainer &
   PublishesViewMode &
   PublishesReload &
   PublishesTimeRange &
-  PublishesUnsavedChanges & {
-    getAllDataViews: () => DataView[];
-  };
+  PublishesUnsavedChanges;
 
 export interface LastSavedState {
   timeRange: TimeRange;

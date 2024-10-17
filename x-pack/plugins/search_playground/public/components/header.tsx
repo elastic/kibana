@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
-          <Toolbar />
+          <Toolbar selectedPageMode={selectedPageMode} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

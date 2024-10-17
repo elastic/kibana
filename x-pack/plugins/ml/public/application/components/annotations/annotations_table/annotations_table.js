@@ -33,7 +33,6 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { mlJobServiceFactory } from '../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import {
@@ -101,10 +100,7 @@ class AnnotationsTableUI extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApi
-    );
+    this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
   }
 
   getAnnotations() {

@@ -22,15 +22,17 @@ import { Document } from 'langchain/document';
 export const addRequiredKbResourceMetadata = ({
   docs,
   kbResource,
+  required = true,
 }: {
   docs: Array<Document<Record<string, unknown>>>;
   kbResource: string;
+  required?: boolean;
 }): Array<Document<Record<string, unknown>>> =>
   docs.map((doc) => ({
     ...doc,
     metadata: {
       ...doc.metadata,
       kbResource,
-      required: true, // indicates that the document is required for searches on the kbResource topic
+      required, // indicates that the document is required for searches on the kbResource topic
     },
   }));

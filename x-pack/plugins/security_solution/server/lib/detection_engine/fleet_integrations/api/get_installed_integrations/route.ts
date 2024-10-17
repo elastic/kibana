@@ -46,7 +46,7 @@ export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRout
           });
 
           const packagePolicies = await fleet.packagePolicy.list(
-            fleet.internalReadonlySoClient,
+            fleet.savedObjects.createInternalScopedSoClient(),
             {}
           );
           packagePolicies.items.forEach((policy) => {

@@ -67,7 +67,8 @@ describe('Title', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('input'), ' is updated');
+    await userEvent.click(await screen.findByTestId('input'));
+    await userEvent.paste(' is updated');
 
     expect(globalForm.getFormData()).toEqual({ title: 'My title is updated' });
   });

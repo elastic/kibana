@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertSummaryField } from '@kbn/observability-plugin/public';
-import React, { useEffect } from 'react';
-import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
+import { AlertDetailsAppSectionProps } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
+import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 import { BurnRateAlert, BurnRateRule } from './types';
 
-interface AppSectionProps {
+interface AppSectionProps extends AlertDetailsAppSectionProps {
   alert: BurnRateAlert;
   rule: BurnRateRule;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertDetailsAppSection({
-  alert,
-  rule,
-  setAlertSummaryFields,
-}: AppSectionProps) {
+export default function AlertDetailsAppSection({ alert, rule, setSources }: AppSectionProps) {
   const {
     services: {
       http: { basePath },
@@ -51,8 +47,8 @@ export default function AlertDetailsAppSection({
       },
     ];
 
-    setAlertSummaryFields(fields);
-  }, [alertLink, rule, setAlertSummaryFields, basePath, slo, instanceId]);
+    setSources(fields);
+  }, [alertLink, rule, setSources, basePath, slo, instanceId]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">

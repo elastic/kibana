@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import { z } from '@kbn/zod';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
+import { Observable, of } from 'rxjs';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 
@@ -98,13 +99,12 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
 });
 
 // Public APIs should be versioned
-// @ts-expect-error
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+  // @ts-expect-error
   endpoint: 'GET /api/endpoint_with_params',
   options: {
     tags: [],
   },
-  // @ts-expect-error
   handler: async (resources) => {},
 });
 
@@ -114,6 +114,15 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
     tags: [],
   },
   handler: async (resources) => {},
+});
+
+// cannot return observables that are not in the SSE structure
+const route = createServerRouteFactory<{}, {}>()({
+  endpoint: 'POST /internal/endpoint_returning_observable_without_sse_structure',
+  // @ts-expect-error
+  handler: async () => {
+    return of({ streamed_response: true });
+  },
 });
 
 const createServerRoute = createServerRouteFactory<{}, {}>();
@@ -201,6 +210,12 @@ const repository = {
       });
     },
   }),
+  ...createServerRoute({
+    endpoint: 'POST /internal/endpoint_returning_observable',
+    handler: async () => {
+      return of({ type: 'foo' as const, streamed_response: true });
+    },
+  }),
 };
 
 type TestRepository = typeof repository;
@@ -248,21 +263,21 @@ const client: TestClient = {} as any;
 // It should respect any additional create options.
 
 // @ts-expect-error Property 'timeout' is missing
-client('GET /internal/endpoint_without_params', {});
+client.fetch('GET /internal/endpoint_without_params', {});
 
-client('GET /internal/endpoint_without_params', {
+client.fetch('GET /internal/endpoint_without_params', {
   timeout: 1,
 });
 
 // It does not allow params for routes without a params codec
-client('GET /internal/endpoint_without_params', {
+client.fetch('GET /internal/endpoint_without_params', {
   // @ts-expect-error Object literal may only specify known properties, and 'params' does not exist in type
   params: {},
   timeout: 1,
 });
 
 // It requires params for routes with a params codec
-client('GET /internal/endpoint_with_params', {
+client.fetch('GET /internal/endpoint_with_params', {
   params: {
     // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
@@ -270,7 +285,7 @@ client('GET /internal/endpoint_with_params', {
   timeout: 1,
 });
 
-client('GET /internal/endpoint_with_params_zod', {
+client.fetch('GET /internal/endpoint_with_params_zod', {
   params: {
     // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
@@ -279,16 +294,16 @@ client('GET /internal/endpoint_with_params_zod', {
 });
 
 // Params are optional if the codec has no required keys
-client('GET /internal/endpoint_with_optional_params', {
+client.fetch('GET /internal/endpoint_with_optional_params', {
   timeout: 1,
 });
 
-client('GET /internal/endpoint_with_optional_params_zod', {
+client.fetch('GET /internal/endpoint_with_optional_params_zod', {
   timeout: 1,
 });
 
 // If optional, an error will still occur if the params do not match
-client('GET /internal/endpoint_with_optional_params', {
+client.fetch('GET /internal/endpoint_with_optional_params', {
   timeout: 1,
   params: {
     // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
@@ -296,7 +311,7 @@ client('GET /internal/endpoint_with_optional_params', {
   },
 });
 
-client('GET /internal/endpoint_with_optional_params_zod', {
+client.fetch('GET /internal/endpoint_with_optional_params_zod', {
   timeout: 1,
   params: {
     // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
@@ -305,57 +320,65 @@ client('GET /internal/endpoint_with_optional_params_zod', {
 });
 
 // The return type is correctly inferred
-client('GET /internal/endpoint_with_params', {
-  params: {
-    path: {
-      serviceName: '',
+client
+  .fetch('GET /internal/endpoint_with_params', {
+    params: {
+      path: {
+        serviceName: '',
+      },
     },
-  },
-  timeout: 1,
-}).then((res) => {
-  assertType<{
-    noParamsForMe: boolean;
-    // @ts-expect-error Property 'noParamsForMe' is missing in type
-  }>(res);
+    timeout: 1,
+  })
+  .then((res) => {
+    assertType<{
+      noParamsForMe: boolean;
+      // @ts-expect-error Property 'noParamsForMe' is missing in type
+    }>(res);
 
-  assertType<{
-    yesParamsForMe: boolean;
-  }>(res);
-});
+    assertType<{
+      yesParamsForMe: boolean;
+    }>(res);
+  });
 
-client('GET /internal/endpoint_with_params_zod', {
-  params: {
-    path: {
-      serviceName: '',
+client
+  .fetch('GET /internal/endpoint_with_params_zod', {
+    params: {
+      path: {
+        serviceName: '',
+      },
     },
-  },
-  timeout: 1,
-}).then((res) => {
-  assertType<{
-    noParamsForMe: boolean;
-    // @ts-expect-error Property 'noParamsForMe' is missing in type
-  }>(res);
+    timeout: 1,
+  })
+  .then((res) => {
+    assertType<{
+      noParamsForMe: boolean;
+      // @ts-expect-error Property 'noParamsForMe' is missing in type
+    }>(res);
 
-  assertType<{
-    yesParamsForMe: boolean;
-  }>(res);
-});
+    assertType<{
+      yesParamsForMe: boolean;
+    }>(res);
+  });
 
-client('GET /internal/endpoint_returning_result', {
-  timeout: 1,
-}).then((res) => {
-  assertType<{
-    result: boolean;
-  }>(res);
-});
+client
+  .fetch('GET /internal/endpoint_returning_result', {
+    timeout: 1,
+  })
+  .then((res) => {
+    assertType<{
+      result: boolean;
+    }>(res);
+  });
 
-client('GET /internal/endpoint_returning_kibana_response', {
-  timeout: 1,
-}).then((res) => {
-  assertType<{
-    result: boolean;
-  }>(res);
-});
+client
+  .fetch('GET /internal/endpoint_returning_kibana_response', {
+    timeout: 1,
+  })
+  .then((res) => {
+    assertType<{
+      result: boolean;
+    }>(res);
+  });
 
 // decodeRequestParams should return the type of the codec that is passed
 assertType<{ path: { serviceName: string } }>(
@@ -383,4 +406,10 @@ assertType<{ path: { serviceName: boolean } }>(
     },
     t.type({ path: t.type({ serviceName: t.string }) })
   )
+);
+
+assertType<Observable<{ type: 'foo'; streamed_response: boolean }>>(
+  client.stream('POST /internal/endpoint_returning_observable', {
+    timeout: 10,
+  })
 );

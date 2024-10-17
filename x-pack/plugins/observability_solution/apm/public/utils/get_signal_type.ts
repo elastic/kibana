@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDataStreamType } from '../../common/entities/types';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 
 export function isApmSignal(dataStreamTypes: EntityDataStreamType[]) {
   return (
@@ -15,4 +15,8 @@ export function isApmSignal(dataStreamTypes: EntityDataStreamType[]) {
 }
 export function isLogsSignal(dataStreamTypes: EntityDataStreamType[]) {
   return dataStreamTypes.includes(EntityDataStreamType.LOGS);
+}
+
+export function isLogsOnlySignal(signalTypes: EntityDataStreamType[]) {
+  return !isApmSignal(signalTypes) && isLogsSignal(signalTypes);
 }

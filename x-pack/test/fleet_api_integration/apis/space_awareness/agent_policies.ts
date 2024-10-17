@@ -11,10 +11,11 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
+import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
@@ -22,13 +23,17 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
-    const apiClient = new SpaceTestApiClient(supertest);
+    const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
+      username: testUsers.fleet_all_int_all.username,
+      password: testUsers.fleet_all_int_all.password,
+    });
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
 
     before(async () => {
+      await setupTestUsers(getService('security'));
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({

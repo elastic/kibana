@@ -24,6 +24,11 @@ function generator({ imageFlavor }: TemplateContext) {
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   monitoring.ui.container.elasticsearch.enabled: true
+
+  # Must be removed before v9 release
+  # Requires all registry packages to add v9 as a compatible semver range
+  # https://github.com/elastic/kibana/issues/192624
+  xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
   `);
 }
 

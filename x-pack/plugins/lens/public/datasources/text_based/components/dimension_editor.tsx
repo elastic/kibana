@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';

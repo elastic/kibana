@@ -7,6 +7,7 @@
 
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
@@ -55,6 +56,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
     connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
@@ -66,13 +68,18 @@ export interface FunctionHandler {
 
 export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
 
-type RegisterInstructionCallback = ({
+export interface InstructionOrCallbackWithScopes {
+  instruction: InstructionOrCallback;
+  scopes: AssistantScope[];
+}
+
+export type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
 }) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
-export type RegisterInstruction = (...instructions: InstructionOrCallback[]) => void;
+export type RegisterInstruction = (...instruction: InstructionOrCallbackWithScopes[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -80,9 +87,13 @@ export type RegisterFunction = <
   TArguments = FromSchema<TParameters>
 >(
   definition: FunctionDefinition<TParameters>,
-  respond: RespondFunction<TArguments, TResponse>
+  respond: RespondFunction<TArguments, TResponse>,
+  scopes: AssistantScope[]
 ) => void;
-export type FunctionHandlerRegistry = Map<string, FunctionHandler>;
+export type FunctionHandlerRegistry = Map<
+  string,
+  { handler: FunctionHandler; scopes: AssistantScope[] }
+>;
 
 export type RegistrationCallback = ({}: {
   signal: AbortSignal;

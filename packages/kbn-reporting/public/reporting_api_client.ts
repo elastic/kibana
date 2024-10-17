@@ -227,6 +227,9 @@ export class ReportingAPIClient implements IReportingAPI {
     });
   }
 
+  /**
+   * Adds the browserTimezone and kibana version to report job params
+   */
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
@@ -251,7 +254,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
+    return this.http.get<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
   }
 
   public verifyScreenCapture() {

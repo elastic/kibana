@@ -352,7 +352,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-center-row"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

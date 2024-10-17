@@ -43,3 +43,5 @@ export const ConsoleOutputLang: LangModuleType = {
 export type { ParsedRequest } from './types';
 export { getParsedRequestsProvider } from './language';
 export { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
+
+export { createOutputParser } from './output_parser';

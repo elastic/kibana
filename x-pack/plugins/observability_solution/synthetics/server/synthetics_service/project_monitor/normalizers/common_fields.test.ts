@@ -163,6 +163,7 @@ describe('getNormalizeCommonFields', () => {
           timeout: '16',
           params: '',
           max_attempts: 2,
+          labels: {},
         },
       });
     }
@@ -228,6 +229,7 @@ describe('getNormalizeCommonFields', () => {
         timeout: '16',
         params: '',
         max_attempts: 2,
+        labels: {},
       },
     });
   });

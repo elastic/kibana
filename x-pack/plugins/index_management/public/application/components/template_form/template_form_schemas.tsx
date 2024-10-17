@@ -129,6 +129,18 @@ export const schemas: Record<string, FormSchema> = {
           type: VALIDATION_TYPES.ARRAY_ITEM,
           isBlocking: false,
         },
+        {
+          validator: startsWithField({
+            char: '.',
+            message: i18n.translate(
+              'xpack.idxMgmt.templateValidation.indexPatternDotPrefixedError',
+              {
+                defaultMessage: 'Index patterns cannot match dot-prefixed indices.',
+              }
+            ),
+          }),
+          type: VALIDATION_TYPES.ARRAY_ITEM,
+        },
       ],
     },
     doCreateDataStream: {

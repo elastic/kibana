@@ -8,22 +8,25 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect } from 'react';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiComboBox,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiTextArea,
+  EuiComboBox,
 } from '@elastic/eui';
+
 import {
   type Field,
   type Aggregation,
   EVENT_RATE_FIELD_ID,
   mlCategory,
 } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
@@ -258,14 +261,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
             <FieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={currentFieldOptions}
                 selectedOptions={createSelectedOptions(fieldOption)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
-                renderOption={renderOption}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -274,53 +276,49 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiFlexGrid columns={2}>
           <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
             <ByFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(byFieldOption)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </ByFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
             <OverFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(overFieldOption)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </OverFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
             <PartitionFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(partitionFieldOption)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
             <ExcludeFrequentDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
                 selectedOptions={createSelectedOptions(excludeFrequentOption)}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
-                renderOption={renderOption}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>

@@ -176,6 +176,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+      x-codeSamples:
+        - lang: cURL
+          label: Import with createNewCopies
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
 components:
   parameters:
     kbn_xsrf:

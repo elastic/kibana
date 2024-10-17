@@ -9,6 +9,7 @@
 
 export type {
   DataTableRecord,
+  DataTableColumnsMeta,
   EsHitRecord,
   IgnoredReason,
   ShouldShowFieldInTableHandler,

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { SelectInterval } from './select_interval';
@@ -28,7 +28,7 @@ describe('SelectInterval', () => {
     jest.clearAllMocks();
   });
 
-  it('updates the selected value correctly on click', () => {
+  it('updates the selected value correctly on click', async () => {
     // arrange
     const { getByText, getByTestId } = render(<SelectInterval />);
 
@@ -36,9 +36,7 @@ describe('SelectInterval', () => {
     expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
 
     // update
-    act(() => {
-      userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
-    });
+    await userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
 
     // assert updated state
     expect(mockUpdateCallback).toBeCalledWith({ display: '1 hour', val: 'hour' });

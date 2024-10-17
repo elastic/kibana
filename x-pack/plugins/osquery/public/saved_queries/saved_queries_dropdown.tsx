@@ -120,7 +120,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   return (
     <EuiFormRow
       isInvalid={!!queryFieldError}
-      error={queryFieldError}
+      error={queryFieldError as React.ReactNode}
       label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
       labelAppend={<OsquerySchemaLink />}
       fullWidth

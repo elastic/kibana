@@ -11,7 +11,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { confirm, question } from '../cli/keystore/utils';
 import { getConfigDirectory } from '@kbn/utils';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 export async function interactive(keys, docs, logger) {
   const settings = Object.keys(keys);
@@ -37,10 +37,10 @@ export async function interactive(keys, docs, logger) {
       `What filename should be used for the sample Kibana config file? [${defaultSaveLocation}])`
     );
     const saveLocation = promptedSaveLocation || defaultSaveLocation;
-    writeFileSync(saveLocation, docs + safeDump(setKeys));
+    writeFileSync(saveLocation, docs + dump(setKeys));
     logger.log(`Wrote configuration to ${saveLocation}`);
   } else {
     logger.log('\nSettings:');
-    logger.log(safeDump(setKeys));
+    logger.log(dump(setKeys));
   }
 }

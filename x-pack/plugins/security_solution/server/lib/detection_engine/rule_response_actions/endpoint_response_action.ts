@@ -6,7 +6,6 @@
  */
 
 import { each } from 'lodash';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
@@ -29,8 +28,8 @@ export const endpointResponseAction = async (
     'ruleExecution',
     'automatedResponseActions'
   );
-  const ruleId = alerts[0][ALERT_RULE_UUID];
-  const ruleName = alerts[0][ALERT_RULE_NAME];
+  const ruleId = alerts[0].kibana.alert?.rule.uuid;
+  const ruleName = alerts[0].kibana.alert?.rule.name;
   const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
   const { comment, command } = responseAction.params;
   const errors: string[] = [];

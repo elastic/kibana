@@ -118,7 +118,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled, isDevMode, isOpen } = props;
+  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -169,7 +169,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
           },
           config: {
-            isMonacoEnabled,
             isDevMode,
           },
         }}
@@ -179,7 +178,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             {isOpen ? (
               <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
                 <EuiWindowEvent event="keydown" handler={onKeyDown} />
-                <Main hideWelcome />
+                <Main isEmbeddable={true} />
               </div>
             ) : (
               <span />

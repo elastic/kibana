@@ -25,8 +25,9 @@ import {
   type DataFrameAnalyticsConfig,
   DEFAULT_RESULTS_FIELD,
 } from '@kbn/ml-data-frame-analytics-utils';
-
 import { isDefined } from '@kbn/ml-is-defined';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -35,7 +36,6 @@ import {
   getPartitioningFieldNames,
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
-import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceStringTokens } from '../../../util/string_utils';
 import {
   replaceTokensInUrlValue,

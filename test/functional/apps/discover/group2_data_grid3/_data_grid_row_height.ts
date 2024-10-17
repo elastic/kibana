@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
 
@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should use the default row height', async () => {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
       expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');

@@ -30,7 +30,6 @@ Object {
       "enabled": true,
       "name": "system-1",
       "namespace": "default",
-      "output_id": null,
       "package": Object {
         "name": "system",
         "requires_root": true,

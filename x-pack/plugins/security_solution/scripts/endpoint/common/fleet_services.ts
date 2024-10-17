@@ -62,6 +62,7 @@ import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
+import { fetchActiveSpace } from './spaces';
 import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
@@ -83,11 +84,14 @@ const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
 /** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
 export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
 
-const randomAgentPolicyName = (() => {
+/**
+ * Generate a random policy name
+ */
+export const randomAgentPolicyName = (() => {
   let counter = fleetGenerator.randomN(100);
 
-  return (): string => {
-    return `agent policy - ${fleetGenerator.randomString(10)}_${counter++}`;
+  return (prefix: string = 'agent policy'): string => {
+    return `${prefix} - ${fleetGenerator.randomString(10)}_${counter++}`;
   };
 })();
 
@@ -814,7 +818,7 @@ export const createAgentPolicy = async ({
   const body: CreateAgentPolicyRequest['body'] = policy ?? {
     name: randomAgentPolicyName(),
     description: `Policy created by security solution tooling: ${__filename}`,
-    namespace: 'default',
+    namespace: (await fetchActiveSpace(kbnClient)).id,
     monitoring_enabled: ['logs', 'metrics'],
   };
 
@@ -862,12 +866,13 @@ export const getOrCreateDefaultAgentPolicy = async ({
 
   log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
+  const spaceId = (await fetchActiveSpace(kbnClient)).id;
   const newAgentPolicy = await createAgentPolicy({
     kbnClient,
     policy: {
       name: policyName,
       description: `Policy created by security solution tooling: ${__filename}`,
-      namespace: 'default',
+      namespace: spaceId,
       monitoring_enabled: ['logs', 'metrics'],
     },
   });
@@ -989,7 +994,6 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
   return createIntegrationPolicy(kbnClient, {
     name: integrationPolicyName,
     description: `Created by script: ${__filename}`,
-    namespace: 'default',
     policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
     enabled: true,
@@ -1217,7 +1221,6 @@ export const addEndpointIntegrationToAgentPolicy = async ({
   const newIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
     name,
     description: `Created by: ${__filename}`,
-    namespace: 'default',
     policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
     enabled: true,
@@ -1352,3 +1355,17 @@ export const fetchAllEndpointIntegrationPolicyListIds = async (
 
   return policyIds;
 };
+
+/**
+ * Calls the Fleet internal API to enable space awareness
+ * @param kbnClient
+ */
+export const enableFleetSpaceAwareness = memoize(async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient
+    .request({
+      path: '/internal/fleet/enable_space_awareness',
+      headers: { 'Elastic-Api-Version': '1' },
+      method: 'POST',
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+});

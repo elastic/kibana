@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -54,6 +55,7 @@ function executeFunctionAndCatchError({
   logger,
   tracer,
   connectorId,
+  useSimulatedFunctionCalling,
 }: {
   name: string;
   args: string | undefined;
@@ -64,6 +66,7 @@ function executeFunctionAndCatchError({
   logger: Logger;
   tracer: LangTracer;
   connectorId: string;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -84,6 +87,7 @@ function executeFunctionAndCatchError({
           signal,
           messages,
           connectorId,
+          useSimulatedFunctionCalling,
         })
       );
 
@@ -134,6 +138,7 @@ function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
   disableFunctions,
+  scope,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
@@ -142,13 +147,14 @@ function getFunctionDefinitions({
     | {
         except: string[];
       };
+  scope: AssistantScope;
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
   let systemFunctions = functionClient
-    .getFunctions()
+    .getFunctions({ scope })
     .map((fn) => fn.definition)
     .filter(
       (def) =>
@@ -181,6 +187,8 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
+  scope,
+  useSimulatedFunctionCalling,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -197,6 +205,8 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
+  scope: AssistantScope;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -206,11 +216,12 @@ export function continueConversation({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
+    scope,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(),
+      applicationInstructions: functionClient.getInstructions(scope),
       userInstructions,
       adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
@@ -310,6 +321,7 @@ export function continueConversation({
       logger,
       tracer,
       connectorId,
+      useSimulatedFunctionCalling,
     });
   }
 
@@ -338,6 +350,8 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
+              scope,
+              useSimulatedFunctionCalling,
             });
           })
         )

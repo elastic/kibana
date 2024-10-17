@@ -93,9 +93,7 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value {"id":"someId"}, excess properties: ["id"]'
-      );
+      expect(result.badRequest.mock.calls[0][0]).toEqual('file_name: Required');
     });
 
     test('return validation error for request params', async () => {
@@ -107,9 +105,7 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value "someId" supplied to "ids"'
-      );
+      expect(result.badRequest.mock.calls[0][0]).toEqual('ids: Expected array, received string');
     });
   });
 });

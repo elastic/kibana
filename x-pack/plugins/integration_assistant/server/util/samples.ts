@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as yaml from 'js-yaml';
+import { dump } from 'js-yaml';
 import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
 interface SampleObj {
@@ -18,9 +18,10 @@ interface NewObj {
   };
 }
 
-interface Field {
+export interface Field {
   name: string;
   type: string;
+  description?: string;
   fields?: Field[];
 }
 
@@ -45,17 +46,6 @@ export function prefixSamples(
   }
 
   return modifiedSamples;
-}
-
-export function formatSamples(samples: string[]): string {
-  const formattedSamples: unknown[] = [];
-
-  for (const sample of samples) {
-    const sampleObj = JSON.parse(sample);
-    formattedSamples.push(sampleObj);
-  }
-
-  return JSON.stringify(formattedSamples, null, 2);
 }
 
 function determineType(value: unknown): string {
@@ -160,42 +150,64 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.safeDump(fieldsStructure, { sortKeys: false });
-}
-
-function isEmptyValue(value: unknown): boolean {
-  return (
-    value === null ||
-    value === undefined ||
-    (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) ||
-    (Array.isArray(value) && value.length === 0)
-  );
+  return dump(fieldsStructure, { sortKeys: false });
 }
 
 export function merge(
   target: Record<string, any>,
   source: Record<string, any>
 ): Record<string, unknown> {
+  const filteredTarget = filterOwnProperties(target);
   for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = target[key];
-    if (Array.isArray(sourceValue)) {
-      // Directly assign arrays
-      target[key] = sourceValue;
-    } else if (
-      typeof sourceValue === 'object' &&
-      sourceValue !== null &&
-      !Array.isArray(targetValue)
-    ) {
-      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
-        target[key] = merge({}, sourceValue);
-      } else {
-        target[key] = merge(targetValue, sourceValue);
+    if (!isBuiltInProperties(key, source)) {
+      const targetValue = filteredTarget[key];
+      if (Array.isArray(sourceValue)) {
+        // Directly assign arrays
+        filteredTarget[key] = sourceValue;
+      } else if (isObject(sourceValue) && !Array.isArray(targetValue)) {
+        if (!isObject(targetValue) || isEmptyValue(targetValue)) {
+          filteredTarget[key] = merge({}, sourceValue);
+        } else {
+          filteredTarget[key] = merge(targetValue, sourceValue);
+        }
+      } else if (
+        !(key in filteredTarget) ||
+        (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))
+      ) {
+        filteredTarget[key] = sourceValue;
       }
-    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      target[key] = sourceValue;
     }
   }
-  return target;
+  return filteredTarget;
+}
+
+function isEmptyValue(value: unknown): boolean {
+  if (value == null) return true;
+  if (isObject(value)) {
+    if (Array.isArray(value)) return value.length === 0;
+    return value && Object.keys(value).length === 0;
+  }
+  return false;
+}
+
+function isObject(value: any): boolean {
+  return typeof value === 'object' && value !== null;
+}
+
+function isBuiltInProperties(key: string, obj: Record<string, any>): boolean {
+  return key === 'constructor' || !Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function filterOwnProperties(obj: Record<string, any>): Record<string, any> {
+  const ownProps: Record<string, any> = {};
+
+  for (const key of Object.getOwnPropertyNames(obj)) {
+    if (!isBuiltInProperties(key, obj)) {
+      ownProps[key] = (obj as any)[key];
+    }
+  }
+
+  return ownProps;
 }
 
 export function mergeSamples(objects: any[]): string {
@@ -210,4 +222,44 @@ export function mergeSamples(objects: any[]): string {
   }
 
   return JSON.stringify(result, null, 2);
+}
+
+export function flattenObjectsList(
+  obj: Field[]
+): Array<{ name: string; type: string; description?: string }> {
+  const result: Array<{ name: string; type: string; description?: string }> = [];
+  flattenObject(obj, '', '.', result);
+
+  return sortArrayOfObjects(result);
+}
+
+function flattenObject(
+  obj: Field[],
+  parentKey: string = '',
+  separator: string = '.',
+  result: Array<{ name: string; type: string; description?: string }>
+): void {
+  obj.forEach((element) => {
+    if (element.name) {
+      const newKey = parentKey ? `${parentKey}${separator}${element.name}` : element.name;
+
+      if (element.fields && Array.isArray(element.fields)) {
+        flattenObject(element.fields, newKey, separator, result);
+      } else {
+        result.push({
+          name: newKey,
+          type: element.type,
+          description: element.description,
+        });
+      }
+    }
+  });
+}
+
+function sortArrayOfObjects(
+  objectsArray: Array<{ name: string; type: string; description?: string }>
+): Array<{ name: string; type: string; description?: string }> {
+  return objectsArray.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
 }

@@ -319,8 +319,6 @@ const serviceAgentRoute = createApmServerRoute({
         end,
       }),
       getServiceEntitySummary({
-        end,
-        start,
         serviceName,
         entitiesESClient,
         environment: ENVIRONMENT_ALL.value,

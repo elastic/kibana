@@ -32,10 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlIds: string[];
 
     const addDocument = async (index: string, document: string) => {
-      await console.enterRequest('\nPOST ' + index + '/_doc/ \n{\n ' + document);
+      await console.enterText('\nPOST ' + index + '/_doc/\n{\n ' + document + '\n}');
       await console.clickPlay();
       await header.waitUntilLoadingHasFinished();
-      const response = JSON.parse(await console.getResponse());
+      const response = JSON.parse(await console.getOutputText());
       newDocuments.push({ index, id: response._id });
     };
 
@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       /* start by adding some incomplete data so that we can test `exists` query */
       await common.navigateToApp('console');
-      await console.closeHelpIfExists();
-      await console.clearTextArea();
+      await console.skipTourIfExists();
+      await console.clearEditorText();
       await addDocument(
         'animals-cats-2018-01-01',
         '"@timestamp": "2018-01-01T16:00:00.000Z", \n"animal": "cat"'
@@ -88,10 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await common.navigateToApp('console');
-      await console.closeHelpIfExists();
-      await console.clearTextArea();
+      await console.clearEditorText();
       for (const { index, id } of newDocuments) {
-        await console.enterRequest(`\nDELETE /${index}/_doc/${id}`);
+        await console.enterText(`\nDELETE /${index}/_doc/${id}`);
         await console.clickPlay();
         await header.waitUntilLoadingHasFinished();
       }

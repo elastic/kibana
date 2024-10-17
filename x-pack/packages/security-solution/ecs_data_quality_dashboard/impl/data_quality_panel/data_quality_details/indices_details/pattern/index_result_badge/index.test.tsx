@@ -30,7 +30,7 @@ describe('IndexResultBadge', () => {
     it('should render the index result badge with the given tooltip text', async () => {
       render(<IndexResultBadge incompatible={0} tooltipText="Tooltip text" />);
 
-      userEvent.hover(screen.getByTestId('indexResultBadge'));
+      await userEvent.hover(screen.getByTestId('indexResultBadge'));
 
       await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent('Tooltip text'));
     });

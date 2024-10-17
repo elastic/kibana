@@ -18,12 +18,14 @@ import {
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
   ALERT_LAST_DETECTED,
+  ALERT_INTENDED_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import moment from 'moment';
-import { orderBy } from 'lodash';
+import { get, orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -43,7 +45,6 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
@@ -93,7 +94,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
@@ -332,9 +332,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
       });
 
       after(async () => {
@@ -536,6 +533,19 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule, invocationCount: 2 });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).toEqual(1);
+    });
+
+    it('should generate alerts with the correct intended timestamp fields', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: `_id:${ID}`,
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      const alert = previewAlerts[0]._source;
+
+      expect(alert?.[ALERT_INTENDED_TIMESTAMP]).toEqual(alert?.[TIMESTAMP]);
     });
 
     describe('with suppression enabled', () => {
@@ -2447,6 +2457,60 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
+      it('alerts has intended_timestamp set to the time of the manual run', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
+        const secondTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        expect(alerts.hits.hits[0]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
+          alerts.hits.hits[0]?._source?.[TIMESTAMP]
+        );
+
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('scheduled');
+
+        const backfillStartDate = moment(firstTimestamp).startOf('hour');
+        const backfillEndDate = moment(backfillStartDate).add(1, 'h');
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: backfillStartDate,
+          endDate: backfillEndDate,
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_INTENDED_TIMESTAMP]).not.toEqual(
+          allNewAlerts.hits.hits[1]?._source?.[TIMESTAMP]
+        );
+
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
+      });
+
       it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
@@ -2681,6 +2745,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits).toHaveLength(1);
+        expect(allNewAlerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
       });
 
       it('supression with time window should work for manual rule runs and update alert', async () => {
@@ -2751,6 +2816,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedAlerts.hits.hits[0]._source).toEqual({
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          [ALERT_RULE_EXECUTION_TYPE]: 'manual',
         });
       });
     });
@@ -2764,7 +2830,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.destination).toEqual(
           expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
         );
-        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
+        expect(get(previewAlerts[0]?._source, 'event.dataset')).toEqual('network_traffic.tls');
       });
     });
   });

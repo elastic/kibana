@@ -19,6 +19,8 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function TransactionOverview() {
   const {
@@ -59,6 +61,15 @@ export function TransactionOverview() {
       screenDescription: `The user is looking at the transactions overview for ${serviceName}, and the transaction type is ${transactionType}`,
     });
   }, [setScreenContext, serviceName, transactionType]);
+
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  if (hasLogsOnlySignal) {
+    return <ServiceTabEmptyState id="transactionOverview" />;
+  }
 
   return (
     <>

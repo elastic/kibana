@@ -24,6 +24,8 @@ const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
     ecs: state.ecs,
     dataStreamName: state.dataStreamName,
     packageName: state.packageName,
+    samplesFormat: state.samplesFormat,
+    additionalProcessors: state.additionalProcessors,
   };
   if (Object.keys(state.currentMapping).length === 0) {
     return state.sampleChunks.map((chunk) => {
@@ -76,8 +78,7 @@ export async function getEcsSubGraph({ model }: EcsGraphParams) {
     })
     .addEdge('modelSubOutput', END);
 
-  const compiledEcsSubGraph = workflow.compile();
-
+  const compiledEcsSubGraph = workflow.compile().withConfig({ runName: 'ECS Mapping (Chunk)' });
   return compiledEcsSubGraph;
 }
 
@@ -118,7 +119,6 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     })
     .addEdge('modelOutput', END);
 
-  const compiledEcsGraph = workflow.compile();
-
+  const compiledEcsGraph = workflow.compile().withConfig({ runName: 'ECS Mapping' });
   return compiledEcsGraph;
 }

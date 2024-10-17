@@ -45,10 +45,6 @@ export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
 export const RiskEngineStatusResponse = z.object({
   legacy_risk_engine_status: RiskEngineStatus,
   risk_engine_status: RiskEngineStatus,
-  /**
-   * Indicates whether the maximum amount of risk engines has been reached
-   */
-  is_max_amount_of_risk_engines_reached: z.boolean(),
   risk_engine_task_status: RiskEngineTaskStatus.optional(),
 });
 

@@ -37,7 +37,7 @@ describe('DeleteConfirmationModal', () => {
     const result = appMock.render(<DeleteConfirmationModal {...props} />);
 
     expect(result.getByText('Delete')).toBeInTheDocument();
-    userEvent.click(result.getByText('Delete'));
+    await userEvent.click(result.getByText('Delete'));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });
@@ -46,7 +46,7 @@ describe('DeleteConfirmationModal', () => {
     const result = appMock.render(<DeleteConfirmationModal {...props} />);
 
     expect(result.getByText('Cancel')).toBeInTheDocument();
-    userEvent.click(result.getByText('Cancel'));
+    await userEvent.click(result.getByText('Cancel'));
 
     expect(props.onCancel).toHaveBeenCalled();
   });

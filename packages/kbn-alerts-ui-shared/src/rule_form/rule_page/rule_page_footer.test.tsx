@@ -32,12 +32,27 @@ const onSave = jest.fn();
 const onCancel = jest.fn();
 
 hasRuleErrors.mockReturnValue(false);
-useRuleFormState.mockReturnValue({
-  baseErrors: {},
-  paramsErrors: {},
-});
 
 describe('rulePageFooter', () => {
+  beforeEach(() => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      formData: {
+        actions: [],
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -70,6 +85,30 @@ describe('rulePageFooter', () => {
 
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
     expect(screen.getByTestId('rulePageConfirmCreateRule')).toBeInTheDocument();
+  });
+
+  test('should not show creat rule confirmation if user cannot read actions', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: false,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      formData: {
+        actions: [],
+      },
+    });
+
+    render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
+    fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
+    expect(screen.queryByTestId('rulePageConfirmCreateRule')).not.toBeInTheDocument();
+    expect(onSave).toHaveBeenCalled();
   });
 
   test('should show call onSave if clicking rule confirmation', () => {

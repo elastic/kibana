@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
+import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
 import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
-import { SUGGESTIONS_ROUTE } from '../../../../../common/endpoint/constants';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
@@ -33,7 +33,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
     super(
       http,
-      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       EVENT_FILTER_LIST_DEFINITION,
       undefined,
       writeTransform
@@ -43,7 +43,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(
       http,
-      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       EVENT_FILTER_LIST_DEFINITION,
       undefined,
       writeTransform
@@ -55,9 +55,9 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
    */
   async getSuggestions(body: EndpointSuggestionsBody): Promise<string[]> {
     const result: string[] = await this.getHttp().post(
-      resolvePathVariables(SUGGESTIONS_ROUTE, { suggestion_type: 'eventFilters' }),
+      resolvePathVariables(SUGGESTIONS_INTERNAL_ROUTE, { suggestion_type: 'eventFilters' }),
       {
-        version: this.version,
+        version: '1',
         body: JSON.stringify(body),
       }
     );

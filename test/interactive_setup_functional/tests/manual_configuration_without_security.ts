@@ -8,6 +8,7 @@
  */
 
 import { getUrl } from '@kbn/test';
+
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObject }: FtrProviderContext) {
@@ -20,7 +21,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Manual configuration without Security)', function () {
-    this.tags('skipCloud');
+    this.tags(['skipCloud', 'skipFIPS']);
 
     let verificationCode: string;
     before(async function () {

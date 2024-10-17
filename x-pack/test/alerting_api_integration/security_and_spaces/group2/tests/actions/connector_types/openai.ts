@@ -147,7 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]\n- [2.apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });
@@ -168,7 +168,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]\n- [2.apiProvider]: expected value to equal [Other]',
             });
           });
       });

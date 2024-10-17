@@ -19,8 +19,6 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../../common/context';
 import type { CreateADJobParams } from '../../../common/job_details';
 import { JobDetails } from '../../../common/job_details';
-import { mlJobServiceFactory } from '../../../../../application/services/job_service';
-import { toastNotificationServiceProvider } from '../../../../../application/services/toast_notification_service';
 
 interface Props {
   layer: LayerResult;
@@ -36,12 +34,9 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       uiSettings,
       lens,
       dashboardService,
-      notifications: { toasts },
       mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
-  const toastNotificationService = toastNotificationServiceProvider(toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
 
   const quickJobCreator = useMemo(
     () =>
@@ -51,8 +46,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
-        mlApi,
-        mlJobService
+        mlApi
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]

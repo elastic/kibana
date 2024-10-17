@@ -1,18 +1,31 @@
-## WHERE
+# WHERE
 
-The `WHERE` processing command produces a table that contains all the rows from the input table for which the provided condition evaluates to true. This command is essential for filtering data based on specific criteria, making it highly useful for narrowing down datasets to relevant records. It supports various functions and operators, including boolean expressions, date math, string patterns, and NULL comparisons. 
+The WHERE command filters the rows in a table based on a specified condition, returning only those rows where the condition evaluates to `true`.
 
-### Use Cases
-- Filtering records based on boolean conditions.
-- Retrieving data within a specific time range using date math.
-- Filtering data based on string patterns using wildcards or regular expressions.
-- Performing NULL comparisons.
-- Testing whether a field or expression equals an element in a list of literals, fields, or expressions.
+## Syntax
 
-### Limitations
-- The `WHERE` command is subject to the limitations of ES|QL, such as the maximum number of rows returned (10,000) and the types of fields supported.
+`WHERE expression`
 
-### Examples
+### Parameters
+
+#### expression
+
+A boolean expression that defines the condition for filtering the rows.
+
+## Notes
+
+WHERE supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+- Operators
+
+Aggregation functions are WHERE supported for EVAL.
+
+## Examples
 
 #### Example 1: Filtering Based on Boolean Condition
 ```esql
@@ -20,7 +33,9 @@ FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 ```
+
 If `still_hired` is a boolean field, this can be simplified to:
+
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
@@ -48,6 +63,7 @@ FROM employees
 | SORT first_name
 | LIMIT 3
 ```
+
 ```esql
 FROM employees
 | WHERE is_rehired IS NOT NULL
@@ -74,4 +90,5 @@ ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
 
-For a complete list of all functions and operators, refer to the Functions overview and Operators documentation.
+### Limitations
+- The `WHERE` command is subject to the maximum number of rows limitation (10,000).

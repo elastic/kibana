@@ -29,7 +29,7 @@ import {
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { ConfigKey, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
@@ -65,7 +65,7 @@ const Container = styled.div<ActionContainerProps>`
 interface Props {
   isPopoverOpen: boolean;
   isInspectView?: boolean;
-  monitor: MonitorOverviewItem;
+  monitor: OverviewStatusMetaData;
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
   position: PopoverPosition;
   iconHasPanel?: boolean;
@@ -112,9 +112,10 @@ export function ActionsPopover({
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.location.id,
+    locationId: locationId ?? monitor.locationId,
+    spaceId: monitor.spaceId,
   });
-  const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -168,8 +169,8 @@ export function ActionsPopover({
           setFlyoutConfig({
             configId: monitor.configId,
             location: locationName,
-            id: monitor.id,
-            locationId: monitor.location.id,
+            id: monitor.configId,
+            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);

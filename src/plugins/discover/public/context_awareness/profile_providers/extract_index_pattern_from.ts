@@ -12,6 +12,11 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isDataViewSource, isEsqlSource } from '../../../common/data_sources';
 import type { DataSourceProfileProviderParams } from '../profiles';
 
+/**
+ * Extracts the index pattern from the given ES|QL query or data view
+ * @param options Options object
+ * @returns The extracted index pattern or null
+ */
 export const extractIndexPatternFrom = ({
   dataSource,
   dataView,

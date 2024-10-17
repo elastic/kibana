@@ -61,7 +61,7 @@ const getAreaSeriesStyle = ({
     radius: points?.radius ?? 3,
     stroke: color,
     strokeWidth: points?.lineWidth ?? 2,
-    visible: points?.show ?? false,
+    visible: points?.show ? 'always' : 'never',
     shape: points?.symbol === 'cross' ? PointShape.X : points?.symbol,
   },
 });

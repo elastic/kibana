@@ -62,6 +62,7 @@ export const AddDomainForm: React.FC = () => {
                 fullWidth
               >
                 <EuiFieldText
+                  controlOnly
                   autoFocus
                   value={addDomainFormInputValue}
                   onChange={(e) => setAddDomainFormInputValue(e.target.value)}

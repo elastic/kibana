@@ -8,9 +8,9 @@
  */
 
 import type { CSSObject } from '@emotion/react';
+import React from 'react';
 import { LogLevelBadge } from '@kbn/discover-utils';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
 
 const dataTestSubj = 'logLevelBadgeCell';
 const badgeCss: CSSObject = { marginTop: '-4px' };
@@ -26,7 +26,7 @@ export const getLogLevelBadgeCell =
     return (
       <LogLevelBadge
         logLevel={value}
-        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
+        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value as string}</span>}
         data-test-subj={dataTestSubj}
         css={badgeCss}
       />

@@ -1,8 +1,19 @@
-## SQRT
+# SQRT
 
-The `SQRT` function returns the square root of a number. The input can be any numeric value, and the return value is always a double. Square roots of negative numbers and infinities are null.
+The SQRT function calculates the square root of a given number.
 
-### Examples
+## Syntax
+
+`SQRT(number)`
+
+### Parameters
+
+#### number
+
+This is a numeric expression.
+
+## Examples
+
 
 ```esql
 ROW d = 100.0

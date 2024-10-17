@@ -8,20 +8,15 @@
  */
 
 import { LATEST_VERSION } from '../../common/content_management';
-import { convertNumberToDashboardVersion } from '../services/dashboard_content_management/lib/dashboard_versioning';
+import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
 export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export type { DashboardContainer } from './embeddable/dashboard_container';
-export {
-  type DashboardContainerFactory,
-  type DashboardCreationOptions,
-  DashboardContainerFactoryDefinition,
-} from './embeddable/dashboard_container_factory';
+export { type DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 
-export { DashboardRenderer } from './external_api/dashboard_renderer';
-export type { DashboardAPI, AwaitingDashboardAPI } from './external_api/dashboard_api';
+export { LazyDashboardRenderer } from './external_api/lazy_dashboard_renderer';
 export type { DashboardLocatorParams } from './types';
 export type { IProvidesLegacyPanelPlacementSettings } from './panel_placement';

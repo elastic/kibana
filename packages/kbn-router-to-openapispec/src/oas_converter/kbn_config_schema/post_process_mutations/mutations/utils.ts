@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
 import { metaFields } from '@kbn/config-schema';
+import type { OpenAPIV3 } from 'openapi-types';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {
@@ -35,9 +35,16 @@ export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processDiscontinued = (schema: OpenAPIV3.SchemaObject): void => {
+  if (metaFields.META_FIELD_X_OAS_DISCONTINUED in schema) {
+    schema['x-discontinued'] = schema[metaFields.META_FIELD_X_OAS_DISCONTINUED] as string;
+    deleteField(schema, metaFields.META_FIELD_X_OAS_DISCONTINUED);
+  }
+};
+
 /** Just for type convenience */
-export const deleteField = (schema: Record<any, unknown>, field: string): void => {
-  delete schema[field];
+export const deleteField = (schema: object, field: string): void => {
+  delete (schema as Record<string, unknown>)[field];
 };
 
 export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {

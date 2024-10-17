@@ -18,3 +18,4 @@ export const META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES =
   'x-oas-get-additional-properties' as const;
 export const META_FIELD_X_OAS_DEPRECATED = 'x-oas-deprecated' as const;
 export const META_FIELD_X_OAS_ANY = 'x-oas-any-type' as const;
+export const META_FIELD_X_OAS_DISCONTINUED = 'x-oas-discontinued' as const;

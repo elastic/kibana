@@ -1,8 +1,20 @@
-## LENGTH
+# LENGTH
 
-The `LENGTH` function returns the character length of a string. If the input string is null, the function returns null.
+The LENGTH function calculates the character length of a given string.
 
-### Examples
+## Syntax
+
+`LENGTH(string)`
+
+### Parameters
+
+#### string
+
+The string expression for which the length is to be calculated.
+
+## Examples
+
+The following example calculates the character length of the `first_name` field:
 
 ```esql
 FROM employees

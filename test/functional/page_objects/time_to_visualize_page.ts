@@ -134,18 +134,6 @@ export class TimeToVisualizePageObject extends FtrService {
     }
   }
 
-  public async libraryNotificationExists(panelTitle: string) {
-    this.log.debug('searching for library modal on panel:', panelTitle);
-    const panel = await this.testSubjects.find(
-      `embeddablePanelHeading-${panelTitle.replace(/ /g, '')}`
-    );
-    const libraryActionExists = await this.testSubjects.descendantExists(
-      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-      panel
-    );
-    return libraryActionExists;
-  }
-
   public async saveFromModal(
     vizName: string,
     saveModalArgs: SaveModalArgs = { addToDashboard: null }

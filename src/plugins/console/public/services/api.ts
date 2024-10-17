@@ -8,7 +8,7 @@
  */
 
 import { sendRequest } from './use_request';
-import type { EditorRequest } from '../application/containers/editor/monaco/types';
+import type { EditorRequest } from '../application/containers/editor/types';
 
 export async function convertRequestToLanguage({
   requests,

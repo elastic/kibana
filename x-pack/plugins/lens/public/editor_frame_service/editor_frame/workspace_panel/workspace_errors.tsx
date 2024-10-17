@@ -15,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { UserMessage } from '../../../types';
+import { getLongMessage } from '../../../user_messages_utils';
 
 interface Props {
   errors: Array<string | UserMessage>;
@@ -56,7 +57,7 @@ export function WorkspaceErrors(props: Props) {
               {activeError.longMessage ? (
                 <>
                   <EuiSpacer />
-                  <EuiText size="s"> {activeError.longMessage}</EuiText>
+                  <EuiText size="s"> {getLongMessage(activeError)}</EuiText>
                 </>
               ) : null}
             </div>

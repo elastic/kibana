@@ -107,9 +107,85 @@ export interface RouteConfigOptionsBody {
  * Public routes are stable and intended for external access and are subject to
  * stricter change management and have long term maintenance windows.
  *
- * @remark On serverless access to internal routes is restricted.
+ * @remark as of 9.0, access to internal routes is restricted by default. See https://github.com/elastic/kibana/issues/163654.
  */
 export type RouteAccess = 'public' | 'internal';
+
+export type Privilege = string;
+
+/**
+ * A set of privileges that can be used to define complex authorization requirements.
+ *
+ * - `anyRequired`: An array of privileges where at least one must be satisfied to meet the authorization requirement.
+ * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
+ */
+export interface PrivilegeSet {
+  anyRequired?: Privilege[];
+  allRequired?: Privilege[];
+}
+
+/**
+ * An array representing a combination of simple privileges or complex privilege sets.
+ */
+type Privileges = Array<Privilege | PrivilegeSet>;
+
+/**
+ * Describes the authorization requirements when authorization is enabled.
+ *
+ * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ */
+export interface AuthzEnabled {
+  requiredPrivileges: Privileges;
+}
+
+/**
+ * Describes the state when authorization is disabled.
+ *
+ * - `enabled`: A boolean indicating that authorization is not enabled (`false`).
+ * - `reason`: A string explaining why authorization is disabled.
+ */
+export interface AuthzDisabled {
+  enabled: false;
+  reason: string;
+}
+
+/**
+ * Describes the authentication status when authentication is enabled.
+ *
+ * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ */
+export interface AuthcEnabled {
+  enabled: true | 'optional';
+}
+
+/**
+ * Describes the state when authentication is disabled.
+ *
+ * - `enabled`: A boolean indicating that authentication is not enabled (`false`).
+ * - `reason`: A string explaining why authentication is disabled.
+ */
+export interface AuthcDisabled {
+  enabled: false;
+  reason: string;
+}
+
+/**
+ * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
+ */
+export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+
+/**
+ * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).
+ */
+export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+
+/**
+ * Describes the security requirements for a route, including authorization and authentication.
+ */
+export interface RouteSecurity {
+  authz: RouteAuthz;
+  authc?: RouteAuthc;
+}
 
 /**
  * Additional route options.
@@ -139,7 +215,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * Defines intended request origin of the route:
    * - public. The route is public, declared stable and intended for external access.
-   *           In the future, may require an incomming request to contain a specified header.
+   *           In the future, may require an incoming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
    * Defaults to 'internal' If not declared,
@@ -207,6 +283,44 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   deprecated?: boolean;
+
+  /**
+   * Whether this route should be treated as "invisible" and excluded from router
+   * OAS introspection.
+   *
+   * @default false
+   */
+  excludeFromOAS?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   * @example 9.0.0
+   */
+  discontinued?: string;
+
+  /**
+   * Defines the security requirements for a route, including authorization and authentication.
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  security?: RouteSecurity;
+
+  /**
+   * Whether this endpoint is being used to serve generated or static HTTP resources
+   * like JS, CSS or HTML. _Do not set to `true` for HTTP APIs._
+   *
+   * @note Unless you need this setting for a special case, rather use the
+   *       {@link HttpResources} service exposed to plugins directly.
+   *
+   * @note This is not a security feature. It may affect aspects of the HTTP
+   *       response like headers.
+   *
+   * @default false
+   */
+  httpResource?: boolean;
 }
 
 /**
@@ -286,6 +400,11 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * ```
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
+
+  /**
+   * Defines the security requirements for a route, including authorization and authentication.
+   */
+  security?: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

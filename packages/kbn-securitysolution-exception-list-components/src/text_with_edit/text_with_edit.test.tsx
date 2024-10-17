@@ -16,7 +16,7 @@ describe('TextWithEdit', () => {
     const wrapper = render(
       <TextWithEdit isReadonly={true} dataTestSubj="TextWithEditTest" text="Test" />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
     expect(wrapper.queryByTestId('TextWithEditTestEditIcon')).not.toBeInTheDocument();
   });
@@ -24,7 +24,7 @@ describe('TextWithEdit', () => {
     const wrapper = render(
       <TextWithEdit isReadonly={false} dataTestSubj="TextWithEditTest" text="Test" />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
     expect(wrapper.getByTestId('TextWithEditTestEditIcon')).toBeInTheDocument();
   });

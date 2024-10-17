@@ -9,26 +9,36 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { isDevMode } from '@kbn/xstate-utils';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { LogEntryCategoriesPage } from './log_entry_categories';
-import { LogEntryRatePage } from './log_entry_rate';
-import { LogsSettingsPage } from './settings';
-import { StreamPage } from './stream';
-import { isDevMode } from '../../utils/dev_mode';
 import { NotFoundPage } from '../404';
+import { getLogsAppRoutes } from './routes';
 
+const StreamPage = dynamic(() => import('./stream').then((mod) => ({ default: mod.StreamPage })));
+const LogEntryCategoriesPage = dynamic(() =>
+  import('./log_entry_categories').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
+);
+const LogEntryRatePage = dynamic(() =>
+  import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
+);
+const LogsSettingsPage = dynamic(() =>
+  import('./settings').then((mod) => ({ default: mod.LogsSettingsPage }))
+);
 const StateMachinePlayground = dynamic(() =>
   import('../../observability_logs/xstate_helpers').then((mod) => ({
     default: mod.StateMachinePlayground,
@@ -37,6 +47,9 @@ const StateMachinePlayground = dynamic(() =>
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
+
+  const isLogsStreamEnabled: boolean = useUiSetting(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
+
   const uiCapabilities = application?.capabilities;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -47,30 +60,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
-  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts
-  const streamTab = {
-    app: 'logs',
-    title: streamTabTitle,
-    pathname: '/stream',
-  };
-
-  const anomaliesTab = {
-    app: 'logs',
-    title: anomaliesTabTitle,
-    pathname: '/anomalies',
-  };
-
-  const logCategoriesTab = {
-    app: 'logs',
-    title: logCategoriesTabTitle,
-    pathname: '/log-categories',
-  };
-
-  const settingsTab = {
-    app: 'logs',
-    title: settingsTabTitle,
-    pathname: '/settings',
-  };
+  const routes = getLogsAppRoutes({ isLogsStreamEnabled });
 
   const settingsLinkProps = useLinkProps({
     app: 'logs',
@@ -104,24 +94,36 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        <Route path={streamTab.pathname} component={StreamPage} />
-        <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
-        <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
-        <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+        {routes.stream ? (
+          <Route path={routes.stream.path} component={StreamPage} />
+        ) : (
+          <Route
+            path="/stream"
+            exact
+            render={() => {
+              share.url.locators
+                .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                ?.navigate({});
+
+              return null;
+            }}
+          />
+        )}
+        <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
+        <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
+        <Route path={routes.settings.path} component={LogsSettingsPage} />
         {enableDeveloperRoutes && (
           <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
         )}
-        <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
-        <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
-        <Route
-          render={() => (
-            <NotFoundPage
-              title={i18n.translate('xpack.infra.logs.index.logsLabel', {
-                defaultMessage: 'Logs',
-              })}
-            />
-          )}
+        <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
+        <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
+        <RedirectWithQueryParams
+          from={'/'}
+          to={routes.stream?.path ?? routes.logsAnomalies.path}
+          exact
         />
+
+        <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>
     </>
   );
@@ -129,18 +131,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
-});
-
-const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-  defaultMessage: 'Stream',
-});
-
-const anomaliesTabTitle = i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-  defaultMessage: 'Anomalies',
-});
-
-const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-  defaultMessage: 'Categories',
 });
 
 const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {

@@ -13,7 +13,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-describe('TemplateSelector', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/193482
+describe.skip('TemplateSelector', () => {
   let appMockRender: AppMockRenderer;
   const onTemplateChange = jest.fn();
 
@@ -52,7 +53,7 @@ describe('TemplateSelector', () => {
 
     expect(onTemplateChange).not.toHaveBeenCalled();
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );
@@ -95,7 +96,7 @@ describe('TemplateSelector', () => {
 
     expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       newTemplate.key
     );
@@ -119,7 +120,7 @@ describe('TemplateSelector', () => {
       />
     );
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );

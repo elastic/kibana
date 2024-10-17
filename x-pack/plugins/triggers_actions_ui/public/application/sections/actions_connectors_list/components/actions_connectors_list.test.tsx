@@ -111,7 +111,7 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
-      userEvent.click(createFirstActionButton);
+      await userEvent.click(createFirstActionButton);
       await waitFor(() => {
         expect(setAddFlyoutVisibility).toBeCalled();
       });
@@ -308,7 +308,7 @@ describe('actions_connectors_list', () => {
           .at(4)
           .find('div[data-test-subj="compatibility-content"]')
           .text()
-      ).toBe('Alerting RulesCases');
+      ).toBe('Alerting RulesCasesSecurity Solution');
 
       expect(
         wrapper

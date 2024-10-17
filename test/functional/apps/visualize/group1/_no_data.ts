@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['visualize', 'header', 'common']);
+  const { header, common } = getPageObjects(['header', 'common']);
   const esArchiver = getService('esArchiver');
   const dataViews = getService('dataViews');
   const kibanaServer = getService('kibanaServer');
@@ -23,20 +23,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
-      await PageObjects.common.waitUntilUrlIncludes('integrations/browse');
+      await common.waitUntilUrlIncludes('integrations/browse');
     });
 
     it('should show the no dataview component if no dataviews exist', async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });

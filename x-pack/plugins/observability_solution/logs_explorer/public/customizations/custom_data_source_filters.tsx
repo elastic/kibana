@@ -22,7 +22,7 @@ const CustomDataSourceFilters = ({
   logsExplorerControllerStateService,
   data,
 }: CustomDataSourceFiltersProps) => {
-  const { getInitialInput, setControlGroupAPI, query, filters, timeRange } = useControlPanels(
+  const { getInitialState, setControlGroupAPI, query, filters, timeRange } = useControlPanels(
     logsExplorerControllerStateService,
     data
   );
@@ -30,8 +30,8 @@ const CustomDataSourceFilters = ({
   return (
     <div data-test-subj={DATA_SOURCE_FILTERS_CUSTOMIZATION_ID}>
       <ControlGroupRenderer
-        ref={setControlGroupAPI}
-        getCreationOptions={getInitialInput}
+        onApiAvailable={setControlGroupAPI}
+        getCreationOptions={getInitialState}
         query={query as Query}
         filters={filters ?? []}
         timeRange={timeRange}

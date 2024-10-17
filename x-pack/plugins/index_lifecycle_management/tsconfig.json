@@ -37,7 +37,7 @@
     "@kbn/shared-ux-router",
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/react-kibana-context-render",
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",

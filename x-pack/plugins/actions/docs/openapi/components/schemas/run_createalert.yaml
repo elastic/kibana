@@ -3,7 +3,7 @@ type: object
 required:
   - subAction
   - subActionParams
-description: The `createAlert` subaction for Opsgenie connectors.
+description: The `createAlert` subaction for Opsgenie and TheHive connectors.
 properties:
   subAction:
     type: string
@@ -12,12 +12,10 @@ properties:
       - createAlert
   subActionParams:
     type: object
-    required:
-      - message
     properties:
       actions:
         type: array
-        description: The custom actions available to the alert.
+        description: The custom actions available to the alert in Opsgenie connectors.
         items: 
           type: string
       alias:
@@ -28,21 +26,21 @@ properties:
         description: A description that provides detailed information about the alert.
       details:
         type: object
-        description: The custom properties of the alert.
+        description: The custom properties of the alert in Opsgenie connectors.
         additionalProperties: true
         example: {"key1":"value1","key2":"value2"}
       entity:
         type: string
-        description: The domain of the alert. For example, the application or server name.
+        description: The domain of the alert in Opsgenie connectors. For example, the application or server name.
       message:
         type: string
-        description: The alert message.
+        description: The alert message in Opsgenie connectors.
       note:
         type: string
-        description: Additional information for the alert.
+        description: Additional information for the alert in Opsgenie connectors.
       priority:
         type: string
-        description: The priority level for the alert.
+        description: The priority level for the alert in Opsgenie connectors.
         enum:
           - P1
           - P2
@@ -52,7 +50,7 @@ properties:
       responders:
         type: array
         description: >
-          The entities to receive notifications about the alert.
+          The entities to receive notifications about the alert in Opsgenie connectors.
           If `type` is `user`, either `id` or `username` is required.
           If `type` is `team`, either `id` or `name` is required.
         items:
@@ -75,14 +73,39 @@ properties:
             username:
               type: string
               description: A valid email address for the user.
+      severity:
+        type: integer
+        minimum: 1
+        maximum: 4
+        description: >
+          The severity of the incident for TheHive connectors.
+          The value ranges from 1 (low) to 4 (critical) with a default value of 2 (medium).
       source:
         type: string
-        description: The display name for the source of the alert.
+        description: The display name for the source of the alert in Opsgenie and TheHive connectors.
+      sourceRef:
+        type: string
+        description: A source reference for the alert in TheHive connectors.
       tags:
         type: array
-        description: The tags for the alert.
+        description: The tags for the alert in Opsgenie and TheHive connectors.
         items:
           type: string
+      title:
+        type: string
+        description: >
+          A title for the incident for TheHive connectors.
+          It is used for searching the contents of the knowledge base.
+      tlp:
+        type: integer
+        minimum: 0
+        maximum: 4
+        default: 2
+        description: >
+          The traffic light protocol designation for the incident in TheHive connectors. Valid values include: 0 (clear), 1 (green), 2 (amber), 3 (amber and strict), and 4 (red).
+      type:
+        type: string
+        description: The type of alert in TheHive connectors.
       user:
         type: string
         description: The display name for the owner.

@@ -9,8 +9,7 @@ import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-type
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
-import { LOG_LEVEL } from '../../es_fields';
-import { existsQuery, kqlQuery } from '../../utils/es_queries';
+import { kqlQuery } from '../../utils/es_queries';
 
 export interface LogsRateTimeseries {
   esClient: ElasticsearchClient;
@@ -59,7 +58,6 @@ export function createGetLogsRateTimeseries() {
       query: {
         bool: {
           filter: [
-            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
             {
               terms: {
