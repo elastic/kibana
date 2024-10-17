@@ -321,6 +321,22 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @default false
    */
   httpResource?: boolean;
+
+  /**
+   * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
+   * Kibana APIs can also specify some metadata about API availability.
+   *
+   * @remark intended to be used for informational purposes only.
+   *
+   */
+  availability?: {
+    /** @default stable */
+    stability?: 'experimental' | 'beta' | 'stable';
+    /**
+     * Must be a stack version
+     */
+    since?: string;
+  };
 }
 
 /**
