@@ -9,7 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateError } from '../../errors';
@@ -20,7 +20,6 @@ import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
-import { response } from 'express';
 
 jest.mock('axios');
 // Add a mock implementation for `isAxiosError` to simulate that the error is an Axios error
@@ -103,7 +102,10 @@ describe('Agentless Agent service', () => {
         supports_agentless: false,
       } as AgentPolicy)
     ).rejects.toThrowError(
-      new AgentlessAgentCreateError('Agentless agent policy does not have agentless enabled')
+      new AgentlessAgentCreateError(
+        'Agentless agent policy does not have agentless enabled',
+        'create'
+      )
     );
   });
 
@@ -120,7 +122,9 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('missing agentless configuration'));
+    ).rejects.toThrowError(
+      new AgentlessAgentCreateError('missing agentless configuration', 'create')
+    );
   });
 
   it('should throw AgentlessAgentCreateError if agentless configuration is not found', async () => {
@@ -137,7 +141,9 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('missing agentless configuration'));
+    ).rejects.toThrowError(
+      new AgentlessAgentCreateError('missing agentless configuration', 'create')
+    );
   });
   it('should throw AgentlessAgentCreateError if fleet hosts are not found', async () => {
     const soClient = getAgentPolicyCreateMock();
@@ -173,7 +179,7 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet server host'));
+    ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet server host', 'create'));
   });
 
   it('should throw AgentlessAgentCreateError if enrollment tokens are not found', async () => {
@@ -213,7 +219,9 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet enrollment token'));
+    ).rejects.toThrowError(
+      new AgentlessAgentCreateError('missing Fleet enrollment token', 'create')
+    );
   });
 
   it('should throw an error and log and error when the Agentless API returns a status not handled and not in the 2xx series', async () => {
