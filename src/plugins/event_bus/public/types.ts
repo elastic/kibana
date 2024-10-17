@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Subject } from 'rxjs';
+
+import type { KibanaEvent } from './event_bus';
+
 export interface EventBusPluginSetup {
-  getGreeting: () => string;
+  eventBus: Subject<KibanaEvent>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EventBusPluginStart {}
