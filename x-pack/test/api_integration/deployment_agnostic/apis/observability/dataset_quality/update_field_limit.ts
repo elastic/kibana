@@ -20,7 +20,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const start = '2024-10-17T11:00:00.000Z';
   const end = '2024-10-17T11:01:00.000Z';
   const type = 'logs';
-  const dataset = 'synth';
   const invalidDataset = 'invalid';
   const integrationsDataset = 'nginx.access';
   const pkg = 'nginx';
@@ -133,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(customTemplate).to.have.length(1);
       expect(
-        customTemplate[0].component_template.template.settings.index.mapping.total_fields.limit
+        customTemplate[0].component_template.template.settings?.index?.mapping?.total_fields?.limit
       ).to.be('50');
 
       const settingsForAllIndices = await esClient.indices.getSettings({
@@ -151,10 +150,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         settingsForAllIndices[backingIndexWithoutVersion + '-000001'].settings;
 
       // Only the Last Backing Index should have the updated limit and not the one previous to it
-      expect(settingsForLastBackingIndex.index.mapping.total_fields.limit).to.be('50');
+      expect(settingsForLastBackingIndex?.index?.mapping?.total_fields?.limit).to.be('50');
 
       // The previous one should have the default limit of 1000
-      expect(settingsForPreviousBackingIndex.index.mapping.total_fields.limit).to.be('1000');
+      expect(settingsForPreviousBackingIndex?.index?.mapping?.total_fields?.limit).to.be('1000');
 
       // Rollover to test custom component template
       await rolloverDataStream(esClient, integrationsDataStreamName);
@@ -165,8 +164,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // The new backing index should read settings from custom component template
       expect(
-        settingsForLatestBackingIndex[backingIndexWithoutVersion + '-000003'].settings.index.mapping
-          .total_fields.limit
+        settingsForLatestBackingIndex[backingIndexWithoutVersion + '-000003'].settings?.index
+          ?.mapping?.total_fields?.limit
       ).to.be('50');
     });
   });
