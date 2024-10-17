@@ -37,6 +37,7 @@ import { isFilters } from '../../../helpers';
 import type { SetRuleQuery } from '../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import type { FieldComponentProps } from '../field_component_props';
 
 export const kqlQuerySchema = {
   ruleType: schema.ruleType,
@@ -46,17 +47,11 @@ export const kqlQuerySchema = {
   queryBar: FieldValueQueryBar;
 }>;
 
-interface KqlQueryEditProps {
-  finalDiffableRule: DiffableRule;
-  setValidity: (isValid: boolean) => void;
-  setFieldValue: (fieldName: string, fieldValue: unknown) => void;
-}
-
 export function KqlQueryEdit({
   finalDiffableRule,
   setValidity,
   setFieldValue,
-}: KqlQueryEditProps): JSX.Element {
+}: FieldComponentProps): JSX.Element {
   const defaultIndexPattern = useDefaultIndexPattern();
   const indexPatternParameters = getUseRuleIndexPatternParameters(
     finalDiffableRule,

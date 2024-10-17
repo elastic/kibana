@@ -16,12 +16,9 @@ import type {
 import { useFinalSideContext } from '../final_side/final_side_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import * as i18n from '../translations';
+import type { FieldComponentProps } from './field_component_props';
 
-type FieldComponent = React.ComponentType<{
-  finalDiffableRule: DiffableRule;
-  setValidity: (isValid: boolean) => void;
-  setFieldValue: (fieldName: string, fieldValue: unknown) => void;
-}>;
+type FieldComponent = React.ComponentType<FieldComponentProps>;
 
 interface FieldFormWrapperProps {
   component: FieldComponent;
@@ -85,6 +82,13 @@ export function FieldFormWrapper({
     onSubmit: handleSubmit,
   });
 
+  const resetField = useCallback(
+    (fieldNameToReset: string, options?: { resetValue?: boolean; defaultValue?: unknown }) => {
+      form.getFields()[fieldNameToReset]?.reset(options);
+    },
+    [form]
+  );
+
   const [validity, setValidity] = useState<boolean | undefined>(undefined);
 
   const isValid = validity === undefined ? form.isValid : validity;
@@ -104,6 +108,7 @@ export function FieldFormWrapper({
           finalDiffableRule={finalDiffableRule}
           setValidity={setValidity}
           setFieldValue={form.setFieldValue}
+          resetField={resetField}
         />
       </Form>
     </>
