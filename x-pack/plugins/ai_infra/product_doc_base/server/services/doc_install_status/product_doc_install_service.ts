@@ -11,7 +11,6 @@ import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
 import type { ProductInstallState } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
-// import { soToModel } from './model_conversion';
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
@@ -19,18 +18,6 @@ export class ProductDocInstallClient {
   constructor({ soClient }: { soClient: SavedObjectsClientContract }) {
     this.soClient = soClient;
   }
-
-  /*
-  async getForProduct(productName: string): Promise<ProductDocInstallStatus> {
-    const objectId = getObjectIdFromProductName(productName);
-    try {
-      const object = await this.soClient.get<TypeAttributes>(typeName, objectId);
-      return soToModel(object);
-    } catch (e) {
-      // TODO
-    }
-  }
-  */
 
   async getInstallationStatus(): Promise<Record<ProductName, ProductInstallState>> {
     const response = await this.soClient.find<TypeAttributes>({

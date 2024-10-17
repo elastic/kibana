@@ -132,6 +132,8 @@ export class PackageInstaller {
       `Starting installing documentation for product [${productName}] and version [${productVersion}]`
     );
 
+    productVersion = majorMinor(productVersion);
+
     await this.uninstallPackage({ productName });
 
     let zipArchive: ZipArchive | undefined;
@@ -184,9 +186,7 @@ export class PackageInstaller {
       await this.productDocClient.setInstallationFailed(productName, e.message);
       throw e;
     } finally {
-      if (zipArchive) {
-        zipArchive.close();
-      }
+      zipArchive?.close();
     }
   }
 
