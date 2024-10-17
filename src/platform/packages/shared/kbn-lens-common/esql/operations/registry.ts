@@ -28,6 +28,7 @@ import { cardinalityToESQL, getCardinalitySerializedFormat } from './cardinality
 import { percentileToESQL } from './percentile_to_esql';
 import { buildMetricToESQL } from './metric_to_esql';
 import { dateHistogramToESQL, getDateHistogramSerializedFormat } from './date_histogram_to_esql';
+import { filtersToESQL } from './filters_to_esql';
 import { rangesToESQL } from './ranges_to_esql';
 import { termsToESQL } from './terms_to_esql';
 import type {
@@ -38,6 +39,7 @@ import type {
 } from './types';
 
 export const DATE_HISTOGRAM_ID = 'date_histogram';
+export const FILTERS_ID = 'filters';
 export const RANGE_ID = 'range';
 export const STATIC_VALUE_ID = 'static_value';
 export const TERMS_ID = 'terms';
@@ -61,6 +63,7 @@ export const toEsqlRegistry: {
   [MEDIAN_ID]: buildMetricToESQL(MEDIAN_ID),
   [STD_DEVIATION_ID]: buildMetricToESQL(STD_DEVIATION_ID),
   [DATE_HISTOGRAM_ID]: dateHistogramToESQL,
+  [FILTERS_ID]: filtersToESQL,
   [RANGE_ID]: rangesToESQL,
   [TERMS_ID]: termsToESQL,
 };
@@ -107,6 +110,7 @@ export const esqlOperationMetaRegistry: {
   [MEDIAN_ID]: metricEsqlMeta,
   [STD_DEVIATION_ID]: metricEsqlMeta,
   [DATE_HISTOGRAM_ID]: dateHistogramEsqlMeta,
+  [FILTERS_ID]: {},
   [RANGE_ID]: {},
   [TERMS_ID]: {},
 };
