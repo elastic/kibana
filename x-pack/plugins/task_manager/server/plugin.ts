@@ -18,7 +18,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -45,6 +45,7 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import { setClaimStrategy } from './lib/set_claim_strategy';
 
 export interface TaskManagerSetupContract {
   /**
@@ -126,9 +127,17 @@ export class TaskManagerPlugin
 
   public setup(
     core: CoreSetup<TaskManagerStartContract, unknown>,
-    plugins: { usageCollection?: UsageCollectionSetup }
+    plugins: { cloud?: CloudSetup; usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
+    this.config = setClaimStrategy({
+      config: this.config,
+      deploymentId: plugins.cloud?.deploymentId,
+      isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+      isCloud: plugins.cloud?.isCloudEnabled ?? false,
+      logger: this.logger,
+    });
 
     core.metrics
       .getOpsMetrics$()
@@ -137,7 +146,7 @@ export class TaskManagerPlugin
         this.heapSizeLimit = metrics.process.memory.heap.size_limit;
       });
 
-    setupSavedObjects(core.savedObjects, this.config);
+    setupSavedObjects(core.savedObjects);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -286,6 +295,7 @@ export class TaskManagerPlugin
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const defaultCapacity = getDefaultCapacity({
+      autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
       claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
       isCloud: cloud?.isCloudEnabled ?? false,
@@ -300,7 +310,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity}`
+      } defaultCapacity=${defaultCapacity} pollingInterval=${
+        this.config!.poll_interval
+      } autoCalculateDefaultEchCapacity=${this.config.auto_calculate_default_ech_capacity}`
     );
 
     const managedConfiguration = createManagedConfiguration({
@@ -406,6 +418,11 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    // Stop polling for tasks
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
+
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();
       try {

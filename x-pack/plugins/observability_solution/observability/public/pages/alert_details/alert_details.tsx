@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -32,11 +33,12 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { BetaBadge } from '../../components/experimental_badge';
+import { RelatedAlerts } from './components/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
-import { RelatedAlerts } from './components/related_alerts';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -109,7 +111,6 @@ export function AlertDetails() {
   const { euiTheme } = useEuiTheme();
 
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
@@ -218,24 +219,21 @@ export function AlertDetails() {
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          {rule && alertDetail.formatted && (
+            <>
+              <AlertDetailsAppSection
+                alert={alertDetail.formatted}
+                rule={rule}
+                timeZone={timeZone}
+                setSources={setSources}
+              />
+              <AlertHistoryChart
+                alert={alertDetail.formatted}
+                rule={rule as unknown as CustomThresholdRule}
+              />
+            </>
+          )}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {rule && alertDetail.formatted && (
-          <>
-            <AlertDetailsAppSection
-              alert={alertDetail.formatted}
-              rule={rule}
-              timeZone={timeZone}
-              setSources={setSources}
-              setRelatedAlertsKuery={setRelatedAlertsKuery}
-            />
-            <EuiSpacer size="l" />
-            <AlertHistoryChart
-              alert={alertDetail.formatted}
-              rule={rule as unknown as CustomThresholdRule}
-            />
-          </>
-        )}
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
@@ -273,18 +271,22 @@ export function AlertDetails() {
       'data-test-subj': 'metadataTab',
       content: metadataTab,
     },
-  ];
-
-  if (relatedAlertsKuery && alertDetail?.formatted) {
-    tabs.push({
+    {
       id: RELATED_ALERTS_TAB_ID,
-      name: i18n.translate('xpack.observability.alertDetails.tab.relatedAlertsLabel', {
-        defaultMessage: 'Related Alerts',
-      }),
+      name: (
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.relatedAlertsLabe"
+            defaultMessage="Related alerts"
+          />
+          &nbsp;
+          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
+        </>
+      ),
       'data-test-subj': 'relatedAlertsTab',
-      content: <RelatedAlerts alert={alertDetail.formatted} kuery={relatedAlertsKuery} />,
-    });
-  }
+      content: <RelatedAlerts alert={alertDetail?.formatted} />,
+    },
+  ];
 
   return (
     <ObservabilityPageTemplate

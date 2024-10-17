@@ -370,6 +370,82 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should delete agentless agent for ESS', async () => {
+    const returnValue = {
+      id: 'mocked',
+    };
+
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    const deleteAgentlessAgentReturnValue = await agentlessAgentService.deleteAgentlessAgent(
+      'mocked-agentless-agent-policy-id'
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(deleteAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'DELETE',
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
+  it('should delete agentless agent for serverless', async () => {
+    const returnValue = {
+      id: 'mocked',
+    };
+
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
+
+    const deleteAgentlessAgentReturnValue = await agentlessAgentService.deleteAgentlessAgent(
+      'mocked-agentless-agent-policy-id'
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(deleteAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'DELETE',
+        url: 'http://api.agentless.com/api/v1/serverless/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
   it('should redact sensitive information from debug logs', async () => {
     const returnValue = {
       id: 'mocked',

@@ -46,9 +46,9 @@ import {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { isNumericDecimalType } from './esql_types';
+import { compareTypesWithLiterals, isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
-import { EDITOR_MARKER } from './constants';
+import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -97,10 +97,6 @@ export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
 export function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
   return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name !== '=';
 }
 
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
@@ -228,7 +224,7 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argType: string, item: ESQLLiteral) {
+function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === 'null') {
     return true;
   }
@@ -249,7 +245,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date', 'date', 'date_period'].includes(argType);
+  return ['string', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -259,13 +255,7 @@ export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  const columnName = getQuotedColumnName(column);
-  return (
-    getColumnByName(columnName, { fields, variables }) ||
-    // It's possible columnName has backticks "`fieldName`"
-    // so we need to access the original name as well
-    getColumnByName(column.name, { fields, variables })
-  );
+  return getColumnByName(column.parts.join('.'), { fields, variables });
 }
 
 /**
@@ -275,6 +265,11 @@ export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    columnName = columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
@@ -445,7 +440,7 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = compareLiteralType(argType as string, arg);
+    const matched = doesLiteralMatchParameterType(argType, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -478,7 +473,7 @@ export function checkFunctionArgMatchesDefinition(
     const lowerArgType = argType?.toLowerCase();
     const lowerArgCastType = arg.castType?.toLowerCase();
     return (
-      lowerArgType === lowerArgCastType ||
+      compareTypesWithLiterals(lowerArgCastType, lowerArgType) ||
       // for valid shorthand casts like 321.12::int or "false"::bool
       (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
     );
@@ -550,16 +545,6 @@ export function isVariable(
 }
 
 /**
- * This will return the name without any quotes.
- *
- * E.g. "`bytes`" will become "bytes"
- *
- * @param column
- * @returns
- */
-export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
-
-/**
  * This returns the name with any quotes that were present.
  *
  * E.g. "`bytes`" will be "`bytes`"
@@ -577,17 +562,16 @@ export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+  const columnName = column.parts.join('.');
+  if (fields.has(columnName) || variables.has(columnName)) {
+    return true;
+  }
 
-  for (const name of namesToCheck) {
-    if (fields.has(name) || variables.has(name)) {
-      return true;
-    }
-
-    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
-      return true;
-    }
+  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+  if (
+    Boolean(fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, variables.keys()))
+  ) {
+    return true;
   }
 
   return false;

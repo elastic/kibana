@@ -23,15 +23,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectUseInPlaygroundLinkExists() {
       await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
     },
-    async expectBackToIndicesButtonExists() {
-      await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
-    },
-    async clickBackToIndicesButton() {
-      await testSubjects.click('backToIndicesButton');
-    },
-    async expectBackToIndicesButtonRedirectsToListPage() {
-      await testSubjects.existOrFail('indicesList');
-    },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
       expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).to.be(
@@ -179,6 +170,32 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
         apiKey
       );
+    },
+
+    async clickFirstDocumentDeleteAction() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      await testSubjects.click('deleteDocumentButton');
+    },
+
+    async expectDeleteDocumentActionNotVisible() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
+      const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+      await indexList[indexOfRow].click();
+      await retry.waitFor('index details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+      });
+    },
+
+    async expectSearchIndexDetailsTabsExists() {
+      await testSubjects.existOrFail('dataTab');
+      await testSubjects.existOrFail('mappingsTab');
+      await testSubjects.existOrFail('settingsTab');
     },
   };
 }

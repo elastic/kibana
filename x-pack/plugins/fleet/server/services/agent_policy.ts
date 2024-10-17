@@ -939,7 +939,8 @@ class AgentPolicyService {
    */
   public async removeFleetServerHostFromAll(
     esClient: ElasticsearchClient,
-    fleetServerHostId: string
+    fleetServerHostId: string,
+    options?: { force?: boolean }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
@@ -965,6 +966,9 @@ class AgentPolicyService {
             agentPolicy.id,
             {
               fleet_server_host_id: null,
+            },
+            {
+              force: options?.force,
             }
           ),
         {
