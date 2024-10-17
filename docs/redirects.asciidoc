@@ -1147,3 +1147,28 @@ Refer to {api-kibana}/group/endpoint-cases[cases API].
 == Sync {ml} saved objects API
 
 Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].
+
+[role="exclude",id="role-management-api-delete]
+== Delete role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-get"]
+== Get all {kib} roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-specific-api-get"]
+== Get specific role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put-bulk"]
+== Bulk create or update roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put"]
+== Create or update role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
