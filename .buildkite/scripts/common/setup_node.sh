@@ -77,7 +77,8 @@ if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
   npm_install_global yarn "^$YARN_VERSION"
 fi
 
-yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"
+grep -q 'yarn-offline-mirror ".yarn-local-mirror"' .yarnrc
+sed -i "s#.yarn-local-mirror#$YARN_OFFLINE_CACHE#" .yarnrc
 
 YARN_GLOBAL_BIN=$(yarn global bin)
 export YARN_GLOBAL_BIN
