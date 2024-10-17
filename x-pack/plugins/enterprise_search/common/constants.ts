@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
@@ -210,6 +212,58 @@ export const SEARCH_RELEVANCE_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const CREATE_CONNECTOR_PLUGIN = {
+  CLI_SNIPPET: dedent`./bin/connectors connector create
+  --index-name my-index
+  --index-language en
+  --from-file config.yml
+  `,
+  CONSOLE_SNIPPET: dedent`# Create an index
+PUT /my-index-000001
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 3,
+      "number_of_replicas": 2
+    }
+  }
+}
+
+# Create an API key
+POST /_security/api_key
+{
+  "name": "my-api-key",
+  "expiration": "1d",
+  "role_descriptors":
+    {
+       "role-a": {
+          "cluster": ["all"],
+            "indices": [
+                          {
+                            "names": ["index-a*"],
+                             "privileges": ["read"]
+                          }
+                        ]
+                          },
+                            "role-b": {
+                            "cluster": ["all"],
+                            "indices": [
+                              {
+                                "names": ["index-b*"],
+                                  "privileges": ["all"]
+                              }]
+                            }
+                          }, "metadata":
+                          {  "application": "my-application",
+                             "environment": {
+                              "level": 1,
+                              "trusted": true,
+                              "tags": ["dev", "staging"]
+                          }
+      }
+  }`,
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
@@ -280,6 +334,10 @@ export const PLUGIN_ID = 'enterpriseSearch';
 
 export const CONNECTOR_NATIVE_TYPE = 'native';
 export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
+
+export const CRAWLER = {
+  github_repo: 'https://github.com/elastic/crawler',
+};
 
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];

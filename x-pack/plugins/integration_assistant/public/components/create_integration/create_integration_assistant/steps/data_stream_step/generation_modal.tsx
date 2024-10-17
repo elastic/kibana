@@ -82,7 +82,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 {error ? (
                   <EuiFlexItem>
                     <EuiCallOut
-                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
                       iconType="alert"
                       data-test-subj="generationErrorCallout"
