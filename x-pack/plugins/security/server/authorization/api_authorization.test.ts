@@ -356,6 +356,50 @@ describe('initAPIAuthorization', () => {
     );
 
     testSecurityConfig(
+      `protected route returns forbidden if user has allRequired AND NONE of anyRequired privileges requested`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: ['privilege1'],
+                anyRequired: ['privilege2', 'privilege3'],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route restricted to only superusers returns forbidden if user not a superuser`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [ReservedPrivilegesSet.Superuser],
+          },
+        },
+        kibanaPrivilegesResponse: { privileges: { kibana: [] }, hasAllRequested: false },
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
       `protected route allowed only for superuser access returns "authzResult" if user is superuser`,
       {
         security: {
