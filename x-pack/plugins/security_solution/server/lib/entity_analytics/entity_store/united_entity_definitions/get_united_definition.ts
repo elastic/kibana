@@ -48,9 +48,7 @@ export const getUnitedEntityDefinition = memoize(
       namespace,
       indexPatterns,
     });
-  },
-  ({ entityType, namespace, fieldHistoryLength }: Options) =>
-    `${entityType}-${namespace}-${fieldHistoryLength}`
+  }
 );
 
 export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
