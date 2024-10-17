@@ -73,10 +73,6 @@ export const GridLayout = ({
           })}
         </div>
       </GridHeightSmoother>
-      {/* <GridOverlay
-        interactionEvent={interactionEvent}
-        gridLayoutStateManager={gridLayoutStateManager}
-      /> */}
     </>
   );
 };

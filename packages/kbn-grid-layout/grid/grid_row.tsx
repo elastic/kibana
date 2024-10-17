@@ -151,7 +151,6 @@ export const GridRow = forwardRef<
               <div
                 ref={gridLayoutStateManager.dragPreviewRef}
                 css={css`
-                  z-index: 1000;
                   pointer-events: none;
                   border-radius: ${euiThemeVars.euiBorderRadius};
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
